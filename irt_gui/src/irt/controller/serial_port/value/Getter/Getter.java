@@ -20,7 +20,6 @@ public class Getter extends GetterAbstract {
 		super(linkHeader, Packet.IRT_SLCP_PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, value);
 	}
 
-	@SuppressWarnings("null")
 	@Override
 	public boolean set(Packet packet) {
 		boolean isSet = false;

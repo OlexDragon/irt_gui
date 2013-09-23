@@ -163,7 +163,6 @@ public class DumpControllers {
 
 		serialNumber = serialNumber.replaceAll("[:\\\\/*?|<>]", "_");
 
-		System.out.println("file : "+serialNumber);
 		startTime = System.currentTimeMillis();
 
 		File file = new File("c:"+File.separator+"irt"+File.separator+serialNumber);
@@ -177,7 +176,6 @@ public class DumpControllers {
 
 		this.file = new File(file,fileName + fileExt);
 
-		System.out.println("file : "+file);
 		try {
 			this.file.createNewFile();
 		} catch (IOException e) {
