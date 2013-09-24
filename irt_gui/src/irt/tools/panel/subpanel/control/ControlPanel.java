@@ -114,7 +114,6 @@ public class ControlPanel extends MonitorPanelAbstract {
 		
 		comboBox = new JComboBox<>();
 		comboBox.addPopupMenuListener(Listeners.popupMenuListener);
-
 		comboBox.addItem(new IdValueForComboBox(FLAG_ATTENUATION, "ATTENUATION"));
 		if((flags&FLAG_GAIN)>0)
 			comboBox.addItem(new IdValueForComboBox(FLAG_GAIN, "GAIN"));

@@ -1,8 +1,8 @@
-package irt.tools.panel;
+package irt.tools.panel.subpanel;
 
 import irt.data.DeviceInfo;
-import irt.tools.panel.subpanel.DACsPanel;
-import irt.tools.panel.subpanel.PLLsPanel;
+import irt.tools.panel.DebagInfoPanel;
+import irt.tools.panel.DevicePanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelConverter;
 import irt.tools.panel.subpanel.control.ControlPanelDownConverter;
