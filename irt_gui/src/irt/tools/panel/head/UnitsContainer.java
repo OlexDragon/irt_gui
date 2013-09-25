@@ -180,4 +180,10 @@ public class UnitsContainer extends JPanel{
 	public void addStatusListener(ValueChangeListener valueChangeListener) {
 		statusChangeListener = valueChangeListener;
 	}
+
+	public void refresh() {
+		for(Component c:getComponents())
+			if(c instanceof Panel)
+				((Panel)c).refresh();
+	}
 }

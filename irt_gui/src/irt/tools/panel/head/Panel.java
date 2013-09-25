@@ -4,17 +4,24 @@ import irt.tools.label.VarticalLabel;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 
+import resources.Translation;
+
 @SuppressWarnings("serial")
 public class Panel extends JPanel {
 
+	private final String TEXT;
+	private static final float FONT_SIZE = 18;
+	private static final Font FONT = new Font("Tahoma", Font.PLAIN, (int)FONT_SIZE);
 	protected int MIN_WIDTH = 25;
 	protected int MID_WIDTH = 310;
 	protected int MAX_WIDTH = 615;
@@ -29,6 +36,7 @@ public class Panel extends JPanel {
 	protected JPanel extraPanel;
 
 	public Panel( String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+		TEXT = verticalLabelText;
 
 		if(minWidth>0)
 			MIN_WIDTH =  minWidth;
@@ -59,13 +67,13 @@ public class Panel extends JPanel {
 		btnMaxSize.setBounds(MID_WIDTH-15, MIN_HEIGHT, 15, MAX_HEIGHT-MIN_HEIGHT);
 		add(btnMaxSize);
 		BTN_WIDTH = btnMaxSize.getWidth();
-
-		verticalLabel = new VarticalLabel(verticalLabelText, false);
+			
+		verticalLabel = new VarticalLabel(Translation.getValue(String.class, "vertical_label_text", TEXT), false);
 		verticalLabel.setBounds(0, MIN_HEIGHT, MIN_WIDTH, getHeight()-MIN_HEIGHT);
 		verticalLabel.setOpaque(true);
 		verticalLabel.setBackground(new Color(0, 153, 255));
 		verticalLabel.setForeground(getForeground());
-		verticalLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		verticalLabel.setFont(replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
 		verticalLabel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		verticalLabel.addMouseListener(new MouseAdapter() {
 			@Override
@@ -91,6 +99,21 @@ public class Panel extends JPanel {
 		extraPanel.setBounds(MID_WIDTH, MIN_HEIGHT, MAX_WIDTH-MID_WIDTH, MAX_HEIGHT-MIN_HEIGHT);
 		extraPanel.setLayout(null);
 		add(extraPanel);
+	}
+
+	protected Font replaceFont(String fontKey, String fontSizeKey, Font defaultFont, float defaultFontSize) {
+		Font font = null;
+		try {
+
+			String fontURL = Translation.getValue(String.class, fontKey, null);
+			font = fontURL==null ? defaultFont : Font.createFont(Font.TRUETYPE_FONT, getClass().getClassLoader().getResource(fontURL).openStream());
+			if(!font.equals(defaultFont))
+				font = font.deriveFont(Translation.getValue(Float.class, fontSizeKey, defaultFontSize));
+
+		} catch (FontFormatException | IOException e) {
+			font = defaultFont;
+		}
+		return font;
 	}
 
 	public boolean isMinSize(){
@@ -125,5 +148,10 @@ public class Panel extends JPanel {
 	public void setThinSize(){
 		if(getWidth()!=MIN_WIDTH || getHeight()!=MAX_HEIGHT)
 			setSize(MIN_WIDTH, MAX_HEIGHT);
+	}
+
+	public void refresh() {
+		verticalLabel.setFont(replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
+		verticalLabel.setText(Translation.getValue(String.class, "vertical_label_text", TEXT));
 	}
 }

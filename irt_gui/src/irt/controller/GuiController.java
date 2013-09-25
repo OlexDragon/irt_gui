@@ -22,8 +22,6 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -37,9 +35,9 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import resources.Tanslation;
-import resources.tools.ValueLabel;
 import jssc.SerialPortList;
+import resources.Translation;
+import resources.tools.ValueLabel;
 
 public class GuiController extends GuiControllerAbstract{
 
@@ -248,8 +246,10 @@ public class GuiController extends GuiControllerAbstract{
 					@Override
 					public void itemStateChanged(ItemEvent itemEvent) {
 						if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-							Tanslation.setLocate(((ValueLabel)languageComboBox.getSelectedItem()).getValue());
+							Translation.setLocate(((ValueLabel)languageComboBox.getSelectedItem()).getValue());
 							headPanel.refresh();
+							if(unitsPanel!=null)
+								unitsPanel.refresh();
 						}
 					}
 				});
