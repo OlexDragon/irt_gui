@@ -1,6 +1,7 @@
-package irt.irt_gui;
+package irt.tools.panel;
 
 import irt.contriller.UserGuiController;
+import irt.irt_gui.IrtGui;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsDevice;
@@ -10,6 +11,8 @@ import javax.swing.JOptionPane;
 
 @SuppressWarnings("serial")
 public class UserIrtGui extends IrtGui {
+	public UserIrtGui() {
+	}
 
 	public static void main(String[] args) {
 	       // Determine what the GraphicsDevice can support.

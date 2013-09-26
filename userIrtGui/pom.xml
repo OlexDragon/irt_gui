@@ -1,0 +1,39 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>userIrtGui</groupId>
+  <artifactId>userIrtGui</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+	<developers>
+		<developer>
+			<id>Olex</id>
+			<name>Oleksandr Potomkin</name>
+			<organization>IRT Technologies Inc.</organization>
+		</developer>
+	</developers>
+
+	<organization>
+		<name>IRT Technologies Inc.</name>
+		<url>http://irttechnologies.com/</url>
+	</organization>
+
+	<properties>
+		<spring.version>3.2.4.RELEASE</spring.version>
+	</properties>
+<dependencies>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-core</artifactId>
+		<version>${spring.version}</version>
+	</dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-context</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-beans</artifactId>
+        <version>${spring.version}</version>
+    </dependency>
+</dependencies>
+</project>
