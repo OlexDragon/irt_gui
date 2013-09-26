@@ -2,6 +2,9 @@ package resources;
 
 import irt.controller.GuiController;
 
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -63,5 +66,20 @@ public class Translation {
 			returnValue = defaultValue;
 
 		return returnValue;
+	}
+
+	public static Font replaceFont(String fontKey, String fontSizeKey, Font defaultFont, float defaultFontSize) {
+		Font font = null;
+		try {
+
+			String fontURL = Translation.getValue(String.class, fontKey, null);
+			font = fontURL==null ? defaultFont : Font.createFont(Font.TRUETYPE_FONT, Translation.class.getClassLoader().getResource(fontURL).openStream());
+			if(!font.equals(defaultFont))
+				font = font.deriveFont(Translation.getValue(Float.class, fontSizeKey, defaultFontSize));
+
+		} catch (FontFormatException | IOException e) {
+			font = defaultFont;
+		}
+		return font;
 	}
 }

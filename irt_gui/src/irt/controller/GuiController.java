@@ -221,9 +221,9 @@ public class GuiController extends GuiControllerAbstract{
 			if(name.equals("Unit's Serial Port")){
 				serialPortSelection = c;
 				DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
-				defaultComboBoxModel.insertElementAt("Select Serial Port", 0);
+				defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
 				serialPortSelection.setModel(defaultComboBoxModel);
-				serialPortSelection.setFont(new Font("Tahoma", Font.BOLD, 18));
+				serialPortSelection.setFont(Translation.replaceFont("resource.font", "serial_port.font.size", new Font("Tahoma", Font.BOLD, 18), 18));
 
 				String portName = comPortThreadQueue.getSerialPort().getPortName();
 				if(defaultComboBoxModel.getIndexOf(portName)==-1){
@@ -250,6 +250,11 @@ public class GuiController extends GuiControllerAbstract{
 							headPanel.refresh();
 							if(unitsPanel!=null)
 								unitsPanel.refresh();
+
+							DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
+							defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
+							serialPortSelection.setModel(defaultComboBoxModel);
+							serialPortSelection.setFont(Translation.replaceFont("resource.font", "serial_port.font.size", new Font("Tahoma", Font.BOLD, 18), 18));
 						}
 					}
 				});

@@ -4,10 +4,8 @@ import irt.tools.label.VarticalLabel;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -73,7 +71,7 @@ public class Panel extends JPanel {
 		verticalLabel.setOpaque(true);
 		verticalLabel.setBackground(new Color(0, 153, 255));
 		verticalLabel.setForeground(getForeground());
-		verticalLabel.setFont(replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
+		verticalLabel.setFont(Translation.replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
 		verticalLabel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		verticalLabel.addMouseListener(new MouseAdapter() {
 			@Override
@@ -99,21 +97,6 @@ public class Panel extends JPanel {
 		extraPanel.setBounds(MID_WIDTH, MIN_HEIGHT, MAX_WIDTH-MID_WIDTH, MAX_HEIGHT-MIN_HEIGHT);
 		extraPanel.setLayout(null);
 		add(extraPanel);
-	}
-
-	protected Font replaceFont(String fontKey, String fontSizeKey, Font defaultFont, float defaultFontSize) {
-		Font font = null;
-		try {
-
-			String fontURL = Translation.getValue(String.class, fontKey, null);
-			font = fontURL==null ? defaultFont : Font.createFont(Font.TRUETYPE_FONT, getClass().getClassLoader().getResource(fontURL).openStream());
-			if(!font.equals(defaultFont))
-				font = font.deriveFont(Translation.getValue(Float.class, fontSizeKey, defaultFontSize));
-
-		} catch (FontFormatException | IOException e) {
-			font = defaultFont;
-		}
-		return font;
 	}
 
 	public boolean isMinSize(){
@@ -151,7 +134,7 @@ public class Panel extends JPanel {
 	}
 
 	public void refresh() {
-		verticalLabel.setFont(replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
+		verticalLabel.setFont(Translation.replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
 		verticalLabel.setText(Translation.getValue(String.class, "vertical_label_text", TEXT));
 	}
 }

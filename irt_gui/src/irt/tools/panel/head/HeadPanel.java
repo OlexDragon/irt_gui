@@ -110,8 +110,8 @@ public class HeadPanel extends MainPanel {
 		comboBoxLanguage.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
 		comboBoxLanguage.setForeground(Color.WHITE);
 		comboBoxLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		comboBoxLanguage.setBackground(color.darker());
-		comboBoxLanguage.setBounds(516, 54, 91, 17);
+		comboBoxLanguage.setBackground(color.darker().darker());
+		comboBoxLanguage.setBounds(530, 50, 91, 17);
 		comboBoxLanguage.setMinimumSize(new Dimension(77, 17));
 		ValueLabel valueLabel = new ValueLabel();
 		valueLabel.setValue(GuiController.getPrefs().get("locate", "en,US"));

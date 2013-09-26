@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-	<bean id="language1" class="resources.tools.ValueLabel">
+	<bean id="english" class="resources.tools.ValueLabel">
 		<property name="value" value="en,US"/>
 		<property name="label" value="English (US)"/>
 	</bean>
@@ -15,7 +15,7 @@
 		<property name="label" value="Français (CA)"/>
 	</bean>
 
-	<bean id="language3" class="resources.tools.ValueLabel">
+	<bean id="chinese" class="resources.tools.ValueLabel">
 		<property name="value" value="cn,CN"/>
 		<property name="label" value="中國的 (CN)"/>
 	</bean>
@@ -23,9 +23,8 @@
 	<bean id="languages" class="java.util.ArrayList">
 		<constructor-arg>
 			<list>
-				<ref bean="language1" />
-				<ref bean="language2" />
-				<ref bean="language3" />
+				<ref bean="english" />
+				<ref bean="chinese" />
 			</list>
 		</constructor-arg>
 	</bean>

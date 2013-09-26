@@ -33,7 +33,7 @@ public class IrtGui extends IrtMainFrame {
 		JLabel lblGui = new JLabel("GUI "+VERTION);
 		lblGui.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblGui.setForeground(Color.WHITE);
-		lblGui.setBounds(531, 37, 107, 14);
+		lblGui.setBounds(531, 31, 107, 14);
 		headPanel.add(lblGui);
 
 		UnitsContainer unitsPanel = new UnitsContainer();
@@ -46,7 +46,7 @@ public class IrtGui extends IrtMainFrame {
 		JLabel lblIrtTechnologies = new JLabel("IRT Technologies");
 		lblIrtTechnologies.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblIrtTechnologies.setForeground(Color.WHITE);
-		lblIrtTechnologies.setBounds(531, 19, 107, 14);
+		lblIrtTechnologies.setBounds(531, 13, 107, 14);
 		headPanel.add(lblIrtTechnologies);
 	}
 
