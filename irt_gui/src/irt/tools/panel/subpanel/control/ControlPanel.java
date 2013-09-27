@@ -38,10 +38,13 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
+import resources.Translation;
+
 
 @SuppressWarnings("serial")
 public class ControlPanel extends MonitorPanelAbstract {
 
+	private static final float _16 = 16;
 	public static final short FLAG_ATTENUATION= 0;
 	public static final short FLAG_GAIN			= 1;
 	public static final short FLAG_FREQUENCY 	= 1<<1;
@@ -60,6 +63,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 	private IdValue selection;
 	private JComboBox<String> cbLoSelect;
 	private boolean hasFreqSet;
+	private ImageButton btnMute;
+	private JLabel lblMute;
+	private ImageButton btnStoreConfig;
 
 	public ControlPanel(LinkHeader linkHeader, int flags) {
 		super(linkHeader, "Control", 214, 180);
@@ -69,8 +75,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 		color = new Color(0x0B,0x17,0x3B);
 		cursor = new Cursor(Cursor.HAND_CURSOR);
 
-		ImageButton btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
-		btnMute.setToolTipText("MUTE Button");
+		btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
+		btnMute.setToolTipText(Translation.getValue(String.class, "mute", "MUTE Button"));
 		btnMute.setName("Button Mute");
 		Point p = setMuteButtonPosition();
 		btnMute.setBounds(p.x, p.y, 33, 33);
@@ -81,12 +87,14 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
-		JLabel lblMute = new JLabel("MUTE");
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", _16));
+
+		lblMute = new JLabel(Translation.getValue(String.class, "mute", "MUTE"));
 		lblMute.setName("Label Mute");
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
-		lblMute.setFont(new Font("Tahoma", Font.BOLD, 16));
-		lblMute.setBounds(p.x+34, p.y+6, 78, 20);
+		lblMute.setFont(font);
+		lblMute.setBounds(48, 107, 104, 20);
 		add(lblMute);
 
 		txtGain = new JTextField();
@@ -94,15 +102,15 @@ public class ControlPanel extends MonitorPanelAbstract {
 		txtGain.setBackground(color);
 		txtGain.setHorizontalAlignment(SwingConstants.CENTER);
 		txtGain.setName("Text Gain");
-		txtGain.setFont(new Font("Tahoma", Font.BOLD, 16));
+		txtGain.setFont(FONT.deriveFont(_16));
 		txtGain.setBounds(14, 42 , 188, 20);
 		txtGain.setCaretColor(Color.WHITE);
 		add(txtGain);
 		txtGain.setColumns(10);
 
-		ImageButton btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
+		btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 		btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnStoreConfig.setToolTipText("Store Config");
+		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
 		btnStoreConfig.setShadowShiftY(4);
 		btnStoreConfig.setShadowShiftX(4);
 		btnStoreConfig.setShadowPressedShiftY(1);
@@ -125,31 +133,19 @@ public class ControlPanel extends MonitorPanelAbstract {
 		comboBox.setForeground(Color.YELLOW);
 		comboBox.setCursor(cursor);
 		add(comboBox);
-
-		chckbxStep = new JCheckBox("Step:");
-		chckbxStep.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				slider.setSnapToTicks(chckbxStep.isSelected());
-				txtGain.requestFocusInWindow();
-			}
-		});
-		chckbxStep.setForeground(Color.WHITE);
-		chckbxStep.setOpaque(false);
-		chckbxStep.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		chckbxStep.setBounds(14, 65, 55, 23);
-		add(chckbxStep);
 		
 		txtStep = new JTextField();
  		txtStep.setBackground(color);
 		txtStep.setForeground(Color.WHITE);
 		txtStep.setText("1");
 		txtStep.setHorizontalAlignment(SwingConstants.CENTER);
-		txtStep.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtStep.setFont(new Font("Tahoma", Font.PLAIN, (int)_16));
 		txtStep.setColumns(10);
 		txtStep.setBounds(75, 65, 127, 20);
 		txtStep.setCaretColor(Color.YELLOW);
 		add(txtStep);
-		
+
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", (float)11));
 		lblChoice = new JLabel("");
 		lblChoice.addMouseListener(new MouseAdapter() {
 			@Override
@@ -162,9 +158,23 @@ public class ControlPanel extends MonitorPanelAbstract {
 		lblChoice.setName("Label Choice");
 		lblChoice.setHorizontalAlignment(SwingConstants.LEFT);
 		lblChoice.setForeground(Color.LIGHT_GRAY);
-		lblChoice.setFont(new Font("Tahoma", Font.BOLD, 11));
+		lblChoice.setFont(font);
 		lblChoice.setBounds(118, 19, 85, 20);
 		add(lblChoice);
+
+		font = font.deriveFont((float)12);
+		chckbxStep = new JCheckBox(Translation.getValue(String.class, "step", "Step")+":");
+		chckbxStep.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				slider.setSnapToTicks(chckbxStep.isSelected());
+				txtGain.requestFocusInWindow();
+			}
+		});
+		chckbxStep.setForeground(Color.WHITE);
+		chckbxStep.setOpaque(false);
+		chckbxStep.setFont(font);
+		chckbxStep.setBounds(14, 65, 55, 23);
+		add(chckbxStep);
 
 		slider = new JSlider();
 
@@ -272,5 +282,16 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 	public JSlider getSlider() {
 		return slider;
+	}
+
+	@Override
+	public void refresh() {
+		super.refresh();
+		btnMute.setToolTipText(Translation.getValue(String.class, "mute", "MUTE Button"));
+		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
+		lblMute.setFont(font);
+		lblMute.setText(Translation.getValue(String.class, "mute", "MUTE"));
+		font = font.deriveFont((float)12);
+		chckbxStep.setText(Translation.getValue(String.class, "step", "Step")+":");
 	}
 }

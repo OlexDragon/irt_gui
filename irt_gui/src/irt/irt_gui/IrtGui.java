@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
-	public static final String VERTION = "- 3.028";
+	public static final String VERTION = "- 4.001";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 

@@ -38,7 +38,7 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		lblInputPower.setName("Input Power");
 		lblInputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblInputPower.setForeground(Color.WHITE);
-		lblInputPower.setFont(font);
+		lblInputPower.setFont(FONT);
 		lblInputPower.setBounds(105, 22, 93, 17);
 		add(lblInputPower);
 
@@ -54,7 +54,7 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		lblOutputPower.setName("Output Power");
 		lblOutputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblOutputPower.setForeground(Color.WHITE);
-		lblOutputPower.setFont(font);
+		lblOutputPower.setFont(FONT);
 		lblOutputPower.setBounds(105, 50, 93, 17);
 		add(lblOutputPower);
 
@@ -70,7 +70,7 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		lblTemperature.setName("Temperature");
 		lblTemperature.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblTemperature.setForeground(Color.WHITE);
-		lblTemperature.setFont(font);
+		lblTemperature.setFont(FONT);
 		lblTemperature.setBounds(114, 78, 84, 17);
 		add(lblTemperature);
 

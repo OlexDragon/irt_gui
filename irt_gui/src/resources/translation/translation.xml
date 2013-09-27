@@ -23,8 +23,8 @@
 	<bean id="languages" class="java.util.ArrayList">
 		<constructor-arg>
 			<list>
-				<ref bean="english" />
-				<ref bean="chinese" />
+<!-- 			<ref bean="english" />
+				<ref bean="chinese" /> -->	
 			</list>
 		</constructor-arg>
 	</bean>

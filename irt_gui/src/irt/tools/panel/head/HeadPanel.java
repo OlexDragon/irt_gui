@@ -97,7 +97,7 @@ public class HeadPanel extends MainPanel {
 		ledRx.setBounds(10, 29, 17, 17);
 		add(ledRx);
 		
-		ClassPathXmlApplicationContext context =  new ClassPathXmlApplicationContext("translation.xml");
+		ClassPathXmlApplicationContext context =  new ClassPathXmlApplicationContext("resources/translation/translation.xml");
 		@SuppressWarnings("unchecked")
 		List<ValueLabel> languages = (ArrayList<ValueLabel>) context.getBean("languages");
 		ValueLabel[] valueLabels = new ValueLabel[languages.size()];

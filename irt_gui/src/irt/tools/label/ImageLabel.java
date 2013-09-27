@@ -5,7 +5,6 @@ import irt.irt_gui.IrtGui;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
@@ -14,7 +13,7 @@ public class ImageLabel extends JLabel{
 
 	public ImageLabel(ImageIcon icon, String text){
 		super(text);
-		setIcon((Icon) (icon!=null ? icon : IrtGui.class.getResource("/irt/irt_gui/images/logo.gif")));
+		setIcon((icon!=null ? icon : new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/logo.gif"))));
 		setOpaque(false);
 	}
 
@@ -22,6 +21,10 @@ public class ImageLabel extends JLabel{
 	public void paint(Graphics g) {
 		Graphics2D g2 = (Graphics2D)g;
 		g2.drawImage(((ImageIcon)getIcon()).getImage(), 1, 1, getWidth()-2, getHeight()-2, this);
-		
+	}
+
+	public void setIcon(String inagePath){
+		setIcon((inagePath!=null ? new ImageIcon(IrtGui.class.getResource(inagePath)) :
+			new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/logo.gif"))));
 	}
 }

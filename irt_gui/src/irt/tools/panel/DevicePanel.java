@@ -41,6 +41,7 @@ public class DevicePanel extends Panel {
 	private LinkHeader linkHeader;
 
 	private MonitorPanelAbstract monitorPanel;
+	private ControlPanel controlPanel;
 	private ValueChangeListener statusChangeListener;
 
 	public DevicePanel(LinkHeader linkHeader, String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
@@ -53,7 +54,7 @@ public class DevicePanel extends Panel {
 				monitorPanel = getNewMonitorPanel();
 				userPanel.add(monitorPanel);
 				monitorPanel.addStatusListener(new ValueChangeListener() {
-					
+
 					@Override
 					public void valueChanged(ValueChangeEvent valueChangeEvent) {
 						if(PacketWork.PACKET_ID_MEASUREMENT_STATUS==valueChangeEvent.getID()){
@@ -82,7 +83,7 @@ public class DevicePanel extends Panel {
 
 				if(statusChangeListener!=null)
 					monitorPanel.addStatusListener(statusChangeListener);
-				ControlPanel controlPanel = getNewControlPanel();
+				controlPanel = getNewControlPanel();
 				userPanel.add(controlPanel);
 
 				JSlider slider = controlPanel.getSlider();
@@ -122,7 +123,6 @@ public class DevicePanel extends Panel {
 		extraPanel.add(infoPanel);
 
 		setTabbedPane(extraPanel);
-		
 	}
 
 	protected void setTabbedPane(JPanel extraPanel) {
@@ -201,5 +201,6 @@ public class DevicePanel extends Panel {
 	public void refresh() {
 		super.refresh();
 		monitorPanel.refresh();
+		controlPanel.refresh();
 	}
 }

@@ -19,6 +19,8 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
+import resources.Translation;
+
 public class MuteController extends ControllerAbstract {
 
 	private JButton btnMute;
@@ -50,14 +52,17 @@ public class MuteController extends ControllerAbstract {
 					else
 						source = (Long)valueChangeEvent.getSource();
 
+					String muteText;
 					if(isMute=(source>0)){
-						lblMute.setText("UNMUTE");
-						lblMute.setToolTipText("UNMUTE");
+						muteText = Translation.getValue(String.class, "unmute", "UNMUTE");
+						lblMute.setText(muteText);
+						btnMute.setToolTipText(muteText);
 						if(style==Style.CHECK_ALWAYS)
 							pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
 					}else if(source==0){
-						lblMute.setText("MUTE");
-						lblMute.setToolTipText("MUTE");
+						muteText = Translation.getValue(String.class, "mute", "MUTE");
+						lblMute.setText(muteText);
+						btnMute.setToolTipText(muteText);
 						if(style==Style.CHECK_ALWAYS)
 							pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
 					}else{

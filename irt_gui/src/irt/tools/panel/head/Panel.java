@@ -12,6 +12,8 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import resources.Translation;
 
 @SuppressWarnings("serial")
@@ -27,11 +29,10 @@ public class Panel extends JPanel {
 	protected int MAX_HEIGHT = 444;
 	protected int BTN_WIDTH;
 
-	protected Color backgroundColor = new Color(0x0B,0x17,0x3B);
-
 	protected VarticalLabel verticalLabel;
 	protected JPanel userPanel;
 	protected JPanel extraPanel;
+	private boolean isDemo;
 
 	public Panel( String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		TEXT = verticalLabelText;
@@ -65,13 +66,17 @@ public class Panel extends JPanel {
 		btnMaxSize.setBounds(MID_WIDTH-15, MIN_HEIGHT, 15, MAX_HEIGHT-MIN_HEIGHT);
 		add(btnMaxSize);
 		BTN_WIDTH = btnMaxSize.getWidth();
-			
-		verticalLabel = new VarticalLabel(Translation.getValue(String.class, "vertical_label_text", TEXT), false);
+
+		
+		isDemo = TEXT.equals("THE UNIT IS NOT CONNECTED");
+		String verticalLabelShowingText = isDemo ? Translation.getValue(String.class, "vertical_label_text", TEXT) : TEXT;
+
+		verticalLabel = new VarticalLabel(verticalLabelShowingText, false);
 		verticalLabel.setBounds(0, MIN_HEIGHT, MIN_WIDTH, getHeight()-MIN_HEIGHT);
 		verticalLabel.setOpaque(true);
 		verticalLabel.setBackground(new Color(0, 153, 255));
 		verticalLabel.setForeground(getForeground());
-		verticalLabel.setFont(Translation.replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
+		verticalLabel.setFont(isDemo ? Translation.replaceFont("resource.font", "font.size", FONT, FONT_SIZE) : FONT);
 		verticalLabel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		verticalLabel.addMouseListener(new MouseAdapter() {
 			@Override
@@ -85,18 +90,18 @@ public class Panel extends JPanel {
 		});
 		add(verticalLabel);
 
-		userPanel = new JPanel();
-		Color color = new Color(0x0B,0x17,0x3B);
-		userPanel.setBackground(color);
+		ClassPathXmlApplicationContext context =  new ClassPathXmlApplicationContext("/irt/tools/panel/head/panel.xml");
+
+		userPanel =(JPanel) context.getBean("userPanel");
 		userPanel.setBounds(MIN_WIDTH, MIN_HEIGHT, MID_WIDTH-MIN_WIDTH-BTN_WIDTH, MAX_HEIGHT-MIN_HEIGHT);
 		userPanel.setLayout(null);
 		add(userPanel);
 
-		extraPanel = new	 JPanel();	
-		extraPanel.setBackground(new Color(0,0x33,0x33));
+		extraPanel = (JPanel) context.getBean("extraPanel");
 		extraPanel.setBounds(MID_WIDTH, MIN_HEIGHT, MAX_WIDTH-MID_WIDTH, MAX_HEIGHT-MIN_HEIGHT);
-		extraPanel.setLayout(null);
 		add(extraPanel);
+
+		context.close();
 	}
 
 	public boolean isMinSize(){
@@ -133,8 +138,18 @@ public class Panel extends JPanel {
 			setSize(MIN_WIDTH, MAX_HEIGHT);
 	}
 
+	public JPanel getUserPanel() {
+		return userPanel;
+	}
+
+	public void setUserPanel(JPanel userPanel) {
+		this.userPanel = userPanel;
+	}
+
 	public void refresh() {
-		verticalLabel.setFont(Translation.replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
-		verticalLabel.setText(Translation.getValue(String.class, "vertical_label_text", TEXT));
+		if(isDemo){
+			verticalLabel.setFont(Translation.replaceFont("resource.font", "font.size", FONT, FONT_SIZE));
+			verticalLabel.setText(Translation.getValue(String.class, "vertical_label_text", TEXT));
+		}
 	}
 }

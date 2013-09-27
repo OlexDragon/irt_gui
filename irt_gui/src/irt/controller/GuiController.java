@@ -188,7 +188,13 @@ public class GuiController extends GuiControllerAbstract{
 					Calendar cal = Calendar.getInstance();
 
 					PrintWriter pw = new PrintWriter(new FileWriter(f, true));
-					pw.println(">>>SN:"+(di!=null ? di.getSerialNumber() : "???")+"; "+dateFormat.format(cal.getTime())+":Vertion:"+IrtGui.VERTION+">>>\n\r"+text.substring(text.length()-1000, text.length()));
+
+					int length = text.length();
+					if(length>0)
+						pw.println(">>>SN:"+(di!=null ? di.getSerialNumber() : "???")+"; "+
+								dateFormat.format(cal.getTime())+
+								":Vertion:"+IrtGui.VERTION+">>>\n\r"+
+								(length>1000 ? text.substring(length-1000, length) : text));
 					pw.close();
 				} catch (IOException e) {
 					Console.appendLn(e.getLocalizedMessage(), "file error");
