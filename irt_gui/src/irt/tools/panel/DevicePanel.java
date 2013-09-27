@@ -196,4 +196,10 @@ public class DevicePanel extends Panel {
 	public InfoPanel getInfoPanel() {
 		return infoPanel;
 	}
+
+	@Override
+	public void refresh() {
+		super.refresh();
+		monitorPanel.refresh();
+	}
 }

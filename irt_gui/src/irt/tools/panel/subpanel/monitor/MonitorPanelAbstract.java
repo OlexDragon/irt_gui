@@ -13,10 +13,14 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import resources.Translation;
+
 @SuppressWarnings("serial")
 public abstract class MonitorPanelAbstract extends JPanel {
 
-	protected static final Font FONT = new Font("Tahoma", Font.PLAIN, 14);
+	protected static final float _14 = 14;
+
+	protected static final Font FONT = new Font("Tahoma", Font.PLAIN, (int)_14);
 
 	protected ControllerAbstract controller;
 
@@ -24,12 +28,20 @@ public abstract class MonitorPanelAbstract extends JPanel {
 
 	private ValueChangeListener statusListener;
 
+	private final String TITLE;
+
+	private TitledBorder titledBorder;
+
+	protected Font font;
+
 //	public MonitorPanelAbstract(LinkHeader linkHeader){
 //		this(linkHeader, "Monitor", 214, 210);
 //	}
 
-	protected MonitorPanelAbstract(LinkHeader linkHeader, String title,int wisth, int height) {
+	protected MonitorPanelAbstract(LinkHeader linkHeader, String title, int wisth, int height) {
 		this.linkHeader = linkHeader;
+		TITLE = title;
+	
 		addAncestorListener(new AncestorListener() {
 
 			public void ancestorAdded(AncestorEvent arg0) {
@@ -50,7 +62,9 @@ public abstract class MonitorPanelAbstract extends JPanel {
 		});
 //TODO		setBackground(new Color(51, 51, 153));
 		setOpaque(false);
-		setBorder(new TitledBorder(UIManager.getBorder("TitledBorder.border"), title, TitledBorder.LEADING, TitledBorder.TOP, FONT, Color.WHITE));
+		font = Translation.replaceFont("resource.font", "info_panel.font.size", FONT, _14);
+		titledBorder = new TitledBorder(UIManager.getBorder("TitledBorder.border"), Translation.getValue(String.class, TITLE.toLowerCase(), TITLE), TitledBorder.LEADING, TitledBorder.TOP, font , Color.WHITE);
+		setBorder(titledBorder);
 		setSize(wisth, height);
 		setLayout(null);
 	}
@@ -66,4 +80,10 @@ public abstract class MonitorPanelAbstract extends JPanel {
 		if(controller!=null)
 			controller.addStatusListener(valueChangeListener);
 	}
+
+	public void refresh(){
+		font = Translation.replaceFont("resource.font", "info_panel.font.size", FONT, _14);
+		titledBorder.setTitle(Translation.getValue(String.class, TITLE.toLowerCase(), TITLE));
+		titledBorder.setTitleFont(font);
+	};
 }

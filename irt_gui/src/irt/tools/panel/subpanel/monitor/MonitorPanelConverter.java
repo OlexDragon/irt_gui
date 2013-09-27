@@ -150,4 +150,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 	protected ControllerAbstract getNewController() {
 		return new MonitorControllerConverter(this, converterType);
 	}
+
+	@Override
+	public void refresh() {}
 }
