@@ -17,7 +17,6 @@ public class UserPicobucPanel extends DevicePanel {
 
 		JLabel lblNewLabel = new ImageLabel(new ImageIcon(UserPicobucPanel.class.getResource("/irt/irt_gui/images/logo.gif")),"");
 		getTabbedPane().addTab("IRT", null, lblNewLabel, null);
-
 	}
 
 	@Override

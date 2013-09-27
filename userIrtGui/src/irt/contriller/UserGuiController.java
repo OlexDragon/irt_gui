@@ -4,8 +4,8 @@ import irt.controller.GuiController;
 import irt.controller.serial_port.value.Getter.DeviceInfoGetter;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.DemoPanel;
-import irt.tools.panel.UserPicobucPanel;
 import irt.tools.panel.DevicePanel;
+import irt.tools.panel.UserPicobucPanel;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
