@@ -57,9 +57,12 @@ public class DemoPanel extends Panel {
 	private JCheckBox checkBoxStep;
 	private ImageButton btnStorConfig;
 	private InfoPanel infoPanel;
+	private ImageLabel imageLabel;
+	private String tabTitle;
 
-	public DemoPanel() {
+	public DemoPanel(String imagePath, String tabTitle) {
 		super("THE UNIT IS NOT CONNECTED", 0, 0, 0, 0, 0);
+		this.tabTitle = tabTitle;
 		
 		Font font = Translation.replaceFont("resource.font", "mute_label_font_size", FONT, _18);
 		JPanel panel = new JPanel();
@@ -222,8 +225,8 @@ public class DemoPanel extends Panel {
 		extraPanel.add(tabbedPane);
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 
-		JLabel lblNewLabel = new ImageLabel(new ImageIcon(UserPicobucPanel.class.getResource("/irt/irt_gui/images/logo.gif")),"");
-		tabbedPane.addTab("IRT", null, lblNewLabel, null);
+		imageLabel = new ImageLabel(new ImageIcon(UserPicobucPanel.class.getResource(imagePath)),"");
+		tabbedPane.addTab(tabTitle, null, imageLabel, null);
 		
 		font = font.deriveFont(Translation.getValue(Float.class, "monitor.led.ip.fomt.size", _14)).deriveFont(Font.PLAIN);
 
@@ -326,5 +329,13 @@ public class DemoPanel extends Panel {
 		checkBoxStep.setText(Translation.getValue(String.class, "step", "Step")+":");
 
 		btnStorConfig.setToolTipText(Translation.getValue(String.class, "stor_config", "Store Config"));
+	}
+
+	public ImageLabel getImageLabel() {
+		return imageLabel;
+	}
+
+	public String getTabTitle() {
+		return tabTitle;
 	}
 }

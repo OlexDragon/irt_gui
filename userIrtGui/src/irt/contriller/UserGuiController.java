@@ -10,7 +10,11 @@ import irt.tools.panel.UserPicobucPanel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 public class UserGuiController extends GuiController {
+
+	private ClassPathXmlApplicationContext context =  new ClassPathXmlApplicationContext("/irt/irt_gui/userGui.xml");
 
 	public UserGuiController(JFrame gui) {
 		super("Gui Controller", gui);
@@ -22,7 +26,7 @@ public class UserGuiController extends GuiController {
 			synchronized (this) {
 				wait(1000);
 			}
-			unitsPanel.add(new DemoPanel());
+			unitsPanel.add((DemoPanel)context.getBean("demoPanel"));
 			unitsPanel.revalidate();
 			unitsPanel.repaint();
 			while(true){
@@ -41,6 +45,11 @@ public class UserGuiController extends GuiController {
 
 	@Override
 	protected DevicePanel getNewBaisPanel(LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight,	int maxHeight) {
-		return new UserPicobucPanel(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+
+		UserPicobucPanel userPicobucPanel = new UserPicobucPanel(linkHeader, text);
+		DemoPanel dp = (DemoPanel)context.getBean("demoPanel");
+		userPicobucPanel.setIcon(dp.getImageLabel());
+		userPicobucPanel.setTabTitle(dp.getTabTitle());
+		return userPicobucPanel;
 	}
 }

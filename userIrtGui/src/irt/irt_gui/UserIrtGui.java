@@ -1,13 +1,15 @@
-package irt.tools.panel;
+package irt.irt_gui;
 
 import irt.contriller.UserGuiController;
-import irt.irt_gui.IrtGui;
+import irt.tools.panel.head.IrtPanel;
 
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class UserIrtGui extends IrtGui {

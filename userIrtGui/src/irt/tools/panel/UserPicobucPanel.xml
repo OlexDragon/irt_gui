@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="logoPath" class=" java.lang.String">
+		<constructor-arg><value>/irt/tools/panel/subpanel/panel.xml</value></constructor-arg>
+	</bean>
+
+	<bean id="userPicobucPanel" class="irt.tools.panel.UserPicobucPanel">
+		<constructor-arg value="THE UNIT IS NOT CONNECTED"/>
+		<constructor-arg value="THE UNIT IS NOT CONNECTED"/>
+		<constructor-arg value="0"/>
+		<constructor-arg value="0"/>
+		<constructor-arg value="0"/>
+		<constructor-arg value="0"/>
+		<constructor-arg value="0"/>
+	</bean>
+</beans>
