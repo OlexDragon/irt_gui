@@ -177,7 +177,6 @@ public class DumpControllers {
 
 		this.file = new File(file,fileName + fileExt);
 
-		System.out.println("file : "+file);
 		try {
 			this.file.createNewFile();
 		} catch (IOException e) {

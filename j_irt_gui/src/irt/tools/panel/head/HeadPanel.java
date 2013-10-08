@@ -1,6 +1,8 @@
 package irt.tools.panel.head;
 
+import irt.controller.GuiController;
 import irt.controller.monitor.MonitorController;
+import irt.controller.translation.Translation;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.value.StaticComponents;
@@ -8,50 +10,81 @@ import irt.tools.label.LED;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.io.IOException;
+import java.util.Properties;
 
 import javax.swing.JFrame;
 
 @SuppressWarnings("serial")
 public class HeadPanel extends MainPanel {
 
+	public static final Color BACKGROUND_COLOR = new Color(0x3B, 0x4A, 0x8B);
+	public static LED ledRx = StaticComponents.getLedRx();
 	private LED ledPowerOn;
 	private LED ledMute;
 	private LED ledAlarm;
-	public static LED ledRx = StaticComponents.getLedRx();
+
+	private static Properties properties = getProperties();
 
 	public HeadPanel(JFrame target) {
-		super(target, 650);
-		setSize(607, 74);
-		setBackground(new Color(0x3B, 0x4A, 0x8B));
+		super(target, Integer.parseInt(properties.get("max_width").toString()));
+		setSize(Integer.parseInt(properties.get("width").toString()), Integer.parseInt(properties.getProperty("height")));
+		setBackground(BACKGROUND_COLOR);
 		setArcStart(-40);
 		setArcStep(155);
 		setArcWidth(80);
 
-		ledPowerOn = new LED(Color.GREEN, "POWER ON");
+		String selectedLanguage = GuiController.getPrefs().get("locate", "en_US");
+		Font font = new Font(
+				properties.getProperty("font_name_"+selectedLanguage),
+				IrtPanel.fontStyle.get(properties.get("font_style_"+selectedLanguage)),
+				Integer.parseInt(properties.getProperty("font_size_"+selectedLanguage)));
+
+		ledPowerOn = new LED(Color.GREEN, Translation.getValue(String.class, "power_on", "POWER ON"));
 		ledPowerOn.setName("Power On");
 		ledPowerOn.setForeground(new Color(176, 224, 230));
-		ledPowerOn.setFont(new Font("Tahoma", Font.BOLD, 18));
-		ledPowerOn.setBounds(48, 22, 137, 30);
+		ledPowerOn.setFont(font);
+		String[] bounds = properties.get("led_powerOn_bounds_"+selectedLanguage).toString().split(",");
+		ledPowerOn.setBounds(Integer.parseInt(bounds[0]),
+									Integer.parseInt(bounds[1]),
+									Integer.parseInt(bounds[2]),
+									Integer.parseInt(bounds[3]));
 		add(ledPowerOn);
 
-		ledAlarm = new LED(Color.RED, "ALARM");
+		ledAlarm = new LED(Color.RED, Translation.getValue(String.class, "alarm", "ALARM"));
 		ledAlarm.setName("Main Alarm");
 		ledAlarm.setForeground(new Color(176, 224, 230));
-		ledAlarm.setFont(new Font("Tahoma", Font.BOLD, 18));
-		ledAlarm.setBounds(207, 22, 100, 30);
+		ledAlarm.setFont(font);
+		bounds = properties.get("led_alarm_bounds_"+selectedLanguage).toString().split(",");
+		ledAlarm.setBounds(Integer.parseInt(bounds[0]),
+									Integer.parseInt(bounds[1]),
+									Integer.parseInt(bounds[2]),
+									Integer.parseInt(bounds[3]));
 		add(ledAlarm);
 
-		ledMute = new LED(Color.YELLOW, "MUTE");
+		ledMute = new LED(Color.YELLOW, Translation.getValue(String.class, "mute", "MUTE"));
 		ledMute.setName("Main Mute");
 		ledMute.setForeground(new Color(176, 224, 230));
-		ledMute.setFont(new Font("Tahoma", Font.BOLD, 18));
-		ledMute.setBounds(362, 22, 88, 30);
+		ledMute.setFont(font);
+		bounds = properties.get("led_mute_bounds_"+selectedLanguage).toString().split(",");
+		ledMute.setBounds(Integer.parseInt(bounds[0]),
+									Integer.parseInt(bounds[1]),
+									Integer.parseInt(bounds[2]),
+									Integer.parseInt(bounds[3]));
 		add(ledMute);
 		
-		ledRx.setForeground(new Color(176, 224, 230));
-		ledRx.setFont(new Font("Tahoma", Font.BOLD, 18));
 		ledRx.setBounds(10, 29, 17, 17);
 		add(ledRx);
+	}
+
+	private static Properties getProperties() {
+		Properties properties = new Properties();
+		try {
+			properties.load(HeadPanel.class.getResourceAsStream("HeadPanel.properties"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return properties;
 	}
 
 	public void setPowerOn(boolean isOn) {
@@ -80,5 +113,9 @@ public class HeadPanel extends MainPanel {
 				ledAlarm.setOn((status&MonitorController.LOCK)==0);
 			}
 		};
+	}
+
+	public void refresh() {
+		System.out.println("Yes");
 	}
 }

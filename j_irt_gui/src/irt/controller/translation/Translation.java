@@ -2,9 +2,6 @@ package irt.controller.translation;
 
 import irt.controller.GuiController;
 
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -16,19 +13,19 @@ public class Translation {
 
 	private static final Preferences PREFS = GuiController.getPrefs();
 
-	private static String locate = PREFS.get("locate", "en,US");
+	private static String locate = PREFS.get("l", "en_US");
 	private static ResourceBundle messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", new Locale(locate.split(",")[0], locate.split(",")[1]));
 	private static Map<String, String> map = getMap();
 
 	public static void setLocate(String locate){
-		String[] splitLocate = locate.split(",");
-		messages = ResourceBundle.getBundle("translation.messageBundle", new Locale(splitLocate[0], splitLocate[1]));
+		System.out.println(locate);
+		String[] splitLocate = locate.split("_");
+		messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", new Locale(splitLocate[0], splitLocate[1]));
 		map = getMap();
 		PREFS.put("locate", locate);
 	}
 
 	private static Map<String, String> getMap() {
-		System.out.println(messages);
 
 		Map<String, String> map = new HashMap<String, String>();
 		Enumeration<String> keys = messages.getKeys();
@@ -67,20 +64,5 @@ public class Translation {
 			returnValue = defaultValue;
 
 		return returnValue;
-	}
-
-	public static Font replaceFont(String fontKey, String fontSizeKey, Font defaultFont, float defaultFontSize) {
-		Font font = null;
-		try {
-
-			String fontURL = Translation.getValue(String.class, fontKey, null);
-			font = fontURL==null ? defaultFont : Font.createFont(Font.TRUETYPE_FONT, Translation.class.getClassLoader().getResource(fontURL).openStream());
-			if(!font.equals(defaultFont))
-				font = font.deriveFont(Translation.getValue(Float.class, fontSizeKey, defaultFontSize));
-
-		} catch (FontFormatException | IOException e) {
-			font = defaultFont;
-		}
-		return font;
 	}
 }

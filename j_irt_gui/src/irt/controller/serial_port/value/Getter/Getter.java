@@ -65,7 +65,6 @@ public class Getter extends GetterAbstract {
 																							 PacketWork.PACKET_ID_DUMP_REGISTER_100==packetId ?
 																									 tmp+1 ://I need all dumps. So tmp!=value
 																										 source.hashCode();
-//							System.out.println("Value: "+value+"; tmp: "+tmp+"; equales: "+(value==tmp)+"; "+packet);
 						}
 					}
 					isSet = true;

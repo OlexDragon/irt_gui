@@ -1,17 +1,28 @@
 package irt.irt_gui;
 import irt.controller.GuiController;
+import irt.data.Listeners;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.tools.KeyValue;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 
 import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.io.IOException;
+import java.util.Properties;
 
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.UIManager;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
@@ -34,7 +45,7 @@ public class IrtGui extends IrtMainFrame {
 		JLabel lblGui = new JLabel("GUI "+VERTION);
 		lblGui.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblGui.setForeground(Color.WHITE);
-		lblGui.setBounds(531, 37, 107, 14);
+		lblGui.setBounds(531, 29, 107, 14);
 		headPanel.add(lblGui);
 
 		UnitsContainer unitsPanel = new UnitsContainer();
@@ -51,8 +62,44 @@ public class IrtGui extends IrtMainFrame {
 						IrtPanel.fontStyle.get(IrtPanel.properties.getProperty("font_style_"+IrtPanel.companyIndex)),
 						12));
 		lblIrtTechnologies.setForeground(Color.WHITE);
-		lblIrtTechnologies.setBounds(531, 19, 107, 14);
+		lblIrtTechnologies.setBounds(531, 10, 107, 14);
 		headPanel.add(lblIrtTechnologies);
+
+//Language ComboBox
+		Properties translationProperties = new Properties();
+		try {
+			translationProperties.load(IrtGui.class.getResourceAsStream("translation.properties"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String[] languagesArr = translationProperties.getProperty("languages").split(",");
+		KeyValue<?,?>[] languages = new KeyValue[languagesArr.length];
+		for(int i=0; i<languagesArr.length; i++){
+			String[] split = languagesArr[i].split(":");
+			languages[i]= new KeyValue<String, String>(split[0], split[1]);
+		}
+
+		KeyValue<String, String> keyValue = new KeyValue<>(GuiController.getPrefs().get("locate", "en_US"), null);
+		@SuppressWarnings("unchecked")
+		DefaultComboBoxModel<KeyValue<String, String>> defaultComboBoxModel = new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages);
+		defaultComboBoxModel.setSelectedItem(keyValue);
+
+		JComboBox<KeyValue<String, String>> comboBoxLanguage = new JComboBox<>();
+		comboBoxLanguage.setName("Language");
+		comboBoxLanguage.setFont(UIManager.getFont("CheckBoxMenuItem.acceleratorFont"));
+		comboBoxLanguage.setModel(defaultComboBoxModel);
+		comboBoxLanguage.addPopupMenuListener(Listeners.popupMenuListener);
+		comboBoxLanguage.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
+		comboBoxLanguage.setForeground(Color.WHITE);
+		comboBoxLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		comboBoxLanguage.setBackground(HeadPanel.BACKGROUND_COLOR.darker().darker());
+		String[] bounds = translationProperties.get("headPanel_comboBoc_bounds").toString().split(",");
+		comboBoxLanguage.setBounds(Integer.parseInt(bounds[0]),
+									Integer.parseInt(bounds[1]),
+									Integer.parseInt(bounds[2]),
+									Integer.parseInt(bounds[3]));
+		comboBoxLanguage.setMinimumSize(new Dimension(77, 17));
+		headPanel.add(comboBoxLanguage);
 	}
 
 	public static void main(String[] args) {

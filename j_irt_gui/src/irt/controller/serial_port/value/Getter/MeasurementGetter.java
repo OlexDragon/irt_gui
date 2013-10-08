@@ -57,8 +57,6 @@ public class MeasurementGetter extends GetterAbstract {
 								source = new Long(pl.getShort(0));
 						}
 					}
-//if(packetId==10)
-//	System.out.println("id="+packetId+"; source="+source+"("+source.getClass().getSimpleName()+"); value="+value);
 					if(source!=null && !source.equals(value)){
 						value = source;
 						fireValueChangeListener(new ValueChangeEvent(source, packetId));

@@ -62,7 +62,7 @@ public class DemoPanel extends Panel {
 		userPanel.add(panel);
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
-		Font font = Translation.replaceFont("resource.font", "mute_label_font_size", FONT, _18);
+		Font font = FONT;
 		
 		ledLock = new LED(Color.GREEN, Translation.getValue(String.class, "lock", "LOCK"));
 		ledLock.setName("Lock");
@@ -282,7 +282,7 @@ public class DemoPanel extends Panel {
 	public void refresh() {
 		super.refresh();
 
-		Font font = Translation.replaceFont("resource.font", "mute_label_font_size", FONT, MUTE_LABEL_FONT_SIZE);
+		Font font = FONT;
 		lblMute.setFont(font);
 		String text = Translation.getValue(String.class, "mute", "MUTE");
 		lblMute.setText(text);

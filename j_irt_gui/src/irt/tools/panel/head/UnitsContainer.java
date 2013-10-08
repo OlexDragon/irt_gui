@@ -180,4 +180,9 @@ public class UnitsContainer extends JPanel{
 	public void addStatusListener(ValueChangeListener valueChangeListener) {
 		statusChangeListener = valueChangeListener;
 	}
+
+	public void refresh() {
+		// TODO Auto-generated method stub
+		
+	}
 }

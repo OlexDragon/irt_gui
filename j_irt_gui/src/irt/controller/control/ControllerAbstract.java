@@ -66,7 +66,6 @@ public abstract class ControllerAbstract implements Runnable{
 
 	@Override
 	public void run() {
-//		System.out.println("Run - "+ControllerAbstract.this.getClass().getSimpleName());
 		if(packetListener!=null && packetWork!=null){
 
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(packetListener);
@@ -75,8 +74,6 @@ public abstract class ControllerAbstract implements Runnable{
 				synchronized (this) {
 					try {
 
-//						if(ControllerAbstract.this instanceof DumpController)
-//							System.out.println(">>> run - "+send+" : "+ControllerAbstract.this.getClass().getSimpleName()+" : "+getPacketWork().getPacketThread());
 
 						if(send){ send(); }
 						if(isWait()) wait(waitTime);
@@ -84,7 +81,6 @@ public abstract class ControllerAbstract implements Runnable{
 					}
 				}
 			}
-//			System.out.println("Stop - "+ControllerAbstract.this.getClass().getSimpleName());
 			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 			clear();
 		}

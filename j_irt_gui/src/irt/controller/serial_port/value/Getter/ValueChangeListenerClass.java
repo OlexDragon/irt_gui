@@ -30,8 +30,6 @@ public class ValueChangeListenerClass {
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
 		t.start();
-
-//		System.out.println("Class-"+getClass().getSimpleName()+" Fire valueChangeEvent: "+valueChangeEvent);
 	}
 
 	public <T> void removeVlueChangeListeners() {

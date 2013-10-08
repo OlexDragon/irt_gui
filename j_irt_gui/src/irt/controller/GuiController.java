@@ -3,6 +3,7 @@ package irt.controller;
 import irt.controller.serial_port.ComPort;
 import irt.controller.serial_port.value.Getter.DeviceInfoGetter;
 import irt.controller.serial_port.value.Getter.ValueChangeListenerClass;
+import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
@@ -11,6 +12,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.irt_gui.IrtGui;
+import irt.tools.KeyValue;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.DevicePanel;
 import irt.tools.panel.PicobucPanel;
@@ -52,6 +54,8 @@ public class GuiController extends GuiControllerAbstract{
 	private HeadPanel headPanel;
 
 	private SoftReleaseChecker softReleaseChecker;
+
+	private JComboBox<KeyValue<String, String>> languageComboBox;
 	private static DumpControllers dumpControllers;
 
 //************************************************************************************************
@@ -69,10 +73,17 @@ public class GuiController extends GuiControllerAbstract{
 				unitsPanel = (UnitsContainer) c;
 				break;
 			case "JComboBox":
-				setComboBox((JComboBox<String>)c);
+				setComboBox((JComboBox<Object>)c);
 				break;
 			case "HeadPanel":
 				headPanel = (HeadPanel)c;
+				Component[] cms = headPanel.getComponents();
+				for(Component cm:cms){
+					String n = cm.getName();
+					if(n!=null && n.equals("Language"))
+						setComboBox(cm);
+				}
+					
 			}
 
 		comPortThreadQueue.addPacketListener(new PacketListener() {
@@ -177,7 +188,13 @@ public class GuiController extends GuiControllerAbstract{
 					Calendar cal = Calendar.getInstance();
 
 					PrintWriter pw = new PrintWriter(new FileWriter(f, true));
-					pw.println(">>>SN:"+(di!=null ? di.getSerialNumber() : "???")+"; "+dateFormat.format(cal.getTime())+":Vertion:"+IrtGui.VERTION+">>>\n\r"+text.substring(text.length()-1000, text.length()));
+
+					int length = text.length();
+					if(length>0)
+						pw.println(">>>SN:"+(di!=null ? di.getSerialNumber() : "???")+"; "+
+								dateFormat.format(cal.getTime())+
+								":Vertion:"+IrtGui.VERTION+">>>\n\r"+
+								(length>1000 ? text.substring(length-1000, length) : text));
 					pw.close();
 				} catch (IOException e) {
 					Console.appendLn(e.getLocalizedMessage(), "file error");
@@ -204,37 +221,57 @@ public class GuiController extends GuiControllerAbstract{
 		return new PicobucPanel(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 	}
 
-	private void setComboBox(JComboBox<String> c) {
+	@SuppressWarnings("unchecked")
+	private void setComboBox(Component c) {
 		String name = c.getName();
-		if(name!=null && name.equals("Unit's Serial Port")){
-			serialPortSelection = c;
-			DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
-			defaultComboBoxModel.insertElementAt("Select Serial Port", 0);
-			serialPortSelection.setModel(defaultComboBoxModel);
-			serialPortSelection.setFont(new Font("Tahoma", Font.BOLD, 18));
+		if(name!=null)
+			if(name.equals("Unit's Serial Port")){
+				serialPortSelection = (JComboBox<String>) c;
+				DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
+				defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
+				serialPortSelection.setModel(defaultComboBoxModel);
+				serialPortSelection.setFont(new Font("Tahoma", Font.BOLD, 18));
 
-			String portName = comPortThreadQueue.getSerialPort().getPortName();
-			if(defaultComboBoxModel.getIndexOf(portName)==-1){
-				if(defaultComboBoxModel.getSize()>1)
-					setSerialPort(serialPortSelection.getSelectedItem().toString());
-			}else
-				serialPortSelection.setSelectedItem(portName);
-
-			serialPortSelection.addItemListener(new ItemListener() {
-				@Override
-				public void itemStateChanged(ItemEvent itemEvent) {
-					if(itemEvent.getStateChange()==ItemEvent.SELECTED)
+				String portName = comPortThreadQueue.getSerialPort().getPortName();
+				if(defaultComboBoxModel.getIndexOf(portName)==-1){
+					if(defaultComboBoxModel.getSize()>1)
 						setSerialPort(serialPortSelection.getSelectedItem().toString());
-				}
-			});
-		}
+				}else
+					serialPortSelection.setSelectedItem(portName);
+
+				serialPortSelection.addItemListener(new ItemListener() {
+					@Override
+					public void itemStateChanged(ItemEvent itemEvent) {
+						if(itemEvent.getStateChange()==ItemEvent.SELECTED)
+							setSerialPort(serialPortSelection.getSelectedItem().toString());
+					}
+				});
+			}else if(name.equals("Language")){
+				languageComboBox = (JComboBox<KeyValue<String, String>>) c;
+				languageComboBox.addItemListener(new ItemListener() {
+					
+					@Override
+					public void itemStateChanged(ItemEvent itemEvent) {
+						if(itemEvent.getStateChange()==ItemEvent.SELECTED){
+							Translation.setLocate(((KeyValue<String, String>)languageComboBox.getSelectedItem()).getKey());
+							headPanel.refresh();
+							if(unitsPanel!=null)
+								unitsPanel.refresh();
+
+							DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
+							defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
+							serialPortSelection.setModel(defaultComboBoxModel);
+							serialPortSelection.setFont(new Font("Tahoma", Font.BOLD, 18));
+						}
+					}
+				});
+			}
 	}
 
 	@Override
 	public void run() {
 		while(true){
 			try {
-				System.out.println("Yes");
 				if(serialPortSelection!=null){
 					Object selectedItem = serialPortSelection.getSelectedItem();
 					if(selectedItem!=null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString())){
