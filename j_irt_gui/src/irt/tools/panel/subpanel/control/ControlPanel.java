@@ -7,17 +7,22 @@ import irt.controller.GuiController;
 import irt.controller.control.ControlController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.translation.Translation;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
 import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.button.ImageButton;
+import irt.tools.panel.PicobucPanel;
+import irt.tools.panel.head.HeadPanel;
+import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,6 +30,9 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Properties;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -60,17 +68,26 @@ public class ControlPanel extends MonitorPanelAbstract {
 	private IdValue selection;
 	private JComboBox<String> cbLoSelect;
 	private boolean hasFreqSet;
+	private JLabel lblMute;
+	private ImageButton btnMute;
+	private ImageButton btnStoreConfig;
 
 	public ControlPanel(LinkHeader linkHeader, int flags) {
-		super(linkHeader, "Control", 214, 180);
+		super(linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
+
+		String selectedLanguage = setFont();
+
+		titledBorder.setTitleFont(font);
 
 		hasFreqSet = (flags & ControlPanel.FLAG_FREQUENCY_SET)>0;
 
 		color = new Color(0x0B,0x17,0x3B);
 		cursor = new Cursor(Cursor.HAND_CURSOR);
 
-		ImageButton btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
-		btnMute.setToolTipText("MUTE Button");
+		String muteText = Translation.getValue(String.class, "mute", "MUTE");
+
+		btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
+		btnMute.setToolTipText(muteText);
 		btnMute.setName("Button Mute");
 		Point p = setMuteButtonPosition();
 		btnMute.setBounds(p.x, p.y, 33, 33);
@@ -81,7 +98,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
-		JLabel lblMute = new JLabel("MUTE");
+		lblMute = new JLabel(muteText);
 		lblMute.setName("Label Mute");
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
@@ -100,9 +117,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 		add(txtGain);
 		txtGain.setColumns(10);
 
-		ImageButton btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
+		btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 		btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnStoreConfig.setToolTipText("Store Config");
+		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
 		btnStoreConfig.setShadowShiftY(4);
 		btnStoreConfig.setShadowShiftX(4);
 		btnStoreConfig.setShadowPressedShiftY(1);
@@ -235,6 +252,17 @@ public class ControlPanel extends MonitorPanelAbstract {
 		return new Point(14, 101);
 	}
 
+	private Properties getProperties() {
+		System.out.println("getProperties");
+		Properties properties = new Properties();
+		try {
+			properties.load(PicobucPanel.class.getResourceAsStream("PicoBucPanel.properties"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return properties;
+	}
+
 	private void setController(int control) {
 		if(ñontroller!=null)
 			ñontroller.setRun(false);
@@ -273,5 +301,23 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 	public JSlider getSlider() {
 		return slider;
+	}
+
+	public void refresh() {
+		super.refresh();
+
+		String text = Translation.getValue(String.class, "control", "Control");
+		titledBorder.setTitle(text);
+
+		font = font.deriveFont(Float.parseFloat(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)));
+		String muteText = Translation.getValue(String.class, "mute", "MUTE");
+
+		btnMute.setToolTipText(muteText);
+		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
+
+		lblMute.setText(muteText);
+		lblMute.setFont(font);
+		
+		repaint();
 	}
 }

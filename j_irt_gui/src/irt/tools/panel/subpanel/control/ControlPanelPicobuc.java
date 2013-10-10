@@ -21,7 +21,7 @@ public class ControlPanelPicobuc extends ControlPanel {
 
 	public ControlPanelPicobuc(LinkHeader linkHeader) {
 		super(linkHeader, ControlPanel.FLAG_ATTENUATION);
-		
+
 		cbLoSelect = new JComboBox<String>();
 		cbLoSelect.setName("LO Select");
 		cbLoSelect.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0; }};}});
@@ -33,6 +33,11 @@ public class ControlPanelPicobuc extends ControlPanel {
 		cbLoSelect.setBounds(10, 141, 194, 26);
 		add(cbLoSelect);
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+	}
+
+	@Override
+	public void refresh() {
+		super.refresh();
 	}
 
 	@Override
