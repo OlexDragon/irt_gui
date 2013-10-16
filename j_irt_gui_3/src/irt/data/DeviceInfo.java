@@ -36,6 +36,8 @@ public class DeviceInfo {
 	private StringData firmwareBuildDate;
 	private int firmwareBuildCounter;
 	private StringData unitName;
+	private StringData unitPartNumber;
+
 	private InfoPanel infoPanel;
 
 	public DeviceInfo(Packet packet) {
@@ -127,9 +129,12 @@ public class DeviceInfo {
 					case Payload.UNIT_NAME:
 						unitName = pl.getStringData();
 						break;
+					case Payload.UNIT_PART_NUMBER:
+						unitPartNumber = pl.getStringData();
+						break;
 //					default:
-//						System.out.println("not used - "+pl.getParameterHeader().getCode());
-//						System.out.println("not used - "+pl.getStringData());
+//						System.out.print("not used - code="+pl.getParameterHeader().getCode()+"; ");
+//						System.out.println("value="+pl.getStringData());
 					}
 				isSet = true;
 			}
@@ -165,6 +170,10 @@ public class DeviceInfo {
 
 	public StringData getUnitName() {
 		return unitName;
+	}
+
+	public StringData getUnitPartNumber() {
+		return unitPartNumber;
 	}
 
 	@Override

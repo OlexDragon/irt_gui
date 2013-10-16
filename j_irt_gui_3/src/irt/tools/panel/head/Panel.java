@@ -86,7 +86,7 @@ public class Panel extends JPanel {
 		userPanel.setLayout(null);
 		add(userPanel);
 
-		extraPanel = new	 JPanel();	
+		extraPanel = new JPanel();	
 		extraPanel.setBackground(new Color(0,0x33,0x33));
 		extraPanel.setBounds(MID_WIDTH, MIN_HEIGHT, MAX_WIDTH-MID_WIDTH, MAX_HEIGHT-MIN_HEIGHT);
 		extraPanel.setLayout(null);

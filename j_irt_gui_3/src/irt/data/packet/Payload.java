@@ -11,12 +11,14 @@ import java.util.Arrays;
 
 public class Payload {
 
-	public static final byte DEVICE_TYPE			= 1;
-	public static final byte FIRMWARE_VERSION		= 2;
-	public static final byte FIRMWARE_BUILD_DATE	= 3;
-	public static final byte FIRMWARE_BUILD_COUNTER = 4;
-	public static final byte DEVICE_SN 				= 5;
-	public static final byte UNIT_NAME				= 6;
+	//Info Code
+	public static final byte DEVICE_TYPE			= 1,
+							FIRMWARE_VERSION		= 2,
+							FIRMWARE_BUILD_DATE		= 3,
+							FIRMWARE_BUILD_COUNTER	= 4,
+							DEVICE_SN 				= 5,
+							UNIT_NAME				= 6,
+							UNIT_PART_NUMBER		= 0;
 
 	public static final int PLL1 = 1;
 	public static final int PLL2 = 2;

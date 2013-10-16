@@ -4,6 +4,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
+import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
@@ -44,8 +45,12 @@ public class InfoPanel extends JPanel {
 	private JLabel lblVertionTxt;
 	private JLabel lblDeviceTxt;
 	private JLabel lblSn;
+	private JLabel lblUnitName;
+	private JLabel lblUnitPartNumber;
 
 	public InfoPanel(LinkHeader linkHeader) {
+		setForeground(Color.WHITE);
+		setBackground(new Color(0,0x33,0x33));
 
 
 		addAncestorListener(new AncestorListener() {
@@ -83,8 +88,6 @@ public class InfoPanel extends JPanel {
 
 		this.linkHeader = linkHeader;
 
-		setOpaque(false);
-
 		Font font = Translation.getFont();
 		titledBorder = new TitledBorder(
 				UIManager.getBorder("TitledBorder.border"),
@@ -96,11 +99,24 @@ public class InfoPanel extends JPanel {
 		);
 
 		setBorder(titledBorder);
-		setSize(286, 104);
+		setSize(286, 355);
 		setLayout(null);
 
 		String fontSize = properties.getProperty("infoPanel.labels.font.size");
 		font = font.deriveFont(Float.parseFloat(fontSize));
+		
+		lblUnitName = new JLabel("");
+		lblUnitName.setForeground(Color.YELLOW);
+		lblUnitName.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblUnitName.setBounds(10, 24, 261, 14);
+		add(lblUnitName);
+		
+		lblUnitPartNumber = new JLabel("");
+		lblUnitPartNumber.setForeground(Color.YELLOW);
+		lblUnitPartNumber.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblUnitPartNumber.setBounds(10, 47, 261, 14);
+		add(lblUnitPartNumber);
+
 		lblCountTxt = new JLabel(Translation.getValue(String.class, "count", "Count")+":");
 		lblCountTxt.setForeground(new Color(153, 255, 255));
 		lblCountTxt.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -116,53 +132,53 @@ public class InfoPanel extends JPanel {
 		lblBuiltDate = new JLabel("Oct  2 2012, 10:45:39");
 		lblBuiltDate.setForeground(Color.WHITE);
 		lblBuiltDate.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblBuiltDate.setBounds(74, 58, 197, 14);
+		lblBuiltDate.setBounds(74, 145, 197, 14);
 		add(lblBuiltDate);
 
 		lblBuiltDateTxt = new JLabel(Translation.getValue(String.class, "built_date", "Built Date")+":");
 		lblBuiltDateTxt.setForeground(new Color(153, 255, 255));
 		lblBuiltDateTxt.setFont(font);
 		lblBuiltDateTxt.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblBuiltDateTxt.setBounds(5, 58, 58, 14);
+		lblBuiltDateTxt.setBounds(5, 145, 58, 14);
 		add(lblBuiltDateTxt);
 
 		lblVertionTxt = new JLabel(Translation.getValue(String.class, "version", "Version")+":");
 		lblVertionTxt.setForeground(new Color(153, 255, 255));
 		lblVertionTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblVertionTxt.setFont(font);
-		lblVertionTxt.setBounds(5, 40, 58, 14);
+		lblVertionTxt.setBounds(5, 126, 58, 14);
 		add(lblVertionTxt);
 
 		lblVersion = new JLabel("0");
 		lblVersion.setForeground(Color.WHITE);
 		lblVersion.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblVersion.setBounds(74, 40, 155, 14);
+		lblVersion.setBounds(74, 126, 155, 14);
 		add(lblVersion);
 
 		lblDeviceTxt = new JLabel(Translation.getValue(String.class, "device", "Device")+":");
 		lblDeviceTxt.setForeground(new Color(153, 255, 255));
 		lblDeviceTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDeviceTxt.setFont(font);
-		lblDeviceTxt.setBounds(5, 22, 58, 14);
+		lblDeviceTxt.setBounds(5, 101, 58, 14);
 		add(lblDeviceTxt);
 
 		lblSN = new JLabel("SN");
 		lblSN.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblSN.setBounds(181, 21, 103, 14);
+		lblSN.setBounds(147, 250, 103, 14);
 		lblSN.setForeground(Color.YELLOW);
 		add(lblSN);
 
 		lblDeviceId = new JLabel("0000.0.0");
 		lblDeviceId.setForeground(Color.WHITE);
 		lblDeviceId.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblDeviceId.setBounds(74, 22, 85, 14);
+		lblDeviceId.setBounds(74, 101, 85, 14);
 		add(lblDeviceId);
 
 		lblSn = new JLabel(Translation.getValue(String.class, "sn", "SN")+":");
 		lblSn.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblSn.setForeground(new Color(153, 255, 255));
 		lblSn.setFont(font);
-		lblSn.setBounds(130, 21, 48, 14);
+		lblSn.setBounds(96, 250, 48, 14);
 		add(lblSn);
 
 		lblError = new JLabel();
@@ -178,6 +194,14 @@ public class InfoPanel extends JPanel {
 			lblVersion.setText(deviceInfo.getFirmwareVersion().toString());
 			lblBuiltDate.setText(deviceInfo.getFirmwareBuildDate().toString());
 			lblSN.setText(deviceInfo.getSerialNumber().toString());
+
+			StringData unitName = deviceInfo.getUnitName();
+			if(unitName!=null)
+				lblUnitName.setText(unitName.toString());
+
+			StringData unitPartNumber = deviceInfo.getUnitPartNumber();
+			if(unitPartNumber!=null)
+				lblUnitPartNumber.setText(unitPartNumber.toString());
 
 			int firmwareBuildCounter = deviceInfo.getFirmwareBuildCounter();
 			lblCount.setText(calculateTime(firmwareBuildCounter));
