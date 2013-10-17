@@ -18,7 +18,7 @@ public class Payload {
 							FIRMWARE_BUILD_COUNTER	= 4,
 							DEVICE_SN 				= 5,
 							UNIT_NAME				= 6,
-							UNIT_PART_NUMBER		= 0;
+							UNIT_PART_NUMBER		= 7;
 
 	public static final int PLL1 = 1;
 	public static final int PLL2 = 2;
