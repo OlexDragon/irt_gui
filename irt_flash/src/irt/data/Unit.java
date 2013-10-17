@@ -4,7 +4,6 @@ import irt.tools.panel.head.Console;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -91,17 +90,19 @@ public class Unit {
 				public int compare(String[] a,String[] b){
 					long compareTo = b[0].compareTo(a[0]);
 					if(compareTo == 0){
-						System.out.println(Arrays.toString(a));
+//						System.out.println(Arrays.toString(a));
 						String a1 = a[1].split("\\s+")[0];
 						String splitStrA = a1.replace("[\\D.-]", "");
 						String b1 = b[1].split("\\s+")[0];
 						String splitStrB = b1.replace("[\\D.-]", "");
-						System.out.println(a1+" : "+b1);
-						System.out.println(splitStrA+" : "+splitStrB);
-						System.out.println();
-						if(!(splitStrA.isEmpty() || splitStrB.isEmpty()))
-							compareTo = (long) (Double.parseDouble(splitStrA)-Double.parseDouble(splitStrB));
-						else if(!splitStrA.isEmpty())
+//						System.out.println(a1+" : "+b1);
+//						System.out.println(splitStrA+" : "+splitStrB);
+						if(!(splitStrA.isEmpty() || splitStrB.isEmpty())){
+							long d = (long) (Double.parseDouble(splitStrA)-Double.parseDouble(splitStrB));
+							compareTo = d>0 ? 1 : d<0 ? -1 : 0;
+//							System.out.println("compareTo:"+compareTo);
+//							System.out.println();
+						}else if(!splitStrA.isEmpty())
 							compareTo = 1;
 						else if(!splitStrB.isEmpty())
 							compareTo = -1;
