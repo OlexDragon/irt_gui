@@ -12,6 +12,7 @@ import irt.tools.label.LED;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.InfoPanel;
+import irt.tools.panel.subpanel.NetworkPanel;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -333,6 +334,9 @@ public class DemoPanel extends Panel {
 		cbLoSelect.addItem(loTxt+":2 13050 MHz");
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		panel_1.add(cbLoSelect);
+
+		NetworkPanel networkPanel = new NetworkPanel(null);
+		tabbedPane.addTab("Network", null, networkPanel, null);
 	}
 
 	private Properties getProperties() {

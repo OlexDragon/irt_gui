@@ -10,14 +10,21 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.tools.Transformer;
 import irt.tools.panel.PicobucPanel;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -25,14 +32,12 @@ import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import javax.swing.JButton;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.Cursor;
 
 @SuppressWarnings("serial")
 public class InfoPanel extends JPanel {
 
+	private static final int WINDOW_MIN_HEIGHT = 105;
+	private static final int WINDOW_MAX_HEIGHT = 135;
 	private JLabel lblDeviceId;
 	private JLabel lblSn;
 	private JLabel lblVersion;
@@ -46,7 +51,7 @@ public class InfoPanel extends JPanel {
 	private Properties properties = getProperties();
 	private JLabel lblCountTxt;
 	private JLabel lblBuiltDateTxt;
-	private JLabel lblVertionTxt;
+	private JLabel lblVersionTxt;
 	private JLabel lblDeviceTxt;
 	private JLabel lblSnTxt;
 	private JLabel lblUnitName;
@@ -57,6 +62,7 @@ public class InfoPanel extends JPanel {
 	public InfoPanel(LinkHeader linkHeader) {
 		setForeground(Color.WHITE);
 		setBackground(new Color(0,0x33,0x33));
+		setSize(286, WINDOW_MIN_HEIGHT);
 
 
 		addAncestorListener(new AncestorListener() {
@@ -103,113 +109,141 @@ public class InfoPanel extends JPanel {
 				font,
 				Color.WHITE
 		);
-
 		setBorder(titledBorder);
-		setSize(286, 191);
-		setLayout(null);
 
 		String fontSize = properties.getProperty("infoPanel.labels.font.size");
 		font = font.deriveFont(Float.parseFloat(fontSize));
 		
 				lblError = new JLabel();
+				lblError.setBounds(15, 2, 266, 15);
 				lblError.setFont(new Font("Tahoma", Font.BOLD, 17));
 				lblError.setHorizontalAlignment(SwingConstants.CENTER);
-				lblError.setBounds(10, 8, 266, 15);
-				add(lblError);
 		
 		lblUnitName = new JLabel("");
+		lblUnitName.setBounds(15, 19, 261, 14);
 		lblUnitName.setHorizontalAlignment(SwingConstants.CENTER);
 		lblUnitName.setForeground(Color.YELLOW);
 		lblUnitName.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblUnitName.setBounds(10, 31, 261, 14);
-		add(lblUnitName);
 				
 						lblSnTxt = new JLabel(Translation.getValue(String.class, "sn", "SN")+":");
+						lblSnTxt.setBounds(9, 35, 59, 14);
 						lblSnTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 						lblSnTxt.setForeground(new Color(153, 255, 255));
 						lblSnTxt.setFont(font);
-						lblSnTxt.setBounds(10, 53, 48, 14);
-						add(lblSnTxt);
 		
 				lblSn = new JLabel("SN");
+				lblSn.setHorizontalAlignment(SwingConstants.LEFT);
+				lblSn.setBounds(78, 35, 198, 14);
 				lblSn.setFont(new Font("Tahoma", Font.PLAIN, 14));
-				lblSn.setBounds(61, 53, 103, 14);
 				lblSn.setForeground(Color.YELLOW);
-				add(lblSn);
 		
 		lblUnitPartNumberTxt = new JLabel(Translation.getValue(String.class, "part_number", "Part Number")+":");
+		lblUnitPartNumberTxt.setBounds(9, 51, 59, 14);
 		lblUnitPartNumberTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblUnitPartNumberTxt.setForeground(new Color(153, 255, 255));
 		lblUnitPartNumberTxt.setFont(font);
-		lblUnitPartNumberTxt.setBounds(5, 75, 80, 14);
-		add(lblUnitPartNumberTxt);
 		
 		lblUnitPartNumber = new JLabel("");
+		lblUnitPartNumber.setHorizontalAlignment(SwingConstants.LEFT);
+		lblUnitPartNumber.setBounds(78, 51, 198, 14);
 		lblUnitPartNumber.setForeground(Color.YELLOW);
 		lblUnitPartNumber.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblUnitPartNumber.setBounds(95, 75, 176, 14);
-		add(lblUnitPartNumber);
 		
 				lblCountTxt = new JLabel(Translation.getValue(String.class, "count", "Count")+":");
+				lblCountTxt.setBounds(9, 67, 59, 14);
 				lblCountTxt.setForeground(new Color(153, 255, 255));
 				lblCountTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 				lblCountTxt.setFont(font);
-				lblCountTxt.setBounds(15, 97, 58, 14);
-				add(lblCountTxt);
 
 		lblCount = new JLabel(":");
+		lblCount.setHorizontalAlignment(SwingConstants.LEFT);
+		lblCount.setBounds(78, 67, 198, 14);
 		lblCount.setForeground(Color.WHITE);
-		lblCount.setBounds(84, 97, 141, 14);
-		add(lblCount);
 		
 				lblBuiltDateTxt = new JLabel(Translation.getValue(String.class, "built_date", "Built Date")+":");
+				lblBuiltDateTxt.setBounds(9, 83, 59, 14);
 				lblBuiltDateTxt.setForeground(new Color(153, 255, 255));
 				lblBuiltDateTxt.setFont(font);
 				lblBuiltDateTxt.setHorizontalAlignment(SwingConstants.RIGHT);
-				lblBuiltDateTxt.setBounds(5, 141, 58, 14);
-				add(lblBuiltDateTxt);
 
 		lblBuiltDate = new JLabel("Oct  2 2012, 10:45:39");
+		lblBuiltDate.setHorizontalAlignment(SwingConstants.LEFT);
+		lblBuiltDate.setBounds(78, 83, 198, 14);
 		lblBuiltDate.setForeground(Color.WHITE);
 		lblBuiltDate.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblBuiltDate.setBounds(74, 141, 197, 14);
-		add(lblBuiltDate);
 
-		lblVertionTxt = new JLabel(Translation.getValue(String.class, "version", "Version")+":");
-		lblVertionTxt.setForeground(new Color(153, 255, 255));
-		lblVertionTxt.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblVertionTxt.setFont(font);
-		lblVertionTxt.setBounds(5, 119, 58, 14);
-		add(lblVertionTxt);
+		lblVersionTxt = new JLabel(Translation.getValue(String.class, "version", "Version")+":");
+		lblVersionTxt.setVisible(false);
+		lblVersionTxt.setBounds(9, 99, 59, 14);
+		lblVersionTxt.setForeground(new Color(153, 255, 255));
+		lblVersionTxt.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblVersionTxt.setFont(font);
 
 		lblVersion = new JLabel("0");
+		lblVersion.setHorizontalAlignment(SwingConstants.LEFT);
+		lblVersion.setVisible(false);
+		lblVersion.setBounds(78, 99, 198, 14);
 		lblVersion.setForeground(Color.WHITE);
 		lblVersion.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblVersion.setBounds(74, 119, 155, 14);
-		add(lblVersion);
 
 		lblDeviceTxt = new JLabel(Translation.getValue(String.class, "device", "Device")+":");
+		lblDeviceTxt.setBounds(9, 115, 59, 14);
 		lblDeviceTxt.setForeground(new Color(153, 255, 255));
 		lblDeviceTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDeviceTxt.setFont(font);
-		lblDeviceTxt.setBounds(5, 163, 58, 14);
-		add(lblDeviceTxt);
 
 		lblDeviceId = new JLabel("0000.0.0");
+		lblDeviceId.setHorizontalAlignment(SwingConstants.LEFT);
+		lblDeviceId.setBounds(78, 115, 198, 14);
 		lblDeviceId.setForeground(Color.WHITE);
 		lblDeviceId.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblDeviceId.setBounds(74, 163, 85, 14);
-		add(lblDeviceId);
 		
 		btnPanelSize = new JButton("");
+		btnPanelSize.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+
+				Transformer transformer = new Transformer();
+				transformer.setComponent(InfoPanel.this);
+				transformer.addProcessingComponent(Transformer.ACTION_SHOW, lblVersion);
+				transformer.addProcessingComponent(Transformer.ACTION_SHOW, lblVersionTxt);
+
+				if(getHeight()>WINDOW_MIN_HEIGHT)
+					transformer.setHeight(WINDOW_MIN_HEIGHT);
+				else
+					transformer.setHeight(WINDOW_MAX_HEIGHT);
+
+				Thread t = new Thread(transformer);
+				int priority = t.getPriority();
+				if(priority>Thread.MIN_PRIORITY)
+					t.setPriority(priority-1);
+					t.start();
+			}
+		});
+		btnPanelSize.setBounds(271, 91, 10, 10);
 		btnPanelSize.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnPanelSize.setBounds(266, 176, 20, 15);
+		setLayout(null);
+		add(lblError);
+		add(lblUnitName);
+		add(lblSnTxt);
+		add(lblSn);
+		add(lblUnitPartNumberTxt);
+		add(lblUnitPartNumber);
+		add(lblCountTxt);
+		add(lblCount);
+		add(lblBuiltDateTxt);
+		add(lblBuiltDate);
+		add(lblVersionTxt);
+		add(lblVersion);
+		add(lblDeviceTxt);
+		add(lblDeviceId);
 		add(btnPanelSize);
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(ComponentEvent arg0) {
 				InfoPanel ip = InfoPanel.this;
-				btnPanelSize.setLocation(ip.getWidth()-btnPanelSize.getWidth(), ip.getHeight()-btnPanelSize.getHeight());
+				int width = ip.getWidth()-btnPanelSize.getWidth()-1;
+				int height = ip.getHeight()-btnPanelSize.getHeight()-1;
+				btnPanelSize.setLocation(width, height);
 			}
 		});
 
@@ -226,9 +260,9 @@ public class InfoPanel extends JPanel {
 			if(unitName!=null)
 				lblUnitName.setText(unitName.toString());
 
-			StringData unitPartNumber = deviceInfo.getUnitPartNumber();
-			if(unitPartNumber!=null)
-				lblUnitPartNumber.setText(unitPartNumber.toString());
+//			StringData unitPartNumber = deviceInfo.getUnitPartNumber();
+//			if(unitPartNumber!=null)
+//				lblUnitPartNumber.setText(unitPartNumber.toString());
 
 			int firmwareBuildCounter = deviceInfo.getFirmwareBuildCounter();
 			lblCount.setText(calculateTime(firmwareBuildCounter));
@@ -313,8 +347,8 @@ public class InfoPanel extends JPanel {
 		lblCountTxt.setText(Translation.getValue(String.class, "count", "Count")+":");
 		lblBuiltDateTxt.setFont(font);
 		lblBuiltDateTxt.setText(Translation.getValue(String.class, "built_date", "Built Date")+":");
-		lblVertionTxt.setFont(font);
-		lblVertionTxt.setText(Translation.getValue(String.class, "version", "Version")+":");
+		lblVersionTxt.setFont(font);
+		lblVersionTxt.setText(Translation.getValue(String.class, "version", "Version")+":");
 		lblDeviceTxt.setFont(font);
 		lblDeviceTxt.setText(Translation.getValue(String.class, "device", "Device")+":");
 		lblSnTxt.setFont(font);

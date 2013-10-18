@@ -3,6 +3,7 @@ package irt.controller.serial_port.value.Getter;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
+import irt.data.network.NetworkAddress;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
@@ -50,6 +51,12 @@ public class Getter extends GetterAbstract {
 						switch(size){
 						case 4:
 							tmp = (Integer) (source = new Integer(pl.getInt(0)));
+							break;
+						case 13:
+							NetworkAddress networkAddress = new NetworkAddress();
+							networkAddress.set(packet);
+							source = networkAddress;
+							tmp = networkAddress.hashCode();
 							break;
 						default:
 							short packetId = cph.getPacketId();

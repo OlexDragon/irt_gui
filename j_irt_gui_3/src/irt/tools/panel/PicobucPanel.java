@@ -3,6 +3,7 @@ package irt.tools.panel;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.subpanel.BIASsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
+import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
@@ -29,7 +30,9 @@ public class PicobucPanel extends DevicePanel {
 		
 		DebagInfoPanel infoPanel = new DebagInfoPanel(linkHeader, this);
 		getTabbedPane().addTab("Info", null, infoPanel, null);
-		
+
+		NetworkPanel networkPanel = new NetworkPanel(linkHeader);
+		getTabbedPane().addTab("Network", null, networkPanel, null);
 	}
 
 	@Override

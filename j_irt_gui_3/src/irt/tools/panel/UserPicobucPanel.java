@@ -3,8 +3,8 @@ package irt.tools.panel;
 import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
-import irt.tools.panel.DevicePanel;
 import irt.tools.panel.head.IrtPanel;
+import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
@@ -23,6 +23,9 @@ public class UserPicobucPanel extends DevicePanel {
 								IrtPanel.properties.getProperty("company_logo_"+IrtPanel.companyIndex))
 						),"");
 		getTabbedPane().addTab("IRT", null, lblNewLabel, null);
+		
+		NetworkPanel networkPanel = new NetworkPanel(linkHeader);
+		getTabbedPane().addTab("Network", null, networkPanel, null);
 
 	}
 

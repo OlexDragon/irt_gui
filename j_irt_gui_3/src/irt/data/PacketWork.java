@@ -85,6 +85,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 	public static final short PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE = 120;
 
+	public static final short PACKET_NETWORK_ADDRESS = 130;
+
 
 	public Integer getPriority();
 	public PacketThread getPacketThread();

@@ -116,11 +116,13 @@ public class GuiController extends GuiControllerAbstract{
 								softReleaseChecker = new SoftReleaseChecker();
 							break;
 						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
-						case DeviceInfo.DEVICE_PICOBUC_KU:
+						case DeviceInfo.DEVICE_TYPE_PICOBUC_KU:
 						case DeviceInfo.DEVICE_PICOBUC_C:
 							protocol = LINKED;
 							unitPanel = getNewBaisPanel(((LinkedPacket)packet).getLinkHeader(), "("+di.getSerialNumber()+") "+di.getUnitName(), 0, 0, 0, 0, unitsPanel.getHeight());
 							break;
+						default:
+							System.out.println("Device Type:"+packet.getHeader().getGroupId());
 						}
 
 						if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
@@ -164,6 +166,7 @@ public class GuiController extends GuiControllerAbstract{
 							saveToFile(di);
 						}
 						unitPanel = null;
+//						System.out.println(packet);
 					}
 
 					if(unitsPanel.getComponentCount()>0 && unitsPanel.getComponent(DevicePanel.class)!=null)
@@ -281,11 +284,12 @@ public class GuiController extends GuiControllerAbstract{
 			try {
 				if(serialPortSelection!=null){
 					Object selectedItem = serialPortSelection.getSelectedItem();
+					LinkHeader linkHeader = new LinkHeader((byte)254, (byte)0, (short)0);
 					if(selectedItem!=null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString())){
 						if(protocol==ALL || protocol==CONVERTER)
 							comPortThreadQueue.add(new DeviceInfoGetter(){ @Override public Integer getPriority() { return 10001; }});
 						if(protocol==ALL || protocol==LINKED)
-							comPortThreadQueue.add(new DeviceInfoGetter(new LinkHeader((byte)254, (byte)0, (short)0)){ @Override public Integer getPriority() { return 10000; }});
+							comPortThreadQueue.add(new DeviceInfoGetter(linkHeader){ @Override public Integer getPriority() { return 10000; }});
 					}
 				}
 				synchronized (this) {

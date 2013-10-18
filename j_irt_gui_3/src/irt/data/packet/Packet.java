@@ -76,7 +76,7 @@ public class Packet {
 		IRTSCP_PACKET_ID_PROTO = 10, /* Protocol configuration. */
 
 	/* Network */
-		IRTSCP_PACKET_ID_NETWORK = 11, /* Network configuration. */
+		IRT_SCP_PACKET_ID_NETWORK = 11, /* Network configuration. */
 
 	/* backwards compatibility - to be deleted */
 		IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1 = 100,
@@ -137,7 +137,12 @@ public class Packet {
 		IRT_SLCP_PACKET_ID_CONFIG_PROFILE_NONE = (IRT_SLCP_PARAMETER_NONE),
 		IRT_SLCP_PACKET_ID_CONFIG_PROFILE_SAVE = 1;
 
-	protected static final String SAVE_CONFIG = null;
+
+	/* Network */
+	public static final byte
+		IRTSCP_PACKET_ID_NETWORK_ADDRESS = 1; /* Network configuration. */
+
+				protected static final String SAVE_CONFIG = null;
 
 	public static final int PACKET_ID = 0;
 

@@ -89,17 +89,19 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 	private void setStep() {
 
-		stepValue.setValue(ValueRangeControllerAbstract.this.txtStep.getText());
+		if(stepValue!=null){
+			stepValue.setValue(ValueRangeControllerAbstract.this.txtStep.getText());
 
-		String string = stepValue.toString();
-		ValueRangeControllerAbstract.this.txtStep.setText(string);
-		int v = (int) stepValue.getValue();
+			String string = stepValue.toString();
+			ValueRangeControllerAbstract.this.txtStep.setText(string);
+			int v = (int) stepValue.getValue();
 
-		JSlider s = ValueRangeControllerAbstract.this.slider;
+			JSlider s = ValueRangeControllerAbstract.this.slider;
 
-		if(stepValue!=null && s!=null && stepPref!=v){
-			s.setMinorTickSpacing(v);
-			GuiControllerAbstract.getPrefs().putInt(ValueRangeControllerAbstract.this.getClass().getSimpleName()+" Step", v);
+			if (stepValue != null && s != null && stepPref != v) {
+				s.setMinorTickSpacing(v);
+				GuiControllerAbstract.getPrefs().putInt(ValueRangeControllerAbstract.this.getClass().getSimpleName() + " Step", v);
+			}
 		}
 	}
 
@@ -110,10 +112,12 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		slider.setMaximum((int) value.getRelativeMaxValue());
 		slider.setMinorTickSpacing(stepPref);
 
-		stepValue = value.getCopy();
-		stepValue.setMinMax(1, slider.getMaximum());
-		stepValue.setValue(stepPref);
-		txtStep.setText(stepValue.toString());
+		if(stepValue!=null){
+			stepValue = value.getCopy();
+			stepValue.setMinMax(1, slider.getMaximum());
+			stepValue.setValue(stepPref);
+			txtStep.setText(stepValue.toString());
+		}
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
 		textSliderController = new TextSliderController(new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
