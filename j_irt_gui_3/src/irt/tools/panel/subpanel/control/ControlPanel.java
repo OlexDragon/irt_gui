@@ -67,11 +67,12 @@ public class ControlPanel extends MonitorPanelAbstract {
 	private ImageButton btnMute;
 	private ImageButton btnStoreConfig;
 	private int flags;
+	protected String selectedLanguage;
 
 	public ControlPanel(LinkHeader linkHeader, int flags) {
 		super(linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
 
-		String selectedLanguage = Translation.getSelectedLanguage();
+		selectedLanguage = Translation.getSelectedLanguage();
 
 		Font font = Translation.getFont();
 		titledBorder.setTitleFont(font);
@@ -307,7 +308,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 		titledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));
 
-		String selectedLanguage = Translation.getSelectedLanguage();
+		selectedLanguage = Translation.getSelectedLanguage();
 		Font font = Translation.getFont().deriveFont(
 				Float.parseFloat(
 						properties.getProperty(

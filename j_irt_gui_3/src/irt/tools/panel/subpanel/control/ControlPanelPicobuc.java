@@ -20,11 +20,11 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 public class ControlPanelPicobuc extends ControlPanel {
 
 	private JComboBox<String>  cbLoSelect;
+	private JLabel lblSave;
 
 	public ControlPanelPicobuc(LinkHeader linkHeader) {
 		super(linkHeader, ControlPanel.FLAG_ATTENUATION);
 		
-		String selectedLanguage = Translation.getSelectedLanguage();
 		Font font = Translation.getFont().deriveFont(16f);
 
 		cbLoSelect = new JComboBox<String>();
@@ -40,12 +40,12 @@ public class ControlPanelPicobuc extends ControlPanel {
 		
 		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)));
 
-		JLabel label = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
-		label.setHorizontalAlignment(SwingConstants.LEFT);
-		label.setForeground(Color.YELLOW);
-		label.setFont(font);
-		label.setBounds(153, 107, 61, 20);
-		add(label);
+		lblSave = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
+		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
+		lblSave.setForeground(Color.YELLOW);
+		lblSave.setFont(font);
+		lblSave.setBounds(153, 107, 61, 20);
+		add(lblSave);
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
@@ -57,5 +57,13 @@ public class ControlPanelPicobuc extends ControlPanel {
 	@Override
 	protected Point setConfigButtonPosition() {
 		return new Point(118, 101);
+	}
+
+	@Override
+	public void refresh() {
+		super.refresh();
+		Font font = Translation.getFont().deriveFont(16f);
+		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
+		lblSave.setFont(font);
 	}
 }
