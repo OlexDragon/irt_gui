@@ -1,6 +1,7 @@
 package irt.tools.panel;
 
 import irt.controller.DeviceDebagController;
+import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.serial_port.value.Getter.Getter;
 import irt.data.PacketWork;
@@ -50,14 +51,14 @@ public class DebagInfoPanel extends JPanel {
 				int mask = KeyEvent.VK_CONTROL|KeyEvent.VK_SHIFT;
 				if((modifiers&mask)==mask){
 					Preferences prefs = GuiController.getPrefs();
-					int prefsValue = prefs.getInt(GuiController.DUMP_WAIT,10);
+					int prefsValue = prefs.getInt(DumpControllers.DUMP_WAIT,10);
 					String output = JOptionPane.showInputDialog(owner, "Put The Time in minutes ("+prefsValue+" min)");
 					if(output!=null){
 						output = output.replaceAll("\\D", "");
 						if(!output.isEmpty() && output.length()<10){
 							int waitTime = Integer.parseInt(output);
 							if(prefsValue!=waitTime)
-								prefs.putInt(GuiController.DUMP_WAIT, waitTime);
+								prefs.putInt(DumpControllers.DUMP_WAIT, waitTime);
 							GuiController.getDumpControllers().setWaitTime(waitTime*1000);
 						}else{
 							JOptionPane.showMessageDialog(owner, "Wrong input.");
@@ -69,7 +70,7 @@ public class DebagInfoPanel extends JPanel {
 		});
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		add(scrollPane, BorderLayout.CENTER);
-		
+
 		panel = new JPanel();
 		add(panel, BorderLayout.NORTH);
 		panel.setLayout(new BorderLayout(0, 0));

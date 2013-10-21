@@ -3,39 +3,34 @@ package irt.controller;
 import irt.controller.serial_port.value.Getter.Getter;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
-import irt.data.dump.DumpToFile;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.tools.panel.head.UnitsContainer;
-import irt.tools.panel.subpanel.InfoPanel;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 
 public class DumpControllers {
 
-	private static final int MAX_FILE_QUANTITY = 10;
+//	private static final int MAX_FILE_QUANTITY = 50;
+//	private static final int MAX_FILE_SIZE = 5000;
+//	private static final String DUMP = "dump";
 
+	public static final String DUMP_WAIT = "DUMP_WAIT";
 
-	private static final String DUMP = "dump";
-
+	private static LoggerContext ctx = setSysSerialNumber(null);
+	private final Logger logger = (Logger) LogManager.getLogger();
+	private final Logger dumper = (Logger) LogManager.getLogger("dumper");
 
 	private List<DumpController> dumpsList = new ArrayList<>();
-
 
 	private volatile static Map<Integer, String> variables = new HashMap<>();
 
@@ -44,16 +39,18 @@ public class DumpControllers {
 		@Override
 		public void valueChanged(ValueChangeEvent valueChangeEvent) {
 
+			logger.debug("valueChanged({})", valueChangeEvent);
 			int id = valueChangeEvent.getID();
-//			System.out.println(id+") valueChangeEvent: "+valueChangeEvent);
 			String source = valueChangeEvent.getSource().toString();
 
 			String value = variables.get(id);
 			if(value==null || !value.equals(source)){
 				variables.put(id, source);
-				deleteExtraFiles(MAX_FILE_QUANTITY, file.getParentFile(), DUMP);
-				renameFile();
-				new DumpToFile(parent, file, parseId(id), source);
+//				deleteExtraFiles(DUMP);
+//				checkFileSize();
+//				renameFile();
+//				new DumpToFile(parent, file, parseId(id), source);
+				dumper.info(parseId(id)+":"+info+"\n"+source);
 			}
 		}
 
@@ -73,22 +70,44 @@ public class DumpControllers {
 		}
 	};
 
-	private File file;
+	private String info;
 
-	private long startTime;
+//	private File file;
+//
+//	private long startTime;
+//
+//	private String fileName;
+//	private String fileExt = ".log";
+//
+//	private UnitsContainer parent;
+//	private File dir;
+//	private String deviceInfoStr;
 
-	private String fileName;
-	private String fileExt = ".log";
+	public DumpControllers(UnitsContainer unitsPanel, LinkHeader linkHeader, DeviceInfo deviceInfo) {
 
+		String serialNumber = deviceInfo.getSerialNumber().toString();
 
-	private UnitsContainer parent;
+		setSysSerialNumber(serialNumber);
+		info = "\nSN: "+deviceInfo.getSerialNumber();
+		info += "\n"+deviceInfo.getUnitName();
+		info += "\nVersion: "+deviceInfo.getFirmwareVersion();
+		info += "\nBuilt Date: "+deviceInfo.getFirmwareBuildDate();
+		info += "\nType: "+deviceInfo.getType();
+		info += "\nSubtype: "+deviceInfo.getSubtype();
+		info += "\nType: "+deviceInfo.getRevision();
+		info += "\ncount: "+deviceInfo.getFirmwareBuildCounter();
+		logger.debug("deviceInfo: "+info);
 
-	public DumpControllers(UnitsContainer unitsPanel, LinkHeader linkHeader, DeviceInfo deviceInfo, int waitTime) {
+		int dumpWaitMinuts = GuiController.getPrefs().getInt(DUMP_WAIT, 10);
+		int waitTime = 1000*60*dumpWaitMinuts;
 
-		this.parent = unitsPanel;
+		logger.debug("new DumpControllers({}, {}, {}, waitTime={} msec({} min))", unitsPanel, linkHeader, deviceInfo, waitTime, dumpWaitMinuts);
 
-		createNewFile(deviceInfo.getSerialNumber().toString());
-		new DumpToFile(unitsPanel, file, "Start", deviceInfo.toString());
+//		this.parent = unitsPanel;
+
+//		createNewFile(serialNumber);
+//		deviceInfoStr = deviceInfo.toString();
+//		new DumpToFile(unitsPanel, file, "Start", deviceInfoStr);
 
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
 				PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0, 0) { @Override public Integer getPriority() { return 14; }
@@ -143,6 +162,24 @@ public class DumpControllers {
 		}, waitTime);
 	}
 
+	public static LoggerContext setSysSerialNumber(String serialNumber) {
+
+
+		if(serialNumber==null)
+			serialNumber ="UnknownSerialNumber";
+
+		String sysSerialNumber = System.getProperty("serialNumber");
+
+		if(sysSerialNumber==null || !sysSerialNumber.equals(serialNumber)){
+			System.setProperty("serialNumber", serialNumber);
+
+			ctx = (LoggerContext) LogManager.getContext(false);
+			ctx.reconfigure();
+		}
+
+		return ctx;
+	}
+
 	private void addDumpController(Getter getter, int waitTime){
 
 		DumpController dumpController = new DumpController(getter)
@@ -158,116 +195,143 @@ public class DumpControllers {
 
 		dumpsList.add(dumpController);
 	}
-
-	private void createNewFile(String serialNumber) {
-
-		serialNumber = serialNumber.replaceAll("[:\\\\/*?|<>]", "_");
-
-//		System.out.println("file : "+serialNumber);
-		startTime = System.currentTimeMillis();
-
-		File file = new File("c:"+File.separator+"irt"+File.separator+serialNumber);
-
-		if(!file.isDirectory())
-			file.mkdirs();
-
-		deleteExtraFiles(MAX_FILE_QUANTITY, file, DUMP);
-
-		fileName = DUMP+serialNumber+'-'+getDate("yyyyMMddHHmmss");
-
-		this.file = new File(file,fileName + fileExt);
-
-//		System.out.println("file : "+file);
-		try {
-			this.file.createNewFile();
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(parent, "DumpControllers:createNewFile:"+e.getLocalizedMessage());
-		}
-	}
-
-	protected void checkFileSize() {
-		if(file.length()>1000000000){
-
-			File[] files = getFilesStartWith(file.getParentFile(), fileName);
-			fileExt = files[files.length-1].getName();
-			fileExt = fileExt.substring(fileExt.lastIndexOf("."));
-
-			char charAt = fileExt.charAt(fileExt.length()-1);
-			String ext = fileExt.substring(0, fileExt.length()-1);
-
-			if(Character.isDigit(charAt))
-				fileExt = ext+(Integer.toString(charAt)+1);
-			else
-				fileExt = ext+1;
-		}
-	}
-
-	/**
-	 * 
-	 * @param file
-	 * @param startWhith
-	 * @return ordered by date array of files (oldest first)
-	 */
-	protected File[] getFilesStartWith(File file, final String startWhith) {
-		FilenameFilter ff = new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.startsWith(startWhith);
-				}
-			};
-		File[] listFiles = file.listFiles(ff);
-
-		if(listFiles!=null)
-			Arrays.sort(listFiles, new Comparator<File>() {
-				@Override
-				public int compare(File o1, File o2) {
-					return o1.lastModified()<o2.lastModified() ? -1 : o1.lastModified()>o2.lastModified() ? 1 : 0;
-				}
-			});
-
-		return listFiles;
-	}
-
-	private void renameFile(){
-
-		checkFileSize();
-
-		File file = new File(this.file.getParentFile(), fileName+"-"+InfoPanel.calculateTime((System.currentTimeMillis()-startTime)/1000).replace(':', '_')+fileExt);
-
-		if(this.file.renameTo(file))
-			this.file = file;
-	}
-
-	private void deleteExtraFiles(int maxFilesQuantity, File file, final String startWhith) {
-	
-		File[] files = getFilesStartWith(file, startWhith);
-	
-		if(files!=null){
-			int countToDelete = files.length - maxFilesQuantity;
-	
-			if(countToDelete>0)
-				for(int i=0; i<countToDelete; i++)
-					files[i].delete();
-		}
-	}
-
-	public static String getDate(String pattern) {
-		DateFormat dateFormat = new SimpleDateFormat(pattern);
-		Calendar cal = Calendar.getInstance();
-		return dateFormat.format(cal.getTime());
-	}
+//
+//	private void createNewFile(String serialNumber) {
+//		logger.trace("createNewFile(serialNumber={})", serialNumber);
+//
+//		serialNumber = serialNumber.replaceAll("[:\\\\/*?|<>]", "_");
+//
+//		logger.debug("createNewFile({}); validated", serialNumber);
+//
+//		startTime = System.currentTimeMillis();
+//
+//		dir = new File("c:"+File.separator+"irt"+File.separator+serialNumber);
+//
+//		if(!dir.isDirectory())
+//			dir.mkdirs();
+//
+//		deleteExtraFiles(DUMP);
+//
+//		fileName = DUMP+serialNumber+'-'+getDate("yyyyMMddHHmmss");
+//
+//		createNewFile();
+//	}
+//
+//	private void createNewFile() {
+//		this.file = new File(dir, fileName + fileExt);
+//
+//		logger.trace("createNewFile: var this.file={}", this.file);
+//
+//		try {
+//			this.file.createNewFile();
+//		} catch (IOException e) {
+//			logger.error(e);
+//			JOptionPane.showMessageDialog(parent, "DumpControllers:createNewFile:"+e.getLocalizedMessage());
+//		}
+//	}
+//
+//	protected void checkFileSize() {
+//		logger.trace("checkFileSize()");
+//		if(file.length()>MAX_FILE_SIZE){
+//
+//			File[] files = getFilesStartWith(file.getParentFile(), fileName);
+//			logger.debug(Arrays.toString(files));
+//			fileExt = files[files.length-1].getName();
+//			fileExt = fileExt.substring(fileExt.lastIndexOf("."));
+//
+//			char charAt = fileExt.charAt(fileExt.length()-1);
+//			String ext = fileExt.substring(0, fileExt.length()-1);
+//
+//			if(Character.isDigit(charAt)){
+//				ext = fileExt.replaceAll("\\d", "");
+//				String digits = fileExt.replaceAll("\\D", "");
+//				fileExt = ext+(Integer.parseInt(digits)+1);
+//				logger.debug("checkFileSize(); fileName{} fileExt={}, ext={}, digits={}", fileName, fileExt, ext, digits);
+//			}else{
+//				ext = fileExt.substring(0, fileExt.length()-1);
+//				fileExt = ext+1;
+//			}
+//			createNewFile();
+//			new DumpToFile(parent, file, "Start", deviceInfoStr);
+//		}
+//	}
+//
+//	/**
+//	 * 
+//	 * @param file
+//	 * @param startWhith
+//	 * @return ordered by date array of files (oldest first)
+//	 */
+//	protected File[] getFilesStartWith(File file, final String startWhith) {
+//		logger.trace("getFilesStartWith({}, startWhith={})", file, startWhith);
+//		FilenameFilter ff = new FilenameFilter() {
+//			@Override
+//			public boolean accept(File dir, String name) {
+//				return name.startsWith(startWhith);
+//				}
+//			};
+//		File[] listFiles = file.listFiles(ff);
+//
+//		if(listFiles!=null)
+//			Arrays.sort(listFiles, new Comparator<File>() {
+//				@Override
+//				public int compare(File o1, File o2) {
+//					return o1.lastModified()<o2.lastModified() ? -1 : o1.lastModified()>o2.lastModified() ? 1 : 0;
+//				}
+//			});
+//
+//		return listFiles;
+//	}
+//
+//	private void renameFile(){
+//		logger.trace("renameFile(); {}", file);
+//		logger.debug("renameFile(); fileName={}, fileExt={}", fileName, fileExt);
+//
+//		File file = new File(
+//				this.file.getParentFile(),
+//				fileName+"-"+InfoPanel.calculateTime(
+//						(System.currentTimeMillis()-startTime)/1000).replace(':', '_')+fileExt);
+//
+//		logger.trace("renameFile(); {}", file);
+//		if(this.file.renameTo(file))
+//			this.file = file;
+//	}
+//
+//	private void deleteExtraFiles(final String startWhith) {
+//		logger.trace("deleteExtraFiles(maxFilesQuantity={}, {}, startWhith={})", MAX_FILE_QUANTITY, dir, startWhith);
+//	
+//		File[] files = getFilesStartWith(dir, startWhith);
+//	
+//		if(files!=null){
+//			int countToDelete = files.length - MAX_FILE_QUANTITY;
+//	
+//			if(countToDelete>0)
+//				for(int i=0; i<countToDelete; i++)
+//					files[i].delete();
+//		}
+//	}
+//
+//
+//	public static String getDate(String pattern) {
+//		DateFormat dateFormat = new SimpleDateFormat(pattern);
+//		Calendar cal = Calendar.getInstance();
+//		return dateFormat.format(cal.getTime());
+//	}
 
 	public void stop() {
+		logger.trace("stop()");
 		for(DumpController dc:dumpsList)
 			dc.setRun(false);
 	}
 
 	@Override
 	protected void finalize() throws Throwable {
+		dumper.info("Communication Lost");
 		stop();
 	}
 
 	public void setWaitTime(int waitTime) {
+		logger.trace("setWaitTime(waitTime={})", waitTime);
 
 		for (DumpController dc:dumpsList)
 			dc.setWaitTime(waitTime);

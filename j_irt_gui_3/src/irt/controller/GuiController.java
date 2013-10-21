@@ -41,8 +41,6 @@ import jssc.SerialPortList;
 
 public class GuiController extends GuiControllerAbstract{
 
-	public static final String DUMP_WAIT = "DUMP_WAIT";
-
 	public static final int CONNECTION = 1;
 
 	protected UnitsContainer unitsPanel;
@@ -89,8 +87,6 @@ public class GuiController extends GuiControllerAbstract{
 		comPortThreadQueue.addPacketListener(new PacketListener() {
 
 			private RemoveComponent remover = new RemoveComponent(8000);
-
-			private int dumpWaitMinuts = prefs.getInt(DUMP_WAIT, 10);
 
 			@Override
 			public void packetRecived(Packet packet) {
@@ -144,7 +140,7 @@ public class GuiController extends GuiControllerAbstract{
 
 								if(dumpControllers!=null)
 									dumpControllers.stop();
-								dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null, di, 1000*60*dumpWaitMinuts);
+								dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null, di);
 							}
 
 						}else{
