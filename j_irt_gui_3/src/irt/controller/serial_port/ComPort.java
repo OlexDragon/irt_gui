@@ -474,7 +474,7 @@ do{
 				if(isSerialPortEven)
 					isSerialPortEven = false;
 			}
-			Console.appendLn("waitTime:"+waitTime+"; isSerialPortEven="+isSerialPortEven, "wait:"+(System.currentTimeMillis()-start));
+//			Console.appendLn("waitTime:"+waitTime+"; isSerialPortEven="+isSerialPortEven, "wait:"+(System.currentTimeMillis()-start));
 		};
 //		Console.append("isOpend:"+isOpened()+"; isReady:"+isReady+"; t:"+t+"; eventValue:"+eventValue+"; isRun():"+isRun(), "Wait");
 		if(isSerialPortEven)
@@ -512,7 +512,7 @@ do{
 			synchronized (ComPort.this) {
 				isSerialPortEven = true;
 				ComPort.this.notify();
-				Console.appendLn("", "notify");
+//				Console.appendLn("", "notify");
 			}
 		}
 		

@@ -20,7 +20,7 @@ public class GuiControllerAbstract extends Thread {
 	public static final int CONVERTER 	= 1;
 	public static final int LINKED 	= 2;
 
-	protected static Preferences prefs = Preferences.userRoot().node("SHOW");
+	protected static Preferences prefs = Preferences.userRoot().node("IRT Technologies inc.");
 
 	protected static ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
 

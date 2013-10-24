@@ -47,6 +47,16 @@ public class NetworkAddress {
 		return address!=null ? asString(gateway, ".") : null;
 	}
 
+	public byte[] asBytes(){
+
+		byte[] copyOf = Arrays.copyOf(new byte[]{type}, 13);
+		System.arraycopy(address, 0, copyOf, 1, address.length);
+		System.arraycopy(mask, 0, copyOf, 5, mask.length);
+		System.arraycopy(gateway, 0, copyOf, 9, gateway.length);
+
+		return copyOf;
+	}
+
 	protected String asString(byte[] buffer, String splitter) {
 		String returnStr = "";
 		for(byte b:buffer){
@@ -96,5 +106,68 @@ public class NetworkAddress {
 		result = prime * result + Arrays.hashCode(mask);
 		result = prime * result + type;
 		return result;
+	}
+
+	public NetworkAddress getCopy() {
+		NetworkAddress na = new NetworkAddress();
+		na.setAddress(Arrays.copyOf(address, address.length));
+		na.setGateway(Arrays.copyOf(gateway, gateway.length));
+		na.setMask(Arrays.copyOf(mask, mask.length));
+		na.setType(type);
+		return na;
+	}
+
+	public byte getType() {
+		return type;
+	}
+
+	public byte[] getAddress() {
+		return address;
+	}
+
+	public byte[] getMask() {
+		return mask;
+	}
+
+	public byte[] getGateway() {
+		return gateway;
+	}
+
+	public void setType(byte type) {
+		this.type = type;
+	}
+
+	public void setAddress(byte[] address) {
+		this.address = address;
+	}
+
+	public void setAddress(String text) {
+		setValue(address, text);
+	}
+
+	public void setMask(byte[] mask) {
+		this.mask = mask;
+	}
+
+	public void setMask(String text) {
+		setValue(mask, text);	
+	}
+
+	public void setGateway(byte[] gateway) {
+		this.gateway = gateway;
+	}
+
+	public void setGateway(String text) {
+		setValue(gateway, text);	
+	}
+
+	public void setType(ADDRESS_TYPE at) {
+		setType((byte) at.ordinal());
+	}
+
+	private void setValue(byte[] field, String text) {
+		String[] split = text.split("\\.");
+		for(int i=0; i<split.length && i<field.length; i++)
+			field[i] = (byte) Integer.parseInt(split[i]);
 	}
 }

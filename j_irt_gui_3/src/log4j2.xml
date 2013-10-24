@@ -14,6 +14,9 @@
     </RollingFile>
   </Appenders>
   <Loggers>
+
+  	<Logger name="irt.tools.panel.ip_address.IpAddressTextField" level="all"/>
+
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />
     </Logger>

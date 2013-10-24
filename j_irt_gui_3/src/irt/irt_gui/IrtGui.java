@@ -1,4 +1,5 @@
 package irt.irt_gui;
+import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
@@ -29,12 +30,13 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
-	public static final String VERTION = "- 3.030";
+	public static final String VERTION = "- 3.031";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 
 	public IrtGui() {
 		super(700, 571, 590);
+		DumpControllers.setSysSerialNumber(null);
 
 		headPanel = new HeadPanel(this);
 		headPanel.setSize(650, 74);
@@ -87,7 +89,7 @@ public class IrtGui extends IrtMainFrame {
 			languages[i]= new KeyValue<String, String>(split[0], split[1]);
 		}
 
-		KeyValue<String, String> keyValue = new KeyValue<>(GuiController.getPrefs().get("locate", "en_US"), null);
+		KeyValue<String, String> keyValue = new KeyValue<>(GuiController.getPrefs().get("locale", "en_US"), null);
 		@SuppressWarnings("unchecked")
 		DefaultComboBoxModel<KeyValue<String, String>> defaultComboBoxModel = new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages);
 

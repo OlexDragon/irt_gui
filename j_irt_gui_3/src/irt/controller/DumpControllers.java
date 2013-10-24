@@ -171,7 +171,7 @@ public class DumpControllers {
 		String sysSerialNumber = System.getProperty("serialNumber");
 
 		if(sysSerialNumber==null || !sysSerialNumber.equals(serialNumber)){
-			System.setProperty("serialNumber", serialNumber);
+			System.setProperty("serialNumber", serialNumber.replaceAll("[:\\\\/*?|<>]", "x"));
 
 			ctx = (LoggerContext) LogManager.getContext(false);
 			ctx.reconfigure();

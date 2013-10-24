@@ -13,7 +13,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public abstract class GetterAbstract extends ValueChangeListenerClass implements PacketWork {
+
+	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	private byte packetType;
 	private byte groupId;
@@ -27,10 +32,13 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 	}
 
 	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId) {
+		logger.trace("packetType={},groupId={},packetParameterHeaderCode={},packetId={}", packetType, groupId, packetParameterHeaderCode, packetId);
 		this.packetType = packetType;
 		this.groupId = groupId;
 		this.packetParameterHeaderCode = packetParameterHeaderCode;
 		this.packetId = packetId;
+		logger.trace(Arrays.toString(getCommand()));
+		logger.trace(linkHeader);
 		packetThread = linkHeader!=null ? new LinkedPacketThread(linkHeader, getCommand(), "LinkedPacketId="+packetId) : new PacketThread(getCommand(), "PacketId="+packetId);
 	}
 

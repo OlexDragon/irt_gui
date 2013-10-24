@@ -17,23 +17,32 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class Translation {
+
+	private static final Logger logger = (Logger) LogManager.getLogger(Translation.class);
 
 	public static final String SPLITER = "_";
 
 	private static final Preferences PREFS = GuiController.getPrefs();
 
-	private static volatile String locate = PREFS.get("locate", "en_US");
-	private static ResourceBundle messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", new Locale(locate.split(SPLITER)[0], locate.split(SPLITER)[1]));
+	private static volatile String selectedLanguage = PREFS.get("locale", "en_US");
+	private static Locale locale = new Locale(selectedLanguage.split(SPLITER)[0], selectedLanguage.split(SPLITER)[1]);
+	private static ResourceBundle messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", new Locale(selectedLanguage.split(SPLITER)[0], selectedLanguage.split(SPLITER)[1]));
 	private static Map<String, String> map = getMap();
 
-	private static Font font = getFont(locate);
+	private static Font font = getFont(selectedLanguage);
 
-	public static void setLocate(String locate){
-		String[] splitLocate = locate.split(SPLITER);
-		messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", new Locale(splitLocate[0], splitLocate[1]));
+	public static void setLocale(String localeStr){
+		logger.trace("setLocale({})", localeStr);
+		getFont(localeStr);
+		String[] splitLocale = localeStr.split(SPLITER);
+		locale = new Locale(splitLocale[0], splitLocale[1]);
+		messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
 		map = getMap();
-		PREFS.put("locate", locate);
+		PREFS.put("locale", localeStr);
 	}
 
 	private static Map<String, String> getMap() {
@@ -48,8 +57,8 @@ public class Translation {
 		return map;
 	}
 
-	public static String getLocate() {
-		return locate;
+	public static String getLocateStr() {
+		return selectedLanguage;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -78,10 +87,11 @@ public class Translation {
 	}
 
 	public static Font getFont(String selectedLanguage) {
-		locate = selectedLanguage;
+		Translation.selectedLanguage = selectedLanguage;
 		try {
 			Properties headPanelProperties = HeadPanel.properties;
 			String fontURL = headPanelProperties.getProperty("font_path_"+Translation.getSelectedLanguage());
+			logger.trace("fontURL={}", fontURL);
 			if(fontURL!=null){
 				URL resource = IrtGui.class.getResource(fontURL);
 				font = Font.createFont(Font.TRUETYPE_FONT, resource.openStream());
@@ -100,7 +110,7 @@ public class Translation {
 	}
 
 	public static String getSelectedLanguage() {
-		return locate;
+		return selectedLanguage!=null && !selectedLanguage.isEmpty() ? selectedLanguage : "us_US";
 	}
 
 	public static void setFont(Font font) {
@@ -108,6 +118,14 @@ public class Translation {
 	}
 
 	public static void setSelectedLanguage(String selectedLanguage) {
-		locate = selectedLanguage;
+		Translation.selectedLanguage = selectedLanguage;
+	}
+
+	public static Locale getLocale() {
+		return locale;
+	}
+
+	public static void setLocace(Locale locace) {
+		Translation.locale = locace;
 	}
 }

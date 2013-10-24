@@ -1,12 +1,15 @@
 package irt.tools.panel.subpanel.monitor;
 
 import irt.controller.control.ControllerAbstract;
+import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.PicobucPanel;
+import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -17,7 +20,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 @SuppressWarnings("serial")
-public abstract class MonitorPanelAbstract extends JPanel {
+public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 	protected ControllerAbstract controller;
 	private LinkHeader linkHeader;
@@ -54,7 +57,11 @@ public abstract class MonitorPanelAbstract extends JPanel {
 
 		setOpaque(false);
 
-		titledBorder = new TitledBorder(UIManager.getBorder("TitledBorder.border"), title, TitledBorder.LEADING, TitledBorder.TOP, Translation.getFont(), Color.WHITE);
+		Font font = Translation.getFont()
+				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
+
+		titledBorder = new TitledBorder(UIManager.getBorder("TitledBorder.border"), title, TitledBorder.LEADING, TitledBorder.TOP, font, Color.WHITE);
 		setBorder(titledBorder);
 		setSize(wisth, height);
 		setLayout(null);
@@ -83,6 +90,9 @@ public abstract class MonitorPanelAbstract extends JPanel {
 	}
 
 	public void refresh() {
-		titledBorder.setTitleFont(Translation.getFont());
+		Font font = Translation.getFont()
+				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
+		titledBorder.setTitleFont(font);
 	}
 }

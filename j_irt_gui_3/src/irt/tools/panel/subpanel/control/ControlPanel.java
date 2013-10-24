@@ -75,7 +75,6 @@ public class ControlPanel extends MonitorPanelAbstract {
 		selectedLanguage = Translation.getSelectedLanguage();
 
 		Font font = Translation.getFont();
-		titledBorder.setTitleFont(font);
 
 		this.flags = flags;
 		hasFreqSet = (flags & ControlPanel.FLAG_FREQUENCY_SET)>0;
@@ -222,14 +221,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 			((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		}
 
-		font = font.deriveFont(
-				new Float(
-						properties.getProperty(
-								"control.checkBox.font.size_"+selectedLanguage)))
-								.deriveFont(
-										IrtPanel.fontStyle.get(
-												properties.getProperty(
-														"control.checkBox.font.style_"+selectedLanguage)));
+		font = font.deriveFont(new Float(properties.getProperty("control.checkBox.font.size_" + selectedLanguage)))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("control.checkBox.font.style_" + selectedLanguage)));
+
 		chckbxStep = new JCheckBox(Translation.getValue(String.class, "step", "Step")+":");
 		chckbxStep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

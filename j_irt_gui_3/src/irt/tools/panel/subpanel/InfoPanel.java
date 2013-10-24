@@ -1,6 +1,7 @@
 package irt.tools.panel.subpanel;
 
 import irt.controller.GuiControllerAbstract;
+import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
@@ -12,6 +13,7 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.tools.Transformer;
 import irt.tools.panel.PicobucPanel;
+import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -34,7 +36,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 @SuppressWarnings("serial")
-public class InfoPanel extends JPanel {
+public class InfoPanel extends JPanel implements Refresh {
 
 	private static final int WINDOW_MIN_HEIGHT = 105;
 	private static final int WINDOW_MAX_HEIGHT = 135;
@@ -100,7 +102,10 @@ public class InfoPanel extends JPanel {
 
 		this.linkHeader = linkHeader;
 
-		Font font = Translation.getFont();
+		Font font = Translation.getFont()
+				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
+
 		titledBorder = new TitledBorder(
 				UIManager.getBorder("TitledBorder.border"),
 				Translation.getValue(String.class, "info", "Info"),
@@ -126,55 +131,55 @@ public class InfoPanel extends JPanel {
 		lblUnitName.setFont(new Font("Tahoma", Font.BOLD, 14));
 				
 						lblSnTxt = new JLabel(Translation.getValue(String.class, "sn", "SN")+":");
-						lblSnTxt.setBounds(9, 35, 59, 14);
+						lblSnTxt.setBounds(4, 36, 76, 14);
 						lblSnTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 						lblSnTxt.setForeground(new Color(153, 255, 255));
 						lblSnTxt.setFont(font);
 		
 				lblSn = new JLabel("SN");
 				lblSn.setHorizontalAlignment(SwingConstants.LEFT);
-				lblSn.setBounds(78, 35, 198, 14);
+				lblSn.setBounds(84, 35, 198, 14);
 				lblSn.setFont(new Font("Tahoma", Font.PLAIN, 14));
 				lblSn.setForeground(Color.YELLOW);
 		
 		lblUnitPartNumberTxt = new JLabel(Translation.getValue(String.class, "part_number", "Part Number")+":");
-		lblUnitPartNumberTxt.setBounds(9, 51, 59, 14);
+		lblUnitPartNumberTxt.setBounds(4, 52, 76, 14);
 		lblUnitPartNumberTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblUnitPartNumberTxt.setForeground(new Color(153, 255, 255));
 		lblUnitPartNumberTxt.setFont(font);
 		
 		lblUnitPartNumber = new JLabel("");
 		lblUnitPartNumber.setHorizontalAlignment(SwingConstants.LEFT);
-		lblUnitPartNumber.setBounds(78, 51, 198, 14);
+		lblUnitPartNumber.setBounds(84, 51, 198, 14);
 		lblUnitPartNumber.setForeground(Color.YELLOW);
 		lblUnitPartNumber.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
 				lblCountTxt = new JLabel(Translation.getValue(String.class, "count", "Count")+":");
-				lblCountTxt.setBounds(9, 67, 59, 14);
+				lblCountTxt.setBounds(4, 68, 76, 14);
 				lblCountTxt.setForeground(new Color(153, 255, 255));
 				lblCountTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 				lblCountTxt.setFont(font);
 
 		lblCount = new JLabel(":");
 		lblCount.setHorizontalAlignment(SwingConstants.LEFT);
-		lblCount.setBounds(78, 67, 198, 14);
+		lblCount.setBounds(84, 67, 198, 14);
 		lblCount.setForeground(Color.WHITE);
 		
 				lblBuiltDateTxt = new JLabel(Translation.getValue(String.class, "built_date", "Built Date")+":");
-				lblBuiltDateTxt.setBounds(9, 83, 59, 14);
+				lblBuiltDateTxt.setBounds(4, 84, 76, 14);
 				lblBuiltDateTxt.setForeground(new Color(153, 255, 255));
 				lblBuiltDateTxt.setFont(font);
 				lblBuiltDateTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 
 		lblBuiltDate = new JLabel("Oct  2 2012, 10:45:39");
 		lblBuiltDate.setHorizontalAlignment(SwingConstants.LEFT);
-		lblBuiltDate.setBounds(78, 83, 198, 14);
+		lblBuiltDate.setBounds(84, 83, 198, 14);
 		lblBuiltDate.setForeground(Color.WHITE);
 		lblBuiltDate.setFont(new Font("Tahoma", Font.PLAIN, 14));
 
 		lblVersionTxt = new JLabel(Translation.getValue(String.class, "version", "Version")+":");
 		lblVersionTxt.setVisible(false);
-		lblVersionTxt.setBounds(9, 99, 59, 14);
+		lblVersionTxt.setBounds(4, 100, 76, 14);
 		lblVersionTxt.setForeground(new Color(153, 255, 255));
 		lblVersionTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblVersionTxt.setFont(font);
@@ -182,19 +187,19 @@ public class InfoPanel extends JPanel {
 		lblVersion = new JLabel("0");
 		lblVersion.setHorizontalAlignment(SwingConstants.LEFT);
 		lblVersion.setVisible(false);
-		lblVersion.setBounds(78, 99, 198, 14);
+		lblVersion.setBounds(84, 99, 198, 14);
 		lblVersion.setForeground(Color.WHITE);
 		lblVersion.setFont(new Font("Tahoma", Font.PLAIN, 14));
 
 		lblDeviceTxt = new JLabel(Translation.getValue(String.class, "device", "Device")+":");
-		lblDeviceTxt.setBounds(9, 115, 59, 14);
+		lblDeviceTxt.setBounds(4, 116, 76, 14);
 		lblDeviceTxt.setForeground(new Color(153, 255, 255));
 		lblDeviceTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDeviceTxt.setFont(font);
 
 		lblDeviceId = new JLabel("0000.0.0");
 		lblDeviceId.setHorizontalAlignment(SwingConstants.LEFT);
-		lblDeviceId.setBounds(78, 115, 198, 14);
+		lblDeviceId.setBounds(84, 115, 198, 14);
 		lblDeviceId.setForeground(Color.WHITE);
 		lblDeviceId.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		
@@ -334,10 +339,11 @@ public class InfoPanel extends JPanel {
 	}
 
 	public void refresh() {
-		getFont();
+		Font font = Translation.getFont()
+				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
 
 		titledBorder.setTitle(Translation.getValue(String.class, "info", "Info"));
-		Font font = Translation.getFont();
 		titledBorder.setTitleFont(font);
 
 		String fontSize = properties.getProperty("infoPanel.labels.font.size");

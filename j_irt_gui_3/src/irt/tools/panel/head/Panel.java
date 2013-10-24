@@ -1,16 +1,23 @@
 package irt.tools.panel.head;
 
+import irt.controller.interfaces.Refresh;
 import irt.tools.label.VarticalLabel;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 
 @SuppressWarnings("serial")
 public class Panel extends JPanel {
@@ -21,6 +28,8 @@ public class Panel extends JPanel {
 	protected int MIN_HEIGHT = 25;
 	protected int MAX_HEIGHT = 444;
 	protected int BTN_WIDTH;
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	protected Color backgroundColor = new Color(0x0B,0x17,0x3B);
 
@@ -128,6 +137,21 @@ public class Panel extends JPanel {
 	}
 
 	public void refresh() {
-		System.out.println("Panel.refresh");
+		logger.trace("refresh()");
+		refresh(this);
+	}
+
+	private void refresh(Component component){
+		logger.trace("* refresh({})", component.getClass().getSimpleName());
+		if(component instanceof JComponent)
+			for(Component c:((Container)component).getComponents()){
+				if(c instanceof Refresh){
+					logger.debug("{} is refreshed", c.getClass().getSimpleName());
+					((Refresh)c).refresh();
+				}else if(c instanceof JComponent){
+					logger.trace("Next component is {}", c.getClass().getSimpleName());
+					refresh(c);
+				}
+			}
 	}
 }

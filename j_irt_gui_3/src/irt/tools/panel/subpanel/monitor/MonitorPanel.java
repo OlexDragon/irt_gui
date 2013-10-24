@@ -4,6 +4,7 @@ import irt.controller.monitor.MonitorController;
 import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
 import irt.tools.label.LED;
+import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -11,9 +12,14 @@ import java.awt.Font;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 
 @SuppressWarnings("serial")
 public class MonitorPanel extends MonitorPanelAbstract {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private LED ledLock;
 	private LED ledMute;
@@ -25,7 +31,21 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		super(linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 214, 210);
 
 		String selectedLanguage = Translation.getSelectedLanguage();
-		Font font = Translation.getFont().deriveFont(new Float(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)));
+		String propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
+		String property = properties.getProperty(propertyToGet);
+
+		if(property==null){
+			logger.error("Impossible to to get properties for {}", propertyToGet);
+			selectedLanguage = "en_US";
+			logger.error("English will be used ({})", selectedLanguage);
+			Translation.setLocale(selectedLanguage);
+			propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
+			property = properties.getProperty(propertyToGet);
+		}
+
+		Font font = Translation.getFont().deriveFont(new Float(property))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.leds.font.style_" + selectedLanguage)));
+
 		ledLock = new LED(Color.GREEN, Translation.getValue(String.class, "lock", "LOCK"));
 		ledLock.setName("Lock");
 		ledLock.setForeground(Color.GREEN);
@@ -40,8 +60,9 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		ledMute.setBounds(115, 138, Integer.parseInt(properties.getProperty("monitor.led.mute.width_"+selectedLanguage)), 28);
 		add(ledMute);
 
-		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_"+selectedLanguage)));
-		
+		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));
+
 		JLabel lblInputPower = new JLabel(":");
 		lblInputPower.setName("Input Power");
 		lblInputPower.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -103,7 +124,19 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		titledBorder.setTitle(Translation.getValue(String.class, "monitor", "Monitor"));
 
 		String selectedLanguage = Translation.getSelectedLanguage();
-		Font font = Translation.getFont().deriveFont(Float.parseFloat(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)));
+		String propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
+		String property = properties.getProperty(propertyToGet);
+
+		if(property==null){
+			logger.error("Impossible to to get properties for {}", propertyToGet);
+			selectedLanguage = "en_US";
+			Translation.setLocale(selectedLanguage);
+			logger.error("English will be used ({})", selectedLanguage);
+			propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
+			property = properties.getProperty(propertyToGet);
+		}
+
+		Font font = Translation.getFont().deriveFont(new Float(property));
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 

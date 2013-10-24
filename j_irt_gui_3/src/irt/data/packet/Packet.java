@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class Packet {
+
+	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final int NO_ERROR = 0;
 
@@ -76,7 +81,7 @@ public class Packet {
 		IRTSCP_PACKET_ID_PROTO = 10, /* Protocol configuration. */
 
 	/* Network */
-		IRT_SCP_PACKET_ID_NETWORK = 11, /* Network configuration. */
+		IRT_SLCP_PACKET_ID_NETWORK = 11, /* Network configuration. */
 
 	/* backwards compatibility - to be deleted */
 		IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1 = 100,
@@ -140,7 +145,7 @@ public class Packet {
 
 	/* Network */
 	public static final byte
-		IRTSCP_PACKET_ID_NETWORK_ADDRESS = 1; /* Network configuration. */
+		IRTSCP_PARAMETER_ID_NETWORK_ADDRESS = 1; /* Network configuration. */
 
 				protected static final String SAVE_CONFIG = null;
 
@@ -187,6 +192,7 @@ public class Packet {
 	}
 
 	public void set(byte[]data){
+		logger.trace(Arrays.toString(data));
 		header = new PacketHeader();
 		data = header.set(data);
 		setPayloads(data);

@@ -8,8 +8,13 @@ import irt.data.value.Value;
 
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 
 public class PacketThread extends Thread {
+
+	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final byte FLAG_SEQUENCE	= 0x7E;
 	public static final byte CONTROL_ESCAPE= 0x7D;
@@ -29,19 +34,25 @@ public class PacketThread extends Thread {
 
 	@Override
 	public void run() {
+		logger.trace(Arrays.toString(data));
 		if(packet==null){
 			packet = newPacket();
-			packet.set(data);
-			if(value!=null){
-				Payload pl = packet.getPayload(0);
-				pl.setBuffer(value);
-			}
+			synchronized (data) {
+				logger.trace(Arrays.toString(data));
+				packet.set(data);
+				if(value!=null){
+					Payload pl = packet.getPayload(0);
+					pl.setBuffer(value);
+				}
 
-			data = preparePacket(packet);
+				data = preparePacket(packet);
+				logger.trace(Arrays.toString(data));
+			}
 		}
 	}
 
 	protected Packet newPacket() {
+		logger.trace("newPacket() = new Packet()");
 		return new Packet();
 	}
 

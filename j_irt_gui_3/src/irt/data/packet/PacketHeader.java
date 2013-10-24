@@ -205,6 +205,9 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE:
 				packetIdStr = "Initialize("+packetId+")";
 				break;
+			case PacketWork.PACKET_NETWORK_ADDRESS:
+				packetIdStr = "Network Address("+packetId+")";
+				break;
 			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0:
 			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1:
 			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2:

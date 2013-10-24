@@ -14,8 +14,13 @@ import java.util.Properties;
 
 import javax.swing.JFrame;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 @SuppressWarnings("serial")
 public class HeadPanel extends MainPanel {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final Color BACKGROUND_COLOR = new Color(0x3B, 0x4A, 0x8B);
 	public static LED ledRx = StaticComponents.getLedRx();
@@ -34,13 +39,27 @@ public class HeadPanel extends MainPanel {
 		setArcWidth(80);
 
 		String selectedLanguage = Translation.getSelectedLanguage();
-		
+
+		logger.trace("selectedLanguage ={}", selectedLanguage);
 		ledPowerOn = new LED(Color.GREEN, Translation.getValue(String.class, "power_on", "POWER ON"));
 		ledPowerOn.setName("Power On");
 		ledPowerOn.setForeground(new Color(176, 224, 230));
 		Font font = Translation.getFont();
 		ledPowerOn.setFont(font);
-		String[] bounds = properties.get("led_powerOn_bounds_"+selectedLanguage).toString().split(",");
+		String string = "led_powerOn_bounds_"+selectedLanguage;
+		String boundsProperties = properties.getProperty(string);
+		logger.trace(string);
+
+		if(boundsProperties==null){
+			logger.error("Impossible to to get properties for {}", boundsProperties);
+			selectedLanguage = "en_US";
+			Translation.setLocale(selectedLanguage);
+			logger.error("English will be used ({})", selectedLanguage);
+			boundsProperties = "monitor.leds.font.size_"+selectedLanguage;
+			boundsProperties = properties.getProperty(boundsProperties);
+		}
+
+		String[] bounds = boundsProperties.split(",");
 		ledPowerOn.setBounds(Integer.parseInt(bounds[0]),
 									Integer.parseInt(bounds[1]),
 									Integer.parseInt(bounds[2]),
