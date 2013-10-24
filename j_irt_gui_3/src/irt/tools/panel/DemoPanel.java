@@ -107,7 +107,8 @@ public class DemoPanel extends Panel {
 
 		verticalLabel.setFont(font);
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)));
+		font = font.deriveFont(Float.parseFloat(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.leds.font.style_" + selectedLanguage)));
 
 		ledLock = new LED(Color.GREEN, Translation.getValue(String.class, "lock", "LOCK"));
 		ledLock.setName("Lock");
@@ -156,7 +157,7 @@ public class DemoPanel extends Panel {
 		btnStoreConfig.setShadowShiftX(4);
 		btnStoreConfig.setShadowPressedShiftY(1);
 		btnStoreConfig.setShadowPressedShiftX(1);
-		btnStoreConfig.setBounds(162, 104, 33, 33);
+		btnStoreConfig.setBounds(124, 104, 33, 33);
 		panel_1.add(btnStoreConfig);
 		
 		textField = new JTextField();
@@ -176,7 +177,7 @@ public class DemoPanel extends Panel {
 		comboBoxAttenuation.setForeground(Color.YELLOW);
 		comboBoxAttenuation.setBackground(new Color(11, 23, 59));
 		comboBoxAttenuation.setBounds(13, 22, 85, 20);
-		comboBoxAttenuation.addItem(Translation.getValue(String.class, "attenuation", "ATTENUATION")+":");
+		comboBoxAttenuation.addItem(Translation.getValue(String.class, "attenuation", "ATTENUATION"));
 		((JLabel)comboBoxAttenuation.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		comboBoxAttenuation.setUI(new BasicComboBoxUI(){
 
@@ -238,21 +239,15 @@ public class DemoPanel extends Panel {
 				),"");
 		tabbedPane.addTab(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex), null, lblLogo, null);
 
-		font = font.deriveFont(
-				Float.parseFloat(
-						properties.getProperty(
-								"monitor.labels.font.size_"+selectedLanguage)))
-							.deriveFont(
-									IrtPanel.fontStyle.get(
-											properties.getProperty(
-													"monitor.labels.font.style_"+selectedLanguage)));
+		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));
 
 		lblInputPowerText = new JLabel(Translation.getValue(String.class, "input_power", "Input Power")+":");
 		lblInputPowerText.setName("");
 		lblInputPowerText.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblInputPowerText.setForeground(new Color(153, 255, 255));
 		lblInputPowerText.setFont(font);
-		lblInputPowerText.setBounds(5, 36, 100, 17);
+		lblInputPowerText.setBounds(5, 36, 112, 17);
 		panel.add(lblInputPowerText);
 		
 		lblOutputPowerText = new JLabel(Translation.getValue(String.class, "output_power", "Output Power")+":");
@@ -260,7 +255,7 @@ public class DemoPanel extends Panel {
 		lblOutputPowerText.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblOutputPowerText.setForeground(new Color(153, 255, 255));
 		lblOutputPowerText.setFont(font);
-		lblOutputPowerText.setBounds(5, 64, 100, 17);
+		lblOutputPowerText.setBounds(5, 64, 112, 17);
 		panel.add(lblOutputPowerText);
 		
 		lblTemperatureText = new JLabel(Translation.getValue(String.class, "temperature", "Temperature")+":");
@@ -268,7 +263,7 @@ public class DemoPanel extends Panel {
 		lblTemperatureText.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblTemperatureText.setForeground(new Color(153, 255, 255));
 		lblTemperatureText.setFont(font);
-		lblTemperatureText.setBounds(5, 92, 100, 17);
+		lblTemperatureText.setBounds(5, 92, 112, 17);
 		panel.add(lblTemperatureText);
 
 //		font = new Font("Tahoma", Font.PLAIN, 14);
@@ -360,7 +355,8 @@ public class DemoPanel extends Panel {
 		controlTitledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));
 		controlTitledBorder.setTitleFont(font);
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)));
+		font = font.deriveFont(Float.parseFloat(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.leds.font.style_" + selectedLanguage)));
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
@@ -379,7 +375,8 @@ public class DemoPanel extends Panel {
 		lblMute.setText(muteText);
 		lblMute.setFont(font);
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("monitor.labels.font.size_"+selectedLanguage)));
+		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));
 
 		lblInputPowerText.setFont(font);
 		lblInputPowerText.setText(Translation.getValue(String.class, "input_power", "Input Power")+":");

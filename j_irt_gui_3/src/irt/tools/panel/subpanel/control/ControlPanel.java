@@ -96,7 +96,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)));
+		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+				.deriveFont(Font.BOLD);
+
 		lblMute = new JLabel(muteText);
 		lblMute.setName("Label Mute");
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
@@ -140,6 +142,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 		comboBox.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
 		comboBox.setBackground(color);
 		comboBox.setForeground(Color.YELLOW);
+		comboBox.setFont(font.deriveFont(new Float(properties.getProperty("controll.comboBox.font.size")))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type"))));
 		comboBox.setCursor(cursor);
 		add(comboBox);
 		
@@ -312,18 +316,13 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnMute.setToolTipText(muteText);
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
 
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)));
+		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+				.deriveFont(Font.BOLD);
 		lblMute.setText(muteText);
 		lblMute.setFont(font);
 
-		font = font.deriveFont(
-				new Float(
-						properties.getProperty(
-								"control.checkBox.font.size_"+selectedLanguage)))
-								.deriveFont(
-										IrtPanel.fontStyle.get(
-												properties.getProperty(
-														"control.checkBox.font.style_"+selectedLanguage)));
+		font = font.deriveFont(new Float(properties.getProperty("control.checkBox.font.size_" + selectedLanguage)))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("control.checkBox.font.style_" + selectedLanguage)));
 		chckbxStep.setText(Translation.getValue(String.class, "step", "Step")+":");
 		chckbxStep.setFont(font);
 
@@ -333,8 +332,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 			model.addElement(new IdValueForComboBox(FLAG_GAIN, Translation.getValue(String.class, "gain", "GAIN")));
 		if((flags&FLAG_FREQUENCY)>0)
 			model.addElement(new IdValueForComboBox(FLAG_FREQUENCY, Translation.getValue(String.class, "frequency", "FREQUENCY")));
+		comboBox.setFont(font.deriveFont(new Float(properties.getProperty("controll.comboBox.font.size")))
+				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type"))));
 		comboBox.setModel(model);
-
-		repaint();
 	}
 }

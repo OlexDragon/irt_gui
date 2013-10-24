@@ -38,7 +38,8 @@ public class ControlPanelPicobuc extends ControlPanel {
 		cbLoSelect.setBounds(10, 141, 194, 26);
 		add(cbLoSelect);
 		
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)));
+		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+				.deriveFont(Font.BOLD);
 
 		lblSave = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
@@ -62,7 +63,8 @@ public class ControlPanelPicobuc extends ControlPanel {
 	@Override
 	public void refresh() {
 		super.refresh();
-		Font font = Translation.getFont().deriveFont(16f);
+		Font font = Translation.getFont().deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+				.deriveFont(Font.BOLD);
 		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setFont(font);
 	}
