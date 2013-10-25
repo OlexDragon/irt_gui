@@ -171,10 +171,6 @@ public class PLLsPanel extends JPanel {
 		});
 		imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		imageButton.setToolTipText("Store Config");
-		imageButton.setShadowShiftY(4);
-		imageButton.setShadowShiftX(4);
-		imageButton.setShadowPressedShiftY(1);
-		imageButton.setShadowPressedShiftX(1);
 		imageButton.setName("Store");
 		imageButton.setBounds(174, 54, 33, 33);
 		add(imageButton);

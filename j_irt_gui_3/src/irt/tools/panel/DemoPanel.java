@@ -59,13 +59,15 @@ public class DemoPanel extends Panel {
 	private JComboBox<String> comboBoxAttenuation;
 	private InfoPanel infoPanel;
 	private JLabel lblDbm;
+	private JTabbedPane tabbedPane;
+	private JLabel lblSave;
 
 	public DemoPanel() {
 		super(Translation.getValue(String.class, "vertical_label_text", "THE UNIT IS NOT CONNECTED"), 0, 0, 0, 0, 0);
 		
 		String selectedLanguage = Translation.getSelectedLanguage();
 
-		JPanel panel = new JPanel();
+		JPanel monitorPanel = new JPanel();
 		Font font = Translation.getFont();
 		monitorTitledBorder = new TitledBorder(
 				UIManager.getBorder("TitledBorder.border"),
@@ -74,14 +76,14 @@ public class DemoPanel extends Panel {
 				TitledBorder.TOP,
 				font ,
 				Color.WHITE);
-		panel.setBorder(monitorTitledBorder);
-		panel.setOpaque(false);
-		panel.setBounds(10, 12, 214, 210);
-		panel.setLayout(null);
-		userPanel.add(panel);
+		monitorPanel.setBorder(monitorTitledBorder);
+		monitorPanel.setOpaque(false);
+		monitorPanel.setBounds(10, 12, 214, 210);
+		monitorPanel.setLayout(null);
+		userPanel.add(monitorPanel);
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(10, 233, 214, 150);
+		JPanel controlPanel = new JPanel();
+		controlPanel.setBounds(10, 233, 214, 150);
 		controlTitledBorder = new TitledBorder(
 				UIManager.getBorder("TitledBorder.border"),
 				Translation.getValue(String.class, "control", "Control"),
@@ -90,11 +92,11 @@ public class DemoPanel extends Panel {
 				font,
 				Color.WHITE);
 
-		panel_1.setBorder(controlTitledBorder);
-		panel_1.setOpaque(false);
-		panel_1.setBounds(10, 225, 214, 180);
-		panel_1.setLayout(null);
-		userPanel.add(panel_1);
+		controlPanel.setBorder(controlTitledBorder);
+		controlPanel.setOpaque(false);
+		controlPanel.setBounds(10, 225, 214, 180);
+		controlPanel.setLayout(null);
+		userPanel.add(controlPanel);
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
@@ -114,52 +116,54 @@ public class DemoPanel extends Panel {
 		ledLock.setName("Lock");
 		ledLock.setForeground(Color.GREEN);
 		ledLock.setFont(font);
-		ledLock.setBounds(
-						19,
-						152,
-						Integer.parseInt(properties.getProperty("monitor.led.lock.width_"+selectedLanguage)),
-						28);
-		panel.add(ledLock);
+		String property;
+		int width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		int x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
+		int y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		ledLock.setBounds(x, y, width, 28);
+		monitorPanel.add(ledLock);
 
 		ledMute = new LED(Color.YELLOW, muteText);
 		ledMute.setName("Mute");
 		ledMute.setForeground(Color.GREEN);
 		ledMute.setFont(font);
-		ledMute.setBounds(
-						117,
-						152,
-						Integer.parseInt(properties.getProperty("monitor.led.mute.width_"+selectedLanguage)),
-						28);
-		panel.add(ledMute);
+		width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
+		y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		ledMute.setBounds(x, y, width, 28);
+		monitorPanel.add(ledMute);
+
+		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+				.deriveFont(Font.BOLD);
 
 		lblMute = new JLabel(muteText);
 		lblMute.setName("Label Mute");
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
 		lblMute.setFont(font);
-		lblMute.setBounds(46, 110, 84, 20);
-		panel_1.add(lblMute);
+		x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
+		y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
+		width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		lblMute.setBounds(x, y, width, 20);
+		controlPanel.add(lblMute);
 
 		btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
 		btnMute.setName("Button Mute");
 		btnMute.setToolTipText(muteText);
-		btnMute.setShadowShiftY(4);
-		btnMute.setShadowShiftX(4);
-		btnMute.setShadowPressedShiftY(1);
-		btnMute.setShadowPressedShiftX(1);
-		btnMute.setBounds(13, 104, 33, 33);
-		panel_1.add(btnMute);
-		
+		x = (property = properties.getProperty("control.button.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 14;
+		y = (property = properties.getProperty("control.button.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 101;
+		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
+		btnMute.setBounds(x, y, size, size);
+		controlPanel.add(btnMute);
+
 		btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 		btnStoreConfig.setName("Store");
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
-		btnStoreConfig.setShadowShiftY(4);
-		btnStoreConfig.setShadowShiftX(4);
-		btnStoreConfig.setShadowPressedShiftY(1);
-		btnStoreConfig.setShadowPressedShiftX(1);
-		btnStoreConfig.setBounds(124, 104, 33, 33);
-		panel_1.add(btnStoreConfig);
-		
+		x = (property = properties.getProperty("control.button.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 118;
+		y = (property = properties.getProperty("control.button.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		btnStoreConfig.setBounds(x, y, size, size);
+		controlPanel.add(btnStoreConfig);
+
 		textField = new JTextField();
 		textField.setEnabled(false);
 		textField.setName("Text Gain");
@@ -170,7 +174,7 @@ public class DemoPanel extends Panel {
 		textField.setCaretColor(Color.WHITE);
 		textField.setBackground(new Color(11, 23, 59));
 		textField.setBounds(13, 45, 188, 20);
-		panel_1.add(textField);
+		controlPanel.add(textField);
 
 		comboBoxAttenuation = new JComboBox<>();
 		comboBoxAttenuation.addPopupMenuListener(Listeners.popupMenuListener);
@@ -192,7 +196,7 @@ public class DemoPanel extends Panel {
 			}
 		});
 		comboBoxAttenuation.setFont(comboBoxAttenuation.getFont().deriveFont(Float.parseFloat(properties.getProperty("control.comboBox.font.size_"+selectedLanguage))));
-		panel_1.add(comboBoxAttenuation);
+		controlPanel.add(comboBoxAttenuation);
 
 		textField_1 = new JTextField();
 		textField_1.setEnabled(false);
@@ -204,7 +208,7 @@ public class DemoPanel extends Panel {
 		textField_1.setCaretColor(Color.YELLOW);
 		textField_1.setBackground(new Color(11, 23, 59));
 		textField_1.setBounds(74, 68, 127, 20);
-		panel_1.add(textField_1);
+		controlPanel.add(textField_1);
 		
 		slider = new JSlider();
 		slider.setEnabled(false);
@@ -228,7 +232,7 @@ public class DemoPanel extends Panel {
 		infoPanel.setBounds(10, 11, 286, 104);
 		extraPanel.add(infoPanel);
 		
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setOpaque(false);
 		tabbedPane.setBounds(10, 123, 286, 296);
 		extraPanel.add(tabbedPane);
@@ -248,7 +252,7 @@ public class DemoPanel extends Panel {
 		lblInputPowerText.setForeground(new Color(153, 255, 255));
 		lblInputPowerText.setFont(font);
 		lblInputPowerText.setBounds(5, 36, 112, 17);
-		panel.add(lblInputPowerText);
+		monitorPanel.add(lblInputPowerText);
 		
 		lblOutputPowerText = new JLabel(Translation.getValue(String.class, "output_power", "Output Power")+":");
 		lblOutputPowerText.setName("");
@@ -256,7 +260,7 @@ public class DemoPanel extends Panel {
 		lblOutputPowerText.setForeground(new Color(153, 255, 255));
 		lblOutputPowerText.setFont(font);
 		lblOutputPowerText.setBounds(5, 64, 112, 17);
-		panel.add(lblOutputPowerText);
+		monitorPanel.add(lblOutputPowerText);
 		
 		lblTemperatureText = new JLabel(Translation.getValue(String.class, "temperature", "Temperature")+":");
 		lblTemperatureText.setName("");
@@ -264,7 +268,7 @@ public class DemoPanel extends Panel {
 		lblTemperatureText.setForeground(new Color(153, 255, 255));
 		lblTemperatureText.setFont(font);
 		lblTemperatureText.setBounds(5, 92, 112, 17);
-		panel.add(lblTemperatureText);
+		monitorPanel.add(lblTemperatureText);
 
 //		font = new Font("Tahoma", Font.PLAIN, 14);
 
@@ -274,7 +278,7 @@ public class DemoPanel extends Panel {
 		lblDbm.setForeground(Color.WHITE);
 		lblDbm.setFont(font);
 		lblDbm.setBounds(118, 36, 82, 17);
-		panel.add(lblDbm);
+		monitorPanel.add(lblDbm);
 
 		font = font.deriveFont(Float.parseFloat(properties.getProperty("control.checkBox.font.size_"+selectedLanguage)));
 
@@ -284,7 +288,7 @@ public class DemoPanel extends Panel {
 		checkBoxStep.setForeground(Color.WHITE);
 		checkBoxStep.setFont(font);
 		checkBoxStep.setBounds(13, 68, 65, 23);
-		panel_1.add(checkBoxStep);
+		controlPanel.add(checkBoxStep);
 		
 		JLabel lblDbm_1 = new JLabel("40 "+Translation.getValue(String.class, "dbm", " dBm"));
 		lblDbm_1.setName("Output Power");
@@ -292,7 +296,7 @@ public class DemoPanel extends Panel {
 		lblDbm_1.setForeground(Color.WHITE);
 		lblDbm_1.setFont(font);
 		lblDbm_1.setBounds(107, 64, 93, 17);
-		panel.add(lblDbm_1);
+		monitorPanel.add(lblDbm_1);
 		
 		JLabel lblC = new JLabel("46 C");
 		lblC.setName("Temperature");
@@ -300,7 +304,7 @@ public class DemoPanel extends Panel {
 		lblC.setForeground(Color.WHITE);
 		lblC.setFont(font);
 		lblC.setBounds(116, 92, 84, 17);
-		panel.add(lblC);
+		monitorPanel.add(lblC);
 
 		font = font.deriveFont(18f);
 
@@ -328,10 +332,33 @@ public class DemoPanel extends Panel {
 		cbLoSelect.addItem(loTxt+":1 12800 MHz");
 		cbLoSelect.addItem(loTxt+":2 13050 MHz");
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-		panel_1.add(cbLoSelect);
+		controlPanel.add(cbLoSelect);
 
 		NetworkPanel networkPanel = new NetworkPanel(null);
-		tabbedPane.addTab("Network", null, networkPanel, null);
+		tabbedPane.addTab("network", null, networkPanel, null);
+
+		int tabCount = tabbedPane.getTabCount();
+		for(int i=0; i<tabCount; i++){
+			String title = tabbedPane.getTitleAt(i);
+			String value = Translation.getValue(String.class, title, null);
+			if(value!=null){
+				JLabel label = new JLabel(value);
+				label.setName(title);
+				label.setFont(Translation.getFont().deriveFont(12f));
+				tabbedPane.setTabComponentAt(i, label);
+			}
+		}
+		
+		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+				.deriveFont(Font.BOLD);
+
+		lblSave = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
+		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
+		lblSave.setForeground(Color.YELLOW);
+		lblSave.setFont(font);
+		lblSave.setBounds(153, 107, 61, 20);
+		controlPanel.add(lblSave);
+		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
 	private Properties getProperties() {
@@ -360,20 +387,33 @@ public class DemoPanel extends Panel {
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
+		ledLock.setFont(font);
+		String property;
+		int width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		int x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
+		int y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		ledLock.setBounds(x, y, width, 28);
+		ledLock.setText(Translation.getValue(String.class, "lock", "LOCK"));
+
 		ledMute.setFont(font);
 		ledMute.setText(muteText);
-		ledMute.setSize(
-				Integer.parseInt(properties.getProperty("monitor.led.mute.width_"+selectedLanguage)),
-				ledMute.getHeight());
+		width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
+		y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		ledMute.setBounds(x, y, width, 28);
 
-		ledLock.setFont(font);
-		ledLock.setSize(
-				Integer.parseInt(properties.getProperty("monitor.led.lock.width_"+selectedLanguage)),
-				ledLock.getHeight());
-		ledLock.setText(Translation.getValue(String.class, "lock", "LOCK"));
+		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+				.deriveFont(Font.BOLD);
 
 		lblMute.setText(muteText);
 		lblMute.setFont(font);
+		x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
+		y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
+		width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		lblMute.setBounds(x, y, width, 20);
+
+		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
+		lblSave.setFont(font);
 
 		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
 				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));
@@ -387,7 +427,15 @@ public class DemoPanel extends Panel {
 		lblTemperatureText.setFont(font);
 		lblTemperatureText.setText(Translation.getValue(String.class, "temperature", "Temperature")+":");
 
+		x = (property = properties.getProperty("control.button.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 14;
+		y = (property = properties.getProperty("control.button.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 101;
+		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
+		btnMute.setBounds(x, y, size, size);
 		btnMute.setToolTipText(muteText);
+
+		x = (property = properties.getProperty("control.button.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 118;
+		y = (property = properties.getProperty("control.button.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		btnStoreConfig.setBounds(x, y, size, size);
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
 
 		font = font.deriveFont(Float.parseFloat(properties.getProperty("verticalLabel.font.size_"+selectedLanguage))).deriveFont(Font.PLAIN);
@@ -406,5 +454,17 @@ public class DemoPanel extends Panel {
 		comboBoxAttenuation.setFont(comboBoxAttenuation.getFont().deriveFont(Float.parseFloat(properties.getProperty("control.comboBox.font.size_"+selectedLanguage))));
 
 		infoPanel.refresh();
+
+		int tabCount = tabbedPane.getTabCount();
+		for(int i=0; i<tabCount; i++){
+			String title = tabbedPane.getTitleAt(i);
+			String value = Translation.getValue(String.class, title, null);
+			if(value!=null){
+				JLabel label = new JLabel(value);
+				label.setName(title);
+				label.setFont(Translation.getFont().deriveFont(12f));
+				tabbedPane.setTabComponentAt(i, label);
+			}
+		}
 	}
 }

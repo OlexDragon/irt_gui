@@ -26,6 +26,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 	private LinkHeader linkHeader;
 	private ValueChangeListener statusListener;
 	protected TitledBorder titledBorder;
+	protected String selectedLanguage;
 
 	protected Properties properties = getProperties();
 
@@ -35,6 +36,9 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 	protected MonitorPanelAbstract(LinkHeader linkHeader, String title,int wisth, int height) {
 		this.linkHeader = linkHeader;
+
+		selectedLanguage = Translation.getSelectedLanguage();
+
 		addAncestorListener(new AncestorListener() {
 
 			public void ancestorAdded(AncestorEvent arg0) {
@@ -90,6 +94,9 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 	}
 
 	public void refresh() {
+
+		selectedLanguage = Translation.getSelectedLanguage();
+
 		Font font = Translation.getFont()
 				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
 				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));

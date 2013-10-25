@@ -42,12 +42,12 @@ public class ControlPanelDownConverter extends ControlPanelConverter {
 	}
 
 	@Override
-	protected Point setConfigButtonPosition() {
+	protected Point getConfigButtonPosition() {
 		return new Point(60, 111);
 	}
 
 	@Override
-	protected Point setMuteButtonPosition() {
+	protected Point getMuteButtonPosition() {
 		return new Point(105, 111);
 	}
 }

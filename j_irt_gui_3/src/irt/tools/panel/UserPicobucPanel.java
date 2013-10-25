@@ -23,28 +23,26 @@ public class UserPicobucPanel extends DevicePanel {
 	public UserPicobucPanel(LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		super(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 
-		JLabel lblNewLabel = new ImageLabel(
-				new ImageIcon(
-						IrtGui.class.getResource(
-								IrtPanel.properties.getProperty("company_logo_"+IrtPanel.companyIndex))
-						),"");
-		tabbedPane = getTabbedPane();
-		tabbedPane.addTab("IRT", null, lblNewLabel, null);
-		
-		NetworkPanel networkPanel = new NetworkPanel(linkHeader);
-		tabbedPane.addTab("network", null, networkPanel, null);
+		try {
+			JLabel lblNewLabel = new ImageLabel(new ImageIcon(IrtGui.class.getResource(IrtPanel.properties.getProperty("company_logo_" + IrtPanel.companyIndex))), "");
+			tabbedPane = getTabbedPane();
+			tabbedPane.addTab("IRT", null, lblNewLabel, null);
 
-		int tabCount = tabbedPane.getTabCount();
-		for(int i=0; i<tabCount; i++){
-			String title = tabbedPane.getTitleAt(i);
-			String value = Translation.getValue(String.class, title, null);
-			if(value!=null){
-				JLabel label = new JLabel(value);
-				label.setName(title);
-				label.setFont(Translation.getFont().deriveFont(12f));
-				tabbedPane.setTabComponentAt(i, label);
+			NetworkPanel networkPanel = new NetworkPanel(linkHeader);
+			tabbedPane.addTab("network", null, networkPanel, null);
+
+			int tabCount = tabbedPane.getTabCount();
+			for (int i = 0; i < tabCount; i++) {
+				String title = tabbedPane.getTitleAt(i);
+				String value = Translation.getValue(String.class, title, null);
+				if (value != null) {
+					JLabel label = new JLabel(value);
+					label.setName(title);
+					label.setFont(Translation.getFont().deriveFont(12f));
+					tabbedPane.setTabComponentAt(i, label);
+				}
 			}
-		}
+		} catch (Exception e) { }
 	}
 
 	@Override

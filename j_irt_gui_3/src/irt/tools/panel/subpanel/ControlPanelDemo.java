@@ -51,20 +51,12 @@ public class ControlPanelDemo extends JPanel {
 		btnMute.setToolTipText("MUTE");
 		btnMute.setName("Button Mute");
 		btnMute.setBounds(50, 13, 33, 9);
-		btnMute.setShadowShiftX(4);
-		btnMute.setShadowShiftY(4);
-		btnMute.setShadowPressedShiftX(1);
-		btnMute.setShadowPressedShiftY(1);
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
 		ImageButton imageButton = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 		imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		imageButton.setToolTipText("Store Config");
-		imageButton.setShadowShiftY(4);
-		imageButton.setShadowShiftX(4);
-		imageButton.setShadowPressedShiftY(1);
-		imageButton.setShadowPressedShiftX(1);
 		imageButton.setName("Store");
 		imageButton.setBounds(88, 13, 33, 9);
 		add(imageButton);

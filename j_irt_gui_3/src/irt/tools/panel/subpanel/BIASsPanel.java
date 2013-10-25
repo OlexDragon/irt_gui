@@ -402,10 +402,6 @@ public class BIASsPanel extends JPanel {
 			}
 		});
 		imageButton.setToolTipText("Initialize");
-		imageButton.setShadowShiftY(4);
-		imageButton.setShadowShiftX(4);
-		imageButton.setShadowPressedShiftY(1);
-		imageButton.setShadowPressedShiftX(1);
 		imageButton.setName("Initialize");
 		imageButton.setBounds(22, 182, 33, 33);
 		add(imageButton);

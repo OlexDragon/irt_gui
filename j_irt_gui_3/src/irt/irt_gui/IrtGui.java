@@ -30,7 +30,7 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
-	public static final String VERTION = "- 3.031";
+	public static final String VERTION = "- 3.033";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 

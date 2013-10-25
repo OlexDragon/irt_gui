@@ -56,8 +56,19 @@ public class ControlPanelPicobuc extends ControlPanel {
 	}
 
 	@Override
-	protected Point setConfigButtonPosition() {
-		return new Point(118, 101);
+	protected Point getConfigButtonPosition() {
+		String property;
+		int x = (property = properties.getProperty("control.button.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 118;
+		int y = (property = properties.getProperty("control.button.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		return new Point(x, y);
+	}
+
+	@Override
+	protected Point getMuteButtonPosition() {
+		String property;
+		int x = (property = properties.getProperty("control.button.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 14;
+		int y = (property = properties.getProperty("control.button.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		return new Point(x, y);
 	}
 
 	@Override
@@ -68,4 +79,5 @@ public class ControlPanelPicobuc extends ControlPanel {
 		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setFont(font);
 	}
+
 }

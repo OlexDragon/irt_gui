@@ -114,6 +114,7 @@ public class NetworkController extends ControllerAbstract {
 				IpAddressTextField ipAddressTextField = (IpAddressTextField)e.getSource();
 				String name = ipAddressTextField.getName();
 				logger.debug("KeyAdapter.keyTyped text={}", name);
+				if(networkAddressTmp!=null)
 				switch(name){
 				case "address":
 					networkAddressTmp.setAddress(ipAddressTextField.getText());
@@ -160,6 +161,8 @@ public class NetworkController extends ControllerAbstract {
 				packetThread.preparePacket();
 
 				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+				networkAddressTmp =null;
+				setButtonEnabled();
 			}
 		};
 	}
@@ -170,6 +173,7 @@ public class NetworkController extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
+				logger.trace("ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
 				
 				Object source = valueChangeEvent.getSource();
 				if(source instanceof NetworkAddress){
@@ -187,7 +191,7 @@ public class NetworkController extends ControllerAbstract {
 					if(networkAddressTmp==null)
 						networkAddressTmp = networkAddress.getCopy();
 				}else
-					logger.error("ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
+					logger.error("Wrong ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
 			}
 		};
 	}
@@ -243,7 +247,7 @@ public class NetworkController extends ControllerAbstract {
 	private void setButtonEnabled() {
 		logger.debug("setButtonEnabled() {}, {}", networkAddress, networkAddressTmp);
 
-		if(networkAddressTmp.equals(networkAddress)){
+		if(networkAddressTmp==null || networkAddressTmp.equals(networkAddress)){
 			btnCansel.setEnabled(false);
 			btnOk.setEnabled(false);
 		}else{

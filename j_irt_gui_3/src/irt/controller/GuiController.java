@@ -256,7 +256,7 @@ public class GuiController extends GuiControllerAbstract{
 					public void itemStateChanged(ItemEvent itemEvent) {
 						if(itemEvent.getStateChange()==ItemEvent.SELECTED){
 							Translation.setLocale(((KeyValue<String, String>)languageComboBox.getSelectedItem()).getKey());
-							Font font = Translation.getFont(((KeyValue<String, String>)languageComboBox.getSelectedItem()).getKey());
+							Font font = Translation.getFont();
 
 							headPanel.refresh();
 							if(unitsPanel!=null)

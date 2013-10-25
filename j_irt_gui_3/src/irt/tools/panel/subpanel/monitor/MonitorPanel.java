@@ -50,14 +50,24 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		ledLock.setName("Lock");
 		ledLock.setForeground(Color.GREEN);
 		ledLock.setFont(font);
-		ledLock.setBounds(17, 138, Integer.parseInt(properties.getProperty("monitor.led.lock.width_"+selectedLanguage)), 28);
+
+		int width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		int x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
+		int y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		logger.debug("ledLock: x={}, y={}, width={}", x, y, width);
+		ledLock.setBounds(x, y, width, 28);
 		add(ledLock);
 		
 		ledMute = new LED(Color.YELLOW, Translation.getValue(String.class, "mute", "MUTE"));
 		ledMute.setName("Mute");
 		ledMute.setForeground(Color.GREEN);
 		ledMute.setFont(font);
-		ledMute.setBounds(115, 138, Integer.parseInt(properties.getProperty("monitor.led.mute.width_"+selectedLanguage)), 28);
+
+		width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
+		y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		logger.debug("ledMute: x={}, y={}, width={}", x, y, width);
+		ledMute.setBounds(x, y, width, 28);
 		add(ledMute);
 
 		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
@@ -142,15 +152,19 @@ public class MonitorPanel extends MonitorPanelAbstract {
 
 		ledMute.setFont(font);
 		ledMute.setText(muteText);
-		ledMute.setSize(
-				Integer.parseInt(properties.getProperty("monitor.led.mute.width_"+selectedLanguage)),
-				ledMute.getHeight());
+		int width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		int x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
+		int y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		logger.debug("ledMute: x={}, y={}, width={}", x, y, width);
+		ledMute.setBounds(x, y, width, 28);
 
 		ledLock.setFont(font);
-		ledLock.setSize(
-				Integer.parseInt(properties.getProperty("monitor.led.lock.width_"+selectedLanguage)),
-				ledLock.getHeight());
-		ledLock.setText(Translation.getValue(String.class, "lock", "LOCK"));
+		width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
+		x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
+		y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		logger.debug("ledLock: x={}, y={}, width={}", x, y, width);
+		ledLock.setBounds(x, y, width, 28);
+		ledLock.setText(Translation.getValue(String.class, "lock".toLowerCase(), "LOCK"));
 
 		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_"+selectedLanguage)));
 		lblInputPowerTxt.setFont(font);

@@ -7,8 +7,10 @@ import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -32,7 +34,6 @@ public class Translation {
 	private static Locale locale = new Locale(selectedLanguage.split(SPLITER)[0], selectedLanguage.split(SPLITER)[1]);
 	private static ResourceBundle messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", new Locale(selectedLanguage.split(SPLITER)[0], selectedLanguage.split(SPLITER)[1]));
 	private static Map<String, String> map = getMap();
-
 	private static Font font = getFont(selectedLanguage);
 
 	public static void setLocale(String localeStr){
@@ -90,18 +91,40 @@ public class Translation {
 		Translation.selectedLanguage = selectedLanguage;
 		try {
 			Properties headPanelProperties = HeadPanel.properties;
-			String fontURL = headPanelProperties.getProperty("font_path_"+Translation.getSelectedLanguage());
+			String fontURL = headPanelProperties.getProperty("font_path_" + Translation.getSelectedLanguage());
 			logger.trace("fontURL={}", fontURL);
-			if(fontURL!=null){
+
+			int fontStyle = IrtPanel.fontStyle.get(headPanelProperties.getProperty("font_style_" + selectedLanguage));
+			float fontSize = Float.parseFloat(headPanelProperties.getProperty("font_size_" + selectedLanguage));
+
+			if (fontURL != null && (font = getSystemFont(fontURL, fontStyle, (int) fontSize)) == null) {
 				URL resource = IrtGui.class.getResource(fontURL);
 				font = Font.createFont(Font.TRUETYPE_FONT, resource.openStream());
-				int fontStyle = IrtPanel.fontStyle.get(headPanelProperties.getProperty("font_style_"+selectedLanguage));
-				float fontSize = Float.parseFloat(headPanelProperties.getProperty("font_size_"+selectedLanguage));
 				font = font.deriveFont(fontStyle).deriveFont(fontSize);
 			}
 		} catch (IOException | FontFormatException e) {
-			e.printStackTrace();
+			logger.catching(e);
 		}
+		return font;
+	}
+
+	private static Font getSystemFont(String fontURL, int fontStyle, int fontSize) {
+
+		Font font = null;
+		String[] split = fontURL.split("/");
+		String fontName = split[split.length-1].split("\\.")[0];
+
+		String[] availableFontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+		for(String s:availableFontNames)
+			if(s.equalsIgnoreCase(fontName)){
+				font = new Font(fontName, fontStyle, fontSize);
+				break;
+			}
+
+		logger.debug(fontURL);
+		logger.debug(Arrays.toString(availableFontNames));
+		logger.debug(font);
+
 		return font;
 	}
 

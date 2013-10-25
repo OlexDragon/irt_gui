@@ -64,15 +64,12 @@ public class ControlPanel extends MonitorPanelAbstract {
 	private JComboBox<String> cbLoSelect;
 	private boolean hasFreqSet;
 	private JLabel lblMute;
-	private ImageButton btnMute;
-	private ImageButton btnStoreConfig;
+	protected ImageButton btnMute;
+	protected ImageButton btnStoreConfig;
 	private int flags;
-	protected String selectedLanguage;
 
 	public ControlPanel(LinkHeader linkHeader, int flags) {
 		super(linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
-
-		selectedLanguage = Translation.getSelectedLanguage();
 
 		Font font = Translation.getFont();
 
@@ -87,12 +84,10 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
 		btnMute.setToolTipText(muteText);
 		btnMute.setName("Button Mute");
-		Point p = setMuteButtonPosition();
-		btnMute.setBounds(p.x, p.y, 33, 33);
-		btnMute.setShadowShiftX(4);
-		btnMute.setShadowShiftY(4);
-		btnMute.setShadowPressedShiftX(1);
-		btnMute.setShadowPressedShiftY(1);
+		Point p = getMuteButtonPosition();
+		String property;
+		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
+		btnMute.setBounds(p.x, p.y, size, size);
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
@@ -104,7 +99,10 @@ public class ControlPanel extends MonitorPanelAbstract {
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
 		lblMute.setFont(font);
-		lblMute.setBounds(48, 107, 93, 20);
+		int x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
+		int y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
+		int width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		lblMute.setBounds(x, y, width, 20);
 		add(lblMute);
 
 		txtGain = new JTextField();
@@ -121,13 +119,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 		btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
-		btnStoreConfig.setShadowShiftY(4);
-		btnStoreConfig.setShadowShiftX(4);
-		btnStoreConfig.setShadowPressedShiftY(1);
-		btnStoreConfig.setShadowPressedShiftX(1);
 		btnStoreConfig.setName("Store");
-		p = setConfigButtonPosition();
-		btnStoreConfig.setBounds(p.x, p.y, 33, 33);
+		p = getConfigButtonPosition();
+		btnStoreConfig.setBounds(p.x, p.y, size, size);
 		add(btnStoreConfig);
 		
 		comboBox = new JComboBox<>();
@@ -253,11 +247,11 @@ public class ControlPanel extends MonitorPanelAbstract {
 		add(txtStep);
 	}
 
-	protected Point setConfigButtonPosition() {
+	protected Point getConfigButtonPosition() {
 		return new Point(151, 101);
 	}
 
-	protected Point setMuteButtonPosition() {
+	protected Point getMuteButtonPosition() {
 		return new Point(14, 101);
 	}
 
@@ -306,20 +300,30 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 		titledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));
 
-		selectedLanguage = Translation.getSelectedLanguage();
 		Font font = Translation.getFont().deriveFont(
 				Float.parseFloat(
 						properties.getProperty(
 								"control.label.mute.font.size_"+selectedLanguage)));
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
+		String property;
+		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
 		btnMute.setToolTipText(muteText);
+		btnMute.setSize(size, size);
+		btnMute.setLocation(getMuteButtonPosition());
+
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
+		btnStoreConfig.setSize(size, size);
+		btnStoreConfig.setLocation(getConfigButtonPosition());
 
 		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
 				.deriveFont(Font.BOLD);
 		lblMute.setText(muteText);
 		lblMute.setFont(font);
+		int x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
+		int y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
+		int width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		lblMute.setBounds(x, y, width, 20);
 
 		font = font.deriveFont(new Float(properties.getProperty("control.checkBox.font.size_" + selectedLanguage)))
 				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("control.checkBox.font.style_" + selectedLanguage)));
@@ -335,5 +339,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 		comboBox.setFont(font.deriveFont(new Float(properties.getProperty("controll.comboBox.font.size")))
 				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type"))));
 		comboBox.setModel(model);
+
+		revalidate();
+		repaint();
 	}
 }
