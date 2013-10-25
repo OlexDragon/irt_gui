@@ -1,6 +1,6 @@
 package irt.irt_gui;
 
-import irt.controller.UserGuiController;
+import irt.controller.GuiControllerUser;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsDevice;
@@ -52,6 +52,6 @@ public class UserIrtGui extends IrtGui {
 
 	@Override
 	protected Thread getNewGuiController() {
-		return new UserGuiController(this);
+		return new GuiControllerUser(this);
 	}
 }

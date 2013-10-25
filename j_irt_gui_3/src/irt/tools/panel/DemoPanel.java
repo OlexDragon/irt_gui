@@ -17,7 +17,6 @@ import irt.tools.panel.subpanel.NetworkPanel;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.io.IOException;
 import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
@@ -50,7 +49,7 @@ public class DemoPanel extends Panel {
 	private JLabel lblOutputPowerText;
 	private JLabel lblTemperatureText;
 
-	private Properties properties = getProperties();
+	private Properties properties = PicobucPanel.getProperties();
 	private TitledBorder monitorTitledBorder;
 	private TitledBorder controlTitledBorder;
 	private ImageButton btnStoreConfig;
@@ -361,18 +360,9 @@ public class DemoPanel extends Panel {
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
-	private Properties getProperties() {
-		Properties properties = new Properties();
-		try {
-			properties.load(getClass().getResourceAsStream("PicoBucPanel.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return properties;
-	}
-
 	@Override
 	public void refresh() {
+		super.refresh();
 
 		String selectedLanguage = Translation.getSelectedLanguage();
 

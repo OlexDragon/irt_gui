@@ -46,11 +46,11 @@ public abstract class IrtMainFrame extends JFrame {
 
 		setIrtPanel(contentPane);
 
-		JComboBox<String> comboBox = new JComboBox<>();
-		comboBox.setName("Unit's Serial Port");
-		comboBox.addPopupMenuListener(Listeners.popupMenuListener);
-		comboBox.setBounds(comboBoxBounds());
-		getContentPane().add(comboBox);
+		JComboBox<String> serialPortSelection = new JComboBox<>();
+		serialPortSelection.setName("Unit's Serial Port");
+		serialPortSelection.addPopupMenuListener(Listeners.popupMenuListener);
+		serialPortSelection.setBounds(comboBoxBounds());
+		getContentPane().add(serialPortSelection);
 
 		addComponentListener(new ComponentAdapter() {
 			@Override

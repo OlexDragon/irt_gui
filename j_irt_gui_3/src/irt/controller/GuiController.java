@@ -21,6 +21,7 @@ import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.UnitsContainer;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -31,15 +32,21 @@ import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 import jssc.SerialPortList;
 
 public class GuiController extends GuiControllerAbstract{
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final int CONNECTION = 1;
 
@@ -118,7 +125,7 @@ public class GuiController extends GuiControllerAbstract{
 							unitPanel = getNewBaisPanel(((LinkedPacket)packet).getLinkHeader(), "("+di.getSerialNumber()+") "+di.getUnitName(), 0, 0, 0, 0, unitsPanel.getHeight());
 							break;
 						default:
-							System.out.println("Device Type:"+packet.getHeader().getGroupId());
+							logger.warn("Device Type:"+packet.getHeader().getGroupId());
 						}
 
 						if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
@@ -228,11 +235,18 @@ public class GuiController extends GuiControllerAbstract{
 		if(name!=null)
 			if(name.equals("Unit's Serial Port")){
 				serialPortSelection = (JComboBox<String>) c;
+
+				String property;
+				Properties properties = PicobucPanel.getProperties();
+				String selectedLanguage = Translation.getSelectedLanguage();
+				float fontSize = (property = properties.getProperty("serialPortSelection.font.size_"+selectedLanguage))!=null ? Float.parseFloat(property): 16;
+				serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
 				DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
 				defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
 				serialPortSelection.setModel(defaultComboBoxModel);
-				Font font = Translation.getFont();
-				serialPortSelection.setFont(font);
+				Dimension size = serialPortSelection.getSize();
+				size.width = (property = properties.getProperty("serialPortSelection.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 200;
+				serialPortSelection.setSize(size);
 
 				String portName = comPortThreadQueue.getSerialPort().getPortName();
 				if(defaultComboBoxModel.getIndexOf(portName)==-1){
@@ -265,9 +279,17 @@ public class GuiController extends GuiControllerAbstract{
 							if(font!=null)
 								serialPortSelection.setFont(font);
 
+							String property;
+							Properties properties = PicobucPanel.getProperties();
+							String selectedLanguage = Translation.getSelectedLanguage();
+							float fontSize = (property = properties.getProperty("serialPortSelection.font.size_"+selectedLanguage))!=null ? Float.parseFloat(property): 16;
+							serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
 							DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
 							defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
 							serialPortSelection.setModel(defaultComboBoxModel);
+							Dimension size = serialPortSelection.getSize();
+							size.width = (property = properties.getProperty("serialPortSelection.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 200;
+							serialPortSelection.setSize(size);
 						}
 					}
 				});

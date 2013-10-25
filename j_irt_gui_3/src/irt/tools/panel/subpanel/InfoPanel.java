@@ -22,7 +22,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +49,7 @@ public class InfoPanel extends JPanel implements Refresh {
 	private LinkHeader linkHeader;
 	private SecondsCount secondsCount;
 	private TitledBorder titledBorder;
-	private Properties properties = getProperties();
+	private Properties properties = PicobucPanel.getProperties();
 	private JLabel lblCountTxt;
 	private JLabel lblBuiltDateTxt;
 	private JLabel lblVersionTxt;
@@ -288,16 +287,6 @@ public class InfoPanel extends JPanel implements Refresh {
 	    long second = TimeUnit.SECONDS.toSeconds(seconds) - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds));
 
 	    return (day>0 ? day+" day"+(day==1 ? ", " : "s, ") : "")+hours+ ":"+minute+":"+second;
-	}
-
-	private Properties getProperties() {
-		Properties properties = new Properties();
-		try {
-			properties.load(PicobucPanel.class.getResourceAsStream("PicoBucPanel.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return properties;
 	}
 
 //********************************************************************************************************************

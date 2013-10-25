@@ -22,14 +22,14 @@ import org.apache.logging.log4j.core.Logger;
 @SuppressWarnings("serial")
 public class Panel extends JPanel {
 
+	private final Logger logger = (Logger) LogManager.getLogger();
+
 	protected int MIN_WIDTH = 25;
 	protected int MID_WIDTH = 310;
 	protected int MAX_WIDTH = 615;
 	protected int MIN_HEIGHT = 25;
 	protected int MAX_HEIGHT = 444;
 	protected int BTN_WIDTH;
-
-	private final Logger logger = (Logger) LogManager.getLogger();
 
 	protected Color backgroundColor = new Color(0x0B,0x17,0x3B);
 
@@ -137,7 +137,6 @@ public class Panel extends JPanel {
 	}
 
 	public void refresh() {
-		logger.trace("refresh()");
 		refresh(this);
 	}
 

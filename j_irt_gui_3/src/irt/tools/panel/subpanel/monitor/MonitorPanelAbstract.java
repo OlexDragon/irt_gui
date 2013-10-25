@@ -10,7 +10,6 @@ import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.IOException;
 import java.util.Properties;
 
 import javax.swing.JPanel;
@@ -28,7 +27,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 	protected TitledBorder titledBorder;
 	protected String selectedLanguage;
 
-	protected Properties properties = getProperties();
+	protected Properties properties = PicobucPanel.getProperties();
 
 //	public MonitorPanelAbstract(LinkHeader linkHeader){
 //		this(linkHeader, "Monitor", 214, 210);
@@ -81,16 +80,6 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 		statusListener = valueChangeListener;
 		if(controller!=null)
 			controller.addStatusListener(valueChangeListener);
-	}
-
-	private Properties getProperties() {
-		Properties properties = new Properties();
-		try {
-			properties.load(PicobucPanel.class.getResourceAsStream("PicoBucPanel.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return properties;
 	}
 
 	public void refresh() {

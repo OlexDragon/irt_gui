@@ -8,12 +8,16 @@ import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.util.Properties;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 @SuppressWarnings("serial")
 public class PicobucPanel extends DevicePanel {
+
+	private static Properties properties;
 
 	public PicobucPanel(final LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight){
 		super(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
@@ -47,5 +51,17 @@ public class PicobucPanel extends DevicePanel {
 		super.refresh();
 		getControlPanel().refresh();
 		getMonitorPanel().refresh();
+	}
+
+	public static Properties getProperties() {
+		if (properties == null) {
+			properties = new Properties();
+			try {
+				properties.load(PicobucPanel.class.getResourceAsStream("PicoBucPanel.properties"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return properties;
 	}
 }

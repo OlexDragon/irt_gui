@@ -10,9 +10,9 @@ import irt.tools.panel.DevicePanel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 
-public class UserGuiController extends GuiController {
+public class GuiControllerUser extends GuiController {
 
-	public UserGuiController(JFrame gui) {
+	public GuiControllerUser(JFrame gui) {
 		super("Gui Controller", gui);
 	}
 
