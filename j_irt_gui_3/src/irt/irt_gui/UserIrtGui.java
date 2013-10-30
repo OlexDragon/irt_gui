@@ -8,8 +8,14 @@ import java.awt.GraphicsEnvironment;
 
 import javax.swing.JOptionPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @SuppressWarnings("serial")
 public class UserIrtGui extends IrtGui {
+
+	private final static Logger logger = (Logger) LogManager.getLogger();
+
 	public UserIrtGui() {
 	}
 
@@ -43,7 +49,7 @@ public class UserIrtGui extends IrtGui {
 
 	                frame.setVisible(true);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.catching(e);
 				}
 			}
 		});

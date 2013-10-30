@@ -84,6 +84,7 @@ public class Translation {
 		}else
 			returnValue = defaultValue;
 
+		logger.debug("getValue(key={})={}, stringValue={}", key, returnValue, stringValue);
 		return returnValue;
 	}
 

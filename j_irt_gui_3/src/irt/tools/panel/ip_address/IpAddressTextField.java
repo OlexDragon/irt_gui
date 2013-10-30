@@ -310,7 +310,7 @@ public class IpAddressTextField extends GridbagPanel {
 		            }
 
 		        } catch (BadLocationException e1) {
-		            e1.printStackTrace();
+		            logger.catching(e1);;
 		            return;
 		        }
 
@@ -507,5 +507,10 @@ public class IpAddressTextField extends GridbagPanel {
 		frame.pack();
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
+	}
+
+	public void setDisabledTextColor(Color color) {
+		for(JTextField tf:textFields)
+			tf.setDisabledTextColor(color);
 	}
 }

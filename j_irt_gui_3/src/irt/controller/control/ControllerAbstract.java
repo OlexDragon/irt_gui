@@ -14,7 +14,12 @@ import java.awt.Component;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public abstract class ControllerAbstract implements Runnable{
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	public enum Style{
 		CHECK_ONCE,
@@ -78,6 +83,7 @@ public abstract class ControllerAbstract implements Runnable{
 						if(send){ send(); }
 						if(isWait()) wait(waitTime);
 					} catch (InterruptedException e) {
+						logger.catching(e);
 					}
 				}
 			}

@@ -10,7 +10,12 @@ import java.awt.Component;
 
 import javax.swing.JTextField;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class DeviceDebagSaveController extends ControllerAbstract {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private JTextField txtField;
 
@@ -38,7 +43,9 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 				else
 					txtField.setText("Error");
 
-				synchronized (this) { try { wait(500); } catch (InterruptedException e) { } }	
+				synchronized (this) { try { wait(500); } catch (InterruptedException e) {
+					logger.catching(e);
+				} }	
 				txtField.setText(str);
 			}
 		};

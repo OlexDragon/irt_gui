@@ -27,16 +27,24 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
-	public static final String VERTION = "- 3.033";
+	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);
+	private static final Logger logger = (Logger) LogManager.getLogger();
+
+	public static final String VERTION = "- 3.034";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 
 	public IrtGui() {
 		super(700, 571, 590);
 		DumpControllers.setSysSerialNumber(null);
+		logger.trace(ctx);
 
 		headPanel = new HeadPanel(this);
 		headPanel.setSize(650, 74);
@@ -47,9 +55,9 @@ public class IrtGui extends IrtMainFrame {
 		try {
 			setHeaderLabel(headPanel);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.catching(e);
 		} catch (FontFormatException e) {
-			e.printStackTrace();
+			logger.catching(e);
 		}
 
 		JLabel lblGui = new JLabel("GUI "+VERTION);
@@ -80,7 +88,7 @@ public class IrtGui extends IrtMainFrame {
 		try {
 			translationProperties.load(Translation.class.getResourceAsStream("translation.properties"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.catching(e);
 		}
 		String[] languagesArr = translationProperties.getProperty("languages").split(",");
 		KeyValue<?,?>[] languages = new KeyValue[languagesArr.length];
@@ -147,7 +155,7 @@ public class IrtGui extends IrtMainFrame {
 
 	                frame.setVisible(true);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.catching(e);
 				}
 			}
 		});

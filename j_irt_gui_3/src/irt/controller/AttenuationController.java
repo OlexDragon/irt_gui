@@ -33,9 +33,16 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 					Object source = valueChangeEvent.getSource();
 					if(source instanceof Range){
 						Range r = (Range) source;
+
+						long minimum = r.getMinimum();
+						long maximum = r.getMaximum();
+						ValueDouble stepValue = new ValueDouble(1, 1, maximum-minimum, 1);
+						stepValue.setPrefix("dB");
+						setStepValue(stepValue);
+
 						ValueDouble value = new ValueDouble(0,r.getMinimum(), r.getMaximum(), 1);
 						value.setPrefix(Translation.getValue(String.class, "db", " dB"));
-						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_ATTENUATION, style);
+						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
 					}
 				}
 			}

@@ -10,7 +10,12 @@ import irt.tools.panel.DevicePanel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class GuiControllerUser extends GuiController {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	public GuiControllerUser(JFrame gui) {
 		super("Gui Controller", gui);
@@ -36,7 +41,9 @@ public class GuiControllerUser extends GuiController {
 					wait(5000);
 				}
 			}
-		} catch (InterruptedException e) {}
+		} catch (InterruptedException e) {
+			logger.catching(e);
+		}
 	}
 
 	@Override

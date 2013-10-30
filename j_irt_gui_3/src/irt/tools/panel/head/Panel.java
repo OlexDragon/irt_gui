@@ -74,7 +74,7 @@ public class Panel extends JPanel {
 		verticalLabel.setOpaque(true);
 		verticalLabel.setBackground(new Color(0, 153, 255));
 		verticalLabel.setForeground(getForeground());
-		verticalLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		verticalLabel.setFont(new Font("Tahoma", Font.PLAIN, 16));
 		verticalLabel.setBorder(new SoftBevelBorder(BevelBorder.LOWERED, null, null, null, null));
 		verticalLabel.addMouseListener(new MouseAdapter() {
 			@Override

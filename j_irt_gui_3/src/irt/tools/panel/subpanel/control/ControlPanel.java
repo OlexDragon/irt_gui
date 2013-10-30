@@ -105,6 +105,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 		lblMute.setBounds(x, y, width, 20);
 		add(lblMute);
 
+		font = font.deriveFont(16f);
 		txtGain = new JTextField();
 		txtGain.setForeground(Color.YELLOW);
 		txtGain.setBackground(color);
@@ -132,7 +133,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 			comboBox.addItem(new IdValueForComboBox(FLAG_GAIN, Translation.getValue(String.class, "gain", "GAIN")));
 		if((flags&FLAG_FREQUENCY)>0)
 			comboBox.addItem(new IdValueForComboBox(FLAG_FREQUENCY, Translation.getValue(String.class, "frequency", "FREQUENCY")));
-		comboBox.setBounds(14, 19, 85, 20);
+		comboBox.setBounds(14, 19, 98, 20);
 		comboBox.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
 		comboBox.setBackground(color);
 		comboBox.setForeground(Color.YELLOW);
@@ -142,6 +143,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 		add(comboBox);
 		
 		lblChoice = new JLabel("");
+		lblChoice.setFont(font);
 		lblChoice.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
@@ -340,7 +342,6 @@ public class ControlPanel extends MonitorPanelAbstract {
 				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type"))));
 		comboBox.setModel(model);
 
-		revalidate();
-		repaint();
+		lblChoice.setFont(font);
 	}
 }

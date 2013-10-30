@@ -10,6 +10,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.tools.panel.ip_address.IpAddressTextField;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -29,6 +30,7 @@ import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
 import javax.swing.JButton;
 
 public class NetworkPanel extends JPanel implements Refresh {
@@ -138,6 +140,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 		panel_1.setLayout(null);
 		
 		ipAddressTextField = new IpAddressTextField();
+		ipAddressTextField.setDisabledTextColor(Color.BLUE);
 		ipAddressTextField.setEditable(true);
 		ipAddressTextField.setName("address");
 		ipAddressTextField.setBounds(0, 45, 150, 20);
@@ -152,6 +155,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 		panel_1.add(ipAddressTextField);
 		
 		ipAddressTextField_1 = new IpAddressTextField();
+		ipAddressTextField_1.setDisabledTextColor(Color.BLUE);
 		ipAddressTextField_1.setEditable(true);
 		ipAddressTextField_1.setName("mask");
 		ipAddressTextField_1.setBounds(0, 77, 150, 20);
@@ -166,6 +170,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 		panel_1.add(ipAddressTextField_1);
 		
 		ipAddressTextField_2 = new IpAddressTextField();
+		ipAddressTextField_2.setDisabledTextColor(Color.BLUE);
 		ipAddressTextField_2.setEditable(true);
 		ipAddressTextField_2.setName("gateway");
 		ipAddressTextField_2.setBounds(0, 109, 150, 20);

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
@@ -29,6 +31,7 @@ public class DumpControllers {
 	private static LoggerContext ctx = setSysSerialNumber(null);
 	private final Logger logger = (Logger) LogManager.getLogger();
 	private final Logger dumper = (Logger) LogManager.getLogger("dumper");
+	private final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private List<DumpController> dumpsList = new ArrayList<>();
 
@@ -50,7 +53,7 @@ public class DumpControllers {
 //				checkFileSize();
 //				renameFile();
 //				new DumpToFile(parent, file, parseId(id), source);
-				dumper.info(parseId(id)+":"+info+"\n"+source);
+				dumper.info(marker, parseId(id)+":"+info+"\n"+source);
 			}
 		}
 

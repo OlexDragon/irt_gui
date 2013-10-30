@@ -3,7 +3,12 @@ package irt.data.value;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Value {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private int type = 0;
 
@@ -150,7 +155,7 @@ public class Value {
 					error = false;
 				} catch (NumberFormatException e) {
 					error = true;
-					e.printStackTrace();
+					logger.catching(e);
 				}
 			else
 				error = true;

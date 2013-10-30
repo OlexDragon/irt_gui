@@ -34,8 +34,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @SuppressWarnings("serial")
 public class InfoPanel extends JPanel implements Refresh {
+
+	private final static Logger logger = (Logger) LogManager.getLogger();
 
 	private static final int WINDOW_MIN_HEIGHT = 105;
 	private static final int WINDOW_MAX_HEIGHT = 135;
@@ -311,7 +316,9 @@ public class InfoPanel extends JPanel implements Refresh {
 						wait(1000);
 					}
 					
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+					logger.catching(e);
+				}
 
 				lblCount.setText(calculateTime(firmwareBuildCounter++));
 			}

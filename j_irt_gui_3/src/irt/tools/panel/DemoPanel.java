@@ -355,7 +355,10 @@ public class DemoPanel extends Panel {
 		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
 		lblSave.setForeground(Color.YELLOW);
 		lblSave.setFont(font);
-		lblSave.setBounds(153, 107, 61, 20);
+		x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
+		y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
+		width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		lblSave.setBounds(x, y, width, 20);
 		controlPanel.add(lblSave);
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 	}
@@ -404,6 +407,10 @@ public class DemoPanel extends Panel {
 
 		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setFont(font);
+		x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
+		y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
+		width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		lblSave.setBounds(x, y, width, 20);
 
 		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
 				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));

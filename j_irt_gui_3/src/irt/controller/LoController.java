@@ -62,7 +62,7 @@ public class LoController extends ControllerAbstract {
 						cbLoSelect.setModel((ComboBoxModel<String>) source);
 
 						pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD);
-						pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_LO_SET);
+						pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET);
 						pt.preparePacket();
 					}else{
 						cbLoSelect.setSelectedItem(new IdValueForComboBox((byte) source, null));

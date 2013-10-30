@@ -6,6 +6,7 @@ import irt.data.IdValue;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.PacketHeader;
 import irt.data.value.Value;
 
 import java.awt.Component;
@@ -60,11 +61,12 @@ public class TextSliderController extends ControllerAbstract {
 
 					switch(source.getClass().getSimpleName()){
 					case "Byte":
-						txtField.setText("* error"+source);
+						txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));
 						cs.preparePacketToSend(new IdValue(packetId, null));
 						setSend(true, false);
 						break;
 					case "Integer":
+						txtField.setToolTipText("");
 						setValue((Integer)valueChangeEvent.getSource());
 						if(style==Style.CHECK_ONCE)
 							setSend(false);
@@ -72,6 +74,7 @@ public class TextSliderController extends ControllerAbstract {
 							((ConfigurationSetter)getPacketWork()).preparePacketToSend(new IdValue(packetId, null));
 						break;
 					default:
+						txtField.setToolTipText("");
 						setValue((Long)valueChangeEvent.getSource());
 						if(style==Style.CHECK_ONCE)
 							setSend(false);

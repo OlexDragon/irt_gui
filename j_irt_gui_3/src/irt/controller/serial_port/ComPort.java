@@ -19,11 +19,19 @@ import java.util.List;
 
 import javax.swing.Timer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.core.Logger;
+
 import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
 public class ComPort extends SerialPort {
+
+	private final Logger logger = (Logger) LogManager.getLogger("comPort");
+	private final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private boolean run = true;
 	private int timeout = 3000;
@@ -50,7 +58,7 @@ public class ComPort extends SerialPort {
 						closePort();
 					}
 				} catch (SerialPortException e) {
-					e.printStackTrace();
+					logger.catching(e);
 				}
 			}
 		});
@@ -74,8 +82,6 @@ public class ComPort extends SerialPort {
 			linkHeader = null;
 			packet = new Packet();
 		}
-//		System.out.println("Send bytes: "+Arrays.toString(packetThread.getData()));
-
 
 		int runTimes = 0;
 		byte[] readData;
@@ -99,25 +105,22 @@ do{
 			setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 		}
 	}
-//	Console.appendLn(""+(System.currentTimeMillis()-start), "openPort");
 
 			timer.restart();
 			clear();
 
 			byte[] data = pt.getData();
+			logger.info(marker, ">> Sent:{}", Arrays.toString(data));
 
 			String prefix = (runTimes+1)+") send";
 
-//			Console.appendLn(""+(System.currentTimeMillis()-start), "Clear Time");
 			Console.appendLn(p, prefix);
 			Console.appendLn(Arrays.toString(data), prefix);
 
 			if(data!=null){
 				writeBytes(data);
-//				Console.appendLn(""+(System.currentTimeMillis()-start), "writeBytes Time");
 
 				if ((isConfirmBytes()) && isFlagSequence()){
-//					Console.appendLn(""+(System.currentTimeMillis()-start), "get answer Time");
 
 					if(linkHeader!=null)
 						if((readData=readLinkHeader())!=null)
@@ -128,14 +131,12 @@ do{
 						}
 
 					if((readData=readHeader())!=null) {
-//					System.out.println("??? 1 readHeader 1 ???");
 						if(checksum!=null)
 							checksum.add(readData);
 						else
 							checksum = new Checksum(readData);
 
 						packetHeader = new PacketHeader(readData);
-//					System.out.println("packetHeader - "+packetHeader);
 
 						if (packetHeader.asBytes() != null && packetHeader.getGroupId()==groupId) {
 							packet.setHeader(packetHeader);
@@ -143,11 +144,9 @@ do{
 
 							while ((readData = readParameterHeader())!=null && isRun()) {
 
-//							System.out.println("??? 2 readHeader 2 ??? "+Arrays.toString(readData));
 								if (containsFlagSequence(readData)) {
 									cs = checksum.getChecksumAsBytes();
 
-//									System.out.println("Checksum - "+Arrays.toString(cs));
 									if (cs[0] == readData[0] && cs[1] == readData[1]){
 										timesTimeout = 0;
 										packet.setPayloads(payloadsList);
@@ -155,11 +154,9 @@ do{
 
 									break;
 								}
-//								System.out.println("??? - add(readData) - ???");
 								checksum.add(readData);
 								parameterHeader = new ParameterHeader(readData);
 
-//								System.out.println("??? - parameterHeader - ??? "+parameterHeader);
 								if(parameterHeader.getCode()>30 || (ev = parameterHeader.getSize())>2000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
 									break;
@@ -168,7 +165,6 @@ do{
 
 									checksum.add(readData);
 									Payload payload = new Payload(parameterHeader,	readData);
-//									System.out.println("Payload - "+payload);
 									payloadsList.add(payload);
 								}else{
 									Console.appendLn("Payload", "Break ");
@@ -179,7 +175,6 @@ do{
 					}
 				}
 				byte[] acknowledge = getAcknowledge();
-//				Console.appendLn(Arrays.toString(acknowledge), "sent Acknowledge");
 				writeBytes(acknowledge);
 			}else
 				setRun(false);
@@ -189,19 +184,17 @@ do{
 					packet = p;
 
 		} catch (SerialPortException e) {
+			logger.catching(e);
 			if(timesTimeout<3){
 				timesTimeout++;
 				setRun(false);
 			}
 			Console.appendLn(e.getLocalizedMessage(), "Error");
-//			System.out.println(e.getLocalizedMessage());
-//			JOptionPane.showMessageDialog(null, e.getLocalizedMessage()+";(E003)");
 		}
 
 		timer.stop();
 
 		Console.appendLn(packet, "Get");
-//		System.out.println("Reseve:"+p);
 		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 
 		return packet;
@@ -225,23 +218,18 @@ do{
 	}
 
 	private byte[] readLinkHeader() throws SerialPortException {
-//		System.out.println("??? - readLinkHeader - ???");
-
 		return readBytes(LinkHeader.SIZE);
 	}
 
 	private byte[] readHeader() throws SerialPortException {
-//		System.out.println("??? - readHeader - ???");
 		return readBytes(PacketHeader.SIZE);
 	}
 
 	private byte[] readParameterHeader() throws SerialPortException {
-//		System.out.println("??? - readParameterHeader - ???");
 		return readBytes(ParameterHeader.SIZE);
 	}
 
 	public boolean isFlagSequence() throws SerialPortException {
-//		System.out.println("??? - readFlagSequence - ???");
 
 		byte[] readBytes = readByte(2500);
 		boolean isFlagSequence = readBytes!=null && readBytes[0] == Packet.FLAG_SEQUENCE;
@@ -272,8 +260,6 @@ do{
 		if(!this.isComfirm && readBytes!=null && linkHeader!=null && readBytes[6]==Packet.FLAG_SEQUENCE)
 					linkHeader = null;
 
-//		System.out.println(" - isConfirmBytes - "+Arrays.toString(readBytes)+" : "+linkHeader);
-
 		if(this.isComfirm){
 			byte[] data = Arrays.copyOfRange(readBytes, 1, index);
 			if((linkHeader==null || new LinkHeader(data).equals(linkHeader)) && packetId==getPacketId(linkHeader!=null, data)){
@@ -284,7 +270,6 @@ do{
 			}
 		}
 
-//		Console.appendLn(""+(System.currentTimeMillis()-start), "Acknowledge Time");
 		return isComfirm;
 	}
 
@@ -315,7 +300,9 @@ do{
 		byte[] readBytes = null;
 		while(wait(1, waitTime)){
 			readBytes = super.readBytes(getInputBufferBytesCount());
-			Console.appendLn(Arrays.toString(readBytes), "Clear");
+			String readBytesStr = Arrays.toString(readBytes);
+			Console.appendLn(readBytesStr, "Clear");
+			logger.info(marker,"?? clear: {}", readBytesStr);
 			if(waitTime!=100)
 				waitTime = 100;
 		}
@@ -323,7 +310,6 @@ do{
 	}
 
 	public byte[] readByte(int timeout) throws SerialPortException {
-//		System.out.println("??? - readByte - ???");
 		return readBytes(1, timeout);
 	}
 
@@ -369,7 +355,7 @@ do{
 		if(hasEsc)
 			readBytes = byteStuffing(readBytes);
 
-//		System.out.println("Read - "+Arrays.toString(readBytes));
+		logger.info(marker, "<< get:{}", Arrays.toString(readBytes));
 
 		return readBytes;
 	}
@@ -390,7 +376,9 @@ do{
 				synchronized (this) {
 					wait(waitTime);
 				}
-			} catch (InterruptedException e) {}
+			} catch (InterruptedException e) {
+				logger.catching(e);
+			}
 
 			if(getInputBufferBytesCount()>0){
 
@@ -469,14 +457,14 @@ do{
 		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTime && isRun()){
 			synchronized (this) {
 
-				try { wait(waitTime); } catch (InterruptedException e) {}
+				try { wait(waitTime); } catch (InterruptedException e) {
+					logger.catching(e);
+				}
 
 				if(isSerialPortEven)
 					isSerialPortEven = false;
 			}
-//			Console.appendLn("waitTime:"+waitTime+"; isSerialPortEven="+isSerialPortEven, "wait:"+(System.currentTimeMillis()-start));
 		};
-//		Console.append("isOpend:"+isOpened()+"; isReady:"+isReady+"; t:"+t+"; eventValue:"+eventValue+"; isRun():"+isRun(), "Wait");
 		if(isSerialPortEven)
 			isSerialPortEven = false;
 		return isReady;

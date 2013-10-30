@@ -23,7 +23,7 @@ public class MeasurementGetter extends GetterAbstract {
 	 * use to get bias board status bits
 	 */
 	public MeasurementGetter(LinkHeader linkHeader) {
-		this(linkHeader, Packet.IRT_SLCP_PARAMETER_25W_BAIS_MEASUREMENT_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
+		this(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
 	}
 
 	public MeasurementGetter(byte packetPayloadParameterHeaderCode, short pacetId) {

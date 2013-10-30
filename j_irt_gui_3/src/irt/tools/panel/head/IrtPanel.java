@@ -16,8 +16,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @SuppressWarnings("serial")
 public class IrtPanel extends MainPanel {
+
+	private final static Logger logger = (Logger) LogManager.getLogger();
 //
 //	public enum Style {
 //		WITH_IMAGE,
@@ -51,6 +56,7 @@ public class IrtPanel extends MainPanel {
 			InputStream resourceAsStream = IrtGui.class.getResourceAsStream("irt.properties");
 			p.load(resourceAsStream);
 		} catch (IOException e) {
+			logger.catching(e);
 		}
 		return p;
 	}

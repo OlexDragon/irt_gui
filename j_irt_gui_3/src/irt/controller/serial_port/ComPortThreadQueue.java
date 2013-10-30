@@ -12,9 +12,14 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 import jssc.SerialPortException;
 
 public class ComPortThreadQueue extends Thread {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(50);
 	private static ComPort serialPort;
@@ -40,7 +45,7 @@ public class ComPortThreadQueue extends Thread {
 					if(packetThread!=null){
 						packetThread.join();
 
-						if(!serialPort.getPortName().startsWith("Select") && packetThread.isReadyToSend()) {
+						if(serialPort.getPortName().startsWith("COM") && packetThread.isReadyToSend()) {
 
 							Packet send = serialPort.send(packetWork);
 							fireValueChangeListener(send);
@@ -62,8 +67,8 @@ public class ComPortThreadQueue extends Thread {
 					}
 				}
 			} catch (InterruptedException | SerialPortException e) {
+				logger.catching(e);
 				Console.appendLn(e.getLocalizedMessage(), "ComPortThreadQueue:run");
-				//e.printStackTrace();
 			}
 		}
 	}
@@ -83,6 +88,7 @@ public class ComPortThreadQueue extends Thread {
 				}
 			}
 		} catch (IllegalStateException e) {
+			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:add");
 		}
 	}
@@ -111,8 +117,8 @@ public class ComPortThreadQueue extends Thread {
 					oldSerialPort.closePort();
 				}
 			} catch (SerialPortException e) {
+				logger.catching(e);
 				Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:setSerialPort");
-				e.printStackTrace();
 			}
 		}
 

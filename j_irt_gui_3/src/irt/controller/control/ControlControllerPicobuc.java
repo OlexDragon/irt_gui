@@ -36,7 +36,7 @@ public class ControlControllerPicobuc extends ControlController{
 						comboBoxfreqSet.addItemListener(itemListenerComboBox);
 
 						pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD);
-						pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_LO_SET);
+						pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET);
 						packetThread.preparePacket();
 						setSend(true);
 					}else{

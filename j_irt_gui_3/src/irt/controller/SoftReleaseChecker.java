@@ -10,7 +10,12 @@ import java.util.Calendar;
 
 import javax.swing.JOptionPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class SoftReleaseChecker extends Thread {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private DeviceInfo deviceInfo;
 
@@ -40,6 +45,7 @@ public class SoftReleaseChecker extends Thread {
 			try {
 				calendar.setTime(simpleDateFormat.parse(deviceInfo.getFirmwareBuildDate().toString()));
 			} catch (ParseException e) {
+				logger.catching(e);
 				JOptionPane.showMessageDialog(null, e.getLocalizedMessage());
 			}
 

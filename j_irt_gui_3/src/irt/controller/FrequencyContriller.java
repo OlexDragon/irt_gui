@@ -7,6 +7,7 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
 import irt.data.value.ValueFrequency;
 
 import java.awt.Component;
@@ -16,10 +17,16 @@ import javax.swing.JTextField;
 
 public class FrequencyContriller extends ValueRangeControllerAbstract {
 
+	private final boolean isConverter;
 	private Style style;
 
-	public FrequencyContriller(LinkHeader linkHeader, JTextField txtField,JSlider slider, JTextField txtStep, Style style) {
-		super(new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY_RANGE, PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+	public FrequencyContriller(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+		super(new ConfigurationSetter(
+				linkHeader,
+				linkHeader==null ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY_RANGE : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY_RANGE,
+						PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+
+		isConverter = linkHeader==null;
 		this.style = style;
 	}
 
@@ -29,13 +36,21 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE){
-					boolean isConverter = getPacketWork().getPacketThread().getLinkHeader()==null;
+				int id = valueChangeEvent.getID();
+				if(id==PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE){
 					Object source = valueChangeEvent.getSource();
 					if(source instanceof Range){
+						txtField.setToolTipText("");
 						Range r = (Range) source;
-						startTextSliderController(new ValueFrequency(0,r.getMinimum(), r.getMaximum()), PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY, isConverter ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY : Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_ATTENUATION, style);
-					}
+
+						long minimum = r.getMinimum();
+						long maximum = r.getMaximum();
+						setStepValue(new ValueFrequency(1, 1, maximum-minimum));
+
+						startTextSliderController(new ValueFrequency(0,minimum, maximum), PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY, isConverter ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY, style);
+
+					}else if(source instanceof Byte)
+						txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));
 				}
 			}
 		};

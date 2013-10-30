@@ -6,8 +6,13 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.text.BadLocationException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @SuppressWarnings("serial")
 public class Console extends JDialog {
+
+	private final static Logger logger = (Logger) LogManager.getLogger();
 
 	public static final JTextArea TEXT_AREA = new JTextArea();
 	private static final int MAX_LINE_COUNT = 5000;
@@ -44,7 +49,7 @@ public class Console extends JDialog {
 			try {
 				TEXT_AREA.replaceRange(null, TEXT_AREA.getLineStartOffset(0), TEXT_AREA.getLineEndOffset(0));
 			} catch (BadLocationException e) {
-				e.printStackTrace();
+				logger.catching(e);
 			}
 		}
 

@@ -17,7 +17,7 @@ public class GainController extends ValueRangeControllerAbstract {
 	private Style style;
 
 	public GainController(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super(new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 	}
 
@@ -33,7 +33,7 @@ public class GainController extends ValueRangeControllerAbstract {
 						Range r = (Range) source;
 						ValueDouble value = new ValueDouble(0, r.getMinimum(), r.getMaximum(), 1);
 						value.setPrefix(" dB");
-						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_GAIN, style);
+						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, style);
 					}
 				}
 			}

@@ -11,12 +11,10 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
-import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.DevicePanel;
 import irt.tools.panel.PicobucPanel;
-import irt.tools.panel.head.Console;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.UnitsContainer;
 
@@ -25,24 +23,18 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import jssc.SerialPortList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-
-import jssc.SerialPortList;
 
 public class GuiController extends GuiControllerAbstract{
 
@@ -88,7 +80,6 @@ public class GuiController extends GuiControllerAbstract{
 					if(n!=null && n.equals("Language"))
 						setComboBox(cm);
 				}
-					
 			}
 
 		comPortThreadQueue.addPacketListener(new PacketListener() {
@@ -106,25 +97,33 @@ public class GuiController extends GuiControllerAbstract{
 						DevicePanel unitPanel = null;
 						di = new DeviceInfo(packet);
 
-						switch(di.getType()){
+						int type = di.getType();
+						switch(type){
 						case DeviceInfo.DEVICE_TYPE_L_TO_70:
 						case DeviceInfo.DEVICE_TYPE_L_TO_140:
 						case DeviceInfo.DEVICE_TYPE_70_TO_L:
 						case DeviceInfo.DEVICE_TYPE_140_TO_L:
 						case DeviceInfo.DEVICE_TYPE_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_L_TO_C:
+						case DeviceInfo.DEVICE_TYPE_70_TO_KY:
+						case DeviceInfo.DEVICE_TYPE_KU_TO_70:
+						case DeviceInfo.DEVICE_TYPE_140_TO_KU:
+						case DeviceInfo.DEVICE_TYPE_KU_TO_140:
 							unitPanel = new ConverterPanel(di, 0, 0, 0, 0, unitsPanel.getHeight());
 							protocol = CONVERTER;
 							if(softReleaseChecker==null)
 								softReleaseChecker = new SoftReleaseChecker();
 							break;
 						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
-						case DeviceInfo.DEVICE_TYPE_PICOBUC_KU:
-						case DeviceInfo.DEVICE_PICOBUC_C:
+						case DeviceInfo.DEVICE_TYPE_PICOBUC:
+						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
+						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
 							protocol = LINKED;
 							unitPanel = getNewBaisPanel(((LinkedPacket)packet).getLinkHeader(), "("+di.getSerialNumber()+") "+di.getUnitName(), 0, 0, 0, 0, unitsPanel.getHeight());
 							break;
 						default:
+							if(type>0)
+								JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id="+type+")");
 							logger.warn("Device Type:"+packet.getHeader().getGroupId());
 						}
 
@@ -165,8 +164,6 @@ public class GuiController extends GuiControllerAbstract{
 							synchronized (GuiController.this) {
 								GuiController.this.notify();
 							}
-
-							saveToFile(di);
 						}
 						unitPanel = null;
 //						System.out.println(packet);
@@ -178,36 +175,6 @@ public class GuiController extends GuiControllerAbstract{
 						vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
 				}else
 					vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
-			}
-
-			private void saveToFile(DeviceInfo di) {
-				File f = new File("c:"+File.separator+"irt"+File.separator+"irt.log");
-				
-				File parentFile = f.getParentFile();
-
-				try {
-					if(!parentFile.exists())
-				    	parentFile.mkdirs();
-					else if(f.length()>1000000000)
-						f.delete();
-
-					String text = Console.getText();
-					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss;");
-					Calendar cal = Calendar.getInstance();
-
-					PrintWriter pw = new PrintWriter(new FileWriter(f, true));
-
-					int length = text.length();
-					if(length>0)
-						pw.println(">>>SN:"+(di!=null ? di.getSerialNumber() : "???")+"; "+
-								dateFormat.format(cal.getTime())+
-								":Vertion:"+IrtGui.VERTION+">>>\n\r"+
-								(length>1000 ? text.substring(length-1000, length) : text));
-					pw.close();
-				} catch (IOException e) {
-					Console.appendLn(e.getLocalizedMessage(), "file error");
-//								e.printStackTrace();
-				}
 			}
 		});
 	}
@@ -242,7 +209,7 @@ public class GuiController extends GuiControllerAbstract{
 				float fontSize = (property = properties.getProperty("serialPortSelection.font.size_"+selectedLanguage))!=null ? Float.parseFloat(property): 16;
 				serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
 				DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
-				defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
+				defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
 				serialPortSelection.setModel(defaultComboBoxModel);
 				Dimension size = serialPortSelection.getSize();
 				size.width = (property = properties.getProperty("serialPortSelection.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 200;
@@ -285,7 +252,7 @@ public class GuiController extends GuiControllerAbstract{
 							float fontSize = (property = properties.getProperty("serialPortSelection.font.size_"+selectedLanguage))!=null ? Float.parseFloat(property): 16;
 							serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
 							DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
-							defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_rerial_port", "Select Serial Port"), 0);
+							defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
 							serialPortSelection.setModel(defaultComboBoxModel);
 							Dimension size = serialPortSelection.getSize();
 							size.width = (property = properties.getProperty("serialPortSelection.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 200;
@@ -314,6 +281,7 @@ public class GuiController extends GuiControllerAbstract{
 					wait(5000);
 				}
 			} catch (InterruptedException e) {
+				logger.catching(e);
 			}
 		}
 	}
@@ -410,7 +378,9 @@ public class GuiController extends GuiControllerAbstract{
 				synchronized (this) {
 					try {
 						wait();
-					} catch (InterruptedException e) { }
+					} catch (InterruptedException e) {
+						logger.catching(e);
+					}
 				}
 				if(packetReceived)
 					continue;
@@ -418,7 +388,9 @@ public class GuiController extends GuiControllerAbstract{
 				synchronized (this) {
 					try {
 						wait(waitTime);
-					} catch (InterruptedException e) { }
+					} catch (InterruptedException e) {
+						logger.catching(e);
+					}
 				}
 				if(packetReceived)
 					continue;

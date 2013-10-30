@@ -15,8 +15,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 @SuppressWarnings("serial")
 public class UserPicobucPanel extends DevicePanel {
+
+	private final static Logger logger = (Logger) LogManager.getLogger();
 
 	private JTabbedPane tabbedPane;
 
@@ -42,7 +47,9 @@ public class UserPicobucPanel extends DevicePanel {
 					tabbedPane.setTabComponentAt(i, label);
 				}
 			}
-		} catch (Exception e) { }
+		} catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	@Override

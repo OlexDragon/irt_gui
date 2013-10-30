@@ -20,7 +20,7 @@ import org.apache.logging.log4j.core.Logger;
 @SuppressWarnings("serial")
 public class HeadPanel extends MainPanel {
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final Color BACKGROUND_COLOR = new Color(0x3B, 0x4A, 0x8B);
 	public static LED ledRx = StaticComponents.getLedRx();
@@ -97,7 +97,7 @@ public class HeadPanel extends MainPanel {
 		try {
 			properties.load(HeadPanel.class.getResourceAsStream("HeadPanel.properties"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.catching(e);;
 		}
 		return properties;
 	}

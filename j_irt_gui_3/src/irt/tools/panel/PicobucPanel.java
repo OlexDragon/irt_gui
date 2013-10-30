@@ -14,8 +14,13 @@ import java.util.Properties;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @SuppressWarnings("serial")
 public class PicobucPanel extends DevicePanel {
+
+	private final static Logger logger = (Logger) LogManager.getLogger();
 
 	private static Properties properties;
 
@@ -59,7 +64,7 @@ public class PicobucPanel extends DevicePanel {
 			try {
 				properties.load(PicobucPanel.class.getResourceAsStream("PicoBucPanel.properties"));
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.catching(e);
 			}
 		}
 		return properties;

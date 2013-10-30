@@ -37,7 +37,7 @@ public class ConfigurationSetter extends SetterAbstract {
 	 */
 	public ConfigurationSetter(LinkHeader linkHeader) {
 		this(linkHeader,
-				linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_LO_FREQUENCIES :
+				linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES :
 					Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES);
 	}
@@ -58,16 +58,16 @@ public class ConfigurationSetter extends SetterAbstract {
 			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_BUC_ENABLE, (byte)((IdValue)value).getValue());
 			break;
 		case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
-			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_LO_SET, value!=null
+			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value!=null
 																						? (Byte)((IdValue)value).getValue()
 																								: null);
 			break;
 		case PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE:
-			pt.preparePacket(lh!=null ? Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_MUTE : Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_MUTE_CONTROL, (byte)(((boolean)((IdValue)value).getValue()) ? 1 : 0));
+			pt.preparePacket(lh!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_MUTE_CONTROL, (byte)(((boolean)((IdValue)value).getValue()) ? 1 : 0));
 			break;
 		case PacketWork.PACKET_ID_CONFIGURATION_GAIN:
 			Value v = (Value)((IdValue)value).getValue();
-			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_GAIN, v!=null ? (short)v.getValue() : null);
+			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, v!=null ? (short)v.getValue() : null);
 			break;
 		case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION:
 			v = (Value)((IdValue)value).getValue();

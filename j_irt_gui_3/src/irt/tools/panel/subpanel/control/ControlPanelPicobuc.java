@@ -23,7 +23,7 @@ public class ControlPanelPicobuc extends ControlPanel {
 	private JLabel lblSave;
 
 	public ControlPanelPicobuc(LinkHeader linkHeader) {
-		super(linkHeader, ControlPanel.FLAG_ATTENUATION);
+		super(linkHeader, ControlPanel.FLAG_ATTENUATION|ControlPanel.FLAG_FREQUENCY);
 		
 		Font font = Translation.getFont().deriveFont(16f);
 
@@ -45,7 +45,11 @@ public class ControlPanelPicobuc extends ControlPanel {
 		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
 		lblSave.setForeground(Color.YELLOW);
 		lblSave.setFont(font);
-		lblSave.setBounds(153, 107, 61, 20);
+		String property;
+		int x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
+		int y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
+		int width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		lblSave.setBounds(x, y, width, 20);
 		add(lblSave);
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 	}
@@ -78,6 +82,11 @@ public class ControlPanelPicobuc extends ControlPanel {
 				.deriveFont(Font.BOLD);
 		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setFont(font);
+		String property;
+		int x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
+		int y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
+		int width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		lblSave.setBounds(x, y, width, 20);
 	}
 
 }

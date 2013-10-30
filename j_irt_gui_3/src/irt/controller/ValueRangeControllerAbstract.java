@@ -15,11 +15,16 @@ import java.awt.event.FocusListener;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private Value stepValue;
 
-	private JTextField txtField;
+	protected JTextField txtField;
 	private JSlider slider;
 	private JTextField txtStep;
 
@@ -47,6 +52,8 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 	@Override
 	protected void clear() {
 		super.clear();
+		logger.trace("clear(), class={}", getClass().getSimpleName());
+
 		if(textSliderController!=null){
 			textSliderController.setRun(false);
 			textSliderController = null;
@@ -88,6 +95,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 	}
 
 	private void setStep() {
+		logger.trace("setStep(), stepValue={}", stepValue);
 
 		if(stepValue!=null){
 			stepValue.setValue(ValueRangeControllerAbstract.this.txtStep.getText());
@@ -130,5 +138,14 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 	public TextSliderController getTextSliderController() {
 		return textSliderController;
+	}
+
+	public Value getStepValue() {
+		return stepValue;
+	}
+
+	public void setStepValue(Value stepValue) {
+		this.stepValue = stepValue;
+		txtStep.setText(stepValue.toString());
 	}
 }

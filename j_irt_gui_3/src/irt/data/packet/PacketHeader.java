@@ -236,6 +236,10 @@ public class PacketHeader{
 	}
 
 	public static String getOptionStr(byte code) {
+
+		if(code<0)
+			code = (byte) -code;
+
 		String codeStr = null;
 		switch (code) {
 		case Packet.ERROR_NO_ERROR:

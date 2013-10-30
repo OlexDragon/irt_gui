@@ -29,7 +29,7 @@ public class MuteController extends ControllerAbstract {
 	private ActionListener actionListener;
 
 	public MuteController(LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style) {
-		super(new ConfigurationSetter(linkHeader, linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_MUTE : Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_MUTE_CONTROL, PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE), null, style);
+		super(new ConfigurationSetter(linkHeader, linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_MUTE_CONTROL, PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE), null, style);
 		this.btnMute = btnMute;
 		this.btnMute.addActionListener(actionListener);
 		this.lblMute = lblMute;

@@ -7,7 +7,12 @@ import java.awt.event.ActionListener;
 
 import javax.swing.Timer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class BlinkControl implements Runnable {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private volatile boolean blink;
 	private volatile boolean isRunning;
@@ -65,10 +70,14 @@ public class BlinkControl implements Runnable {
 		do {
 			if (blink) {
 				led.setOn(!led.isOn());
-				synchronized (this) { try { wait(blinkTime); } catch (InterruptedException e) { }}
+				synchronized (this) { try { wait(blinkTime); } catch (InterruptedException e) {
+					logger.catching(e);
+				}}
 			} else if (led.isOn()) {
 				led.setOn(false);
-				synchronized (this) { try { wait(); } catch (InterruptedException e) { }}
+				synchronized (this) { try { wait(); } catch (InterruptedException e) {
+					logger.catching(e);
+				}}
 			}
 		} while (isRunning);
 		blink = false;
