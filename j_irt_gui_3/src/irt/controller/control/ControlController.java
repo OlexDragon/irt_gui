@@ -54,7 +54,7 @@ public class ControlController extends ControllerAbstract {
 		t.start();
 
 		if(chbxLNB!=null){
-			lnbController = new SwitchController(chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION__LNB));
+			lnbController = new SwitchController(chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION__LNB));
 			t = new Thread(lnbController, "LNB ON/OFF");
 			t.setPriority(t.getPriority()-1);
 			t.start();
@@ -78,7 +78,7 @@ public class ControlController extends ControllerAbstract {
 							comboBoxfreqSet.setModel(comboBoxModel);
 
 							pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY);
-							pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY);
+							pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY);
 							pw.getPacketThread().preparePacket();
 							setSend(true, false);
 						}else if(source instanceof Long){

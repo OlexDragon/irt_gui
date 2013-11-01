@@ -23,7 +23,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 	public FrequencyContriller(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(new ConfigurationSetter(
 				linkHeader,
-				linkHeader==null ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY_RANGE : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY_RANGE,
+				linkHeader==null ? Packet.IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY_RANGE : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 
 		isConverter = linkHeader==null;
@@ -47,7 +47,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 						long maximum = r.getMaximum();
 						setStepValue(new ValueFrequency(1, 1, maximum-minimum));
 
-						startTextSliderController(new ValueFrequency(0,minimum, maximum), PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY, isConverter ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY, style);
+						startTextSliderController(new ValueFrequency(0,minimum, maximum), PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY, isConverter ? Packet.IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY, style);
 
 					}else if(source instanceof Byte)
 						txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));

@@ -18,7 +18,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 	private Style style;
 
 	public AttenuationController(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super(new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 	}
 
@@ -42,7 +42,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 
 						ValueDouble value = new ValueDouble(0,r.getMinimum(), r.getMaximum(), 1);
 						value.setPrefix(Translation.getValue(String.class, "db", " dB"));
-						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter ? Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
+						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter ? Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
 					}
 				}
 			}

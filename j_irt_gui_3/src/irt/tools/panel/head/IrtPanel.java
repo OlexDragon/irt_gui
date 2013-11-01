@@ -37,7 +37,7 @@ public class IrtPanel extends MainPanel {
 //		this(target, (ImageIcon)null, text, font,  Style.WITHOUT_IMAGE);
 //	}
 
-	public static Map<String, Integer> fontStyle = getFontStyles();
+	private static Map<String, Integer> fontStyle;
 
 	protected static HashMap<String, Integer> getFontStyles() {
 		HashMap<String, Integer> hashMap = new HashMap<>();
@@ -45,6 +45,14 @@ public class IrtPanel extends MainPanel {
 		hashMap.put("BOLD|ITALIC", Font.BOLD|Font.ITALIC);
 		hashMap.put("PLAIN", Font.PLAIN);
 		return hashMap;
+	}
+
+	public static Integer parseFontStyle(String fontStyleStr) {
+
+		if(fontStyle==null)
+			fontStyle=getFontStyles();
+
+		return fontStyleStr!=null ? fontStyle.get(fontStyleStr) : 0;
 	}
 
 	public static Properties properties = getProperties();
@@ -74,7 +82,7 @@ public class IrtPanel extends MainPanel {
 		String text = properties.getProperty("company_name_"+companyIndex);
 
 		Font font = new Font(properties.getProperty("font_name_"+companyIndex),
-								fontStyle.get(properties.get("font_style_"+companyIndex)),
+								parseFontStyle((String) properties.get("font_style_"+companyIndex)),
 								Integer.parseInt(properties.get("font_size_"+companyIndex).toString()));
 
 		ImageIcon imageIcon = new ImageIcon(

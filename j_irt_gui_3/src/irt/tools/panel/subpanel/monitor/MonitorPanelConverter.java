@@ -13,11 +13,8 @@ import javax.swing.SwingConstants;
 @SuppressWarnings("serial")
 public class MonitorPanelConverter extends MonitorPanelAbstract {
 
-	private int converterType;
-
-	public MonitorPanelConverter(int converterType) {
+	public MonitorPanelConverter() {
 		super(null, "Monitor", 214, 210);
-		this.converterType = converterType;
 		
 		LED ledMute = new LED(Color.YELLOW, "MUTE");
 		ledMute.setName("Mute");
@@ -148,6 +145,6 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 
 	@Override
 	protected ControllerAbstract getNewController() {
-		return new MonitorControllerConverter(this, converterType);
+		return new MonitorControllerConverter(this);
 	}
 }

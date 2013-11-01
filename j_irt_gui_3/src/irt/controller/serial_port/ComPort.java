@@ -483,7 +483,11 @@ do{
 
 		boolean isClose = false;
 		if(isOpened()){
-			removeEventListener();
+			try{
+				removeEventListener();
+			}catch(Exception e){
+				logger.catching(e);
+			}
 			isClose = super.closePort();
 		}else
 			isClose = true;

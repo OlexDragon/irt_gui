@@ -5,12 +5,9 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.tools.panel.PicobucPanel;
-import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.Properties;
 
 import javax.swing.JPanel;
 import javax.swing.UIManager;
@@ -26,8 +23,6 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 	private ValueChangeListener statusListener;
 	protected TitledBorder titledBorder;
 	protected String selectedLanguage;
-
-	protected Properties properties = PicobucPanel.getProperties();
 
 //	public MonitorPanelAbstract(LinkHeader linkHeader){
 //		this(linkHeader, "Monitor", 214, 210);
@@ -60,14 +55,18 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 		setOpaque(false);
 
-		Font font = Translation.getFont()
-				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
+		Font font = getTitledBorderFont();
 
 		titledBorder = new TitledBorder(UIManager.getBorder("TitledBorder.border"), title, TitledBorder.LEADING, TitledBorder.TOP, font, Color.WHITE);
 		setBorder(titledBorder);
 		setSize(wisth, height);
 		setLayout(null);
+	}
+
+	private Font getTitledBorderFont() {
+		return Translation.getFont()
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.size", 18))
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD));
 	}
 
 	protected abstract ControllerAbstract getNewController();
@@ -86,9 +85,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 		selectedLanguage = Translation.getSelectedLanguage();
 
-		Font font = Translation.getFont()
-				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
+		Font font = getTitledBorderFont();
 		titledBorder.setTitleFont(font);
 	}
 }

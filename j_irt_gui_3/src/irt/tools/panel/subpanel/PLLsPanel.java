@@ -1,7 +1,9 @@
 package irt.tools.panel.subpanel;
 
 import irt.controller.DeviceDebagController;
+import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.value.seter.ConfigurationSetter;
 import irt.controller.serial_port.value.seter.DeviceDebagSetter;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
@@ -17,6 +19,7 @@ import irt.tools.button.ImageButton;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -257,6 +260,18 @@ public class PLLsPanel extends JPanel {
 		lblOffsetCurr.setFont(new Font("Tahoma", Font.BOLD, 14));
 		lblOffsetCurr.setBounds(84, 184, 86, 17);
 		add(lblOffsetCurr);
+
+		JButton btnClear = new JButton("Clear The Flags");
+		btnClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ConfigurationSetter packetWork = new ConfigurationSetter(null, Packet.IRT_SCP_DATA_FCM_CONFIG_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
+				packetWork.preparePacketToSend(0);
+				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+			}
+		});
+		btnClear.setMargin(new Insets(0, 0, 0, 0));
+		btnClear.setBounds(12, 88, 97, 17);
+		add(btnClear);
 	}
 
 	private void setFlag(JCheckBox cb, int value) {

@@ -221,7 +221,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, -100, 100, 0);
-					abstractController = new TextSliderController(new ConfigurationSetter(null, Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION__GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE);
+					abstractController = new TextSliderController(new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION__GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE);
 					abstractController.setWaitTime(10000);
 					t = new Thread(abstractController, "Gain Offset");
 					priority = t.getPriority();
@@ -260,6 +260,8 @@ public class DACsPanel extends JPanel {
 		addComponentListener(componentAdapter);
 		setLayout(null);
 
+		Font font = new Font("Tahoma", Font.PLAIN, 14);
+
 		slider = new JSlider();
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setOpaque(false);
@@ -269,7 +271,7 @@ public class DACsPanel extends JPanel {
 		txtDAC1 = new JTextField();
 		txtDAC1.setText("0");
 		txtDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC1.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtDAC1.setFont(font);
 		txtDAC1.setColumns(10);
 		txtDAC1.setBounds(186, 16, 55, 20);
 		add(txtDAC1);
@@ -278,55 +280,57 @@ public class DACsPanel extends JPanel {
 		txtDAC2.setEnabled(false);
 		txtDAC2.setText("0");
 		txtDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC2.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtDAC2.setFont(font);
 		txtDAC2.setColumns(10);
 		txtDAC2.setBounds(186, 44, 55, 20);
 		add(txtDAC2);
 
+		txtDAC3 = new JTextField();
+		txtDAC3.setText("0");
+		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtDAC3.setFont(font);
+		txtDAC3.setColumns(10);
+		txtDAC3.setBounds(186, 72, 55, 20);
+		add(txtDAC3);
+
+		txtDAC4 = new JTextField();
+		txtDAC4.setText("0");
+		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtDAC4.setFont(font);
+		txtDAC4.setColumns(10);
+		txtDAC4.setBounds(187, 100, 55, 20);
+		add(txtDAC4);
+
+		font = font.deriveFont(12f);
+
+		lblDAC4 = new JLabel("DAC 4:");
+		lblDAC4.setRequestFocusEnabled(false);
+		lblDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblDAC4.setFont(font);
+		lblDAC4.setBounds(112, 102, 73, 17);
+		add(lblDAC4);
+
 		lblDAC1 = new JLabel("Gain DAC:");
 		lblDAC1.setRequestFocusEnabled(false);
 		lblDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblDAC1.setFont(font);
 		lblDAC1.setBounds(112, 18, 73, 17);
 		add(lblDAC1);
 
 		lblDAC2 = new JLabel("Comp DAC:");
 		lblDAC2.setRequestFocusEnabled(false);
 		lblDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblDAC2.setFont(font);
 		lblDAC2.setBounds(112, 46, 73, 17);
 		add(lblDAC2);
 
 		lblDAC3 = new JLabel("DAC 3:");
 		lblDAC3.setRequestFocusEnabled(false);
 		lblDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC3.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblDAC3.setFont(font);
 		lblDAC3.setBounds(112, 74, 73, 17);
 		add(lblDAC3);
 
-		txtDAC3 = new JTextField();
-		txtDAC3.setText("0");
-		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC3.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		txtDAC3.setColumns(10);
-		txtDAC3.setBounds(186, 72, 55, 20);
-		add(txtDAC3);
-
-		lblDAC4 = new JLabel("DAC 4:");
-		lblDAC4.setRequestFocusEnabled(false);
-		lblDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC4.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblDAC4.setBounds(112, 102, 73, 17);
-		add(lblDAC4);
-
-		txtDAC4 = new JTextField();
-		txtDAC4.setText("0");
-		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC4.setFont(new Font("Tahoma", Font.PLAIN, 16));
-		txtDAC4.setColumns(10);
-		txtDAC4.setBounds(187, 100, 55, 20);
-		add(txtDAC4);
-		
 		Image offImage = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/switch_off.png")).getImage();
 		Image onImage = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png")).getImage();
 		switchBoxCalibrationModeswitchBox = new SwitchBox(offImage, onImage);
@@ -344,8 +348,8 @@ public class DACsPanel extends JPanel {
 
 		JLabel lblCalibrationMode = new JLabel("Calibration Mode");
 		lblCalibrationMode.setRequestFocusEnabled(false);
-		lblCalibrationMode.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblCalibrationMode.setBounds(6, 8, 100, 17);
+		lblCalibrationMode.setFont(font);
+		lblCalibrationMode.setBounds(6, 8, 107, 17);
 		add(lblCalibrationMode);
 		
 		chckbxStep = new JCheckBox("Step:");
@@ -356,14 +360,14 @@ public class DACsPanel extends JPanel {
 			}
 		});
 		chckbxStep.setOpaque(false);
-		chckbxStep.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		chckbxStep.setBounds(6, 80, 55, 23);
+		chckbxStep.setFont(font.deriveFont(12f));
+		chckbxStep.setBounds(6, 80, 59, 23);
 		add(chckbxStep);
 		
 		txtStep = new JTextField();
 		txtStep.setText("1");
 		txtStep.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtStep.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtStep.setFont(font);
 		txtStep.setColumns(10);
 		txtStep.setBounds(59, 81, 34, 20);
 		txtStep.addFocusListener(new FocusAdapter() {
@@ -380,7 +384,7 @@ public class DACsPanel extends JPanel {
 		});
 		add(txtStep);
 
-		if(linkHeader==null){
+		if(true){//linkHeader==null){
 			
 			JPanel panel = new JPanel();
 			panel.setBorder(new TitledBorder(null, "ADCs", TitledBorder.LEADING, TitledBorder.TOP, null, null));
@@ -393,7 +397,7 @@ public class DACsPanel extends JPanel {
 			label.setRequestFocusEnabled(false);
 			label.setHorizontalAlignment(SwingConstants.RIGHT);
 			label.setForeground(Color.BLACK);
-			label.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			label.setFont(font);
 			label.setBounds(9, 19, 23, 17);
 			panel.add(label);
 			
@@ -401,7 +405,7 @@ public class DACsPanel extends JPanel {
 			lblInputPower.setRequestFocusEnabled(false);
 			lblInputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblInputPower.setForeground(Color.BLUE);
-			lblInputPower.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblInputPower.setFont(font);
 			lblInputPower.setBounds(31, 19, 60, 17);
 			panel.add(lblInputPower);
 			
@@ -409,7 +413,7 @@ public class DACsPanel extends JPanel {
 			lblOutputPower.setRequestFocusEnabled(false);
 			lblOutputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblOutputPower.setForeground(Color.BLUE);
-			lblOutputPower.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblOutputPower.setFont(font);
 			lblOutputPower.setBounds(31, 42, 60, 17);
 			panel.add(lblOutputPower);
 			
@@ -418,7 +422,7 @@ public class DACsPanel extends JPanel {
 			label_3.setRequestFocusEnabled(false);
 			label_3.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_3.setForeground(Color.BLACK);
-			label_3.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			label_3.setFont(font);
 			label_3.setBounds(9, 42, 23, 17);
 			panel.add(label_3);
 			
@@ -426,7 +430,7 @@ public class DACsPanel extends JPanel {
 			lblTemperature.setRequestFocusEnabled(false);
 			lblTemperature.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblTemperature.setForeground(Color.BLUE);
-			lblTemperature.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblTemperature.setFont(font);
 			lblTemperature.setBounds(31, 65, 60, 17);
 			panel.add(lblTemperature);
 			
@@ -435,7 +439,7 @@ public class DACsPanel extends JPanel {
 			lblTm.setRequestFocusEnabled(false);
 			lblTm.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblTm.setForeground(Color.BLACK);
-			lblTm.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblTm.setFont(font);
 			lblTm.setBounds(9, 65, 23, 17);
 			panel.add(lblTm);
 			
@@ -443,7 +447,7 @@ public class DACsPanel extends JPanel {
 			lblCurrent.setRequestFocusEnabled(false);
 			lblCurrent.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblCurrent.setForeground(Color.BLUE);
-			lblCurrent.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblCurrent.setFont(font);
 			lblCurrent.setBounds(31, 88, 60, 17);
 			panel.add(lblCurrent);
 			
@@ -452,7 +456,7 @@ public class DACsPanel extends JPanel {
 			lblCu.setRequestFocusEnabled(false);
 			lblCu.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblCu.setForeground(Color.BLACK);
-			lblCu.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lblCu.setFont(font);
 			lblCu.setBounds(9, 88, 23, 17);
 			panel.add(lblCu);
 			
@@ -460,7 +464,7 @@ public class DACsPanel extends JPanel {
 			lbl5V5.setRequestFocusEnabled(false);
 			lbl5V5.setHorizontalAlignment(SwingConstants.RIGHT);
 			lbl5V5.setForeground(Color.BLUE);
-			lbl5V5.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lbl5V5.setFont(font);
 			lbl5V5.setBounds(156, 21, 60, 17);
 			panel.add(lbl5V5);
 			
@@ -468,7 +472,7 @@ public class DACsPanel extends JPanel {
 			label_9.setRequestFocusEnabled(false);
 			label_9.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_9.setForeground(Color.BLACK);
-			label_9.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			label_9.setFont(font);
 			label_9.setBounds(106, 21, 50, 17);
 			panel.add(label_9);
 			
@@ -476,7 +480,7 @@ public class DACsPanel extends JPanel {
 			lbl13V2.setRequestFocusEnabled(false);
 			lbl13V2.setHorizontalAlignment(SwingConstants.RIGHT);
 			lbl13V2.setForeground(Color.BLUE);
-			lbl13V2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lbl13V2.setFont(font);
 			lbl13V2.setBounds(156, 48, 60, 17);
 			panel.add(lbl13V2);
 			
@@ -484,7 +488,7 @@ public class DACsPanel extends JPanel {
 			label_11.setRequestFocusEnabled(false);
 			label_11.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_11.setForeground(Color.BLACK);
-			label_11.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			label_11.setFont(font);
 			label_11.setBounds(106, 48, 50, 17);
 			panel.add(label_11);
 			
@@ -492,7 +496,7 @@ public class DACsPanel extends JPanel {
 			lbl13V2_neg.setRequestFocusEnabled(false);
 			lbl13V2_neg.setHorizontalAlignment(SwingConstants.RIGHT);
 			lbl13V2_neg.setForeground(Color.BLUE);
-			lbl13V2_neg.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			lbl13V2_neg.setFont(font);
 			lbl13V2_neg.setBounds(155, 75, 60, 17);
 			panel.add(lbl13V2_neg);
 			
@@ -500,7 +504,7 @@ public class DACsPanel extends JPanel {
 			label_13.setRequestFocusEnabled(false);
 			label_13.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_13.setForeground(Color.BLACK);
-			label_13.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			label_13.setFont(font);
 			label_13.setBounds(105, 75, 50, 17);
 			panel.add(label_13);
 			
@@ -518,16 +522,16 @@ public class DACsPanel extends JPanel {
 			JLabel lblGainOffset = new JLabel("Gain Offset:");
 			lblGainOffset.setRequestFocusEnabled(false);
 			lblGainOffset.setHorizontalAlignment(SwingConstants.RIGHT);
-			lblGainOffset.setFont(new Font("Tahoma", Font.PLAIN, 12));
-			lblGainOffset.setBounds(11, 119, 65, 15);
+			lblGainOffset.setFont(font.deriveFont(12f));
+			lblGainOffset.setBounds(8, 119, 72, 15);
 			add(lblGainOffset);
 			
 			txtGainOffset = new JTextField();
 			txtGainOffset.setText("0");
 			txtGainOffset.setHorizontalAlignment(SwingConstants.RIGHT);
-			txtGainOffset.setFont(new Font("Tahoma", Font.PLAIN, 16));
+			txtGainOffset.setFont(font);
 			txtGainOffset.setColumns(10);
-			txtGainOffset.setBounds(77, 116, 42, 20);
+			txtGainOffset.setBounds(79, 116, 42, 20);
 			add(txtGainOffset);
 		}
 	}

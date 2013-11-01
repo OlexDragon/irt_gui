@@ -34,19 +34,19 @@ public class PacketThread extends Thread {
 
 	@Override
 	public void run() {
-		logger.trace(Arrays.toString(data));
-		if(packet==null){
+		logger.trace("Start with data={}", Arrays.toString(data));
+		if(packet==null && data!=null){
 			packet = newPacket();
 			synchronized (data) {
-				logger.trace(Arrays.toString(data));
 				packet.set(data);
 				if(value!=null){
 					Payload pl = packet.getPayload(0);
 					pl.setBuffer(value);
 				}
+				logger.trace("packet={}", packet);
 
 				data = preparePacket(packet);
-				logger.trace(Arrays.toString(data));
+				logger.trace("result={}", Arrays.toString(data));
 			}
 		}
 	}

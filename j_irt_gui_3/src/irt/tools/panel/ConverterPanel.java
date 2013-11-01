@@ -45,7 +45,7 @@ public class ConverterPanel extends DevicePanel {
 
 	@Override
 	protected MonitorPanelAbstract getNewMonitorPanel() {
-		MonitorPanelConverter monitorPanel = new MonitorPanelConverter(converterType);
+		MonitorPanelConverter monitorPanel = new MonitorPanelConverter();
 		monitorPanel.setLocation(10, 11);
 		return monitorPanel;
 	}

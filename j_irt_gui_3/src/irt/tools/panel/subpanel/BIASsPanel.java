@@ -215,10 +215,12 @@ public class BIASsPanel extends JPanel {
 		slider.setBounds(249, 0, 22, 260);
 		add(slider);
 
+		Font font = new Font("Tahoma", Font.PLAIN, 14);
+
 		txtPotentiometer1 = new JTextField();
 		txtPotentiometer1.setText("0");
 		txtPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer1.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtPotentiometer1.setFont(font);
 		txtPotentiometer1.setColumns(10);
 		txtPotentiometer1.setBounds(184, 13, 55, 20);
 		add(txtPotentiometer1);
@@ -237,7 +239,7 @@ public class BIASsPanel extends JPanel {
 		});
 		txtStep.setText("1");
 		txtStep.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtStep.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtStep.setFont(font);
 		txtStep.setColumns(10);
 		txtStep.setBounds(205, 134, 34, 20);
 		add(txtStep);
@@ -245,7 +247,7 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer2 = new JTextField();
 		txtPotentiometer2.setText("0");
 		txtPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer2.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtPotentiometer2.setFont(font);
 		txtPotentiometer2.setColumns(10);
 		txtPotentiometer2.setBounds(184, 44, 55, 20);
 		add(txtPotentiometer2);
@@ -253,7 +255,7 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer3 = new JTextField();
 		txtPotentiometer3.setText("0");
 		txtPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer3.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtPotentiometer3.setFont(font);
 		txtPotentiometer3.setColumns(10);
 		txtPotentiometer3.setBounds(184, 75, 55, 20);
 		add(txtPotentiometer3);
@@ -261,48 +263,50 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer4 = new JTextField();
 		txtPotentiometer4.setText("0");
 		txtPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer4.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		txtPotentiometer4.setFont(font);
 		txtPotentiometer4.setColumns(10);
 		txtPotentiometer4.setBounds(184, 106, 55, 20);
 		add(txtPotentiometer4);
 
+		font = font.deriveFont(12f);
+
 		lblOutput = new JLabel("OUTPUT:");
 		lblOutput.setRequestFocusEnabled(false);
 		lblOutput.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOutput.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblOutput.setFont(font);
 		lblOutput.setBounds(126, 13, 57, 17);
 		add(lblOutput);
 
 		lblMmic = new JLabel("MMIC:");
 		lblMmic.setRequestFocusEnabled(false);
 		lblMmic.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblMmic.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblMmic.setFont(font);
 		lblMmic.setBounds(126, 106, 57, 17);
 		add(lblMmic);
 
 		lblDriver = new JLabel("DRIVER:");
 		lblDriver.setRequestFocusEnabled(false);
 		lblDriver.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDriver.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblDriver.setFont(font);
 		lblDriver.setBounds(126, 47, 57, 17);
 		add(lblDriver);
 
 		lblPred = new JLabel("PRED:");
 		lblPred.setRequestFocusEnabled(false);
 		lblPred.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPred.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblPred.setFont(font);
 		lblPred.setBounds(126, 78, 57, 17);
 		add(lblPred);
 
 		lblOutput_1 = new JLabel("OUTPUT");
 		lblOutput_1.setRequestFocusEnabled(false);
-		lblOutput_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblOutput_1.setFont(font);
 		lblOutput_1.setBounds(30, 13, 57, 17);
 		add(lblOutput_1);
 
 		lblLineUp = new JLabel("LINE UP");
 		lblLineUp.setRequestFocusEnabled(false);
-		lblLineUp.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblLineUp.setFont(font);
 		lblLineUp.setBounds(31, 64, 57, 17);
 		add(lblLineUp);
 
@@ -313,7 +317,7 @@ public class BIASsPanel extends JPanel {
 
 		JLabel lblNglobal = new JLabel("NGlobal");
 		lblNglobal.setRequestFocusEnabled(false);
-		lblNglobal.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblNglobal.setFont(font);
 		lblNglobal.setBounds(22, 113, 57, 17);
 		add(lblNglobal);
 
@@ -323,7 +327,7 @@ public class BIASsPanel extends JPanel {
 				slider.setSnapToTicks(chckbxStep.isSelected());
 			}
 		});
-		chckbxStep.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		chckbxStep.setFont(font.deriveFont(11f));
 		chckbxStep.setOpaque(false);
 		chckbxStep.setBounds(152, 133, 55, 23);
 		add(chckbxStep);
@@ -331,56 +335,56 @@ public class BIASsPanel extends JPanel {
 		lblCurrent_11 = new JLabel("CURR:");
 		lblCurrent_11.setRequestFocusEnabled(false);
 		lblCurrent_11.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurrent_11.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblCurrent_11.setFont(font);
 		lblCurrent_11.setBounds(124, 158, 41, 17);
 		add(lblCurrent_11);
 
 		lblCurrent1 = new JLabel(":");
 		lblCurrent1.setRequestFocusEnabled(false);
 		lblCurrent1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurrent1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblCurrent1.setFont(font);
 		lblCurrent1.setBounds(171, 158, 68, 17);
 		add(lblCurrent1);
 
 		lblCurr = new JLabel("CURR:");
 		lblCurr.setRequestFocusEnabled(false);
 		lblCurr.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurr.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblCurr.setFont(font);
 		lblCurr.setBounds(124, 186, 41, 17);
 		add(lblCurr);
 		
 		lblCurrent2 = new JLabel(":");
 		lblCurrent2.setRequestFocusEnabled(false);
 		lblCurrent2.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurrent2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblCurrent2.setFont(font);
 		lblCurrent2.setBounds(171, 186, 68, 17);
 		add(lblCurrent2);
 		
 		lblOutPower = new JLabel("OUTPUT POWER:");
 		lblOutPower.setRequestFocusEnabled(false);
 		lblOutPower.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOutPower.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblOutPower.setFont(font);
 		lblOutPower.setBounds(49, 242, 116, 17);
 		add(lblOutPower);
 		
 		lblOPower = new JLabel(":");
 		lblOPower.setRequestFocusEnabled(false);
 		lblOPower.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOPower.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblOPower.setFont(font);
 		lblOPower.setBounds(171, 242, 68, 17);
 		add(lblOPower);
 		
 		lblTemp_1 = new JLabel("TEMP:");
 		lblTemp_1.setRequestFocusEnabled(false);
 		lblTemp_1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblTemp_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblTemp_1.setFont(font);
 		lblTemp_1.setBounds(124, 214, 39, 17);
 		add(lblTemp_1);
 
 		lblTemp = new JLabel(":");
 		lblTemp.setRequestFocusEnabled(false);
 		lblTemp.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblTemp.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblTemp.setFont(font);
 		lblTemp.setBounds(171, 214, 68, 17);
 		add(lblTemp);
 

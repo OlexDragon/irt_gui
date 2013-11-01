@@ -12,8 +12,6 @@ import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.tools.Transformer;
-import irt.tools.panel.PicobucPanel;
-import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -22,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
@@ -54,7 +51,6 @@ public class InfoPanel extends JPanel implements Refresh {
 	private LinkHeader linkHeader;
 	private SecondsCount secondsCount;
 	private TitledBorder titledBorder;
-	private Properties properties = PicobucPanel.getProperties();
 	private JLabel lblCountTxt;
 	private JLabel lblBuiltDateTxt;
 	private JLabel lblVersionTxt;
@@ -107,8 +103,8 @@ public class InfoPanel extends JPanel implements Refresh {
 		this.linkHeader = linkHeader;
 
 		Font font = Translation.getFont()
-				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.size", 18))
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD));
 
 		titledBorder = new TitledBorder(
 				UIManager.getBorder("TitledBorder.border"),
@@ -120,8 +116,7 @@ public class InfoPanel extends JPanel implements Refresh {
 		);
 		setBorder(titledBorder);
 
-		String fontSize = properties.getProperty("infoPanel.labels.font.size");
-		font = font.deriveFont(Float.parseFloat(fontSize));
+		font = font.deriveFont(Translation.getValue(Float.class, "infoPanel.labels.font.size", 16f));
 		
 				lblError = new JLabel();
 				lblError.setBounds(15, 2, 266, 15);
@@ -336,14 +331,13 @@ public class InfoPanel extends JPanel implements Refresh {
 
 	public void refresh() {
 		Font font = Translation.getFont()
-				.deriveFont(new Float(properties.getProperty("titledBorder.font.size")))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type")));
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.size", 18))
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD));
 
 		titledBorder.setTitle(Translation.getValue(String.class, "info", "Info"));
 		titledBorder.setTitleFont(font);
 
-		String fontSize = properties.getProperty("infoPanel.labels.font.size");
-		font = font.deriveFont(Float.parseFloat(fontSize));
+		font = font.deriveFont(Translation.getValue(Float.class, "infoPanel.labels.font.size", 12f));
 		
 		lblCountTxt.setFont(font);
 		lblCountTxt.setText(Translation.getValue(String.class, "count", "Count")+":");

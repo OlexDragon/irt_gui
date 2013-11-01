@@ -5,8 +5,13 @@ import irt.data.listener.ValueChangeListener;
 
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 	
 	public class FireValue implements Runnable{
+
+		private final Logger logger = (Logger) LogManager.getLogger();
 
 		private EventListenerList valueChangeListeners;
 		private ValueChangeEvent valueChangeEvent;
@@ -23,7 +28,11 @@ import javax.swing.event.EventListenerList;
 			for (int i = 0; i < listeners.length; i++) {
 				Object l = listeners[i];
 				if (l == ValueChangeListener.class)
-					((ValueChangeListener) listeners[++i]).valueChanged(valueChangeEvent);
+					try{
+						((ValueChangeListener) listeners[++i]).valueChanged(valueChangeEvent);
+					}catch (Exception e) {
+						logger.catching(e);
+					}
 			}
 		}
 	}

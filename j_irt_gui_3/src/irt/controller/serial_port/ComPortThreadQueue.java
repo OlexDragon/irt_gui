@@ -66,7 +66,7 @@ public class ComPortThreadQueue extends Thread {
 						}
 					}
 				}
-			} catch (InterruptedException | SerialPortException e) {
+			} catch (Exception e) {
 				logger.catching(e);
 				Console.appendLn(e.getLocalizedMessage(), "ComPortThreadQueue:run");
 			}

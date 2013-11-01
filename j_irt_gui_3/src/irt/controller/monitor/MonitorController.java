@@ -25,8 +25,8 @@ import javax.swing.JLabel;
 
 public class MonitorController extends ControllerAbstract {
 
-	public static final int MUTE = 1;
-	public static final int LOCK = 2;
+	public static final int MUTE = 1,
+							LOCK = 2;
 
 	private LED ledLock;
 	private LED ledMute;

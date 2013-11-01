@@ -16,11 +16,17 @@ import irt.data.value.Value;
 import irt.data.value.ValueFrequency;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class ConfigurationSetter extends SetterAbstract {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private long value = Integer.MIN_VALUE;
 
@@ -38,7 +44,7 @@ public class ConfigurationSetter extends SetterAbstract {
 	public ConfigurationSetter(LinkHeader linkHeader) {
 		this(linkHeader,
 				linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES :
-					Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY_RANGE,
+					Packet.IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES);
 	}
 
@@ -49,38 +55,51 @@ public class ConfigurationSetter extends SetterAbstract {
 	@Override
 	public void preparePacketToSend(Object value) {
 
-		short id = ((IdValue)value).getID();
-		PacketThread pt = getPacketThread();
-		LinkHeader lh = pt.getLinkHeader();
+		if (value instanceof IdValue) {
+			short id = ((IdValue) value).getID();
+			PacketThread pt = packetThread;
+			LinkHeader lh = pt.getLinkHeader();
 
-		switch(id){
-		case PacketWork.PACKET_ID_CONFIGURATION__LNB:
-			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_BUC_ENABLE, (byte)((IdValue)value).getValue());
-			break;
-		case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
-			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value!=null
-																						? (Byte)((IdValue)value).getValue()
-																								: null);
-			break;
-		case PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE:
-			pt.preparePacket(lh!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_MUTE_CONTROL, (byte)(((boolean)((IdValue)value).getValue()) ? 1 : 0));
-			break;
-		case PacketWork.PACKET_ID_CONFIGURATION_GAIN:
-			Value v = (Value)((IdValue)value).getValue();
-			pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, v!=null ? (short)v.getValue() : null);
-			break;
-		case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION:
-			v = (Value)((IdValue)value).getValue();
-			pt.preparePacket(((GetterAbstract)this).getPacketParameterHeaderCode(), v!=null ? (short)v.getValue() : null);
-			break;
-		case PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY:
-			v = (Value)((IdValue)value).getValue();
-			pt.preparePacket(((GetterAbstract)this).getPacketParameterHeaderCode(), v!=null ? v.getValue() : null);
-			break;
-		case PacketWork.PACKET_ID_CONFIGURATION__GAIN_OFFSET:
-			v = (Value)((IdValue)value).getValue();
-			pt.preparePacket(((GetterAbstract)this).getPacketParameterHeaderCode(), v!=null ? (short)v.getValue() : null);
-		}
+			switch (id) {
+			case PacketWork.PACKET_ID_CONFIGURATION__LNB:
+				pt.preparePacket(Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, (byte) ((IdValue) value).getValue());
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
+				pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE:
+				pt.preparePacket(lh != null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL,
+						(byte) (((boolean) ((IdValue) value).getValue()) ? 1 : 0));
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_GAIN:
+				Value v = (Value) ((IdValue) value).getValue();
+				pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, v != null ? (short) v.getValue() : null);
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION:
+				v = (Value) ((IdValue) value).getValue();
+				pt.preparePacket(((GetterAbstract) this).getPacketParameterHeaderCode(), v != null ? (short) v.getValue() : null);
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY:
+				v = (Value) ((IdValue) value).getValue();
+				pt.preparePacket(((GetterAbstract) this).getPacketParameterHeaderCode(), v != null ? v.getValue() : null);
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION__GAIN_OFFSET:
+				v = (Value) ((IdValue) value).getValue();
+				pt.preparePacket(((GetterAbstract) this).getPacketParameterHeaderCode(), v != null ? (short) v.getValue() : null);
+			}
+		}else if(value instanceof Integer){
+			byte[] data = packetThread.getData();
+			int length = data.length;
+			data[length-1] = 4;
+			data = Arrays.copyOf(data, length+4);
+			int v = (int)value;
+			if(v!=0){
+				byte[] bytes = Packet.toBytes(v);
+				System.out.println("data="+Arrays.toString(data)+", bytes="+Arrays.toString(bytes));
+			}
+			packetThread.setData(data);
+		}else
+			logger.warn("Not Posible to prepare Packet. value is {}", value.getClass());
 	}
 
 	@Override

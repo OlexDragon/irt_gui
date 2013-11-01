@@ -3,7 +3,6 @@ package irt.controller.monitor;
 import irt.controller.MeasurementController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.Getter.MeasurementGetter;
-import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -22,19 +21,22 @@ import javax.swing.JPanel;
 
 public class MonitorControllerConverter extends ControllerAbstract {
 
-	public static final int	LOCK1	= 1,
-							LOCK2	= 2,
-							MUTE	= 4;
+	public static final int	LOCK1			= 1,	//FCM_STATUS_LOCK_DETECT_PLL1
+							LOCK2			= 1<<1,	//FCM_STATUS_LOCK_DETECT_PLL2
+							MUTE			= 1<<2,	//FCM_STATUS_MUTE
+							MUTE_TTL		= 1<<3,	//FCM_STATUS_TTL_MUTE_CONTROL
+							LOCK3			= 1<<4,	//FCM_STATUS_LOCK_DETECT_PLL3
+							LOCK			= 1<<5,	//FCM_STATUS_LOCK_DETECT_SUMMARY
+							INPUT_OWERDRIVE	= 1<<6;	//FCM_STATUS_INPUT_OVERDRIVE
 
 	private LED ledLock;
 	private LED ledMute;
 	private List<ControllerAbstract> controllerList;
 
-	private int converterType;
+	private JLabel lblInputPower;
 
-	public MonitorControllerConverter(JPanel monitorPanel, int converterType) {
+	public MonitorControllerConverter(JPanel monitorPanel) {
 		super(new MeasurementGetter(), monitorPanel, Style.CHECK_ONCE);
-		this.converterType = converterType;
 	}
 
 	@Override
@@ -53,13 +55,16 @@ public class MonitorControllerConverter extends ControllerAbstract {
 					Object source = valueChangeEvent.getSource();
 					if(source instanceof Long){
 						Long status = (Long)source;
-						boolean isNotLock1 = (status&LOCK1)==0 && converterType!=DeviceInfo.DEVICE_TYPE_L_TO_C;
-						boolean isNotLock2 = (status&LOCK2)==0;
-						boolean isMute = (status&MUTE) > 0;
+						boolean isNotLock = (status&LOCK)==0;
+						boolean isMute = (status&(MUTE|MUTE_TTL)) > 0;
+						boolean isInputOwerLoad = (status&INPUT_OWERDRIVE)==0;
 
-						if(isNotLock1 || isNotLock2){
+						if(isNotLock){
+							boolean isNotLock1 = (status&LOCK1)==0;
+							boolean isNotLock2 = (status&LOCK2)==0;
+							boolean isNotLock3 = (status&LOCK3)==0;
 							ledLock.setLedColor(Color.RED);
-							String s = (isNotLock1 ? "PLL1; ":"")+(isNotLock2 ? "PLL2;" : "");
+							String s = (isNotLock1 ? "PLL1; ":"")+(isNotLock2 ? "PLL2;" : "")+(isNotLock3 ? "PLL3;" : "");
 							ledLock.setToolTipText(s);
 						}else{
 							ledLock.setLedColor(Color.GREEN);
@@ -69,7 +74,15 @@ public class MonitorControllerConverter extends ControllerAbstract {
 						ledMute.setOn(isMute);
 						ledMute.setToolTipText("Status flags= "+status);
 
-						fireStatusChangeListener(new ValueChangeEvent(new Integer((isNotLock1||isNotLock2 ? 0 : MonitorController.LOCK)+(isMute ? MonitorController.MUTE : 0)), PacketWork.PACKET_ID_MEASUREMENT_STATUS));
+						if(isInputOwerLoad){
+							lblInputPower.setForeground(Color.RED);
+							lblInputPower.setToolTipText("Owerload");
+						}else{
+							lblInputPower.setBackground(Color.BLACK);
+							lblInputPower.setToolTipText("");
+						}
+
+						fireStatusChangeListener(new ValueChangeEvent(new Integer((isNotLock ? 0 : MonitorController.LOCK)+(isMute ? MonitorController.MUTE : 0)), PacketWork.PACKET_ID_MEASUREMENT_STATUS));
 					}else
 						ledLock.setToolTipText("Error:"+source);
 				}
@@ -94,7 +107,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 		case "Input Power":
 			Value value = new ValueDouble(0, 1);
 			value.setPrefix(" dBm");
-			ControllerAbstract abstractController = new MeasurementController((JLabel)component, Packet.IRT_SLCP_PARAMETER_FCM_MEASUREMENT_INPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER);
+			lblInputPower = (JLabel)component;
+			ControllerAbstract abstractController = new MeasurementController(lblInputPower, Packet.IRT_SLCP_PARAMETER_FCM_MEASUREMENT_INPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER);
 			t = new Thread(abstractController, "Input Power");
 			t.start();
 			controllerList.add(abstractController);

@@ -23,7 +23,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -44,6 +43,7 @@ public class GuiController extends GuiControllerAbstract{
 
 	protected UnitsContainer unitsPanel;
 	private JComboBox<String> serialPortSelection;
+	private JComboBox<KeyValue<String, String>> languageComboBox;
 
 	private VCLC vclc =  new VCLC();
 	protected int protocol;
@@ -52,7 +52,6 @@ public class GuiController extends GuiControllerAbstract{
 
 	private SoftReleaseChecker softReleaseChecker;
 
-	private JComboBox<KeyValue<String, String>> languageComboBox;
 	private static DumpControllers dumpControllers;
 
 //************************************************************************************************
@@ -203,16 +202,13 @@ public class GuiController extends GuiControllerAbstract{
 			if(name.equals("Unit's Serial Port")){
 				serialPortSelection = (JComboBox<String>) c;
 
-				String property;
-				Properties properties = PicobucPanel.getProperties();
-				String selectedLanguage = Translation.getSelectedLanguage();
-				float fontSize = (property = properties.getProperty("serialPortSelection.font.size_"+selectedLanguage))!=null ? Float.parseFloat(property): 16;
+				float fontSize = Translation.getValue(Float.class, "serialPortSelection.font.size", 16f);
 				serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
 				DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
 				defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
 				serialPortSelection.setModel(defaultComboBoxModel);
 				Dimension size = serialPortSelection.getSize();
-				size.width = (property = properties.getProperty("serialPortSelection.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 200;
+				size.width = Translation.getValue(Integer.class, "serialPortSelection.width", 200);
 				serialPortSelection.setSize(size);
 
 				String portName = comPortThreadQueue.getSerialPort().getPortName();
@@ -246,16 +242,13 @@ public class GuiController extends GuiControllerAbstract{
 							if(font!=null)
 								serialPortSelection.setFont(font);
 
-							String property;
-							Properties properties = PicobucPanel.getProperties();
-							String selectedLanguage = Translation.getSelectedLanguage();
-							float fontSize = (property = properties.getProperty("serialPortSelection.font.size_"+selectedLanguage))!=null ? Float.parseFloat(property): 16;
+							float fontSize = Translation.getValue(Float.class, "serialPortSelection.font.size", 16f);
 							serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
 							DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
 							defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
 							serialPortSelection.setModel(defaultComboBoxModel);
 							Dimension size = serialPortSelection.getSize();
-							size.width = (property = properties.getProperty("serialPortSelection.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 200;
+							size.width = Translation.getValue(Integer.class, "serialPortSelection.width", 200);
 							serialPortSelection.setSize(size);
 						}
 					}

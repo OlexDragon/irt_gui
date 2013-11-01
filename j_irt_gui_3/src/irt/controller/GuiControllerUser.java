@@ -41,7 +41,7 @@ public class GuiControllerUser extends GuiController {
 					wait(5000);
 				}
 			}
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			logger.catching(e);
 		}
 	}

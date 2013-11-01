@@ -124,6 +124,9 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE:
 				packetIdStr = "AttenuationRange("+packetId+")";
 				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS:
+				packetIdStr = "FCM FLAGS("+packetId+")";
+				break;
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1:
 				packetIdStr = "DAC 1("+packetId+")";
 				break;

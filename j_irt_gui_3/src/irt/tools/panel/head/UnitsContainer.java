@@ -12,8 +12,13 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 @SuppressWarnings("serial")
 public class UnitsContainer extends JPanel{
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private int shift;
 	private final int SPACE = 5;
@@ -182,9 +187,13 @@ public class UnitsContainer extends JPanel{
 	}
 
 	public void refresh() {
+		try{
 		for(Component c:getComponents()){
 			if(c instanceof Panel)
 				((Panel)c).refresh();
+		}
+		}catch(Exception e){
+			logger.catching(e);
 		}
 	}
 }

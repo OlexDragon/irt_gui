@@ -167,7 +167,6 @@ public class DumpControllers {
 
 	public static LoggerContext setSysSerialNumber(String serialNumber) {
 
-
 		if(serialNumber==null)
 			serialNumber ="UnknownSerialNumber";
 

@@ -38,17 +38,16 @@ public class ControlPanelPicobuc extends ControlPanel {
 		cbLoSelect.setBounds(10, 141, 194, 26);
 		add(cbLoSelect);
 		
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 
 		lblSave = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
 		lblSave.setForeground(Color.YELLOW);
 		lblSave.setFont(font);
-		String property;
-		int x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
-		int y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
-		int width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		int x = Translation.getValue(Integer.class, "control.label.save.x", 153);
+		int y = Translation.getValue(Integer.class, "control.label.save.y", 107);
+		int width = Translation.getValue(Integer.class, "control.label.save.width", 61);
 		lblSave.setBounds(x, y, width, 20);
 		add(lblSave);
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
@@ -61,31 +60,28 @@ public class ControlPanelPicobuc extends ControlPanel {
 
 	@Override
 	protected Point getConfigButtonPosition() {
-		String property;
-		int x = (property = properties.getProperty("control.button.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 118;
-		int y = (property = properties.getProperty("control.button.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		int x = Translation.getValue(Integer.class, "control.button.save.x", 118);
+		int y = Translation.getValue(Integer.class, "control.button.save.y", 101);
 		return new Point(x, y);
 	}
 
 	@Override
 	protected Point getMuteButtonPosition() {
-		String property;
-		int x = (property = properties.getProperty("control.button.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 14;
-		int y = (property = properties.getProperty("control.button.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		int x = Translation.getValue(Integer.class, "control.button.mute.x", 14);
+		int y = Translation.getValue(Integer.class, "control.button.mute.y", 101);
 		return new Point(x, y);
 	}
 
 	@Override
 	public void refresh() {
 		super.refresh();
-		Font font = Translation.getFont().deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setFont(font);
-		String property;
-		int x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
-		int y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
-		int width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		int x = Translation.getValue(Integer.class, "control.label.save.x", 153);
+		int y = Translation.getValue(Integer.class, "control.label.save.y", 107);
+		int width = Translation.getValue(Integer.class, "control.label.save.width", 61);
 		lblSave.setBounds(x, y, width, 20);
 	}
 

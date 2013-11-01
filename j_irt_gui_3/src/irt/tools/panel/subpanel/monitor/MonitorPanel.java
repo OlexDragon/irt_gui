@@ -4,7 +4,6 @@ import irt.controller.monitor.MonitorController;
 import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
 import irt.tools.label.LED;
-import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -30,30 +29,17 @@ public class MonitorPanel extends MonitorPanelAbstract {
 	public MonitorPanel(LinkHeader linkHeader) {
 		super(linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 214, 210);
 
-		String selectedLanguage = Translation.getSelectedLanguage();
-		String propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
-		String property = properties.getProperty(propertyToGet);
-
-		if(property==null){
-			logger.error("Impossible to to get properties for {}", propertyToGet);
-			selectedLanguage = "en_US";
-			logger.error("English will be used ({})", selectedLanguage);
-			Translation.setLocale(selectedLanguage);
-			propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
-			property = properties.getProperty(propertyToGet);
-		}
-
-		Font font = Translation.getFont().deriveFont(new Float(property))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.leds.font.style_" + selectedLanguage)));
+		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", 12f))
+				.deriveFont(Translation.getValue(Integer.class, "monitor.leds.font.style", Font.PLAIN));
 
 		ledLock = new LED(Color.GREEN, Translation.getValue(String.class, "lock", "LOCK"));
 		ledLock.setName("Lock");
 		ledLock.setForeground(Color.GREEN);
 		ledLock.setFont(font);
 
-		int width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		int x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
-		int y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		int width = Translation.getValue(Integer.class, "monitor.led.lock.width", 100);
+		int x = Translation.getValue(Integer.class, "monitor.led.lock.x", 17);
+		int y = Translation.getValue(Integer.class, "monitor.led.lock.y", 138);
 		logger.debug("ledLock: x={}, y={}, width={}", x, y, width);
 		ledLock.setBounds(x, y, width, 28);
 		add(ledLock);
@@ -63,15 +49,15 @@ public class MonitorPanel extends MonitorPanelAbstract {
 		ledMute.setForeground(Color.GREEN);
 		ledMute.setFont(font);
 
-		width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
-		y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		width = Translation.getValue(Integer.class, "monitor.led.mute.width", 100);
+		x = Translation.getValue(Integer.class, "monitor.led.mute.x", 115);
+		y = Translation.getValue(Integer.class, "monitor.led.mute.y", 138);
 		logger.debug("ledMute: x={}, y={}, width={}", x, y, width);
 		ledMute.setBounds(x, y, width, 28);
 		add(ledMute);
 
-		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
+				.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));
 
 		JLabel lblInputPower = new JLabel(":");
 		lblInputPower.setName("Input Power");
@@ -133,40 +119,27 @@ public class MonitorPanel extends MonitorPanelAbstract {
 
 		titledBorder.setTitle(Translation.getValue(String.class, "monitor", "Monitor"));
 
-		String selectedLanguage = Translation.getSelectedLanguage();
-		String propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
-		String property = properties.getProperty(propertyToGet);
-
-		if(property==null){
-			logger.error("Impossible to to get properties for {}", propertyToGet);
-			selectedLanguage = "en_US";
-			Translation.setLocale(selectedLanguage);
-			logger.error("English will be used ({})", selectedLanguage);
-			propertyToGet = "monitor.leds.font.size_"+selectedLanguage;
-			property = properties.getProperty(propertyToGet);
-		}
-
-		Font font = Translation.getFont().deriveFont(new Float(property));
+		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", 12f));
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
 		ledMute.setFont(font);
 		ledMute.setText(muteText);
-		int width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		int x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
-		int y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		int width = Translation.getValue(Integer.class, "monitor.led.mute.width", 100);
+		int x = Translation.getValue(Integer.class, "monitor.led.mute.x", 115);
+		int y = Translation.getValue(Integer.class, "monitor.led.mute.y", 138);
 		logger.debug("ledMute: x={}, y={}, width={}", x, y, width);
 		ledMute.setBounds(x, y, width, 28);
 
 		ledLock.setFont(font);
-		width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
-		y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		width = Translation.getValue(Integer.class, "monitor.led.lock.width", 100);
+		x = Translation.getValue(Integer.class, "monitor.led.lock.x", 17);
+		y = Translation.getValue(Integer.class, "monitor.led.lock.y", 138);
 		logger.debug("ledLock: x={}, y={}, width={}", x, y, width);
 		ledLock.setBounds(x, y, width, 28);
 		ledLock.setText(Translation.getValue(String.class, "lock".toLowerCase(), "LOCK"));
 
-		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_"+selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f));
 		lblInputPowerTxt.setFont(font);
 		String string = Translation.getValue(String.class, "input_power", "Input Power")+":";
 		lblInputPowerTxt.setText(string);

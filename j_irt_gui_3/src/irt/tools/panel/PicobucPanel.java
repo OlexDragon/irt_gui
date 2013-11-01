@@ -8,8 +8,6 @@ import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
 import java.awt.Color;
-import java.io.IOException;
-import java.util.Properties;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -21,8 +19,6 @@ import org.apache.logging.log4j.Logger;
 public class PicobucPanel extends DevicePanel {
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
-
-	private static Properties properties;
 
 	public PicobucPanel(final LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight){
 		super(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
@@ -53,20 +49,12 @@ public class PicobucPanel extends DevicePanel {
 
 	@Override
 	public void refresh() {
+		try{
 		super.refresh();
 		getControlPanel().refresh();
 		getMonitorPanel().refresh();
-	}
-
-	public static Properties getProperties() {
-		if (properties == null) {
-			properties = new Properties();
-			try {
-				properties.load(PicobucPanel.class.getResourceAsStream("PicoBucPanel.properties"));
-			} catch (IOException e) {
-				logger.catching(e);
-			}
+		}catch(Exception e){
+			logger.catching(e);
 		}
-		return properties;
 	}
 }

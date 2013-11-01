@@ -14,7 +14,6 @@ import irt.data.Listeners;
 import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.button.ImageButton;
-import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 import java.awt.Color;
@@ -85,13 +84,12 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnMute.setToolTipText(muteText);
 		btnMute.setName("Button Mute");
 		Point p = getMuteButtonPosition();
-		String property;
-		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
+		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
 		btnMute.setBounds(p.x, p.y, size, size);
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 
 		lblMute = new JLabel(muteText);
@@ -99,9 +97,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
 		lblMute.setFont(font);
-		int x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
-		int y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
-		int width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		int x = Translation.getValue(Integer.class, "control.label.mute.x", 48);
+		int y = Translation.getValue(Integer.class, "control.label.mute.y", 107);
+		int width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
 		lblMute.setBounds(x, y, width, 20);
 		add(lblMute);
 
@@ -137,8 +135,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 		comboBox.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
 		comboBox.setBackground(color);
 		comboBox.setForeground(Color.YELLOW);
-		comboBox.setFont(font.deriveFont(new Float(properties.getProperty("controll.comboBox.font.size")))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type"))));
+		comboBox.setFont(font.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 14f))
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD)));
 		comboBox.setCursor(cursor);
 		add(comboBox);
 		
@@ -221,8 +219,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 			((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		}
 
-		font = font.deriveFont(new Float(properties.getProperty("control.checkBox.font.size_" + selectedLanguage)))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("control.checkBox.font.style_" + selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
+				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));
 
 		chckbxStep = new JCheckBox(Translation.getValue(String.class, "step", "Step")+":");
 		chckbxStep.addActionListener(new ActionListener() {
@@ -302,14 +300,10 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 		titledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));
 
-		Font font = Translation.getFont().deriveFont(
-				Float.parseFloat(
-						properties.getProperty(
-								"control.label.mute.font.size_"+selectedLanguage)));
+		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f));
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
-		String property;
-		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
+		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
 		btnMute.setToolTipText(muteText);
 		btnMute.setSize(size, size);
 		btnMute.setLocation(getMuteButtonPosition());
@@ -318,17 +312,17 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnStoreConfig.setSize(size, size);
 		btnStoreConfig.setLocation(getConfigButtonPosition());
 
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 		lblMute.setText(muteText);
 		lblMute.setFont(font);
-		int x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
-		int y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
-		int width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		int x = Translation.getValue(Integer.class, "control.label.mute.x", 48);
+		int y = Translation.getValue(Integer.class, "control.label.mute.y", 107);
+		int width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
 		lblMute.setBounds(x, y, width, 20);
 
-		font = font.deriveFont(new Float(properties.getProperty("control.checkBox.font.size_" + selectedLanguage)))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("control.checkBox.font.style_" + selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
+				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));
 		chckbxStep.setText(Translation.getValue(String.class, "step", "Step")+":");
 		chckbxStep.setFont(font);
 
@@ -338,8 +332,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 			model.addElement(new IdValueForComboBox(FLAG_GAIN, Translation.getValue(String.class, "gain", "GAIN")));
 		if((flags&FLAG_FREQUENCY)>0)
 			model.addElement(new IdValueForComboBox(FLAG_FREQUENCY, Translation.getValue(String.class, "frequency", "FREQUENCY")));
-		comboBox.setFont(font.deriveFont(new Float(properties.getProperty("controll.comboBox.font.size")))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("titledBorder.font.type"))));
+		comboBox.setFont(font
+				.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 18f))
+				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD)));
 		comboBox.setModel(model);
 
 		lblChoice.setFont(font);

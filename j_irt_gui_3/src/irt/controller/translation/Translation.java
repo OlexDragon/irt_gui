@@ -2,15 +2,12 @@ package irt.controller.translation;
 
 import irt.controller.GuiController;
 import irt.irt_gui.IrtGui;
-import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
-import java.io.IOException;
+import java.awt.Rectangle;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
@@ -24,26 +21,35 @@ import org.apache.logging.log4j.core.Logger;
 
 public class Translation {
 
+	private static final String DEFAULT_LANGUAGE = "en";
+
 	private static final Logger logger = (Logger) LogManager.getLogger(Translation.class);
 
-	public static final String SPLITER = "_";
-
 	private static final Preferences PREFS = GuiController.getPrefs();
+	private static Locale locale = setLocale(PREFS.get("locale", DEFAULT_LANGUAGE));
 
-	private static volatile String selectedLanguage = PREFS.get("locale", "en_US");
-	private static Locale locale = new Locale(selectedLanguage.split(SPLITER)[0], selectedLanguage.split(SPLITER)[1]);
-	private static ResourceBundle messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", new Locale(selectedLanguage.split(SPLITER)[0], selectedLanguage.split(SPLITER)[1]));
-	private static Map<String, String> map = getMap();
-	private static Font font = getFont(selectedLanguage);
+	private static ResourceBundle messages;
+	private static Map<String, String> map;
+	private static Font font;
 
-	public static void setLocale(String localeStr){
+	private static Properties translationProperties;
+
+	public static Locale setLocale(String localeStr){
+
 		logger.trace("setLocale({})", localeStr);
-		getFont(localeStr);
-		String[] splitLocale = localeStr.split(SPLITER);
-		locale = new Locale(splitLocale[0], splitLocale[1]);
+
+		locale = new Locale(localeStr);
+
 		messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
 		map = getMap();
-		PREFS.put("locale", localeStr);
+
+		if(!PREFS.get("locale", DEFAULT_LANGUAGE).equals(localeStr))
+			PREFS.put("locale", localeStr);
+
+		getFont(localeStr);
+
+		logger.debug("setLocale(), Locale={}", locale);
+		return locale;
 	}
 
 	private static Map<String, String> getMap() {
@@ -58,58 +64,76 @@ public class Translation {
 		return map;
 	}
 
-	public static String getLocateStr() {
-		return selectedLanguage;
-	}
-
 	@SuppressWarnings("unchecked")
 	public static <T> T getValue(Class<T> clazz, String key, T defaultValue){
+		logger.trace("getValue({}, {}, {})", clazz, key, defaultValue);
 		T returnValue = null;
 
+		logger.debug("map=", map);
 		String stringValue = map.get(key);
 
 		if(stringValue!=null){
 			switch(clazz.getName()){
 			case "java.lang.Integer":
-				stringValue = stringValue.replaceAll("\\D", "");
-				if(!stringValue.isEmpty())
-					returnValue = (T) new Integer(Integer.parseInt(stringValue));
+				String tmp = stringValue.replaceAll("\\D", "");
+				if(tmp.isEmpty())
+					returnValue = (T) IrtPanel.parseFontStyle(stringValue);
+				else
+					returnValue = (T) new Integer(Integer.parseInt(tmp));
 				break;
 			case "java.lang.Float":
 				returnValue = (T) new Float(Float.parseFloat(stringValue));
 				break;
 			case "java.lang.String":
 				returnValue = (T) stringValue;
+				break;
+			case "java.awt.Rectangle":
+				String[] split = stringValue.split(",");
+				if(split.length==4)
+					returnValue = (T) new Rectangle(Integer.parseInt(split[0]),
+													Integer.parseInt(split[1]),
+													Integer.parseInt(split[2]),
+													Integer.parseInt(split[3]));
+				break;
+			default:
+				logger.warn("Have to do implementation for '{}'", clazz);
 			}
-		}else
+		}else{
+			if(defaultValue!=null)
+				logger.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
 			returnValue = defaultValue;
+		}
 
 		logger.debug("getValue(key={})={}, stringValue={}", key, returnValue, stringValue);
 		return returnValue;
 	}
 
-	public static Font getFont(String selectedLanguage) {
-		Translation.selectedLanguage = selectedLanguage;
+	private static Font getFont(String selectedLanguage) {
+		logger.trace("getFont(selectedLanguage={})", selectedLanguage);
 		try {
-			Properties headPanelProperties = HeadPanel.properties;
-			String fontURL = headPanelProperties.getProperty("font_path_" + Translation.getSelectedLanguage());
+			String fontURL = getValue(String.class, "font_path", "fonts/TAHOMA.TTF");
 			logger.trace("fontURL={}", fontURL);
 
-			int fontStyle = IrtPanel.fontStyle.get(headPanelProperties.getProperty("font_style_" + selectedLanguage));
-			float fontSize = Float.parseFloat(headPanelProperties.getProperty("font_size_" + selectedLanguage));
+			int fontStyle = Font.BOLD;
+			float fontSize = getValue(Float.class, "headPanel.font_size", 18f);
 
 			if (fontURL != null && (font = getSystemFont(fontURL, fontStyle, (int) fontSize)) == null) {
+				logger.warn("The Operating System does not have {} font.", fontURL);
 				URL resource = IrtGui.class.getResource(fontURL);
 				font = Font.createFont(Font.TRUETYPE_FONT, resource.openStream());
 				font = font.deriveFont(fontStyle).deriveFont(fontSize);
 			}
-		} catch (IOException | FontFormatException e) {
+		} catch (Exception e) {
 			logger.catching(e);
 		}
+
+		if(font==null)
+			font = new Font("Tahoma", Font.PLAIN, 14);
+
 		return font;
 	}
 
-	private static Font getSystemFont(String fontURL, int fontStyle, int fontSize) {
+	public static Font getSystemFont(String fontURL, int fontStyle, int fontSize) {
 
 		Font font = null;
 		String[] split = fontURL.split("/");
@@ -123,33 +147,45 @@ public class Translation {
 			}
 
 		logger.debug(fontURL);
-		logger.debug(Arrays.toString(availableFontNames));
 		logger.debug(font);
 
 		return font;
 	}
 
 	public static Font getFont() {
+		logger.trace("getFont()={}", font);
 		return font;
 	}
 
 	public static String getSelectedLanguage() {
-		return selectedLanguage!=null && !selectedLanguage.isEmpty() ? selectedLanguage : "us_US";
+		logger.trace("getSelectedLanguage(), locale={}", locale);
+
+		return locale.toString();
 	}
 
 	public static void setFont(Font font) {
+		logger.trace("setFont({})", font);
 		Translation.font = font;
 	}
 
-	public static void setSelectedLanguage(String selectedLanguage) {
-		Translation.selectedLanguage = selectedLanguage;
-	}
-
 	public static Locale getLocale() {
+		logger.trace("getLocale()", font);
 		return locale;
 	}
 
-	public static void setLocace(Locale locace) {
-		Translation.locale = locace;
+	private static Properties getTranslationProperties() {
+		if(translationProperties==null){
+			translationProperties = new Properties();
+			try {
+				translationProperties.load(Translation.class.getResourceAsStream("translation.properties"));
+			} catch (Exception e) {
+				logger.catching(e);
+			}
+		}
+		return translationProperties;
+	}
+
+	public static String getTranslationProperties(String key) {
+		return getTranslationProperties().getProperty(key);
 	}
 }

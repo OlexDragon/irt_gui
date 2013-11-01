@@ -19,7 +19,6 @@ import java.awt.FontFormatException;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -34,10 +33,10 @@ import org.apache.logging.log4j.core.LoggerContext;
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
-	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);
+	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.034";
+	public static final String VERTION = "- 3.035";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 
@@ -77,20 +76,14 @@ public class IrtGui extends IrtMainFrame {
 		lblIrtTechnologies.setFont(
 				new Font(
 						IrtPanel.properties.getProperty("font_name_"+IrtPanel.companyIndex),
-						IrtPanel.fontStyle.get(IrtPanel.properties.getProperty("font_style_"+IrtPanel.companyIndex)),
+						IrtPanel.parseFontStyle(IrtPanel.properties.getProperty("font_style_"+IrtPanel.companyIndex)),
 						12));
 		lblIrtTechnologies.setForeground(Color.WHITE);
 		lblIrtTechnologies.setBounds(531, 10, 107, 14);
 		headPanel.add(lblIrtTechnologies);
 
 //Language ComboBox
-		Properties translationProperties = new Properties();
-		try {
-			translationProperties.load(Translation.class.getResourceAsStream("translation.properties"));
-		} catch (IOException e) {
-			logger.catching(e);
-		}
-		String[] languagesArr = translationProperties.getProperty("languages").split(",");
+		String[] languagesArr = Translation.getTranslationProperties("languages").split(",");
 		KeyValue<?,?>[] languages = new KeyValue[languagesArr.length];
 		for(int i=0; i<languagesArr.length; i++){
 			String[] split = languagesArr[i].split(":");
@@ -104,10 +97,7 @@ public class IrtGui extends IrtMainFrame {
 		JComboBox<KeyValue<String, String>> comboBoxLanguage = new JComboBox<>();
 		comboBoxLanguage.setName("Language");
 
-		Properties headPanelProperties = HeadPanel.properties;
-		String fontURL = headPanelProperties.getProperty("font_path_"+"cn_CN");
-		URL resource = IrtGui.class.getResource(fontURL);
-		float fontSize = Float.parseFloat(headPanelProperties.getProperty("comboBox.font.size"));
+		float fontSize = Translation.getValue(Float.class, "headPanel.language.comboBox.font.size", 12f);
 
 		comboBoxLanguage.setModel(defaultComboBoxModel);
 		comboBoxLanguage.addPopupMenuListener(Listeners.popupMenuListener);
@@ -115,14 +105,26 @@ public class IrtGui extends IrtMainFrame {
 		comboBoxLanguage.setForeground(Color.WHITE);
 		comboBoxLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		comboBoxLanguage.setBackground(HeadPanel.BACKGROUND_COLOR.darker().darker());
-		String[] bounds = translationProperties.get("headPanel_comboBoc_bounds").toString().split(",");
+		String[] bounds = Translation.getTranslationProperties("headPanel_comboBoc_bounds").toString().split(",");
 		comboBoxLanguage.setBounds(Integer.parseInt(bounds[0]),
 									Integer.parseInt(bounds[1]),
 									Integer.parseInt(bounds[2]),
 									Integer.parseInt(bounds[3]));
 		comboBoxLanguage.setMinimumSize(new Dimension(77, 17));
 		comboBoxLanguage.setSelectedItem(keyValue);
-		comboBoxLanguage.setFont(Font.createFont(Font.TRUETYPE_FONT, resource.openStream()).deriveFont(fontSize).deriveFont(Font.BOLD));
+
+		String fontURL = "fonts/MINGLIU.TTF";
+		Font f = Translation.getSystemFont(fontURL, Font.BOLD, (int)fontSize);
+		if(f==null){
+			URL resource = getClass().getResource(fontURL);//Chinese
+			if(resource!=null)
+				f = Font.createFont(Font.TRUETYPE_FONT, resource.openStream()).deriveFont(fontSize).deriveFont(Font.BOLD);
+			else
+				logger.warn("Can not get the resouce font 'MINGLIU.TTF'");
+		}
+		if(f!=null)
+			comboBoxLanguage.setFont(f);
+
 		headPanel.add(comboBoxLanguage);
 	}
 

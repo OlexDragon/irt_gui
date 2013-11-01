@@ -17,7 +17,6 @@ import irt.tools.panel.subpanel.NetworkPanel;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -49,7 +48,6 @@ public class DemoPanel extends Panel {
 	private JLabel lblOutputPowerText;
 	private JLabel lblTemperatureText;
 
-	private Properties properties = PicobucPanel.getProperties();
 	private TitledBorder monitorTitledBorder;
 	private TitledBorder controlTitledBorder;
 	private ImageButton btnStoreConfig;
@@ -63,8 +61,6 @@ public class DemoPanel extends Panel {
 
 	public DemoPanel() {
 		super(Translation.getValue(String.class, "vertical_label_text", "THE UNIT IS NOT CONNECTED"), 0, 0, 0, 0, 0);
-		
-		String selectedLanguage = Translation.getSelectedLanguage();
 
 		JPanel monitorPanel = new JPanel();
 		Font font = Translation.getFont();
@@ -99,26 +95,21 @@ public class DemoPanel extends Panel {
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
-		font = font.deriveFont(
-				Float.parseFloat(
-						properties.getProperty(
-								"verticalLabel.font.size_"+selectedLanguage)
-				)
-			).deriveFont(Font.PLAIN);
+		font = font.deriveFont(Translation.getValue(Float.class, "verticalLabel.font.size", 18f)).deriveFont(Font.PLAIN);
 
 		verticalLabel.setFont(font);
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.leds.font.style_" + selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", 14f))
+				.deriveFont(Translation.getValue(Integer.class, "monitor.leds.font.style", Font.BOLD));
 
 		ledLock = new LED(Color.GREEN, Translation.getValue(String.class, "lock", "LOCK"));
 		ledLock.setName("Lock");
 		ledLock.setForeground(Color.GREEN);
 		ledLock.setFont(font);
-		String property;
-		int width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		int x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
-		int y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+
+		int width = Translation.getValue(Integer.class, "monitor.led.lock.width", 100);
+		int x = Translation.getValue(Integer.class, "monitor.led.lock.x", 17);
+		int y = Translation.getValue(Integer.class, "monitor.led.lock.y", 138);
 		ledLock.setBounds(x, y, width, 28);
 		monitorPanel.add(ledLock);
 
@@ -126,13 +117,13 @@ public class DemoPanel extends Panel {
 		ledMute.setName("Mute");
 		ledMute.setForeground(Color.GREEN);
 		ledMute.setFont(font);
-		width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
-		y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		width = Translation.getValue(Integer.class, "monitor.led.mute.width", 100);
+		x = Translation.getValue(Integer.class, "monitor.led.mute.x", 115);
+		y = Translation.getValue(Integer.class, "monitor.led.mute.y", 138);
 		ledMute.setBounds(x, y, width, 28);
 		monitorPanel.add(ledMute);
 
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 14f))
 				.deriveFont(Font.BOLD);
 
 		lblMute = new JLabel(muteText);
@@ -140,26 +131,26 @@ public class DemoPanel extends Panel {
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
 		lblMute.setFont(font);
-		x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
-		y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
-		width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		x = Translation.getValue(Integer.class, "control.label.mute.x", 48);
+		y = Translation.getValue(Integer.class, "control.label.mute.y", 107);
+		width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
 		lblMute.setBounds(x, y, width, 20);
 		controlPanel.add(lblMute);
 
 		btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
 		btnMute.setName("Button Mute");
 		btnMute.setToolTipText(muteText);
-		x = (property = properties.getProperty("control.button.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 14;
-		y = (property = properties.getProperty("control.button.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 101;
-		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
+		x = Translation.getValue(Integer.class, "control.button.mute.x", 14);
+		y = Translation.getValue(Integer.class, "control.button.mute.y", 101);
+		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
 		btnMute.setBounds(x, y, size, size);
 		controlPanel.add(btnMute);
 
 		btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 		btnStoreConfig.setName("Store");
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
-		x = (property = properties.getProperty("control.button.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 118;
-		y = (property = properties.getProperty("control.button.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		x = Translation.getValue(Integer.class, "control.button.save.x", 118);
+		y = Translation.getValue(Integer.class, "control.button.save.y", 101);
 		btnStoreConfig.setBounds(x, y, size, size);
 		controlPanel.add(btnStoreConfig);
 
@@ -194,7 +185,7 @@ public class DemoPanel extends Panel {
 					}};
 			}
 		});
-		comboBoxAttenuation.setFont(comboBoxAttenuation.getFont().deriveFont(Float.parseFloat(properties.getProperty("control.comboBox.font.size_"+selectedLanguage))));
+		comboBoxAttenuation.setFont(comboBoxAttenuation.getFont().deriveFont(Translation.getValue(Float.class, "control.comboBox.font.size", 12f)));
 		controlPanel.add(comboBoxAttenuation);
 
 		textField_1 = new JTextField();
@@ -242,8 +233,8 @@ public class DemoPanel extends Panel {
 				),"");
 		tabbedPane.addTab(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex), null, lblLogo, null);
 
-		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
+				.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));
 
 		lblInputPowerText = new JLabel(Translation.getValue(String.class, "input_power", "Input Power")+":");
 		lblInputPowerText.setName("");
@@ -279,7 +270,7 @@ public class DemoPanel extends Panel {
 		lblDbm.setBounds(118, 36, 82, 17);
 		monitorPanel.add(lblDbm);
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("control.checkBox.font.size_"+selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f));
 
 		checkBoxStep = new JCheckBox(Translation.getValue(String.class, "step", "Step")+":");
 		checkBoxStep.setEnabled(false);
@@ -348,16 +339,16 @@ public class DemoPanel extends Panel {
 			}
 		}
 		
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 
 		lblSave = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
 		lblSave.setForeground(Color.YELLOW);
 		lblSave.setFont(font);
-		x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
-		y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
-		width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		x = Translation.getValue(Integer.class, "control.label.save.x", 153);
+		y = Translation.getValue(Integer.class, "control.label.save.y", 107);
+		width = Translation.getValue(Integer.class, "control.label.save.width", 61);
 		lblSave.setBounds(x, y, width, 20);
 		controlPanel.add(lblSave);
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
@@ -367,53 +358,50 @@ public class DemoPanel extends Panel {
 	public void refresh() {
 		super.refresh();
 
-		String selectedLanguage = Translation.getSelectedLanguage();
-
 		monitorTitledBorder.setTitle(Translation.getValue(String.class, "monitor", "Monitor"));
 		Font font =Translation.getFont();
 		monitorTitledBorder.setTitleFont(font);
 		controlTitledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));
 		controlTitledBorder.setTitleFont(font);
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("monitor.leds.font.size_"+selectedLanguage)))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.leds.font.style_" + selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", 12f))
+				.deriveFont(Translation.getValue(Integer.class, "monitor.leds.font.style", Font.PLAIN));
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
 		ledLock.setFont(font);
-		String property;
-		int width = (property = properties.getProperty("monitor.led.lock.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		int x = (property = properties.getProperty("monitor.led.lock.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 17;
-		int y = (property = properties.getProperty("monitor.led.lock.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		int width = Translation.getValue(Integer.class, "monitor.led.lock.width", 100);
+		int x = Translation.getValue(Integer.class, "monitor.led.lock.x", 17);
+		int y = Translation.getValue(Integer.class, "monitor.led.lock.y", 138);
 		ledLock.setBounds(x, y, width, 28);
 		ledLock.setText(Translation.getValue(String.class, "lock", "LOCK"));
 
 		ledMute.setFont(font);
 		ledMute.setText(muteText);
-		width = (property = properties.getProperty("monitor.led.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 100;
-		x = (property = properties.getProperty("monitor.led.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 115;
-		y = (property = properties.getProperty("monitor.led.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 138;
+		width = Translation.getValue(Integer.class, "monitor.led.mute.width", 100);
+		x = Translation.getValue(Integer.class, "monitor.led.mute.x", 115);
+		y = Translation.getValue(Integer.class, "monitor.led.mute.y", 138);
 		ledMute.setBounds(x, y, width, 28);
 
-		font = font.deriveFont(new Float(properties.getProperty("control.label.mute.font.size_"+selectedLanguage)))
+		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 
 		lblMute.setText(muteText);
 		lblMute.setFont(font);
-		x = (property = properties.getProperty("control.label.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 48;
-		y = (property = properties.getProperty("control.label.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 107;
-		width = (property = properties.getProperty("control.label.mute.width_"+selectedLanguage))!=null ? Integer.parseInt(property) : 93;
+		x = Translation.getValue(Integer.class, "control.label.mute.x", 48);
+		y = Translation.getValue(Integer.class, "control.label.mute.y", 107);
+		width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
 		lblMute.setBounds(x, y, width, 20);
 
 		lblSave.setText(Translation.getValue(String.class, "save", "SAVE"));
 		lblSave.setFont(font);
-		x = (property = properties.getProperty("control.label.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 153;
-		y = (property = properties.getProperty("control.label.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 107;
-		width = (property = properties.getProperty("control.label.save.width_"+selectedLanguage))!=null ? Integer.parseInt(property): 61;
+		x = Translation.getValue(Integer.class, "control.label.save.x", 153);
+		y = Translation.getValue(Integer.class, "control.label.save.y", 107);
+		width = Translation.getValue(Integer.class, "control.label.save.width", 61);
 		lblSave.setBounds(x, y, width, 20);
 
-		font = font.deriveFont(new Float(properties.getProperty("monitor.labels.font.size_" + selectedLanguage)))
-				.deriveFont(IrtPanel.fontStyle.get(properties.getProperty("monitor.labels.font.style_" + selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
+				.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));
 
 		lblInputPowerText.setFont(font);
 		lblInputPowerText.setText(Translation.getValue(String.class, "input_power", "Input Power")+":");
@@ -424,23 +412,23 @@ public class DemoPanel extends Panel {
 		lblTemperatureText.setFont(font);
 		lblTemperatureText.setText(Translation.getValue(String.class, "temperature", "Temperature")+":");
 
-		x = (property = properties.getProperty("control.button.mute.x_"+selectedLanguage))!=null ? Integer.parseInt(property) : 14;
-		y = (property = properties.getProperty("control.button.mute.y_"+selectedLanguage))!=null ? Integer.parseInt(property) : 101;
-		int size = (property=properties.getProperty("control.buttons.size_"+selectedLanguage))!=null ? Integer.parseInt(property) : 33;
+		x = Translation.getValue(Integer.class, "control.button.mute.x", 14);
+		y = Translation.getValue(Integer.class, "control.button.mute.y", 101);
+		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
 		btnMute.setBounds(x, y, size, size);
 		btnMute.setToolTipText(muteText);
 
-		x = (property = properties.getProperty("control.button.save.x_"+selectedLanguage))!=null ? Integer.parseInt(property): 118;
-		y = (property = properties.getProperty("control.button.save.y_"+selectedLanguage))!=null ? Integer.parseInt(property): 101;
+		x = Translation.getValue(Integer.class, "control.button.save.x", 118);
+		y = Translation.getValue(Integer.class, "control.button.save.y", 101);
 		btnStoreConfig.setBounds(x, y, size, size);
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("verticalLabel.font.size_"+selectedLanguage))).deriveFont(Font.PLAIN);
+		font = font.deriveFont(Translation.getValue(Float.class, "verticalLabel.font.size", 12f)).deriveFont(Font.PLAIN);
 
 		verticalLabel.setFont(font);
 		verticalLabel.setText(Translation.getValue(String.class, "vertical_label_text", "THE UNIT IS NOT CONNECTED"));
 
-		font = font.deriveFont(Float.parseFloat(properties.getProperty("control.checkBox.font.size_"+selectedLanguage)));
+		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f));
 
 		checkBoxStep.setFont(font);
 		checkBoxStep.setText(Translation.getValue(String.class, "step", "Step")+":");
@@ -448,7 +436,7 @@ public class DemoPanel extends Panel {
 		DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>();
 		defaultComboBoxModel.addElement(Translation.getValue(String.class, "attenuation", "ATTENUATION"));
 		comboBoxAttenuation.setModel(defaultComboBoxModel);
-		comboBoxAttenuation.setFont(comboBoxAttenuation.getFont().deriveFont(Float.parseFloat(properties.getProperty("control.comboBox.font.size_"+selectedLanguage))));
+		comboBoxAttenuation.setFont(comboBoxAttenuation.getFont().deriveFont(Translation.getValue(Float.class, "control.comboBox.font.size", 12f)));
 
 		infoPanel.refresh();
 
