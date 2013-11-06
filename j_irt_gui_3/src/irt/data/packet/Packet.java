@@ -126,7 +126,7 @@ public class Packet {
 		IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE	= 6,
 		IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL		= 7,
 		IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE			= 8,
-		IRT_SCP_DATA_FCM_CONFIG_FLAGS 				= 9,
+		IRT_SLCP_DATA_FCM_CONFIG_FLAGS 				= 9,
 		IRT_SLCP_DATA_FCM_CONFIG_GAIN_OFFSET		= 10,
 		IRT_SLCP_DATA_FCM_CONFIG_ALL = IRT_SLCP_PARAMETER_ALL;		/* Read all available parameters. */
 
@@ -411,7 +411,22 @@ public class Packet {
 		return (toShift<<8) ^ l;
 	}
 
-	public static byte[] toBytes(long value) {
+	public static <T> byte[] toBytes(T value) {
+		byte[] bytes = null;
+
+		if(value!=null){
+			if(value instanceof Short)
+				bytes = shortToBytes((Short)value);
+			else if(value instanceof Integer)
+				bytes = intToBytes((Integer)value);
+			else if(value instanceof Long)
+				bytes = longToBytes((Long)value);
+		}
+
+		return bytes;
+	}
+
+	private static byte[] longToBytes(long value) {
 		byte[] bs = new byte[8];
 
 		bs[7] = (byte)	value;
@@ -426,7 +441,7 @@ public class Packet {
 		return bs;
 	}
 
-	public static byte[] toBytes(int value) {
+	private static byte[] intToBytes(int value) {
 		byte[] bs = new byte[4];
 
 		bs[3] = (byte)	value;
@@ -437,7 +452,7 @@ public class Packet {
 		return bs;
 	}
 
-	public static byte[] toBytes(short value) {
+	private static byte[] shortToBytes(short value) {
 		byte[] bs = new byte[2];
 
 		bs[1] = (byte)	value;

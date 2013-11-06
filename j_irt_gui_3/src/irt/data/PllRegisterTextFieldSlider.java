@@ -1,6 +1,6 @@
 package irt.data;
 
-import irt.controller.serial_port.value.Getter.ValueChangeListenerClass;
+import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.data.event.ValueChangeEvent;
 import irt.data.value.Value;
 

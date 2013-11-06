@@ -1,21 +1,16 @@
 package irt.controller;
 
-import irt.controller.GuiController;
-import irt.controller.serial_port.value.Getter.DeviceInfoGetter;
+import irt.controller.serial_port.value.getter.DeviceInfoGetter;
+import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.DemoPanel;
-import irt.tools.panel.UserPicobucPanel;
 import irt.tools.panel.DevicePanel;
+import irt.tools.panel.UserPicobucPanel;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
-
-public class GuiControllerUser extends GuiController {
-
-	private final Logger logger = (Logger) LogManager.getLogger();
+public class GuiControllerUser extends GuiControllerAbstract {
 
 	public GuiControllerUser(JFrame gui) {
 		super("Gui Controller", gui);
@@ -49,5 +44,10 @@ public class GuiControllerUser extends GuiController {
 	@Override
 	protected DevicePanel getNewBaisPanel(LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight,	int maxHeight) {
 		return new UserPicobucPanel(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+	}
+
+	@Override
+	protected DevicePanel getConverterPanel(DeviceInfo di) {
+		return null;
 	}
 }

@@ -106,6 +106,9 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE:
 				packetIdStr = "Unit Temperature("+packetId+")";
 				break;
+			case PacketWork.PACKET_ID_ALARMS:
+				packetIdStr = "Alarms("+packetId+")";
+				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE:
 				packetIdStr = "Bias Temperature("+packetId+")";
 				break;

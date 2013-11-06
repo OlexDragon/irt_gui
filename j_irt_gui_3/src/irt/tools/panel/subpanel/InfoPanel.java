@@ -264,9 +264,9 @@ public class InfoPanel extends JPanel implements Refresh {
 			if(unitName!=null)
 				lblUnitName.setText(unitName.toString());
 
-//			StringData unitPartNumber = deviceInfo.getUnitPartNumber();
-//			if(unitPartNumber!=null)
-//				lblUnitPartNumber.setText(unitPartNumber.toString());
+			StringData unitPartNumber = deviceInfo.getUnitPartNumber();
+			if(unitPartNumber!=null)
+				lblUnitPartNumber.setText(unitPartNumber.toString());
 
 			int firmwareBuildCounter = deviceInfo.getFirmwareBuildCounter();
 			lblCount.setText(calculateTime(firmwareBuildCounter));

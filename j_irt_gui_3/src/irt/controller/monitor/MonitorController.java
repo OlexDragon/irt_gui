@@ -2,8 +2,8 @@ package irt.controller.monitor;
 
 import irt.controller.MeasurementController;
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.Getter.GetterAbstract;
-import irt.controller.serial_port.value.Getter.MeasurementGetter;
+import irt.controller.serial_port.value.getter.GetterAbstract;
+import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.controller.translation.Translation;
 import irt.data.LinkedPacketThread;
 import irt.data.PacketWork;
@@ -15,6 +15,7 @@ import irt.data.value.Value;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
+import irt.tools.panel.subpanel.progressBar.ProgressBar;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -96,6 +97,7 @@ public class MonitorController extends ControllerAbstract {
 				t = new Thread(abstractController, "Output Power");
 				t.start();
 				controllerList.add(abstractController);
+				abstractController.setObservable(ProgressBar.getValue());
 				break;
 			case "Temperature":
 				value = new ValueDouble(0, 1);

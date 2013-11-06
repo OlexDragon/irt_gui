@@ -1,15 +1,16 @@
 package irt.tools.panel;
 
-import java.awt.Font;
-
 import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.panel.head.IrtPanel;
+import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
+
+import java.awt.Font;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -31,10 +32,14 @@ public class UserPicobucPanel extends DevicePanel {
 		try {
 			JLabel lblNewLabel = new ImageLabel(new ImageIcon(IrtGui.class.getResource(IrtPanel.properties.getProperty("company_logo_" + IrtPanel.companyIndex))), "");
 			tabbedPane = getTabbedPane();
-			tabbedPane.addTab("IRT", null, lblNewLabel, null);
+			tabbedPane.addTab("IRT", lblNewLabel);
 
 			NetworkPanel networkPanel = new NetworkPanel(linkHeader);
-			tabbedPane.addTab("network", null, networkPanel, null);
+			tabbedPane.addTab("network", networkPanel);
+
+			AlarmsPanel alarmPanel = new AlarmsPanel(linkHeader);
+			alarmPanel.setBorder(null);
+			tabbedPane.addTab("alarms", alarmPanel);
 
 			int tabCount = tabbedPane.getTabCount();
 			for (int i = 0; i < tabCount; i++) {
@@ -43,10 +48,11 @@ public class UserPicobucPanel extends DevicePanel {
 				if (value != null) {
 					JLabel label = new JLabel(value);
 					label.setName(title);
-					label.setFont(Translation.getFont().deriveFont(12f));
+					label.setFont(Translation.getFont().deriveFont(12f).deriveFont(Font.BOLD));
 					tabbedPane.setTabComponentAt(i, label);
 				}
 			}
+
 		} catch (Exception e) {
 			logger.catching(e);
 		}

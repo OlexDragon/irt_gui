@@ -3,6 +3,7 @@ package irt.controller.serial_port;
 import irt.data.Checksum;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
+import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
@@ -110,14 +111,15 @@ do{
 			clear();
 
 			byte[] data = pt.getData();
-			logger.info(marker, ">> Sent:{}", Arrays.toString(data));
+			String hexStr = ToHex.bytesToHex(data);
+			logger.info(marker, ">> Sent:{}", hexStr);
 
 			String prefix = (runTimes+1)+") send";
 
 			Console.appendLn(p, prefix);
-			Console.appendLn(Arrays.toString(data), prefix);
+			Console.appendLn(hexStr, prefix);
 
-			if(data!=null){
+			if(isRun() && data!=null){
 				writeBytes(data);
 
 				if ((isConfirmBytes()) && isFlagSequence()){
@@ -175,7 +177,8 @@ do{
 					}
 				}
 				byte[] acknowledge = getAcknowledge();
-				writeBytes(acknowledge);
+				if(isRun())
+					writeBytes(acknowledge);
 			}else
 				setRun(false);
 }while(isComfirm && packet.getPayloads()==null && ++runTimes<3 && isRun());//if error repeat up to 3 times
@@ -300,7 +303,7 @@ do{
 		byte[] readBytes = null;
 		while(wait(1, waitTime)){
 			readBytes = super.readBytes(getInputBufferBytesCount());
-			String readBytesStr = Arrays.toString(readBytes);
+			String readBytesStr = ToHex.bytesToHex(readBytes);
 			Console.appendLn(readBytesStr, "Clear");
 			logger.info(marker,"?? clear: {}", readBytesStr);
 			if(waitTime!=100)
@@ -334,7 +337,7 @@ do{
 					escCount = hasEsc(tmpBytes = super.readBytes(readBytes==null ? byteCount : escCount));
 			}
 
-			Console.appendLn(Arrays.toString(tmpBytes), "Read");
+			Console.appendLn(ToHex.bytesToHex(tmpBytes), "Read");
 
 			if(hasEsc){
 				if(tmpBytes!=null){
@@ -355,7 +358,7 @@ do{
 		if(hasEsc)
 			readBytes = byteStuffing(readBytes);
 
-		logger.info(marker, "<< get:{}", Arrays.toString(readBytes));
+		logger.info(marker, "<< get:{}", ToHex.bytesToHex(readBytes));
 
 		return readBytes;
 	}
@@ -482,15 +485,17 @@ do{
 	public boolean closePort() throws SerialPortException {
 
 		boolean isClose = false;
-		if(isOpened()){
-			try{
-				removeEventListener();
-			}catch(Exception e){
-				logger.catching(e);
-			}
-			isClose = super.closePort();
-		}else
-			isClose = true;
+		synchronized (this) {
+			if (isOpened()) {
+				try {
+					removeEventListener();
+				} catch (Exception e) {
+					logger.catching(e);
+				}
+				isClose = super.closePort();
+			} else
+				isClose = true;
+		}
 
 		return isClose;
 	}

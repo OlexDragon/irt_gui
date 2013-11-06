@@ -10,6 +10,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
 
 import java.awt.Component;
+import java.util.Observable;
 
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
@@ -19,7 +20,7 @@ import org.apache.logging.log4j.core.Logger;
 
 public abstract class ControllerAbstract implements Runnable{
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
 
 	public enum Style{
 		CHECK_ONCE,
@@ -37,7 +38,10 @@ public abstract class ControllerAbstract implements Runnable{
 	private int waitTime = 3000;
 	private JPanel owner;
 
+	protected Observable observable;
+
 	public ControllerAbstract(PacketWork packetWork, JPanel panel, Style style) {
+		logger.trace(logger.getName());
 		this.packetWork = packetWork;
 		this.style = style;
  		setListeners();
@@ -77,8 +81,7 @@ public abstract class ControllerAbstract implements Runnable{
 				synchronized (this) {
 					try {
 
-//						if(ControllerAbstract.this instanceof DumpController)
-//							System.out.println(">>> run - "+send+" : "+ControllerAbstract.this.getClass().getSimpleName()+" : "+getPacketWork().getPacketThread());
+						logger.trace(">>> run - {}  : {}", send, getPacketWork().getPacketThread());
 
 						if(send){ send(); }
 						if(isWait()) wait(waitTime);
@@ -170,6 +173,10 @@ public abstract class ControllerAbstract implements Runnable{
 		synchronized (this) {
 			notify();
 		}
+	}
+
+	public void setObservable(Observable observable) {
+		this.observable = observable;
 	}
 
 	@Override

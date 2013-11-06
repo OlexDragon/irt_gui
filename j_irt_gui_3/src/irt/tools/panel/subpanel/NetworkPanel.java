@@ -3,7 +3,7 @@ package irt.tools.panel.subpanel;
 import irt.controller.NetworkController;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.interfaces.Refresh;
-import irt.controller.serial_port.value.Getter.Getter;
+import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
 import irt.data.packet.LinkHeader;

@@ -1,6 +1,6 @@
 package irt.controller;
 
-import irt.controller.serial_port.value.Getter.Getter;
+import irt.controller.serial_port.value.getter.Getter;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;

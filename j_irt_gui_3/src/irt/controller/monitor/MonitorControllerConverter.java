@@ -2,7 +2,7 @@ package irt.controller.monitor;
 
 import irt.controller.MeasurementController;
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.Getter.MeasurementGetter;
+import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -57,7 +57,7 @@ public class MonitorControllerConverter extends ControllerAbstract {
 						Long status = (Long)source;
 						boolean isNotLock = (status&LOCK)==0;
 						boolean isMute = (status&(MUTE|MUTE_TTL)) > 0;
-						boolean isInputOwerLoad = (status&INPUT_OWERDRIVE)==0;
+//						boolean isInputOverdrive = (status&INPUT_OWERDRIVE)==0;
 
 						if(isNotLock){
 							boolean isNotLock1 = (status&LOCK1)==0;
@@ -74,13 +74,13 @@ public class MonitorControllerConverter extends ControllerAbstract {
 						ledMute.setOn(isMute);
 						ledMute.setToolTipText("Status flags= "+status);
 
-						if(isInputOwerLoad){
-							lblInputPower.setForeground(Color.RED);
-							lblInputPower.setToolTipText("Owerload");
-						}else{
-							lblInputPower.setBackground(Color.BLACK);
-							lblInputPower.setToolTipText("");
-						}
+//						if(isInputOverdrive){
+//							lblInputPower.setForeground(Color.RED);
+//							lblInputPower.setToolTipText("Overdrive");
+//						}else{
+//							lblInputPower.setBackground(Color.BLACK);
+//							lblInputPower.setToolTipText("");
+//						}
 
 						fireStatusChangeListener(new ValueChangeEvent(new Integer((isNotLock ? 0 : MonitorController.LOCK)+(isMute ? MonitorController.MUTE : 0)), PacketWork.PACKET_ID_MEASUREMENT_STATUS));
 					}else

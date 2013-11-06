@@ -11,6 +11,7 @@ import irt.tools.label.ImageLabel;
 import irt.tools.label.LED;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.Panel;
+import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 
@@ -326,6 +327,9 @@ public class DemoPanel extends Panel {
 
 		NetworkPanel networkPanel = new NetworkPanel(null);
 		tabbedPane.addTab("network", null, networkPanel, null);
+		
+		AlarmsPanel alarmsPanel = new AlarmsPanel(null);
+		tabbedPane.addTab("alarms", alarmsPanel);
 
 		int tabCount = tabbedPane.getTabCount();
 		for(int i=0; i<tabCount; i++){

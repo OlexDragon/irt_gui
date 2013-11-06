@@ -1,8 +1,8 @@
 package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.Getter.GetterAbstract;
-import irt.controller.serial_port.value.Getter.MeasurementGetter;
+import irt.controller.serial_port.value.getter.GetterAbstract;
+import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.controller.translation.Translation;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
@@ -71,11 +71,15 @@ public class MeasurementController extends ControllerAbstract {
 					else{
 						if(value!=null){
 							PacketThread upt = getPacketWork().getPacketThread();
+							Long longValue = (Long)source;
 							if(upt.getValue()==null){
-								value.setValue((Long)source);
+								value.setValue(longValue);
 								upt.setValue(value);
 							}else
-								value.setValue((Long)source);
+								value.setValue(longValue);
+
+							if(observable instanceof Value)
+								((Value)observable).setValue(longValue);
 						}
 
 						long v = value.getValue();

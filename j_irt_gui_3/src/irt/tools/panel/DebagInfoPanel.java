@@ -3,7 +3,7 @@ package irt.tools.panel;
 import irt.controller.DeviceDebagController;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
-import irt.controller.serial_port.value.Getter.Getter;
+import irt.controller.serial_port.value.getter.Getter;
 import irt.data.PacketWork;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;

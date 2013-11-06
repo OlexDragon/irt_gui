@@ -87,7 +87,7 @@ public class ImageButton extends JButton {
 		boolean contains = super.contains(x, y);
 		if(isIn!=contains){
 			isIn = contains;
-			getParent().repaint(getX()-1,getY()-1,getWidth(),getHeight());
+			repaint();
 		}if(!isIn && isPressed)
 			setPressed(false);
 		return contains;
@@ -109,7 +109,7 @@ public class ImageButton extends JButton {
 	private void setPressed(boolean isPressed) {
 		if(this.isPressed != isPressed){
 			this.isPressed = isPressed;
-			getParent().repaint(getX()-1,getY()-1,getWidth(),getHeight());
+			repaint();
 		}
 	}
 

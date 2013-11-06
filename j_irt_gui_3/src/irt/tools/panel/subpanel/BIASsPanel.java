@@ -7,7 +7,7 @@ import irt.controller.SetterController;
 import irt.controller.SwitchControllerRegister;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.Getter.DeviceDebagGetter;
+import irt.controller.serial_port.value.getter.DeviceDebagGetter;
 import irt.controller.serial_port.value.seter.DeviceDebagSetter;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.to_do.InitializePicoBuc;

@@ -1,7 +1,7 @@
 package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.Getter.GetterAbstract;
+import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;

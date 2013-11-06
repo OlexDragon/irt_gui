@@ -8,8 +8,14 @@ import irt.tools.panel.subpanel.InfoPanel;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 
 public class DeviceInfo {
+
+	protected final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final int REVISION_FIRST_BYTE = 4;
 	public static final int SUBTYPE_FIRST_BYTE 	= 8;
@@ -34,6 +40,7 @@ public class DeviceInfo {
 	private int type;
 	private int revision;
 	private int subtype;
+	private StringData unitPartNumber;
 	private StringData serialNumber = new StringData(null);
 	private StringData firmwareVersion;
 	private StringData firmwareBuildDate;
@@ -109,30 +116,33 @@ public class DeviceInfo {
 		boolean isSet = false;
 		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO){
 			linkHeader = packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null;
-			if(packet.getPayloads()!=null){
-				for (Payload pl : packet.getPayloads())
+			List<Payload> payloads = packet.getPayloads();
+			if(payloads!=null){
+				for (Payload pl : payloads)
 					switch (pl.getParameterHeader().getCode()) {
-					case Payload.DEVICE_TYPE:
+					case Payload.DI_DEVICE_TYPE:
 						set(pl.getBuffer());
 						break;
-					case Payload.DEVICE_SN:
+					case Payload.DI_DEVICE_SN:
 						serialNumber = pl.getStringData();
 						break;
-					case Payload.FIRMWARE_VERSION:
+					case Payload.DI_FIRMWARE_VERSION:
 						firmwareVersion = pl.getStringData();
 						break;
-					case Payload.FIRMWARE_BUILD_DATE:
+					case Payload.DI_FIRMWARE_BUILD_DATE:
 						firmwareBuildDate = pl.getStringData();
 						break;
-					case Payload.FIRMWARE_BUILD_COUNTER:
+					case Payload.DI_FIRMWARE_BUILD_COUNTER:
 						firmwareBuildCounter = pl.getInt(0);
 						break;
-					case Payload.UNIT_NAME:
+					case Payload.DI_UNIT_NAME:
 						unitName = pl.getStringData();
 						break;
-//					default:
-//						System.out.println("not used - "+pl.getParameterHeader().getCode());
-//						System.out.println("not used - "+pl.getStringData());
+					case Payload.DI_UNIT_PART_NUMBER:
+						unitPartNumber = pl.getStringData();
+						break;
+					default:
+						logger.warn("not used - {}", pl);
 					}
 				isSet = true;
 			}
@@ -184,5 +194,9 @@ public class DeviceInfo {
 	public void setInfoPanel(InfoPanel infoPanel) {
 		this.infoPanel = infoPanel;
 		infoPanel.setInfo(this);
+	}
+
+	public StringData getUnitPartNumber() {
+		return unitPartNumber;
 	}
 }

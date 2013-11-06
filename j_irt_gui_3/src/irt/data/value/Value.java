@@ -2,14 +2,21 @@ package irt.data.value;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Observable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Value {
+public class Value extends Observable{
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
+	public enum Status{
+				IN_RANGE,
+				UNDER_RANGE,
+				MORE_THEN_RANGE,
+				RANGE_SET
+	}
 	private int type = 0;
 
 	protected long oldValue;
@@ -57,6 +64,7 @@ public class Value {
 	}
 
 	public void setMinMax(long minValue, long maxValue) {
+		setChanged();
 		if (minValue < maxValue) {
 			this.minValue = minValue;
 			this.maxValue = maxValue;
@@ -64,6 +72,9 @@ public class Value {
 			this.minValue = maxValue;
 			this.maxValue = minValue;
 		}
+		notifyObservers(Status.RANGE_SET);
+
+		setValue(value);
 	}
 
 	public void setMinMax(String minValue, String maxValue) {
@@ -106,21 +117,32 @@ public class Value {
 
 	public void setValue(long value) {
 
-		oldValue = this.value;
-		
-		if(value>maxValue){
-			this.value = maxValue;
-			error = true;
-		}else if(value<minValue){
-			error = true;
-			this.value = minValue;
-		}else{
-			this.value = value;
+		if (this.value != value || value<minValue || value>maxValue) {
+			oldValue = this.value;
+			setChanged();
+
+			if (value > maxValue) {
+				this.value = maxValue;
+				error = true;
+				notifyObservers(Status.MORE_THEN_RANGE);
+			} else if (value < minValue) {
+				error = true;
+				this.value = minValue;
+				notifyObservers(Status.UNDER_RANGE);
+			} else {
+				error = false;
+				this.value = value;
+				notifyObservers(Status.IN_RANGE);
+			}
 		}
 	}
 
 	public void setValue(String text) {
 		setValue(parseLong(text));
+	}
+
+	public void setValue(double value) {
+		// TODO Auto-generated method stub
 	}
 
 	public long getValue() {
@@ -209,11 +231,6 @@ public class Value {
 
 	public void setType(int type) {
 		this.type = type;
-	}
-
-	public void setValue(double value) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public Value getCopy() {

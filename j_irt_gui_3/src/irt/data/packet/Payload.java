@@ -11,12 +11,13 @@ import java.util.Arrays;
 
 public class Payload {
 
-	public static final byte DEVICE_TYPE			= 1;
-	public static final byte FIRMWARE_VERSION		= 2;
-	public static final byte FIRMWARE_BUILD_DATE	= 3;
-	public static final byte FIRMWARE_BUILD_COUNTER = 4;
-	public static final byte DEVICE_SN 				= 5;
-	public static final byte UNIT_NAME				= 6;
+	public static final byte 	DI_DEVICE_TYPE				= 1,
+								DI_FIRMWARE_VERSION			= 2,
+								DI_FIRMWARE_BUILD_DATE		= 3,
+								DI_FIRMWARE_BUILD_COUNTER	= 4,
+								DI_DEVICE_SN 				= 5,
+								DI_UNIT_NAME				= 6,
+								DI_UNIT_PART_NUMBER			= 7;
 
 	public static final int PLL1 = 1;
 	public static final int PLL2 = 2;
@@ -207,5 +208,17 @@ public class Payload {
 		}
 
 		return longs;
+	}
+
+	public short[] getArrayShort() {
+		short[] shorts = null;
+
+		if(buffer!=null && (buffer.length%2)==0){
+			shorts = new short[buffer.length/2];
+			for(int i=0; i<shorts.length; i++)
+				shorts[i] = getShort(i);
+		}
+
+		return shorts;
 	}
 }

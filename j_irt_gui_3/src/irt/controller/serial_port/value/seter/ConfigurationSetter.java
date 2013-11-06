@@ -1,6 +1,6 @@
 package irt.controller.serial_port.value.seter;
 
-import irt.controller.serial_port.value.Getter.GetterAbstract;
+import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.translation.Translation;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;

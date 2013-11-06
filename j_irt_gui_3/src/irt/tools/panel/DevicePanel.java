@@ -136,6 +136,7 @@ public class DevicePanel extends Panel {
 
 	protected void setTabbedPane(JPanel extraPanel) {
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		tabbedPane.setOpaque(false);
 		tabbedPane.setBounds(10, 118, 286, 296);
 		extraPanel.add(tabbedPane);

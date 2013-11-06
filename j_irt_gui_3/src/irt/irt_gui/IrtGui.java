@@ -9,6 +9,7 @@ import irt.tools.KeyValue;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
+import irt.tools.panel.subpanel.progressBar.ProgressBar;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -36,7 +37,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.035";
+	public static final String VERTION = "- 3.036";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 
@@ -69,6 +70,10 @@ public class IrtGui extends IrtMainFrame {
 		unitsPanel.setBounds(0, 127, getWidth(), 444);
 		unitsPanel.addStatusListener(headPanel.getStatusChangeListener());
 		getContentPane().add(unitsPanel);
+		
+		ProgressBar progressBar = new ProgressBar();
+		progressBar.setBounds(523, 0, 110, 50);
+		getContentPane().add(progressBar);
 	}
 
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {

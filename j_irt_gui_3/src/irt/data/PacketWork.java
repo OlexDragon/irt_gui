@@ -89,6 +89,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 	public static final short PACKET_NETWORK_ADDRESS = 130;
 
 
+	public static final short PACKET_ID_ALARMS = 140;
+
 	public Integer getPriority();
 	public PacketThread getPacketThread();
 	public void addVlueChangeListener(ValueChangeListener valueChangeListener);

@@ -5,26 +5,40 @@
     	<PatternLayout pattern="%d [%t] %C{2} (%F:%L) %-5p - %m%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
     </Console>
-    <RollingFile name="DumpFile" fileName="${sys:user.home}\irt\${sys:serialNumber}\${sys:serialNumber}.log"
-    						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz">
-		<PatternLayout pattern="%n%d%n %m%n"/>
-			<Policies>
-				<TimeBasedTriggeringPolicy interval="24" modulate="true"/>
-				<SizeBasedTriggeringPolicy size="250 MB"/>
-			</Policies>
-		<DefaultRolloverStrategy max="20"/>
+
+    <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.log"
+    						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz"
+    						  bufferedIO="false">
+		<PatternLayout pattern="%n%d%n %m%n" />
+		<Policies>
+			<SizeBasedTriggeringPolicy size="500 MB" />
+		</Policies>
+		<DefaultRolloverStrategy max="10" />
     </RollingFile>
-    <RandomAccessFile name="communication" fileName="${sys:user.home}\irt\${sys:serialNumber}\comm_${sys:serialNumber}.log">
+
+    <RollingFile name="communication" fileName="${sys:user.home}/irt\${sys:serialNumber}/comm_${sys:serialNumber}.log"
+    						  			filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/comm_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz"
+    						  			bufferedIO="true">
 		<PatternLayout pattern="%d %m%n"/>
-    </RandomAccessFile>
-    <RandomAccessFile name="log" fileName="${sys:user.home}\irt\${sys:serialNumber}\log_${sys:serialNumber}.log">
+		<Policies>
+			<SizeBasedTriggeringPolicy size="500 MB" />
+		</Policies>
+		<DefaultRolloverStrategy max="10" />
+    </RollingFile>
+
+    <RollingFile name="log" fileName="${sys:user.home}/irt/${sys:serialNumber}/log_${sys:serialNumber}.log"
+    					filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/log_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz"
+    					bufferedIO="true">
 		<PatternLayout pattern="%d %m%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
-    </RandomAccessFile>
+		<Policies>
+			<SizeBasedTriggeringPolicy size="500 MB" />
+		</Policies>
+		<DefaultRolloverStrategy max="10" />
+    </RollingFile>
   </Appenders>
 
   <Loggers>
-  <Logger name="irt.data.PacketThread" level="all"/>
  
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

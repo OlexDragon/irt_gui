@@ -13,6 +13,5 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/j_irt_gui_3/resource/log4j-core-2.0-beta9-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

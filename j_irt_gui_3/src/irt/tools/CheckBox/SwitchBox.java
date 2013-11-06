@@ -32,7 +32,7 @@ public class SwitchBox extends JCheckBox {
 		g2.dispose();
 		if (selected != isSelected()) {
 			selected = isSelected();
-			getParent().getParent().getParent().repaint();
+			repaint();
 		}
 	}
 }

@@ -6,7 +6,7 @@ import irt.controller.SwitchController;
 import irt.controller.TextSliderController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.Getter.DeviceDebagGetter;
+import irt.controller.serial_port.value.getter.DeviceDebagGetter;
 import irt.controller.serial_port.value.seter.ConfigurationSetter;
 import irt.controller.serial_port.value.seter.DeviceDebagSetter;
 import irt.controller.serial_port.value.seter.Setter;
