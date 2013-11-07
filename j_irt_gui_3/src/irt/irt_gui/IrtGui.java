@@ -17,6 +17,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.net.URL;
@@ -37,12 +38,12 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.036";
+	public static final String VERTION = "- 3.037";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 
 	public IrtGui() {
-		super(700, 571, 590);
+		super(700, 571);
 		DumpControllers.setSysSerialNumber(null);
 		logger.trace(ctx);
 
@@ -72,7 +73,7 @@ public class IrtGui extends IrtMainFrame {
 		getContentPane().add(unitsPanel);
 		
 		ProgressBar progressBar = new ProgressBar();
-		progressBar.setBounds(523, 0, 110, 50);
+		progressBar.setBounds(540, 0, 110, 50);
 		getContentPane().add(progressBar);
 	}
 
@@ -184,5 +185,10 @@ public class IrtGui extends IrtMainFrame {
 	@Override
 	protected Rectangle comboBoxBounds() {
 		return new Rectangle(279, 11, 186, 28);
+	}
+
+	@Override
+	protected Point getClosePanelPosition() {
+		return new Point(660, 0);
 	}
 }

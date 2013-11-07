@@ -31,7 +31,8 @@ import jssc.SerialPortException;
 
 public class ComPort extends SerialPort {
 
-	private final Logger logger = (Logger) LogManager.getLogger("comPort");
+	private final Logger logger = (Logger) LogManager.getLogger();
+	private final Logger comPortLogger = (Logger) LogManager.getLogger("comPort");
 	private final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private boolean run = true;
@@ -58,7 +59,7 @@ public class ComPort extends SerialPort {
 						closePort();
 					}
 				} catch (SerialPortException e) {
-					logger.catching(e);
+					comPortLogger.catching(e);
 				}
 			}
 		});
@@ -100,8 +101,7 @@ do{
 	Checksum checksum = null;
 
 	synchronized (this) {
-		if(!isOpened()){
-			openPort();
+		if(openPort()){
 			setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 		}
 	}
@@ -114,8 +114,8 @@ do{
 
 			String prefix = (runTimes+1)+") send";
 
-			logger.info(marker, ">> {}: {}", prefix, p);
-			logger.info(marker, ">> {}: {}", prefix, hexStr);
+			comPortLogger.info(marker, ">> {}: {}", prefix, p);
+			comPortLogger.info(marker, ">> {}: {}", prefix, hexStr);
 			Console.appendLn(p, prefix);
 			Console.appendLn(hexStr, prefix);
 
@@ -187,7 +187,7 @@ do{
 					packet = p;
 
 		} catch (SerialPortException e) {
-			logger.catching(e);
+			comPortLogger.catching(e);
 			if(timesTimeout<3){
 				timesTimeout++;
 				setRun(false);
@@ -197,7 +197,7 @@ do{
 
 		timer.stop();
 
-		logger.info(marker, "<< Get: {}", packet);
+		comPortLogger.info(marker, "<< Get: {}", packet);
 		Console.appendLn(packet, "Get");
 		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 
@@ -306,7 +306,7 @@ do{
 			readBytes = super.readBytes(getInputBufferBytesCount());
 			String readBytesStr = ToHex.bytesToHex(readBytes);
 			Console.appendLn(readBytesStr, "Clear");
-			logger.info(marker,"?? clear: {}", readBytesStr);
+			comPortLogger.info(marker,"?? clear: {}", readBytesStr);
 			if(waitTime!=100)
 				waitTime = 100;
 		}
@@ -359,7 +359,7 @@ do{
 		if(hasEsc)
 			readBytes = byteStuffing(readBytes);
 
-		logger.info(marker, "<< get:{}", ToHex.bytesToHex(readBytes));
+		comPortLogger.info(marker, "<< get:{}", ToHex.bytesToHex(readBytes));
 
 		return readBytes;
 	}
@@ -381,7 +381,7 @@ do{
 					wait(waitTime);
 				}
 			} catch (InterruptedException e) {
-				logger.catching(e);
+				comPortLogger.catching(e);
 			}
 
 			if(getInputBufferBytesCount()>0){
@@ -462,7 +462,7 @@ do{
 			synchronized (this) {
 
 				try { wait(waitTime); } catch (InterruptedException e) {
-					logger.catching(e);
+					comPortLogger.catching(e);
 				}
 
 				if(isSerialPortEven)
@@ -476,14 +476,22 @@ do{
 
 	@Override
 	public boolean openPort() throws SerialPortException {
-		boolean isOpen = super.openPort();
-		if(isOpen)
-			addEventListener(serialPortEvent);
+		logger.debug("openPort()");
+
+		boolean isOpen = isOpened();
+
+		if(!isOpen){
+			isOpen = super.openPort();
+			if(isOpen)
+				addEventListener(serialPortEvent);
+		}
+
 		return isOpen;
 	}
 
 	@Override
 	public boolean closePort() throws SerialPortException {
+		logger.debug("closePort()");
 
 		boolean isClose = false;
 		synchronized (this) {
@@ -491,7 +499,7 @@ do{
 				try {
 					removeEventListener();
 				} catch (Exception e) {
-					logger.catching(e);
+					comPortLogger.catching(e);
 				}
 				isClose = super.closePort();
 			} else

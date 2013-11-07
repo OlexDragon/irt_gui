@@ -19,15 +19,13 @@ public class GuiController extends GuiControllerAbstract{
 
 	@Override
 	protected DevicePanel getConverterPanel(DeviceInfo di) {
-		if(softReleaseChecker==null)
-			softReleaseChecker = new SoftReleaseChecker();
+		softReleaseChecker = new SoftReleaseChecker();
 		return new ConverterPanel(di, 0, 0, 0, 0, unitsPanel.getHeight());
 	}
 
 	@Override
 	protected DevicePanel getNewBaisPanel(LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
-		if(softReleaseChecker==null)
-			softReleaseChecker = new SoftReleaseChecker();
+		softReleaseChecker = new SoftReleaseChecker();
 		return new PicobucPanel(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 	}
 

@@ -5,6 +5,7 @@ import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
 
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -19,7 +20,7 @@ import javax.swing.border.EmptyBorder;
 public abstract class IrtMainFrame extends JFrame {
 
 
-	public IrtMainFrame(int width, int hight, int closePanelXPosition) {
+	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex));
 		setSize(width, hight);
 		ImageIcon imageIcon = new ImageIcon(
@@ -41,7 +42,7 @@ public abstract class IrtMainFrame extends JFrame {
 		setLocationRelativeTo(null);
 		
 		ClosePanel closePanel = new ClosePanel(this);
-		closePanel.setLocation(closePanelXPosition, 29);
+		closePanel.setLocation(getClosePanelPosition());
 		contentPane.add(closePanel);
 
 		setIrtPanel(contentPane);
@@ -69,7 +70,8 @@ public abstract class IrtMainFrame extends JFrame {
 		contentPane.add(irtPanel);
 	}
 
-	protected abstract Rectangle comboBoxBounds();
 
+	protected abstract Point getClosePanelPosition();
+	protected abstract Rectangle comboBoxBounds();
 	protected abstract Thread getNewGuiController();
 }

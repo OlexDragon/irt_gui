@@ -39,6 +39,7 @@
   </Appenders>
 
   <Loggers>
+  	<Logger name="irt.controller.serial_port.ComPort" level="debug"/>
  
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

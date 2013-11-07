@@ -119,7 +119,7 @@ public class InfoPanel extends JPanel implements Refresh {
 		font = font.deriveFont(Translation.getValue(Float.class, "infoPanel.labels.font.size", 16f));
 		
 				lblError = new JLabel();
-				lblError.setBounds(15, 2, 266, 15);
+				lblError.setBounds(4, 0, 277, 21);
 				lblError.setFont(new Font("Tahoma", Font.BOLD, 17));
 				lblError.setHorizontalAlignment(SwingConstants.CENTER);
 		
@@ -277,6 +277,8 @@ public class InfoPanel extends JPanel implements Refresh {
 	public void setError(String errorStr, Color errorColor) {
 		lblError.setText(errorStr);
 		lblError.setForeground(errorColor);
+		lblError.setBackground(new Color(0, 51, 51));
+		lblError.setOpaque(true);
 	}
 
 	public static String calculateTime(long seconds) {

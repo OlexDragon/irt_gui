@@ -13,11 +13,10 @@ import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class UserIrtGui extends IrtGui {
-
-	private final static Logger logger = (Logger) LogManager.getLogger();
-
 	public UserIrtGui() {
 	}
+
+	private final static Logger logger = (Logger) LogManager.getLogger();
 
 	public static void main(String[] args) {
 		
