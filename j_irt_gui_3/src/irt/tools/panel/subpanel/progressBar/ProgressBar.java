@@ -136,9 +136,9 @@ public class ProgressBar extends JPanel implements Observer{
 		return value;
 	}
 
-	public static void setMaxValue(String maxValueStr) {
-		logger.trace("setMaxValue({})", maxValueStr);
-		value.setMinMax("330", maxValueStr);
+	public static void setMinMaxValue(String minValueStr, String maxValueStr) {
+		logger.trace("setMaxValue({}, {})", minValueStr, maxValueStr);
+		value.setMinMax(minValueStr, maxValueStr);
 	}
 
 	@Override

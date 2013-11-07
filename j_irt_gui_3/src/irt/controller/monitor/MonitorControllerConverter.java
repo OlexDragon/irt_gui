@@ -10,6 +10,7 @@ import irt.data.packet.Packet;
 import irt.data.value.Value;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
+import irt.tools.panel.subpanel.progressBar.ProgressBar;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -120,6 +121,7 @@ public class MonitorControllerConverter extends ControllerAbstract {
 			t = new Thread(abstractController, "Input Power");
 			t.start();
 			controllerList.add(abstractController);
+			abstractController.setObservable(ProgressBar.getValue());
 			break;
 		case "Unit Temp":
 			value = new ValueDouble(0, 1);

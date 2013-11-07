@@ -43,7 +43,6 @@ public class ComPort extends SerialPort {
 	private short packetId;
 	private boolean isSerialPortEven;
 	private boolean isComfirm;
-	private long start;
 
 	public ComPort(String portName) {
 		super(portName);
@@ -68,7 +67,7 @@ public class ComPort extends SerialPort {
 
 	public Packet send(PacketWork packetWork){
 
-		start = System.currentTimeMillis();
+		long start = System.currentTimeMillis();
 		PacketThread pt = packetWork.getPacketThread();
 		Packet p = pt.getPacket();
 		PacketHeader ph = p.getHeader();
@@ -112,10 +111,11 @@ do{
 
 			byte[] data = pt.getData();
 			String hexStr = ToHex.bytesToHex(data);
-			logger.info(marker, ">> Sent:{}", hexStr);
 
 			String prefix = (runTimes+1)+") send";
 
+			logger.info(marker, ">> {}: {}", prefix, p);
+			logger.info(marker, ">> {}: {}", prefix, hexStr);
 			Console.appendLn(p, prefix);
 			Console.appendLn(hexStr, prefix);
 
@@ -197,6 +197,7 @@ do{
 
 		timer.stop();
 
+		logger.info(marker, "<< Get: {}", packet);
 		Console.appendLn(packet, "Get");
 		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 

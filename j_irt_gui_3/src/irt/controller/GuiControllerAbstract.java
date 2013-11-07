@@ -160,6 +160,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						}
 
 						if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+							logger.debug(packet.getHeader());
 
 							remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null);
 
@@ -181,9 +182,14 @@ public abstract class GuiControllerAbstract extends Thread {
 								dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null, di);
 
 								StringData unitPartNumber = di.getUnitPartNumber();
-								if(!unitPartNumber.equals("N/A")){
-									logger.trace("unitPartNumber={}", unitPartNumber);
-									ProgressBar.setMaxValue(unitPartNumber.toString().substring(7, 11));
+								if(protocol == Protocol.LINKED){
+									if(!unitPartNumber.equals("N/A")){
+										logger.trace("protocol={}, unitPartNumber={}", protocol, unitPartNumber);
+										ProgressBar.setMinMaxValue("330", unitPartNumber.toString().substring(7, 11));
+									}
+								}else if(protocol == Protocol.CONVERTER){
+									logger.debug(protocol);
+									ProgressBar.setMinMaxValue("-80", "120");
 								}
 							}
 
