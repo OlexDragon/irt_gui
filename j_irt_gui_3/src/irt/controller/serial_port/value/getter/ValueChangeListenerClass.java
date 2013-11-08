@@ -8,9 +8,13 @@ import irt.data.listener.ValueChangeListener;
 
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 
 public class ValueChangeListenerClass {
 
+	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	private EventListenerList valueChangeListeners = new EventListenerList();
@@ -25,6 +29,7 @@ public class ValueChangeListenerClass {
 	}
 
 	public void fireValueChangeListener(ValueChangeEvent valueChangeEvent) {
+		logger.trace("fireValueChangeListener() valueChangeListeners={}", valueChangeListeners);
 		Thread t = new Thread(new FireValue(valueChangeListeners, valueChangeEvent), "fireValueChangeListener for "+getClass().getSimpleName());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

@@ -60,11 +60,9 @@ public class ComPortThreadQueue extends Thread {
 							StaticComponents.getLedRx().blink();
 						}
 					}
-					synchronized (serialPort) {
-						if(comPortQueue.isEmpty()){
-							serialPort.closePort();
-						}
-					}
+//					if(comPortQueue.isEmpty()){
+//						serialPort.closePort();
+//					}
 				}
 			} catch (Exception e) {
 				logger.catching(e);
@@ -73,19 +71,17 @@ public class ComPortThreadQueue extends Thread {
 		}
 	}
 
-	public void add(PacketWork packetWork){
+	public synchronized void add(PacketWork packetWork){
 			
 		try {
-			synchronized (this) {
 
-				if(!comPortQueue.contains(packetWork)){
+			if (!comPortQueue.contains(packetWork)) {
 
-					PacketThread pt = packetWork.getPacketThread();
-					pt.start();
+				PacketThread pt = packetWork.getPacketThread();
+				pt.start();
 
-					comPortQueue.add(packetWork);
-//					System.out.println("<<< is added - "+packetWork);
-				}
+				comPortQueue.add(packetWork);
+				// System.out.println("<<< is added - "+packetWork);
 			}
 		} catch (IllegalStateException e) {
 			logger.catching(e);

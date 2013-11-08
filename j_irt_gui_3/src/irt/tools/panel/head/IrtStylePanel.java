@@ -31,33 +31,32 @@ public class IrtStylePanel extends JPanel {
 
 	@Override
 	protected void paintComponent(Graphics g) {
-		logger.trace("paintComponent(Graphics g) {}", getClass().getSimpleName());
-		Graphics2D g2 = (Graphics2D)g;
-		g2.setRenderingHints(ImageButton.RENDERING);
-		Color background = getBackground();
-		if(isGradient)
-			g2.setPaint(new GradientPaint(0,0, background, 0,(int)(getHeight()/1.5), background.darker().darker().darker(), true));
-		else
-			g2.setPaint(background);
-		int w = getWidth()-1;
-		int h = getHeight()-1;
-		g2.fillRoundRect(0, 0, w, h, cornerWidth, cornerHeight);
-		g2.setPaint(Color.WHITE);
-		g2.drawRoundRect(0, 0, w, h, cornerWidth, cornerHeight);
-		g2.setPaint(Color.BLACK);
-		g2.drawRoundRect(2, 2, w-4, h-4, cornerWidth, cornerHeight);
-
-		g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
-		g2.setPaint(new GradientPaint(0, 0, Color.WHITE, 0, getHeight()/2, Color.BLUE, true));
-
-		if(isArc){
-			int arcStart = this.arcStart;
-			for(;arcStart<getWidth(); arcStart+=arcStep)
-				g2.draw(new Arc2D.Double(arcStart, 0, arcWidth, getHeight(), -42, 80, Arc2D.OPEN));
+		synchronized (g) {
+			logger.trace("paintComponent(Graphics g) {}", getClass().getSimpleName());
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setRenderingHints(ImageButton.RENDERING);
+			Color background = getBackground();
+			if (isGradient)
+				g2.setPaint(new GradientPaint(0, 0, background, 0, (int) (getHeight() / 1.5), background.darker().darker().darker(), true));
+			else
+				g2.setPaint(background);
+			int w = getWidth() - 1;
+			int h = getHeight() - 1;
+			g2.fillRoundRect(0, 0, w, h, cornerWidth, cornerHeight);
+			g2.setPaint(Color.WHITE);
+			g2.drawRoundRect(0, 0, w, h, cornerWidth, cornerHeight);
+			g2.setPaint(Color.BLACK);
+			g2.drawRoundRect(2, 2, w - 4, h - 4, cornerWidth, cornerHeight);
+			g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
+			g2.setPaint(new GradientPaint(0, 0, Color.WHITE, 0, getHeight() / 2, Color.BLUE, true));
+			if (isArc) {
+				int arcStart = this.arcStart;
+				for (; arcStart < getWidth(); arcStart += arcStep)
+					g2.draw(new Arc2D.Double(arcStart, 0, arcWidth, getHeight(), -42, 80, Arc2D.OPEN));
+			}
+			paintChildren(g2);
+			g.dispose();
 		}
-
-		paintChildren(g2);
-		g.dispose();
 	}
 
 	public int getArcStep() {

@@ -154,9 +154,11 @@ public abstract class GuiControllerAbstract extends Thread {
 							unitPanel = getNewBaisPanel(((LinkedPacket)packet).getLinkHeader(), "("+di.getSerialNumber()+") "+di.getUnitName(), 0, 0, 0, 0, unitsPanel.getHeight());
 							break;
 						default:
-							if(type>0)
+							if(type>0){
 								JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id="+type+")");
-							logger.warn("Device Type:{}", packet.getHeader().getGroupId());
+								logger.warn("The Device is not Supported.(device Id={})", type);
+							}else
+								logger.warn("Can not connect");
 						}
 
 						if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){

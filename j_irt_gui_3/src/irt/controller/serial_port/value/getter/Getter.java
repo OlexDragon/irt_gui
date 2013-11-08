@@ -1,5 +1,7 @@
 package irt.controller.serial_port.value.getter;
 
+import java.util.Arrays;
+
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
@@ -31,10 +33,11 @@ public class Getter extends GetterAbstract {
 			PacketThread upt = getPacketThread();
 			Packet up = upt.getPacket();
 
+			short packetId = getPacketId();
 			if(cph!=null && up!=null &&
 					cph.getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
 						cph.getGroupId()==up.getHeader().getGroupId() &&
-							cph.getPacketId()==getPacketId()){
+							cph.getPacketId()==packetId){
 
 				long tmp = value;
 				Object source = null;
@@ -70,25 +73,32 @@ public class Getter extends GetterAbstract {
 							case PacketWork.PACKET_ID_DUMP_REGISTER_6:
 							case PacketWork.PACKET_ID_DUMP_REGISTER_100:
 								source = pl.getStringData();
+								logger.trace("Dump, source={}", source);
 								tmp= value+1;//I need all dumps. So tmp!=value
 								break;
 							case PacketWork.PACKET_ID_ALARMS:
+							case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+							case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+							case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+							case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
 								source = pl.getArrayShort();
-								tmp = source.hashCode();
+								logger.trace("PacketWork.PACKET_ID_ALARMS, {}", source);
+								tmp = Arrays.hashCode((short[]) source);
 								break;
 							default:
 								source = pl.getStringData();
+								logger.trace("default, source=", source);
 								tmp = source.hashCode();
 							}
-							logger.trace("source: {}; Value: {}; tmp: {}; equales: {}; {}", source, value, tmp, value==tmp, packet);
 						}
 					}
 					isSet = true;
 				}
 
 				if(source!=null && tmp!=value){
+					logger.trace("fireValueChangeListener(new ValueChangeEvent(source={}, packetId={}))", source, packetId);
 					value = tmp;
-					fireValueChangeListener(new ValueChangeEvent(source, getPacketId()));
+					fireValueChangeListener(new ValueChangeEvent(source, packetId));
 				}
 
 			}

@@ -20,14 +20,14 @@ import java.util.List;
 
 import javax.swing.Timer;
 
+import jssc.SerialPort;
+import jssc.SerialPortEventListener;
+import jssc.SerialPortException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.apache.logging.log4j.core.Logger;
-
-import jssc.SerialPort;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
 
 public class ComPort extends SerialPort {
 
@@ -99,7 +99,7 @@ if(!isRun())
 do{
 
 	Checksum checksum = null;
-
+	logger.trace(ph);
 	synchronized (this) {
 		if(openPort()){
 			setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
@@ -476,37 +476,44 @@ do{
 
 	@Override
 	public boolean openPort() throws SerialPortException {
-		logger.debug("openPort()");
+		
+		boolean isOpened;
 
-		boolean isOpen = isOpened();
+		synchronized (logger) {
+			isOpened = isOpened();
 
-		if(!isOpen){
-			isOpen = super.openPort();
-			if(isOpen)
-				addEventListener(serialPortEvent);
+			logger.debug("openPort() is Opened={}", isOpened);
+
+			if (!isOpened) {
+				isOpened = super.openPort();
+				if (isOpened)
+					addEventListener(serialPortEvent);
+			}
 		}
-
-		return isOpen;
+		return isOpened;
 	}
 
 	@Override
 	public boolean closePort() throws SerialPortException {
-		logger.debug("closePort()");
 
-		boolean isClose = false;
-		synchronized (this) {
-			if (isOpened()) {
+		boolean isClosed = !isOpened();
+		logger.debug("1) closePort()is Closed={}",isClosed);
+
+		synchronized (logger) {
+			if (!isClosed) {
 				try {
 					removeEventListener();
 				} catch (Exception e) {
+					
 					comPortLogger.catching(e);
 				}
-				isClose = super.closePort();
-			} else
-				isClose = true;
+				boolean isPurged = purgePort(PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
+				isClosed = super.closePort();
+				logger.debug("2) closePort()is Closed={}, is purged={}",isClosed, isPurged);
+			}
 		}
 
-		return isClose;
+		return isClosed;
 	}
 
 	//*** Class SerialPortEvent *****************************************************

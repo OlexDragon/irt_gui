@@ -89,7 +89,11 @@ public interface PacketWork extends Comparable<PacketWork>{
 	public static final short PACKET_NETWORK_ADDRESS = 130;
 
 
-	public static final short PACKET_ID_ALARMS = 140;
+	public static final short 	PACKET_ID_ALARMS = 140,
+								PACKET_ID_ALARMS_OWER_CURRENT		= 141,
+								PACKET_ID_ALARMS_UNDER_CURRENT		= 142,
+								PACKET_ID_ALARMS_OWER_TEMPERATURE	= 143,
+								PACKET_ID_ALARMS_PLL_OUT_OF_LOCK	= 144;
 
 	public Integer getPriority();
 	public PacketThread getPacketThread();

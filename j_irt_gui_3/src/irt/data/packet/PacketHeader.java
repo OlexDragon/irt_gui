@@ -109,6 +109,18 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_ALARMS:
 				packetIdStr = "Alarms("+packetId+")";
 				break;
+			case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+				packetIdStr = "Alarm - Ower Current("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+				packetIdStr = "Alarm - Ower Temperature("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+				packetIdStr = "Alarm - PLL out of Lock("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+				packetIdStr = "Alarm - Under Current("+packetId+")";
+				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE:
 				packetIdStr = "Bias Temperature("+packetId+")";
 				break;

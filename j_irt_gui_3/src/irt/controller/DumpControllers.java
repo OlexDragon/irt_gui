@@ -1,5 +1,6 @@
 package irt.controller;
 
+import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
@@ -33,7 +34,7 @@ public class DumpControllers {
 	private final Logger dumper = (Logger) LogManager.getLogger("dumper");
 	private final Marker marker = MarkerManager.getMarker("FileWork");
 
-	private List<DumpController> dumpsList = new ArrayList<>();
+	private List<DefaultController> dumpsList = new ArrayList<>();
 
 	private volatile static Map<Integer, String> variables = new HashMap<>();
 
@@ -104,7 +105,7 @@ public class DumpControllers {
 		int dumpWaitMinuts = GuiController.getPrefs().getInt(DUMP_WAIT, 10);
 		int waitTime = 1000*60*dumpWaitMinuts;
 
-		logger.debug("new DumpControllers({}, {}, {}, waitTime={} msec({} min))", unitsPanel, linkHeader, deviceInfo, waitTime, dumpWaitMinuts);
+		logger.trace("new DumpControllers({}, {}, {}, waitTime={} msec({} min))", unitsPanel, linkHeader, deviceInfo, waitTime, dumpWaitMinuts);
 
 //		this.parent = unitsPanel;
 
@@ -184,8 +185,8 @@ public class DumpControllers {
 
 	private void addDumpController(Getter getter, int waitTime){
 
-		DumpController dumpController = new DumpController(getter)
-		{ @Override protected ValueChangeListener addGetterValueChangeListener() { return valueChangeListener; }};
+		DefaultController dumpController = new DefaultController(getter, Style.CHECK_ONCE)
+		{ @Override protected ValueChangeListener addGetterValueChangeListener() { return DumpControllers.this.valueChangeListener; }};
 
 		dumpController.setWaitTime(waitTime);
 
@@ -322,7 +323,7 @@ public class DumpControllers {
 
 	public void stop() {
 		logger.trace("stop()");
-		for(DumpController dc:dumpsList)
+		for(DefaultController dc:dumpsList)
 			dc.setRun(false);
 	}
 
@@ -335,7 +336,7 @@ public class DumpControllers {
 	public void setWaitTime(int waitTime) {
 		logger.trace("setWaitTime(waitTime={})", waitTime);
 
-		for (DumpController dc:dumpsList)
+		for (DefaultController dc:dumpsList)
 			dc.setWaitTime(waitTime);
 	}
 }

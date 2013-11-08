@@ -79,12 +79,12 @@ public class AlarmsPanel extends JPanel {
 		label_6.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
 		JLabel lblOwerTemperature = new JLabel("No Alarm");
+		lblOwerTemperature.setEnabled(false);
 		lblOwerTemperature.setOpaque(true);
 		lblOwerTemperature.setName("Ower-Temperature");
 		lblOwerTemperature.setHorizontalAlignment(SwingConstants.CENTER);
-		lblOwerTemperature.setForeground(Color.YELLOW);
+		lblOwerTemperature.setForeground(new Color(204, 204, 204));
 		lblOwerTemperature.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblOwerTemperature.setBackground(new Color(46, 139, 87));
 		GroupLayout gl_panel_3 = new GroupLayout(panel_3);
 		gl_panel_3.setHorizontalGroup(
 			gl_panel_3.createParallelGroup(Alignment.LEADING)
@@ -111,12 +111,12 @@ public class AlarmsPanel extends JPanel {
 		label_4.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
 		JLabel lblUnderCurrent = new JLabel("No Alarm");
+		lblUnderCurrent.setEnabled(false);
 		lblUnderCurrent.setOpaque(true);
 		lblUnderCurrent.setName("Under-Current");
 		lblUnderCurrent.setHorizontalAlignment(SwingConstants.CENTER);
-		lblUnderCurrent.setForeground(Color.YELLOW);
+		lblUnderCurrent.setForeground(new Color(204, 204, 204));
 		lblUnderCurrent.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblUnderCurrent.setBackground(new Color(46, 139, 87));
 		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
 		gl_panel_2.setHorizontalGroup(
 			gl_panel_2.createParallelGroup(Alignment.LEADING)
@@ -143,12 +143,12 @@ public class AlarmsPanel extends JPanel {
 		label_2.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
 		JLabel lblOwerCurrent = new JLabel("No Alarm");
+		lblOwerCurrent.setEnabled(false);
 		lblOwerCurrent.setOpaque(true);
 		lblOwerCurrent.setName("Ower-Current");
 		lblOwerCurrent.setHorizontalAlignment(SwingConstants.CENTER);
-		lblOwerCurrent.setForeground(Color.YELLOW);
+		lblOwerCurrent.setForeground(new Color(204, 204, 204));
 		lblOwerCurrent.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblOwerCurrent.setBackground(new Color(46, 139, 87));
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
@@ -170,24 +170,24 @@ public class AlarmsPanel extends JPanel {
 		);
 		panel_1.setLayout(gl_panel_1);
 		
-		JLabel label = new JLabel("PLL Out Off Lock");
-		label.setForeground(new Color(0, 0, 255));
-		label.setFont(new Font("Tahoma", Font.BOLD, 14));
+		JLabel lblPllOutOf = new JLabel("PLL Out of Lock");
+		lblPllOutOf.setForeground(new Color(0, 0, 255));
+		lblPllOutOf.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
 		JLabel lblPllOutOffLock = new JLabel("No Alarm");
+		lblPllOutOffLock.setEnabled(false);
 		
 		lblPllOutOffLock.setOpaque(true);
 		lblPllOutOffLock.setName("PLL Out Off Lock");
 		lblPllOutOffLock.setHorizontalAlignment(SwingConstants.CENTER);
-		lblPllOutOffLock.setForeground(Color.YELLOW);
+		lblPllOutOffLock.setForeground(new Color(204, 204, 204));
 		lblPllOutOffLock.setFont(new Font("Tahoma", Font.BOLD, 14));
-		lblPllOutOffLock.setBackground(new Color(46, 139, 87));
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.TRAILING)
 				.addGroup(Alignment.LEADING, gl_panel.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(label, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+					.addComponent(lblPllOutOf, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblPllOutOffLock, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
@@ -197,7 +197,7 @@ public class AlarmsPanel extends JPanel {
 				.addGroup(gl_panel.createSequentialGroup()
 					.addGap(2)
 					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-						.addComponent(label)
+						.addComponent(lblPllOutOf)
 						.addComponent(lblPllOutOffLock))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);

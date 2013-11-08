@@ -142,7 +142,7 @@ public class DeviceInfo {
 						unitPartNumber = pl.getStringData();
 						break;
 					default:
-						logger.warn("not used - {}", pl);
+						logger.warn("not used - {}", packet);
 					}
 				isSet = true;
 			}

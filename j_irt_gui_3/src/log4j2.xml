@@ -16,30 +16,27 @@
 		<DefaultRolloverStrategy max="10" />
     </RollingFile>
 
-    <RollingFile name="communication" fileName="${sys:user.home}/irt\${sys:serialNumber}/comm_${sys:serialNumber}.log"
-    						  			filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/comm_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz"
-    						  			bufferedIO="true">
+    <RollingRandomAccessFile name="communication" fileName="${sys:user.home}/irt\${sys:serialNumber}/comm_${sys:serialNumber}.log"
+    						  			filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/comm_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz">
 		<PatternLayout pattern="%d %m%n"/>
 		<Policies>
 			<SizeBasedTriggeringPolicy size="500 MB" />
 		</Policies>
 		<DefaultRolloverStrategy max="10" />
-    </RollingFile>
+    </RollingRandomAccessFile>
 
-    <RollingFile name="log" fileName="${sys:user.home}/irt/${sys:serialNumber}/log_${sys:serialNumber}.log"
-    					filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/log_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz"
-    					bufferedIO="true">
+    <RollingRandomAccessFile name="log" fileName="${sys:user.home}/irt/${sys:serialNumber}/log_${sys:serialNumber}.log"
+    					filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/log_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz">
 		<PatternLayout pattern="%d %m%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
 		<Policies>
 			<SizeBasedTriggeringPolicy size="500 MB" />
 		</Policies>
 		<DefaultRolloverStrategy max="10" />
-    </RollingFile>
+    </RollingRandomAccessFile>
   </Appenders>
 
   <Loggers>
-  	<Logger name="irt.controller.serial_port.ComPort" level="debug"/>
  
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />
@@ -49,7 +46,7 @@
       <AppenderRef ref="communication" />
     </Logger>
 
-    <Root level="WARM">
+    <Root level="WARN">
       <AppenderRef ref="STDOUT"/>
       <AppenderRef ref="log"/>
     </Root>

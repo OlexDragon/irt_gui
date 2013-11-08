@@ -28,7 +28,7 @@ public abstract class ControllerAbstract implements Runnable{
 	}
 	private PacketWork packetWork;
 	private PacketListener packetListener;
-	private ValueChangeListener valueChangeListener;
+	protected ValueChangeListener valueChangeListener;
 
 	protected volatile boolean run = true;
 	protected volatile boolean send = true;
@@ -83,14 +83,21 @@ public abstract class ControllerAbstract implements Runnable{
 
 						logger.trace(">>> run - {}  : {}", send, getPacketWork().getPacketThread());
 
-						if(send){ send(); }
-						if(isWait()) wait(waitTime);
+						if(send){
+							send();
+							if(isWait())
+								logger.trace("wait({})", waitTime);
+								wait(waitTime);
+						}else{
+							logger.trace("wait()");
+							wait();
+						}
 					} catch (InterruptedException e) {
 						logger.catching(e);
 					}
 				}
 			}
-//			System.out.println("Stop - "+ControllerAbstract.this.getClass().getSimpleName());
+			logger.trace("{} is stopped", ControllerAbstract.this.getClass().getSimpleName());
 			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 			clear();
 		}
@@ -153,7 +160,7 @@ public abstract class ControllerAbstract implements Runnable{
 
 		this.send = send;
 
-		if(isNotify)
+		if(isNotify || send)
 			notify();
 	}
 
