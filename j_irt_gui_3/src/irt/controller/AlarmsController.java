@@ -2,6 +2,7 @@ package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.Getter;
+import irt.controller.translation.Translation;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -125,19 +126,19 @@ public class AlarmsController extends ControllerAbstract {
 				case ALARMS_STATUS_NO_ALARM:
 					label.setBackground(new Color(46, 139, 87));
 					label.setForeground(Color.YELLOW);
-					label.setText("No Alarm");
+					label.setText(Translation.getValue(String.class, "no_alarm", "No Alarm"));
 					break;
 				case ALARMS_STATUS_WARNING:
 				case ALARMS_STATUS_MINOR:
 					label.setBackground(new Color(255, 204, 102));
 					label.setForeground(Color.BLACK);
-					label.setText("Warning");
+					label.setText(Translation.getValue(String.class, "warning", "Warning"));
 					break;
 				case ALARMS_STATUS_ALARM:
 				case ALARMS_STATUS_FAULT:
 					label.setBackground(Color.RED);
 					label.setForeground(Color.YELLOW);
-					label.setText("Alarm");
+					label.setText(Translation.getValue(String.class, "alarm", "Alarm"));
 				}
 			}
 		};
@@ -233,13 +234,13 @@ public class AlarmsController extends ControllerAbstract {
 					case "PLL Out Off Lock":
 						lblPllOutOffLock = (JLabel) c;
 						break;
-					case "Ower-Current":
+					case "Over-Current":
 						lblOwerCurrent = (JLabel) c;
 						break;
 					case "Under-Current":
 						lblUnderCurrent = (JLabel) c;
 						break;
-					case "Ower-Temperature":
+					case "Over-Temperature":
 						lblOwerTemperature = (JLabel) c;
 						break;
 					default:

@@ -34,7 +34,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblCpuTemp_1.setName("");
 		lblCpuTemp_1.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblCpuTemp_1.setForeground(new Color(153, 255, 255));
-		lblCpuTemp_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblCpuTemp_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblCpuTemp_1.setBounds(15, 86, 93, 17);
 		add(lblCpuTemp_1);
 		
@@ -50,7 +50,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblUnitTemp_1.setName("");
 		lblUnitTemp_1.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblUnitTemp_1.setForeground(new Color(153, 255, 255));
-		lblUnitTemp_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblUnitTemp_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblUnitTemp_1.setBounds(15, 62, 93, 17);
 		add(lblUnitTemp_1);
 		
@@ -58,7 +58,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		label_3.setName("");
 		label_3.setHorizontalAlignment(SwingConstants.RIGHT);
 		label_3.setForeground(new Color(153, 255, 255));
-		label_3.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		label_3.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		label_3.setBounds(15, 14, 93, 17);
 		add(label_3);
 		
@@ -82,7 +82,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblV_2.setName("");
 		lblV_2.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblV_2.setForeground(new Color(153, 255, 255));
-		lblV_2.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblV_2.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblV_2.setBounds(15, 158, 93, 17);
 		add(lblV_2);
 		
@@ -90,7 +90,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblV_1.setName("");
 		lblV_1.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblV_1.setForeground(new Color(153, 255, 255));
-		lblV_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblV_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblV_1.setBounds(15, 134, 93, 17);
 		add(lblV_1);
 		
@@ -98,7 +98,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblV.setName("");
 		lblV.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblV.setForeground(new Color(153, 255, 255));
-		lblV.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblV.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblV.setBounds(15, 110, 93, 17);
 		add(lblV);
 		
@@ -130,7 +130,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblOutputPower_1.setName("");
 		lblOutputPower_1.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblOutputPower_1.setForeground(new Color(153, 255, 255));
-		lblOutputPower_1.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		lblOutputPower_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
 		lblOutputPower_1.setBounds(15, 38, 93, 17);
 		add(lblOutputPower_1);
 		

@@ -110,10 +110,10 @@ public class PacketHeader{
 				packetIdStr = "Alarms("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
-				packetIdStr = "Alarm - Ower Current("+packetId+")";
+				packetIdStr = "Alarm - Over Current("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
-				packetIdStr = "Alarm - Ower Temperature("+packetId+")";
+				packetIdStr = "Alarm - Over Temperature("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
 				packetIdStr = "Alarm - PLL out of Lock("+packetId+")";

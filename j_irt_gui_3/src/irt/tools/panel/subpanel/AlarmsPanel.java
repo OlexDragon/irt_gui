@@ -1,6 +1,8 @@
 package irt.tools.panel.subpanel;
 
 import irt.controller.AlarmsController;
+import irt.controller.interfaces.Refresh;
+import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
 
 import java.awt.Color;
@@ -19,9 +21,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
 import java.awt.Component;
+
 import javax.swing.border.LineBorder;
 
-public class AlarmsPanel extends JPanel {
+public class AlarmsPanel extends JPanel implements Refresh{
 	private static final int ALARMS_WIDTH = 90;
 
 	private static final long serialVersionUID = -3029893758378178725L;
@@ -29,16 +32,34 @@ public class AlarmsPanel extends JPanel {
 	protected final Logger logger = (Logger) LogManager.getLogger();
 
 	private AlarmsController alarmsController;
+
+	private JLabel lblPllOutOfLockTxt;
+
+	private JLabel lblOverCurrentTxt;
+
+	private JLabel lblUnderCurrentTxt;
+
+	private JLabel lblOverTemperatureTxt;
+
+	private JLabel lblPllOutOffLock;
+
+	private JLabel lblOverCurrent;
+
+	private JLabel lblUnderCurrent;
+
+	private JLabel lblOverTemperature;
 	
 	public AlarmsPanel(final LinkHeader linkHeader) {
-		
+
+		Font font = Translation.getFont().deriveFont(14f);
+
 		JPanel panel = new JPanel();
 		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
 		panel.setName("PLL Out Off Lock");
 		
 		JPanel panel_1 = new JPanel();
 		panel_1.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel_1.setName("Ower-Current");
+		panel_1.setName("Over-Current");
 		
 		JPanel panel_2 = new JPanel();
 		panel_2.setBorder(new LineBorder(new Color(0, 0, 0)));
@@ -46,7 +67,7 @@ public class AlarmsPanel extends JPanel {
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel_3.setName("Ower-Temperature");
+		panel_3.setName("Over-Temperature");
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
@@ -74,25 +95,26 @@ public class AlarmsPanel extends JPanel {
 		);
 		groupLayout.linkSize(SwingConstants.VERTICAL, new Component[] {panel, panel_1, panel_2, panel_3});
 		
-		JLabel label_6 = new JLabel("Ower-Temperature");
-		label_6.setForeground(new Color(0, 0, 255));
-		label_6.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblOverTemperatureTxt = new JLabel(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
+		lblOverTemperatureTxt.setForeground(new Color(0, 0, 255));
+		lblOverTemperatureTxt.setFont(font);
 		
-		JLabel lblOwerTemperature = new JLabel("No Alarm");
-		lblOwerTemperature.setEnabled(false);
-		lblOwerTemperature.setOpaque(true);
-		lblOwerTemperature.setName("Ower-Temperature");
-		lblOwerTemperature.setHorizontalAlignment(SwingConstants.CENTER);
-		lblOwerTemperature.setForeground(new Color(204, 204, 204));
-		lblOwerTemperature.setFont(new Font("Tahoma", Font.BOLD, 14));
+		String noAlarmTxt = Translation.getValue(String.class, "no_alarm", "No Alarm");
+		lblOverTemperature = new JLabel(noAlarmTxt);
+		lblOverTemperature.setEnabled(false);
+		lblOverTemperature.setOpaque(true);
+		lblOverTemperature.setName("Over-Temperature");
+		lblOverTemperature.setHorizontalAlignment(SwingConstants.CENTER);
+		lblOverTemperature.setForeground(new Color(204, 204, 204));
+		lblOverTemperature.setFont(font);
 		GroupLayout gl_panel_3 = new GroupLayout(panel_3);
 		gl_panel_3.setHorizontalGroup(
 			gl_panel_3.createParallelGroup(Alignment.LEADING)
 				.addGroup(Alignment.TRAILING, gl_panel_3.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(label_6, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+					.addComponent(lblOverTemperatureTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(lblOwerTemperature, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
+					.addComponent(lblOverTemperature, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
 		);
 		gl_panel_3.setVerticalGroup(
@@ -100,29 +122,29 @@ public class AlarmsPanel extends JPanel {
 				.addGroup(gl_panel_3.createSequentialGroup()
 					.addGap(2)
 					.addGroup(gl_panel_3.createParallelGroup(Alignment.BASELINE)
-						.addComponent(label_6)
-						.addComponent(lblOwerTemperature))
+						.addComponent(lblOverTemperatureTxt)
+						.addComponent(lblOverTemperature))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		panel_3.setLayout(gl_panel_3);
 		
-		JLabel label_4 = new JLabel("Under-Current");
-		label_4.setForeground(new Color(0, 0, 255));
-		label_4.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblUnderCurrentTxt = new JLabel(Translation.getValue(String.class, "under_current", "Under-Current"));
+		lblUnderCurrentTxt.setForeground(new Color(0, 0, 255));
+		lblUnderCurrentTxt.setFont(font);
 		
-		JLabel lblUnderCurrent = new JLabel("No Alarm");
+		lblUnderCurrent = new JLabel(noAlarmTxt);
 		lblUnderCurrent.setEnabled(false);
 		lblUnderCurrent.setOpaque(true);
 		lblUnderCurrent.setName("Under-Current");
 		lblUnderCurrent.setHorizontalAlignment(SwingConstants.CENTER);
 		lblUnderCurrent.setForeground(new Color(204, 204, 204));
-		lblUnderCurrent.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblUnderCurrent.setFont(font);
 		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
 		gl_panel_2.setHorizontalGroup(
 			gl_panel_2.createParallelGroup(Alignment.LEADING)
 				.addGroup(Alignment.TRAILING, gl_panel_2.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(label_4, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+					.addComponent(lblUnderCurrentTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblUnderCurrent, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
@@ -132,31 +154,31 @@ public class AlarmsPanel extends JPanel {
 				.addGroup(gl_panel_2.createSequentialGroup()
 					.addGap(2)
 					.addGroup(gl_panel_2.createParallelGroup(Alignment.BASELINE)
-						.addComponent(label_4)
+						.addComponent(lblUnderCurrentTxt)
 						.addComponent(lblUnderCurrent))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		panel_2.setLayout(gl_panel_2);
 		
-		JLabel label_2 = new JLabel("Ower-Current");
-		label_2.setForeground(new Color(0, 0, 255));
-		label_2.setFont(new Font("Tahoma", Font.BOLD, 14));
-		
-		JLabel lblOwerCurrent = new JLabel("No Alarm");
-		lblOwerCurrent.setEnabled(false);
-		lblOwerCurrent.setOpaque(true);
-		lblOwerCurrent.setName("Ower-Current");
-		lblOwerCurrent.setHorizontalAlignment(SwingConstants.CENTER);
-		lblOwerCurrent.setForeground(new Color(204, 204, 204));
-		lblOwerCurrent.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblOverCurrentTxt = new JLabel(Translation.getValue(String.class, "over_current", "Over-Current"));
+		lblOverCurrentTxt.setForeground(new Color(0, 0, 255));
+		lblOverCurrentTxt.setFont(font);
+
+		lblOverCurrent = new JLabel(noAlarmTxt);
+		lblOverCurrent.setEnabled(false);
+		lblOverCurrent.setOpaque(true);
+		lblOverCurrent.setName("Over-Current");
+		lblOverCurrent.setHorizontalAlignment(SwingConstants.CENTER);
+		lblOverCurrent.setForeground(new Color(204, 204, 204));
+		lblOverCurrent.setFont(font);
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
 				.addGroup(Alignment.TRAILING, gl_panel_1.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(label_2, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+					.addComponent(lblOverCurrentTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(lblOwerCurrent, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
+					.addComponent(lblOverCurrent, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
 		);
 		gl_panel_1.setVerticalGroup(
@@ -164,30 +186,30 @@ public class AlarmsPanel extends JPanel {
 				.addGroup(gl_panel_1.createSequentialGroup()
 					.addGap(2)
 					.addGroup(gl_panel_1.createParallelGroup(Alignment.BASELINE)
-						.addComponent(label_2)
-						.addComponent(lblOwerCurrent))
+						.addComponent(lblOverCurrentTxt)
+						.addComponent(lblOverCurrent))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		panel_1.setLayout(gl_panel_1);
+
+		lblPllOutOfLockTxt = new JLabel(Translation.getValue(String.class, "pll_out_of_lock", "PLL Out of Lock"));
+		lblPllOutOfLockTxt.setForeground(new Color(0, 0, 255));
+		lblPllOutOfLockTxt.setFont(font);
 		
-		JLabel lblPllOutOf = new JLabel("PLL Out of Lock");
-		lblPllOutOf.setForeground(new Color(0, 0, 255));
-		lblPllOutOf.setFont(new Font("Tahoma", Font.BOLD, 14));
-		
-		JLabel lblPllOutOffLock = new JLabel("No Alarm");
+		lblPllOutOffLock = new JLabel(noAlarmTxt);
 		lblPllOutOffLock.setEnabled(false);
 		
 		lblPllOutOffLock.setOpaque(true);
 		lblPllOutOffLock.setName("PLL Out Off Lock");
 		lblPllOutOffLock.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPllOutOffLock.setForeground(new Color(204, 204, 204));
-		lblPllOutOffLock.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblPllOutOffLock.setFont(font);
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.TRAILING)
 				.addGroup(Alignment.LEADING, gl_panel.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(lblPllOutOf, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
+					.addComponent(lblPllOutOfLockTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblPllOutOffLock, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
@@ -197,7 +219,7 @@ public class AlarmsPanel extends JPanel {
 				.addGroup(gl_panel.createSequentialGroup()
 					.addGap(2)
 					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblPllOutOf)
+						.addComponent(lblPllOutOfLockTxt)
 						.addComponent(lblPllOutOffLock))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
@@ -223,5 +245,25 @@ public class AlarmsPanel extends JPanel {
 			}
 		});
 
+	}
+
+	@Override
+	public void refresh() {
+		lblPllOutOfLockTxt.setText(Translation.getValue(String.class, "pll_out_of_lock", "PLL Out of Lock"));
+		lblOverCurrentTxt.setText(Translation.getValue(String.class, "over_current", "Over-Current"));
+		lblUnderCurrentTxt.setText(Translation.getValue(String.class, "under_current", "Under-Current"));
+		lblOverTemperatureTxt.setText(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
+
+		Font font = Translation.getFont().deriveFont(14f);
+
+		lblPllOutOfLockTxt.setFont(font);
+		lblOverCurrentTxt.setFont(font);
+		lblUnderCurrentTxt.setFont(font);
+		lblOverTemperatureTxt.setFont(font);
+
+		lblPllOutOffLock.setFont(font);
+		lblOverCurrent.setFont(font);
+		lblUnderCurrent.setFont(font);
+		lblOverTemperature.setFont(font);
 	}
 }
