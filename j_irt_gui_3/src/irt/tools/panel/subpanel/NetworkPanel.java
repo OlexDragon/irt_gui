@@ -64,6 +64,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 				int priority = t.getPriority();
 				if(priority<Thread.MAX_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {

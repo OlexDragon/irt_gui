@@ -2,12 +2,12 @@
 <Configuration>
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
-    	<PatternLayout pattern="%d [%t] %C{2} (%F:%L) %-5p - %m%n"/>
+    	<PatternLayout pattern="%d [%t] %C{2} %M(%F:%L) %-5p - %m%xEx%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
     </Console>
 
     <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.log"
-    						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz"
+    						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{yyyy-MM-dd}-%i.log.gz"
     						  bufferedIO="false">
 		<PatternLayout pattern="%n%d%n %m%n" />
 		<Policies>
@@ -37,6 +37,7 @@
   </Appenders>
 
   <Loggers>
+  <logger name="irt.controller.SoftReleaseChecker" level="ALL"/>
  
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

@@ -23,7 +23,8 @@ public class AlarmsController extends ControllerAbstract {
 	private static final short  PLL_OUT_OFF_LOCK = 1,
 								OWER_CURRENT	 = 4,
 								UNDER_CURRENT	 = 5,
-								OWER_TEMPERATURE = 7;
+								OWER_TEMPERATURE = 7,
+								HW_FAULT		= 10;
 
 	public static final byte 	ALARMS_NUMBER 			= 1,
 								ALARMS_IDS				= 2,
@@ -43,6 +44,7 @@ public class AlarmsController extends ControllerAbstract {
 	private JLabel lblOwerCurrent;
 	private JLabel lblUnderCurrent;
 	private JLabel lblOwerTemperature;
+	private JLabel lblHardware;
 
 	private LinkHeader linkHeader;
 	
@@ -50,6 +52,7 @@ public class AlarmsController extends ControllerAbstract {
 	private DefaultController alarmController2;
 	private DefaultController alarmController3;
 	private DefaultController alarmController4;
+	private DefaultController alarmController5;
 
 	public AlarmsController(LinkHeader linkHeader, JPanel panel) {
 		super(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS), panel, Style.CHECK_ALWAYS);
@@ -97,11 +100,18 @@ public class AlarmsController extends ControllerAbstract {
 					break;
 				case OWER_TEMPERATURE:
 					setAlarm(lblOwerTemperature, status);
+					break;
+				case HW_FAULT:
+					setAlarm(lblHardware, status);
 				}
 				
 			}
 
 			private void setControllers(short[] source) {
+				logger.trace("setControllers(source={})", source);
+
+				setHardwareController();
+
 				for(short sh:source)
 					switch(sh){
 					case PLL_OUT_OFF_LOCK:
@@ -150,6 +160,7 @@ public class AlarmsController extends ControllerAbstract {
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
+		t.setDaemon(true);
 		t.start();
 
 		label.setEnabled(true);
@@ -219,6 +230,22 @@ public class AlarmsController extends ControllerAbstract {
 		startController(alarmController4, lblPllOutOffLock);
 	}
 
+	private void setHardwareController() {
+		logger.trace("setHardwareController({})", lblHardware);
+		lblHardware.setEnabled(true);
+		alarmController5 = new DefaultController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT, HW_FAULT)
+														{@Override
+														public Integer getPriority() {
+															return PRIORITY;
+														}}, Style.CHECK_ALWAYS){
+
+			@Override
+			protected ValueChangeListener addGetterValueChangeListener() {
+				return AlarmsController.this.valueChangeListener;
+			}};
+		startController(alarmController5, lblHardware);
+	}
+
 	@Override
 	protected boolean setComponent(Component component) {
 		logger.trace("setComponent({})", component);
@@ -243,6 +270,9 @@ public class AlarmsController extends ControllerAbstract {
 					case "Over-Temperature":
 						lblOwerTemperature = (JLabel) c;
 						break;
+					case "Other":
+						lblHardware = (JLabel) c;
+						break;
 					default:
 						isSet = false;
 						logger.warn("Net Used: {}", name);
@@ -263,10 +293,13 @@ public class AlarmsController extends ControllerAbstract {
 			alarmController3.setRun(false);
 		if(alarmController4!=null)
 			alarmController4.setRun(false);
+		if(alarmController5!=null)
+			alarmController5.setRun(false);
 		lblPllOutOffLock = null;
 		lblOwerCurrent = null;
 		lblUnderCurrent = null;
 		lblOwerTemperature = null;
+		lblHardware = null;
 		super.clear();
 	}
 

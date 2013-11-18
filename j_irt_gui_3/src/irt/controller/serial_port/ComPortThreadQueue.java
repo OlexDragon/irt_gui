@@ -78,6 +78,7 @@ public class ComPortThreadQueue extends Thread {
 			if (!comPortQueue.contains(packetWork)) {
 
 				PacketThread pt = packetWork.getPacketThread();
+				pt.setDaemon(true);
 				pt.start();
 
 				comPortQueue.add(packetWork);

@@ -41,7 +41,6 @@ public abstract class ControllerAbstract implements Runnable{
 	protected Observable observable;
 
 	public ControllerAbstract(PacketWork packetWork, JPanel panel, Style style) {
-		logger.trace(logger.getName());
 		this.packetWork = packetWork;
 		this.style = style;
  		setListeners();
@@ -207,6 +206,7 @@ public abstract class ControllerAbstract implements Runnable{
 
 		Thread t = new Thread(new FireValue(statusChangeListeners, valueChangeEvent), ControllerAbstract.this.getClass().getSimpleName());
 		t.setPriority(t.getPriority()-1);
+		t.setDaemon(true);
 		t.start();
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

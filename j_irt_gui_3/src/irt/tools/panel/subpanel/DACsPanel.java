@@ -106,6 +106,7 @@ public class DACsPanel extends JPanel {
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 				threadList.add(abstractController);
 				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
@@ -117,6 +118,7 @@ public class DACsPanel extends JPanel {
 				priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 				threadList.add(abstractController);
 				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
@@ -128,6 +130,7 @@ public class DACsPanel extends JPanel {
 				priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 				threadList.add(abstractController);
 				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
@@ -139,6 +142,7 @@ public class DACsPanel extends JPanel {
 				priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 				threadList.add(abstractController);
 				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
@@ -149,6 +153,7 @@ public class DACsPanel extends JPanel {
 				priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 				threadList.add(abstractController);
 
@@ -159,6 +164,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 
@@ -168,6 +174,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 
@@ -178,6 +185,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 
@@ -187,6 +195,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 
@@ -197,6 +206,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 
@@ -207,6 +217,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 
@@ -217,6 +228,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 
@@ -227,6 +239,7 @@ public class DACsPanel extends JPanel {
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 					threadList.add(abstractController);
 				}

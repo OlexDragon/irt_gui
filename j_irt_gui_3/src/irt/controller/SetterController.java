@@ -24,6 +24,7 @@ public class SetterController extends ControllerAbstract {
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
+		t.setDaemon(true);
 		t.start();
 	}
 

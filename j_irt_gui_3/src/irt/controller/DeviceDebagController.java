@@ -38,7 +38,6 @@ import javax.swing.event.EventListenerList;
 
 public class DeviceDebagController extends ControllerAbstract {
 
-
 	protected Value value;
 
 	private FocusListener txtFocusListener;
@@ -125,12 +124,14 @@ public class DeviceDebagController extends ControllerAbstract {
 
 					switch(source.getClass().getSimpleName()){
 					case "Byte":
+						logger.debug("DeviceDebagController.valueChanged: ERROR ={}", source);
 						txtField.setText("error"+source);
 						rv.setValue(null);
 						pt.preparePacket(pw.getPacketParameterHeaderCode(), rv);
 						setSend(true, false);
 						break;
 					case "RegisterValue":
+						logger.debug("DeviceDebagController.valueChanged: {}", source);
 						RegisterValue crv = (RegisterValue)source;
 						if(rv.getAddr()==crv.getAddr() && rv.getIndex()==crv.getIndex()){
 							Value unitValue = urv.getValue();
@@ -143,6 +144,7 @@ public class DeviceDebagController extends ControllerAbstract {
 
 							setAll();
 							if(style==Style.CHECK_ALWAYS){
+								logger.debug("DeviceDebagController.valueChanged: style==Style.CHECK_ALWAYS");
 								RegisterValue tmpRV = new RegisterValue(rv);
 								tmpRV.setValue(null);
 								pt.preparePacket(pw.getPacketParameterHeaderCode(), tmpRV);
@@ -343,10 +345,13 @@ public class DeviceDebagController extends ControllerAbstract {
 		txtActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String s = DeviceDebagController.this.txtField.getText().replaceAll("\\D", "");
-				int value = 0;
+				int value;
+
 				if(s.length()>0){
 					value = Integer.parseInt(s);
-				}
+				}else
+					value = 0;
+
 				DeviceDebagController.this.slider.setValue(value);
 				setValue(DeviceDebagController.this.slider.getValue());
 			}

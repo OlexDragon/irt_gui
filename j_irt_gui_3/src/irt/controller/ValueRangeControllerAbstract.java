@@ -130,6 +130,10 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
 		textSliderController = new TextSliderController(new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
 		Thread t = new Thread(textSliderController, getClass().getSimpleName());
+		int priority = t.getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			t.setPriority(priority-1);
+		t.setDaemon(true);
 		t.start();
 
 		setSend(false);

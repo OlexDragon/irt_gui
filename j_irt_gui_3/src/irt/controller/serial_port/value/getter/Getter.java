@@ -1,7 +1,5 @@
 package irt.controller.serial_port.value.getter;
 
-import java.util.Arrays;
-
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
@@ -10,6 +8,8 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.Payload;
+
+import java.util.Arrays;
 
 public class Getter extends GetterAbstract {
 
@@ -81,6 +81,8 @@ public class Getter extends GetterAbstract {
 							case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
 							case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
 							case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+							case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+							case PacketWork.PACKET_ID_ALARMS_SUMMARY:
 								source = pl.getArrayShort();
 								logger.trace("PacketWork.PACKET_ID_ALARMS, {}", source);
 								tmp = Arrays.hashCode((short[]) source);

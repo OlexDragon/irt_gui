@@ -35,6 +35,7 @@ public class BlinkControl implements Runnable {
 
 		Thread t = new Thread(this, "Blink Control");
 		t.setPriority(t.getPriority()-1);
+		t.setDaemon(true);
 		t.start();
 	}
 

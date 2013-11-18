@@ -121,6 +121,12 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
 				packetIdStr = "Alarm - Under Current("+packetId+")";
 				break;
+			case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+				packetIdStr = "Alarm - Other("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+				packetIdStr = "Alarm - Summary("+packetId+")";
+				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE:
 				packetIdStr = "Bias Temperature("+packetId+")";
 				break;

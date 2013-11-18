@@ -170,6 +170,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 							if(unitPanel!=null && packet.getPayloads()!=null && unitsPanel.add(unitPanel)==unitPanel){
 
+								setSeftReleaseChecker();
 								if(softReleaseChecker!=null)
 									softReleaseChecker.check(di);
 
@@ -182,6 +183,7 @@ public abstract class GuiControllerAbstract extends Thread {
 								if(dumpControllers!=null)
 									dumpControllers.stop();
 								dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null, di);
+								dumpControllers.addVlueChangeListener(headPanel.getStatusChangeListener());
 
 								StringData unitPartNumber = di.getUnitPartNumber();
 								if(protocol == Protocol.LINKED){
@@ -223,6 +225,9 @@ public abstract class GuiControllerAbstract extends Thread {
 					vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
 			}
 		});
+	}
+
+	protected void setSeftReleaseChecker() {
 	}
 
 	protected abstract DevicePanel getConverterPanel(DeviceInfo di);
@@ -366,6 +371,7 @@ public abstract class GuiControllerAbstract extends Thread {
 		private boolean packetReceived;
 
 		public RemoveComponent(int waitTime) {
+			super("RemoveComponent");
 
 			this.waitTime = waitTime;
 

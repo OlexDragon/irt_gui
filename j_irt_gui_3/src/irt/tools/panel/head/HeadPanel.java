@@ -2,6 +2,7 @@ package irt.tools.panel.head;
 
 import irt.controller.monitor.MonitorController;
 import irt.controller.translation.Translation;
+import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.value.StaticComponents;
@@ -103,16 +104,30 @@ public class HeadPanel extends MainPanel {
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 
+				int id = valueChangeEvent.getID();
+				logger.trace(valueChangeEvent);
 				Object source = valueChangeEvent.getSource();
 				int status;
 
-				if(source instanceof Long)
+				if(source instanceof Long){
 					status=((Long)source).intValue();
-				else
+					ledMute.setOn((status&MonitorController.MUTE)>0);
+				}else{
 					status = (int) source;
-
-				ledMute.setOn((status&MonitorController.MUTE)>0);
-				ledAlarm.setOn((status&MonitorController.LOCK)==0);
+					if(id==PacketWork.PACKET_ID_ALARMS_SUMMARY){
+						int alarmStatus = status&7;
+						if(alarmStatus>3){
+							ledAlarm.setLedColor(Color.RED);
+							ledAlarm.setOn(true);
+						}else if(alarmStatus>1){
+							ledAlarm.setLedColor(Color.YELLOW);
+							ledAlarm.setOn(true);
+						}else
+							ledAlarm.setOn(false);
+					}else{
+						ledMute.setOn((status&MonitorController.MUTE)>0);
+					}
+				}
 			}
 		};
 	}

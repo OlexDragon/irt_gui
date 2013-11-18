@@ -69,6 +69,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 	public ControlPanel(LinkHeader linkHeader, int flags) {
 		super(linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
+		setName("ControlPanel");
 
 		Font font = Translation.getFont();
 

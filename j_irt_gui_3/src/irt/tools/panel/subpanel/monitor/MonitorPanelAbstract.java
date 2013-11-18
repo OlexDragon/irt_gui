@@ -29,6 +29,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 //	}
 
 	protected MonitorPanelAbstract(LinkHeader linkHeader, String title,int wisth, int height) {
+		setName("MonitorPanel");
 		this.linkHeader = linkHeader;
 
 		selectedLanguage = Translation.getSelectedLanguage();

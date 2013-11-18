@@ -68,17 +68,56 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		JPanel panel_3 = new JPanel();
 		panel_3.setBorder(new LineBorder(new Color(0, 0, 0)));
 		panel_3.setName("Over-Temperature");
+		
+		JPanel panel_4 = new JPanel();
+		panel_4.setName("Over-Temperature");
+		panel_4.setBorder(new LineBorder(new Color(0, 0, 0)));
+		
+		JLabel label = new JLabel(Translation.getValue(String.class, "other", "Other"));
+		label.setForeground(Color.BLUE);
+		label.setFont(new Font("Tahoma", Font.BOLD, 14));
+
+		String noAlarmTxt = Translation.getValue(String.class, "no_alarm", "No Alarm");
+
+		JLabel label_1 = new JLabel(noAlarmTxt);
+		label_1.setOpaque(true);
+		label_1.setName("Other");
+		label_1.setHorizontalAlignment(SwingConstants.CENTER);
+		label_1.setForeground(new Color(204, 204, 204));
+		label_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		GroupLayout gl_panel_4 = new GroupLayout(panel_4);
+		gl_panel_4.setHorizontalGroup(
+			gl_panel_4.createParallelGroup(Alignment.TRAILING)
+				.addGap(0, 278, Short.MAX_VALUE)
+				.addGroup(gl_panel_4.createSequentialGroup()
+					.addContainerGap()
+					.addComponent(label, GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(label_1, 90, 90, 90))
+		);
+		gl_panel_4.setVerticalGroup(
+			gl_panel_4.createParallelGroup(Alignment.LEADING)
+				.addGap(0, 25, Short.MAX_VALUE)
+				.addGroup(gl_panel_4.createSequentialGroup()
+					.addGap(2)
+					.addGroup(gl_panel_4.createParallelGroup(Alignment.BASELINE)
+						.addComponent(label)
+						.addComponent(label_1))
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+		);
+		panel_4.setLayout(gl_panel_4);
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
-						.addComponent(panel_1, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
-						.addComponent(panel_2, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
-						.addComponent(panel_3, GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE))
-					.addContainerGap())
+						.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+						.addComponent(panel_1, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+						.addComponent(panel_2, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+						.addComponent(panel_3, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+						.addComponent(panel_4, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE))
+					.addGap(10))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -91,7 +130,9 @@ public class AlarmsPanel extends JPanel implements Refresh{
 					.addComponent(panel_2, GroupLayout.PREFERRED_SIZE, 25, 25)
 					.addGap(20)
 					.addComponent(panel_3, GroupLayout.PREFERRED_SIZE, 25, 25)
-					.addContainerGap(4, Short.MAX_VALUE))
+					.addGap(18)
+					.addComponent(panel_4, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(69, Short.MAX_VALUE))
 		);
 		groupLayout.linkSize(SwingConstants.VERTICAL, new Component[] {panel, panel_1, panel_2, panel_3});
 		
@@ -99,7 +140,6 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverTemperatureTxt.setForeground(new Color(0, 0, 255));
 		lblOverTemperatureTxt.setFont(font);
 		
-		String noAlarmTxt = Translation.getValue(String.class, "no_alarm", "No Alarm");
 		lblOverTemperature = new JLabel(noAlarmTxt);
 		lblOverTemperature.setEnabled(false);
 		lblOverTemperature.setOpaque(true);
@@ -232,6 +272,10 @@ public class AlarmsPanel extends JPanel implements Refresh{
 				try {
 					alarmsController = new AlarmsController(linkHeader, AlarmsPanel.this);
 					Thread t = new Thread(alarmsController);
+					int priority = t.getPriority();
+					if(priority>Thread.MIN_PRIORITY)
+						t.setPriority(priority-1);
+					t.setDaemon(true);
 					t.start();
 				} catch (Exception e) {
 					logger.catching(e);

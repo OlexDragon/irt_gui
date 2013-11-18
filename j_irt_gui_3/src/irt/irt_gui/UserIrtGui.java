@@ -1,6 +1,8 @@
 package irt.irt_gui;
 
 import irt.controller.GuiControllerUser;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsDevice;
@@ -57,6 +59,14 @@ public class UserIrtGui extends IrtGui {
 
 	@Override
 	protected Thread getNewGuiController() {
-		return new GuiControllerUser(this);
+		GuiControllerUser guiControllerUser = new GuiControllerUser(this);
+		guiControllerUser.addChangeListener(new ValueChangeListener() {
+
+			@Override
+			public void valueChanged(ValueChangeEvent valueChangeEvent) {
+				headPanel.setPowerOn((Boolean)valueChangeEvent.getSource());
+			}
+		});
+		return guiControllerUser;
 	}
 }

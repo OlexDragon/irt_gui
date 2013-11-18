@@ -50,6 +50,7 @@ public class DeviceDebagSetter extends SetterAbstract {
 					source = new Byte((byte) -cph.getOption());
 					if((Byte)source==0)
 						source=-20;
+					hashCode = source.hashCode()+1;// hashCode != source.hashCode()
 				}else{
 
 					Payload cpl = packet.getPayload(getPacketParameterHeaderCode());

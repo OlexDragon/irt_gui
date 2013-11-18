@@ -220,7 +220,8 @@ public class InfoPanel extends JPanel implements Refresh {
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
-					t.start();
+				t.setDaemon(true);
+				t.start();
 			}
 		});
 		btnPanelSize.setBounds(271, 91, 10, 10);
@@ -301,6 +302,7 @@ public class InfoPanel extends JPanel implements Refresh {
 			this.firmwareBuildCounter = firmwareBuildCounter;
 			Thread t = new Thread(this);
 			t.setPriority(t.getPriority()-1);
+			t.setDaemon(true);
 			t.start();
 		}
 

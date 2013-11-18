@@ -188,6 +188,7 @@ public class BIASsPanel extends JPanel {
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 
 				threadList.add(abstractController);
