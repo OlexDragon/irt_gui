@@ -51,17 +51,15 @@ public class GuiController extends GuiControllerAbstract{
 							});
 					}
 				}
-				synchronized (this) {
-					wait(5000);
-				}
-			} catch (InterruptedException e) {
+				synchronized (this) { wait(5000); }
+			} catch (Exception e) {
 				logger.catching(e);
 			}
 		}
 	}
 
 	@Override
-	protected void setSeftReleaseChecker() {
-		softReleaseChecker = SoftReleaseChecker.getInstance();
+	protected SoftReleaseChecker getSeftReleaseChecker() {
+		return SoftReleaseChecker.getInstance();
 	}
 }

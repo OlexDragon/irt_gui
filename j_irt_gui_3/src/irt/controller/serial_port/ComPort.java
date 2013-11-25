@@ -128,10 +128,11 @@ do{
 						if((readData=readLinkHeader())!=null)
 							checksum = new Checksum(readData);
 						else{
-							Console.append("LinkHeader", "Break");
+							Console.appendLn("LinkHeader", "Break");
 							break;
 						}
 
+					Console.appendLn("", "Header ");
 					if((readData=readHeader())!=null) {
 						if(checksum!=null)
 							checksum.add(readData);
@@ -144,6 +145,7 @@ do{
 							packet.setHeader(packetHeader);
 							payloadsList = new ArrayList<>();
 
+							Console.appendLn("", "Parameter Header ");
 							while ((readData = readParameterHeader())!=null && isRun()) {
 
 								if (containsFlagSequence(readData)) {
@@ -159,10 +161,13 @@ do{
 								checksum.add(readData);
 								parameterHeader = new ParameterHeader(readData);
 
-								if(parameterHeader.getCode()>30 || (ev = parameterHeader.getSize())>2000){
+								ev = parameterHeader.getSize();
+								logger.info("parameterHeader.getSize()={}", ev);
+								if(parameterHeader.getCode()>30 || ev>2000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
 									break;
 								}
+								Console.appendLn("", "Payload ");
 								if (ev >= 0 && (readData = readBytes(ev))!=null) {
 
 									checksum.add(readData);
@@ -457,11 +462,12 @@ do{
 	public boolean wait(int eventValue, int waitTime) throws SerialPortException {
 		boolean isReady = false;
 		long start = System.currentTimeMillis();
+		long waitTimeL = waitTime*eventValue;
 
-		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTime && isRun()){
+		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTimeL && isRun()){
 			synchronized (this) {
 
-				try { wait(waitTime); } catch (InterruptedException e) {
+				try { wait(waitTimeL); } catch (InterruptedException e) {
 					comPortLogger.catching(e);
 				}
 

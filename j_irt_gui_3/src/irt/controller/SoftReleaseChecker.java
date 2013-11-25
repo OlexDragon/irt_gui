@@ -42,7 +42,7 @@ public class SoftReleaseChecker extends Thread {
 		while (true) {
 			synchronized (this) { try { wait(); } catch (InterruptedException e) { logger.catching(e); } }
 
-			String string = "\\\\192.168.2.250\\Share\\4alex\\boards\\SW release\\latest\\" + (deviceInfo.getType() < 100 ? "picobuc.bin" : "fcm.bin");
+			String string = "\\\\192.168.2.250\\Share\\4alex\\boards\\SW release\\latest\\" + (deviceInfo.getType() < 1000 ? "picobuc.bin" : "fcm.bin");
 			File file = new File(string);
 			if (file.exists()) {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM dd yyyy, HH:mm:ss");

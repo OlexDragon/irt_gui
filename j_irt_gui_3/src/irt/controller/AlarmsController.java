@@ -20,10 +20,10 @@ public class AlarmsController extends ControllerAbstract {
 
 	private static final int PRIORITY = 20;
 
-	private static final short  PLL_OUT_OFF_LOCK = 1,
-								OWER_CURRENT	 = 4,
-								UNDER_CURRENT	 = 5,
-								OWER_TEMPERATURE = 7,
+	public static final short  PLL_OUT_OF_LOCK 	= 1,
+								OWER_CURRENT	= 4,
+								UNDER_CURRENT	= 5,
+								OWER_TEMPERATURE= 7,
 								HW_FAULT		= 10;
 
 	public static final byte 	ALARMS_NUMBER 			= 1,
@@ -88,8 +88,9 @@ public class AlarmsController extends ControllerAbstract {
 
 				byte status = (byte) (source[2]&7);
 
-				switch(source[0]){
-				case PLL_OUT_OFF_LOCK:
+				short alarm = source[0];
+				switch(alarm){
+				case PLL_OUT_OF_LOCK:
 					setAlarm(lblPllOutOffLock, status);
 					break;
 				case OWER_CURRENT:
@@ -104,7 +105,6 @@ public class AlarmsController extends ControllerAbstract {
 				case HW_FAULT:
 					setAlarm(lblHardware, status);
 				}
-				
 			}
 
 			private void setControllers(short[] source) {
@@ -114,7 +114,7 @@ public class AlarmsController extends ControllerAbstract {
 
 				for(short sh:source)
 					switch(sh){
-					case PLL_OUT_OFF_LOCK:
+					case PLL_OUT_OF_LOCK:
 						setPllOutOffLockController();
 						break;
 					case OWER_CURRENT:
@@ -169,11 +169,8 @@ public class AlarmsController extends ControllerAbstract {
 	private void setAlarmOwerTemperatureController() {
 		logger.trace("setAlarmOwerTemperatureController({})", lblOwerTemperature);
 		lblOwerTemperature.setEnabled(true);
-		alarmController1 = new DefaultController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE, OWER_TEMPERATURE)
-														{@Override
-														public Integer getPriority() {
-															return PRIORITY;
-														}}, Style.CHECK_ALWAYS){
+		alarmController1 = new DefaultController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE, OWER_TEMPERATURE),
+															Style.CHECK_ALWAYS){
 
 															@Override
 															protected ValueChangeListener addGetterValueChangeListener() {
@@ -217,7 +214,7 @@ public class AlarmsController extends ControllerAbstract {
 	private void setPllOutOffLockController() {
 		logger.trace("setPllOutOffLockController({})", lblPllOutOffLock);
 		lblPllOutOffLock.setEnabled(true);
-		alarmController4 = new DefaultController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK, PLL_OUT_OFF_LOCK)
+		alarmController4 = new DefaultController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK, PLL_OUT_OF_LOCK)
 														{@Override
 														public Integer getPriority() {
 															return PRIORITY;
@@ -303,4 +300,60 @@ public class AlarmsController extends ControllerAbstract {
 		super.clear();
 	}
 
+	public static String alarmStatusToString(byte status){
+		String alarmStr = null;
+		status = (byte) (status&7);
+		switch(status){
+		case ALARMS_STATUS_ALARM:
+			alarmStr = "Alarm";
+			break;
+		case ALARMS_STATUS_FAULT:
+			alarmStr = "Fault";
+			break;
+		case ALARMS_STATUS_INFO:
+			alarmStr = "Info";
+			break;
+		case ALARMS_STATUS_MINOR:
+			alarmStr = "Minor";
+			break;
+		case ALARMS_STATUS_NO_ALARM:
+			alarmStr = "No Alarm";
+			break;
+		case ALARMS_STATUS_WARNING:
+			alarmStr = "Warning";
+			break;
+		default:
+			alarmStr = "Alarm status = "+status;
+		}
+		return alarmStr;
+	}
+
+	public static String getAlarmName(short alarm) {
+		String name;
+		switch(alarm){
+		case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+		case PLL_OUT_OF_LOCK:
+			name = "Pll Out of Lock";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+		case OWER_CURRENT:
+			name = "Ower Current";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+		case UNDER_CURRENT:
+			name = "Under Current";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+		case OWER_TEMPERATURE:
+			name = "Ower Temperature";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+		case HW_FAULT:
+			name = "HW Fault";
+			break;
+		default:
+			name = "Alarm id="+alarm;
+		}
+		return name;
+	}
 }

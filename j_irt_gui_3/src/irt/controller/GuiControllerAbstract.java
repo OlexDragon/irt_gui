@@ -69,7 +69,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	protected VCLC vclc =  new VCLC();
 	protected static DumpControllers dumpControllers;
-	protected SoftReleaseChecker softReleaseChecker;
+	protected SoftReleaseChecker softReleaseChecker = getSeftReleaseChecker();
 	protected Protocol protocol = Protocol.ALL;
 
 	@SuppressWarnings("unchecked")
@@ -122,6 +122,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			@Override
 			public void packetRecived(Packet packet) {
+				logger.trace(packet);
 
 				if (packet != null && packet.getHeader()!=null) {
 					ComPort serialPort = comPortThreadQueue.getSerialPort();
@@ -170,7 +171,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 							if(unitPanel!=null && packet.getPayloads()!=null && unitsPanel.add(unitPanel)==unitPanel){
 
-								setSeftReleaseChecker();
+								getSeftReleaseChecker();
 								if(softReleaseChecker!=null)
 									softReleaseChecker.check(di);
 
@@ -227,7 +228,8 @@ public abstract class GuiControllerAbstract extends Thread {
 		});
 	}
 
-	protected void setSeftReleaseChecker() {
+	protected SoftReleaseChecker getSeftReleaseChecker() {
+		return null;
 	}
 
 	protected abstract DevicePanel getConverterPanel(DeviceInfo di);

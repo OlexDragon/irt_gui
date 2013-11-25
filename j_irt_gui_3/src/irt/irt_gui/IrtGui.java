@@ -38,7 +38,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.040";
+	public static final String VERTION = "- 3.041";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 

@@ -1,5 +1,6 @@
 package irt.data.packet;
 
+import irt.controller.DumpControllers;
 import irt.data.PacketWork;
 
 import java.util.Arrays;
@@ -245,7 +246,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_DUMP_REGISTER_5:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_6:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_100:
-				packetIdStr = "Dump("+packetId+")";
+				packetIdStr = "Dump "+DumpControllers.parseId(packetId);
 				break;
 			default:
 				packetIdStr = ""+packetId;

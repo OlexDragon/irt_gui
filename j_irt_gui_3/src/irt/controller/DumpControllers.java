@@ -5,7 +5,6 @@ import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
-import irt.data.ToHex;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
@@ -35,8 +34,8 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	private static LoggerContext ctx = setSysSerialNumber(null);
 	private final Logger logger = (Logger) LogManager.getLogger();
-	private final Logger dumper = (Logger) LogManager.getLogger("dumper");
-	private final Marker marker = MarkerManager.getMarker("FileWork");
+	public static final Logger dumper = (Logger) LogManager.getLogger("dumper");
+	public static final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private List<DefaultController> dumpsList = new ArrayList<>();
 
@@ -54,10 +53,24 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 			String value = variables.get(id);
 			if (value == null || !value.equals(sourceStr)) {
-				if (id == PacketWork.PACKET_ID_ALARMS_SUMMARY && source instanceof Integer) {
-					notifyAllControllers();
-					fireValueChangeListener(new ValueChangeEvent(source, id));
-					source = ToHex.bytesToHex(Packet.toBytes(source));
+				if(source instanceof Integer){
+					int integer = (Integer) source;
+					switch(id){
+					case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+						notifyAllControllers();
+						fireValueChangeListener(new ValueChangeEvent(source, id));
+						sourceStr = AlarmsController.alarmStatusToString((byte) integer);
+					}
+				}else if(source instanceof short[]){
+					byte status = (byte) (((short[])source)[2]&7);
+					switch(id){
+					case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+					case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+					case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+					case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+					case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+						sourceStr = "*** Alarm "+AlarmsController.getAlarmName((short) id)+" - "+AlarmsController.alarmStatusToString(status)+" ***";
+					}
 				}
 				variables.put(id, sourceStr);
 				dumper.info(marker, "{}:{}\n{}",parseId(id), info, sourceStr);
@@ -69,23 +82,6 @@ public class DumpControllers extends ValueChangeListenerClass {
 				synchronized(d){
 					d.notify();
 				}
-		}
-
-		private String parseId(int id) {
-			String str = ""+id;
-
-			if(id==PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT)
-				str = "*** SUMMARY ALARM(PaketWork ID="+id+ ") ***";
-			else if(id==PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10)
-				str = "1.10(PaketWork ID="+id+ ")";
-			else if(id==PacketWork.PACKET_ID_DUMP_REGISTER_100)
-				str = "2.100(PaketWork ID="+id+ ")";
-			else if(str.charAt(0)=='9')
-				str = str.replace("9", "1.")+"(PaketWork ID="+id+ ")";
-			else if(str.charAt(str.length()-1)>'0')
-				str = str.replace("10", "2.")+"(PaketWork ID="+id+ ")";
-
-			return str;
 		}
 	};
 
@@ -108,7 +104,7 @@ public class DumpControllers extends ValueChangeListenerClass {
 		int waitTime = 1000*60*dumpWaitMinuts;
 
 		logger.trace("new DumpControllers({}, {}, {}, waitTime={} msec({} min))", unitsPanel, linkHeader, deviceInfo, waitTime, dumpWaitMinuts);
-		dumper.info(marker, "********************** Start New Dump Block ***********************************");
+		dumper.info(marker, "******************** Start New Dump Block ********************");
 
 //		this.parent = unitsPanel;
 
@@ -170,7 +166,27 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS,
 				PacketWork.PACKET_ID_ALARMS_SUMMARY) { @Override public Integer getPriority() { return 50; }
-		}, 1000, "ALARMS_SUMMARY_STATUS");
+		}, 1000, "ALARMS_SUMMARY");
+
+		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
+				PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE, AlarmsController.OWER_TEMPERATURE) { @Override public Integer getPriority() { return 50; }
+		}, waitTime, "ALARMS_OWER_TEMPERATURE");
+
+		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
+				PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT, AlarmsController.HW_FAULT) { @Override public Integer getPriority() { return 50; }
+		}, waitTime, "ALARMS_HARDWARE_FAULT");
+
+		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
+				PacketWork.PACKET_ID_ALARMS_OWER_CURRENT, AlarmsController.OWER_CURRENT) { @Override public Integer getPriority() { return 50; }
+		}, waitTime, "ALARMS_OWER_CURRENT");
+
+		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
+				PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK, AlarmsController.PLL_OUT_OF_LOCK) { @Override public Integer getPriority() { return 50; }
+		}, waitTime, "ALARMS_PLL_OUT_OF_LOCK");
+
+		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
+				PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT, AlarmsController.UNDER_CURRENT) { @Override public Integer getPriority() { return 50; }
+		}, waitTime, "ALARMS_UNDER_CURRENT");
 	}
 
 	public static LoggerContext setSysSerialNumber(String serialNumber) {
@@ -225,5 +241,22 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 		for (DefaultController dc:dumpsList)
 			dc.setWaitTime(waitTime);
+	}
+
+	public static String parseId(int id) {
+		String str = ""+id;
+
+		if(id==PacketWork.PACKET_ID_ALARMS_SUMMARY)
+			str = "*** SUMMARY ALARM(PaketWork ID="+id+ ") ***";
+		else if(id==PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10)
+			str = "1.10(PaketWork ID="+id+ ")";
+		else if(id==PacketWork.PACKET_ID_DUMP_REGISTER_100)
+			str = "2.100(PaketWork ID="+id+ ")";
+		else if(str.charAt(0)=='9')
+			str = str.replace("9", "1.")+"(PaketWork ID="+id+ ")";
+		else if(str.charAt(str.length()-1)>'0')
+			str = str.replace("10", "2.")+"(PaketWork ID="+id+ ")";
+
+		return str;
 	}
 }

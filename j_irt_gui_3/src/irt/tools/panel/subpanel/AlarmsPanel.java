@@ -6,6 +6,7 @@ import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.GroupLayout;
@@ -14,15 +15,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-
-import java.awt.Component;
-
-import javax.swing.border.LineBorder;
 
 public class AlarmsPanel extends JPanel implements Refresh{
 	private static final int ALARMS_WIDTH = 90;
