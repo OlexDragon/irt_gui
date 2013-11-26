@@ -162,7 +162,7 @@ do{
 								parameterHeader = new ParameterHeader(readData);
 
 								ev = parameterHeader.getSize();
-								logger.info("parameterHeader.getSize()={}", ev);
+								logger.trace("parameterHeader.getSize()={}", ev);
 								if(parameterHeader.getCode()>30 || ev>2000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
 									break;
@@ -488,9 +488,9 @@ do{
 		synchronized (logger) {
 			isOpened = isOpened();
 
-			logger.debug("openPort() is Opened={}", isOpened);
+			logger.debug("Port Name={} openPort() is Opened={}, run={}", getPortName(), isOpened, run);
 
-			if (!isOpened) {
+			if (run && !isOpened) {
 				isOpened = super.openPort();
 				if (isOpened)
 					addEventListener(serialPortEvent);
@@ -503,8 +503,9 @@ do{
 	public boolean closePort() throws SerialPortException {
 
 		boolean isClosed = !isOpened();
-		logger.debug("1) closePort()is Closed={}",isClosed);
+		logger.debug("1) Port Name={} closePort()is Closed={}", getPortName(), isClosed);
 
+		run = false;
 		synchronized (logger) {
 			if (!isClosed) {
 				try {

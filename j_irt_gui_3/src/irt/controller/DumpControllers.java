@@ -30,7 +30,7 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	public static final String DUMP_WAIT = "DUMP_WAIT";
 
-	private String info;
+	private volatile String info;
 
 	private static LoggerContext ctx = setSysSerialNumber(null);
 	private final Logger logger = (Logger) LogManager.getLogger();
@@ -87,18 +87,8 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	public DumpControllers(UnitsContainer unitsPanel, LinkHeader linkHeader, DeviceInfo deviceInfo) {
 
-		String serialNumber = deviceInfo.getSerialNumber().toString();
-
-		setSysSerialNumber(serialNumber);
-		info = "\n! SN: "+deviceInfo.getSerialNumber();
-		info += "\n! "+deviceInfo.getUnitName();
-		info += "\n! Version: "+deviceInfo.getFirmwareVersion();
-		info += "\n! Built Date: "+deviceInfo.getFirmwareBuildDate();
-		info += "\n! Type: "+deviceInfo.getType();
-		info += "\n! Subtype: "+deviceInfo.getSubtype();
-		info += "\n! Type: "+deviceInfo.getRevision();
-		info += "\n! count: "+deviceInfo.getFirmwareBuildCounter();
-		logger.debug("deviceInfo: "+info);
+		setSysSerialNumber(deviceInfo.getSerialNumber().toString());
+		setInfo(deviceInfo);
 
 		int dumpWaitMinuts = GuiController.getPrefs().getInt(DUMP_WAIT, 10);
 		int waitTime = 1000*60*dumpWaitMinuts;
@@ -187,6 +177,18 @@ public class DumpControllers extends ValueChangeListenerClass {
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
 				PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT, AlarmsController.UNDER_CURRENT) { @Override public Integer getPriority() { return 50; }
 		}, waitTime, "ALARMS_UNDER_CURRENT");
+	}
+
+	public void setInfo(DeviceInfo deviceInfo) {
+		info = "\n! SN: "+deviceInfo.getSerialNumber();
+		info += "\n! "+deviceInfo.getUnitName();
+		info += "\n! Version: "+deviceInfo.getFirmwareVersion();
+		info += "\n! Built Date: "+deviceInfo.getFirmwareBuildDate();
+		info += "\n! Type: "+deviceInfo.getType();
+		info += "\n! Subtype: "+deviceInfo.getSubtype();
+		info += "\n! Revision: "+deviceInfo.getRevision();
+		info += "\n! count: "+deviceInfo.getFirmwareBuildCounter();
+		logger.debug("deviceInfo: "+info);
 	}
 
 	public static LoggerContext setSysSerialNumber(String serialNumber) {

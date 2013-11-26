@@ -35,6 +35,7 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 import org.apache.logging.log4j.LogManager;
@@ -133,6 +134,8 @@ public abstract class GuiControllerAbstract extends Thread {
 						di = new DeviceInfo(packet);
 
 						int type = di.getType();
+						if(dumpControllers!=null)
+							dumpControllers.setInfo(di);
 						switch(type){
 						case DeviceInfo.DEVICE_TYPE_L_TO_70:
 						case DeviceInfo.DEVICE_TYPE_L_TO_140:
@@ -329,7 +332,12 @@ public abstract class GuiControllerAbstract extends Thread {
 			}
 
 			protocol = Protocol.ALL;
-		}
+		} else
+			try {
+				comPortThreadQueue.getSerialPort().closePort();
+			} catch (SerialPortException e) {
+				logger.catching(e);
+			}
 
 		synchronized (this) {
 			notify();

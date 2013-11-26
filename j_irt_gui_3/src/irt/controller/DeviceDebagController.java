@@ -152,7 +152,7 @@ public class DeviceDebagController extends ControllerAbstract {
 						}
 						break;
 					default:
-						textArea.setText(source.toString());
+						textArea.setText(source!=null ? source.toString() : null);
 					}
 				}
 			}
