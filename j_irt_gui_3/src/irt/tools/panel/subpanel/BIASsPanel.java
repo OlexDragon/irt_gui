@@ -54,7 +54,19 @@ import org.apache.logging.log4j.core.Logger;
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel {
 
+	private static final int P6 = 170;
+
+	private static final int P5 = 137;
+
+	private static final int P4 = 106;
+
+	private static final int P3 = 75;
+
+	private static final int P2 = 44;
+
 	protected final Logger logger = (Logger) LogManager.getLogger();
+
+	private final int P1 = 13;
 
 	private JSlider slider;
 	private JTextField txtStep;
@@ -64,10 +76,10 @@ public class BIASsPanel extends JPanel {
 	private JTextField txtPotentiometer2;
 	private JTextField txtPotentiometer3;
 	private JTextField txtPotentiometer4;
-	private JLabel lblOutput;
-	private JLabel lblMmic;
-	private JLabel lblDriver;
-	private JLabel lblPred;
+	private JLabel lblPotentiometer1;
+	private JLabel lblPotentiometer4;
+	private JLabel lblPotentiometer2;
+	private JLabel lblPotentiometer3;
 	private JLabel lblOutput_1;
 	private JLabel lblLineUp;
 	private SwitchBox switchNGlobal;
@@ -83,8 +95,8 @@ public class BIASsPanel extends JPanel {
 	private JLabel lblTemp;
 	private JTextField txtPotentiometer5;
 	private JTextField txtPotentiometer6;
-	private JLabel label;
-	private JLabel label_1;
+	private JLabel lblPotentiometer5;
+	private JLabel lblPotentiometer6;
 
 	public BIASsPanel(final LinkHeader linkHeader) {
 		setLayout(null);
@@ -107,6 +119,10 @@ public class BIASsPanel extends JPanel {
 
 			public void ancestorAdded(AncestorEvent arg0) {
 
+				DeviceInfo deviceInfo = GuiController.getDeviceInfo();
+				logger.trace(deviceInfo);
+				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()==2 : false;
+
 				addController("NGlobal",
 						new NGlobalController(switchNGlobal,
 								new DeviceDebagGetter(linkHeader,
@@ -115,83 +131,86 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_NGLOBAL,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
-				((DeviceDebagController)addController("Potentiometer 1",
-						new DeviceDebagController(txtPotentiometer1,
+				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 4" : "Potentiometer 1",
+						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer4 : txtPotentiometer1,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
 										1,
 										0,
-										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N1,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N1,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController("Potentiometer 2",
-						new DeviceDebagController(txtPotentiometer2,
+				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 1" : "Potentiometer 2",
+						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer1 : txtPotentiometer2,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
 										1,
 										8,
-										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N2,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N2,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController("Potentiometer 3",
-						new DeviceDebagController(txtPotentiometer3,
+				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 5" : "Potentiometer 3",
+						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer5 : txtPotentiometer3,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
 										2,
 										0,
-										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N3,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N3,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController("Potentiometer 4",
-						new DeviceDebagController(txtPotentiometer4,
+				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 6" : "Potentiometer 4",
+						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer6 : txtPotentiometer4,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
 										2,
 										8,
-										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N4,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N4,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				DeviceInfo deviceInfo = GuiController.getDeviceInfo();
-				logger.trace(deviceInfo);
-				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()==2 : false;
-				label.setVisible(isNewBiasBoard);
-				label_1.setVisible(isNewBiasBoard);
+				lblPotentiometer5.setVisible(isNewBiasBoard);
+				lblPotentiometer6.setVisible(isNewBiasBoard);
 				txtPotentiometer5.setVisible(isNewBiasBoard);
 				txtPotentiometer6.setVisible(isNewBiasBoard);
 				if(isNewBiasBoard){
+					lblPotentiometer1.setText("Output1:");
+					lblPotentiometer2.setText("Output2:");
+					lblPotentiometer3.setText("Driver1:");
+					lblPotentiometer4.setText("Driver2:");
+					lblPotentiometer5.setText("Driver:");
+					lblPotentiometer6.setText("Pred.Dr");
 
-					((DeviceDebagController)addController("Potentiometer 5",
-							new DeviceDebagController(txtPotentiometer5,
+					((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 2" : "Potentiometer 5",
+							new DeviceDebagController(isNewBiasBoard ? txtPotentiometer2 : txtPotentiometer5,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
 										7,
 										0,
-										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N5,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N5,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-					((DeviceDebagController)addController("Potentiometer 6",
-							new DeviceDebagController(txtPotentiometer6,
+					((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 3" : "Potentiometer 6",
+							new DeviceDebagController(isNewBiasBoard ? txtPotentiometer3 : txtPotentiometer6,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
 										7,
 										8,
-										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N6,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N6,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
@@ -269,7 +288,7 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer1.setFont(font);
 		txtPotentiometer1.setColumns(10);
-		txtPotentiometer1.setBounds(184, 13, 55, 20);
+		txtPotentiometer1.setBounds(184, P1, 55, 20);
 		add(txtPotentiometer1);
 
 		txtStep = new JTextField();
@@ -296,7 +315,7 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer2.setFont(font);
 		txtPotentiometer2.setColumns(10);
-		txtPotentiometer2.setBounds(184, 44, 55, 20);
+		txtPotentiometer2.setBounds(184, P2, 55, 20);
 		add(txtPotentiometer2);
 
 		txtPotentiometer3 = new JTextField();
@@ -304,7 +323,7 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer3.setFont(font);
 		txtPotentiometer3.setColumns(10);
-		txtPotentiometer3.setBounds(184, 75, 55, 20);
+		txtPotentiometer3.setBounds(184, P3, 55, 20);
 		add(txtPotentiometer3);
 
 		txtPotentiometer4 = new JTextField();
@@ -312,38 +331,38 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer4.setFont(font);
 		txtPotentiometer4.setColumns(10);
-		txtPotentiometer4.setBounds(184, 106, 55, 20);
+		txtPotentiometer4.setBounds(184, P4, 55, 20);
 		add(txtPotentiometer4);
 
 		font = font.deriveFont(12f);
 
-		lblOutput = new JLabel("OUTPUT:");
-		lblOutput.setRequestFocusEnabled(false);
-		lblOutput.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOutput.setFont(font);
-		lblOutput.setBounds(126, 13, 57, 17);
-		add(lblOutput);
+		lblPotentiometer1 = new JLabel("OUTPUT:");
+		lblPotentiometer1.setRequestFocusEnabled(false);
+		lblPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblPotentiometer1.setFont(font);
+		lblPotentiometer1.setBounds(126, 13, 57, 17);
+		add(lblPotentiometer1);
 
-		lblMmic = new JLabel("MMIC:");
-		lblMmic.setRequestFocusEnabled(false);
-		lblMmic.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblMmic.setFont(font);
-		lblMmic.setBounds(126, 106, 57, 17);
-		add(lblMmic);
+		lblPotentiometer4 = new JLabel("MMIC:");
+		lblPotentiometer4.setRequestFocusEnabled(false);
+		lblPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblPotentiometer4.setFont(font);
+		lblPotentiometer4.setBounds(126, 106, 57, 17);
+		add(lblPotentiometer4);
 
-		lblDriver = new JLabel("DRIVER:");
-		lblDriver.setRequestFocusEnabled(false);
-		lblDriver.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDriver.setFont(font);
-		lblDriver.setBounds(126, 47, 57, 17);
-		add(lblDriver);
+		lblPotentiometer2 = new JLabel("DRIVER:");
+		lblPotentiometer2.setRequestFocusEnabled(false);
+		lblPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblPotentiometer2.setFont(font);
+		lblPotentiometer2.setBounds(126, 47, 57, 17);
+		add(lblPotentiometer2);
 
-		lblPred = new JLabel("PRED:");
-		lblPred.setRequestFocusEnabled(false);
-		lblPred.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPred.setFont(font);
-		lblPred.setBounds(126, 78, 57, 17);
-		add(lblPred);
+		lblPotentiometer3 = new JLabel("PRED:");
+		lblPotentiometer3.setRequestFocusEnabled(false);
+		lblPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblPotentiometer3.setFont(font);
+		lblPotentiometer3.setBounds(126, 78, 57, 17);
+		add(lblPotentiometer3);
 
 		lblOutput_1 = new JLabel("OUTPUT");
 		lblOutput_1.setRequestFocusEnabled(false);
@@ -463,34 +482,34 @@ public class BIASsPanel extends JPanel {
 		lblInitialize.setBounds(11, 100, 46, 14);
 		add(lblInitialize);
 		
-		label = new JLabel("MMIC:");
-		label.setRequestFocusEnabled(false);
-		label.setHorizontalAlignment(SwingConstants.RIGHT);
-		label.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		label.setBounds(126, 137, 57, 17);
-		add(label);
+		lblPotentiometer5 = new JLabel("MMIC:");
+		lblPotentiometer5.setRequestFocusEnabled(false);
+		lblPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		lblPotentiometer5.setBounds(126, 137, 57, 17);
+		add(lblPotentiometer5);
 		
 		txtPotentiometer5 = new JTextField();
 		txtPotentiometer5.setText("0");
 		txtPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		txtPotentiometer5.setColumns(10);
-		txtPotentiometer5.setBounds(184, 137, 55, 20);
+		txtPotentiometer5.setBounds(184, P5, 55, 20);
 		add(txtPotentiometer5);
 		
-		label_1 = new JLabel("MMIC:");
-		label_1.setRequestFocusEnabled(false);
-		label_1.setHorizontalAlignment(SwingConstants.RIGHT);
-		label_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		label_1.setBounds(126, 170, 57, 17);
-		add(label_1);
+		lblPotentiometer6 = new JLabel("MMIC:");
+		lblPotentiometer6.setRequestFocusEnabled(false);
+		lblPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		lblPotentiometer6.setBounds(126, 170, 57, 17);
+		add(lblPotentiometer6);
 		
 		txtPotentiometer6 = new JTextField();
 		txtPotentiometer6.setText("0");
 		txtPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		txtPotentiometer6.setColumns(10);
-		txtPotentiometer6.setBounds(184, 170, 55, 20);
+		txtPotentiometer6.setBounds(184, P6, 55, 20);
 		add(txtPotentiometer6);
 	}
 

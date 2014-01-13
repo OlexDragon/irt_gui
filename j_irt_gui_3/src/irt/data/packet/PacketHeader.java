@@ -56,27 +56,27 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE:
 				packetIdStr = "Mute("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N1:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N1:
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N1_SET:
 				packetIdStr = "Potentiometer_N1("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N2:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N2:
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N2_SET:
 				packetIdStr = "Potentiometer_N2("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N3:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N3:
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N3_SET:
 				packetIdStr = "Potentiometer_ N3("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N4:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N4:
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N4_SET:
 				packetIdStr = "Potentiometer_N4("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N5:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N5:
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N5_SET:
 				packetIdStr = "Potentiometer_N5("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N6:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N6:
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N6_SET:
 				packetIdStr = "Potentiometer_N6("+packetId+")";
 				break;
