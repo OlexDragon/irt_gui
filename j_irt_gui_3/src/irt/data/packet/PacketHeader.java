@@ -72,6 +72,14 @@ public class PacketHeader{
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N4_SET:
 				packetIdStr = "Potentiometer_N4("+packetId+")";
 				break;
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N5:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N5_SET:
+				packetIdStr = "Potentiometer_N5("+packetId+")";
+				break;
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N6:
+			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N6_SET:
+				packetIdStr = "Potentiometer_N6("+packetId+")";
+				break;
 			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N1:
 				packetIdStr = "Switch_N1("+packetId+")";
 				break;

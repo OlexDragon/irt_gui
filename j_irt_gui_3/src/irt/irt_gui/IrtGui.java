@@ -21,11 +21,13 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.SwingWorker;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.apache.logging.log4j.LogManager;
@@ -38,7 +40,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.042";
+	public static final String VERTION = "- 3.044";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 
@@ -55,9 +57,7 @@ public class IrtGui extends IrtMainFrame {
 
 		try {
 			setHeaderLabel(headPanel);
-		} catch (IOException e) {
-			logger.catching(e);
-		} catch (FontFormatException e) {
+		} catch (Exception e) {
 			logger.catching(e);
 		}
 
@@ -78,60 +78,125 @@ public class IrtGui extends IrtMainFrame {
 	}
 
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {
-		JLabel lblIrtTechnologies = new JLabel(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex));
-		lblIrtTechnologies.setFont(
-				new Font(
-						IrtPanel.properties.getProperty("font_name_"+IrtPanel.companyIndex),
-						IrtPanel.parseFontStyle(IrtPanel.properties.getProperty("font_style_"+IrtPanel.companyIndex)),
-						12));
+		final JLabel lblIrtTechnologies = new JLabel(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex));
 		lblIrtTechnologies.setForeground(Color.WHITE);
 		lblIrtTechnologies.setBounds(531, 10, 107, 14);
 		headPanel.add(lblIrtTechnologies);
+		new SwingWorker<Font, Void>() {
+			@Override
+			protected Font doInBackground() throws Exception {
+				Thread.currentThread().setName("irtGui.lblIrtTechnologies.setFont");
+				return new Font(
+						IrtPanel.properties.getProperty(
+								"font_name_" + IrtPanel.companyIndex),
+								IrtPanel.parseFontStyle(
+										IrtPanel.properties.getProperty(
+												"font_style_" + IrtPanel.companyIndex)),
+						12);
+			}
+
+			@Override
+			protected void done() {
+				try {
+					lblIrtTechnologies.setFont(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
 
 //Language ComboBox
-		String[] languagesArr = Translation.getTranslationProperties("languages").split(",");
-		KeyValue<?,?>[] languages = new KeyValue[languagesArr.length];
-		for(int i=0; i<languagesArr.length; i++){
-			String[] split = languagesArr[i].split(":");
-			languages[i]= new KeyValue<String, String>(split[0], split[1]);
-		}
 
-		KeyValue<String, String> keyValue = new KeyValue<>(GuiController.getPrefs().get("locale", "en_US"), null);
-		@SuppressWarnings("unchecked")
-		DefaultComboBoxModel<KeyValue<String, String>> defaultComboBoxModel = new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages);
-
-		JComboBox<KeyValue<String, String>> comboBoxLanguage = new JComboBox<>();
+		final JComboBox<KeyValue<String, String>> comboBoxLanguage = new JComboBox<>();
 		comboBoxLanguage.setName("Language");
+		headPanel.add(comboBoxLanguage);
 
-		float fontSize = Translation.getValue(Float.class, "headPanel.language.comboBox.font.size", 12f);
+		new SwingWorker<DefaultComboBoxModel<KeyValue<String, String>>, Void>() {
+			@SuppressWarnings("unchecked")
+			@Override
+			protected DefaultComboBoxModel<KeyValue<String, String>> doInBackground() throws Exception {
+				Thread.currentThread().setName("irtGui.comboBoxLanguage.setModel");
 
-		comboBoxLanguage.setModel(defaultComboBoxModel);
+				String[] languagesArr = Translation.getTranslationProperties("languages").split(",");
+				logger.entry((Object[])languagesArr);
+
+				KeyValue<?,?>[] languages = new KeyValue[languagesArr.length];
+				for(int i=0; i<languagesArr.length; i++){
+					String[] split = languagesArr[i].split(":");
+					languages[i]= new KeyValue<String, String>(split[0], split[1]);
+				}
+				return logger.exit(new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages));
+			}
+
+			@Override
+			protected void done() {
+				try {
+					comboBoxLanguage.setModel(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+				KeyValue<String, String> keyValue = new KeyValue<>(GuiController.getPrefs().get("locale", "en_US"), null);
+				comboBoxLanguage.setSelectedItem(keyValue);
+			}
+		}.execute();
+
+
 		comboBoxLanguage.addPopupMenuListener(Listeners.popupMenuListener);
 		comboBoxLanguage.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
 		comboBoxLanguage.setForeground(Color.WHITE);
 		comboBoxLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		comboBoxLanguage.setBackground(HeadPanel.BACKGROUND_COLOR.darker().darker());
-		String[] bounds = Translation.getTranslationProperties("headPanel_comboBoc_bounds").toString().split(",");
-		comboBoxLanguage.setBounds(Integer.parseInt(bounds[0]),
-									Integer.parseInt(bounds[1]),
-									Integer.parseInt(bounds[2]),
-									Integer.parseInt(bounds[3]));
+
+		new SwingWorker<Rectangle, Void>() {
+			@Override
+			protected Rectangle doInBackground() throws Exception {
+				Thread.currentThread().setName("irtGui.comboBoxLanguage.setBounds");
+				String[] bounds = Translation.getTranslationProperties("headPanel_comboBoc_bounds").toString().split(",");
+				return new Rectangle(Integer.parseInt(bounds[0]),
+						Integer.parseInt(bounds[1]),
+						Integer.parseInt(bounds[2]),
+						Integer.parseInt(bounds[3]));
+			}
+
+			@Override
+			protected void done() {
+				try {
+					comboBoxLanguage.setBounds(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
 		comboBoxLanguage.setMinimumSize(new Dimension(77, 17));
-		comboBoxLanguage.setSelectedItem(keyValue);
 
-		String fontURL = "fonts/MINGLIU.TTF";
-		Font f = Translation.getSystemFont(fontURL, Font.BOLD, (int)fontSize);
-		if(f==null){
-			URL resource = getClass().getResource(fontURL);//Chinese
-			if(resource!=null)
-				f = Font.createFont(Font.TRUETYPE_FONT, resource.openStream()).deriveFont(fontSize).deriveFont(Font.BOLD);
-			else
-				logger.warn("Can not get the resouce font 'MINGLIU.TTF'");
-		}
-		if(f!=null)
-			comboBoxLanguage.setFont(f);
+		new SwingWorker<Font, Void>() {
+			@Override
+			protected Font doInBackground() throws Exception {
+				Thread.currentThread().setName("irtGui.comboBoxLanguage.setFont");
+				float fontSize = Translation.getValue(Float.class, "headPanel.language.comboBox.font.size", 12f);
+				String fontURL = "fonts/MINGLIU.TTF";
+				Font f = Translation.getSystemFont(fontURL, Font.BOLD, (int)fontSize);
+				if(f==null){
+					URL resource = getClass().getResource(fontURL);//Chinese
+					if(resource!=null)
+						f = Font.createFont(Font.TRUETYPE_FONT, resource.openStream()).deriveFont(fontSize).deriveFont(Font.BOLD);
+					else
+						logger.warn("Can not get the resouce font 'MINGLIU.TTF'");
+				}
+				return f;
+			}
 
-		headPanel.add(comboBoxLanguage);
+			@Override
+			protected void done() {
+				try {
+					Font f = get();
+					if(f!=null)
+						comboBoxLanguage.setFont(f);
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
 	}
 
 	public static void main(String[] args) {

@@ -13,8 +13,10 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFrame;
+import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
@@ -33,7 +35,7 @@ public class HeadPanel extends MainPanel {
 	private static Properties properties;
 
 	public HeadPanel(JFrame target) {
-		super(target, Translation.getValue(Integer.class, "headPanel.max_width", 650));
+		super(target, (int)Translation.getValue(Integer.class, "headPanel.max_width", 650));
 		setSize(Translation.getValue(Integer.class, "headPanel.width", 650), Translation.getValue(Integer.class, "headPanel.height", 74));
 		setBackground(BACKGROUND_COLOR);
 		setCorner(35);
@@ -41,37 +43,26 @@ public class HeadPanel extends MainPanel {
 		setArcStep(155);
 		setArcWidth(80);
 
-		String selectedLanguage = Translation.getSelectedLanguage();
-
-		logger.trace("selectedLanguage ={}", selectedLanguage);
 		ledPowerOn = new LED(Color.GREEN, Translation.getValue(String.class, "power_on", "POWER ON"));
 		ledPowerOn.setName("Power On");
 		ledPowerOn.setForeground(new Color(176, 224, 230));
-		Font font = Translation.getFont();
-		ledPowerOn.setFont(font);
-		Rectangle rectangle = Translation.getValue(Rectangle.class, "headPanel.led_powerOn_bounds", new Rectangle());
-		ledPowerOn.setBounds(rectangle);
 		add(ledPowerOn);
 
 		ledAlarm = new LED(Color.RED, Translation.getValue(String.class, "alarm", "ALARM"));
 		ledAlarm.setName("Main Alarm");
 		ledAlarm.setForeground(new Color(176, 224, 230));
-		ledAlarm.setFont(font);
-		rectangle = Translation.getValue(Rectangle.class, "headPanel.led_alarm_bounds", new Rectangle());
-		ledAlarm.setBounds(rectangle);
 		add(ledAlarm);
 
 		ledMute = new LED(Color.YELLOW, Translation.getValue(String.class, "mute", "MUTE"));
 		ledMute.setName("Main Mute");
 		ledMute.setForeground(new Color(176, 224, 230));
-		ledMute.setFont(font);
-		rectangle = Translation.getValue(Rectangle.class, "headPanel.led_mute_bounds", new Rectangle());
-		ledMute.setBounds(rectangle);
 		add(ledMute);
-		
+
 		ledRx.setBounds(10, 29, 17, 17);
 		add(ledRx);
-	}
+
+		swingWorkers();
+}
 
 	private static Properties getProperties() {
 		if(properties==null){
@@ -134,20 +125,138 @@ public class HeadPanel extends MainPanel {
 
 	public void refresh() {
 
-		ledPowerOn.setText(Translation.getValue(String.class, "power_on", "POWER ON"));
-		Font font = Translation.getFont();
-		ledPowerOn.setFont(font );
-		Rectangle rectangle = Translation.getValue(Rectangle.class, "headPanel.led_powerOn_bounds", new Rectangle());
-		ledPowerOn.setBounds(rectangle);
+		new SwingWorker<String, Void>() {
 
-		ledAlarm.setText(Translation.getValue(String.class, "alarm", "ALARM"));
-		ledAlarm.setFont(font);
-		rectangle = Translation.getValue(Rectangle.class, "headPanel.led_alarm_bounds", new Rectangle());
-		ledAlarm.setBounds(rectangle);
+			@Override
+			protected String doInBackground() throws Exception {
+				Thread.currentThread().setName("HeadPanel.ledPowerOn.setText");
+				return Translation.getValue(String.class, "power_on", "POWER ON");
+			}
 
-		ledMute.setText(Translation.getValue(String.class, "mute", "MUTE"));
-		ledMute.setFont(font);
-		rectangle = Translation.getValue(Rectangle.class, "headPanel.led_mute_bounds", new Rectangle());
-		ledMute.setBounds(rectangle);
+			@Override
+			protected void done() {
+				try {
+					ledPowerOn.setText(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+
+		new SwingWorker<String, Void>() {
+
+			@Override
+			protected String doInBackground() throws Exception {
+				Thread.currentThread().setName("HeadPanel.ledAlarm.setText");
+				return Translation.getValue(String.class, "alarm", "ALARM");
+			}
+
+			@Override
+			protected void done() {
+				try {
+					ledAlarm.setText(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+
+		new SwingWorker<String, Void>() {
+
+			@Override
+			protected String doInBackground() throws Exception {
+				Thread.currentThread().setName("HeadPanel.ledMute.setText");
+				return Translation.getValue(String.class, "mute", "MUTE");
+			}
+
+			@Override
+			protected void done() {
+				try {
+					ledMute.setText(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+
+		swingWorkers();
+	}
+
+	/**
+	 * set Bounds and Font for ledPowerOn, ledAlarm, ledMute
+	 */
+	private void swingWorkers() {
+		new SwingWorker<Rectangle, Void>() {
+
+			@Override
+			protected Rectangle doInBackground() throws Exception {
+				Thread.currentThread().setName("HeadPanel.ledPowerOn.setBounds");
+				return Translation.getValue(Rectangle.class, "headPanel.led_powerOn_bounds", new Rectangle());
+			}
+
+			@Override
+			protected void done() {
+				try {
+					ledPowerOn.setBounds(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+		new SwingWorker<Rectangle, Void>() {
+
+			@Override
+			protected Rectangle doInBackground() throws Exception {
+				Thread.currentThread().setName("HeadPanel.ledAlarm.setBounds");
+				return Translation.getValue(Rectangle.class, "headPanel.led_alarm_bounds", new Rectangle());
+			}
+
+			@Override
+			protected void done() {
+				try {
+					ledAlarm.setBounds(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+		new SwingWorker<Rectangle, Void>() {
+
+			@Override
+			protected Rectangle doInBackground() throws Exception {
+				Thread.currentThread().setName("HeadPanel.ledMute.setBounds");
+				return Translation.getValue(Rectangle.class, "headPanel.led_mute_bounds", new Rectangle());
+			}
+
+			@Override
+			protected void done() {
+				try {
+					ledMute.setBounds(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+		new SwingWorker<Font, Void>() {
+
+			@Override
+			protected Font doInBackground() throws Exception {
+				Thread.currentThread().setName("HeadPanel.setFont");
+				logger.entry();
+				return logger.exit(Translation.getFont());
+			}
+
+			@Override
+			protected void done() {
+				try {
+					Font font = get();
+					ledPowerOn.setFont(font);
+					ledAlarm.setFont(font);
+					ledMute.setFont(font);
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
 	}
 }

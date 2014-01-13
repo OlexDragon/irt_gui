@@ -72,6 +72,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	protected static DumpControllers dumpControllers;
 	protected SoftReleaseChecker softReleaseChecker = getSeftReleaseChecker();
 	protected Protocol protocol = Protocol.ALL;
+	private static DeviceInfo deviceInfo;
 
 	@SuppressWarnings("unchecked")
 	public GuiControllerAbstract(String threadName, JFrame gui) {
@@ -127,15 +128,14 @@ public abstract class GuiControllerAbstract extends Thread {
 
 				if (packet != null && packet.getHeader()!=null) {
 					ComPort serialPort = comPortThreadQueue.getSerialPort();
-					DeviceInfo di = null;
 					switch (packet.getHeader().getGroupId()) {
 					case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
 						DevicePanel unitPanel = null;
-						di = new DeviceInfo(packet);
+						deviceInfo = new DeviceInfo(packet);
 
-						int type = di.getType();
+						int type = deviceInfo.getType();
 						if(dumpControllers!=null)
-							dumpControllers.setInfo(di);
+							dumpControllers.setInfo(deviceInfo);
 						switch(type){
 						case DeviceInfo.DEVICE_TYPE_L_TO_70:
 						case DeviceInfo.DEVICE_TYPE_L_TO_140:
@@ -147,7 +147,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_KU_TO_70:
 						case DeviceInfo.DEVICE_TYPE_140_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_KU_TO_140:
-							unitPanel = getConverterPanel(di);
+							unitPanel = getConverterPanel(deviceInfo);
 							protocol = Protocol.CONVERTER;
 							break;
 						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
@@ -155,7 +155,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
 							protocol = Protocol.LINKED;
-							unitPanel = getNewBaisPanel(((LinkedPacket)packet).getLinkHeader(), "("+di.getSerialNumber()+") "+di.getUnitName(), 0, 0, 0, 0, unitsPanel.getHeight());
+							unitPanel = getNewBaisPanel(((LinkedPacket)packet).getLinkHeader(), "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName(), 0, 0, 0, 0, unitsPanel.getHeight());
 							break;
 						default:
 							if(type>0){
@@ -166,7 +166,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						}
 
 						if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
-							logger.debug(packet.getHeader());
+							logger.trace(packet.getHeader());
 
 							remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null);
 
@@ -176,9 +176,9 @@ public abstract class GuiControllerAbstract extends Thread {
 
 								getSeftReleaseChecker();
 								if(softReleaseChecker!=null)
-									softReleaseChecker.check(di);
+									softReleaseChecker.check(deviceInfo);
 
-								di.setInfoPanel(unitPanel.getInfoPanel());
+								deviceInfo.setInfoPanel(unitPanel.getInfoPanel());
 								unitsPanel.revalidate();
 								unitsPanel.repaint();
 								if(headPanel!=null)
@@ -186,17 +186,17 @@ public abstract class GuiControllerAbstract extends Thread {
 
 								if(dumpControllers!=null)
 									dumpControllers.stop();
-								dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null, di);
+								dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null, deviceInfo);
 								dumpControllers.addVlueChangeListener(headPanel.getStatusChangeListener());
 
-								StringData unitPartNumber = di.getUnitPartNumber();
+								StringData unitPartNumber = deviceInfo.getUnitPartNumber();
 								if(protocol == Protocol.LINKED){
 									if(!unitPartNumber.equals("N/A")){
 										logger.trace("protocol={}, unitPartNumber={}", protocol, unitPartNumber);
 										ProgressBar.setMinMaxValue("330", unitPartNumber.toString().substring(7, 11));
 									}
 								}else if(protocol == Protocol.CONVERTER){
-									logger.debug(protocol);
+									logger.trace(protocol);
 									ProgressBar.setMinMaxValue("-80", "120");
 								}
 							}
@@ -229,6 +229,11 @@ public abstract class GuiControllerAbstract extends Thread {
 					vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
 			}
 		});
+	}
+
+
+	public static DeviceInfo getDeviceInfo() {
+		return deviceInfo;
 	}
 
 	protected SoftReleaseChecker getSeftReleaseChecker() {
@@ -284,8 +289,9 @@ public abstract class GuiControllerAbstract extends Thread {
 
 					@Override
 					public void itemStateChanged(ItemEvent itemEvent) {
-						logger.trace("languageComboBox.itemStateChanged(ItemEvent {})", itemEvent);
 						if(itemEvent.getStateChange()==ItemEvent.SELECTED){
+							logger.trace("languageComboBox.itemStateChanged(ItemEvent {})", itemEvent);
+
 							Translation.setLocale(((KeyValue<String, String>)languageComboBox.getSelectedItem()).getKey());
 							Font font = Translation.getFont();
 

@@ -5,16 +5,19 @@ import irt.tools.label.ImageLabel;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Rectangle;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,41 +81,74 @@ public class IrtPanel extends MainPanel {
 		setArcWidth(45);
 		setBackground(new Color(0x3B, 0x4A, 0x8B, 100));
 
-
 		String text = properties.getProperty("company_name_"+companyIndex);
-
-		Font font = new Font(properties.getProperty("font_name_"+companyIndex),
-								parseFontStyle((String) properties.get("font_style_"+companyIndex)),
-								Integer.parseInt(properties.get("font_size_"+companyIndex).toString()));
 
 		ImageIcon imageIcon = new ImageIcon(
 				IrtGui.class.getResource(
 						properties.get("company_logo_"+companyIndex).toString()));
 
-		String[] split = properties.get("logo_bounds_"+companyIndex).toString().split(",");
 
-		JLabel lblIrtTechnologies = new ImageLabel(imageIcon, text);
-		lblIrtTechnologies.setBounds(Integer.parseInt(split[0]),
-									Integer.parseInt(split[1]),
-									Integer.parseInt(split[2]),
-									Integer.parseInt(split[3]));
+		final JLabel lblIrtTechnologies = new ImageLabel(imageIcon, text);
 		lblIrtTechnologies.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblIrtTechnologies.setForeground(new Color(176, 224, 230));
-		lblIrtTechnologies.setFont(font);
 		add(lblIrtTechnologies);
 
-		JLabel lblText = new JLabel(text);
+		final JLabel lblText = new JLabel(text);
 		lblText.setBounds(68, 13, 166, 20);
 		lblText.setHorizontalAlignment(SwingConstants.LEFT);
 		lblText.setForeground(new Color(0x3B, 0x4A, 0x8B));
-		lblText.setFont(font);
 		add(lblText);
 		
-		JLabel lblShadow = new JLabel(text);
+		final JLabel lblShadow = new JLabel(text);
 		lblShadow.setHorizontalAlignment(SwingConstants.LEFT);
 		lblShadow.setForeground(Color.WHITE);
-		lblShadow.setFont(font);
 		lblShadow.setBounds(lblText.getX()-1, lblText.getY()-1, 166, 20);
 		add(lblShadow);
+
+		new SwingWorker<Rectangle, Void>() {
+			@Override
+			protected Rectangle doInBackground() throws Exception {
+				Thread.currentThread().setName("IrtPanel.lblIrtTechnologies.setBounds");
+				String[] split = properties.get("logo_bounds_"+companyIndex).toString().split(",");
+				return new Rectangle(Integer.parseInt(split[0]),
+						Integer.parseInt(split[1]),
+						Integer.parseInt(split[2]),
+						Integer.parseInt(split[3]));
+			}
+
+			@Override
+			protected void done() {
+				try {
+					lblIrtTechnologies.setBounds(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+
+		new SwingWorker<Font, Void>() {
+			@Override
+			protected Font doInBackground() throws Exception {
+				Thread.currentThread().setName("IrtPanel.setFont");
+				return new Font(properties.getProperty("font_name_"+companyIndex),
+						parseFontStyle((String) properties.get("font_style_"+companyIndex)),
+						Integer.parseInt(properties.get("font_size_"+companyIndex).toString()));
+			}
+
+			@Override
+			protected void done() {
+				try {
+
+					Font font = get();
+					lblIrtTechnologies.setFont(font);
+					lblText.setFont(font);
+					lblShadow.setFont(font);
+
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
+
 	}
 }

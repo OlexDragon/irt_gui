@@ -22,7 +22,7 @@ public class MainPanel extends IrtStylePanel {
 	private boolean increase = true;
 
 	public MainPanel(final JFrame target, int width) {
-		PANEL_WIDTH = width;
+		PANEL_WIDTH = width!=0 ? width : 650;
 		this.target = target;
 		this.addMouseMotionListener(new MouseAdapter() {
 

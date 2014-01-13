@@ -154,11 +154,6 @@ public class IpAddressTextField extends GridbagPanel {
 		        textField.addFocusListener(new MyFocusAdapter());
 		    }
 
-		    for (int i = 0; i < textFields.length; i++) {
-		        JTextField textField = textFields[i];
-		        textField.addFocusListener(new MyFocusAdapter());
-		    }
-
 		    keyListenersList = new ArrayList<KeyListener>();
 		    focusListenersList = new ArrayList<FocusListener>();
 //		    focusAdapterList = new ArrayList<FocusAdapter>();

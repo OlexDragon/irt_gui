@@ -1,7 +1,9 @@
 package irt.tools.panel.subpanel;
 
 import irt.controller.AdcController;
+import irt.controller.AdcCurrentController;
 import irt.controller.DeviceDebagController;
+import irt.controller.GuiController;
 import irt.controller.NGlobalController;
 import irt.controller.SetterController;
 import irt.controller.SwitchControllerRegister;
@@ -11,6 +13,7 @@ import irt.controller.serial_port.value.getter.DeviceDebagGetter;
 import irt.controller.serial_port.value.seter.DeviceDebagSetter;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.to_do.InitializePicoBuc;
+import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ControllerFocusListener;
@@ -45,8 +48,13 @@ import javax.swing.SwingConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel {
+
+	protected final Logger logger = (Logger) LogManager.getLogger();
 
 	private JSlider slider;
 	private JTextField txtStep;
@@ -73,6 +81,10 @@ public class BIASsPanel extends JPanel {
 	private JLabel lblOPower;
 	private JLabel lblTemp_1;
 	private JLabel lblTemp;
+	private JTextField txtPotentiometer5;
+	private JTextField txtPotentiometer6;
+	private JLabel label;
+	private JLabel label_1;
 
 	public BIASsPanel(final LinkHeader linkHeader) {
 		setLayout(null);
@@ -151,16 +163,50 @@ public class BIASsPanel extends JPanel {
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
+				DeviceInfo deviceInfo = GuiController.getDeviceInfo();
+				logger.trace(deviceInfo);
+				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()==2 : false;
+				label.setVisible(isNewBiasBoard);
+				label_1.setVisible(isNewBiasBoard);
+				txtPotentiometer5.setVisible(isNewBiasBoard);
+				txtPotentiometer6.setVisible(isNewBiasBoard);
+				if(isNewBiasBoard){
+
+					((DeviceDebagController)addController("Potentiometer 5",
+							new DeviceDebagController(txtPotentiometer5,
+								slider,
+								new Value(0, 0, 896, 0),
+								new DeviceDebagSetter(linkHeader,
+										7,
+										0,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N5,
+										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+						3,
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+
+					((DeviceDebagController)addController("Potentiometer 6",
+							new DeviceDebagController(txtPotentiometer6,
+								slider,
+								new Value(0, 0, 896, 0),
+								new DeviceDebagSetter(linkHeader,
+										7,
+										8,
+										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N6,
+										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+						11,
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+				}
+
 				addController("Switch 1", new SwitchControllerRegister(switch_1, new DeviceDebagSetter(linkHeader, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 				addController("Switch 2", new SwitchControllerRegister(switch_2, new DeviceDebagSetter(linkHeader, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
 				ValueDouble value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController("HS1_CURRENT", new AdcController(lblCurrent1, new DeviceDebagGetter(linkHeader,  5, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS1_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController("HS1_CURRENT", new AdcCurrentController(lblCurrent1, new DeviceDebagGetter(linkHeader,  5, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS1_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController("HS2_CURRENT", new AdcController(lblCurrent2, new DeviceDebagGetter(linkHeader,  5, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS2_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController("HS2_CURRENT", new AdcCurrentController(lblCurrent2, new DeviceDebagGetter(linkHeader,  5, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS2_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
@@ -201,13 +247,13 @@ public class BIASsPanel extends JPanel {
 		Image onImage = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png")).getImage();
 
 		switch_1 = new SwitchBox(offImage, onImage);
-		switch_1.setBounds(22, 31, 72, 30);
+		switch_1.setBounds(61, 2, 55, 25);
 		switch_1.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		add(switch_1);
 
 		switch_2= new SwitchBox(offImage, onImage);
 		switch_2.setCursor(new Cursor(Cursor.HAND_CURSOR));
-		switch_2.setBounds(22, 82, 72, 30);
+		switch_2.setBounds(61, 30, 55, 25);
 		add(switch_2);
 
 		slider = new JSlider();
@@ -242,7 +288,7 @@ public class BIASsPanel extends JPanel {
 		txtStep.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtStep.setFont(font);
 		txtStep.setColumns(10);
-		txtStep.setBounds(205, 134, 34, 20);
+		txtStep.setBounds(205, 203, 34, 20);
 		add(txtStep);
 
 		txtPotentiometer2 = new JTextField();
@@ -301,25 +347,25 @@ public class BIASsPanel extends JPanel {
 
 		lblOutput_1 = new JLabel("OUTPUT");
 		lblOutput_1.setRequestFocusEnabled(false);
-		lblOutput_1.setFont(font);
-		lblOutput_1.setBounds(30, 13, 57, 17);
+		lblOutput_1.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblOutput_1.setBounds(10, 7, 57, 17);
 		add(lblOutput_1);
 
 		lblLineUp = new JLabel("LINE UP");
 		lblLineUp.setRequestFocusEnabled(false);
-		lblLineUp.setFont(font);
-		lblLineUp.setBounds(31, 64, 57, 17);
+		lblLineUp.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblLineUp.setBounds(10, 34, 57, 17);
 		add(lblLineUp);
 
 		switchNGlobal = new SwitchBox(offImage, onImage);
 		switchNGlobal.setEnabled(false);
-		switchNGlobal.setBounds(13, 131, 107, 44);
+		switchNGlobal.setBounds(61, 58, 55, 25);
 		add(switchNGlobal);
 
 		JLabel lblNglobal = new JLabel("NGlobal");
 		lblNglobal.setRequestFocusEnabled(false);
-		lblNglobal.setFont(font);
-		lblNglobal.setBounds(22, 113, 57, 17);
+		lblNglobal.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblNglobal.setBounds(10, 63, 57, 17);
 		add(lblNglobal);
 
 		chckbxStep = new JCheckBox("Step:");
@@ -330,63 +376,63 @@ public class BIASsPanel extends JPanel {
 		});
 		chckbxStep.setFont(font.deriveFont(11f));
 		chckbxStep.setOpaque(false);
-		chckbxStep.setBounds(152, 133, 55, 23);
+		chckbxStep.setBounds(152, 202, 55, 23);
 		add(chckbxStep);
 
 		lblCurrent_11 = new JLabel("CURR:");
 		lblCurrent_11.setRequestFocusEnabled(false);
 		lblCurrent_11.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurrent_11.setFont(font);
-		lblCurrent_11.setBounds(124, 158, 41, 17);
+		lblCurrent_11.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblCurrent_11.setBounds(20, 161, 31, 13);
 		add(lblCurrent_11);
 
 		lblCurrent1 = new JLabel(":");
 		lblCurrent1.setRequestFocusEnabled(false);
 		lblCurrent1.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblCurrent1.setFont(font);
-		lblCurrent1.setBounds(171, 158, 68, 17);
+		lblCurrent1.setBounds(54, 158, 68, 17);
 		add(lblCurrent1);
 
 		lblCurr = new JLabel("CURR:");
 		lblCurr.setRequestFocusEnabled(false);
 		lblCurr.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurr.setFont(font);
-		lblCurr.setBounds(124, 186, 41, 17);
+		lblCurr.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblCurr.setBounds(20, 189, 31, 13);
 		add(lblCurr);
 		
 		lblCurrent2 = new JLabel(":");
 		lblCurrent2.setRequestFocusEnabled(false);
 		lblCurrent2.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblCurrent2.setFont(font);
-		lblCurrent2.setBounds(171, 186, 68, 17);
+		lblCurrent2.setBounds(54, 186, 68, 17);
 		add(lblCurrent2);
 		
-		lblOutPower = new JLabel("OUTPUT POWER:");
+		lblOutPower = new JLabel("POWER:");
 		lblOutPower.setRequestFocusEnabled(false);
 		lblOutPower.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOutPower.setFont(font);
-		lblOutPower.setBounds(49, 242, 116, 17);
+		lblOutPower.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblOutPower.setBounds(10, 245, 41, 13);
 		add(lblOutPower);
 		
 		lblOPower = new JLabel(":");
 		lblOPower.setRequestFocusEnabled(false);
 		lblOPower.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblOPower.setFont(font);
-		lblOPower.setBounds(171, 242, 68, 17);
+		lblOPower.setBounds(54, 242, 68, 17);
 		add(lblOPower);
 		
 		lblTemp_1 = new JLabel("TEMP:");
 		lblTemp_1.setRequestFocusEnabled(false);
 		lblTemp_1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblTemp_1.setFont(font);
-		lblTemp_1.setBounds(124, 214, 39, 17);
+		lblTemp_1.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblTemp_1.setBounds(20, 221, 32, 13);
 		add(lblTemp_1);
 
 		lblTemp = new JLabel(":");
 		lblTemp.setRequestFocusEnabled(false);
 		lblTemp.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblTemp.setFont(font);
-		lblTemp.setBounds(171, 214, 68, 17);
+		lblTemp.setBounds(54, 214, 68, 17);
 		add(lblTemp);
 
 		
@@ -408,13 +454,44 @@ public class BIASsPanel extends JPanel {
 		});
 		imageButton.setToolTipText("Initialize");
 		imageButton.setName("Initialize");
-		imageButton.setBounds(22, 182, 33, 33);
+		imageButton.setBounds(68, 90, 33, 33);
 		add(imageButton);
 		
 		JLabel lblInitialize = new JLabel("Initialize");
+		lblInitialize.setFont(new Font("Tahoma", Font.BOLD, 10));
 		lblInitialize.setHorizontalAlignment(SwingConstants.CENTER);
-		lblInitialize.setBounds(14, 216, 46, 14);
+		lblInitialize.setBounds(11, 100, 46, 14);
 		add(lblInitialize);
+		
+		label = new JLabel("MMIC:");
+		label.setRequestFocusEnabled(false);
+		label.setHorizontalAlignment(SwingConstants.RIGHT);
+		label.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		label.setBounds(126, 137, 57, 17);
+		add(label);
+		
+		txtPotentiometer5 = new JTextField();
+		txtPotentiometer5.setText("0");
+		txtPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		txtPotentiometer5.setColumns(10);
+		txtPotentiometer5.setBounds(184, 137, 55, 20);
+		add(txtPotentiometer5);
+		
+		label_1 = new JLabel("MMIC:");
+		label_1.setRequestFocusEnabled(false);
+		label_1.setHorizontalAlignment(SwingConstants.RIGHT);
+		label_1.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		label_1.setBounds(126, 170, 57, 17);
+		add(label_1);
+		
+		txtPotentiometer6 = new JTextField();
+		txtPotentiometer6.setText("0");
+		txtPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
+		txtPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		txtPotentiometer6.setColumns(10);
+		txtPotentiometer6.setBounds(184, 170, 55, 20);
+		add(txtPotentiometer6);
 	}
 
 	private int getStep() {

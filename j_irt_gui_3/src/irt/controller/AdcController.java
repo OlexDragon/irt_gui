@@ -10,6 +10,7 @@ import irt.data.packet.PacketHeader;
 import irt.data.value.Value;
 
 import java.awt.Component;
+import java.text.DecimalFormat;
 
 import javax.swing.JLabel;
 
@@ -57,12 +58,16 @@ public class AdcController extends ControllerAbstract {
 							value.setValue(sourceValue);
 					
 						String string = value.toString();
-						label.setText(string);
-						label.setToolTipText(""+(5.4*sourceValue));
+						setText(new DecimalFormat("#.## A").format(5.4*sourceValue/1000), string);
 					}
 				}
 			}
 		};
+	}
+
+	public void setText(String toolTip, String text) {
+		label.setText(text);
+		label.setToolTipText(toolTip);
 	}
 
 	@Override

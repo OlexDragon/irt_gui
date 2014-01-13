@@ -37,6 +37,19 @@
   </Appenders>
 
   <Loggers>
+ 	<Logger name="irt.irt_gui.IrtGui" level="WARN"/>
+
+ 	<Logger name="irt.tools.panel.head.HeadPanel" level="WARN"/>
+
+  	<Logger name="irt.tools.panel.subpanel.BIASsPanel" level="all"/>
+
+  	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="WARN"/>
+
+  	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="WARN"/>
+
+ 	<Logger name="irt.controller.translation.Translation" level="WARN"/>
+
+ 	<Logger name="irt.controller.GuiControllerAbstract" level="debug"/>
  
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

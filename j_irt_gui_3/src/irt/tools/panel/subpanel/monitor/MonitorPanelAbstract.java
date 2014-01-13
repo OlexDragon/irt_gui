@@ -15,8 +15,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 @SuppressWarnings("serial")
 public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
+
+	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
 	protected ControllerAbstract controller;
 	private LinkHeader linkHeader;

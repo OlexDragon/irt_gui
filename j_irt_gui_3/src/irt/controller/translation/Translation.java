@@ -23,33 +23,46 @@ public class Translation {
 
 	private static final String DEFAULT_LANGUAGE = "en";
 
-	private static final Logger logger = (Logger) LogManager.getLogger(Translation.class);
+	private static final Logger LOGGER = (Logger) LogManager.getLogger();
 
 	private static final Preferences PREFS = GuiController.getPrefs();
-	private static Locale locale = setLocale(PREFS.get("locale", DEFAULT_LANGUAGE));
-
-	private static ResourceBundle messages;
-	private static Map<String, String> map;
+	private static Locale locale;
 	private static Font font;
 
+	static {
+		setLocale(PREFS.get("locale", DEFAULT_LANGUAGE));
+	}
+
 	private static Properties translationProperties;
+	private static Map<String, String> map;
+	private static ResourceBundle messages;
 
-	public static Locale setLocale(String localeStr){
+	public static void setLocale(final String localeStr){
+		font = null;
 
-		logger.trace("setLocale({})", localeStr);
+		Thread thread = new Thread(new Runnable() {
 
-		locale = new Locale(localeStr);
+			@Override
+			public void run() {
 
-		messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
-		map = getMap();
+				LOGGER.entry(localeStr);
 
-		if(!PREFS.get("locale", DEFAULT_LANGUAGE).equals(localeStr))
-			PREFS.put("locale", localeStr);
+				locale = new Locale(localeStr);
 
-		getFont(localeStr);
+				messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
+				map = getMap();
 
-		logger.debug("setLocale(), Locale={}", locale);
-		return locale;
+				if(!PREFS.get("locale", DEFAULT_LANGUAGE).equals(localeStr))
+					PREFS.put("locale", localeStr);
+
+				getFont(localeStr);
+				LOGGER.exit(locale);
+			}
+		}, "setLocale "+localeStr);
+		int priority = thread.getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			thread.setPriority(priority-1);
+		thread.start();
 	}
 
 	private static Map<String, String> getMap() {
@@ -66,10 +79,17 @@ public class Translation {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T getValue(Class<T> clazz, String key, T defaultValue){
-		logger.trace("getValue({}, {}, {})", clazz, key, defaultValue);
+		LOGGER.entry(clazz, key, defaultValue);
 		T returnValue = null;
 
-		logger.debug("map=", map);
+		while(map==null)
+			synchronized (LOGGER) {
+				try {
+					Thread.sleep(10);
+				} catch (InterruptedException e) {
+					LOGGER.catching(e);
+				}
+			}
 		String stringValue = map.get(key);
 
 		if(stringValue!=null){
@@ -96,44 +116,43 @@ public class Translation {
 													Integer.parseInt(split[3]));
 				break;
 			default:
-				logger.warn("Have to do implementation for '{}'", clazz);
+				LOGGER.warn("Have to do implementation for '{}'", clazz);
 			}
 		}else{
 			if(defaultValue!=null)
-				logger.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
+				LOGGER.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
 			returnValue = defaultValue;
 		}
 
-		logger.debug("getValue(key={})={}, stringValue={}", key, returnValue, stringValue);
-		return returnValue;
+		return LOGGER.exit(returnValue);
 	}
 
 	private static Font getFont(String selectedLanguage) {
-		logger.trace("getFont(selectedLanguage={})", selectedLanguage);
+		LOGGER.entry(selectedLanguage);
 		try {
 			String fontURL = getValue(String.class, "font_path", "fonts/TAHOMA.TTF");
-			logger.trace("fontURL={}", fontURL);
 
 			int fontStyle = Font.BOLD;
 			float fontSize = getValue(Float.class, "headPanel.font_size", 18f);
 
 			if (fontURL != null && (font = getSystemFont(fontURL, fontStyle, (int) fontSize)) == null) {
-				logger.warn("The Operating System does not have {} font.", fontURL);
+				LOGGER.warn("The Operating System does not have {} font.", fontURL);
 				URL resource = IrtGui.class.getResource(fontURL);
 				font = Font.createFont(Font.TRUETYPE_FONT, resource.openStream());
 				font = font.deriveFont(fontStyle).deriveFont(fontSize);
 			}
 		} catch (Exception e) {
-			logger.catching(e);
+			LOGGER.catching(e);
 		}
 
 		if(font==null)
 			font = new Font("Tahoma", Font.PLAIN, 14);
 
-		return font;
+		return LOGGER.exit(font);
 	}
 
 	public static Font getSystemFont(String fontURL, int fontStyle, int fontSize) {
+		LOGGER.entry( fontURL, fontStyle, fontSize);
 
 		Font font = null;
 		String[] split = fontURL.split("/");
@@ -146,46 +165,51 @@ public class Translation {
 				break;
 			}
 
-		logger.debug(fontURL);
-		logger.debug(font);
-
-		return font;
+		return LOGGER.exit(font);
 	}
 
 	public static Font getFont() {
-		logger.trace("getFont()={}", font);
-		return font;
+		LOGGER.entry();
+		while(font==null)
+			synchronized (LOGGER) {
+				try {
+					LOGGER.trace("Wait for Font");
+					Thread.sleep(400);
+				} catch (InterruptedException e) {
+					LOGGER.catching(e);
+				}
+			}
+		return LOGGER.exit(font);
 	}
 
 	public static String getSelectedLanguage() {
-		logger.trace("getSelectedLanguage(), locale={}", locale);
-
-		return locale.toString();
+		return LOGGER.exit(locale.toString());
 	}
 
 	public static void setFont(Font font) {
-		logger.trace("setFont({})", font);
+		LOGGER.trace("setFont({})", font);
 		Translation.font = font;
 	}
 
 	public static Locale getLocale() {
-		logger.trace("getLocale()", font);
-		return locale;
+		return LOGGER.exit(locale);
 	}
 
 	private static Properties getTranslationProperties() {
+		LOGGER.entry();
 		if(translationProperties==null){
 			translationProperties = new Properties();
 			try {
 				translationProperties.load(Translation.class.getResourceAsStream("translation.properties"));
 			} catch (Exception e) {
-				logger.catching(e);
+				LOGGER.catching(e);
 			}
 		}
-		return translationProperties;
+		return LOGGER.exit(translationProperties);
 	}
 
 	public static String getTranslationProperties(String key) {
-		return getTranslationProperties().getProperty(key);
+		LOGGER.entry(key);
+		return LOGGER.exit(getTranslationProperties().getProperty(key));
 	}
 }

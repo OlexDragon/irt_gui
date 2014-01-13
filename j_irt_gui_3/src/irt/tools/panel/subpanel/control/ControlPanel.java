@@ -20,12 +20,14 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -36,6 +38,7 @@ import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -98,11 +101,28 @@ public class ControlPanel extends MonitorPanelAbstract {
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
 		lblMute.setFont(font);
-		int x = Translation.getValue(Integer.class, "control.label.mute.x", 48);
-		int y = Translation.getValue(Integer.class, "control.label.mute.y", 107);
-		int width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
-		lblMute.setBounds(x, y, width, 20);
 		add(lblMute);
+		new SwingWorker<Rectangle, Void>() {
+
+			@Override
+			protected Rectangle doInBackground() throws Exception {
+				Thread.currentThread().setName(getClass().getSimpleName()+".lblMute.setBounds");
+				int width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
+				return new Rectangle(Translation.getValue(Integer.class, "control.label.mute.x", 48),
+									Translation.getValue(Integer.class, "control.label.mute.y", 107),
+									width,
+									20);
+			}
+
+			@Override
+			protected void done() {
+				try {
+					lblMute.setBounds(get());
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
 
 		font = font.deriveFont(16f);
 		txtGain = new JTextField();

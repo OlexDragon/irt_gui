@@ -60,8 +60,9 @@ public class ControlPanelPicobuc extends ControlPanel {
 
 	@Override
 	protected Point getConfigButtonPosition() {
-		int x = Translation.getValue(Integer.class, "control.button.save.x", 118);
-		int y = Translation.getValue(Integer.class, "control.button.save.y", 101);
+		int x = Translation.getValue(Integer.class, "control.button.save.x", 124);
+		int y = Translation.getValue(Integer.class, "control.button.save.y", 103);
+		logger.trace("x={}; y={};",x, y);
 		return new Point(x, y);
 	}
 

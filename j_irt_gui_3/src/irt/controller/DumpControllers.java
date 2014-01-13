@@ -55,12 +55,7 @@ public class DumpControllers extends ValueChangeListenerClass {
 			if (value == null || !value.equals(sourceStr)) {
 				if(source instanceof Integer){
 					int integer = (Integer) source;
-					switch(id){
-					case PacketWork.PACKET_ID_ALARMS_SUMMARY:
-						notifyAllControllers();
-						fireValueChangeListener(new ValueChangeEvent(source, id));
-						sourceStr = AlarmsController.alarmStatusToString((byte) integer);
-					}
+					sourceStr = summaryAlarm(id, integer);
 				}else if(source instanceof short[]){
 					byte status = (byte) (((short[])source)[2]&7);
 					switch(id){
@@ -75,6 +70,17 @@ public class DumpControllers extends ValueChangeListenerClass {
 				variables.put(id, sourceStr);
 				dumper.info(marker, "{}:{}\n{}",parseId(id), info, sourceStr);
 			}
+		}
+
+		private String summaryAlarm(int id, int integer) {
+			String sourceStr = null;
+			switch(id){
+			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+				notifyAllControllers();
+				fireValueChangeListener(new ValueChangeEvent(integer, id));
+				sourceStr = AlarmsController.alarmStatusToString((byte) integer);
+			}
+			return "Summary Alarm - "+sourceStr;
 		}
 
 		private void notifyAllControllers() {
