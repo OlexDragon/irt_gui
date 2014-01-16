@@ -32,8 +32,8 @@ public class TextSliderController extends ControllerAbstract {
 	private ActionListener txtActionListener;
 	private KeyListener txtKeyListener;
 
-	public TextSliderController(PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
-		super(packetWork, null, style);
+	public TextSliderController(String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
+		super(controllerName, packetWork, null, style);
 		this.value = value;
 		slider.setMinimum(value.getRelativeMinValue());
 		slider.setMaximum((int) value.getRelativeMaxValue());
@@ -53,41 +53,7 @@ public class TextSliderController extends ControllerAbstract {
 			
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-
-				ConfigurationSetter cs = (ConfigurationSetter)getPacketWork();
-				short packetId = cs.getPacketId();
-				if( valueChangeEvent.getID()==packetId){
-					Object source = valueChangeEvent.getSource();
-
-					switch(source.getClass().getSimpleName()){
-					case "Byte":
-						txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));
-						cs.preparePacketToSend(new IdValue(packetId, null));
-						setSend(true, false);
-						break;
-					case "Integer":
-						txtField.setToolTipText("");
-						setValue((Integer)valueChangeEvent.getSource());
-						if(style==Style.CHECK_ONCE)
-							setSend(false);
-						else
-							((ConfigurationSetter)getPacketWork()).preparePacketToSend(new IdValue(packetId, null));
-						break;
-					default:
-						txtField.setToolTipText("");
-						setValue((Long)valueChangeEvent.getSource());
-						if(style==Style.CHECK_ONCE)
-							setSend(false);
-						else
-							((ConfigurationSetter)getPacketWork()).preparePacketToSend(new IdValue(packetId, null));
-					}
-				}
-			}
-
-			private void setValue(long l) {
-				value.setValue(l);
-				txtField.setText(value.toString());
-				slider.setValue(value.getRelativeValue());
+				new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -189,5 +155,58 @@ public class TextSliderController extends ControllerAbstract {
 
 	public Value getValue() {
 		return value;
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			ConfigurationSetter cs = (ConfigurationSetter)getPacketWork();
+			short packetId = cs.getPacketId();
+			if( valueChangeEvent.getID()==packetId){
+				Object source = valueChangeEvent.getSource();
+
+				switch(source.getClass().getSimpleName()){
+				case "Byte":
+					txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));
+					cs.preparePacketToSend(new IdValue(packetId, null));
+					setSend(true, false);
+					break;
+				case "Integer":
+					txtField.setToolTipText("");
+					setValue((Integer)valueChangeEvent.getSource());
+					if(style==Style.CHECK_ONCE)
+						setSend(false);
+					else
+						((ConfigurationSetter)getPacketWork()).preparePacketToSend(new IdValue(packetId, null));
+					break;
+				default:
+					txtField.setToolTipText("");
+					setValue((Long)valueChangeEvent.getSource());
+					if(style==Style.CHECK_ONCE)
+						setSend(false);
+					else
+						((ConfigurationSetter)getPacketWork()).preparePacketToSend(new IdValue(packetId, null));
+				}
+			}
+		}
+
+		private void setValue(long l) {
+			value.setValue(l);
+			txtField.setText(value.toString());
+			slider.setValue(value.getRelativeValue());
+		}
 	}
 }

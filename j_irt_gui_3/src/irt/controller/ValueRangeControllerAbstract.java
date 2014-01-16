@@ -35,8 +35,8 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 	protected TextSliderController textSliderController;
 
-	public ValueRangeControllerAbstract(PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(packetWork, null, style);
+	public ValueRangeControllerAbstract(String controllerName, PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+		super(controllerName, packetWork, null, style);
 		this.txtField = txtField;
 		this.slider = slider;
 		this.txtStep = txtStep;
@@ -113,7 +113,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 	}
 
-	protected void startTextSliderController( Value value, short packetId, byte parameterId, Style style) {
+	protected void startTextSliderController(String controllerName, Value value, short packetId, byte parameterId, Style style) {
 
 		stepPref = GuiControllerAbstract.getPrefs().getInt(getClass().getSimpleName()+" Step", 1);
 
@@ -128,7 +128,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
-		textSliderController = new TextSliderController(new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
+		textSliderController = new TextSliderController(controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
 		Thread t = new Thread(textSliderController, getClass().getSimpleName());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

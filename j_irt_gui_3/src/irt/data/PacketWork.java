@@ -86,6 +86,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_DUMP_REGISTER_4					= 104,
 								PACKET_ID_DUMP_REGISTER_5					= 105,
 								PACKET_ID_DUMP_REGISTER_6					= 106,
+								PACKET_ID_DUMP_REGISTER_7					= 107,
 								PACKET_ID_DUMP_REGISTER_10					= 110;
 
 	public static final short PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE = 120;

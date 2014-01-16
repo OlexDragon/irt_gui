@@ -55,7 +55,7 @@ public class NetworkController extends ControllerAbstract {
 	private KeyListener keyListener;
 
 	public NetworkController(PacketWork packetWork, JPanel panel, Style style) {
-		super(packetWork, panel, style);
+		super("Network Controller", packetWork, panel, style);
 		logger.trace("NetworkController();");
 	}
 
@@ -174,24 +174,7 @@ public class NetworkController extends ControllerAbstract {
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 				logger.trace("ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
-				
-				Object source = valueChangeEvent.getSource();
-				if(source instanceof NetworkAddress){
-					networkAddress = (NetworkAddress) source;
-					comboBoxAddressType.setSelectedItem(
-							Translation.getValue(
-									String.class,
-									networkAddress.getTypeAsString().toLowerCase(),
-									networkAddress.getTypeAsString()
-							)
-					);
-					ipAddress.setText(networkAddress.getAddressAsString());
-					ipMask.setText(networkAddress.getMaskAsString());
-					ipGateway.setText(networkAddress.getGatewayAsString());
-					if(networkAddressTmp==null)
-						networkAddressTmp = networkAddress.getCopy();
-				}else
-					logger.error("Wrong ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
+				new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -263,5 +246,41 @@ public class NetworkController extends ControllerAbstract {
 		ipMask.setText(networkAddress.getMaskAsString());
 		ipGateway.setText(networkAddress.getGatewayAsString());
 		setButtonEnabled();
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			Object source = valueChangeEvent.getSource();
+			if(source instanceof NetworkAddress){
+				networkAddress = (NetworkAddress) source;
+				comboBoxAddressType.setSelectedItem(
+						Translation.getValue(
+								String.class,
+								networkAddress.getTypeAsString().toLowerCase(),
+								networkAddress.getTypeAsString()
+						)
+				);
+				ipAddress.setText(networkAddress.getAddressAsString());
+				ipMask.setText(networkAddress.getMaskAsString());
+				ipGateway.setText(networkAddress.getGatewayAsString());
+				if(networkAddressTmp==null)
+					networkAddressTmp = networkAddress.getCopy();
+			}else
+				logger.error("Wrong ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
+		}
 	}
 }

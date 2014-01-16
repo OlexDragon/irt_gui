@@ -39,12 +39,12 @@ public class PicobucPanel extends DevicePanel {
 		
 		DebagInfoPanel infoPanel = new DebagInfoPanel(linkHeader, this);
 		getTabbedPane().addTab("Info", infoPanel);
-
-		NetworkPanel networkPanel = new NetworkPanel(linkHeader);
-		getTabbedPane().addTab("network", networkPanel);
 		
 		AlarmsPanel alarmsPanel = new AlarmsPanel(linkHeader);
 		getTabbedPane().addTab("alarms", alarmsPanel);
+
+		NetworkPanel networkPanel = new NetworkPanel(linkHeader);
+		getTabbedPane().addTab("network", networkPanel);
 
 		int tabCount = tabbedPane.getTabCount();
 		for (int i = 0; i < tabCount; i++) {

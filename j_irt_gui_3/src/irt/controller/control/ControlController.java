@@ -43,8 +43,8 @@ public class ControlController extends ControllerAbstract {
 	 * Use for LO control
 	 * @param hasFreqSet 
 	 */
-	public ControlController(LinkHeader linkHeader, ControlPanel panel) {
-		super(new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
+	public ControlController(String controllerName,LinkHeader linkHeader, ControlPanel panel) {
+		super(controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
 		if(comboBoxfreqSet==null)
 			setSend(false);
 
@@ -55,7 +55,7 @@ public class ControlController extends ControllerAbstract {
 		t.start();
 
 		if(chbxLNB!=null){
-			lnbController = new SwitchController(chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION__LNB));
+			lnbController = new SwitchController("LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION__LNB));
 			t = new Thread(lnbController, "LNB ON/OFF");
 			t.setPriority(t.getPriority()-1);
 			t.setDaemon(true);

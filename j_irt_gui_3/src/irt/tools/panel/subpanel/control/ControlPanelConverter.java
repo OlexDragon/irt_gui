@@ -16,7 +16,7 @@ public class ControlPanelConverter extends ControlPanel {
 
 	@Override
 	protected ControllerAbstract getNewController() {
-		return new ControlController((LinkHeader)null, this);
+		return new ControlController(getClass().getSimpleName(), (LinkHeader)null, this);
 	}
 
 	@Override

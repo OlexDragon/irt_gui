@@ -20,13 +20,13 @@ public class AdcController extends ControllerAbstract {
 	
 	Value value = new Value(0, 0, 4095, 0);
 
-	public AdcController(JLabel label, PacketWork packetWork) {
-		super(packetWork, null, null);
+	public AdcController(String controllerName, JLabel label, PacketWork packetWork) {
+		super(controllerName, packetWork, null, null);
 		this.label = label;
 	}
 
-	public AdcController(JLabel label, PacketWork packetWork, Value value) {
-		this(label, packetWork);
+	public AdcController(String controllerName, JLabel label, PacketWork packetWork, Value value) {
+		this(controllerName, label, packetWork);
 		this.value = value;
 	}
 
@@ -37,30 +37,8 @@ public class AdcController extends ControllerAbstract {
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 
-				if(valueChangeEvent.getID()==((GetterAbstract)getPacketWork()).getPacketId()){
-
-					Object source = valueChangeEvent.getSource();
-					if(source instanceof Byte){
-
-						Byte b = (Byte)source;
-						label.setText("error"+b);
-						label.setToolTipText(PacketHeader.getOptionStr((byte) Math.abs(b)));
-
-					}else{
-						
-						RegisterValue urv = (RegisterValue)getPacketWork().getPacketThread().getValue();
-						Value uv = urv.getValue();
-						long sourceValue = ((RegisterValue)source).getValue().getValue();
-						if(uv==null){
-							value.setValue(sourceValue);
-							urv.setValue(value);
-						}else
-							value.setValue(sourceValue);
-					
-						String string = value.toString();
-						setText(new DecimalFormat("#.## A").format(5.4*sourceValue/1000), string);
-					}
-				}
+				if(valueChangeEvent.getID()==((GetterAbstract)getPacketWork()).getPacketId())
+					new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -83,5 +61,46 @@ public class AdcController extends ControllerAbstract {
 	protected void clear() {
 		super.clear();
 		label = null;
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			Object source = valueChangeEvent.getSource();
+			if(source instanceof Byte){
+
+				Byte b = (Byte)source;
+				label.setText("error"+b);
+				label.setToolTipText(PacketHeader.getOptionStr((byte) Math.abs(b)));
+
+			}else{
+				
+				RegisterValue urv = (RegisterValue)getPacketWork().getPacketThread().getValue();
+				Value uv = urv.getValue();
+				long sourceValue = ((RegisterValue)source).getValue().getValue();
+				if(uv==null){
+					value.setValue(sourceValue);
+					urv.setValue(value);
+				}else
+					value.setValue(sourceValue);
+			
+				String string = value.toString();
+				setText(new DecimalFormat("#.### A").format(5.4*sourceValue/1000), string);
+			}
+		}
+
 	}
 }

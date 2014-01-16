@@ -26,7 +26,7 @@ public class LoController extends ControllerAbstract {
 	private ItemListener itemListener;
 
 	public LoController(LinkHeader linkHeader, JComboBox<String> cbLoSelect, Style stile) {
-		super(new ConfigurationSetter(linkHeader), null, stile);
+		super("LoController", new ConfigurationSetter(linkHeader), null, stile);
 
 		this.cbLoSelect = cbLoSelect;
 		cbLoSelect.addItemListener(itemListener);
@@ -49,26 +49,9 @@ public class LoController extends ControllerAbstract {
 	protected ValueChangeListener addGetterValueChangeListener() {
 		return new ValueChangeListener() {
 
-			@SuppressWarnings("unchecked")
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				SetterAbstract pw = (SetterAbstract) getPacketWork();
-				PacketThread pt = pw.getPacketThread();
-
-				if(valueChangeEvent.getID()==pw.getPacketId()){
-					Object source = valueChangeEvent.getSource();
-
-					if(source instanceof ComboBoxModel){
-						cbLoSelect.setModel((ComboBoxModel<String>) source);
-
-						pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD);
-						pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET);
-						pt.preparePacket();
-					}else{
-						cbLoSelect.setSelectedItem(new IdValueForComboBox((byte) source, null));
-						setSend(false);
-					}
-				}
+				new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -85,5 +68,43 @@ public class LoController extends ControllerAbstract {
 		cbLoSelect.removePopupMenuListener(Listeners.popupMenuListener);
 		cbLoSelect = null;
 		itemListener = null;
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void run() {
+			SetterAbstract pw = (SetterAbstract) getPacketWork();
+			PacketThread pt = pw.getPacketThread();
+
+			if(valueChangeEvent.getID()==pw.getPacketId()){
+				Object source = valueChangeEvent.getSource();
+
+				if(source instanceof ComboBoxModel){
+					cbLoSelect.setModel((ComboBoxModel<String>) source);
+
+					pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD);
+					pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET);
+					pt.preparePacket();
+				}else{
+					cbLoSelect.setSelectedItem(new IdValueForComboBox((byte) source, null));
+					setSend(false);
+				}
+			}
+		}
+
 	}
 }

@@ -15,7 +15,7 @@ import javax.swing.ComboBoxModel;
 public class ControlControllerPicobuc extends ControlController{
 
 	public ControlControllerPicobuc(LinkHeader linkHeader, ControlPanel panel) {
-		super(linkHeader, panel);
+		super("ControlControllerPicobuc", linkHeader, panel);
 	}
 
 	@Override

@@ -329,7 +329,7 @@ public class PLLsPanel extends JPanel {
 		if(registerController!=null)
 			registerController.setRun(false);
 
-		registerController = new DeviceDebagController(txtPllReg,
+		registerController = new DeviceDebagController("PLL reg.N9", txtPllReg,
 									null,
 									value,
 									new DeviceDebagSetter(null,
@@ -340,7 +340,7 @@ public class PLLsPanel extends JPanel {
 							0,
 							Style.CHECK_ONCE);
 
-		Thread t = new Thread(registerController, "PLL reg.N9");
+		Thread t = new Thread(registerController);
 		int priority = t.getPriority();
 		t.setPriority(priority<=Thread.MIN_PRIORITY ? Thread.MIN_PRIORITY : priority-1);
 		t.setDaemon(true);

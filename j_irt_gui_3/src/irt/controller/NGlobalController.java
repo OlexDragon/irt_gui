@@ -22,7 +22,7 @@ public class NGlobalController extends ControllerAbstract {
 	private ActionListener actionListener;
 
 	public NGlobalController(JCheckBox checkBox, PacketWork packetWork) {
-		super(packetWork, null, null);
+		super("NGlobalController", packetWork, null, null);
 		setListeners();
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);
@@ -35,14 +35,8 @@ public class NGlobalController extends ControllerAbstract {
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 				int id = valueChangeEvent.getID();
-				if(id==((GetterAbstract)getPacketWork()).getPacketId()){
-
-					Object source = valueChangeEvent.getSource();
-					if(source instanceof RegisterValue){
-						RegisterValue sv = (RegisterValue)source;
-						checkBox.setSelected((sv.getValue().getValue()&1)==1);
-					}
-				}
+				if(id==((GetterAbstract)getPacketWork()).getPacketId())
+					new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -82,5 +76,30 @@ public class NGlobalController extends ControllerAbstract {
 		checkBox.removeActionListener(actionListener);
 		checkBox = null;
 		actionListener = null;
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			Object source = valueChangeEvent.getSource();
+			if(source instanceof RegisterValue){
+				RegisterValue sv = (RegisterValue)source;
+				checkBox.setSelected((sv.getValue().getValue()&1)==1);
+			}
+		}
+
 	}
 }

@@ -40,9 +40,10 @@ public abstract class ControllerAbstract implements Runnable{
 
 	protected Observable observable;
 
-	public ControllerAbstract(PacketWork packetWork, JPanel panel, Style style) {
+	public ControllerAbstract(String controllerName, PacketWork packetWork, JPanel panel, Style style) {
 		this.packetWork = packetWork;
 		this.style = style;
+		setName(controllerName);
  		setListeners();
 
  		valueChangeListener = addGetterValueChangeListener();
@@ -185,6 +186,19 @@ public abstract class ControllerAbstract implements Runnable{
 		this.observable = observable;
 	}
 
+	public JPanel getOwner() {
+		return owner;
+	}
+
+	public String getName() {
+		return Thread.currentThread().getName();
+	}
+
+	public void setName(String name) {
+		logger.trace("setName(String {})", name);
+		Thread.currentThread().setName(name);
+	}
+
 	@Override
 	protected void finalize() throws Throwable {
 //		System.out.println("+++++++++++++++++++++++++++++++ - finalize - "+getClass().getSimpleName()+" - ++++++++++++++++++++++++++++++++++++++");
@@ -210,8 +224,4 @@ public abstract class ControllerAbstract implements Runnable{
 		t.start();
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-	public JPanel getOwner() {
-		return owner;
-	}
 }

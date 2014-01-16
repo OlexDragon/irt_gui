@@ -20,8 +20,8 @@ public class SwitchController extends ControllerAbstract {
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchController(JCheckBox checkBox, PacketWork packetWork) {
-		super(packetWork, null, null);
+	public SwitchController(String controllerName, JCheckBox checkBox, PacketWork packetWork) {
+		super(controllerName, packetWork, null, null);
 		this.checkBox = checkBox;
 	}
 
@@ -55,25 +55,7 @@ public class SwitchController extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-
-				Object source = valueChangeEvent.getSource();
-				int id = valueChangeEvent.getID();
-
-				GetterAbstract as = (GetterAbstract)getPacketWork();
-				if(id==as.getPacketId()){
-
-					PacketThread pt = as.getPacketThread();
-					pt.setValue(source);
-					if(source instanceof Byte){
-						checkBox.setSelected(((Byte)source)>0);
-					}else
-						checkBox.setSelected(((Integer)source)>0);
-
-					if(checkBox.getActionListeners().length==0){
-						checkBox.addActionListener(actionListener);
-						checkBox.setEnabled(true);
-					}
-				}
+				new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -89,5 +71,43 @@ public class SwitchController extends ControllerAbstract {
 		checkBox.removeActionListener(actionListener);
 		checkBox = null;
 		actionListener = null;
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			Object source = valueChangeEvent.getSource();
+			int id = valueChangeEvent.getID();
+
+			GetterAbstract as = (GetterAbstract)getPacketWork();
+			if(id==as.getPacketId()){
+
+				PacketThread pt = as.getPacketThread();
+				pt.setValue(source);
+				if(source instanceof Byte){
+					checkBox.setSelected(((Byte)source)>0);
+				}else
+					checkBox.setSelected(((Integer)source)>0);
+
+				if(checkBox.getActionListeners().length==0){
+					checkBox.addActionListener(actionListener);
+					checkBox.setEnabled(true);
+				}
+			}
+		}
+
 	}
 }

@@ -61,11 +61,12 @@ public class DeviceDebagController extends ControllerAbstract {
 /**
  * @param addrToSave if addrToSave < 0 save command deasn't work
  */
-	public DeviceDebagController(JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
-		super(packetWork, null, style);
+	public DeviceDebagController(String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
+		super(controllerName, packetWork, null, style);
+		logger.entry();
 
 		this.addrToSave = addrToSave;
-		setWaitTime(1000);
+//		setWaitTime(1000);
 		setListeners();
 		this.txtField = txtField;
 		if(slider!=null)
@@ -77,10 +78,12 @@ public class DeviceDebagController extends ControllerAbstract {
 		this.value = value;
 		if(slider!=null)
 			slider.setMaximum((int) value.getRelativeMaxValue());
+		logger.exit();
 	}
 
-	public DeviceDebagController(PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
-		super(packetWork, null, null);
+	public DeviceDebagController(String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
+		super(controllerName, packetWork, null, null);
+		logger.entry();
 
 		this.cbCommand = cbCommand;
 		this.cbParameter = cbParameter;
@@ -103,58 +106,16 @@ public class DeviceDebagController extends ControllerAbstract {
 		cbCommand.addItemListener(commandItemListener);
 		cbParameter.addPopupMenuListener(Listeners.popupMenuListener);
 		cbParameter.addItemListener(parameterItemListener);
+
+		logger.exit();
 	}
 
 	@Override
 	protected ValueChangeListener addGetterValueChangeListener() {
 		return new ValueChangeListener() {
-
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-
-				int id = valueChangeEvent.getID();
-
-				GetterAbstract pw = (GetterAbstract) getPacketWork();
-				PacketThread pt = pw.getPacketThread();
-				if(id==pw.getPacketId()){
-
-					RegisterValue rv = (RegisterValue)pt.getValue();
-					RegisterValue urv = rv;
-					Object source = valueChangeEvent.getSource();
-
-					switch(source.getClass().getSimpleName()){
-					case "Byte":
-						logger.debug("DeviceDebagController.valueChanged: ERROR ={}", source);
-						txtField.setText("error"+source);
-						rv.setValue(null);
-						pt.preparePacket(pw.getPacketParameterHeaderCode(), rv);
-						setSend(true, false);
-						break;
-					case "RegisterValue":
-						logger.debug("DeviceDebagController.valueChanged: {}", source);
-						RegisterValue crv = (RegisterValue)source;
-						if(rv.getAddr()==crv.getAddr() && rv.getIndex()==crv.getIndex()){
-							Value unitValue = urv.getValue();
-
-							if(unitValue==null){
-								value.setValue(crv.getValue().getValue());
-								urv.setValue(value);
-							}else
-								value.setValue(crv.getValue().getValue());
-
-							setAll();
-							if(style==Style.CHECK_ALWAYS){
-								logger.debug("DeviceDebagController.valueChanged: style==Style.CHECK_ALWAYS");
-								RegisterValue tmpRV = new RegisterValue(rv);
-								tmpRV.setValue(null);
-								pt.preparePacket(pw.getPacketParameterHeaderCode(), tmpRV);
-							}
-						}
-						break;
-					default:
-						textArea.setText(source!=null ? source.toString() : null);
-					}
-				}
+				new ControllerWorker(DeviceDebagController.this.getName(), valueChangeEvent);
 			}
 		};
 	}
@@ -180,7 +141,6 @@ public class DeviceDebagController extends ControllerAbstract {
 		};
 
 		commandItemListener = new ItemListener() {
-			
 
 			@Override
 			public void itemStateChanged(ItemEvent itemEvent) {
@@ -445,5 +405,73 @@ public class DeviceDebagController extends ControllerAbstract {
 			cbParameter = null;
 			parameterItemListener = null;
 		}
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(String threadName, ValueChangeEvent valueChangeEvent){
+			super(threadName);
+			logger.entry(threadName, valueChangeEvent);
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+			logger.exit();
+		}
+
+		@Override
+		public void run() {
+			logger.entry();
+			int id = valueChangeEvent.getID();
+
+			GetterAbstract pw = (GetterAbstract) getPacketWork();
+			PacketThread pt = pw.getPacketThread();
+			if(id==pw.getPacketId()){
+
+				RegisterValue rv = (RegisterValue)pt.getValue();
+				RegisterValue urv = rv;
+				Object source = valueChangeEvent.getSource();
+
+				switch(source.getClass().getSimpleName()){
+				case "Byte":
+					logger.debug("DeviceDebagController.valueChanged: ERROR ={}", source);
+					txtField.setText("error"+source);
+					rv.setValue(null);
+					pt.preparePacket(pw.getPacketParameterHeaderCode(), rv);
+					setSend(true, false);
+					break;
+				case "RegisterValue":
+					logger.debug("DeviceDebagController.valueChanged: {}", source);
+					RegisterValue crv = (RegisterValue)source;
+					if(rv.getAddr()==crv.getAddr() && rv.getIndex()==crv.getIndex()){
+						Value unitValue = urv.getValue();
+
+						if(unitValue==null){
+							value.setValue(crv.getValue().getValue());
+							urv.setValue(value);
+						}else
+							value.setValue(crv.getValue().getValue());
+
+						setAll();
+						if(style==Style.CHECK_ALWAYS){
+							logger.debug("DeviceDebagController.valueChanged: style==Style.CHECK_ALWAYS");
+							RegisterValue tmpRV = new RegisterValue(rv);
+							tmpRV.setValue(null);
+							pt.preparePacket(pw.getPacketParameterHeaderCode(), tmpRV);
+						}
+					}
+					break;
+				default:
+					textArea.setText(source!=null ? source.toString() : null);
+				}
+			}
+			logger.exit();
+		}
+
 	}
 }

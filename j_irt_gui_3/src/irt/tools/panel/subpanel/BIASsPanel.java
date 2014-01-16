@@ -123,16 +123,15 @@ public class BIASsPanel extends JPanel {
 				logger.trace(deviceInfo);
 				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()==2 : false;
 
-				addController("NGlobal",
-						new NGlobalController(switchNGlobal,
+				addController(new NGlobalController(switchNGlobal,
 								new DeviceDebagGetter(linkHeader,
 										6,
 										0,
 										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_NGLOBAL,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
-				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 4" : "Potentiometer 1",
-						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer4 : txtPotentiometer1,
+				((DeviceDebagController)addController(
+						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 2" : "Potentiometer 1",isNewBiasBoard ? txtPotentiometer2 : txtPotentiometer1,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -143,8 +142,8 @@ public class BIASsPanel extends JPanel {
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 1" : "Potentiometer 2",
-						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer1 : txtPotentiometer2,
+				((DeviceDebagController)addController(
+						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 1" : "Potentiometer 2", isNewBiasBoard ? txtPotentiometer1 : txtPotentiometer2,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -155,8 +154,8 @@ public class BIASsPanel extends JPanel {
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 5" : "Potentiometer 3",
-						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer5 : txtPotentiometer3,
+				((DeviceDebagController)addController(
+						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 5" : "Potentiometer 3", isNewBiasBoard ? txtPotentiometer5 : txtPotentiometer3,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -167,8 +166,8 @@ public class BIASsPanel extends JPanel {
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 6" : "Potentiometer 4",
-						new DeviceDebagController(isNewBiasBoard ? txtPotentiometer6 : txtPotentiometer4,
+				((DeviceDebagController)addController(
+						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 6" : "Potentiometer 4", isNewBiasBoard ? txtPotentiometer6 : txtPotentiometer4,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -191,8 +190,8 @@ public class BIASsPanel extends JPanel {
 					lblPotentiometer5.setText("Driver:");
 					lblPotentiometer6.setText("Pred.Dr");
 
-					((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 2" : "Potentiometer 5",
-							new DeviceDebagController(isNewBiasBoard ? txtPotentiometer2 : txtPotentiometer5,
+					((DeviceDebagController)addController(
+							new DeviceDebagController(isNewBiasBoard ? "Potentiometer 4" : "Potentiometer 5", isNewBiasBoard ? txtPotentiometer4 : txtPotentiometer5,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -203,8 +202,8 @@ public class BIASsPanel extends JPanel {
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-					((DeviceDebagController)addController(isNewBiasBoard ? "Potentiometer 3" : "Potentiometer 6",
-							new DeviceDebagController(isNewBiasBoard ? txtPotentiometer3 : txtPotentiometer6,
+					((DeviceDebagController)addController(
+							new DeviceDebagController(isNewBiasBoard ? "Potentiometer 3" : "Potentiometer 6", isNewBiasBoard ? txtPotentiometer3 : txtPotentiometer6,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -216,24 +215,24 @@ public class BIASsPanel extends JPanel {
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 				}
 
-				addController("Switch 1", new SwitchControllerRegister(switch_1, new DeviceDebagSetter(linkHeader, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
-				addController("Switch 2", new SwitchControllerRegister(switch_2, new DeviceDebagSetter(linkHeader, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
+				addController(new SwitchControllerRegister("Switch 1", switch_1, new DeviceDebagSetter(linkHeader, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
+				addController(new SwitchControllerRegister("Switch 2", switch_2, new DeviceDebagSetter(linkHeader, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
 				ValueDouble value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController("HS1_CURRENT", new AdcCurrentController(lblCurrent1, new DeviceDebagGetter(linkHeader,  5, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS1_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcCurrentController("HS1_CURRENT", lblCurrent1, new DeviceDebagGetter(linkHeader,  5, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS1_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController("HS2_CURRENT", new AdcCurrentController(lblCurrent2, new DeviceDebagGetter(linkHeader,  5, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS2_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcCurrentController("HS2_CURRENT", lblCurrent2, new DeviceDebagGetter(linkHeader,  5, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS2_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController("Output Power", new AdcController(lblOPower, new DeviceDebagGetter(linkHeader,  5, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcController("Output Power", lblOPower, new DeviceDebagGetter(linkHeader,  5, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController("DeviceDebag Temperature", new AdcController(lblTemp, new DeviceDebagGetter(linkHeader,  5, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcController("DeviceDebag Temperature", lblTemp, new DeviceDebagGetter(linkHeader,  5, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
 			}
 			public void ancestorMoved(AncestorEvent arg0) {}
 
@@ -246,9 +245,9 @@ public class BIASsPanel extends JPanel {
 				threadList.clear();
 			}
 
-			private ControllerAbstract addController(String threadName, ControllerAbstract abstractController){
+			private ControllerAbstract addController(ControllerAbstract abstractController){
 
-				Thread t = new Thread(abstractController, threadName);
+				Thread t = new Thread(abstractController);
 
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
@@ -461,7 +460,7 @@ public class BIASsPanel extends JPanel {
 
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				new SetterController(
+				new SetterController("Initialize Controller",
 						new Setter(linkHeader,
 								Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
 								Packet.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1,

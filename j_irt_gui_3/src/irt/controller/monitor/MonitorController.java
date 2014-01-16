@@ -34,7 +34,7 @@ public class MonitorController extends ControllerAbstract {
 	private List<ControllerAbstract> controllerList;
 
 	public MonitorController(LinkHeader linkHeader, MonitorPanelAbstract monitorPanel) {
-		super(new MeasurementGetter(linkHeader), monitorPanel, Style.CHECK_ONCE);
+		super("Monitor Controller", new MeasurementGetter(linkHeader), monitorPanel, Style.CHECK_ONCE);
 	}
 
 	@Override
@@ -85,8 +85,8 @@ public class MonitorController extends ControllerAbstract {
 			case "Input Power":
 				Value value = new ValueDouble(0, 1);
 				value.setPrefix(prefix);
-				ControllerAbstract abstractController = new MeasurementController(((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_INPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER);
-				t = new Thread(abstractController, "Input Power");
+				ControllerAbstract abstractController = new MeasurementController(name, ((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_INPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER);
+				t = new Thread(abstractController);
 				t.setDaemon(true);
 				t.start();
 				controllerList.add(abstractController);
@@ -94,8 +94,8 @@ public class MonitorController extends ControllerAbstract {
 			case "Output Power":
 				value = new ValueDouble(0, 1);
 				value.setPrefix(prefix);
-				abstractController = new MeasurementController(((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_OUTPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER);
-				t = new Thread(abstractController, "Output Power");
+				abstractController = new MeasurementController(name, ((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_OUTPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER);
+				t = new Thread(abstractController);
 				t.setDaemon(true);
 				t.start();
 				controllerList.add(abstractController);
@@ -104,8 +104,8 @@ public class MonitorController extends ControllerAbstract {
 			case "Temperature":
 				value = new ValueDouble(0, 1);
 				value.setPrefix(" C");
-				abstractController = new MeasurementController(((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_25W_BAIS_TEMPERATURE, value, PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE);
-				t = new Thread(abstractController, "Temperature");
+				abstractController = new MeasurementController(name, ((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_25W_BAIS_TEMPERATURE, value, PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE);
+				t = new Thread(abstractController);
 				t.setDaemon(true);
 				t.start();
 				controllerList.add(abstractController);

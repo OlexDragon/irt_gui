@@ -7,8 +7,8 @@ import javax.swing.JLabel;
 
 public class AdcCurrentController extends AdcController {
 
-	public AdcCurrentController(JLabel label, PacketWork packetWork, Value value) {
-		super(label, packetWork, value);
+	public AdcCurrentController(String controllerName, JLabel label, PacketWork packetWork, Value value) {
+		super(controllerName, label, packetWork, value);
 	}
 
 	@Override

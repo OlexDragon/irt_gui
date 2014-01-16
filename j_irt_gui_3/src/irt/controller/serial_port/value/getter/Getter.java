@@ -107,5 +107,4 @@ public class Getter extends GetterAbstract {
 		}
 		return isSet;
 	}
-
 }

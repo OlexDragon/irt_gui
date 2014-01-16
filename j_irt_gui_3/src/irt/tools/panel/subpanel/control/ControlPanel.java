@@ -297,7 +297,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 	@Override
 	protected ControllerAbstract getNewController() {
-		return new ControlController(getLinkHeader(),this);
+		return new ControlController(getClass().getSimpleName(), getLinkHeader(),this);
 	}
 
 	protected AttenuationController getNewAttenController() {

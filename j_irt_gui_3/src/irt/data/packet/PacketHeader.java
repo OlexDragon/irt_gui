@@ -253,6 +253,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_DUMP_REGISTER_4:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_5:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_6:
+			case PacketWork.PACKET_ID_DUMP_REGISTER_7:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_100:
 				packetIdStr = "Dump "+DumpControllers.parseId(packetId);
 				break;

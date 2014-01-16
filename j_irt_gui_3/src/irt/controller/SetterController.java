@@ -16,8 +16,8 @@ public class SetterController extends ControllerAbstract {
  * @param packetWork should be command 
  * @param style Controller work style 
  */
-	public SetterController(PacketWork packetWork, ToDo toDo, Style style) {
-		super(packetWork, null, style);
+	public SetterController(String controllerName, PacketWork packetWork, ToDo toDo, Style style) {
+		super(controllerName, packetWork, null, style);
 		this.toDo = toDo;
 
 		Thread t = new Thread(this);
@@ -34,7 +34,7 @@ public class SetterController extends ControllerAbstract {
 			
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				toDo.doIt(valueChangeEvent);
+				new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -42,4 +42,25 @@ public class SetterController extends ControllerAbstract {
 	@Override protected void setListeners() {}
 	@Override protected boolean setComponent(Component component) { return false; }
 
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			toDo.doIt(valueChangeEvent);
+		}
+
+	}
 }

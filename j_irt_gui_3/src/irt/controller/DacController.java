@@ -27,8 +27,8 @@ public class DacController extends ControllerAbstract {
 
 	private Value value;
 
-	public DacController(PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
-		super(packetWork, null, null);
+	public DacController(String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
+		super(controllerName, packetWork, null, null);
 		value = setValue();
 		setListeners();
 		this.dacNumber = dacNumber;
@@ -42,10 +42,7 @@ public class DacController extends ControllerAbstract {
 			
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				DacValue dv = (DacValue)valueChangeEvent.getSource();
-				if(dv.getDacNumber()==dacNumber)
-					setAllValues(dv.getDacValue());
-				
+				new ControllerWorker(valueChangeEvent);				
 			}
 		};
 	}
@@ -132,5 +129,28 @@ public class DacController extends ControllerAbstract {
 		slider = null;
 
 		value = null;
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			DacValue dv = (DacValue)valueChangeEvent.getSource();
+			if(dv.getDacNumber()==dacNumber)
+				setAllValues(dv.getDacValue());
+		}
+
 	}
 }

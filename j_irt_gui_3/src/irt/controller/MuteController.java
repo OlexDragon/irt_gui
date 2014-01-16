@@ -29,7 +29,7 @@ public class MuteController extends ControllerAbstract {
 	private ActionListener actionListener;
 
 	public MuteController(LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style) {
-		super(new ConfigurationSetter(linkHeader, linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL, PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE), null, style);
+		super("Mute Controller", new ConfigurationSetter(linkHeader, linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL, PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE), null, style);
 		this.btnMute = btnMute;
 		this.btnMute.addActionListener(actionListener);
 		this.lblMute = lblMute;
@@ -41,35 +41,8 @@ public class MuteController extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				if(valueChangeEvent.getID() == PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE){
-
-					GetterAbstract pw = (GetterAbstract)getPacketWork();
-					long source;
-
-					if(valueChangeEvent.getSource() instanceof Byte)
-						source = (Byte)valueChangeEvent.getSource();
-					else
-						source = (Long)valueChangeEvent.getSource();
-
-					String text;
-					if(isMute=(source>0)){
-						text = Translation.getValue(String.class, "unmute", "UNMUTE");
-						lblMute.setText(text);
-						btnMute.setToolTipText(text);
-						if(style==Style.CHECK_ALWAYS)
-							pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
-					}else if(source==0){
-						text = Translation.getValue(String.class, "mute", "MUTE");
-						lblMute.setText(text);
-						btnMute.setToolTipText(text);
-						if(style==Style.CHECK_ALWAYS)
-							pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
-					}else{
-						lblMute.setText("error"+source);
-						pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
-						setSend(true, false);
-					}
-				}
+				if(valueChangeEvent.getID() == PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE)
+					new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -106,5 +79,51 @@ public class MuteController extends ControllerAbstract {
 					MuteController.this.lblMute.setText(Translation.getValue(String.class, "mute", "MUTE"));
 			}
 		};
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			GetterAbstract pw = (GetterAbstract)getPacketWork();
+			long source;
+
+			if(valueChangeEvent.getSource() instanceof Byte)
+				source = (Byte)valueChangeEvent.getSource();
+			else
+				source = (Long)valueChangeEvent.getSource();
+
+			String text;
+			if(isMute=(source>0)){
+				text = Translation.getValue(String.class, "unmute", "UNMUTE");
+				lblMute.setText(text);
+				btnMute.setToolTipText(text);
+				if(style==Style.CHECK_ALWAYS)
+					pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
+			}else if(source==0){
+				text = Translation.getValue(String.class, "mute", "MUTE");
+				lblMute.setText(text);
+				btnMute.setToolTipText(text);
+				if(style==Style.CHECK_ALWAYS)
+					pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
+			}else{
+				lblMute.setText("error"+source);
+				pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
+				setSend(true, false);
+			}
+		}
+
 	}
 }

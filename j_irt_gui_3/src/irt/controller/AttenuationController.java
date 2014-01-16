@@ -18,7 +18,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 	private Style style;
 
 	public AttenuationController(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super("Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 	}
 
@@ -28,24 +28,44 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 			
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE){
-					boolean isConverter = getPacketWork().getPacketThread().getLinkHeader()==null;
-					Object source = valueChangeEvent.getSource();
-					if(source instanceof Range){
-						Range r = (Range) source;
-
-						long minimum = r.getMinimum();
-						long maximum = r.getMaximum();
-						ValueDouble stepValue = new ValueDouble(1, 1, maximum-minimum, 1);
-						stepValue.setPrefix("dB");
-						setStepValue(stepValue);
-
-						ValueDouble value = new ValueDouble(0,r.getMinimum(), r.getMaximum(), 1);
-						value.setPrefix(Translation.getValue(String.class, "db", " dB"));
-						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter ? Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
-					}
-				}
+				if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE)
+					new ControllerWorker(valueChangeEvent);
 			}
 		};
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			boolean isConverter = getPacketWork().getPacketThread().getLinkHeader()==null;
+			Object source = valueChangeEvent.getSource();
+			if(source instanceof Range){
+				Range r = (Range) source;
+
+				long minimum = r.getMinimum();
+				long maximum = r.getMaximum();
+				ValueDouble stepValue = new ValueDouble(1, 1, maximum-minimum, 1);
+				stepValue.setPrefix("dB");
+				setStepValue(stepValue);
+
+				ValueDouble value = new ValueDouble(0,r.getMinimum(), r.getMaximum(), 1);
+				value.setPrefix(Translation.getValue(String.class, "db", " dB"));
+				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter ? Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
+			}
+		}
+
 	}
 }

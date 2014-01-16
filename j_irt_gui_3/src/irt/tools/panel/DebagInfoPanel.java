@@ -99,7 +99,7 @@ public class DebagInfoPanel extends JPanel {
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent arg0) {
 
-				deviceDebagInfoController = new DeviceDebagController(
+				deviceDebagInfoController = new DeviceDebagController("Info Controller",
 																new Getter(
 																		DebagInfoPanel.this.linkHeader,
 																		Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,

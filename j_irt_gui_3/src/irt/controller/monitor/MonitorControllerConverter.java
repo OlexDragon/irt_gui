@@ -37,7 +37,7 @@ public class MonitorControllerConverter extends ControllerAbstract {
 	private JLabel lblInputPower;
 
 	public MonitorControllerConverter(JPanel monitorPanel) {
-		super(new MeasurementGetter(), monitorPanel, Style.CHECK_ONCE);
+		super("Converter Monitor Controller", new MeasurementGetter(), monitorPanel, Style.CHECK_ONCE);
 	}
 
 	@Override
@@ -98,7 +98,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 			controllerList = new ArrayList<>();
 
 		Thread t;
-		switch(component.getName()){
+		String name = component.getName();
+		switch(name){
 		case "Lock":
 			ledLock = (LED) component;
 			break;
@@ -109,8 +110,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 			Value value = new ValueDouble(0, 1);
 			value.setPrefix(" dBm");
 			lblInputPower = (JLabel)component;
-			ControllerAbstract abstractController = new MeasurementController(lblInputPower, Packet.IRT_SLCP_PARAMETER_FCM_MEASUREMENT_INPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER);
-			t = new Thread(abstractController, "Input Power");
+			ControllerAbstract abstractController = new MeasurementController(name, lblInputPower, Packet.IRT_SLCP_PARAMETER_FCM_MEASUREMENT_INPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER);
+			t = new Thread(abstractController);
 			t.setDaemon(true);
 			t.start();
 			controllerList.add(abstractController);
@@ -118,8 +119,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 		case "Output Power":
 			value = new ValueDouble(0, 1);
 			value.setPrefix(" dBm");
-			abstractController = new MeasurementController((JLabel)component, Packet.IRT_SLCP_PARAMETER_FCM_MEASUREMENT_OUTPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_OUTPUT_POWER);
-			t = new Thread(abstractController, "Input Power");
+			abstractController = new MeasurementController(name, (JLabel)component, Packet.IRT_SLCP_PARAMETER_FCM_MEASUREMENT_OUTPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_OUTPUT_POWER);
+			t = new Thread(abstractController);
 			t.setDaemon(true);
 			t.start();
 			controllerList.add(abstractController);
@@ -128,8 +129,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 		case "Unit Temp":
 			value = new ValueDouble(0, 1);
 			value.setPrefix(" C");
-			abstractController = new MeasurementController((JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE, value, PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE);
-			t = new Thread(abstractController, "Unit Temp");
+			abstractController = new MeasurementController(name, (JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE, value, PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE);
+			t = new Thread(abstractController);
 			t.setDaemon(true);
 			t.start();
 			controllerList.add(abstractController);
@@ -137,8 +138,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 		case "CPU Temp":
 			value = new ValueDouble(0, 1);
 			value.setPrefix(" C");
-			abstractController = new MeasurementController((JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU, value, PacketWork.PACKET_ID_MEASUREMENT_CPU_TEMPERATURE);
-			t = new Thread(abstractController, "CPU Temp");
+			abstractController = new MeasurementController(name, (JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU, value, PacketWork.PACKET_ID_MEASUREMENT_CPU_TEMPERATURE);
+			t = new Thread(abstractController);
 			t.setDaemon(true);
 			t.start();
 			controllerList.add(abstractController);
@@ -146,8 +147,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 		case "5.5V":
 			value = new ValueDouble(0, 3);
 			value.setPrefix(" V");
-			abstractController = new MeasurementController((JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_5V5, value, PacketWork.PACKET_ID_MEASUREMENT_5V5);
-			t = new Thread(abstractController, "5.5V");
+			abstractController = new MeasurementController(name, (JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_5V5, value, PacketWork.PACKET_ID_MEASUREMENT_5V5);
+			t = new Thread(abstractController);
 			t.setDaemon(true);
 			t.start();
 			controllerList.add(abstractController);
@@ -155,8 +156,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 		case "13.2V":
 			value = new ValueDouble(0, 3);
 			value.setPrefix(" V");
-			abstractController = new MeasurementController((JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_POS, value, PacketWork.PACKET_ID_MEASUREMENT_13V2);
-			t = new Thread(abstractController, "13.2V");
+			abstractController = new MeasurementController(name, (JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_POS, value, PacketWork.PACKET_ID_MEASUREMENT_13V2);
+			t = new Thread(abstractController);
 			t.setDaemon(true);
 			t.start();
 			controllerList.add(abstractController);
@@ -164,8 +165,8 @@ public class MonitorControllerConverter extends ControllerAbstract {
 		case "-13.2V":
 			value = new ValueDouble(0, 3);
 			value.setPrefix(" V");
-			abstractController = new MeasurementController((JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_NEG, value, PacketWork.PACKET_ID_MEASUREMENT_13V2_NEG);
-			t = new Thread(abstractController, "-13.2V");
+			abstractController = new MeasurementController(name, (JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_NEG, value, PacketWork.PACKET_ID_MEASUREMENT_13V2_NEG);
+			t = new Thread(abstractController);
 			t.setDaemon(true);
 			t.start();
 			controllerList.add(abstractController);

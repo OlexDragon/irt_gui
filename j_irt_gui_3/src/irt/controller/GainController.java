@@ -17,7 +17,7 @@ public class GainController extends ValueRangeControllerAbstract {
 	private Style style;
 
 	public GainController(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super("Gain Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 	}
 
@@ -27,16 +27,36 @@ public class GainController extends ValueRangeControllerAbstract {
 			
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE){
-					Object source = valueChangeEvent.getSource();
-					if(source instanceof Range){
-						Range r = (Range) source;
-						ValueDouble value = new ValueDouble(0, r.getMinimum(), r.getMaximum(), 1);
-						value.setPrefix(" dB");
-						startTextSliderController(value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, style);
-					}
-				}
+				if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE)
+					new ControllerWorker(valueChangeEvent);
 			}
 		};
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			Object source = valueChangeEvent.getSource();
+			if(source instanceof Range){
+				Range r = (Range) source;
+				ValueDouble value = new ValueDouble(0, r.getMinimum(), r.getMaximum(), 1);
+				value.setPrefix(" dB");
+				startTextSliderController(GainController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, style);
+			}
+		}
+
 	}
 }

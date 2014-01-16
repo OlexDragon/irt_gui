@@ -20,8 +20,8 @@ public class SwitchControllerRegister extends ControllerAbstract {
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchControllerRegister(JCheckBox checkBox, PacketWork packetWork) {
-		super(packetWork, null, null);
+	public SwitchControllerRegister(String controllerName, JCheckBox checkBox, PacketWork packetWork) {
+		super(controllerName, packetWork, null, null);
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);
 	}
@@ -32,12 +32,7 @@ public class SwitchControllerRegister extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				int id = valueChangeEvent.getID();
-				if(id==getPacketWork().getPacketThread().getPacket().getHeader().getPacketId()){
-
-					RegisterValue crv = (RegisterValue)valueChangeEvent.getSource();
-					checkBox.setSelected((crv.getValue().getValue()&1)==1);
-				}
+				new ControllerWorker(valueChangeEvent);
 			}
 		};
 	}
@@ -79,5 +74,31 @@ public class SwitchControllerRegister extends ControllerAbstract {
 		checkBox.removeActionListener(actionListener);
 		checkBox = null;
 		actionListener = null;
+	}
+
+	//********************* class ControllerWorker *****************
+	private class ControllerWorker extends Thread {
+
+		private ValueChangeEvent valueChangeEvent;
+
+		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+			setDaemon(true);
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			int id = valueChangeEvent.getID();
+			if(id==getPacketWork().getPacketThread().getPacket().getHeader().getPacketId()){
+
+				RegisterValue crv = (RegisterValue)valueChangeEvent.getSource();
+				checkBox.setSelected((crv.getValue().getValue()&1)==1);
+			}
+		}
+
 	}
 }

@@ -11,6 +11,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.tools.panel.head.UnitsContainer;
 
+import java.awt.AWTEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -42,52 +43,10 @@ public class DumpControllers extends ValueChangeListenerClass {
 	private volatile static Map<Integer, String> variables = new HashMap<>();
 
 	private ValueChangeListener valueChangeListener = new ValueChangeListener() {
-
 		@Override
 		public void valueChanged(ValueChangeEvent valueChangeEvent) {
-
 			logger.debug("valueChanged({})", valueChangeEvent);
-			int id = valueChangeEvent.getID();
-			Object source = valueChangeEvent.getSource();
-			String sourceStr = source.toString();
-
-			String value = variables.get(id);
-			if (value == null || !value.equals(sourceStr)) {
-				if(source instanceof Integer){
-					int integer = (Integer) source;
-					sourceStr = summaryAlarm(id, integer);
-				}else if(source instanceof short[]){
-					byte status = (byte) (((short[])source)[2]&7);
-					switch(id){
-					case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
-					case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
-					case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
-					case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
-					case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
-						sourceStr = "*** Alarm "+AlarmsController.getAlarmName((short) id)+" - "+AlarmsController.alarmStatusToString(status)+" ***";
-					}
-				}
-				variables.put(id, sourceStr);
-				dumper.info(marker, "{}:{}\n{}",parseId(id), info, sourceStr);
-			}
-		}
-
-		private String summaryAlarm(int id, int integer) {
-			String sourceStr = null;
-			switch(id){
-			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
-				notifyAllControllers();
-				fireValueChangeListener(new ValueChangeEvent(integer, id));
-				sourceStr = AlarmsController.alarmStatusToString((byte) integer);
-			}
-			return "Summary Alarm - "+sourceStr;
-		}
-
-		private void notifyAllControllers() {
-			for(DefaultController d:dumpsList)
-				synchronized(d){
-					d.notify();
-				}
+			new DumpWorker(valueChangeEvent);
 		}
 	};
 
@@ -133,12 +92,16 @@ public class DumpControllers extends ValueChangeListenerClass {
 		}, waitTime, "DUMP_DEVICE_DEBAG_DEVICE_INFO_10");
 
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_1, 1) { @Override public Integer getPriority() { return 7; }
+				PacketWork.PACKET_ID_DUMP_REGISTER_1, 1) { @Override public Integer getPriority() { return 8; }
 		}, waitTime, "DUMP_REGISTER_1");
 
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_2, 2) { @Override public Integer getPriority() { return 6; }
+				PacketWork.PACKET_ID_DUMP_REGISTER_2, 2) { @Override public Integer getPriority() { return 7; }
 		}, waitTime, "DUMP_REGISTER_2");
+
+		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+				PacketWork.PACKET_ID_DUMP_REGISTER_7, 7) { @Override public Integer getPriority() { return 6; }
+		}, waitTime, "DUMP_REGISTER_7");
 
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 				PacketWork.PACKET_ID_DUMP_REGISTER_3, 3) { @Override public Integer getPriority() { return 5; }
@@ -216,12 +179,12 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	private void addDumpController(Getter getter, int waitTime, String threadName){
 
-		DefaultController dumpController = new DefaultController(getter, Style.CHECK_ONCE)
+		DefaultController dumpController = new DefaultController(threadName, getter, Style.CHECK_ONCE)
 		{ @Override protected ValueChangeListener addGetterValueChangeListener() { return DumpControllers.this.valueChangeListener; }};
 
 		dumpController.setWaitTime(waitTime);
 
-		Thread t = new Thread(dumpController, threadName);
+		Thread t = new Thread(dumpController);
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
@@ -266,5 +229,65 @@ public class DumpControllers extends ValueChangeListenerClass {
 			str = str.replace("10", "2.")+"(PaketWork ID="+id+ ")";
 
 		return str;
+	}
+
+	//******************* class DumpWorker *******************************
+	private class DumpWorker extends Thread{
+
+		private AWTEvent valueChangeEvent;
+
+		public DumpWorker(ValueChangeEvent valueChangeEvent) {
+			this.valueChangeEvent = valueChangeEvent;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+			setPriority(priority-1);
+			start();
+		}
+
+		@Override
+		public void run() {
+			int id = valueChangeEvent.getID();
+			Object source = valueChangeEvent.getSource();
+			String sourceStr = source.toString();
+
+			String value = variables.get(id);
+			if (value == null || !value.equals(sourceStr)) {
+				if(source instanceof Integer){
+					int integer = (Integer) source;
+					sourceStr = summaryAlarm(id, integer);
+				}else if(source instanceof short[]){
+					byte status = (byte) (((short[])source)[2]&7);
+					switch(id){
+					case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+					case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+					case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+					case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+					case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+						sourceStr = "*** Alarm "+AlarmsController.getAlarmName((short) id)+" - "+AlarmsController.alarmStatusToString(status)+" ***";
+					}
+				}
+				variables.put(id, sourceStr);
+				dumper.info(marker, "{}:{}\n{}",parseId(id), info, sourceStr);
+			}
+		}
+		
+
+		private String summaryAlarm(int id, int integer) {
+			String sourceStr = null;
+			switch(id){
+			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+				notifyAllControllers();
+				fireValueChangeListener(new ValueChangeEvent(integer, id));
+				sourceStr = AlarmsController.alarmStatusToString((byte) integer);
+			}
+			return "Summary Alarm - "+sourceStr;
+		}
+
+		private void notifyAllControllers() {
+			for(DefaultController d:dumpsList)
+				synchronized(d){
+					d.notify();
+				}
+		}
 	}
 }

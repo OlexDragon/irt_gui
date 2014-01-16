@@ -32,7 +32,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 	};
 
 	public DeviceDebagSaveController(JTextField txtField, PacketWork packetWork, Style stile) {
-		super(packetWork, null, stile);
+		super("DeviceDebagSaveController", packetWork, null, stile);
 		this.txtField = txtField;
 
 		timer = new Timer(9000, timerListener);
