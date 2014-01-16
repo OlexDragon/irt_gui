@@ -159,7 +159,7 @@ public class DACsPanel extends JPanel {
 
 				if(linkHeader==null){
 					Value value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value);
+					abstractController = new AdcController("Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
 					t = new Thread(abstractController);
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
@@ -169,7 +169,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Output Power Controller", lblOutputPower, new DeviceDebagGetter(null,  10, 1, PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value);
+					abstractController = new AdcController("Output Power Controller", lblOutputPower, new DeviceDebagGetter(null,  10, 1, PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
 					t = new Thread(abstractController);
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
@@ -179,7 +179,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Temperature Controller", lblTemperature, new DeviceDebagGetter(null,  10, 2, PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value);
+					abstractController = new AdcController("Temperature Controller", lblTemperature, new DeviceDebagGetter(null,  10, 2, PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
 					abstractController.setWaitTime(10000);
 					t = new Thread(abstractController);
 					priority = t.getPriority();
@@ -190,7 +190,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Current Controller", lblCurrent, new DeviceDebagGetter(null,  10, 4, PacketWork.PACKET_ID_FCM_ADC_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value);
+					abstractController = new AdcController("Current Controller", lblCurrent, new DeviceDebagGetter(null,  10, 4, PacketWork.PACKET_ID_FCM_ADC_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
 					t = new Thread(abstractController);
 					priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
@@ -200,7 +200,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("5.5V Controller", lbl5V5, new DeviceDebagGetter(null,  10, 6, PacketWork.PACKET_ID_FCM_ADC_5V5, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value);
+					abstractController = new AdcController("5.5V Controller", lbl5V5, new DeviceDebagGetter(null,  10, 6, PacketWork.PACKET_ID_FCM_ADC_5V5, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
 					abstractController.setWaitTime(10000);
 					t = new Thread(abstractController);
 					priority = t.getPriority();
@@ -211,7 +211,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("3.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value);
+					abstractController = new AdcController("3.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
 					abstractController.setWaitTime(10000);
 					t = new Thread(abstractController);
 					priority = t.getPriority();
@@ -222,7 +222,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value);
+					abstractController = new AdcController("-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
 					abstractController.setWaitTime(10000);
 					t = new Thread(abstractController);
 					priority = t.getPriority();

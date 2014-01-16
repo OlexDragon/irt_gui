@@ -182,6 +182,8 @@ public class BIASsPanel extends JPanel {
 				lblPotentiometer6.setVisible(isNewBiasBoard);
 				txtPotentiometer5.setVisible(isNewBiasBoard);
 				txtPotentiometer6.setVisible(isNewBiasBoard);
+
+				double multiplier;
 				if(isNewBiasBoard){
 					lblPotentiometer1.setText("Output1:");
 					lblPotentiometer2.setText("Output2:");
@@ -213,26 +215,28 @@ public class BIASsPanel extends JPanel {
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
-				}
+					multiplier = 10.8;
+				}else
+					multiplier = 5.4;
 
 				addController(new SwitchControllerRegister("Switch 1", switch_1, new DeviceDebagSetter(linkHeader, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 				addController(new SwitchControllerRegister("Switch 2", switch_2, new DeviceDebagSetter(linkHeader, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
 				ValueDouble value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController(new AdcCurrentController("HS1_CURRENT", lblCurrent1, new DeviceDebagGetter(linkHeader,  5, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS1_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcCurrentController("HS1_CURRENT", lblCurrent1, new DeviceDebagGetter(linkHeader,  5, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS1_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, multiplier));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController(new AdcCurrentController("HS2_CURRENT", lblCurrent2, new DeviceDebagGetter(linkHeader,  5, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS2_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcCurrentController("HS2_CURRENT", lblCurrent2, new DeviceDebagGetter(linkHeader,  5, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS2_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, multiplier));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController(new AdcController("Output Power", lblOPower, new DeviceDebagGetter(linkHeader,  5, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcController("Output Power", lblOPower, new DeviceDebagGetter(linkHeader,  5, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
 
 				value = new ValueDouble(0, 0, 4095, 0);
 				value.setPrefix(" mV");
-				addController(new AdcController("DeviceDebag Temperature", lblTemp, new DeviceDebagGetter(linkHeader,  5, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value));
+				addController(new AdcController("DeviceDebag Temperature", lblTemp, new DeviceDebagGetter(linkHeader,  5, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
 			}
 			public void ancestorMoved(AncestorEvent arg0) {}
 

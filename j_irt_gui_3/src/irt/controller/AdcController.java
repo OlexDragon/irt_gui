@@ -16,17 +16,20 @@ import javax.swing.JLabel;
 
 public class AdcController extends ControllerAbstract {
 
+	private final double multiplier;
+
 	private JLabel label;
 	
 	Value value = new Value(0, 0, 4095, 0);
 
-	public AdcController(String controllerName, JLabel label, PacketWork packetWork) {
+	public AdcController(String controllerName, JLabel label, PacketWork packetWork, double multiplier) {
 		super(controllerName, packetWork, null, null);
 		this.label = label;
+		this.multiplier = multiplier;
 	}
 
-	public AdcController(String controllerName, JLabel label, PacketWork packetWork, Value value) {
-		this(controllerName, label, packetWork);
+	public AdcController(String controllerName, JLabel label, PacketWork packetWork, Value value, double multiplier) {
+		this(controllerName, label, packetWork, multiplier);
 		this.value = value;
 	}
 
@@ -38,7 +41,7 @@ public class AdcController extends ControllerAbstract {
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 
 				if(valueChangeEvent.getID()==((GetterAbstract)getPacketWork()).getPacketId())
-					new ControllerWorker(valueChangeEvent);
+					new ControllerWorker(valueChangeEvent, multiplier);
 			}
 		};
 	}
@@ -66,9 +69,11 @@ public class AdcController extends ControllerAbstract {
 	//********************* class ControllerWorker *****************
 	private class ControllerWorker extends Thread {
 
+		private final double multiplier;
 		private ValueChangeEvent valueChangeEvent;
 
-		public ControllerWorker(ValueChangeEvent valueChangeEvent){
+		public ControllerWorker(ValueChangeEvent valueChangeEvent, double multiplier){
+			this.multiplier = multiplier;
 			setDaemon(true);
 			this.valueChangeEvent = valueChangeEvent;
 			int priority = getPriority();
@@ -98,7 +103,7 @@ public class AdcController extends ControllerAbstract {
 					value.setValue(sourceValue);
 			
 				String string = value.toString();
-				setText(new DecimalFormat("#.### A").format(5.4*sourceValue/1000), string);
+				setText(new DecimalFormat("#.### A").format(multiplier*sourceValue/1000), string);
 			}
 		}
 
