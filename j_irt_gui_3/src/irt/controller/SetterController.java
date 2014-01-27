@@ -20,7 +20,7 @@ public class SetterController extends ControllerAbstract {
 		super(controllerName, packetWork, null, style);
 		this.toDo = toDo;
 
-		Thread t = new Thread(this);
+		Thread t = new Thread(this, controllerName);
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

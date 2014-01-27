@@ -340,7 +340,7 @@ public class PLLsPanel extends JPanel {
 							0,
 							Style.CHECK_ONCE);
 
-		Thread t = new Thread(registerController);
+		Thread t = new Thread(registerController, registerController.getName());
 		int priority = t.getPriority();
 		t.setPriority(priority<=Thread.MIN_PRIORITY ? Thread.MIN_PRIORITY : priority-1);
 		t.setDaemon(true);

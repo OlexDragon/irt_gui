@@ -216,7 +216,7 @@ public class InfoPanel extends JPanel implements Refresh {
 				else
 					transformer.setHeight(WINDOW_MAX_HEIGHT);
 
-				Thread t = new Thread(transformer);
+				Thread t = new Thread(transformer, "Size Change");
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
@@ -300,7 +300,7 @@ public class InfoPanel extends JPanel implements Refresh {
 
 		public SecondsCount(int firmwareBuildCounter){
 			this.firmwareBuildCounter = firmwareBuildCounter;
-			Thread t = new Thread(this);
+			Thread t = new Thread(this, "Firmware Build Counter");
 			t.setPriority(t.getPriority()-1);
 			t.setDaemon(true);
 			t.start();

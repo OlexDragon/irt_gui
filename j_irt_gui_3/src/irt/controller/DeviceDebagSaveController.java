@@ -38,7 +38,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		timer = new Timer(9000, timerListener);
 		timer.start();
 
-		Thread t = new Thread(this);
+		Thread t = new Thread(this, "Device Debag Save Controller");
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

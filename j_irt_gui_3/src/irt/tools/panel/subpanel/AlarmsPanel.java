@@ -46,6 +46,10 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	private JLabel lblUnderCurrent;
 
 	private JLabel lblOverTemperature;
+
+	private JLabel lblOther;
+
+	private JLabel lblOtherTxt;
 	
 	public AlarmsPanel(final LinkHeader linkHeader) {
 
@@ -71,27 +75,27 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		panel_4.setName("Over-Temperature");
 		panel_4.setBorder(new LineBorder(new Color(0, 0, 0)));
 		
-		JLabel label = new JLabel(Translation.getValue(String.class, "other", "Other"));
-		label.setForeground(Color.BLUE);
-		label.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblOtherTxt = new JLabel(Translation.getValue(String.class, "other", "Other"));
+		lblOtherTxt.setForeground(Color.BLUE);
+		lblOtherTxt.setFont(font);
 
 		String noAlarmTxt = Translation.getValue(String.class, "no_alarm", "No Alarm");
 
-		JLabel label_1 = new JLabel(noAlarmTxt);
-		label_1.setOpaque(true);
-		label_1.setName("Other");
-		label_1.setHorizontalAlignment(SwingConstants.CENTER);
-		label_1.setForeground(new Color(204, 204, 204));
-		label_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblOther = new JLabel(noAlarmTxt);
+		lblOther.setOpaque(true);
+		lblOther.setName("Other");
+		lblOther.setHorizontalAlignment(SwingConstants.CENTER);
+		lblOther.setForeground(new Color(204, 204, 204));
+		lblOther.setFont(font);
 		GroupLayout gl_panel_4 = new GroupLayout(panel_4);
 		gl_panel_4.setHorizontalGroup(
 			gl_panel_4.createParallelGroup(Alignment.TRAILING)
 				.addGap(0, 278, Short.MAX_VALUE)
 				.addGroup(gl_panel_4.createSequentialGroup()
 					.addContainerGap()
-					.addComponent(label, GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+					.addComponent(lblOtherTxt, GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(label_1, 90, 90, 90))
+					.addComponent(lblOther, 90, 90, 90))
 		);
 		gl_panel_4.setVerticalGroup(
 			gl_panel_4.createParallelGroup(Alignment.LEADING)
@@ -99,8 +103,8 @@ public class AlarmsPanel extends JPanel implements Refresh{
 				.addGroup(gl_panel_4.createSequentialGroup()
 					.addGap(2)
 					.addGroup(gl_panel_4.createParallelGroup(Alignment.BASELINE)
-						.addComponent(label)
-						.addComponent(label_1))
+						.addComponent(lblOtherTxt)
+						.addComponent(lblOther))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		panel_4.setLayout(gl_panel_4);
@@ -269,7 +273,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			public void ancestorAdded(AncestorEvent arg0) {
 				try {
 					alarmsController = new AlarmsController(linkHeader, AlarmsPanel.this);
-					Thread t = new Thread(alarmsController);
+					Thread t = new Thread(alarmsController, alarmsController.getName());
 					int priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);
@@ -295,6 +299,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverCurrentTxt.setText(Translation.getValue(String.class, "over_current", "Over-Current"));
 		lblUnderCurrentTxt.setText(Translation.getValue(String.class, "under_current", "Under-Current"));
 		lblOverTemperatureTxt.setText(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
+		lblOtherTxt.setText(Translation.getValue(String.class, "other", "Other"));
 
 		Font font = Translation.getFont().deriveFont(14f);
 
@@ -302,10 +307,12 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverCurrentTxt.setFont(font);
 		lblUnderCurrentTxt.setFont(font);
 		lblOverTemperatureTxt.setFont(font);
+		lblOtherTxt.setFont(font);
 
 		lblPllOutOffLock.setFont(font);
 		lblOverCurrent.setFont(font);
 		lblUnderCurrent.setFont(font);
 		lblOverTemperature.setFont(font);
+		lblOther.setFont(font);
 	}
 }

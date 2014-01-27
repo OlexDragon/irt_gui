@@ -251,7 +251,7 @@ public class BIASsPanel extends JPanel {
 
 			private ControllerAbstract addController(ControllerAbstract abstractController){
 
-				Thread t = new Thread(abstractController);
+				Thread t = new Thread(abstractController, abstractController.getName());
 
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)

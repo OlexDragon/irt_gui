@@ -111,7 +111,7 @@ public class DebagInfoPanel extends JPanel {
 
 				deviceDebagInfoController.setWaitTime(10000);//10 sec
 
-				Thread t = new Thread(deviceDebagInfoController);
+				Thread t = new Thread(deviceDebagInfoController, deviceDebagInfoController.getName());
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);

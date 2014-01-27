@@ -24,7 +24,7 @@ public class StoreConfigController extends ControllerAbstract {
 
 		this.owner = owner;
 
-		Thread t = new Thread(this);
+		Thread t = new Thread(this, "Stor Config Controller");
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

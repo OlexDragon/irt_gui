@@ -77,7 +77,7 @@ public class AlarmsController extends ControllerAbstract {
 
 	private void startController(DefaultController controller, JLabel label) {
 
-		Thread t = new Thread(controller);
+		Thread t = new Thread(controller, controller.getName());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

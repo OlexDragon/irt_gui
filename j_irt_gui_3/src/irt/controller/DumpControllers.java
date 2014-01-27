@@ -184,7 +184,7 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 		dumpController.setWaitTime(waitTime);
 
-		Thread t = new Thread(dumpController);
+		Thread t = new Thread(dumpController, threadName);
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

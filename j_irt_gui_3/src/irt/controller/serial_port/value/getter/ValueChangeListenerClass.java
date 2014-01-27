@@ -31,7 +31,7 @@ public class ValueChangeListenerClass {
 	public void fireValueChangeListener(ValueChangeEvent valueChangeEvent) {
 		logger.trace("fireValueChangeListener(ValueChangeEvent {});", valueChangeListeners);
 
-		Thread t = new Thread(new FireValue(valueChangeListeners, valueChangeEvent), "fireValueChangeListener for "+Thread.currentThread().getName());
+		Thread t = new Thread(new FireValue(valueChangeListeners, valueChangeEvent), "fireValueChangeListener");
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

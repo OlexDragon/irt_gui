@@ -63,7 +63,7 @@ public class DeviceDebagController extends ControllerAbstract {
  */
 	public DeviceDebagController(String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
 		super(controllerName, packetWork, null, style);
-		logger.entry();
+		logger.entry(controllerName);
 
 		this.addrToSave = addrToSave;
 //		setWaitTime(1000);

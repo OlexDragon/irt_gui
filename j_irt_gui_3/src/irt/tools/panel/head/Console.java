@@ -1,5 +1,8 @@
 package irt.tools.panel.head;
 
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -16,6 +19,7 @@ public class Console extends JDialog {
 
 	public static final JTextArea TEXT_AREA = new JTextArea();
 	private static final int MAX_LINE_COUNT = 5000;
+	private static ThreadsWorker threadsWorker = new ThreadsWorker();
 
 	public Console(JFrame gui, String string) {
 		super(gui, string);
@@ -44,21 +48,51 @@ public class Console extends JDialog {
 	}
 
 	public static void append(Object localizedMessage, String prefix) {
-		int lineCount = TEXT_AREA.getLineCount();
-		if(lineCount>MAX_LINE_COUNT){
-			try {
-				TEXT_AREA.replaceRange(null, TEXT_AREA.getLineStartOffset(0), TEXT_AREA.getLineEndOffset(0));
-			} catch (BadLocationException e) {
-				logger.catching(e);
-			}
-		}
-
-		TEXT_AREA.append(prefix+" : "+localizedMessage);
-		TEXT_AREA.setCaretPosition(TEXT_AREA.getDocument().getLength());
-//			GuiController.TEXT_AREA.setCaretPosition(GuiController.TEXT_AREA.getDocument().getLength());
+		threadsWorker.append(prefix+" : "+localizedMessage);
 	}
 
 	public static String getText() {
 		return TEXT_AREA.getText();
+	}
+
+	//*************************** class ThreadsWorker *************************************************
+	private static class ThreadsWorker extends Thread{
+
+		public ThreadsWorker() {
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			setDaemon(true);
+			start();
+		}
+
+		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(1024);
+
+		@Override
+		public void run() {
+			while (true)
+				try {
+					String s = stringQueue.take();
+
+					int lineCount = TEXT_AREA.getLineCount();
+					if (lineCount > MAX_LINE_COUNT) {
+						try {
+							TEXT_AREA.replaceRange(null, TEXT_AREA.getLineStartOffset(0), TEXT_AREA.getLineEndOffset(0));
+						} catch (BadLocationException e) {
+							logger.catching(e);
+						}
+					}
+
+					TEXT_AREA.append(s);
+					TEXT_AREA.setCaretPosition(TEXT_AREA.getDocument().getLength());
+
+				} catch (InterruptedException e) {
+					logger.catching(e);
+				}
+		}
+
+		public void append(String string) {
+			stringQueue.add(string);
+		}
 	}
 }
