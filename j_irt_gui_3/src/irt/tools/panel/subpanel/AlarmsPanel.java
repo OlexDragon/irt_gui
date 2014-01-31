@@ -32,48 +32,42 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	private AlarmsController alarmsController;
 
 	private JLabel lblPllOutOfLockTxt;
-
 	private JLabel lblOverCurrentTxt;
-
 	private JLabel lblUnderCurrentTxt;
-
 	private JLabel lblOverTemperatureTxt;
+	private JLabel lblOtherTxt;
+	private JLabel lblRedundantTxt;
 
 	private JLabel lblPllOutOffLock;
-
 	private JLabel lblOverCurrent;
-
 	private JLabel lblUnderCurrent;
-
 	private JLabel lblOverTemperature;
-
 	private JLabel lblOther;
-
-	private JLabel lblOtherTxt;
+	private JLabel lblRedundant;
 	
 	public AlarmsPanel(final LinkHeader linkHeader) {
 
 		Font font = Translation.getFont().deriveFont(14f);
 
-		JPanel panel = new JPanel();
-		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel.setName("PLL Out Off Lock");
+		JPanel pnlPllOutOffLock = new JPanel();
+		pnlPllOutOffLock.setBorder(new LineBorder(new Color(0, 0, 0)));
+		pnlPllOutOffLock.setName("PLL Out Off Lock");
 		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel_1.setName("Over-Current");
+		JPanel pnlOverCurrent = new JPanel();
+		pnlOverCurrent.setBorder(new LineBorder(new Color(0, 0, 0)));
+		pnlOverCurrent.setName("Over-Current");
 		
-		JPanel panel_2 = new JPanel();
-		panel_2.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel_2.setName("Under-Current");
+		JPanel pnlUnderCurrent = new JPanel();
+		pnlUnderCurrent.setBorder(new LineBorder(new Color(0, 0, 0)));
+		pnlUnderCurrent.setName("Under-Current");
 		
-		JPanel panel_3 = new JPanel();
-		panel_3.setBorder(new LineBorder(new Color(0, 0, 0)));
-		panel_3.setName("Over-Temperature");
+		JPanel pnlOverTemperature = new JPanel();
+		pnlOverTemperature.setBorder(new LineBorder(new Color(0, 0, 0)));
+		pnlOverTemperature.setName("Over-Temperature");
 		
-		JPanel panel_4 = new JPanel();
-		panel_4.setName("Over-Temperature");
-		panel_4.setBorder(new LineBorder(new Color(0, 0, 0)));
+		JPanel pnlOther = new JPanel();
+		pnlOther.setName("Over-Temperature");
+		pnlOther.setBorder(new LineBorder(new Color(0, 0, 0)));
 		
 		lblOtherTxt = new JLabel(Translation.getValue(String.class, "other", "Other"));
 		lblOtherTxt.setForeground(Color.BLUE);
@@ -82,61 +76,114 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		String noAlarmTxt = Translation.getValue(String.class, "no_alarm", "No Alarm");
 
 		lblOther = new JLabel(noAlarmTxt);
+		lblOther.setEnabled(false);
 		lblOther.setOpaque(true);
 		lblOther.setName("Other");
 		lblOther.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOther.setForeground(new Color(204, 204, 204));
 		lblOther.setFont(font);
-		GroupLayout gl_panel_4 = new GroupLayout(panel_4);
-		gl_panel_4.setHorizontalGroup(
-			gl_panel_4.createParallelGroup(Alignment.TRAILING)
+		GroupLayout gl_pnlOther = new GroupLayout(pnlOther);
+		gl_pnlOther.setHorizontalGroup(
+			gl_pnlOther.createParallelGroup(Alignment.TRAILING)
 				.addGap(0, 278, Short.MAX_VALUE)
-				.addGroup(gl_panel_4.createSequentialGroup()
+				.addGroup(gl_pnlOther.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(lblOtherTxt, GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblOther, 90, 90, 90))
 		);
-		gl_panel_4.setVerticalGroup(
-			gl_panel_4.createParallelGroup(Alignment.LEADING)
+		gl_pnlOther.setVerticalGroup(
+			gl_pnlOther.createParallelGroup(Alignment.LEADING)
 				.addGap(0, 25, Short.MAX_VALUE)
-				.addGroup(gl_panel_4.createSequentialGroup()
+				.addGroup(gl_pnlOther.createSequentialGroup()
 					.addGap(2)
-					.addGroup(gl_panel_4.createParallelGroup(Alignment.BASELINE)
+					.addGroup(gl_pnlOther.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblOtherTxt)
 						.addComponent(lblOther))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
-		panel_4.setLayout(gl_panel_4);
+		pnlOther.setLayout(gl_pnlOther);
+		
+		JPanel pnlRedundant = new JPanel();
+		pnlRedundant.setVisible(false);
+		pnlRedundant.setName("Over-Temperature");
+		pnlRedundant.setBorder(new LineBorder(new Color(0, 0, 0)));
+		
+		lblRedundantTxt = new JLabel(Translation.getValue(String.class, "redundant", "Redundant"));
+		lblRedundantTxt.setForeground(Color.BLUE);
+		lblRedundantTxt.setFont(font);
+		
+		lblRedundant = new JLabel(noAlarmTxt);
+		lblRedundant.setEnabled(false);
+		lblRedundant.setOpaque(true);
+		lblRedundant.setName("Redundant");
+		lblRedundant.setHorizontalAlignment(SwingConstants.CENTER);
+		lblRedundant.setForeground(new Color(204, 204, 204));
+		lblRedundant.setFont(font);
+		GroupLayout gl_pnlRedundant = new GroupLayout(pnlRedundant);
+		gl_pnlRedundant.setHorizontalGroup(
+			gl_pnlRedundant.createParallelGroup(Alignment.TRAILING)
+				.addGap(0, 278, Short.MAX_VALUE)
+				.addGroup(gl_pnlRedundant.createSequentialGroup()
+						.addContainerGap()
+					.addComponent(lblRedundantTxt, GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(lblRedundant, 90, 90, 90))
+		);
+		gl_pnlRedundant.setVerticalGroup(
+			gl_pnlRedundant.createParallelGroup(Alignment.LEADING)
+				.addGap(0, 25, Short.MAX_VALUE)
+				.addGroup(gl_pnlRedundant.createSequentialGroup()
+					.addGap(2)
+					.addGroup(gl_pnlRedundant.createParallelGroup(Alignment.BASELINE)
+						.addComponent(lblRedundantTxt)
+						.addComponent(lblRedundant))
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+		);
+		pnlRedundant.setLayout(gl_pnlRedundant);
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addComponent(panel, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-						.addComponent(panel_1, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-						.addComponent(panel_2, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-						.addComponent(panel_3, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-						.addComponent(panel_4, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE))
-					.addGap(10))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(pnlPllOutOffLock, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addGap(10))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(pnlOverCurrent, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addGap(10))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(pnlUnderCurrent, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addGap(10))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(pnlOverTemperature, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addGap(10))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(pnlOther, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addGap(10))
+						.addGroup(groupLayout.createSequentialGroup()
+							.addComponent(pnlRedundant, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
 					.addGap(20)
-					.addComponent(panel, GroupLayout.PREFERRED_SIZE, 25, 25)
-					.addGap(20)
-					.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 25, 25)
-					.addGap(20)
-					.addComponent(panel_2, GroupLayout.PREFERRED_SIZE, 25, 25)
-					.addGap(20)
-					.addComponent(panel_3, GroupLayout.PREFERRED_SIZE, 25, 25)
-					.addGap(18)
-					.addComponent(panel_4, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(69, Short.MAX_VALUE))
+					.addComponent(pnlPllOutOffLock, GroupLayout.PREFERRED_SIZE, 25, 25)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(pnlOverCurrent, GroupLayout.PREFERRED_SIZE, 25, 25)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(pnlUnderCurrent, GroupLayout.PREFERRED_SIZE, 25, 25)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(pnlOverTemperature, GroupLayout.PREFERRED_SIZE, 25, 25)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(pnlOther, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(pnlRedundant, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(67, Short.MAX_VALUE))
 		);
-		groupLayout.linkSize(SwingConstants.VERTICAL, new Component[] {panel, panel_1, panel_2, panel_3});
+		groupLayout.linkSize(SwingConstants.VERTICAL, new Component[] {pnlPllOutOffLock, pnlOverCurrent, pnlUnderCurrent, pnlOverTemperature});
 		
 		lblOverTemperatureTxt = new JLabel(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
 		lblOverTemperatureTxt.setForeground(new Color(0, 0, 255));
@@ -149,26 +196,26 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverTemperature.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOverTemperature.setForeground(new Color(204, 204, 204));
 		lblOverTemperature.setFont(font);
-		GroupLayout gl_panel_3 = new GroupLayout(panel_3);
-		gl_panel_3.setHorizontalGroup(
-			gl_panel_3.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_panel_3.createSequentialGroup()
+		GroupLayout gl_pnlOverTemperature = new GroupLayout(pnlOverTemperature);
+		gl_pnlOverTemperature.setHorizontalGroup(
+			gl_pnlOverTemperature.createParallelGroup(Alignment.LEADING)
+				.addGroup(Alignment.TRAILING, gl_pnlOverTemperature.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(lblOverTemperatureTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblOverTemperature, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
 		);
-		gl_panel_3.setVerticalGroup(
-			gl_panel_3.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_3.createSequentialGroup()
+		gl_pnlOverTemperature.setVerticalGroup(
+			gl_pnlOverTemperature.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_pnlOverTemperature.createSequentialGroup()
 					.addGap(2)
-					.addGroup(gl_panel_3.createParallelGroup(Alignment.BASELINE)
+					.addGroup(gl_pnlOverTemperature.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblOverTemperatureTxt)
 						.addComponent(lblOverTemperature))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
-		panel_3.setLayout(gl_panel_3);
+		pnlOverTemperature.setLayout(gl_pnlOverTemperature);
 		
 		lblUnderCurrentTxt = new JLabel(Translation.getValue(String.class, "under_current", "Under-Current"));
 		lblUnderCurrentTxt.setForeground(new Color(0, 0, 255));
@@ -181,26 +228,26 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblUnderCurrent.setHorizontalAlignment(SwingConstants.CENTER);
 		lblUnderCurrent.setForeground(new Color(204, 204, 204));
 		lblUnderCurrent.setFont(font);
-		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
-		gl_panel_2.setHorizontalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_panel_2.createSequentialGroup()
+		GroupLayout gl_pnlUnderCurrent = new GroupLayout(pnlUnderCurrent);
+		gl_pnlUnderCurrent.setHorizontalGroup(
+			gl_pnlUnderCurrent.createParallelGroup(Alignment.LEADING)
+				.addGroup(Alignment.TRAILING, gl_pnlUnderCurrent.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(lblUnderCurrentTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblUnderCurrent, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
 		);
-		gl_panel_2.setVerticalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_2.createSequentialGroup()
+		gl_pnlUnderCurrent.setVerticalGroup(
+			gl_pnlUnderCurrent.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_pnlUnderCurrent.createSequentialGroup()
 					.addGap(2)
-					.addGroup(gl_panel_2.createParallelGroup(Alignment.BASELINE)
+					.addGroup(gl_pnlUnderCurrent.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblUnderCurrentTxt)
 						.addComponent(lblUnderCurrent))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
-		panel_2.setLayout(gl_panel_2);
+		pnlUnderCurrent.setLayout(gl_pnlUnderCurrent);
 		
 		lblOverCurrentTxt = new JLabel(Translation.getValue(String.class, "over_current", "Over-Current"));
 		lblOverCurrentTxt.setForeground(new Color(0, 0, 255));
@@ -213,26 +260,26 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverCurrent.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOverCurrent.setForeground(new Color(204, 204, 204));
 		lblOverCurrent.setFont(font);
-		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
-		gl_panel_1.setHorizontalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(Alignment.TRAILING, gl_panel_1.createSequentialGroup()
+		GroupLayout gl_pnlOverCurrent = new GroupLayout(pnlOverCurrent);
+		gl_pnlOverCurrent.setHorizontalGroup(
+			gl_pnlOverCurrent.createParallelGroup(Alignment.LEADING)
+				.addGroup(Alignment.TRAILING, gl_pnlOverCurrent.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(lblOverCurrentTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblOverCurrent, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
 		);
-		gl_panel_1.setVerticalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup()
+		gl_pnlOverCurrent.setVerticalGroup(
+			gl_pnlOverCurrent.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_pnlOverCurrent.createSequentialGroup()
 					.addGap(2)
-					.addGroup(gl_panel_1.createParallelGroup(Alignment.BASELINE)
+					.addGroup(gl_pnlOverCurrent.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblOverCurrentTxt)
 						.addComponent(lblOverCurrent))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
-		panel_1.setLayout(gl_panel_1);
+		pnlOverCurrent.setLayout(gl_pnlOverCurrent);
 
 		lblPllOutOfLockTxt = new JLabel(Translation.getValue(String.class, "pll_out_of_lock", "PLL Out of Lock"));
 		lblPllOutOfLockTxt.setForeground(new Color(0, 0, 255));
@@ -246,26 +293,26 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblPllOutOffLock.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPllOutOffLock.setForeground(new Color(204, 204, 204));
 		lblPllOutOffLock.setFont(font);
-		GroupLayout gl_panel = new GroupLayout(panel);
-		gl_panel.setHorizontalGroup(
-			gl_panel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(Alignment.LEADING, gl_panel.createSequentialGroup()
+		GroupLayout gl_pnlPllOutOffLock = new GroupLayout(pnlPllOutOffLock);
+		gl_pnlPllOutOffLock.setHorizontalGroup(
+			gl_pnlPllOutOffLock.createParallelGroup(Alignment.TRAILING)
+				.addGroup(Alignment.LEADING, gl_pnlPllOutOffLock.createSequentialGroup()
 					.addContainerGap()
 					.addComponent(lblPllOutOfLockTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblPllOutOffLock, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
 		);
-		gl_panel.setVerticalGroup(
-			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel.createSequentialGroup()
+		gl_pnlPllOutOffLock.setVerticalGroup(
+			gl_pnlPllOutOffLock.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_pnlPllOutOffLock.createSequentialGroup()
 					.addGap(2)
-					.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
+					.addGroup(gl_pnlPllOutOffLock.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblPllOutOfLockTxt)
 						.addComponent(lblPllOutOffLock))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
-		panel.setLayout(gl_panel);
+		pnlPllOutOffLock.setLayout(gl_pnlPllOutOffLock);
 		setLayout(groupLayout);
 		addAncestorListener(new AncestorListener() {
 			public void ancestorMoved(AncestorEvent arg0) { }
@@ -300,6 +347,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblUnderCurrentTxt.setText(Translation.getValue(String.class, "under_current", "Under-Current"));
 		lblOverTemperatureTxt.setText(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
 		lblOtherTxt.setText(Translation.getValue(String.class, "other", "Other"));
+		lblRedundantTxt.setText(Translation.getValue(String.class, "redundant", "Redundant"));
 
 		Font font = Translation.getFont().deriveFont(14f);
 
@@ -308,11 +356,13 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblUnderCurrentTxt.setFont(font);
 		lblOverTemperatureTxt.setFont(font);
 		lblOtherTxt.setFont(font);
+		lblRedundantTxt.setFont(font);
 
 		lblPllOutOffLock.setFont(font);
 		lblOverCurrent.setFont(font);
 		lblUnderCurrent.setFont(font);
 		lblOverTemperature.setFont(font);
 		lblOther.setFont(font);
+		lblRedundant.setFont(font);
 	}
 }

@@ -47,11 +47,14 @@
 
   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="WARN"/>
 
- 	<Logger name="irt.controller.DeviceDebagController" level="all"/>
+ 	<Logger name="irt.controller.DeviceDebagController" level="WARN"/>
 
  	<Logger name="irt.controller.translation.Translation" level="WARN"/>
 
  	<Logger name="irt.controller.GuiControllerAbstract" level="WARN"/>
+ 	<Logger name="irt.controller.AlarmsController" level="WARN"/>
+ 
+  	<Logger name="irt.controller.serial_port.value.getter.Getter" level="WARN"/>
  
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

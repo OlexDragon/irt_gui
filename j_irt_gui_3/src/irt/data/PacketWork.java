@@ -100,7 +100,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_ALARMS_OWER_TEMPERATURE	= 143,
 								PACKET_ID_ALARMS_PLL_OUT_OF_LOCK	= 144,
 								PACKET_ID_ALARMS_HARDWARE_FAULT		= 145,
-								PACKET_ID_ALARMS_SUMMARY			= 146;
+								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 146,
+								PACKET_ID_ALARMS_SUMMARY			= 147;
 
 	public Integer getPriority();
 	public PacketThread getPacketThread();

@@ -146,6 +146,10 @@ public class DumpControllers extends ValueChangeListenerClass {
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
 				PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT, AlarmsController.UNDER_CURRENT) { @Override public Integer getPriority() { return 50; }
 		}, waitTime, "ALARMS_UNDER_CURRENT");
+
+		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
+				PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT, AlarmsController.REDUNDANT_FAULT) { @Override public Integer getPriority() { return 50; }
+		}, waitTime, "ALARMS_REDUNDANT_FAULT");
 	}
 
 	public void setInfo(DeviceInfo deviceInfo) {
@@ -217,16 +221,40 @@ public class DumpControllers extends ValueChangeListenerClass {
 	public static String parseId(int id) {
 		String str = ""+id;
 
-		if(id==PacketWork.PACKET_ID_ALARMS_SUMMARY)
+		switch(id){
+		case PacketWork.PACKET_ID_ALARMS_SUMMARY:
 			str = "*** SUMMARY ALARM(PaketWork ID="+id+ ") ***";
-		else if(id==PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10)
+			break;
+		case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
+			str = "Alarm Redundant("+id+")";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+			str = "Alarm Hardware("+id+")";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+			str = "Alarm Ower Current("+id+")";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+			str = "Alarm Ower Temperarure("+id+")";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+			str = "Alarm PLL out of Lock("+id+")";
+			break;
+		case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+			str = "Alarm Under Current("+id+")";
+			break;
+		case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10:
 			str = "1.10(PaketWork ID="+id+ ")";
-		else if(id==PacketWork.PACKET_ID_DUMP_REGISTER_100)
+			break;
+		case PacketWork.PACKET_ID_DUMP_REGISTER_100:
 			str = "2.100(PaketWork ID="+id+ ")";
-		else if(str.charAt(0)=='9')
-			str = str.replace("9", "1.")+"(PaketWork ID="+id+ ")";
-		else if(str.charAt(str.length()-1)>'0')
-			str = str.replace("10", "2.")+"(PaketWork ID="+id+ ")";
+			break;
+		default:
+			if(str.charAt(0)=='9')
+				str = str.replace("9", "1.")+"(PaketWork ID="+id+ ")";
+			else if(str.charAt(str.length()-1)>'0')
+				str = str.replace("10", "2.")+"(PaketWork ID="+id+ ")";
+		}
 
 		return str;
 	}
@@ -263,6 +291,7 @@ public class DumpControllers extends ValueChangeListenerClass {
 					case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
 					case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
 					case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+					case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
 						sourceStr = "*** Alarm "+AlarmsController.getAlarmName((short) id)+" - "+AlarmsController.alarmStatusToString(status)+" ***";
 					}
 				}

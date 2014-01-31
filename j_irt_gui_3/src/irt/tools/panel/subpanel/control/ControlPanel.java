@@ -106,12 +106,15 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName(getClass().getSimpleName()+".lblMute.setBounds");
-				int width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
-				return new Rectangle(Translation.getValue(Integer.class, "control.label.mute.x", 48),
-									Translation.getValue(Integer.class, "control.label.mute.y", 107),
-									width,
-									20);
+				Thread.currentThread().setName(getClass().getSimpleName() + ".lblMute.setBounds");
+				try {
+					int width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
+					return new Rectangle(Translation.getValue(Integer.class, "control.label.mute.x", 48),
+							Translation.getValue(Integer.class, "control.label.mute.y", 107), width, 20);
+				} catch (Exception e) {
+					logger.catching(e);
+					return null;
+				}
 			}
 
 			@Override

@@ -25,6 +25,7 @@ public class Getter extends GetterAbstract {
 
 	@Override
 	public boolean set(Packet packet) {
+		logger.entry(packet);
 		boolean isSet = false;
 		if(packet!=null) {
 
@@ -39,6 +40,7 @@ public class Getter extends GetterAbstract {
 						cph.getGroupId()==up.getHeader().getGroupId() &&
 							cph.getPacketId()==packetId){
 
+				logger.debug(packet);
 				long tmp = value;
 				Object source = null;
 
@@ -83,6 +85,7 @@ public class Getter extends GetterAbstract {
 							case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
 							case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
 							case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+							case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
 								source = pl.getArrayShort();
 								logger.trace("PacketWork.PACKET_ID_ALARMS, {}", source);
 								tmp = Arrays.hashCode((short[]) source);
@@ -105,6 +108,6 @@ public class Getter extends GetterAbstract {
 
 			}
 		}
-		return isSet;
+		return logger.exit(isSet);
 	}
 }

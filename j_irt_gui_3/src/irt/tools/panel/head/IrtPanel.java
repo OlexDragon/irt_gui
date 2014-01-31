@@ -109,11 +109,13 @@ public class IrtPanel extends MainPanel {
 			@Override
 			protected Rectangle doInBackground() throws Exception {
 				Thread.currentThread().setName("IrtPanel.lblIrtTechnologies.setBounds");
-				String[] split = properties.get("logo_bounds_"+companyIndex).toString().split(",");
-				return new Rectangle(Integer.parseInt(split[0]),
-						Integer.parseInt(split[1]),
-						Integer.parseInt(split[2]),
-						Integer.parseInt(split[3]));
+				try {
+					String[] split = properties.get("logo_bounds_" + companyIndex).toString().split(",");
+					return new Rectangle(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+				} catch (Exception e) {
+					logger.catching(e);
+					return null;
+				}
 			}
 
 			@Override
@@ -130,9 +132,13 @@ public class IrtPanel extends MainPanel {
 			@Override
 			protected Font doInBackground() throws Exception {
 				Thread.currentThread().setName("IrtPanel.setFont");
-				return new Font(properties.getProperty("font_name_"+companyIndex),
-						parseFontStyle((String) properties.get("font_style_"+companyIndex)),
-						Integer.parseInt(properties.get("font_size_"+companyIndex).toString()));
+				try {
+					return new Font(properties.getProperty("font_name_" + companyIndex), parseFontStyle((String) properties.get("font_style_" + companyIndex)),
+							Integer.parseInt(properties.get("font_size_" + companyIndex).toString()));
+				} catch (Exception e) {
+					logger.catching(e);
+					return null;
+				}
 			}
 
 			@Override

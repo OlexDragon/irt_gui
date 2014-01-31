@@ -40,7 +40,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.048";
+	public static final String VERTION = "- 3.050";
 	private GuiController guiController;
 	protected HeadPanel headPanel;
 
@@ -86,13 +86,13 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected Font doInBackground() throws Exception {
 				Thread.currentThread().setName("irtGui.lblIrtTechnologies.setFont");
-				return new Font(
-						IrtPanel.properties.getProperty(
-								"font_name_" + IrtPanel.companyIndex),
-								IrtPanel.parseFontStyle(
-										IrtPanel.properties.getProperty(
-												"font_style_" + IrtPanel.companyIndex)),
-						12);
+				try {
+					return new Font(IrtPanel.properties.getProperty("font_name_" + IrtPanel.companyIndex), IrtPanel.parseFontStyle(IrtPanel.properties
+							.getProperty("font_style_" + IrtPanel.companyIndex)), 12);
+				} catch (Exception e) {
+					logger.catching(e);
+					return null;
+				}
 			}
 
 			@Override
@@ -117,15 +117,20 @@ public class IrtGui extends IrtMainFrame {
 			protected DefaultComboBoxModel<KeyValue<String, String>> doInBackground() throws Exception {
 				Thread.currentThread().setName("irtGui.comboBoxLanguage.setModel");
 
-				String[] languagesArr = Translation.getTranslationProperties("languages").split(",");
-				logger.entry((Object[])languagesArr);
+				try {
+					String[] languagesArr = Translation.getTranslationProperties("languages").split(",");
+					logger.entry((Object[]) languagesArr);
 
-				KeyValue<?,?>[] languages = new KeyValue[languagesArr.length];
-				for(int i=0; i<languagesArr.length; i++){
-					String[] split = languagesArr[i].split(":");
-					languages[i]= new KeyValue<String, String>(split[0], split[1]);
+					KeyValue<?, ?>[] languages = new KeyValue[languagesArr.length];
+					for (int i = 0; i < languagesArr.length; i++) {
+						String[] split = languagesArr[i].split(":");
+						languages[i] = new KeyValue<String, String>(split[0], split[1]);
+					}
+					return logger.exit(new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages));
+				} catch (Exception e) {
+					logger.catching(e);
+					return null;
 				}
-				return logger.exit(new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages));
 			}
 
 			@Override
@@ -150,12 +155,17 @@ public class IrtGui extends IrtMainFrame {
 		new SwingWorker<Rectangle, Void>() {
 			@Override
 			protected Rectangle doInBackground() throws Exception {
+				try{
 				Thread.currentThread().setName("irtGui.comboBoxLanguage.setBounds");
 				String[] bounds = Translation.getTranslationProperties("headPanel_comboBoc_bounds").toString().split(",");
 				return new Rectangle(Integer.parseInt(bounds[0]),
 						Integer.parseInt(bounds[1]),
 						Integer.parseInt(bounds[2]),
 						Integer.parseInt(bounds[3]));
+				}catch(Exception e){
+					logger.catching(e);
+					return null;
+				}
 			}
 
 			@Override
@@ -173,17 +183,22 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected Font doInBackground() throws Exception {
 				Thread.currentThread().setName("irtGui.comboBoxLanguage.setFont");
-				float fontSize = Translation.getValue(Float.class, "headPanel.language.comboBox.font.size", 12f);
-				String fontURL = "fonts/MINGLIU.TTF";
-				Font f = Translation.getSystemFont(fontURL, Font.BOLD, (int)fontSize);
-				if(f==null){
-					URL resource = getClass().getResource(fontURL);//Chinese
-					if(resource!=null)
-						f = Font.createFont(Font.TRUETYPE_FONT, resource.openStream()).deriveFont(fontSize).deriveFont(Font.BOLD);
-					else
-						logger.warn("Can not get the resouce font 'MINGLIU.TTF'");
+				try {
+					float fontSize = Translation.getValue(Float.class, "headPanel.language.comboBox.font.size", 12f);
+					String fontURL = "fonts/MINGLIU.TTF";
+					Font f = Translation.getSystemFont(fontURL, Font.BOLD, (int) fontSize);
+					if (f == null) {
+						URL resource = getClass().getResource(fontURL);// Chinese
+						if (resource != null)
+							f = Font.createFont(Font.TRUETYPE_FONT, resource.openStream()).deriveFont(fontSize).deriveFont(Font.BOLD);
+						else
+							logger.warn("Can not get the resouce font 'MINGLIU.TTF'");
+					}
+					return f;
+				} catch (Exception e) {
+					logger.catching(e);
+					return null;
 				}
-				return f;
 			}
 
 			@Override
