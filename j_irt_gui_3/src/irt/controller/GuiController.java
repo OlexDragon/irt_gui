@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 
 public class GuiController extends GuiControllerAbstract{
 
+
 //************************************************************************************************
 
 	public GuiController(String name, JFrame gui) {
@@ -33,7 +34,7 @@ public class GuiController extends GuiControllerAbstract{
 			try {
 				if (serialPortSelection != null) {
 					Object selectedItem = serialPortSelection.getSelectedItem();
-					LinkHeader linkHeader = new LinkHeader((byte) 254, (byte) 0, (short) 0);
+					LinkHeader linkHeader = new LinkHeader(getAddress(), (byte) 0, (short) 0);
 					if (selectedItem != null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString())) {
 						if (protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL) || protocol.equals(Protocol.CONVERTER))
 							comPortThreadQueue.add(new DeviceInfoGetter() {
@@ -59,7 +60,7 @@ public class GuiController extends GuiControllerAbstract{
 	}
 
 	@Override
-	protected SoftReleaseChecker getSeftReleaseChecker() {
+	protected SoftReleaseChecker getSoftReleaseChecker() {
 		return SoftReleaseChecker.getInstance();
 	}
 }

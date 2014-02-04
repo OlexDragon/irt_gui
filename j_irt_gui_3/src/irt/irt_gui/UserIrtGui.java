@@ -1,5 +1,6 @@
 package irt.irt_gui;
 
+import irt.controller.GuiControllerAbstract;
 import irt.controller.GuiControllerUser;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -58,7 +59,7 @@ public class UserIrtGui extends IrtGui {
 
 
 	@Override
-	protected Thread getNewGuiController() {
+	protected GuiControllerAbstract getNewGuiController() {
 		GuiControllerUser guiControllerUser = new GuiControllerUser(this);
 		guiControllerUser.addChangeListener(new ValueChangeListener() {
 

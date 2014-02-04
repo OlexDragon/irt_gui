@@ -30,7 +30,7 @@ public class GuiControllerUser extends GuiControllerAbstract {
 				if(serialPortSelection!=null) {
 					Object selectedItem = serialPortSelection.getSelectedItem();
 					if(selectedItem!=null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString()))
-						getComPortThreadQueue().add(new DeviceInfoGetter(new LinkHeader((byte)254, (byte)0, (short)0)));
+						getComPortThreadQueue().add(new DeviceInfoGetter(new LinkHeader(getAddress(), (byte)0, (short)0)));
 				}
 				synchronized (this) {
 					wait(5000);

@@ -1,5 +1,6 @@
 package irt.irt_gui;
 
+import irt.controller.GuiControllerAbstract;
 import irt.data.Listeners;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
@@ -19,6 +20,7 @@ import javax.swing.border.EmptyBorder;
 @SuppressWarnings("serial")
 public abstract class IrtMainFrame extends JFrame {
 
+	protected GuiControllerAbstract guiController;
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex));
@@ -54,10 +56,11 @@ public abstract class IrtMainFrame extends JFrame {
 		getContentPane().add(serialPortSelection);
 
 		addComponentListener(new ComponentAdapter() {
+
 			@Override
 			public void componentShown(ComponentEvent arg0) {
 
-				Thread guiController = getNewGuiController();
+				guiController = getNewGuiController();
 				guiController.setPriority(guiController.getPriority()-1);
 				guiController.start();
 			}
@@ -73,5 +76,5 @@ public abstract class IrtMainFrame extends JFrame {
 
 	protected abstract Point getClosePanelPosition();
 	protected abstract Rectangle comboBoxBounds();
-	protected abstract Thread getNewGuiController();
+	protected abstract GuiControllerAbstract getNewGuiController();
 }

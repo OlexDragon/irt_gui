@@ -1,6 +1,7 @@
 package irt.irt_gui;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
+import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
 import irt.data.event.ValueChangeEvent;
@@ -10,8 +11,10 @@ import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
+import irt.tools.panel.vizards.address.AddressWizard;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -19,15 +22,30 @@ import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
+import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.apache.logging.log4j.LogManager;
@@ -40,9 +58,12 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.050";
-	private GuiController guiController;
+	public static final String VERTION = "- 3.051";
+	private static final Preferences pref = GuiController.getPrefs();
+	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
+
 	protected HeadPanel headPanel;
+	private JTextField txtAddress;
 
 	public IrtGui() {
 		super(700, 571);
@@ -75,6 +96,109 @@ public class IrtGui extends IrtMainFrame {
 		ProgressBar progressBar = new ProgressBar();
 		progressBar.setBounds(540, 0, 110, 50);
 		getContentPane().add(progressBar);
+		
+		JPopupMenu popupMenu = new JPopupMenu();
+		addPopup(progressBar, popupMenu);
+		popupMenu.addPopupMenuListener(new PopupMenuListener() {
+			
+			@Override
+			public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
+				final JPopupMenu m = (JPopupMenu) popupMenuEvent.getSource();
+
+				EventQueue.invokeLater(new Runnable() {
+					
+					@Override 
+		            public void run() {
+		            	 Component[] components = m.getComponents();
+						for (Component c : components)
+							if (c instanceof JComponent) { // BasicComboPopup
+								c.repaint();
+							}
+					}
+				});
+			}
+			
+			@Override public void popupMenuWillBecomeInvisible(PopupMenuEvent e) { }
+			@Override public void popupMenuCanceled(PopupMenuEvent e) { }
+		});
+
+		JMenuItem mntmAddressWizard = new JMenuItem("Address Wizard...");
+		mntmAddressWizard.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JOptionPane.showMessageDialog(IrtGui.this, "Coming soon.");
+//				ADDRESS_VIZARD.setVisible(true);
+			}
+		});
+		popupMenu.add(mntmAddressWizard);
+		
+		txtAddress = new JTextField();
+		txtAddress.setHorizontalAlignment(SwingConstants.CENTER);
+		txtAddress.setFont(new Font("Tahoma", Font.BOLD, 18));
+		txtAddress.setText(""+pref.getInt("address", 254));
+		txtAddress.setBounds(512, 11, 48, 28);
+		getContentPane().add(txtAddress);
+		txtAddress.setColumns(4);
+		txtAddress.addKeyListener(new KeyAdapter() {
+
+			private String[] values = new String[]{"1","2","254"};
+			private int key = getKey();
+
+			@Override
+			public void keyPressed(KeyEvent keyEvent) {
+				switch(keyEvent.getExtendedKeyCode()){
+				case KeyEvent.VK_UP:
+					if(key<2)
+						key++;
+					else
+						key = 0;
+					break;
+				case KeyEvent.VK_DOWN:
+					if(key>0)
+						key--;
+					else
+						key = 2;
+				}
+				logger.trace("Key={}", key);
+				txtAddress.setText(values[key]);
+			}
+
+			private int getKey() {
+				String text = txtAddress.getText();
+				int result = 0;
+
+				for(int i=0; i<values.length; i++)
+					if(values[i].equals(text)){
+						result = i;
+						break;
+					}
+
+				return result;
+			}
+		});
+		txtAddress.setToolTipText("Unit Address");
+		txtAddress.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String text = txtAddress.getText();
+				logger.trace("Address={}", text);
+				final int address;
+				if(text==null || (text=text.replaceAll("\\D", "")).isEmpty() || (address=Integer.parseInt(text))<1 || address>AddressWizard.MAX_ADDRESS)
+					JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
+				else{
+					new SwingWorker<Void, Void>() {
+						@Override
+						protected Void doInBackground() throws Exception {
+							pref.putInt("address", address);
+							txtAddress.setText(""+address);
+							logger.trace("Set Address to {}", address);
+							guiController.setAddress((byte) address);
+							return null;
+						}
+					}.execute();
+				}
+			}
+		});
+
+		ADDRESS_VIZARD.setOwner(this);
 	}
 
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {
@@ -250,8 +374,8 @@ public class IrtGui extends IrtMainFrame {
 	}
 
 	@Override
-	protected Thread getNewGuiController() {
-		guiController = new GuiController("Gui Controller", this);
+	protected GuiControllerAbstract getNewGuiController() {
+		GuiController guiController = new GuiController("Gui Controller", this);
 		guiController.addChangeListener(new ValueChangeListener() {
 
 			@Override
@@ -270,5 +394,23 @@ public class IrtGui extends IrtMainFrame {
 	@Override
 	protected Point getClosePanelPosition() {
 		return new Point(660, 0);
+	}
+
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
 	}
 }

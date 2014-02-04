@@ -21,7 +21,7 @@ public class ComPortThreadQueue extends Thread {
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
-	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(50);
+	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300);
 	private static ComPort serialPort;
 
 	public ComPortThreadQueue(){

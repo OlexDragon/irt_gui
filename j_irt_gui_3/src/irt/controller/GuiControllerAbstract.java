@@ -43,7 +43,7 @@ import org.apache.logging.log4j.core.Logger;
 
 public abstract class GuiControllerAbstract extends Thread {
 
-	protected final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
 
 	public static final int CONNECTION = 1;
 
@@ -70,13 +70,17 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	protected VCLC vclc =  new VCLC();
 	protected static DumpControllers dumpControllers;
-	protected SoftReleaseChecker softReleaseChecker = getSeftReleaseChecker();
+	protected SoftReleaseChecker softReleaseChecker = getSoftReleaseChecker();
 	protected Protocol protocol = Protocol.ALL;
 	private static DeviceInfo deviceInfo;
+
+	private byte address;
 
 	@SuppressWarnings("unchecked")
 	public GuiControllerAbstract(String threadName, JFrame gui) {
 		super(threadName);
+
+		address = (byte) prefs.getInt("address", 254);
 
 		comPortThreadQueue.setSerialPort(new ComPort(prefs.get(SERIAL_PORT, "COM1")));
 		console = new Console(gui, "Console");
@@ -120,7 +124,7 @@ public abstract class GuiControllerAbstract extends Thread {
 			}
 		comPortThreadQueue.addPacketListener(new PacketListener() {
 
-			private RemoveComponent remover = new RemoveComponent(8000);
+			private RemoveComponent remover = new RemoveComponent(16000);
 
 			@Override
 			public void packetRecived(Packet packet) {
@@ -174,7 +178,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 							if(unitPanel!=null && packet.getPayloads()!=null && unitsPanel.add(unitPanel)==unitPanel){
 
-								getSeftReleaseChecker();
+								getSoftReleaseChecker();
 								if(softReleaseChecker!=null)
 									softReleaseChecker.check(deviceInfo);
 
@@ -202,7 +206,6 @@ public abstract class GuiControllerAbstract extends Thread {
 							}
 
 						}else{
-							remover.setPacketNotReceived();
 							if(unitsPanel!=null && unitsPanel.getComponentCount()>0) {
 								synchronized (this) {
 									notify();
@@ -236,7 +239,7 @@ public abstract class GuiControllerAbstract extends Thread {
 		return deviceInfo;
 	}
 
-	protected SoftReleaseChecker getSeftReleaseChecker() {
+	protected SoftReleaseChecker getSoftReleaseChecker() {
 		return null;
 	}
 
@@ -271,7 +274,7 @@ public abstract class GuiControllerAbstract extends Thread {
 				String portName = comPortThreadQueue.getSerialPort().getPortName();
 				if(defaultComboBoxModel.getIndexOf(portName)==-1){
 					if(defaultComboBoxModel.getSize()>1)
-						setSerialPort(serialPortSelection.getSelectedItem().toString());
+						setSerialPort();
 				}else
 					serialPortSelection.setSelectedItem(portName);
 
@@ -279,7 +282,7 @@ public abstract class GuiControllerAbstract extends Thread {
 					@Override
 					public void itemStateChanged(ItemEvent itemEvent) {
 						if(itemEvent.getStateChange()==ItemEvent.SELECTED)
-							setSerialPort(serialPortSelection.getSelectedItem().toString());
+							setSerialPort();
 					}
 				});
 			}else if(name.equals("Language")){
@@ -316,8 +319,13 @@ public abstract class GuiControllerAbstract extends Thread {
 			}
 	}
 
+
 	public static DumpControllers getDumpControllers() {
 		return dumpControllers;
+	}
+
+	protected void setSerialPort() {
+		setSerialPort(serialPortSelection.getSelectedItem().toString());
 	}
 
 	protected void setSerialPort(String serialPortName) {
@@ -327,27 +335,38 @@ public abstract class GuiControllerAbstract extends Thread {
 			dumpControllers = null;
 		}
 
-		if (serialPortName != null && !serialPortName.isEmpty()) {
-			comPortThreadQueue.setSerialPort(new ComPort(serialPortName));
-			prefs.put(SERIAL_PORT, serialPortName);
-
-			if (unitsPanel != null) {
-				unitsPanel.removeAll();
-				unitsPanel.revalidate();
-				unitsPanel.getParent().getParent().repaint();
-			}
-
-			protocol = Protocol.ALL;
-		} else
+		if (serialPortName == null || serialPortName.isEmpty())
 			try {
 				comPortThreadQueue.getSerialPort().closePort();
 			} catch (SerialPortException e) {
 				logger.catching(e);
 			}
+		else {
+			comPortThreadQueue.setSerialPort(new ComPort(serialPortName));
+			prefs.put(SERIAL_PORT, serialPortName);
+
+			reset();
+		} 
 
 		synchronized (this) {
 			notify();
 		}
+	}
+
+
+	private void reset() {
+
+		logger.debug("reset();");
+		comPortThreadQueue.clear();
+
+		if (unitsPanel != null) {
+			unitsPanel.removeAll();
+			unitsPanel.revalidate();
+			unitsPanel.getParent().getParent().repaint();
+		}
+
+		protocol = Protocol.ALL;
+		logger.debug("protocol={}", protocol);
 	}
 
 	protected boolean removePanel(LinkHeader linkHeader) {
@@ -369,6 +388,15 @@ public abstract class GuiControllerAbstract extends Thread {
 		vclc.addVlueChangeListener(valueChangeListener);
 	}
 
+	public byte getAddress() {
+		return logger.exit(address);
+	}
+
+	public void setAddress(byte address) {
+		logger.error(this.address = address);
+		reset();
+	}
+
 	// ***********************************************************************
 	protected class VCLC extends ValueChangeListenerClass {
 
@@ -382,12 +410,16 @@ public abstract class GuiControllerAbstract extends Thread {
 	// ************************************************************************************************************
 	public class RemoveComponent extends Thread {
 
+
+		protected final Logger logger = (Logger) LogManager.getLogger();
+
 		private int waitTime;
 		private LinkHeader linkHeader;
-		private boolean packetReceived;
+		private volatile boolean packetReceived;
 
 		public RemoveComponent(int waitTime) {
 			super("RemoveComponent");
+			logger.info("* Start Remove Controller. *");
 
 			this.waitTime = waitTime;
 
@@ -397,38 +429,21 @@ public abstract class GuiControllerAbstract extends Thread {
 			start();
 		}
 
-		public void setPacketNotReceived() {
-			synchronized (this) {
-				if (packetReceived) {
-					packetReceived = false;
-					notify();
-				}
-			}
-		}
-
 		public void setLinkHeader(LinkHeader linkHeader) {
-			this.linkHeader = linkHeader;
+			logger.entry(this.linkHeader = linkHeader);
 			synchronized (this) {
-				if (!packetReceived) {
-					packetReceived = true;
-					notify();
-				}
+				logger.debug("notify();");
+				packetReceived = true;
+				notify();
 			}
+			logger.exit();
 		}
 
 		@Override
 		public void run() {
+			logger.entry();
 			while (true) {
-
-				synchronized (this) {
-					try {
-						wait();
-					} catch (InterruptedException e) {
-						logger.catching(e);
-					}
-				}
-				if (packetReceived)
-					continue;
+				logger.trace("while entry");
 
 				synchronized (this) {
 					try {
@@ -437,11 +452,15 @@ public abstract class GuiControllerAbstract extends Thread {
 						logger.catching(e);
 					}
 				}
-				if (packetReceived)
+				logger.trace("packetReceived={}", packetReceived);
+				if (packetReceived){
+					packetReceived = false;
 					continue;
+				}
 
 				synchronized (this) {
 					if (!packetReceived && removePanel(linkHeader)) {
+						logger.trace("Remove Panel( {} )", linkHeader);
 						protocol = Protocol.ALL;
 						if (dumpControllers != null) {
 							dumpControllers.stop();
