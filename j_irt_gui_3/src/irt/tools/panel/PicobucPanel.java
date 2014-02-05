@@ -6,6 +6,7 @@ import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.BIASsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
+import irt.tools.panel.subpanel.RedundancyPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
@@ -42,6 +43,9 @@ public class PicobucPanel extends DevicePanel {
 		
 		AlarmsPanel alarmsPanel = new AlarmsPanel(linkHeader);
 		getTabbedPane().addTab("alarms", alarmsPanel);
+		
+		RedundancyPanel panel = new RedundancyPanel(linkHeader);
+		getTabbedPane().addTab("redundancy", panel);
 
 		NetworkPanel networkPanel = new NetworkPanel(linkHeader);
 		getTabbedPane().addTab("network", networkPanel);

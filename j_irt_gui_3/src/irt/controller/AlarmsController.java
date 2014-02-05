@@ -135,7 +135,7 @@ public class AlarmsController extends ControllerAbstract {
 					case "Other":
 						lblHardware = (JLabel) c;
 						break;
-					case "Redundant":
+					case "Redundancy":
 						lblRedundant = (JLabel) c;
 						break;
 					default:
@@ -243,12 +243,16 @@ public class AlarmsController extends ControllerAbstract {
 		public void run() {
 			Object source = valueChangeEvent.getSource();
 			logger.entry(source);
+			try{
 			if(source !=null && source instanceof short[]){
 				logger.debug("valueChanged(ValueChangeEvent {})", Arrays.toString((short[])source));
 				if(isSend())
 					setControllers((short[])source);
 				else
 					fillFields((short[])source);
+			}
+			}catch(Exception ex){
+				logger.catching(ex);
 			}
 			logger.exit();
 		}

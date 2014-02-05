@@ -61,4 +61,8 @@ public class ValueChangeListenerClass {
 		return "ValueChangeListenerClass [getListenerCount()="
 				+ valueChangeListeners.getListenerCount() + ", getClass()=" + getClass() + "]";
 	}
+
+	public void stop() {
+		removeVlueChangeListeners();
+	}
 }

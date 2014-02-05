@@ -36,14 +36,14 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	private JLabel lblUnderCurrentTxt;
 	private JLabel lblOverTemperatureTxt;
 	private JLabel lblOtherTxt;
-	private JLabel lblRedundantTxt;
+	private JLabel lblRedundancyTxt;
 
 	private JLabel lblPllOutOffLock;
 	private JLabel lblOverCurrent;
 	private JLabel lblUnderCurrent;
 	private JLabel lblOverTemperature;
 	private JLabel lblOther;
-	private JLabel lblRedundant;
+	private JLabel lblRedundancy;
 	
 	public AlarmsPanel(final LinkHeader linkHeader) {
 
@@ -104,31 +104,31 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		);
 		pnlOther.setLayout(gl_pnlOther);
 		
-		JPanel pnlRedundant = new JPanel();
-		pnlRedundant.setVisible(false);
-		pnlRedundant.setName("Over-Temperature");
-		pnlRedundant.setBorder(new LineBorder(new Color(0, 0, 0)));
+		JPanel pnlRedundancy = new JPanel();
+		pnlRedundancy.setVisible(false);
+		pnlRedundancy.setName("Redundancy");
+		pnlRedundancy.setBorder(new LineBorder(new Color(0, 0, 0)));
 		
-		lblRedundantTxt = new JLabel(Translation.getValue(String.class, "redundant", "Redundant"));
-		lblRedundantTxt.setForeground(Color.BLUE);
-		lblRedundantTxt.setFont(font);
+		lblRedundancyTxt = new JLabel(Translation.getValue(String.class, "redundancy", "Redundant"));
+		lblRedundancyTxt.setForeground(Color.BLUE);
+		lblRedundancyTxt.setFont(font);
 		
-		lblRedundant = new JLabel(noAlarmTxt);
-		lblRedundant.setEnabled(false);
-		lblRedundant.setOpaque(true);
-		lblRedundant.setName("Redundant");
-		lblRedundant.setHorizontalAlignment(SwingConstants.CENTER);
-		lblRedundant.setForeground(new Color(204, 204, 204));
-		lblRedundant.setFont(font);
-		GroupLayout gl_pnlRedundant = new GroupLayout(pnlRedundant);
+		lblRedundancy = new JLabel(noAlarmTxt);
+		lblRedundancy.setEnabled(false);
+		lblRedundancy.setOpaque(true);
+		lblRedundancy.setName("Redundancy");
+		lblRedundancy.setHorizontalAlignment(SwingConstants.CENTER);
+		lblRedundancy.setForeground(new Color(204, 204, 204));
+		lblRedundancy.setFont(font);
+		GroupLayout gl_pnlRedundant = new GroupLayout(pnlRedundancy);
 		gl_pnlRedundant.setHorizontalGroup(
 			gl_pnlRedundant.createParallelGroup(Alignment.TRAILING)
 				.addGap(0, 278, Short.MAX_VALUE)
 				.addGroup(gl_pnlRedundant.createSequentialGroup()
 						.addContainerGap()
-					.addComponent(lblRedundantTxt, GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+					.addComponent(lblRedundancyTxt, GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(lblRedundant, 90, 90, 90))
+					.addComponent(lblRedundancy, 90, 90, 90))
 		);
 		gl_pnlRedundant.setVerticalGroup(
 			gl_pnlRedundant.createParallelGroup(Alignment.LEADING)
@@ -136,11 +136,11 @@ public class AlarmsPanel extends JPanel implements Refresh{
 				.addGroup(gl_pnlRedundant.createSequentialGroup()
 					.addGap(2)
 					.addGroup(gl_pnlRedundant.createParallelGroup(Alignment.BASELINE)
-						.addComponent(lblRedundantTxt)
-						.addComponent(lblRedundant))
+						.addComponent(lblRedundancyTxt)
+						.addComponent(lblRedundancy))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
-		pnlRedundant.setLayout(gl_pnlRedundant);
+		pnlRedundancy.setLayout(gl_pnlRedundant);
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.TRAILING)
@@ -163,7 +163,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 							.addComponent(pnlOther, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 							.addGap(10))
 						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(pnlRedundant, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addComponent(pnlRedundancy, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
 							.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
 		);
 		groupLayout.setVerticalGroup(
@@ -180,7 +180,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(pnlOther, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
-					.addComponent(pnlRedundant, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
+					.addComponent(pnlRedundancy, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
 					.addContainerGap(67, Short.MAX_VALUE))
 		);
 		groupLayout.linkSize(SwingConstants.VERTICAL, new Component[] {pnlPllOutOffLock, pnlOverCurrent, pnlUnderCurrent, pnlOverTemperature});
@@ -347,7 +347,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblUnderCurrentTxt.setText(Translation.getValue(String.class, "under_current", "Under-Current"));
 		lblOverTemperatureTxt.setText(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
 		lblOtherTxt.setText(Translation.getValue(String.class, "other", "Other"));
-		lblRedundantTxt.setText(Translation.getValue(String.class, "redundant", "Redundant"));
+		lblRedundancyTxt.setText(Translation.getValue(String.class, "redundancy", "Redundant"));
 
 		Font font = Translation.getFont().deriveFont(14f);
 
@@ -356,13 +356,13 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblUnderCurrentTxt.setFont(font);
 		lblOverTemperatureTxt.setFont(font);
 		lblOtherTxt.setFont(font);
-		lblRedundantTxt.setFont(font);
+		lblRedundancyTxt.setFont(font);
 
 		lblPllOutOffLock.setFont(font);
 		lblOverCurrent.setFont(font);
 		lblUnderCurrent.setFont(font);
 		lblOverTemperature.setFont(font);
 		lblOther.setFont(font);
-		lblRedundant.setFont(font);
+		lblRedundancy.setFont(font);
 	}
 }

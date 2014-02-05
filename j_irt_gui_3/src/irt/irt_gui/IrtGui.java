@@ -30,6 +30,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
@@ -55,15 +57,18 @@ import org.apache.logging.log4j.core.LoggerContext;
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
+	private static final int DEFAULT_ADDRESS = 254;
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.051";
+	public static final String VERTION = "- 3.052";
 	private static final Preferences pref = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
+	private int address;
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
+	private Set<Integer> addressHistory =  new TreeSet<>();
 
 	public IrtGui() {
 		super(700, 571);
@@ -92,6 +97,127 @@ public class IrtGui extends IrtMainFrame {
 		unitsPanel.setBounds(0, 127, getWidth(), 444);
 		unitsPanel.addStatusListener(headPanel.getStatusChangeListener());
 		getContentPane().add(unitsPanel);
+
+		setAddressHistory(pref.get("address_history", null));
+		
+		txtAddress = new JTextField();
+		txtAddress.setHorizontalAlignment(SwingConstants.CENTER);
+		txtAddress.setFont(new Font("Tahoma", Font.BOLD, 18));
+		txtAddress.setText(""+pref.getInt("address", DEFAULT_ADDRESS));
+		txtAddress.setBounds(512, 11, 48, 28);
+		getContentPane().add(txtAddress);
+		txtAddress.setColumns(8);
+		txtAddress.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyPressed(KeyEvent keyEvent) {
+
+				try {
+					Object[] values = addressHistory.toArray();
+					int key = getKey(values);
+
+					int length = values.length-1;
+
+					switch (keyEvent.getExtendedKeyCode()) {
+					case KeyEvent.VK_UP:
+						if (key < length)
+							txtAddress.setText(values[++key].toString());
+						else
+							txtAddress.setText(values[key = 0].toString());
+						break;
+					case KeyEvent.VK_DOWN:
+						if (key > 0)
+							txtAddress.setText(values[--key].toString());
+						else
+							txtAddress.setText(values[key = length].toString());
+					}
+
+					logger.trace("Key={}", key);
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
+			}
+
+			private int getKey(Object[] values) {
+				String text = txtAddress.getText();
+				int result = 0;
+
+				for(int i=0; i<values.length; i++)
+					if(values[i].toString().equals(text)){
+						result = i;
+						break;
+					}
+
+				return result;
+			}
+		});
+		if(addressHistory.isEmpty())
+			txtAddress.setToolTipText("Unit Address");
+		else
+			txtAddress.setToolTipText(addressHistory.toString());
+
+		JPopupMenu popupMenu_1 = new JPopupMenu();
+		addPopup(txtAddress, popupMenu_1);
+		
+		JMenuItem mntmClear = new JMenuItem("Clear");
+		mntmClear.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				txtAddress.setText(""+DEFAULT_ADDRESS);
+				pref.remove("address_history");
+				pref.putInt("address", DEFAULT_ADDRESS);
+			}
+		});
+		popupMenu_1.add(mntmClear);
+		
+		JMenuItem mntmRemove = new JMenuItem("Remove");
+		mntmRemove.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String text = txtAddress.getText();
+				if(text!=null && !(text = text.replaceAll("\\D", "")).isEmpty()){
+					addressHistory.remove(Integer.parseInt(text));
+					pref.put("address_history", addressHistory.toString());
+					if(addressHistory.isEmpty())
+						txtAddress.setText(""+DEFAULT_ADDRESS);
+					else
+						txtAddress.setText(""+addressHistory.iterator().next());
+
+					txtAddress.setToolTipText(addressHistory.toString());
+				}
+			}
+		});
+		popupMenu_1.add(mntmRemove);
+		txtAddress.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String text = txtAddress.getText();
+				logger.trace("Address={}", text);
+
+				if(text==null || (text=text.replaceAll("\\D", "")).isEmpty() || (address=Integer.parseInt(text))<1 || address>AddressWizard.MAX_ADDRESS)
+					JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
+				else{
+					new SwingWorker<Void, Void>() {
+						@Override
+						protected Void doInBackground() throws Exception {
+							try{
+								logger.debug("Set Address to {}", address);
+								if(addressHistory.add(address)){
+									pref.put("address_history", addressHistory.toString());
+									logger.debug("address history = {}", addressHistory);
+									txtAddress.setToolTipText(addressHistory.toString());
+								}
+
+								pref.putInt("address", address);
+								txtAddress.setText(""+address);
+								guiController.setAddress((byte) address);
+								logger.debug("Address is set to {}", address);
+							}catch(Exception ex){
+								logger.catching(ex);
+							}
+							return null;
+						}
+					}.execute();
+				}
+			}
+		});
 		
 		ProgressBar progressBar = new ProgressBar();
 		progressBar.setBounds(540, 0, 110, 50);
@@ -130,75 +256,17 @@ public class IrtGui extends IrtMainFrame {
 			}
 		});
 		popupMenu.add(mntmAddressWizard);
-		
-		txtAddress = new JTextField();
-		txtAddress.setHorizontalAlignment(SwingConstants.CENTER);
-		txtAddress.setFont(new Font("Tahoma", Font.BOLD, 18));
-		txtAddress.setText(""+pref.getInt("address", 254));
-		txtAddress.setBounds(512, 11, 48, 28);
-		getContentPane().add(txtAddress);
-		txtAddress.setColumns(4);
-		txtAddress.addKeyListener(new KeyAdapter() {
-
-			private String[] values = new String[]{"1","2","254"};
-			private int key = getKey();
-
-			@Override
-			public void keyPressed(KeyEvent keyEvent) {
-				switch(keyEvent.getExtendedKeyCode()){
-				case KeyEvent.VK_UP:
-					if(key<2)
-						key++;
-					else
-						key = 0;
-					break;
-				case KeyEvent.VK_DOWN:
-					if(key>0)
-						key--;
-					else
-						key = 2;
-				}
-				logger.trace("Key={}", key);
-				txtAddress.setText(values[key]);
-			}
-
-			private int getKey() {
-				String text = txtAddress.getText();
-				int result = 0;
-
-				for(int i=0; i<values.length; i++)
-					if(values[i].equals(text)){
-						result = i;
-						break;
-					}
-
-				return result;
-			}
-		});
-		txtAddress.setToolTipText("Unit Address");
-		txtAddress.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String text = txtAddress.getText();
-				logger.trace("Address={}", text);
-				final int address;
-				if(text==null || (text=text.replaceAll("\\D", "")).isEmpty() || (address=Integer.parseInt(text))<1 || address>AddressWizard.MAX_ADDRESS)
-					JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
-				else{
-					new SwingWorker<Void, Void>() {
-						@Override
-						protected Void doInBackground() throws Exception {
-							pref.putInt("address", address);
-							txtAddress.setText(""+address);
-							logger.trace("Set Address to {}", address);
-							guiController.setAddress((byte) address);
-							return null;
-						}
-					}.execute();
-				}
-			}
-		});
 
 		ADDRESS_VIZARD.setOwner(this);
+	}
+
+	private void setAddressHistory(String historyStr) {
+		if(historyStr!=null){
+			for(String s:historyStr.split(","))
+				addressHistory.add(Integer.parseInt(s.replaceAll("\\D", "")));
+
+			logger.debug("History={}", addressHistory);
+		}
 	}
 
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {
@@ -296,7 +364,7 @@ public class IrtGui extends IrtMainFrame {
 			protected void done() {
 				try {
 					comboBoxLanguage.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}

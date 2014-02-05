@@ -393,7 +393,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	public void setAddress(byte address) {
-		logger.error(this.address = address);
+		this.address = address;
 		reset();
 	}
 

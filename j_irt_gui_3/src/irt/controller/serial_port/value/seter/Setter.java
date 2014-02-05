@@ -29,6 +29,13 @@ public class Setter extends SetterAbstract {
 		getPacketThread().preparePacket((byte)((IdValue)value).getID(), (int)((IdValue)value).getValue());
 	}
 
+	public void preparePacketToSend(byte value) throws InterruptedException {
+		PacketThread packetThread = getPacketThread();
+		packetThread.start();
+		packetThread.join();
+		packetThread.preparePacket(value);
+	}
+
 	@Override
 	public boolean set(Packet packet) {
 		boolean isSet = false;

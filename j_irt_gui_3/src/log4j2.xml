@@ -37,31 +37,7 @@
   </Appenders>
 
   <Loggers>
- 	<Logger name="irt.irt_gui.IrtGui" level="ALL"/>
 
- 	<Logger name="irt.tools.panel.head.HeadPanel" level="WARN"/>
-
- 	<Logger name="irt.tools.panel.vizards.address.AddressWizard" level="WARN"/>
- 	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel" level="WARN"/>
- 	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel$AddressWorker" level="WARN"/>
-
-  	<Logger name="irt.tools.panel.subpanel.BIASsPanel" level="WARN"/>
-
-  	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="WARN"/>
-
-  	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="WARN"/>
-
- 	<Logger name="irt.controller.DeviceDebagController" level="WARN"/>
- 	<Logger name="irt.controller.DefaultController" level="WARN"/>
-
- 	<Logger name="irt.controller.translation.Translation" level="WARN"/>
-
- 	<Logger name="irt.controller.GuiControllerAbstract" level="WARN"/>
- 	<Logger name="irt.controller.GuiControllerAbstract$RemoveComponent" level="WARN"/>
- 	<Logger name="irt.controller.GuiControllerUser" level="all"/>
- 
-  	<Logger name="irt.controller.serial_port.value.getter.Getter" level="WARN"/>
- 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />
     </Logger>

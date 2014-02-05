@@ -150,6 +150,13 @@ public class DumpControllers extends ValueChangeListenerClass {
 		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
 				PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT, AlarmsController.REDUNDANT_FAULT) { @Override public Integer getPriority() { return 50; }
 		}, waitTime, "ALARMS_REDUNDANT_FAULT");
+
+		addDumpController(new Getter(linkHeader,
+				Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+				Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
+				PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT){ @Override public Integer getPriority() { return 50; }},
+			waitTime,
+			"REDUNDANCY_STAT");
 	}
 
 	public void setInfo(DeviceInfo deviceInfo) {
@@ -200,8 +207,10 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	public void stop() {
 		logger.trace("stop()");
+		super.stop();
 		for(DefaultController dc:dumpsList)
 			dc.setRun(false);
+		dumpsList.clear();
 	}
 
 	@Override
@@ -248,6 +257,9 @@ public class DumpControllers extends ValueChangeListenerClass {
 			break;
 		case PacketWork.PACKET_ID_DUMP_REGISTER_100:
 			str = "2.100(PaketWork ID="+id+ ")";
+			break;
+		case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
+			str = "Redundancy Status(PaketWork ID="+id+ ")";
 			break;
 		default:
 			if(str.charAt(0)=='9')

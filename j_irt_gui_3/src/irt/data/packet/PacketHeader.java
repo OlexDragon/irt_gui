@@ -199,10 +199,10 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES:
 				packetIdStr = "LO Frequencies("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION__GAIN_OFFSET:
+			case PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET:
 				packetIdStr = "Gain Offset("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION__LNB:
+			case PacketWork.PACKET_ID_CONFIGURATION_LNB:
 				packetIdStr = "LNB On/Off("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_STORE_CONFIG:
@@ -256,6 +256,18 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_DUMP_REGISTER_7:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_100:
 				packetIdStr = "Dump "+DumpControllers.parseId(packetId);
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
+				packetIdStr = "Redundancy Enable ("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE:
+				packetIdStr = "Redundancy Mode ("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME:
+				packetIdStr = "Redundancy Name ("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
+				packetIdStr = "Redundancy Status ("+packetId+")";
 				break;
 			default:
 				packetIdStr = ""+packetId;

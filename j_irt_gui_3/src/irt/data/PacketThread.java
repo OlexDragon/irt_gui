@@ -86,6 +86,15 @@ public class PacketThread extends Thread {
 		return data;
 	}
 
+	public void preparePacket(byte value) {
+		logger.entry(value);
+		setPacketHeaderType(Packet.IRT_SLCP_PACKET_TYPE_COMMAND);
+		Payload payload = packet.getPayload(0);
+		payload.setBuffer(value);
+		data = preparePacket(packet.asBytes());
+		logger.exit();
+	}
+
 	public static int checkControlEscape(byte[] surce, int surceIndex, byte[] destination, int destinationIndex) {
 		if(surce[surceIndex]==FLAG_SEQUENCE || surce[surceIndex]==CONTROL_ESCAPE){
 			destination[destinationIndex++] = CONTROL_ESCAPE;

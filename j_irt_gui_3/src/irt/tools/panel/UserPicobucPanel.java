@@ -7,6 +7,7 @@ import irt.tools.label.ImageLabel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
+import irt.tools.panel.subpanel.RedundancyPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
@@ -34,12 +35,15 @@ public class UserPicobucPanel extends DevicePanel {
 			tabbedPane = getTabbedPane();
 			tabbedPane.addTab("IRT", lblNewLabel);
 
-			NetworkPanel networkPanel = new NetworkPanel(linkHeader);
-			tabbedPane.addTab("network", networkPanel);
-
 			AlarmsPanel alarmPanel = new AlarmsPanel(linkHeader);
 			alarmPanel.setBorder(null);
 			tabbedPane.addTab("alarms", alarmPanel);
+
+			RedundancyPanel panel = new RedundancyPanel(linkHeader);
+			getTabbedPane().addTab("redundancy", panel);
+
+			NetworkPanel networkPanel = new NetworkPanel(linkHeader);
+			tabbedPane.addTab("network", networkPanel);
 
 			int tabCount = tabbedPane.getTabCount();
 			for (int i = 0; i < tabCount; i++) {

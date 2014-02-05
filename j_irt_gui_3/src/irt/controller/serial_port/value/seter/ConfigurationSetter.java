@@ -61,7 +61,7 @@ public class ConfigurationSetter extends SetterAbstract {
 			LinkHeader lh = pt.getLinkHeader();
 
 			switch (id) {
-			case PacketWork.PACKET_ID_CONFIGURATION__LNB:
+			case PacketWork.PACKET_ID_CONFIGURATION_LNB:
 				pt.preparePacket(Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, (byte) ((IdValue) value).getValue());
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
@@ -83,7 +83,7 @@ public class ConfigurationSetter extends SetterAbstract {
 				v = (Value) ((IdValue) value).getValue();
 				pt.preparePacket(((GetterAbstract) this).getPacketParameterHeaderCode(), v != null ? v.getValue() : null);
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION__GAIN_OFFSET:
+			case PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET:
 				v = (Value) ((IdValue) value).getValue();
 				pt.preparePacket(((GetterAbstract) this).getPacketParameterHeaderCode(), v != null ? (short) v.getValue() : null);
 			}

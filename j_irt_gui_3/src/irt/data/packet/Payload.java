@@ -8,8 +8,13 @@ import irt.data.value.Value;
 
 import java.util.Arrays;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 
 public class Payload {
+
+	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final byte 	DI_DEVICE_TYPE				= 1,
 								DI_FIRMWARE_VERSION			= 2,
@@ -70,11 +75,15 @@ public class Payload {
 
 	public void setParameterHeader	(ParameterHeader parameterHeader)	{ this.parameterHeader= parameterHeader;			}
 
-	public void setBuffer(byte[] buffer	){ this.buffer = buffer; parameterHeader.setSize((short)(buffer!=null ?  buffer.length : 0));}
-	public void setBuffer(byte value		)					{ setBuffer(new byte[]{value});			}
+	public void setBuffer(byte[] buffer	){
+		logger.trace("buffer={}", buffer);
+		this.buffer = buffer;
+		parameterHeader.setSize((short)(buffer!=null ?  buffer.length : 0));
+	}
+	public void setBuffer(byte value	)					{ setBuffer(new byte[]{value});			}
 	public void setBuffer(short value	)					{ setBuffer(new byte[]{(byte) (value>>8),	(byte) value});		}
 	public void setBuffer(int value		)					{ setBuffer(Packet.toBytes(value));		}
-	public void setBuffer(long value		)					{ setBuffer(Packet.toBytes(value));		}
+	public void setBuffer(long value	)					{ setBuffer(Packet.toBytes(value));		}
 	public void setBuffer(byte dacNumber, short dacValue)				{ byte[] buffer = new byte[3];
 																			buffer[0] = dacNumber;
 																			byte[] b = Packet.toBytes(dacValue);

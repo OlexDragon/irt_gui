@@ -233,7 +233,7 @@ public class DACsPanel extends JPanel {
 					threadList.add(abstractController);
 
 					value = new Value(0, -100, 100, 0);
-					abstractController = new TextSliderController("Gain Offset Controller", new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION__GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE);
+					abstractController = new TextSliderController("Gain Offset Controller", new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE);
 					abstractController.setWaitTime(10000);
 					t = new Thread(abstractController, abstractController.getName());
 					priority = t.getPriority();

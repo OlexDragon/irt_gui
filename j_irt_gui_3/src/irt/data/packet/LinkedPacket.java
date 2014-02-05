@@ -30,7 +30,7 @@ public class LinkedPacket extends Packet {
 
 	@Override
 	public String toString() {
-		return "LinkedPacket [linkHeader=" + linkHeader + ", header=" + getHeader() + ", payloads" + getPayloads() + "]";
+		return "LinkedPacket [\n\tlinkHeader=\n\t\t" + linkHeader + ",\n\theader=\n\t\t" + getHeader() + ",\n\tpayloads" + getPayloads() + "]";
 	}
 
 	@Override
