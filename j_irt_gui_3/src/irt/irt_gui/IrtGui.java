@@ -46,6 +46,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
+import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -74,6 +75,8 @@ public class IrtGui extends IrtMainFrame {
 		super(700, 571);
 		DumpControllers.setSysSerialNumber(null);
 		logger.trace(ctx);
+
+		UIManager.put("ToolTip.background", Color.WHITE);
 
 		headPanel = new HeadPanel(this);
 		headPanel.setSize(650, 74);
@@ -186,6 +189,9 @@ public class IrtGui extends IrtMainFrame {
 			}
 		});
 		popupMenu_1.add(mntmRemove);
+		
+		JMenuItem mntmSet = new JMenuItem("Set");
+		popupMenu_1.add(mntmSet);
 		txtAddress.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String text = txtAddress.getText();

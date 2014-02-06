@@ -4,6 +4,7 @@ import irt.controller.DefaultController;
 import irt.controller.GuiController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.translation.Translation;
@@ -15,11 +16,14 @@ import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
 
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -34,21 +38,16 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
+import javax.swing.border.BevelBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
-import javax.swing.SwingConstants;
-import javax.swing.border.BevelBorder;
-
-import java.awt.Color;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-public class RedundancyPanel extends JPanel {
+public class RedundancyPanel extends JPanel implements Refresh{
 	private static final long serialVersionUID = -3045298115182952527L;
 
 	protected final Logger logger = (Logger) LogManager.getLogger();
@@ -129,6 +128,12 @@ public class RedundancyPanel extends JPanel {
 	private ImageLabel lblImage;
 
 	private VarticalLabel lblSetOnline;
+
+	private JLabel lblRedundancy;
+
+	private JLabel lblMode;
+
+	private JLabel lblUnitName;
 
 	public RedundancyPanel(final LinkHeader linkHeader) {
 		setBackground(SystemColor.inactiveCaption);
@@ -275,18 +280,21 @@ public class RedundancyPanel extends JPanel {
 			}
 		});
 		
-		JLabel lblRedundancy = new JLabel(Translation.getValue(String.class, "redundancy", "Redundancy"));
-		lblRedundancy.setFont(new Font("Tahoma", Font.BOLD, 14));
+		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
+
+		lblRedundancy = new JLabel(Translation.getValue(String.class, "redundancy", "Redundancy"));
+		lblRedundancy.setFont(font);
 		
-		JLabel lblMode = new JLabel(Translation.getValue(String.class, "redundancy.mode", "Mode"));
-		lblMode.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblMode = new JLabel(Translation.getValue(String.class, "redundancy.mode", "Mode"));
+		lblMode.setFont(font);
 		
-		JLabel lblUnitName = new JLabel(Translation.getValue(String.class, "redundancy.unit_name", "Unit Name"));
-		lblUnitName.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblUnitName = new JLabel(Translation.getValue(String.class, "redundancy.unit_name", "Unit Name"));
+		lblUnitName.setFont(font);
 		
 		lblImage = new ImageLabel(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")), null);
-		
-		
+
+		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));
+
 		DefaultComboBoxModel<REDUNDANCY_MODE> modeModel = new DefaultComboBoxModel<>();
 		REDUNDANCY_MODE[] values = REDUNDANCY_MODE.values();
 		for(REDUNDANCY_MODE rm:values){
@@ -295,6 +303,7 @@ public class RedundancyPanel extends JPanel {
 			modeModel.addElement(rm);
 		}
 		cmbBxMode = new JComboBox<>(modeModel);
+		cmbBxMode.setFont(font);
 		cmbBxMode.addItemListener(modeListener);
 		
 		DefaultComboBoxModel<REDUNDANCY> redundancyModel = new DefaultComboBoxModel<>();
@@ -305,6 +314,7 @@ public class RedundancyPanel extends JPanel {
 			redundancyModel.addElement(r);
 		}
 		cmbBxRedundancy = new JComboBox<>(redundancyModel);
+		cmbBxRedundancy.setFont(font);
 		cmbBxRedundancy.addItemListener(redundancyListener);
 		
 		DefaultComboBoxModel<REDUNDANCY_NAME> nameModel = new DefaultComboBoxModel<>();
@@ -312,6 +322,7 @@ public class RedundancyPanel extends JPanel {
 		for(REDUNDANCY_NAME n:ns)
 			nameModel.addElement(n);
 		cmbBxName = new JComboBox<>(nameModel);
+		cmbBxName.setFont(font);
 		cmbBxName.addItemListener(nameListener);
 		
 		JPanel panel = new JPanel();
@@ -361,23 +372,32 @@ public class RedundancyPanel extends JPanel {
 						.addComponent(lblImage, 0, 194, Short.MAX_VALUE))
 					.addContainerGap())
 		);
-		
-		lblSetOnline = new VarticalLabel("Set Online", false);
+
+		String text = Translation.getValue(String.class, "SET_ONLINE", "Set Online");
+		lblSetOnline = new VarticalLabel(text, false);
+		lblSetOnline.setToolTipText(text);
 		lblSetOnline.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String text = lblSetOnline.getText();
-				if(SET_ONLINE.equals(text)){
-					Setter packetWork = new Setter(linkHeader,
-							Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
-							Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_SET_ONLINE,
-							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE);
-					GuiController.getComPortThreadQueue().add(packetWork);
+				if(SET_ONLINE.equals(lblSetOnline.getText())){
+					try{
+						logger.debug("Click");
+						Setter packetWork = new Setter(
+								linkHeader,
+								Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
+								Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_SET_ONLINE,
+								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE);
+						GuiController.getComPortThreadQueue().add(packetWork);
+						logger.debug(packetWork);
+					}catch(Exception ex){
+						logger.catching(ex);
+					}
 				}
 			}
 		});
 		lblSetOnline.setHorizontalAlignment(SwingConstants.CENTER);
-		lblSetOnline.setFont(new Font("Tahoma", Font.BOLD, 14));
+		lblSetOnline.setFont(font);
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
@@ -458,7 +478,6 @@ public class RedundancyPanel extends JPanel {
 				cmbBxMode.removeItemListener(modeListener);
 				cmbBxMode.setSelectedItem(mode = m);
 				cmbBxMode.addItemListener(modeListener);
-				setImage();
 			}
 		}
 
@@ -469,11 +488,10 @@ public class RedundancyPanel extends JPanel {
 				cmbBxRedundancy.removeItemListener(redundancyListener);
 				cmbBxRedundancy.setSelectedItem( enable = e);
 				cmbBxRedundancy.addItemListener(redundancyListener);
-				setImage();
 			}
 		}
 
-		private synchronized void setImage() throws IOException {
+		private void setImage() throws IOException {
 			Properties p = parseString(status);
 			logger.entry( p, name);
 			boolean online = false;
@@ -486,12 +504,14 @@ public class RedundancyPanel extends JPanel {
 					standby = ustatus.equals(STANDBY);
 				}
 			}
-			if(online && name==REDUNDANCY_NAME.BUC_A || standby && name==REDUNDANCY_NAME.BUC_B)
-				lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
-			else if(standby && name==REDUNDANCY_NAME.BUC_A || online && name==REDUNDANCY_NAME.BUC_B)
-				lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
-			else
-				lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")));
+			synchronized (logger) {
+				if(online && name==REDUNDANCY_NAME.BUC_A || standby && name==REDUNDANCY_NAME.BUC_B)
+					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
+				else if(standby && name==REDUNDANCY_NAME.BUC_A || online && name==REDUNDANCY_NAME.BUC_B)
+					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
+				else
+					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")));
+			}
 		}
 
 		private Properties parseString(StringData stringData) throws IOException {
@@ -511,15 +531,58 @@ public class RedundancyPanel extends JPanel {
 
 		private void setOnlineText(boolean standby, boolean online) {
 			if(standby){
-				lblSetOnline.setText(SET_ONLINE);
+				String text = Translation.getValue(String.class, "SET_ONLINE", SET_ONLINE);
+				lblSetOnline.setText(text);
+				lblSetOnline.setName("SET_ONLINE");
 				lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				lblSetOnline.setToolTipText(text);
 			}else if(online){
-				lblSetOnline.setText("Online");
+				String text = Translation.getValue(String.class, "ONLINE", ONLINE);
+				lblSetOnline.setText(text);
+				lblSetOnline.setName("ONLINE");
 				lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				lblSetOnline.setToolTipText(text);
 			}else{
 				lblSetOnline.setText("");
+				lblSetOnline.setName("");
 				lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				lblSetOnline.setToolTipText("");
 			}
 		}
+	}
+
+	@Override
+	public void refresh() {
+		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
+
+		lblRedundancy.setText(Translation.getValue(String.class, "redundancy", "Redundancy"));
+		lblRedundancy.setFont(font);
+
+		lblMode.setText(Translation.getValue(String.class, "redundancy.mode", "Mode"));
+		lblMode.setFont(font);
+
+		lblUnitName.setText(Translation.getValue(String.class, "redundancy.unit_name", "Unit Name"));
+		lblUnitName.setFont(font);
+
+		String text = Translation.getValue(String.class, lblSetOnline.getName(), SET_ONLINE);
+		lblSetOnline.setText(text);
+		lblSetOnline.setToolTipText(text);
+		lblSetOnline.setFont(font);
+
+		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));
+
+		for(int i=0; i<cmbBxMode.getItemCount(); i++){
+			REDUNDANCY_MODE itemAt = cmbBxMode.getItemAt(i);
+			String name = itemAt.name();
+			itemAt.setMode(Translation.getValue(String.class, name, name));
+		}
+		cmbBxMode.setFont(font);
+
+		for(int i=0; i<cmbBxRedundancy.getItemCount(); i++){
+			REDUNDANCY itemAt = cmbBxRedundancy.getItemAt(i);
+			String name = itemAt.name();
+			itemAt.setRedundancy(Translation.getValue(String.class, name, name));
+		}
+		cmbBxRedundancy.setFont(font);
 	}
 }
