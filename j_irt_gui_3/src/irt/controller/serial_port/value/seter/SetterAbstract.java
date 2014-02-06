@@ -26,6 +26,10 @@ public abstract class SetterAbstract extends GetterAbstract{
 		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
 	}
 
+	public <T> SetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, T value) {
+		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value);
+	}
+
 	public abstract void preparePacketToSend(Object value);
 
 	@Override

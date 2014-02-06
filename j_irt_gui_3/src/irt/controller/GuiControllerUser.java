@@ -3,16 +3,16 @@ package irt.controller;
 import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
+import irt.irt_gui.IrtGui;
 import irt.tools.panel.DemoPanel;
 import irt.tools.panel.DevicePanel;
 import irt.tools.panel.UserPicobucPanel;
 
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 
 public class GuiControllerUser extends GuiControllerAbstract {
 
-	public GuiControllerUser(JFrame gui) {
+	public GuiControllerUser(IrtGui gui) {
 		super("Gui Controller", gui);
 	}
 

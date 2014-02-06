@@ -82,7 +82,7 @@ public class Packet {
 		IRT_SLCP_PACKET_ID_RESET		= 5,		/* Device reset: generic command. */
 		IRT_SLCP_PACKET_ID_DEVICE_INFO	= 8,		/* Device information: generic command. */
 		IRT_SLCP_PACKET_ID_CONFIG_PROFILE= 9,		/* Save configuration: generic command. */
-		IRT_SLCP_PACKET_ID_GET_CONFIG	= 10,		/* Get configuration: generic command (optional). */
+		IRT_SLCP_PACKET_ID_PROTOCOL		= 10,		/* Packet protocol parameters configuration and monitoring */
 		IRT_SLCP_PACKET_ID_DEVICE_DEBAG	= 61,		/* Device Debug. */
 
 	/* Protocol */
@@ -437,7 +437,9 @@ public class Packet {
 		byte[] bytes = null;
 
 		if(value!=null){
-			if(value instanceof Short)
+			if(value instanceof Byte)
+				bytes = new byte[]{(Byte) value};
+			else if(value instanceof Short)
 				bytes = shortToBytes((Short)value);
 			else if(value instanceof Integer)
 				bytes = intToBytes((Integer)value);

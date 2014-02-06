@@ -12,6 +12,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
+import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.panel.DevicePanel;
 import irt.tools.panel.head.Console;
@@ -31,7 +32,6 @@ import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -60,10 +60,9 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	protected static ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
 
+	private IrtGui gui;
 	private Console console;
-
 	protected UnitsContainer unitsPanel;
-
 	protected JComboBox<String> serialPortSelection;
 	protected JComboBox<KeyValue<String, String>> languageComboBox;
 	protected HeadPanel headPanel;
@@ -77,8 +76,9 @@ public abstract class GuiControllerAbstract extends Thread {
 	private byte address;
 
 	@SuppressWarnings("unchecked")
-	public GuiControllerAbstract(String threadName, JFrame gui) {
+	public GuiControllerAbstract(String threadName, IrtGui gui) {
 		super(threadName);
+		this.gui = gui;
 
 		address = (byte) prefs.getInt("address", 254);
 
@@ -370,6 +370,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	protected boolean removePanel(LinkHeader linkHeader) {
+		logger.warn(linkHeader);
 		comPortThreadQueue.getSerialPort().setRun(false);
 		boolean removed;
 		if (removed = unitsPanel.remove(linkHeader)) {
@@ -431,6 +432,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		public void setLinkHeader(LinkHeader linkHeader) {
 			logger.entry(this.linkHeader = linkHeader);
+			gui.setConnected(true);
 			synchronized (this) {
 				logger.debug("notify();");
 				packetReceived = true;
@@ -458,6 +460,7 @@ public abstract class GuiControllerAbstract extends Thread {
 					continue;
 				}
 
+				gui.setConnected(false);
 				synchronized (this) {
 					if (!packetReceived && removePanel(linkHeader)) {
 						logger.trace("Remove Panel( {} )", linkHeader);

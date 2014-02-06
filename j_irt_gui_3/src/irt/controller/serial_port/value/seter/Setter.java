@@ -20,6 +20,10 @@ public class Setter extends SetterAbstract {
 		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
 	}
 
+	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId, T value) {
+		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value);
+	}
+
 	public Setter(byte groupId, byte packetParameterHeaderCode,	short packetId) {
 		this(null, groupId, packetParameterHeaderCode, packetId);
 	}

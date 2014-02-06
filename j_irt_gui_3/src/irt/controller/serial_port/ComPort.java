@@ -155,7 +155,7 @@ do{
 										timesTimeout = 0;
 										packet.setPayloads(payloadsList);
 									}
-
+									comPortLogger.trace("END");
 									break;
 								}
 								checksum.add(readData);
@@ -165,6 +165,7 @@ do{
 								logger.trace("parameterHeader.getSize()={}", ev);
 								if(parameterHeader.getCode()>30 || ev>2000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
+									comPortLogger.warn("parameterHeader.getCode()>30 || ev>2000");
 									break;
 								}
 								Console.appendLn("", "Payload ");
@@ -175,12 +176,16 @@ do{
 									payloadsList.add(payload);
 								}else{
 									Console.appendLn("Payload", "Break ");
+									comPortLogger.warn("ev < 0 || (readData = readBytes(ev))==null");
 									break;
 								}
-							}					
-						}
-					}
-				}
+							}
+						}else
+							comPortLogger.warn("packetHeader.asBytes() == null || packetHeader.getGroupId()!=groupId");
+					}else
+						comPortLogger.warn("(readData=readHeader())==null");
+				}else
+					comPortLogger.warn("((isConfirmBytes()) && isFlagSequence()) = false");
 				byte[] acknowledge = getAcknowledge();
 				if(isRun())
 					writeBytes(acknowledge);
@@ -449,6 +454,7 @@ do{
 	}
 
 	public void setRun(boolean run) {
+		comPortLogger.warn("setRun({})", run);
 		synchronized (this) {
 			this.run = run;
 			notify();

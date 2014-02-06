@@ -1,7 +1,13 @@
 package irt.tools.panel;
 
+import irt.controller.AlarmsController;
+import irt.controller.DefaultController;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
+import irt.data.PacketWork;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.Packet;
 import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.BIASsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
@@ -24,11 +30,14 @@ import org.apache.logging.log4j.Logger;
 public class PicobucPanel extends DevicePanel {
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
+	private RedundancyPanel redundancyPanel;
+	private DefaultController target;
+	private JTabbedPane tabbedPane;
 
 	public PicobucPanel(final LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight){
 		super(linkHeader, text, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 
-		JTabbedPane tabbedPane = getTabbedPane();
+		tabbedPane = getTabbedPane();
 
 		JPanel baisPanel = new BIASsPanel(linkHeader);
 		baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
@@ -42,13 +51,12 @@ public class PicobucPanel extends DevicePanel {
 		getTabbedPane().addTab("Info", infoPanel);
 		
 		AlarmsPanel alarmsPanel = new AlarmsPanel(linkHeader);
-		getTabbedPane().addTab("alarms", alarmsPanel);
+		tabbedPane.addTab("alarms", alarmsPanel);
 		
-		RedundancyPanel panel = new RedundancyPanel(linkHeader);
-		getTabbedPane().addTab("redundancy", panel);
+		redundancyPanel = new RedundancyPanel(linkHeader);
 
 		NetworkPanel networkPanel = new NetworkPanel(linkHeader);
-		getTabbedPane().addTab("network", networkPanel);
+		tabbedPane.addTab("network", networkPanel);
 
 		int tabCount = tabbedPane.getTabCount();
 		for (int i = 0; i < tabCount; i++) {
@@ -61,6 +69,22 @@ public class PicobucPanel extends DevicePanel {
 				label.setFont(Translation.getFont().deriveFont(12f).deriveFont(Font.PLAIN));
 			}
 		}
+
+		Getter packetWork = new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_IDS, PacketWork.PACKET_ID_ALARMS){
+			@Override
+			public boolean set(Packet packet) {
+				if(packet!=null && packet.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS) {
+					byte[] buffer = packet.getPayload(0).getBuffer();
+					if(buffer[buffer.length-1]==AlarmsController.REDUNDANT_FAULT)
+						showRedundant();
+					target.setRun(false);
+				}
+				return true;
+			}};
+			target = new DefaultController("", packetWork, Style.CHECK_ONCE);
+			Thread t = new Thread(target);
+			t.setDaemon(true);
+			t.start();
 	}
 
 	@Override
@@ -89,6 +113,19 @@ public class PicobucPanel extends DevicePanel {
 				label.setFont(Translation.getFont().deriveFont(12f).deriveFont(Font.PLAIN));
 				label.setText(Translation.getValue(String.class, name, null));
 			}
+		}
+	}
+
+	public void showRedundant() {
+		tabbedPane.addTab("redundancy", redundancyPanel);
+		int index = tabbedPane.getTabCount()-1;
+		String title = tabbedPane.getTitleAt(index);
+		String value = Translation.getValue(String.class, title, null);
+		if (value != null) {
+			JLabel label = new JLabel(value);
+			label.setName(title);
+			label.setFont(Translation.getFont().deriveFont(12f).deriveFont(Font.BOLD));
+			tabbedPane.setTabComponentAt(index, label);
 		}
 	}
 }

@@ -383,8 +383,8 @@ public class PacketHeader{
 		case Packet.IRT_SLCP_PACKET_ID_CONFIG_PROFILE:
 			typeStr = "SaveConfigProfile("+ Packet.IRT_SLCP_PACKET_ID_CONFIG_PROFILE+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_GET_CONFIG:
-			typeStr = "GetConfig("+ Packet.IRT_SLCP_PACKET_ID_GET_CONFIG+")";
+		case Packet.IRT_SLCP_PACKET_ID_PROTOCOL:
+			typeStr = "Protocol("+ Packet.IRT_SLCP_PACKET_ID_PROTOCOL+")";
 			break;
 		case Packet.IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1:
 			typeStr = "DeveloperGeneric("+ Packet.IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1+")";

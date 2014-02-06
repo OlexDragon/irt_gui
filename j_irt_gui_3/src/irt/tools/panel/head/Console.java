@@ -17,6 +17,8 @@ public class Console extends JDialog {
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
 
+	private static final int MAX_QUEUE_SIZE = 1024;
+
 	public static final JTextArea TEXT_AREA = new JTextArea();
 	private static final int MAX_LINE_COUNT = 5000;
 	private static ThreadsWorker threadsWorker = new ThreadsWorker();
@@ -48,7 +50,11 @@ public class Console extends JDialog {
 	}
 
 	public static void append(Object localizedMessage, String prefix) {
-		threadsWorker.append(prefix+" : "+localizedMessage);
+		try{
+			threadsWorker.append(prefix+" : "+localizedMessage);
+		}catch(Exception ex){
+			logger.catching(ex);
+		}
 	}
 
 	public static String getText() {
@@ -66,7 +72,8 @@ public class Console extends JDialog {
 			start();
 		}
 
-		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(1024);
+		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
+		private boolean queueIsFull;
 
 		@Override
 		public void run() {
@@ -92,7 +99,16 @@ public class Console extends JDialog {
 		}
 
 		public void append(String string) {
-			stringQueue.add(string);
+			if(stringQueue.size()<MAX_QUEUE_SIZE){
+				if(queueIsFull){
+					string = "\n*** computer is very slow... Information has been lost... ***\n"+string;
+					queueIsFull = false;
+				}
+				stringQueue.add(string);
+			}else{
+				queueIsFull = true;
+				logger.warn("String Queue is full.");
+			}
 		}
 	}
 }

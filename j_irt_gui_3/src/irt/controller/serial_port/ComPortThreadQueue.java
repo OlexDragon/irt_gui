@@ -107,6 +107,7 @@ public class ComPortThreadQueue extends Thread {
 		ComPort oldSerialPort = ComPortThreadQueue.serialPort;
 
 		if(oldSerialPort!=null){
+			logger.warn("oldSerialPort={}, serialPort={}", oldSerialPort, serialPort);
 			clear();
 			oldSerialPort.setRun(false);
 			try {

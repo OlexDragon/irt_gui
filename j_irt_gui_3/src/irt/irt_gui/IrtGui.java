@@ -2,10 +2,14 @@ package irt.irt_gui;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
+import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.Packet;
 import irt.tools.KeyValue;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
@@ -62,14 +66,16 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.052";
+	public static final String VERTION = "- 3.053";
 	private static final Preferences pref = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
+	private Set<Integer> addressHistory =  new TreeSet<>();
+	private boolean connected;
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
-	private Set<Integer> addressHistory =  new TreeSet<>();
+	private JMenuItem mntmSet;
 
 	public IrtGui() {
 		super(700, 571);
@@ -190,7 +196,19 @@ public class IrtGui extends IrtMainFrame {
 		});
 		popupMenu_1.add(mntmRemove);
 		
-		JMenuItem mntmSet = new JMenuItem("Set");
+		mntmSet = new JMenuItem("Set");
+		mntmSet.setVisible(false);
+		mntmSet.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				byte a = (byte)address;
+				Setter packetWork = new Setter(new LinkHeader(a, (byte)0, (short) 0),
+						Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
+						Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+						Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
+						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE, (byte)address);
+				GuiController.getComPortThreadQueue().add(packetWork);
+			}
+		});
 		popupMenu_1.add(mntmSet);
 		txtAddress.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -486,5 +504,14 @@ public class IrtGui extends IrtMainFrame {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
 		});
+	}
+
+	public boolean isConnected() {
+		return connected;
+	}
+
+	public void setConnected(boolean connected) {
+		this.connected = connected;
+		mntmSet.setVisible(connected);
 	}
 }
