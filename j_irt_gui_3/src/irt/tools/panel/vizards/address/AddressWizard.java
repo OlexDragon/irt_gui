@@ -22,7 +22,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 public class AddressWizard extends JDialog {
-	public static final int MAX_ADDRESS = 255;
+	public static final int MAX_ADDRESS = 254;
 
 	private static final long serialVersionUID = -8162692468959448079L;
 

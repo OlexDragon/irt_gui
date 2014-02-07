@@ -108,6 +108,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 146,
 								PACKET_ID_ALARMS_SUMMARY			= 147;
 
+	public static final short	PACKET_ID_PROTOCOL_ADDRESS	= 150;
+
 	public Integer getPriority();
 	public PacketThread getPacketThread();
 	public void addVlueChangeListener(ValueChangeListener valueChangeListener);

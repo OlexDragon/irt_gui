@@ -38,7 +38,7 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 	}
 
 	public <T> GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, T value) {
-		this(linkHeader, groupId, packetParameterHeaderCode, packetId);
+		this(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
 		byte[] data = packetThread.getData();
 		byte[] bytesValue = Packet.toBytes(value);
 		int length = data.length;

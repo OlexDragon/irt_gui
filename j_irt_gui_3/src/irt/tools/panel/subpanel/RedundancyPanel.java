@@ -272,10 +272,10 @@ public class RedundancyPanel extends JPanel implements Refresh{
 				controllers.add(defaultController);
 
 				Thread t = new Thread(defaultController);
-				t.setDaemon(true);
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
+				t.setDaemon(true);
 				t.start();
 			}
 		});

@@ -342,7 +342,8 @@ public class PLLsPanel extends JPanel {
 
 		Thread t = new Thread(registerController, registerController.getName());
 		int priority = t.getPriority();
-		t.setPriority(priority<=Thread.MIN_PRIORITY ? Thread.MIN_PRIORITY : priority-1);
+		if(priority>Thread.MIN_PRIORITY)
+			t.setPriority(priority-1);
 		t.setDaemon(true);
 		t.start();
 	}
@@ -369,7 +370,9 @@ public class PLLsPanel extends JPanel {
 			this.txtOffsetCurr = txtOffsetCurr;
 			
 			int priority = getPriority();
-			setPriority(priority<=Thread.MIN_PRIORITY ? Thread.MIN_PRIORITY : priority-1);
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			setDaemon(true);
 			start();
 		}
 

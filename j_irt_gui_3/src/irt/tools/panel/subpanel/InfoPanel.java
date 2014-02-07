@@ -301,7 +301,9 @@ public class InfoPanel extends JPanel implements Refresh {
 		public SecondsCount(int firmwareBuildCounter){
 			this.firmwareBuildCounter = firmwareBuildCounter;
 			Thread t = new Thread(this, "Firmware Build Counter");
-			t.setPriority(t.getPriority()-1);
+			int priority = t.getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				t.setPriority(priority-1);
 			t.setDaemon(true);
 			t.start();
 		}

@@ -468,7 +468,7 @@ public class BIASsPanel extends JPanel {
 						new Setter(linkHeader,
 								Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
 								Packet.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1,
-								Packet.IRTSCP_PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
+								Packet.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
 								PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE),
 						new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
 				);

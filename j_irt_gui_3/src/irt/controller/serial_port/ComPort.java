@@ -248,7 +248,7 @@ do{
 		byte[] readBytes = readByte(2500);
 		boolean isFlagSequence = readBytes!=null && readBytes[0] == Packet.FLAG_SEQUENCE;
 
-		return isFlagSequence;
+		return comPortLogger.exit(isFlagSequence);
 	}
 
 	private boolean containsFlagSequence(byte[] readBytes) {
@@ -284,7 +284,7 @@ do{
 			}
 		}
 
-		return isComfirm;
+		return comPortLogger.exit(isComfirm);
 	}
 
 	private short getPacketId(boolean isLinked, byte[] data) {

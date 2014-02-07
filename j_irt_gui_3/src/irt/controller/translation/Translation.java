@@ -40,7 +40,7 @@ public class Translation {
 	public static void setLocale(final String localeStr){
 		font = null;
 
-		Thread thread = new Thread(new Runnable() {
+		Thread t = new Thread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -59,10 +59,11 @@ public class Translation {
 				LOGGER.exit(locale);
 			}
 		}, "setLocale "+localeStr);
-		int priority = thread.getPriority();
+		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
-			thread.setPriority(priority-1);
-		thread.start();
+			t.setPriority(priority-1);
+		t.setDaemon(true);
+		t.start();
 	}
 
 	private static Map<String, String> getMap() {

@@ -50,14 +50,18 @@ public class ControlController extends ControllerAbstract {
 
 		muteController = new MuteController(linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
 		Thread t = new Thread(muteController, "Mute Controller");
-		t.setPriority(t.getPriority()-1);
+		int priority = t.getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			t.setPriority(priority-1);
 		t.setDaemon(true);
 		t.start();
 
 		if(chbxLNB!=null){
 			lnbController = new SwitchController("LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB));
 			t = new Thread(lnbController, "LNB ON/OFF");
-			t.setPriority(t.getPriority()-1);
+			priority = t.getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				t.setPriority(priority-1);
 			t.setDaemon(true);
 			t.start();
 		}

@@ -62,7 +62,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
-	private static final int DEFAULT_ADDRESS = 254;
+	private static final int DEFAULT_ADDRESS = 255;
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
@@ -109,10 +109,11 @@ public class IrtGui extends IrtMainFrame {
 
 		setAddressHistory(pref.get("address_history", null));
 		
+		address = pref.getInt("address", DEFAULT_ADDRESS);
 		txtAddress = new JTextField();
 		txtAddress.setHorizontalAlignment(SwingConstants.CENTER);
 		txtAddress.setFont(new Font("Tahoma", Font.BOLD, 18));
-		txtAddress.setText(""+pref.getInt("address", DEFAULT_ADDRESS));
+		txtAddress.setText(""+address);
 		txtAddress.setBounds(512, 11, 48, 28);
 		getContentPane().add(txtAddress);
 		txtAddress.setColumns(8);
@@ -200,13 +201,32 @@ public class IrtGui extends IrtMainFrame {
 		mntmSet.setVisible(false);
 		mntmSet.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				byte a = (byte)address;
-				Setter packetWork = new Setter(new LinkHeader(a, (byte)0, (short) 0),
-						Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
-						Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
-						Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
-						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE, (byte)address);
-				GuiController.getComPortThreadQueue().add(packetWork);
+				String newAddressStr = txtAddress.getText();
+				if(newAddressStr!=null && !(newAddressStr=newAddressStr.replaceAll("\\D", "")).isEmpty()){
+					int newAddress = Integer.parseInt(newAddressStr);
+					if(newAddress>0 && newAddress<=AddressWizard.MAX_ADDRESS){
+						if(newAddress!=address){
+							if(JOptionPane.showConfirmDialog(
+									IrtGui.this,
+									"Are you really want to change the address '"+address+"' to '"+newAddress+"'.","Addres Change",
+									JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION){
+								byte na = (byte)newAddress;
+								Setter packetWork = new Setter(new LinkHeader((byte)address, (byte)0, (short) 0),
+										Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
+										Packet.IRT_SLCP_PACKET_ID_PROTOCOL,
+										Packet.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
+										PacketWork.PACKET_ID_PROTOCOL_ADDRESS, na);
+								GuiController.getComPortThreadQueue().add(packetWork);
+								guiController.setAddress(na);
+								pref.putInt("address", address);
+							}else
+								txtAddress.setText(""+address);
+						}else
+							JOptionPane.showMessageDialog(IrtGui.this, "First type the new address");
+					}else
+						JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
+				}else
+					JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
 			}
 		});
 		popupMenu_1.add(mntmSet);

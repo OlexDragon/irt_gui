@@ -1,5 +1,7 @@
 package irt.tools.panel.head;
 
+import irt.controller.GuiController;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -50,11 +52,7 @@ public class Console extends JDialog {
 	}
 
 	public static void append(Object localizedMessage, String prefix) {
-		try{
 			threadsWorker.append(prefix+" : "+localizedMessage);
-		}catch(Exception ex){
-			logger.catching(ex);
-		}
 	}
 
 	public static String getText() {
@@ -64,16 +62,17 @@ public class Console extends JDialog {
 	//*************************** class ThreadsWorker *************************************************
 	private static class ThreadsWorker extends Thread{
 
+		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
+		private boolean queueIsFull;
+
 		public ThreadsWorker() {
+			queueIsFull = GuiController.getPrefs().getBoolean("is_slow", true);
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				setPriority(priority-1);
 			setDaemon(true);
 			start();
 		}
-
-		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
-		private boolean queueIsFull;
 
 		@Override
 		public void run() {
@@ -93,21 +92,29 @@ public class Console extends JDialog {
 					TEXT_AREA.append(s);
 					TEXT_AREA.setCaretPosition(TEXT_AREA.getDocument().getLength());
 
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 		}
 
 		public void append(String string) {
-			if(stringQueue.size()<MAX_QUEUE_SIZE){
-				if(queueIsFull){
-					string = "\n*** computer is very slow... Information has been lost... ***\n"+string;
-					queueIsFull = false;
+			try {
+				if (stringQueue.size() < MAX_QUEUE_SIZE && (!queueIsFull || isAlive())) {
+					if (queueIsFull) {
+						string = "\n*** computer is very slow... Information has been lost... ***\n" + string;
+						queueIsFull = false;
+						GuiController.getPrefs().putBoolean("is_slow", false);
+					}
+					stringQueue.add(string);
+				} else {
+					if (!queueIsFull) {
+						logger.warn("String Queue is full.");
+						queueIsFull = true;
+						GuiController.getPrefs().putBoolean("is_slow", true);
+					}
 				}
-				stringQueue.add(string);
-			}else{
-				queueIsFull = true;
-				logger.warn("String Queue is full.");
+			} catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 	}

@@ -61,7 +61,10 @@ public abstract class IrtMainFrame extends JFrame {
 			public void componentShown(ComponentEvent arg0) {
 
 				guiController = getNewGuiController();
-				guiController.setPriority(guiController.getPriority()-1);
+				int priority = guiController.getPriority();
+				if(priority>Thread.MIN_PRIORITY)
+					guiController.setPriority(priority-1);
+				guiController.setDaemon(true);
 				guiController.start();
 			}
 		});

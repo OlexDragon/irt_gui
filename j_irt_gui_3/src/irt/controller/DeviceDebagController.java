@@ -415,11 +415,11 @@ public class DeviceDebagController extends ControllerAbstract {
 		public ControllerWorker(String threadName, ValueChangeEvent valueChangeEvent){
 			super(threadName);
 			logger.entry(threadName, valueChangeEvent);
-			setDaemon(true);
 			this.valueChangeEvent = valueChangeEvent;
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				setPriority(priority-1);
+			setDaemon(true);
 			start();
 			logger.exit();
 		}

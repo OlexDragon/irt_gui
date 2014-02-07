@@ -74,11 +74,11 @@ public class AdcController extends ControllerAbstract {
 
 		public ControllerWorker(ValueChangeEvent valueChangeEvent, double multiplier){
 			this.multiplier = multiplier;
-			setDaemon(true);
 			this.valueChangeEvent = valueChangeEvent;
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				setPriority(priority-1);
+			setDaemon(true);
 			start();
 		}
 

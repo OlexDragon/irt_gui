@@ -370,10 +370,10 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	protected boolean removePanel(LinkHeader linkHeader) {
-		logger.warn(linkHeader);
 		comPortThreadQueue.getSerialPort().setRun(false);
 		boolean removed;
 		if (removed = unitsPanel.remove(linkHeader)) {
+			logger.warn("removePanel({})", linkHeader);
 			unitsPanel.revalidate();
 			unitsPanel.getParent().getParent().repaint();
 		}
@@ -427,6 +427,7 @@ public abstract class GuiControllerAbstract extends Thread {
 			int priority = getPriority();
 			if (priority > Thread.MIN_PRIORITY)
 				setPriority(priority - 1);
+			setDaemon(true);
 			start();
 		}
 

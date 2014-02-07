@@ -27,7 +27,10 @@ public class ComPortThreadQueue extends Thread {
 	public ComPortThreadQueue(){
 		super("ComPortThreadQueue");
 
-		setPriority(Thread.currentThread().getPriority()-1);
+		int priority = getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			setPriority(priority-1);
+		setDaemon(true);
 		start();
 	}
 
@@ -75,15 +78,19 @@ public class ComPortThreadQueue extends Thread {
 			
 		try {
 
-			if (!comPortQueue.contains(packetWork)) {
+			if (comPortQueue.size() < 300)
+				if (!comPortQueue.contains(packetWork)) {
 
-				PacketThread pt = packetWork.getPacketThread();
-				pt.setDaemon(true);
-				pt.start();
+					PacketThread pt = packetWork.getPacketThread();
+					pt.setDaemon(true);
+					pt.start();
 
-				comPortQueue.add(packetWork);
-				// System.out.println("<<< is added - "+packetWork);
-			}
+					comPortQueue.add(packetWork);
+					// System.out.println("<<< is added - "+packetWork);
+				} else
+					logger.warn("Already contains " + packetWork);
+			else
+				logger.warn("comPortQueue is FULL");
 		} catch (IllegalStateException e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:add");

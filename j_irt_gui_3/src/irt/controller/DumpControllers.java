@@ -280,7 +280,8 @@ public class DumpControllers extends ValueChangeListenerClass {
 			this.valueChangeEvent = valueChangeEvent;
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
-			setPriority(priority-1);
+				setPriority(priority-1);
+			setDaemon(true);
 			start();
 		}
 

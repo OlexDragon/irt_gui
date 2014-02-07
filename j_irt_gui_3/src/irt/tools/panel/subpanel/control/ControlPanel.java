@@ -283,19 +283,22 @@ public class ControlPanel extends MonitorPanelAbstract {
 		if(ñontroller!=null)
 			ñontroller.setRun(false);
 
-		Thread thread;
+		Thread t;
 		switch(control){
 		case FLAG_GAIN:
-			thread = new Thread(ñontroller =  getNewGainController(), "Gain Controller");
+			t = new Thread(ñontroller =  getNewGainController(), "Gain Controller");
 			break;
 		case FLAG_FREQUENCY:
-			thread = new Thread(ñontroller = getNewFreqController(), "Frequency Controller");
+			t = new Thread(ñontroller = getNewFreqController(), "Frequency Controller");
 			break;
 		default:
-			thread = new Thread(ñontroller = getNewAttenController(), "Attenuation Controller");
+			t = new Thread(ñontroller = getNewAttenController(), "Attenuation Controller");
 		}
-		thread.setPriority(thread.getPriority()-1);
-		thread.start();
+		int priority = t.getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			t.setPriority(priority-1);
+		t.setDaemon(true);
+		t.start();
 	}
 
 	@Override

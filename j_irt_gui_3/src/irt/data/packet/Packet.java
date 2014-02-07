@@ -82,11 +82,10 @@ public class Packet {
 		IRT_SLCP_PACKET_ID_RESET		= 5,		/* Device reset: generic command. */
 		IRT_SLCP_PACKET_ID_DEVICE_INFO	= 8,		/* Device information: generic command. */
 		IRT_SLCP_PACKET_ID_CONFIG_PROFILE= 9,		/* Save configuration: generic command. */
-		IRT_SLCP_PACKET_ID_PROTOCOL		= 10,		/* Packet protocol parameters configuration and monitoring */
 		IRT_SLCP_PACKET_ID_DEVICE_DEBAG	= 61,		/* Device Debug. */
 
 	/* Protocol */
-		IRTSCP_PACKET_ID_PROTO = 10, /* Protocol configuration. */
+		IRT_SLCP_PACKET_ID_PROTOCOL = 10, /* Packet protocol parameters configuration and monitoring. */
 
 	/* Network */
 		IRT_SLCP_PACKET_ID_NETWORK = 11, /* Network configuration. */
@@ -197,8 +196,9 @@ public class Packet {
 
 	/* PicoBUC production procedures */
 
-	public static final byte IRTSCP_PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT = 1; /* Re-init default values of RDAC */
+	public static final byte IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT = 1; /* Re-init default values of RDAC */
 
+	public static final byte IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS	= 3;
 
 	private PacketHeader header;	//irtslcp_packet_header
 	private List<Payload> payloads;	//irtslcp_payload

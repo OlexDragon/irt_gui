@@ -222,7 +222,9 @@ public abstract class ControllerAbstract implements Runnable{
 	protected void fireStatusChangeListener(ValueChangeEvent valueChangeEvent) {
 
 		Thread t = new Thread(new FireValue(statusChangeListeners, valueChangeEvent), ControllerAbstract.this.getName());
-		t.setPriority(t.getPriority()-1);
+		int priority = t.getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			t.setPriority(priority-1);
 		t.setDaemon(true);
 		t.start();
 	}
