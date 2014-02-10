@@ -62,11 +62,11 @@ import org.apache.logging.log4j.core.LoggerContext;
 @SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
 
-	private static final int DEFAULT_ADDRESS = 255;
+	private static final int DEFAULT_ADDRESS = 256;
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.053";
+	public static final String VERTION = "- 3.054";
 	private static final Preferences pref = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -392,12 +392,18 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected Rectangle doInBackground() throws Exception {
 				try{
-				Thread.currentThread().setName("irtGui.comboBoxLanguage.setBounds");
-				String[] bounds = Translation.getTranslationProperties("headPanel_comboBoc_bounds").toString().split(",");
-				return new Rectangle(Integer.parseInt(bounds[0]),
-						Integer.parseInt(bounds[1]),
-						Integer.parseInt(bounds[2]),
-						Integer.parseInt(bounds[3]));
+
+					Thread.currentThread().setName("irtGui.comboBoxLanguage.setBounds");
+					String translationProperties = Translation.getTranslationProperties("headPanel_comboBoc_bounds");
+
+					if(translationProperties==null)
+						return null;
+
+					String[] bounds = translationProperties.toString().split(",");
+					return new Rectangle(Integer.parseInt(bounds[0]),
+							Integer.parseInt(bounds[1]),
+							Integer.parseInt(bounds[2]),
+							Integer.parseInt(bounds[3]));
 				}catch(Exception e){
 					logger.catching(e);
 					return null;

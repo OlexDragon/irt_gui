@@ -21,10 +21,11 @@ public class DeviceInfo {
 	public static final int SUBTYPE_FIRST_BYTE 	= 8;
 	public static final int SIZE 				= 12;
 
-	public static final int DEVICE_TYPE_BAIS_BOARD	= 2,
-							DEVICE_TYPE_PICOBUC 	= 100,
-							DEVICE_TYPE_PICOBUC_L_TO_KU = 101,
-							DEVICE_TYPE_PICOBUC_L_TO_C 	= 102,
+	public static final int DEVICE_TYPE_BAIS_BOARD		= 2,
+							DEVICE_TYPE_PICOBUC_L_TO_KU = 100,
+							DEVICE_TYPE_PICOBUC_L_TO_C 	= 101,
+							DEVICE_TYPE_SSPA 			= 102,
+
 							DEVICE_TYPE_70_TO_L		= 1001,
 							DEVICE_TYPE_L_TO_70		= 1002,
 							DEVICE_TYPE_140_TO_L	= 1003,
@@ -34,7 +35,8 @@ public class DeviceInfo {
 							DEVICE_TYPE_70_TO_KY	= 1007,
 							DEVICE_TYPE_KU_TO_70	= 1008,
 							DEVICE_TYPE_140_TO_KU	= 1009,
-							DEVICE_TYPE_KU_TO_140	= 1010;
+							DEVICE_TYPE_KU_TO_140	= 1010,
+							DEVICE_TYPE_SSPA_CONVERTER = 1051;
 
 	private LinkHeader linkHeader;
 	private int type;

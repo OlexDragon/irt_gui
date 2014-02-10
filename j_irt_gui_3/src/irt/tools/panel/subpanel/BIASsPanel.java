@@ -76,10 +76,14 @@ public class BIASsPanel extends JPanel {
 	private JTextField txtPotentiometer2;
 	private JTextField txtPotentiometer3;
 	private JTextField txtPotentiometer4;
+	private JTextField txtPotentiometer5;
+	private JTextField txtPotentiometer6;
 	private JLabel lblPotentiometer1;
 	private JLabel lblPotentiometer4;
 	private JLabel lblPotentiometer2;
 	private JLabel lblPotentiometer3;
+	private JLabel lblPotentiometer5;
+	private JLabel lblPotentiometer6;
 	private JLabel lblOutput_1;
 	private JLabel lblLineUp;
 	private SwitchBox switchNGlobal;
@@ -93,10 +97,6 @@ public class BIASsPanel extends JPanel {
 	private JLabel lblOPower;
 	private JLabel lblTemp_1;
 	private JLabel lblTemp;
-	private JTextField txtPotentiometer5;
-	private JTextField txtPotentiometer6;
-	private JLabel lblPotentiometer5;
-	private JLabel lblPotentiometer6;
 
 	public BIASsPanel(final LinkHeader linkHeader) {
 		setLayout(null);
@@ -121,7 +121,7 @@ public class BIASsPanel extends JPanel {
 
 				DeviceInfo deviceInfo = GuiController.getDeviceInfo();
 				logger.trace(deviceInfo);
-				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()==2 : false;
+				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()==2 : true;
 
 				addController(new NGlobalController(switchNGlobal,
 								new DeviceDebagGetter(linkHeader,

@@ -166,7 +166,7 @@ public class DeviceDebagController extends ControllerAbstract {
 		};
 
 		txtPropertyChangeListener = new PropertyChangeListener() {
-			
+
 			private long oldValue;
 
 			@Override

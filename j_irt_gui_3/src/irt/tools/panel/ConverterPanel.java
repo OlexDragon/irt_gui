@@ -23,9 +23,9 @@ public class ConverterPanel extends DevicePanel {
 	private boolean hasDcOutput;
 	private boolean hasFreqSet;//Frequency Set(true) or Frequency range(false)
 
-	public ConverterPanel(DeviceInfo di, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight)	throws HeadlessException {
-		super(null, "("+di.getSerialNumber()+") "+di.getUnitName(), minWidth, midWidth, maxWidth, minHeight, maxHeight);
-		converterType = di.getType();
+	public ConverterPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight)	throws HeadlessException {
+		super(null, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+		converterType = deviceInfo.getType();
 		hasDcOutput = converterType == DeviceInfo.DEVICE_TYPE_L_TO_140 || converterType == DeviceInfo.DEVICE_TYPE_L_TO_70;
 		hasFreqSet 	= converterType == DeviceInfo.DEVICE_TYPE_L_TO_KU || converterType == DeviceInfo.DEVICE_TYPE_L_TO_C;
 

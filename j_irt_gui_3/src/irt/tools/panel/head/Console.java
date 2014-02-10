@@ -27,6 +27,7 @@ public class Console extends JDialog {
 
 	public Console(JFrame gui, String string) {
 		super(gui, string);
+		threadsWorker.setOwner(this);
 
 		setSize(1800, 200);
 		JScrollPane contentPane = new JScrollPane();
@@ -64,6 +65,7 @@ public class Console extends JDialog {
 
 		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
 		private boolean queueIsFull;
+		private Console console;
 
 		public ThreadsWorker() {
 			queueIsFull = GuiController.getPrefs().getBoolean("is_slow", true);
@@ -99,7 +101,7 @@ public class Console extends JDialog {
 
 		public void append(String string) {
 			try {
-				if (stringQueue.size() < MAX_QUEUE_SIZE && (!queueIsFull || isAlive())) {
+				if (console!=null && stringQueue.size() < MAX_QUEUE_SIZE && (!queueIsFull || console.isVisible())) {
 					if (queueIsFull) {
 						string = "\n*** computer is very slow... Information has been lost... ***\n" + string;
 						queueIsFull = false;
@@ -116,6 +118,10 @@ public class Console extends JDialog {
 			} catch (Exception e) {
 				logger.catching(e);
 			}
+		}
+
+		public void setOwner(Console console) {
+			this.console = console;
 		}
 	}
 }

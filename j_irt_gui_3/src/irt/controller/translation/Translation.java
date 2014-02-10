@@ -83,10 +83,13 @@ public class Translation {
 		LOGGER.entry(clazz, key, defaultValue);
 		T returnValue = null;
 
+		int times = 0;
 		while(map==null)
 			synchronized (LOGGER) {
 				try {
 					Thread.sleep(10);
+					if(times>10)
+						return defaultValue;
 				} catch (InterruptedException e) {
 					LOGGER.catching(e);
 				}
@@ -184,7 +187,7 @@ public class Translation {
 	}
 
 	public static String getSelectedLanguage() {
-		return LOGGER.exit(locale.toString());
+		return LOGGER.exit(locale!=null ? locale.toString() : Locale.getDefault().toString());
 	}
 
 	public static void setFont(Font font) {

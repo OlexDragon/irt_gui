@@ -14,6 +14,7 @@ import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
+import irt.tools.panel.subpanel.RedundancyPanelDemo;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -200,7 +201,7 @@ public class DemoPanel extends Panel {
 		textField_1.setBackground(new Color(11, 23, 59));
 		textField_1.setBounds(74, 68, 127, 20);
 		controlPanel.add(textField_1);
-		
+
 		slider = new JSlider();
 		slider.setEnabled(false);
 		slider.setMinimum(0);
@@ -218,12 +219,13 @@ public class DemoPanel extends Panel {
 		slider.setBounds(234, 12, 28, 397);
 		userPanel.add(slider);
 		slider.setOrientation(SwingConstants.VERTICAL);
-		
+
 		infoPanel = new InfoPanel((LinkHeader) null);
 		infoPanel.setBounds(10, 11, 286, 104);
 		extraPanel.add(infoPanel);
-		
+
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		tabbedPane.setOpaque(false);
 		tabbedPane.setBounds(10, 123, 286, 296);
 		extraPanel.add(tabbedPane);
@@ -232,7 +234,7 @@ public class DemoPanel extends Panel {
 				new ImageIcon(IrtGui.class.getResource(
 						IrtPanel.properties.getProperty("company_logo_"+IrtPanel.companyIndex))
 				),"");
-		tabbedPane.addTab(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex), null, lblLogo, null);
+		tabbedPane.addTab(IrtPanel.properties.getProperty("tab_title_"+IrtPanel.companyIndex), lblLogo);
 
 		font = font.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));
@@ -326,10 +328,13 @@ public class DemoPanel extends Panel {
 		controlPanel.add(cbLoSelect);
 
 		NetworkPanel networkPanel = new NetworkPanel(null);
-		tabbedPane.addTab("network", null, networkPanel, null);
-		
+		tabbedPane.addTab("network", networkPanel);
+
 		AlarmsPanel alarmsPanel = new AlarmsPanel(null);
 		tabbedPane.addTab("alarms", alarmsPanel);
+
+		JPanel panel = new RedundancyPanelDemo();
+		tabbedPane.addTab("redundancy", panel);
 
 		int tabCount = tabbedPane.getTabCount();
 		for(int i=0; i<tabCount; i++){
@@ -342,7 +347,7 @@ public class DemoPanel extends Panel {
 				tabbedPane.setTabComponentAt(i, label);
 			}
 		}
-		
+
 		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 

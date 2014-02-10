@@ -12,6 +12,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.panel.DevicePanel;
@@ -28,6 +29,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -62,7 +65,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	private IrtGui gui;
 	private Console console;
-	protected UnitsContainer unitsPanel;
+	protected volatile UnitsContainer unitsPanel;
 	protected JComboBox<String> serialPortSelection;
 	protected JComboBox<KeyValue<String, String>> languageComboBox;
 	protected HeadPanel headPanel;
@@ -124,111 +127,121 @@ public abstract class GuiControllerAbstract extends Thread {
 			}
 		comPortThreadQueue.addPacketListener(new PacketListener() {
 
-			private RemoveComponent remover = new RemoveComponent(16000);
+			private Remover remover = new Remover(16000);
 
 			@Override
 			public void packetRecived(Packet packet) {
 				logger.trace(packet);
 
-				if (packet != null && packet.getHeader()!=null) {
+				if (packet != null && packet.getHeader() != null) {
 					ComPort serialPort = comPortThreadQueue.getSerialPort();
-					switch (packet.getHeader().getGroupId()) {
-					case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
-						DevicePanel unitPanel = null;
-						deviceInfo = new DeviceInfo(packet);
+					LinkHeader linkHeader = null;
+					PacketHeader header = packet.getHeader();
 
-						int type = deviceInfo.getType();
-						if(dumpControllers!=null)
-							dumpControllers.setInfo(deviceInfo);
-						switch(type){
-						case DeviceInfo.DEVICE_TYPE_L_TO_70:
-						case DeviceInfo.DEVICE_TYPE_L_TO_140:
-						case DeviceInfo.DEVICE_TYPE_70_TO_L:
-						case DeviceInfo.DEVICE_TYPE_140_TO_L:
-						case DeviceInfo.DEVICE_TYPE_L_TO_KU:
-						case DeviceInfo.DEVICE_TYPE_L_TO_C:
-						case DeviceInfo.DEVICE_TYPE_70_TO_KY:
-						case DeviceInfo.DEVICE_TYPE_KU_TO_70:
-						case DeviceInfo.DEVICE_TYPE_140_TO_KU:
-						case DeviceInfo.DEVICE_TYPE_KU_TO_140:
-							unitPanel = getConverterPanel(deviceInfo);
-							protocol = Protocol.CONVERTER;
-							break;
-						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
-						case DeviceInfo.DEVICE_TYPE_PICOBUC:
-						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
-						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
-							protocol = Protocol.LINKED;
-							unitPanel = getNewBaisPanel(((LinkedPacket)packet).getLinkHeader(), "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName(), 0, 0, 0, 0, unitsPanel.getHeight());
+					byte packetType = header.getType();
+					if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
+						remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : null);
+
+						switch (header.getGroupId()) {
+						case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
+							DevicePanel unitPanel = null;
+							deviceInfo = new DeviceInfo(packet);
+
+							int type = deviceInfo.getType();
+							if (dumpControllers != null)
+								dumpControllers.setInfo(deviceInfo);
+							switch (type) {
+							case DeviceInfo.DEVICE_TYPE_L_TO_70:
+							case DeviceInfo.DEVICE_TYPE_L_TO_140:
+							case DeviceInfo.DEVICE_TYPE_70_TO_L:
+							case DeviceInfo.DEVICE_TYPE_140_TO_L:
+							case DeviceInfo.DEVICE_TYPE_L_TO_KU:
+							case DeviceInfo.DEVICE_TYPE_L_TO_C:
+							case DeviceInfo.DEVICE_TYPE_70_TO_KY:
+							case DeviceInfo.DEVICE_TYPE_KU_TO_70:
+							case DeviceInfo.DEVICE_TYPE_140_TO_KU:
+							case DeviceInfo.DEVICE_TYPE_KU_TO_140:
+							case DeviceInfo.DEVICE_TYPE_SSPA_CONVERTER:
+								protocol = Protocol.CONVERTER;
+								break;
+							case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
+							case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
+							case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
+							case DeviceInfo.DEVICE_TYPE_SSPA:
+								protocol = Protocol.LINKED;
+								linkHeader = ((LinkedPacket) packet).getLinkHeader();
+								break;
+							default:
+								if (type > 0) {
+									JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + type + ")");
+									logger.warn("The Device is not Supported.(device Id={})", type);
+								} else
+									logger.warn("Can not connect");
+							}
+
+							if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
+								logger.trace(header);
+
+								remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : null);
+
+								unitsPanel.remove("DemoPanel");
+
+								if (protocol != Protocol.ALL && packet.getPayloads() != null && !unitsPanel.contains(linkHeader)) {
+
+									if (protocol == Protocol.CONVERTER)
+										unitPanel = getConverterPanel(deviceInfo);
+									else
+										unitPanel = getNewBaisPanel(linkHeader, deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
+
+									unitsPanel.add(unitPanel);
+
+									getSoftReleaseChecker();
+									if (softReleaseChecker != null)
+										softReleaseChecker.check(deviceInfo);
+
+									deviceInfo.setInfoPanel(unitPanel.getInfoPanel());
+									unitsPanel.revalidate();
+									unitsPanel.repaint();
+									if (headPanel != null)
+										unitPanel.addStatusChangeListener(headPanel.getStatusChangeListener());
+
+									if (dumpControllers != null)
+										dumpControllers.stop();
+									dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : null,
+											deviceInfo);
+									dumpControllers.addVlueChangeListener(headPanel.getStatusChangeListener());
+
+									StringData unitPartNumber = deviceInfo.getUnitPartNumber();
+									if (protocol == Protocol.LINKED) {
+										if (!unitPartNumber.equals("N/A")) {
+											logger.trace("protocol={}, unitPartNumber={}", protocol, unitPartNumber);
+											ProgressBar.setMinMaxValue("330", unitPartNumber.toString().substring(7, 11));
+										}
+									} else if (protocol == Protocol.CONVERTER) {
+										logger.trace(protocol);
+										ProgressBar.setMinMaxValue("-80", "120");
+									}
+								}
+
+							}
+
 							break;
 						default:
-							if(type>0){
-								JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id="+type+")");
-								logger.warn("The Device is not Supported.(device Id={})", type);
-							}else
-								logger.warn("Can not connect");
-						}
-
-						if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
-							logger.trace(packet.getHeader());
-
-							remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null);
-
-							unitsPanel.remove("DemoPanel");
-
-							if(unitPanel!=null && packet.getPayloads()!=null && unitsPanel.add(unitPanel)==unitPanel){
-
-								getSoftReleaseChecker();
-								if(softReleaseChecker!=null)
-									softReleaseChecker.check(deviceInfo);
-
-								deviceInfo.setInfoPanel(unitPanel.getInfoPanel());
-								unitsPanel.revalidate();
-								unitsPanel.repaint();
-								if(headPanel!=null)
-									unitPanel.addStatusChangeListener(headPanel.getStatusChangeListener());
-
-								if(dumpControllers!=null)
-									dumpControllers.stop();
-								dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null, deviceInfo);
-								dumpControllers.addVlueChangeListener(headPanel.getStatusChangeListener());
-
-								StringData unitPartNumber = deviceInfo.getUnitPartNumber();
-								if(protocol == Protocol.LINKED){
-									if(!unitPartNumber.equals("N/A")){
-										logger.trace("protocol={}, unitPartNumber={}", protocol, unitPartNumber);
-										ProgressBar.setMinMaxValue("330", unitPartNumber.toString().substring(7, 11));
-									}
-								}else if(protocol == Protocol.CONVERTER){
-									logger.trace(protocol);
-									ProgressBar.setMinMaxValue("-80", "120");
+							if (packetType == Packet.IRT_SLCP_PACKET_TYPE_REQUEST && serialPort.isRun()) {
+								synchronized (GuiControllerAbstract.this) {
+									GuiControllerAbstract.this.notify();
 								}
 							}
-
-						}else{
-							if(unitsPanel!=null && unitsPanel.getComponentCount()>0) {
-								synchronized (this) {
-									notify();
-								}
-							}
+							unitPanel = null;
+							// System.out.println(packet);
 						}
-
-						break;
-					default:
-						if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_REQUEST && serialPort.isRun()){
-							synchronized (GuiControllerAbstract.this) {
-								GuiControllerAbstract.this.notify();
-							}
-						}
-						unitPanel = null;
-//						System.out.println(packet);
 					}
 
-					if(unitsPanel!=null && unitsPanel.getComponentCount()>0 && unitsPanel.getComponent(DevicePanel.class)!=null)
+					if (unitsPanel != null && unitsPanel.getComponentCount() > 0 && unitsPanel.getComponent(DevicePanel.class) != null)
 						vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(true), CONNECTION));
 					else
 						vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
-				}else
+				} else
 					vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
 			}
 		});
@@ -244,7 +257,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	protected abstract DevicePanel getConverterPanel(DeviceInfo di);
-	protected abstract DevicePanel getNewBaisPanel(LinkHeader linkHeader, String text, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
+	protected abstract DevicePanel getNewBaisPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
 
 	public static ComPortThreadQueue getComPortThreadQueue() {
 		return comPortThreadQueue;
@@ -409,70 +422,118 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	// ************************************************************************************************************
-	public class RemoveComponent extends Thread {
-
+	private class Remover{
 
 		protected final Logger logger = (Logger) LogManager.getLogger();
 
 		private int waitTime;
-		private LinkHeader linkHeader;
-		private volatile boolean packetReceived;
+		private Set<LinkHeaderController> controllers = new HashSet<>();
 
-		public RemoveComponent(int waitTime) {
-			super("RemoveComponent");
-			logger.info("* Start Remove Controller. *");
-
+		public Remover(int waitTime) {
 			this.waitTime = waitTime;
-
-			int priority = getPriority();
-			if (priority > Thread.MIN_PRIORITY)
-				setPriority(priority - 1);
-			setDaemon(true);
-			start();
 		}
 
 		public void setLinkHeader(LinkHeader linkHeader) {
-			logger.entry(this.linkHeader = linkHeader);
-			gui.setConnected(true);
-			synchronized (this) {
-				logger.debug("notify();");
-				packetReceived = true;
-				notify();
+			logger.entry(linkHeader);
+
+			LinkHeaderController controller = new LinkHeaderController(linkHeader);
+			if(controllers.add(controller)){
+				controller.start();
+			}else{
+				LinkHeaderController[] lhc = new LinkHeaderController[controllers.size()];
+				controllers.toArray(lhc);
+				for (LinkHeaderController c:lhc) {
+					if (c.equals(controller)){
+						c.reset();
+					}
+				}
 			}
-			logger.exit();
+
+			logger.exit(controller);
 		}
 
-		@Override
-		public void run() {
-			logger.entry();
-			while (true) {
-				logger.trace("while entry");
+		public void update(LinkHeaderController linkHeaderController) {
+			logger.trace(linkHeaderController);
+			if(unitsPanel.remove(linkHeaderController.getLinkHeader()))
+					gui.repaint();
 
-				synchronized (this) {
-					try {
-						wait(waitTime);
-					} catch (InterruptedException e) {
-						logger.catching(e);
-					}
-				}
-				logger.trace("packetReceived={}", packetReceived);
-				if (packetReceived){
-					packetReceived = false;
-					continue;
-				}
+			controllers.remove(linkHeaderController);
 
-				gui.setConnected(false);
-				synchronized (this) {
-					if (!packetReceived && removePanel(linkHeader)) {
-						logger.trace("Remove Panel( {} )", linkHeader);
-						protocol = Protocol.ALL;
-						if (dumpControllers != null) {
-							dumpControllers.stop();
-							dumpControllers = null;
+			if(controllers.isEmpty()){
+//				protocol = Protocol.ALL;
+				if (dumpControllers != null) {
+					dumpControllers.stop();
+					dumpControllers = null;
+				}
+				softReleaseChecker = null;
+			}
+		}
+
+		//********************************************************************
+		private class LinkHeaderController extends Thread{
+			private LinkHeader linkHeader;
+			private volatile boolean reset;
+
+			public LinkHeaderController(LinkHeader linkHeader){
+				logger.entry(linkHeader);
+				this.linkHeader = linkHeader;
+				logger.exit();
+			}
+
+			@Override
+			public void run() {
+				logger.entry(linkHeader);
+				do{
+					logger.trace("while loop");
+					reset = false;
+					synchronized (this) {
+						try {
+							wait(waitTime);
+						} catch (InterruptedException e) {
+							logger.catching(e);
 						}
-						softReleaseChecker = null;
 					}
+					logger.trace("reset = {}", reset);
+
+				}while(reset);
+
+				update(this);
+				logger.exit(linkHeader);
+			}
+
+			public void reset(){
+				logger.trace("reset()");
+				reset = true;
+				synchronized (this) {
+					notify();
+					logger.trace("notify()");
 				}
+			}
+
+			public void start() {
+				int priority = getPriority();
+				if(priority>Thread.MIN_PRIORITY)
+					setPriority(priority-1);
+				setDaemon(true);
+				super.start();
+			}
+
+			@Override
+			public int hashCode() {
+				return linkHeader!=null ? linkHeader.getIntAddr() : -1;
+			}
+
+			@Override
+			public boolean equals(Object obj) {
+				return obj!=null ? obj.hashCode()==hashCode() : false;
+			}
+			@Override
+			public String toString() {
+				return "LinkHeaderController [linkHeader=" + linkHeader + "]";
+			}
+
+			public LinkHeader getLinkHeader() {
+				return linkHeader;
 			}
 		}
 	}

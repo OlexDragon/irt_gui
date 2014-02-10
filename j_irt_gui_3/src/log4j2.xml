@@ -2,7 +2,7 @@
 <Configuration>
   <Appenders>
     <Console name="STDOUT" target="SYSTEM_OUT">
-    	<PatternLayout pattern="%d [%t] %C{2} %M (%F:%L) %-5p - %m%xEx%n"/>
+    	<PatternLayout pattern="%-5p %d [%t] %C{2} %M (%F:%L) - %m%xEx%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
     </Console>
 
@@ -27,7 +27,7 @@
 
     <RollingRandomAccessFile name="log" fileName="${sys:user.home}/irt/${sys:serialNumber}/log_${sys:serialNumber}.log"
     					filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/log_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz">
-		<PatternLayout pattern="%d %m%n"/>
+		<PatternLayout pattern="%-5p %d %M (%F:%L) %m%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
 		<Policies>
 			<SizeBasedTriggeringPolicy size="500 MB" />
@@ -39,7 +39,11 @@
   <Loggers>
  	<Logger name="irt.irt_gui.IrtGui" level="WARN"/>
 
+ 	<Logger name="irt.tools.panel.UserPicobucPanel" level="WARN"/>
+ 	<Logger name="irt.tools.panel.PicobucPanel" level="WARN"/>
+
  	<Logger name="irt.tools.panel.head.HeadPanel" level="WARN"/>
+ 	<Logger name="irt.tools.panel.head.UnitsContainer" level="WARN"/>
 
  	<Logger name="irt.tools.panel.vizards.address.AddressWizard" level="WARN"/>
  	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel" level="WARN"/>
@@ -51,6 +55,7 @@
   	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="WARN"/>
 
   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="WARN"/>
+  	<Logger name="irt.tools.panel.subpanel.control.ControlPanelSSPB" level="WARN"/>
 
  	<Logger name="irt.controller.DeviceDebagController" level="WARN"/>
  	<Logger name="irt.controller.DefaultController" level="WARN"/>
@@ -59,7 +64,7 @@
  	<Logger name="irt.controller.translation.Translation" level="WARN"/>
 
  	<Logger name="irt.controller.GuiControllerAbstract" level="WARN"/>
- 	<Logger name="irt.controller.GuiControllerAbstract$RemoveComponent" level="WARN"/>
+ 	<Logger name="irt.controller.GuiControllerAbstract$Remover" level="WARN"/>
  	<Logger name="irt.controller.GuiControllerUser" level="WARN"/>
  
   	<Logger name="irt.controller.serial_port.value.getter.Getter" level="WARN"/>
@@ -71,11 +76,11 @@
       <AppenderRef ref="DumpFile" />
     </Logger>
 
-    <Logger name="comPort" level="ALL">
+    <Logger name="comPort" level="error">
       <AppenderRef ref="communication" />
     </Logger>
 
-    <Root level="WARN">
+    <Root level="error">
       <AppenderRef ref="STDOUT"/>
       <AppenderRef ref="log"/>
     </Root>

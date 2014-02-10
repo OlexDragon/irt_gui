@@ -4,7 +4,6 @@ import irt.controller.DefaultController;
 import irt.controller.GuiController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.translation.Translation;
@@ -47,68 +46,10 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
-public class RedundancyPanel extends JPanel implements Refresh{
+public class RedundancyPanel extends RedundancyPanelDemo{
 	private static final long serialVersionUID = -3045298115182952527L;
 
 	protected final Logger logger = (Logger) LogManager.getLogger();
-//	private static final String UNKNOWN = "'Unknown',";
-	private static final String STANDBY = "'Standby',";
-	private static final String ONLINE = "'Online',";
-	private static final String SET_ONLINE = "Set Online";
-
-	public enum REDUNDANCY{
-		DISABLE("Desable"),
-		ENABLE("Enable");
-		
-		private String redundancy;
-
-		private REDUNDANCY(String redundancy){
-			this.redundancy = redundancy;
-		}
-
-		@Override
-		public String toString() {
-			return redundancy;
-		}
-
-		public void setRedundancy(String redundancy) {
-			this.redundancy = redundancy;
-		}
-	}
-
-	public enum REDUNDANCY_MODE {
-		COLD_STANDBY("Cold Standby"),
-		HOT_STANDBY("Hot Standby");
-
-		private String mode;
-
-		private REDUNDANCY_MODE(String mode){
-			this.mode = mode;
-		}
-		@Override
-		public String toString() {
-			return mode;
-		}
-		public void setMode(String mode) {
-			this.mode = mode;
-		}
-	}
-
-	public enum REDUNDANCY_NAME {
-		NO_NAME(null),
-		BUC_A("BUC A"),
-		BUC_B("BUC B");
-
-		private String name;
-
-		private REDUNDANCY_NAME(String name){
-			this.name = name;
-		}
-		@Override
-		public String toString() {
-			return name;
-		}
-	}
 	private ItemListener redundancyListener;
 
 	private List<ControllerAbstract> controllers = new ArrayList<>();

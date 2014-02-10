@@ -186,17 +186,17 @@ do{
 						comPortLogger.warn("(readData=readHeader())==null");
 				}else
 					comPortLogger.warn("((isConfirmBytes()) && isFlagSequence()) = false");
-				byte[] acknowledge = getAcknowledge();
-				if(isRun())
-					writeBytes(acknowledge);
 			}else
 				setRun(false);
 }while(isComfirm && packet.getPayloads()==null && ++runTimes<3 && isRun());//if error repeat up to 3 times
 
-			if(packet.getHeader()==null || packet.getPayloads()==null && isRun())
+				if(isRun())
+					writeBytes(getAcknowledge());
+
+				if(packet.getHeader()==null || packet.getPayloads()==null && isRun())
 					packet = p;
 
-		} catch (SerialPortException e) {
+		} catch (Exception e) {
 			comPortLogger.catching(e);
 			if(timesTimeout<3){
 				timesTimeout++;
@@ -271,20 +271,26 @@ do{
 		byte[] readBytes = readBytes(ev,100);
 		this.isComfirm = readBytes!=null && readBytes[0]==Packet.FLAG_SEQUENCE && readBytes[readBytes.length-1]==Packet.FLAG_SEQUENCE;
 
+		//for converters
 		if(!this.isComfirm && readBytes!=null && linkHeader!=null && readBytes[6]==Packet.FLAG_SEQUENCE)
 					linkHeader = null;
 
 		if(this.isComfirm){
 			byte[] data = Arrays.copyOfRange(readBytes, 1, index);
-			if((linkHeader==null || new LinkHeader(data).equals(linkHeader)) && packetId==getPacketId(linkHeader!=null, data)){
+			LinkHeader lh = new LinkHeader(data);
+			if((linkHeader==null || lh.equals(linkHeader)) && packetId==getPacketId(linkHeader!=null, data)){
 				Checksum cs = new Checksum(data);
 				byte[] b = cs.getChecksumAsBytes();
 				if(b[0]==readBytes[index] && b[1]==readBytes[++index])
 					isComfirm = true;
-			}
-		}
+				else
+					comPortLogger.warn("Checksum ERROR ({})", readBytes);
+			}else
+				comPortLogger.warn("LinckHeaders are not equal (sent={}, received={}", linkHeader, lh);
+		}else
+			logger.warn("Acknowledge is wrong({})", readBytes);
 
-		return comPortLogger.exit(isComfirm);
+			return comPortLogger.exit(isComfirm);
 	}
 
 	private short getPacketId(boolean isLinked, byte[] data) {
@@ -310,15 +316,16 @@ do{
 	}
 
 	public byte[] clear() throws SerialPortException {
-		int waitTime = 20;
 		byte[] readBytes = null;
-		while(wait(1, waitTime)){
-			readBytes = super.readBytes(getInputBufferBytesCount());
-			String readBytesStr = ToHex.bytesToHex(readBytes);
-			Console.appendLn(readBytesStr, "Clear");
-			comPortLogger.info(marker,"?? clear: {}", readBytesStr);
-			if(waitTime!=100)
-				waitTime = 100;
+		if (wait(1, 20)){
+			if(isRun())
+				writeBytes(getAcknowledge());
+			do {
+				readBytes = super.readBytes(getInputBufferBytesCount());
+				String readBytesStr = ToHex.bytesToHex(readBytes);
+				Console.appendLn(readBytesStr, "Clear");
+				comPortLogger.warn(marker, "?? Clear: {}", readBytesStr);
+			} while (wait(1, 200));
 		}
 		return readBytes;
 	}
@@ -369,7 +376,7 @@ do{
 		if(hasEsc)
 			readBytes = byteStuffing(readBytes);
 
-		comPortLogger.info(marker, "<< get:{}", ToHex.bytesToHex(readBytes));
+		comPortLogger.info(marker, "<< get:{}, hasEsc={}", ToHex.bytesToHex(readBytes), hasEsc);
 
 		return readBytes;
 	}
@@ -466,6 +473,7 @@ do{
 	}
 
 	public boolean wait(int eventValue, int waitTime) throws SerialPortException {
+		comPortLogger.entry(eventValue, waitTime);
 		boolean isReady = false;
 		long start = System.currentTimeMillis();
 		long waitTimeL = waitTime*eventValue;
@@ -473,17 +481,20 @@ do{
 		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTimeL && isRun()){
 			synchronized (this) {
 
-				try { wait(waitTimeL); } catch (InterruptedException e) {
+				try {
+					wait(waitTimeL);
+				} catch (InterruptedException e) {
 					comPortLogger.catching(e);
 				}
 
-				if(isSerialPortEven)
-					isSerialPortEven = false;
+				logger.trace("isSerialPortEven={}", isSerialPortEven);
+				isSerialPortEven = false;
 			}
 		};
-		if(isSerialPortEven)
-			isSerialPortEven = false;
-		return isReady;
+
+		isSerialPortEven = false;
+
+		return comPortLogger.exit(isReady);
 	}
 
 	@Override

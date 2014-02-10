@@ -8,7 +8,6 @@ import java.awt.Component;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -38,6 +37,28 @@ public class UnitsContainer extends JPanel{
 				setLocation((Panel)componentEvent.getSource());
 			}
 		};
+	}
+
+	public boolean contains(LinkHeader linkHeader){
+		logger.entry(linkHeader);
+
+		boolean result = false;
+
+		for (Component c : getComponents()) {
+			if (c instanceof DevicePanel) {
+				LinkHeader lh = ((DevicePanel) c).getLinkHeader();
+				if (linkHeader == null) {
+					if (lh == null) {
+						result = true;
+						break;
+					}
+				} else if (linkHeader.equals(lh)) {
+					result = true;
+					break;
+				}
+			}
+		}
+		return logger.exit(result);
 	}
 
 	public boolean contains(Component component) {
@@ -137,27 +158,21 @@ public class UnitsContainer extends JPanel{
 
 	public boolean remove(LinkHeader linkHeader) {
 
-		boolean removed;
-		List<Component> components = Arrays.asList(getComponents());
-		Component componentToReamove = null;
+		boolean removed = false;
+		Component[] components = getComponents();
 
 		if(components!=null)
 			for(Component c:components){
 				if(c instanceof DevicePanel){
 					DevicePanel devicePanel = (DevicePanel)c;
-
-					if((linkHeader==null && devicePanel.getLinkHeader()==null) || (linkHeader!=null && devicePanel.getLinkHeader()!=null && devicePanel.getLinkHeader().getAddr()==linkHeader.getAddr())){
-						componentToReamove = c;
-					break;
+					LinkHeader lh = devicePanel.getLinkHeader();
+					if((linkHeader==null && lh==null) || (linkHeader!=null && lh!=null && lh.getAddr()==linkHeader.getAddr())){
+						super.remove(c);
+						removed = true;
+						break;
 					}
 				}
 			}
-
-		if(componentToReamove!=null){
-			super.remove(componentToReamove);
-			removed = true;
-		}else
-			removed = false;
 
 		return removed;
 	}
