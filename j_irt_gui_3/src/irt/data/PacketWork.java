@@ -99,14 +99,14 @@ public interface PacketWork extends Comparable<PacketWork>{
 	public static final short PACKET_NETWORK_ADDRESS = 130;
 
 
-	public static final short 	PACKET_ID_ALARMS = 140,
-								PACKET_ID_ALARMS_OWER_CURRENT		= 141,
-								PACKET_ID_ALARMS_UNDER_CURRENT		= 142,
-								PACKET_ID_ALARMS_OWER_TEMPERATURE	= 143,
-								PACKET_ID_ALARMS_PLL_OUT_OF_LOCK	= 144,
-								PACKET_ID_ALARMS_HARDWARE_FAULT		= 145,
-								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 146,
-								PACKET_ID_ALARMS_SUMMARY			= 147;
+	public static final short 	PACKET_ID_ALARMS_IDs = 140,
+								PACKET_ID_ALARMS_SUMMARY			= 141,
+								PACKET_ID_ALARMS_OWER_CURRENT		= 142,
+								PACKET_ID_ALARMS_UNDER_CURRENT		= 143,
+								PACKET_ID_ALARMS_OWER_TEMPERATURE	= 144,
+								PACKET_ID_ALARMS_PLL_OUT_OF_LOCK	= 145,
+								PACKET_ID_ALARMS_HARDWARE_FAULT		= 146,
+								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 147;
 
 	public static final short	PACKET_ID_PROTOCOL_ADDRESS	= 150;
 
@@ -116,4 +116,5 @@ public interface PacketWork extends Comparable<PacketWork>{
 	public void removeVlueChangeListener(ValueChangeListener valuechangelistener);
 	public boolean set(Packet packet);
 	public void clear();
+	public void removeVlueChangeListeners();
 }

@@ -13,8 +13,8 @@ import org.apache.logging.log4j.core.Logger;
 
 		private final Logger logger = (Logger) LogManager.getLogger();
 
-		private EventListenerList valueChangeListeners;
-		private ValueChangeEvent valueChangeEvent;
+		private volatile EventListenerList valueChangeListeners;
+		private volatile ValueChangeEvent valueChangeEvent;
 
 		public FireValue(EventListenerList valueChangeListeners, ValueChangeEvent valueChangeEvent){
 			this.valueChangeListeners = valueChangeListeners;

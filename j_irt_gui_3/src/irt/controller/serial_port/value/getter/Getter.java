@@ -27,7 +27,7 @@ public class Getter extends GetterAbstract {
 	public boolean set(Packet packet) {
 		logger.entry(packet);
 		boolean isSet = false;
-		if(packet!=null) {
+		if(isAddressEquals(packet)) {
 
 			PacketHeader cph = packet.getHeader();
 
@@ -78,7 +78,7 @@ public class Getter extends GetterAbstract {
 								logger.trace("Dump, source={}", source);
 								tmp= value+1;//I need all dumps. So tmp!=value
 								break;
-							case PacketWork.PACKET_ID_ALARMS:
+							case PacketWork.PACKET_ID_ALARMS_IDs:
 							case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
 							case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
 							case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:

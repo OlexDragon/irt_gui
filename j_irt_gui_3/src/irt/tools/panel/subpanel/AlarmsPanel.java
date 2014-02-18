@@ -320,7 +320,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			public void ancestorAdded(AncestorEvent arg0) {
 				try {
 					alarmsController = new AlarmsController(linkHeader, AlarmsPanel.this);
-					Thread t = new Thread(alarmsController, alarmsController.getName());
+					Thread t = new Thread(alarmsController);
 					int priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);

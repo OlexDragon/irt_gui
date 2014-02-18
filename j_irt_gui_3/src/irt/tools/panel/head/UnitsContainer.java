@@ -66,7 +66,7 @@ public class UnitsContainer extends JPanel{
 	}
 
 	@Override
-	public Component add(Component unitPanel) {
+	public synchronized Component add(Component unitPanel) {
 
 		if(contains(unitPanel)){
 			DevicePanel dp = (DevicePanel)getComponent(unitPanel.getClass());
@@ -95,16 +95,23 @@ public class UnitsContainer extends JPanel{
 	}
 
 	private void setLocation(Panel source) {
+		int width = (int) Math.round(source.getSize().getWidth());
 
 		shift = 0;
 		Component[] cs = getComponents();
+		Arrays.sort(cs);
 		for(Component c:cs)
 			if(c instanceof Panel){
 				Panel p = (Panel)c;
 				ComponentListener[] cls = removeComponentListeners(p);
 				
 				if(p!=source){
-					p.setThinSize();
+					if(width>=p.MAX_WIDTH)
+						p.setThinSize();
+					else if(width>=p.MID_WIDTH)
+						p.setMidSize();
+					else
+						p.setMaxSize();
 				}
 
 				p.setLocation(shift, 0);
@@ -163,14 +170,10 @@ public class UnitsContainer extends JPanel{
 
 		if(components!=null)
 			for(Component c:components){
-				if(c instanceof DevicePanel){
-					DevicePanel devicePanel = (DevicePanel)c;
-					LinkHeader lh = devicePanel.getLinkHeader();
-					if((linkHeader==null && lh==null) || (linkHeader!=null && lh!=null && lh.getAddr()==linkHeader.getAddr())){
-						super.remove(c);
-						removed = true;
-						break;
-					}
+				if(isDevicePanel(linkHeader, c)){
+					super.remove(c);
+					removed = true;
+					break;
 				}
 			}
 
@@ -210,5 +213,33 @@ public class UnitsContainer extends JPanel{
 		}catch(Exception e){
 			logger.catching(e);
 		}
+	}
+
+	public DevicePanel getDevicePanel(LinkHeader linkHeader) {
+
+		DevicePanel devicePanel = null;
+		Component[] components = getComponents();
+
+		if(components!=null)
+			for(Component c:components){
+				if(isDevicePanel(linkHeader, c)){
+					devicePanel = (DevicePanel) c;
+					break;
+				}
+			}
+
+		return devicePanel;
+	}
+
+	private boolean isDevicePanel(LinkHeader linkHeader, Component component){
+		boolean isDevicePanel = false;
+
+		if(component instanceof DevicePanel){
+			DevicePanel devicePanel = (DevicePanel)component;
+			LinkHeader lh = devicePanel.getLinkHeader();
+			isDevicePanel = (linkHeader.equals(lh));
+		}
+
+		return isDevicePanel;
 	}
 }

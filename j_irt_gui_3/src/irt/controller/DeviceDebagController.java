@@ -426,49 +426,53 @@ public class DeviceDebagController extends ControllerAbstract {
 
 		@Override
 		public void run() {
-			logger.entry();
-			int id = valueChangeEvent.getID();
+			try {
+				logger.entry();
+				int id = valueChangeEvent.getID();
 
-			GetterAbstract pw = (GetterAbstract) getPacketWork();
-			PacketThread pt = pw.getPacketThread();
-			if(id==pw.getPacketId()){
+				GetterAbstract pw = (GetterAbstract) getPacketWork();
+				PacketThread pt = pw.getPacketThread();
+				if (id == pw.getPacketId()) {
 
-				RegisterValue rv = (RegisterValue)pt.getValue();
-				RegisterValue urv = rv;
-				Object source = valueChangeEvent.getSource();
+					RegisterValue rv = (RegisterValue) pt.getValue();
+					RegisterValue urv = rv;
+					Object source = valueChangeEvent.getSource();
 
-				switch(source.getClass().getSimpleName()){
-				case "Byte":
-					logger.debug("DeviceDebagController.valueChanged: ERROR ={}", source);
-					txtField.setText("error"+source);
-					rv.setValue(null);
-					pt.preparePacket(pw.getPacketParameterHeaderCode(), rv);
-					setSend(true, false);
-					break;
-				case "RegisterValue":
-					logger.debug("DeviceDebagController.valueChanged: {}", source);
-					RegisterValue crv = (RegisterValue)source;
-					if(rv.getAddr()==crv.getAddr() && rv.getIndex()==crv.getIndex()){
-						Value unitValue = urv.getValue();
+					switch (source.getClass().getSimpleName()) {
+					case "Byte":
+						logger.debug("DeviceDebagController.valueChanged: ERROR ={}", source);
+						txtField.setText("error" + source);
+						rv.setValue(null);
+						pt.preparePacket(pw.getPacketParameterHeaderCode(), rv);
+						setSend(true, false);
+						break;
+					case "RegisterValue":
+						logger.debug("DeviceDebagController.valueChanged: {}", source);
+						RegisterValue crv = (RegisterValue) source;
+						if (rv.getAddr() == crv.getAddr() && rv.getIndex() == crv.getIndex()) {
+							Value unitValue = urv.getValue();
 
-						if(unitValue==null){
-							value.setValue(crv.getValue().getValue());
-							urv.setValue(value);
-						}else
-							value.setValue(crv.getValue().getValue());
+							if (unitValue == null) {
+								value.setValue(crv.getValue().getValue());
+								urv.setValue(value);
+							} else
+								value.setValue(crv.getValue().getValue());
 
-						setAll();
-						if(style==Style.CHECK_ALWAYS){
-							logger.debug("DeviceDebagController.valueChanged: style==Style.CHECK_ALWAYS");
-							RegisterValue tmpRV = new RegisterValue(rv);
-							tmpRV.setValue(null);
-							pt.preparePacket(pw.getPacketParameterHeaderCode(), tmpRV);
+							setAll();
+							if (style == Style.CHECK_ALWAYS) {
+								logger.debug("DeviceDebagController.valueChanged: style==Style.CHECK_ALWAYS");
+								RegisterValue tmpRV = new RegisterValue(rv);
+								tmpRV.setValue(null);
+								pt.preparePacket(pw.getPacketParameterHeaderCode(), tmpRV);
+							}
 						}
+						break;
+					default:
+						textArea.setText(source != null ? source.toString() : null);
 					}
-					break;
-				default:
-					textArea.setText(source!=null ? source.toString() : null);
 				}
+			} catch (Exception ex) {
+				logger.catching(ex);
 			}
 			logger.exit();
 		}

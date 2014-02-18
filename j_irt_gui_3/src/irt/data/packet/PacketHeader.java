@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 public class PacketHeader{
 
+//	private final Logger logger = (Logger) LogManager.getLogger();
+
 	public static final int SIZE = 7;
 	byte[] packetHeader;
 
@@ -115,7 +117,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE:
 				packetIdStr = "Unit Temperature("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_ALARMS:
+			case PacketWork.PACKET_ID_ALARMS_IDs:
 				packetIdStr = "Alarms("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
@@ -135,6 +137,9 @@ public class PacketHeader{
 				break;
 			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
 				packetIdStr = "Alarm - Summary("+packetId+")";
+				break;
+			case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
+				packetIdStr = "Redundancy Fault ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE:
 				packetIdStr = "Bias Temperature("+packetId+")";
@@ -269,6 +274,9 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
 				packetIdStr = "Redundancy Status ("+packetId+")";
 				break;
+			case PacketWork.PACKET_ID_PROTOCOL_ADDRESS:
+				packetIdStr = "Unit Address ("+packetId+")";
+				break;
 			default:
 				packetIdStr = ""+packetId;
 			}
@@ -396,5 +404,15 @@ public class PacketHeader{
 			typeStr = ""+(getType()&0xFF);
 		}
 		return typeStr;
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(packetHeader);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj!=null ? obj.hashCode()==hashCode() : false;
 	}
 }

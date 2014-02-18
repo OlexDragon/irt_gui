@@ -38,7 +38,7 @@ public class MeasurementGetter extends GetterAbstract {
 	@Override
 	public boolean set(Packet packet) {
 		boolean isSet = false;			
-		if(packet!=null){
+		if(isAddressEquals(packet)){
 			PacketHeader ph = packet.getHeader();
 			if(ph!=null){
 				short packetId = ph.getPacketId();

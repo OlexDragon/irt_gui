@@ -37,7 +37,7 @@ public class UserPicobucPanel extends DevicePanel {
 			tabbedPane = getTabbedPane();
 
 			if (getClass().equals(UserPicobucPanel.class)) {
-				JLabel lblNewLabel = new ImageLabel(new ImageIcon(IrtGui.class.getResource(IrtPanel.properties.getProperty("company_logo_" + IrtPanel.companyIndex))), "");
+				JLabel lblNewLabel = new ImageLabel(new ImageIcon(IrtGui.class.getResource(IrtPanel.PROPERTIES.getProperty("company_logo_" + IrtPanel.companyIndex))), "");
 				tabbedPane.addTab("IRT", lblNewLabel);
 			}
 
@@ -64,10 +64,10 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		Getter packetWork = new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_IDS, PacketWork.PACKET_ID_ALARMS) {
+		Getter packetWork = new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs) {
 			@Override
 			public boolean set(Packet packet) {
-				if(packet!=null && packet.getHeader().getPacketId()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE && packet.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS) {
+				if(isAddressEquals(packet) && packet.getHeader().getPacketId()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE && packet.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_IDs) {
 					byte[] buffer = packet.getPayload(0).getBuffer();
 					if(buffer!=null && buffer[buffer.length-1]==AlarmsController.REDUNDANT_FAULT)
 						showRedundant();

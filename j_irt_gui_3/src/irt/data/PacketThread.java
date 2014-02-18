@@ -77,7 +77,7 @@ public class PacketThread extends Thread {
 			for(int i=0; i< data.length; i++, index ++){
 				index = checkControlEscape(data, i, p, index);
 			}
-		
+
 			byte[] csTmp = Packet.toBytes((short)new Checksum(data).getChecksum());
 			for(int i=1; i>=0; i--, index ++)
 				index = checkControlEscape(csTmp, i, p, index);
@@ -120,7 +120,7 @@ public class PacketThread extends Thread {
 
 	@Override
 	public String toString() {
-		return "PacketThread [data=" + Arrays.toString(data) + ", packet="
+		return "PacketThread [data=" + ToHex.bytesToHex(data) + ", packet="
 				+ packet + "]";
 	}
 

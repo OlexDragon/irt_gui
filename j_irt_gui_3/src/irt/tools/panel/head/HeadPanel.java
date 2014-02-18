@@ -1,10 +1,6 @@
 package irt.tools.panel.head;
 
-import irt.controller.monitor.MonitorController;
 import irt.controller.translation.Translation;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
 import irt.data.value.StaticComponents;
 import irt.tools.label.LED;
 
@@ -82,46 +78,48 @@ public class HeadPanel extends MainPanel {
 	}
 
 	public void setPowerOn(boolean isOn) {
-		ledPowerOn.setOn(isOn);
-		if(!isOn){
-			ledMute.setOn(isOn);
-			ledAlarm.setOn(isOn);
+		if(ledPowerOn.isOn()!=isOn){
+			ledPowerOn.setOn(isOn);
+			if(!isOn){
+				ledMute.setOn(false);
+				ledAlarm.setOn(false);
+			}
 		}
 	}
-
-	public ValueChangeListener getStatusChangeListener() {
-		return new ValueChangeListener() {
-
-			@Override
-			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-
-				int id = valueChangeEvent.getID();
-				logger.trace(valueChangeEvent);
-				Object source = valueChangeEvent.getSource();
-				int status;
-
-				if(source instanceof Long){
-					status=((Long)source).intValue();
-					ledMute.setOn((status&MonitorController.MUTE)>0);
-				}else{
-					status = (int) source;
-					if(id==PacketWork.PACKET_ID_ALARMS_SUMMARY){
-						int alarmStatus = status&7;
-						if(alarmStatus>3){
-							ledAlarm.setLedColor(Color.RED);
-							ledAlarm.setOn(true);
-						}else if(alarmStatus>1){
-							ledAlarm.setLedColor(Color.YELLOW);
-							ledAlarm.setOn(true);
-						}else
-							ledAlarm.setOn(false);
-					}else{
-						ledMute.setOn((status&MonitorController.MUTE)>0);
-					}
-				}
-			}
-		};
-	}
+//
+//	public ValueChangeListener getStatusChangeListener() {
+//		return new ValueChangeListener() {
+//
+//			@Override
+//			public void valueChanged(ValueChangeEvent valueChangeEvent) {
+//
+//				int id = valueChangeEvent.getID();
+//				logger.trace(valueChangeEvent);
+//				Object source = valueChangeEvent.getSource();
+//				int status;
+//
+//				if(source instanceof Long){
+//					status=((Long)source).intValue();
+//					ledMute.setOn((status&MonitorController.MUTE)>0);
+//				}else{
+//					status = (int) source;
+//					if(id==PacketWork.PACKET_ID_ALARMS_SUMMARY){
+//						int alarmStatus = status&7;
+//						if(alarmStatus>3){
+//							ledAlarm.setLedColor(Color.RED);
+//							ledAlarm.setOn(true);
+//						}else if(alarmStatus>1){
+//							ledAlarm.setLedColor(Color.YELLOW);
+//							ledAlarm.setOn(true);
+//						}else
+//							ledAlarm.setOn(false);
+//					}else{
+//						ledMute.setOn((status&MonitorController.MUTE)>0);
+//					}
+//				}
+//			}
+//		};
+//	}
 
 	public void refresh() {
 
@@ -129,7 +127,6 @@ public class HeadPanel extends MainPanel {
 
 			@Override
 			protected String doInBackground() throws Exception {
-				Thread.currentThread().setName("HeadPanel.ledPowerOn.setText");
 				return Translation.getValue(String.class, "power_on", "POWER ON");
 			}
 
@@ -147,7 +144,6 @@ public class HeadPanel extends MainPanel {
 
 			@Override
 			protected String doInBackground() throws Exception {
-				Thread.currentThread().setName("HeadPanel.ledAlarm.setText");
 				return Translation.getValue(String.class, "alarm", "ALARM");
 			}
 
@@ -165,7 +161,6 @@ public class HeadPanel extends MainPanel {
 
 			@Override
 			protected String doInBackground() throws Exception {
-				Thread.currentThread().setName("HeadPanel.ledMute.setText");
 				return Translation.getValue(String.class, "mute", "MUTE");
 			}
 
@@ -190,7 +185,6 @@ public class HeadPanel extends MainPanel {
 
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName("HeadPanel.ledPowerOn.setBounds");
 				return Translation.getValue(Rectangle.class, "headPanel.led_powerOn_bounds", new Rectangle());
 			}
 
@@ -207,7 +201,6 @@ public class HeadPanel extends MainPanel {
 
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName("HeadPanel.ledAlarm.setBounds");
 				return Translation.getValue(Rectangle.class, "headPanel.led_alarm_bounds", new Rectangle());
 			}
 
@@ -224,7 +217,6 @@ public class HeadPanel extends MainPanel {
 
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName("HeadPanel.ledMute.setBounds");
 				return Translation.getValue(Rectangle.class, "headPanel.led_mute_bounds", new Rectangle());
 			}
 
@@ -241,7 +233,6 @@ public class HeadPanel extends MainPanel {
 
 			@Override
 			protected Font doInBackground() throws Exception {
-				Thread.currentThread().setName("HeadPanel.setFont");
 				logger.entry();
 				return logger.exit(Translation.getFont());
 			}
@@ -258,5 +249,17 @@ public class HeadPanel extends MainPanel {
 				}
 			}
 		}.execute();
+	}
+
+	public void setAlarm(boolean isOn) {
+		ledAlarm.setOn(isOn);
+	}
+
+	public void setAlarmColor(Color color) {
+		ledAlarm.setLedColor(color);
+	}
+
+	public void setMute(boolean isMute) {
+		ledMute.setOn(isMute);
 	}
 }

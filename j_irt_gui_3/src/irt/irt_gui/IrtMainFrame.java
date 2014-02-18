@@ -23,11 +23,11 @@ public abstract class IrtMainFrame extends JFrame {
 	protected GuiControllerAbstract guiController;
 
 	public IrtMainFrame(int width, int hight) {
-		super(IrtPanel.properties.getProperty("company_name_"+IrtPanel.companyIndex));
+		super(IrtPanel.PROPERTIES.getProperty("company_name_"+IrtPanel.companyIndex));
 		setSize(width, hight);
 		ImageIcon imageIcon = new ImageIcon(
 				IrtGui.class.getResource(
-						IrtPanel.properties.get("company_logo_"+IrtPanel.companyIndex).toString()));
+						IrtPanel.PROPERTIES.get("company_logo_"+IrtPanel.companyIndex).toString()));
 		setIconImage(imageIcon.getImage());
  
         Color transparent = new Color(0,true);

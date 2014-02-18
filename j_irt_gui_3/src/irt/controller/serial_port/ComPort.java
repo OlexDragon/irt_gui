@@ -45,6 +45,8 @@ public class ComPort extends SerialPort {
 	private boolean isSerialPortEven;
 	private boolean isComfirm;
 
+	private boolean logged = false;
+
 	public ComPort(String portName) {
 		super(portName);
 
@@ -132,7 +134,6 @@ do{
 							break;
 						}
 
-					Console.appendLn("", "Header ");
 					if((readData=readHeader())!=null) {
 						if(checksum!=null)
 							checksum.add(readData);
@@ -145,7 +146,6 @@ do{
 							packet.setHeader(packetHeader);
 							payloadsList = new ArrayList<>();
 
-							Console.appendLn("", "Parameter Header ");
 							while ((readData = readParameterHeader())!=null && isRun()) {
 
 								if (containsFlagSequence(readData)) {
@@ -184,14 +184,18 @@ do{
 							comPortLogger.warn("packetHeader.asBytes() == null || packetHeader.getGroupId()!=groupId");
 					}else
 						comPortLogger.warn("(readData=readHeader())==null");
-				}else
-					comPortLogger.warn("((isConfirmBytes()) && isFlagSequence()) = false");
+				}else if(!logged){
+					comPortLogger.warn("isFlagSequence() = false");
+				}
 			}else
 				setRun(false);
 }while(isComfirm && packet.getPayloads()==null && ++runTimes<3 && isRun());//if error repeat up to 3 times
 
-				if(isRun())
-					writeBytes(getAcknowledge());
+				if(isRun()) {
+					byte[] acknowledge = getAcknowledge();
+					writeBytes(acknowledge);
+					comPortLogger.info(marker, "acknowledge={}", ToHex.bytesToHex(acknowledge));
+				}
 
 				if(packet.getHeader()==null || packet.getPayloads()==null && isRun())
 					packet = p;
@@ -215,6 +219,7 @@ do{
 	}
 
 	private byte[] getAcknowledge() {
+		logger.entry();
 		byte[] b;
 
 		if(linkHeader!=null)
@@ -228,7 +233,7 @@ do{
 		byte[] packetId = Packet.toBytes(this.packetId);
 		System.arraycopy(packetId, 0, b, ++idPosition, 2);
 
-		return PacketThread.preparePacket(b);
+		return logger.exit(PacketThread.preparePacket(b));
 	}
 
 	private byte[] readLinkHeader() throws SerialPortException {
@@ -264,6 +269,7 @@ do{
 
 	private boolean isConfirmBytes() throws SerialPortException {
 
+
 		boolean isComfirm = false;
 		int ev = linkHeader!=null ? 11 : 7;
 		int index = ev - 3;
@@ -284,13 +290,16 @@ do{
 				if(b[0]==readBytes[index] && b[1]==readBytes[++index])
 					isComfirm = true;
 				else
-					comPortLogger.warn("Checksum ERROR ({})", readBytes);
+					comPortLogger.warn("Checksum ERROR ({})", ToHex.bytesToHex(readBytes));
 			}else
 				comPortLogger.warn("LinckHeaders are not equal (sent={}, received={}", linkHeader, lh);
-		}else
-			logger.warn("Acknowledge is wrong({})", readBytes);
+		}else if(!logged){
+			comPortLogger.warn("Acknowledge is wrong({})", ToHex.bytesToHex(readBytes));
+		}
 
-			return comPortLogger.exit(isComfirm);
+		logged = readBytes==null || !isComfirm;
+
+		return comPortLogger.exit(isComfirm);
 	}
 
 	private short getPacketId(boolean isLinked, byte[] data) {
@@ -311,15 +320,22 @@ do{
 	}
 
 	@Override
-	protected void finalize() throws Throwable {
-		closePort();
+	protected void finalize(){
+		try {
+			closePort();
+		} catch (SerialPortException e) {
+			logger.catching(e);
+		}
 	}
 
 	public byte[] clear() throws SerialPortException {
 		byte[] readBytes = null;
 		if (wait(1, 20)){
-			if(isRun())
-				writeBytes(getAcknowledge());
+			if(isRun()) {
+				byte[] acknowledge = getAcknowledge();
+				writeBytes(acknowledge);
+				comPortLogger.info(marker, "acknowledge={}", ToHex.bytesToHex(acknowledge));
+			}
 			do {
 				readBytes = super.readBytes(getInputBufferBytesCount());
 				String readBytesStr = ToHex.bytesToHex(readBytes);

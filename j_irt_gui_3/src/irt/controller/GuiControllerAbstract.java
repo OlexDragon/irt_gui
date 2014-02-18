@@ -1,10 +1,13 @@
 package irt.controller;
 
+import irt.controller.monitor.MonitorController;
 import irt.controller.serial_port.ComPort;
 import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
+import irt.data.PacketWork;
 import irt.data.StringData;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
@@ -13,13 +16,16 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.panel.DevicePanel;
 import irt.tools.panel.head.Console;
 import irt.tools.panel.head.HeadPanel;
+import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
+import irt.tools.panel.wizards.address.AddressWizard;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -29,8 +35,13 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -48,7 +59,9 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
 
-	public static final int CONNECTION = 1;
+	public static final int CONNECTION	= 1;
+	public static final int ALARM		= 2;
+	public static final int MUTE		= 3;
 
 	protected static final String SERIAL_PORT = "serialPort";
 
@@ -71,12 +84,96 @@ public abstract class GuiControllerAbstract extends Thread {
 	protected HeadPanel headPanel;
 
 	protected VCLC vclc =  new VCLC();
-	protected static DumpControllers dumpControllers;
 	protected SoftReleaseChecker softReleaseChecker = getSoftReleaseChecker();
 	protected Protocol protocol = Protocol.ALL;
-	private static DeviceInfo deviceInfo;
+
+	private Remover remover = new Remover(16000);
+
+	private static Map<LinkHeader, DeviceInfo>  deviceInfos = new HashMap<>();
+	public Map<LinkHeader, Boolean> mutes = new HashMap<>();
+	public Map<LinkHeader, Integer> alarms = new HashMap<>();
 
 	private byte address;
+
+	private PacketListener packetListener = new PacketListener() {
+
+		private boolean powerIsOff;
+
+		@Override
+		public void packetRecived(Packet packet) {
+			logger.trace(packet);
+
+			if (packet != null && packet.getHeader() != null) {
+				PacketHeader header = packet.getHeader();
+
+				byte packetType = header.getType();
+				if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
+					remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : null);
+
+					DeviceInfo deviceInfo;
+					switch (header.getGroupId()) {
+					case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
+						deviceInfo = new DeviceInfo(packet);
+
+						int type = deviceInfo.getType();
+						switch (type) {
+						case DeviceInfo.DEVICE_TYPE_L_TO_70:
+						case DeviceInfo.DEVICE_TYPE_L_TO_140:
+						case DeviceInfo.DEVICE_TYPE_70_TO_L:
+						case DeviceInfo.DEVICE_TYPE_140_TO_L:
+						case DeviceInfo.DEVICE_TYPE_L_TO_KU:
+						case DeviceInfo.DEVICE_TYPE_L_TO_C:
+						case DeviceInfo.DEVICE_TYPE_70_TO_KY:
+						case DeviceInfo.DEVICE_TYPE_KU_TO_70:
+						case DeviceInfo.DEVICE_TYPE_140_TO_KU:
+						case DeviceInfo.DEVICE_TYPE_KU_TO_140:
+						case DeviceInfo.DEVICE_TYPE_SSPA_CONVERTER:
+							protocol = Protocol.CONVERTER;
+							break;
+						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
+						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
+						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
+						case DeviceInfo.DEVICE_TYPE_SSPA:
+							protocol = Protocol.LINKED;
+							break;
+						default:
+							if (type > 0) {
+								JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + type + ")");
+								logger.warn("The Device is not Supported.(device Id={})", type);
+							} else
+								logger.warn("Can not connect");
+						}
+
+						if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
+							new PanelWorker(protocol, packet, deviceInfo);
+						break;
+					case Packet.IRT_SLCP_PACKET_ID_ALARM:
+						if(header.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY && header.getOption()==0) 
+							new AlarmWorker(packet);
+						break;
+					case Packet.IRT_SLCP_PACKET_ID_MEASUREMENT:
+						if(header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS && header.getOption()==0) 
+							new MeasurementWorker(packet);
+						
+						break;
+					}
+				}
+
+				boolean powerIsOff = remover.controllers.isEmpty();
+				if (this.powerIsOff != powerIsOff){
+
+					if(powerIsOff)
+						vclc.fireValueChangeListener(new ValueChangeEvent(false, CONNECTION));
+					else
+						vclc.fireValueChangeListener(new ValueChangeEvent(true, CONNECTION));
+
+					this.powerIsOff = powerIsOff;
+				}
+
+			} else
+				vclc.fireValueChangeListener(new ValueChangeEvent(false, CONNECTION));
+		}
+	};
 
 	@SuppressWarnings("unchecked")
 	public GuiControllerAbstract(String threadName, IrtGui gui) {
@@ -84,6 +181,7 @@ public abstract class GuiControllerAbstract extends Thread {
 		this.gui = gui;
 
 		address = (byte) prefs.getInt("address", 254);
+		setRedundancy();
 
 		comPortThreadQueue.setSerialPort(new ComPort(prefs.get(SERIAL_PORT, "COM1")));
 		console = new Console(gui, "Console");
@@ -112,7 +210,7 @@ public abstract class GuiControllerAbstract extends Thread {
 				}
 			case "IrtPanel":
 				c.addMouseListener(new MouseListener() {
-					
+
 					@Override
 					public void mouseReleased(MouseEvent e) {
 						int modifiers = e.getModifiers();
@@ -125,131 +223,44 @@ public abstract class GuiControllerAbstract extends Thread {
 					@Override public void mouseClicked(MouseEvent e) {}
 				});
 			}
-		comPortThreadQueue.addPacketListener(new PacketListener() {
-
-			private Remover remover = new Remover(16000);
-
-			@Override
-			public void packetRecived(Packet packet) {
-				logger.trace(packet);
-
-				if (packet != null && packet.getHeader() != null) {
-					ComPort serialPort = comPortThreadQueue.getSerialPort();
-					LinkHeader linkHeader = null;
-					PacketHeader header = packet.getHeader();
-
-					byte packetType = header.getType();
-					if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
-						remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : null);
-
-						switch (header.getGroupId()) {
-						case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
-							DevicePanel unitPanel = null;
-							deviceInfo = new DeviceInfo(packet);
-
-							int type = deviceInfo.getType();
-							if (dumpControllers != null)
-								dumpControllers.setInfo(deviceInfo);
-							switch (type) {
-							case DeviceInfo.DEVICE_TYPE_L_TO_70:
-							case DeviceInfo.DEVICE_TYPE_L_TO_140:
-							case DeviceInfo.DEVICE_TYPE_70_TO_L:
-							case DeviceInfo.DEVICE_TYPE_140_TO_L:
-							case DeviceInfo.DEVICE_TYPE_L_TO_KU:
-							case DeviceInfo.DEVICE_TYPE_L_TO_C:
-							case DeviceInfo.DEVICE_TYPE_70_TO_KY:
-							case DeviceInfo.DEVICE_TYPE_KU_TO_70:
-							case DeviceInfo.DEVICE_TYPE_140_TO_KU:
-							case DeviceInfo.DEVICE_TYPE_KU_TO_140:
-							case DeviceInfo.DEVICE_TYPE_SSPA_CONVERTER:
-								protocol = Protocol.CONVERTER;
-								break;
-							case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
-							case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
-							case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
-							case DeviceInfo.DEVICE_TYPE_SSPA:
-								protocol = Protocol.LINKED;
-								linkHeader = ((LinkedPacket) packet).getLinkHeader();
-								break;
-							default:
-								if (type > 0) {
-									JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + type + ")");
-									logger.warn("The Device is not Supported.(device Id={})", type);
-								} else
-									logger.warn("Can not connect");
-							}
-
-							if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
-								logger.trace(header);
-
-								remover.setLinkHeader(packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : null);
-
-								unitsPanel.remove("DemoPanel");
-
-								if (protocol != Protocol.ALL && packet.getPayloads() != null && !unitsPanel.contains(linkHeader)) {
-
-									if (protocol == Protocol.CONVERTER)
-										unitPanel = getConverterPanel(deviceInfo);
-									else
-										unitPanel = getNewBaisPanel(linkHeader, deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
-
-									unitsPanel.add(unitPanel);
-
-									getSoftReleaseChecker();
-									if (softReleaseChecker != null)
-										softReleaseChecker.check(deviceInfo);
-
-									deviceInfo.setInfoPanel(unitPanel.getInfoPanel());
-									unitsPanel.revalidate();
-									unitsPanel.repaint();
-									if (headPanel != null)
-										unitPanel.addStatusChangeListener(headPanel.getStatusChangeListener());
-
-									if (dumpControllers != null)
-										dumpControllers.stop();
-									dumpControllers = new DumpControllers(unitsPanel, packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : null,
-											deviceInfo);
-									dumpControllers.addVlueChangeListener(headPanel.getStatusChangeListener());
-
-									StringData unitPartNumber = deviceInfo.getUnitPartNumber();
-									if (protocol == Protocol.LINKED) {
-										if (!unitPartNumber.equals("N/A")) {
-											logger.trace("protocol={}, unitPartNumber={}", protocol, unitPartNumber);
-											ProgressBar.setMinMaxValue("330", unitPartNumber.toString().substring(7, 11));
-										}
-									} else if (protocol == Protocol.CONVERTER) {
-										logger.trace(protocol);
-										ProgressBar.setMinMaxValue("-80", "120");
-									}
-								}
-
-							}
-
-							break;
-						default:
-							if (packetType == Packet.IRT_SLCP_PACKET_TYPE_REQUEST && serialPort.isRun()) {
-								synchronized (GuiControllerAbstract.this) {
-									GuiControllerAbstract.this.notify();
-								}
-							}
-							unitPanel = null;
-							// System.out.println(packet);
-						}
-					}
-
-					if (unitsPanel != null && unitsPanel.getComponentCount() > 0 && unitsPanel.getComponent(DevicePanel.class) != null)
-						vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(true), CONNECTION));
-					else
-						vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
-				} else
-					vclc.fireValueChangeListener(new ValueChangeEvent(new Boolean(false), CONNECTION));
-			}
-		});
+		comPortThreadQueue.addPacketListener(packetListener);
 	}
 
 
-	public static DeviceInfo getDeviceInfo() {
-		return deviceInfo;
+	private void setRedundancy() {
+		String addresses = null;
+		String lastModified = null;
+		String prefsLastModified = prefs.get("lastModified", null);
+
+		Properties p = IrtPanel.PROPERTIES;
+		for (Object s : p.keySet()) {
+			String str = (String) s;
+			if (str.equalsIgnoreCase("addresses"))
+				addresses = p.getProperty(str);
+			else if (str.equals("lastModified")) {
+				lastModified = p.getProperty("lastModified");
+			}
+		}
+
+		if (prefsLastModified != null ? !prefsLastModified.equals(lastModified) : lastModified != null) {
+
+			if(lastModified==null)
+				prefs.remove("lastModified");
+			else
+				prefs.put("lastModified", lastModified);
+			logger.error("Addresses={}", addresses);
+
+			if (addresses == null)
+				prefs.remove(AddressWizard.REDUNDANCY_ADDRESSES);
+			else if (addresses.isEmpty())
+				prefs.put(AddressWizard.REDUNDANCY_ADDRESSES, AddressWizard.REDUNDANCY_DEFAULT_ADDRESSES);
+			else
+				prefs.put(AddressWizard.REDUNDANCY_ADDRESSES, addresses);
+		}
+	}
+
+	public static DeviceInfo getDeviceInfo(LinkHeader linkHeader) {
+		return deviceInfos.get(linkHeader);
 	}
 
 	protected SoftReleaseChecker getSoftReleaseChecker() {
@@ -333,20 +344,11 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 
-	public static DumpControllers getDumpControllers() {
-		return dumpControllers;
-	}
-
 	protected void setSerialPort() {
 		setSerialPort(serialPortSelection.getSelectedItem().toString());
 	}
 
 	protected void setSerialPort(String serialPortName) {
-
-		if (dumpControllers != null) {
-			dumpControllers.stop();
-			dumpControllers = null;
-		}
 
 		if (serialPortName == null || serialPortName.isEmpty())
 			try {
@@ -371,6 +373,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		logger.debug("reset();");
 		comPortThreadQueue.clear();
+		gui.setConnected(false);
 
 		if (unitsPanel != null) {
 			unitsPanel.removeAll();
@@ -411,6 +414,77 @@ public abstract class GuiControllerAbstract extends Thread {
 		reset();
 	}
 
+	protected boolean isSerialPortSet(){
+		boolean set = false;
+		if (serialPortSelection != null) {
+			Object selectedItem = serialPortSelection.getSelectedItem();
+			if (selectedItem != null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString())) {
+				set = true;
+			}
+		}
+		return set;
+	}
+
+	protected void getConverterInfo() {
+		if(protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL ) || protocol.equals(Protocol.CONVERTER))
+			comPortThreadQueue.add(new DeviceInfoGetter() {
+				@Override
+				public Integer getPriority() {
+					return 10001;
+				}
+			});
+	}
+
+	protected void getUnitInfo() {
+		if (protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL ) || protocol.equals(Protocol.LINKED)) {
+
+			Set<Byte> addresses = getAddresses(address);
+
+			for(Byte b:addresses.toArray(new Byte[addresses.size()])){
+				DeviceInfoGetter packetWork = new DeviceInfoGetter(new LinkHeader(b, (byte) 0, (short) 0)) {
+					@Override
+					public Integer getPriority() {
+						return 10000;
+					}
+				};
+				logger.trace(packetWork);
+				comPortThreadQueue.add(packetWork);
+			}
+		}
+	}
+
+
+	public static Set<Byte> getAddresses(Byte addtess) {
+		String addressesStr = prefs.get(AddressWizard.REDUNDANCY_ADDRESSES, null);
+		Set<Byte> addresses = new HashSet<>();
+		if(addtess!=null)
+			addresses.add(addtess);
+		if(addressesStr!=null){
+			addressesStr = addressesStr.replaceAll("\\D+", ",");
+			String[] split = addressesStr.split(",");
+
+			for(String s:split)
+				if(!s.isEmpty()) {
+					int parseInt = Integer.parseInt(s);
+					addresses.add((byte) parseInt);
+				}
+		}
+
+		if(addresses.isEmpty())
+			addresses.add((byte) IrtGui.DEFAULT_ADDRESS);
+
+		return addresses;
+	}
+
+	public LinkHeader getLinkHeader(Packet packet) {
+		LinkHeader linkHeader;
+		if (packet instanceof LinkedPacket) {
+			linkHeader = ((LinkedPacket) packet).getLinkHeader();
+		}else
+			linkHeader = new LinkHeader((byte)0, (byte)0, (short) 0);
+		return linkHeader;
+	}
+
 	// ***********************************************************************
 	protected class VCLC extends ValueChangeListenerClass {
 
@@ -424,13 +498,100 @@ public abstract class GuiControllerAbstract extends Thread {
 	// ************************************************************************************************************
 	private class Remover{
 
-		protected final Logger logger = (Logger) LogManager.getLogger();
-
 		private int waitTime;
-		private Set<LinkHeaderController> controllers = new HashSet<>();
+		private volatile Set<LinkHeaderController> controllers = new HashSet<>();
+		private Map<LinkHeader, String> serialNumbers = new TreeMap<>();
 
 		public Remover(int waitTime) {
 			this.waitTime = waitTime;
+		}
+
+		public boolean isMute(Packet packet) {
+			LinkHeaderController controller = getController(getLinkHeader(packet));
+			return controller!=null ? controller.isMute() : true;
+		}
+
+		private LinkHeaderController getController(LinkHeader linkHeader) {
+			LinkHeaderController controller = null;
+
+			LinkHeaderController[] controllers = getControllers();
+			for(LinkHeaderController c:controllers){
+				LinkHeader lh = c.getLinkHeader();
+				if(lh.equals(linkHeader))
+					controller = c;
+			}
+
+			return controller;
+		}
+
+		public boolean isMute() {
+			boolean isMute = false;
+			for(Iterator<LinkHeaderController> i = controllers.iterator(); i.hasNext();){
+				boolean m = i.next().isMute();
+				if(m==true){
+					isMute = true;
+					break;
+				}
+			}
+			return isMute;
+		}
+
+		public void setMute(Packet packet) {
+			if(packet!=null){
+				PacketHeader header = packet.getHeader();
+
+				if (header != null && header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS && header.getOption()==0) {
+
+					Payload payload = packet.getPayload(0);
+					if (payload != null) {
+						LinkHeader linkHeader = getLinkHeader(packet);
+
+						for (LinkHeaderController c : getControllers()) {
+							LinkHeader lh = c.getLinkHeader();
+							if (linkHeader.equals(lh)) {
+								c.setMute((payload.getInt(0)&MonitorController.MUTE)>0);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		public LinkHeaderController[] getControllers() {
+			LinkHeaderController[] lhc = new LinkHeaderController[controllers.size()];
+			controllers.toArray(lhc);
+			return lhc;
+		}
+
+		public int getAlarm() {
+			int alarm = 0;
+			for(Iterator<LinkHeaderController> i = controllers.iterator(); i.hasNext();){
+				int a = i.next().getAlarm();
+				if(alarm<a)
+					alarm = a;
+			}
+			return alarm;
+		}
+
+		public void setAlarm(Packet packet) {
+			if(packet!=null){
+				PacketHeader header = packet.getHeader();
+
+				if (header != null && header.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY && header.getOption()==0) {
+
+					Payload payload = packet.getPayload(0);
+					if (payload != null) {
+						LinkHeader linkHeader = getLinkHeader(packet);
+
+						for (LinkHeaderController c : getControllers()) {
+							LinkHeader lh = c.getLinkHeader();
+							if (linkHeader.equals(lh)) {
+								c.setAlarm(payload.getInt(0)&7);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		public void setLinkHeader(LinkHeader linkHeader) {
@@ -439,10 +600,9 @@ public abstract class GuiControllerAbstract extends Thread {
 			LinkHeaderController controller = new LinkHeaderController(linkHeader);
 			if(controllers.add(controller)){
 				controller.start();
+				gui.setConnected(true);
 			}else{
-				LinkHeaderController[] lhc = new LinkHeaderController[controllers.size()];
-				controllers.toArray(lhc);
-				for (LinkHeaderController c:lhc) {
+				for (LinkHeaderController c:getControllers()) {
 					if (c.equals(controller)){
 						c.reset();
 					}
@@ -458,21 +618,41 @@ public abstract class GuiControllerAbstract extends Thread {
 					gui.repaint();
 
 			controllers.remove(linkHeaderController);
+			serialNumbers.remove(linkHeaderController.getLinkHeader());
 
 			if(controllers.isEmpty()){
+				gui.setConnected(false);
 //				protocol = Protocol.ALL;
-				if (dumpControllers != null) {
-					dumpControllers.stop();
-					dumpControllers = null;
-				}
 				softReleaseChecker = null;
 			}
 		}
 
-		//********************************************************************
-		private class LinkHeaderController extends Thread{
+		public void setSerialNumbers(LinkHeader linkHeader, StringData serialNumber) {
+			if(serialNumber!=null) {
+				String sn = serialNumber.toString();
+				String oldSerialNumber = serialNumbers.put(linkHeader, sn);
+				if (!sn.equals(oldSerialNumber)) {
+					String fileName = null;
+					for (LinkHeader l : serialNumbers.keySet()) {
+						if (fileName == null)
+							fileName = serialNumbers.get(l);
+						else
+							fileName += "_" + serialNumbers.get(l);
+					}
+
+					DumpControllers.setSysSerialNumber(fileName);
+				}
+			}
+
+		}
+
+		// ********************************************************************
+		private class LinkHeaderController extends Thread {
 			private LinkHeader linkHeader;
 			private volatile boolean reset;
+			protected DumpControllers dumpControllers;
+			private int alarm;
+			private boolean isMute;
 
 			public LinkHeaderController(LinkHeader linkHeader){
 				logger.entry(linkHeader);
@@ -480,9 +660,15 @@ public abstract class GuiControllerAbstract extends Thread {
 				logger.exit();
 			}
 
+			public void setMute(boolean isMute) {
+				this.isMute = isMute;
+			}
+
 			@Override
 			public void run() {
+				dumpControllers = new DumpControllers(unitsPanel, linkHeader);
 				logger.entry(linkHeader);
+
 				do{
 					logger.trace("while loop");
 					reset = false;
@@ -497,6 +683,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 				}while(reset);
 
+				dumpControllers.stop();
 				update(this);
 				logger.exit(linkHeader);
 			}
@@ -535,6 +722,143 @@ public abstract class GuiControllerAbstract extends Thread {
 			public LinkHeader getLinkHeader() {
 				return linkHeader;
 			}
+
+			public int getAlarm() {
+				return alarm;
+			}
+
+			public void setAlarm(int alarm) {
+				this.alarm = alarm;
+			}
+
+			public boolean isMute() {
+				return isMute;
+			}
 		}
+	}
+
+	private class AlarmWorker extends Thread{
+
+		private Packet packet;
+
+		public AlarmWorker(Packet packet) {
+			this.packet = packet;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			setDaemon(true);
+			start();
+		}
+
+		@Override
+		public void run() {
+			remover.setAlarm(packet);
+			int alarm = remover.getAlarm();
+			LinkHeader linkHeader = getLinkHeader(packet);
+			Integer integer = alarms.get(linkHeader);
+
+			if(integer==null || integer!=alarm){
+				vclc.fireValueChangeListener(new ValueChangeEvent(alarm, ALARM));
+				DevicePanel unitPanel = unitsPanel.getDevicePanel(packet instanceof LinkedPacket ? linkHeader : null);
+				if(unitPanel!=null){
+					unitPanel.setAlarm(remover.getController(linkHeader).getAlarm());
+					alarms.put(linkHeader, alarm);
+				}
+			}
+		}
+
+	}
+
+	private class MeasurementWorker extends Thread{
+
+		private Packet packet;
+
+		public MeasurementWorker(Packet packet) {
+			this.packet = packet;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			setDaemon(true);
+			start();
+		}
+
+		@Override
+		public void run() {
+			remover.setMute(packet);
+			boolean isMute = remover.isMute();
+			
+			LinkHeader linkHeader = getLinkHeader(packet);
+			Boolean get = mutes.get(linkHeader);
+			if(get==null || get!=isMute){
+				vclc.fireValueChangeListener(new ValueChangeEvent(isMute, MUTE));
+				mutes.put(linkHeader, isMute);
+			}
+			DevicePanel unitPanel = unitsPanel.getDevicePanel(packet instanceof LinkedPacket ? linkHeader : null);
+			unitPanel.setMute(remover.isMute(packet));
+		}
+	}
+
+	public class PanelWorker extends Thread {
+
+		private Protocol protocol;
+		private Packet packet;
+		private DeviceInfo deviceInfo;
+
+		public PanelWorker(Protocol protocol, Packet packet, DeviceInfo deviceInfo) {
+			this.protocol = protocol;
+			this.packet = packet;
+			this.deviceInfo = deviceInfo;
+			int priority = getPriority();
+			if(priority>Thread.MIN_PRIORITY)
+				setPriority(priority-1);
+			setDaemon(true);
+			start();
+		}
+
+		@Override
+		public void run() {
+			LinkHeader linkHeader = ((LinkedPacket) packet).getLinkHeader();
+
+			if(deviceInfo!=null)
+				deviceInfos.put(linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0), deviceInfo);
+
+			remover.setLinkHeader(packet instanceof LinkedPacket ? linkHeader : null);
+
+			unitsPanel.remove("DemoPanel");
+
+			if (protocol != Protocol.ALL && packet.getPayloads() != null && !unitsPanel.contains(linkHeader)) {
+				GuiControllerAbstract.this.gui.setConnected(true);
+
+				remover.setSerialNumbers(linkHeader, deviceInfo.getSerialNumber()); ;
+
+				DevicePanel unitPanel;
+				if (protocol == Protocol.CONVERTER)
+					unitPanel = getConverterPanel(deviceInfo);
+				else
+					unitPanel = getNewBaisPanel(linkHeader, deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
+
+				unitsPanel.add(unitPanel);
+
+				getSoftReleaseChecker();
+				if (softReleaseChecker != null)
+					softReleaseChecker.check(deviceInfo);
+
+				deviceInfo.setInfoPanel(unitPanel.getInfoPanel());
+				unitsPanel.revalidate();
+				unitsPanel.repaint();
+
+				StringData unitPartNumber = deviceInfo.getUnitPartNumber();
+				if (protocol == Protocol.LINKED) {
+					if (!unitPartNumber.equals("N/A")) {
+						logger.trace("protocol={}, unitPartNumber={}", protocol, unitPartNumber);
+						ProgressBar.setMinMaxValue("330", unitPartNumber.toString().substring(7, 11));
+					}
+				} else if (protocol == Protocol.CONVERTER) {
+					logger.trace(protocol);
+					ProgressBar.setMinMaxValue("-80", "120");
+				}
+			}
+		}
+
 	}
 }

@@ -1,15 +1,12 @@
 package irt.tools.panel;
 
+import irt.controller.AlarmsController;
 import irt.controller.GuiController;
-import irt.controller.monitor.MonitorController;
 import irt.data.DeviceInfo;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.label.LED;
-import irt.tools.label.VarticalLabel;
 import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
@@ -20,7 +17,6 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.HeadlessException;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
@@ -41,7 +37,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
 @SuppressWarnings("serial")
-public class DevicePanel extends Panel {
+public class DevicePanel extends Panel implements Comparable<DevicePanel>{
+
+	private static final Color WARNING_COLOR = new Color(255, 204, 102);
 
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
@@ -67,6 +65,10 @@ public class DevicePanel extends Panel {
 
 	private int deviceType;
 
+	private int alarm;
+
+	private boolean isMute;
+
 	public DevicePanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
 		super( deviceInfo!=null ? "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName() : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 		setName("DevicePanel");
@@ -78,33 +80,37 @@ public class DevicePanel extends Panel {
 
 				monitorPanel = getNewMonitorPanel();
 				userPanel.add(monitorPanel);
-				monitorPanel.addStatusListener(new ValueChangeListener() {
-					
-					@Override
-					public void valueChanged(ValueChangeEvent valueChangeEvent) {
-						if(PacketWork.PACKET_ID_MEASUREMENT_STATUS==valueChangeEvent.getID()){
-							Object source = valueChangeEvent.getSource();
-							int status;
-							if(source instanceof Long)
-								status = (int) ((Long) source&(MonitorController.LOCK|MonitorController.MUTE));
-							else
-								status = (int)source&(MonitorController.LOCK|MonitorController.MUTE);
-							switch(status){
-							case MonitorController.LOCK:
-								led.setLedColor(Color.GREEN);
-								verticalLabel.setBackground(Color.GREEN);
-								break;
-							case MonitorController.MUTE|MonitorController.LOCK:
-								led.setLedColor(Color.YELLOW);
-								verticalLabel.setBackground(Color.YELLOW);
-								break;
-							default:
-								led.setLedColor(Color.RED);
-								verticalLabel.setBackground(Color.RED);
-							}
-						}
-					}
-				});
+//				monitorPanel.addStatusListener(new ValueChangeListener() {
+//					
+//					@Override
+//					public void valueChanged(ValueChangeEvent valueChangeEvent) {
+//						if(PacketWork.PACKET_ID_MEASUREMENT_STATUS==valueChangeEvent.getID()){
+//							logger.error(valueChangeEvent);
+//							Object source = valueChangeEvent.getSource();
+//							int status;
+//
+//							if(source instanceof Long)
+//								status = (int) ((Long) source&(MonitorController.LOCK|MonitorController.MUTE));
+//							else
+//								status = (int)source&(MonitorController.LOCK|MonitorController.MUTE);
+//
+//							logger.error(status);
+//							switch(status){
+//							case MonitorController.LOCK:
+//								led.setLedColor(Color.GREEN);
+//								setVerticalLabelBackground(Color.GREEN);
+//								break;
+//							case MonitorController.MUTE|MonitorController.LOCK:
+//								led.setLedColor(Color.YELLOW);
+//								setVerticalLabelBackground(Color.YELLOW);
+//								break;
+//							default:
+//								led.setLedColor(Color.RED);
+//								setVerticalLabelBackground(Color.RED);
+//							}
+//						}
+//					}
+//				});
 
 				if(statusChangeListener!=null)
 					monitorPanel.addStatusListener(statusChangeListener);
@@ -206,18 +212,6 @@ public class DevicePanel extends Panel {
 		return controlPanel;
 	}
 
-	public void setLabelForeground(Color labelForeground) {
-		verticalLabel.setForeground(labelForeground);
-	}
-
-	public void setLabelBackground(Color labelBackground) {
-		verticalLabel.setBackground(labelBackground);
-	}
-
-	public void setLabelFont(Font font) {
-		verticalLabel.setFont(font);
-	}
-
 	@Override
 	public boolean equals(Object obj) {
 		return obj!=null ? obj.hashCode()==hashCode() : false;
@@ -234,10 +228,6 @@ public class DevicePanel extends Panel {
 
 	public PacketListener getPacketListener() {
 		return null;
-	}
-
-	public VarticalLabel getVarticalLabel() {
-		return verticalLabel;
 	}
 
 	protected JTabbedPane getTabbedPane() {
@@ -257,5 +247,43 @@ public class DevicePanel extends Panel {
 
 	public InfoPanel getInfoPanel() {
 		return infoPanel;
+	}
+
+	public void setAlarm(int alarm) {
+		this.alarm = alarm;
+
+		switch(alarm){
+		case AlarmsController.ALARMS_STATUS_INFO:
+		case AlarmsController.ALARMS_STATUS_NO_ALARM:
+			if(!isMute)
+				setVerticalLabelBackground(Color.GREEN);
+			break;
+		case AlarmsController.ALARMS_STATUS_WARNING:
+		case AlarmsController.ALARMS_STATUS_MINOR:
+			setVerticalLabelBackground(WARNING_COLOR);
+			break;
+		case AlarmsController.ALARMS_STATUS_ALARM:
+		case AlarmsController.ALARMS_STATUS_FAULT:
+			setVerticalLabelBackground(Color.RED);
+			break;
+		}
+	}
+
+	public void setMute(boolean isMute) {
+		this.isMute = isMute;
+		if(isMute){
+			if(alarm<AlarmsController.ALARMS_STATUS_WARNING)
+				setVerticalLabelBackground(Color.YELLOW);
+			if(led.getLedColor()!=Color.YELLOW)
+				led.setLedColor(Color.YELLOW);
+		}else
+			if(led.getLedColor()!=Color.GREEN)
+				led.setLedColor(Color.GREEN);
+	}
+
+	@Override
+	public int compareTo(DevicePanel o) {
+		LinkHeader lh = o.getLinkHeader();
+		return linkHeader!=null ? linkHeader.compareTo(lh) : lh==null ? 0 : 1;
 	}
 }

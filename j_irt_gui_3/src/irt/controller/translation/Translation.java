@@ -58,7 +58,7 @@ public class Translation {
 				getFont(localeStr);
 				LOGGER.exit(locale);
 			}
-		}, "setLocale "+localeStr);
+		});
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

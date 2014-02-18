@@ -1,6 +1,5 @@
 package irt.controller;
 
-import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
@@ -31,27 +30,13 @@ public class GuiController extends GuiControllerAbstract{
 	public void run() {
 		while (true) {
 			try {
-				if (serialPortSelection != null) {
-					Object selectedItem = serialPortSelection.getSelectedItem();
-					LinkHeader linkHeader = new LinkHeader(getAddress(), (byte) 0, (short) 0);
-					if (selectedItem != null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString())) {
-						if (protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL) || protocol.equals(Protocol.CONVERTER))
-							comPortThreadQueue.add(new DeviceInfoGetter() {
-								@Override
-								public Integer getPriority() {
-									return 10001;
-								}
-							});
-						if (protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL) || protocol.equals(Protocol.LINKED))
-							comPortThreadQueue.add(new DeviceInfoGetter(linkHeader) {
-								@Override
-								public Integer getPriority() {
-									return 10000;
-								}
-							});
-					}
+				if (isSerialPortSet()) {
+					getConverterInfo();
+					getUnitInfo();
 				}
-				synchronized (this) { wait(5000); }
+				synchronized (this) {
+					wait(5000);
+				}
 			} catch (Exception e) {
 				logger.catching(e);
 			}

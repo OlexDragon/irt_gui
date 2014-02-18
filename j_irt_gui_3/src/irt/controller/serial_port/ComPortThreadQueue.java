@@ -37,6 +37,7 @@ public class ComPortThreadQueue extends Thread {
 	@Override
 	public void run() {
 
+		boolean sent = false;
 		while(true){
 			try {
 
@@ -49,9 +50,12 @@ public class ComPortThreadQueue extends Thread {
 						packetThread.join();
 
 						if(serialPort.getPortName().startsWith("COM") && packetThread.isReadyToSend()) {
+							sent = false;
 
+							logger.trace("Data to send - {}", packetWork);
 							Packet send = serialPort.send(packetWork);
-							fireValueChangeListener(send);
+							firePacketListener(send);
+							logger.trace("Received data - {}", send);
 
 							if(send==null || send.getHeader()==null)
 								StaticComponents.getLedRx().setLedColor(Color.WHITE);
@@ -61,12 +65,17 @@ public class ComPortThreadQueue extends Thread {
 								StaticComponents.getLedRx().setLedColor(Color.GREEN);
 
 							StaticComponents.getLedRx().blink();
+						}else if(!sent){
+							sent = true;
+							logger.warn("Serial port or Packet is not ready:\n{}", packetWork);
 						}
-					}
+					}else
+						logger.warn("packetThread==null");
 //					if(comPortQueue.isEmpty()){
 //						serialPort.closePort();
 //					}
-				}
+				}else
+					logger.warn("serialPort==null");
 			} catch (Exception e) {
 				logger.catching(e);
 				Console.appendLn(e.getLocalizedMessage(), "ComPortThreadQueue:run");
@@ -77,20 +86,22 @@ public class ComPortThreadQueue extends Thread {
 	public synchronized void add(PacketWork packetWork){
 			
 		try {
+			if(packetWork!=null)
+				if (comPortQueue.size() < 300)
+					if (!comPortQueue.contains(packetWork)) {
 
-			if (comPortQueue.size() < 300)
-				if (!comPortQueue.contains(packetWork)) {
+						PacketThread pt = packetWork.getPacketThread();
+						pt.setDaemon(true);
+						pt.start();
 
-					PacketThread pt = packetWork.getPacketThread();
-					pt.setDaemon(true);
-					pt.start();
-
-					comPortQueue.add(packetWork);
-					// System.out.println("<<< is added - "+packetWork);
-				} else
-					logger.warn("Already contains " + packetWork);
+						comPortQueue.add(packetWork);
+						logger.trace("<<< is added - {}", packetWork);
+					} else
+						logger.warn("Already contains " + packetWork);
+				else
+					logger.warn("comPortQueue is FULL");
 			else
-				logger.warn("comPortQueue is FULL");
+				logger.warn("packetWork!=null");
 		} catch (IllegalStateException e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:add");
@@ -140,13 +151,12 @@ public class ComPortThreadQueue extends Thread {
 		packetListeners.remove(PacketListener.class, packetListener);
 	}
 
-	public void fireValueChangeListener(Packet packet) {
+	public void firePacketListener(Packet packet) {
 		Object[] listeners = packetListeners.getListenerList();
 		for (int i = 0; i < listeners.length; i++) {
 			Object l = listeners[i];
 			if (l == PacketListener.class)
 				((PacketListener) listeners[i + 1]).packetRecived(packet);
-			;
 		}
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

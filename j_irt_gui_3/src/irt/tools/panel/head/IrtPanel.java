@@ -6,8 +6,8 @@ import irt.tools.label.ImageLabel;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -26,19 +26,6 @@ import org.apache.logging.log4j.Logger;
 public class IrtPanel extends MainPanel {
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
-//
-//	public enum Style {
-//		WITH_IMAGE,
-//		WITHOUT_IMAGE
-//	}
-//
-//	public IrtPanel(JFrame target) {
-//		this(target, (ImageIcon)null, "IRT Technologies", new Font("Tahoma", Font.BOLD, 16), Style.WITH_IMAGE);
-//	}
-//
-//	public IrtPanel(JFrame target, String text, Font font) {
-//		this(target, (ImageIcon)null, text, font,  Style.WITHOUT_IMAGE);
-//	}
 
 	private static Map<String, Integer> fontStyle;
 
@@ -58,22 +45,27 @@ public class IrtPanel extends MainPanel {
 		return fontStyleStr!=null ? fontStyle.get(fontStyleStr) : 0;
 	}
 
-	public static Properties properties = getProperties();
-	public static String companyIndex = properties.getProperty("used_company_index");
-
-	protected static Properties getProperties() {
-		Properties p = new Properties();
+	public static Properties PROPERTIES;
+	public static String companyIndex;
+	static{
 		try {
-			InputStream resourceAsStream = IrtGui.class.getResourceAsStream("irt.properties");
-			p.load(resourceAsStream);
-		} catch (IOException e) {
+			PROPERTIES = new Properties();
+			PROPERTIES.load(IrtGui.class.getResourceAsStream("irt.properties"));
+			companyIndex = PROPERTIES.getProperty("used_company_index");
+
+			File f = new File(System.getProperty("user.dir")+File.separator+"irtGui.properties");
+			if(f.exists() && !f.isDirectory()){
+				PROPERTIES.load(new FileInputStream(f));
+				PROPERTIES.put("lastModified", ""+f.lastModified());
+			}
+
+		} catch (Exception e) {
 			logger.catching(e);
 		}
-		return p;
 	}
 
 	public IrtPanel(JFrame target) {
-		super(target, Integer.parseInt(properties.getProperty("IrtPanel_width_"+companyIndex)));
+		super(target, Integer.parseInt(PROPERTIES.getProperty("IrtPanel_width_"+companyIndex)));
 		setCorner(30);
 		setGradient(false);
 		setSize(1, 46);
@@ -81,11 +73,11 @@ public class IrtPanel extends MainPanel {
 		setArcWidth(45);
 		setBackground(new Color(0x3B, 0x4A, 0x8B, 100));
 
-		String text = properties.getProperty("company_name_"+companyIndex);
+		String text = PROPERTIES.getProperty("company_name_"+companyIndex);
 
 		ImageIcon imageIcon = new ImageIcon(
 				IrtGui.class.getResource(
-						properties.get("company_logo_"+companyIndex).toString()));
+						PROPERTIES.get("company_logo_"+companyIndex).toString()));
 
 
 		final JLabel lblIrtTechnologies = new ImageLabel(imageIcon, text);
@@ -108,9 +100,8 @@ public class IrtPanel extends MainPanel {
 		new SwingWorker<Rectangle, Void>() {
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName("IrtPanel.lblIrtTechnologies.setBounds");
 				try {
-					String[] split = properties.get("logo_bounds_" + companyIndex).toString().split(",");
+					String[] split = PROPERTIES.get("logo_bounds_" + companyIndex).toString().split(",");
 					return new Rectangle(Integer.parseInt(split[0]), Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
 				} catch (Exception e) {
 					logger.catching(e);
@@ -131,10 +122,9 @@ public class IrtPanel extends MainPanel {
 		new SwingWorker<Font, Void>() {
 			@Override
 			protected Font doInBackground() throws Exception {
-				Thread.currentThread().setName("IrtPanel.setFont");
 				try {
-					return new Font(properties.getProperty("font_name_" + companyIndex), parseFontStyle((String) properties.get("font_style_" + companyIndex)),
-							Integer.parseInt(properties.get("font_size_" + companyIndex).toString()));
+					return new Font(PROPERTIES.getProperty("font_name_" + companyIndex), parseFontStyle((String) PROPERTIES.get("font_style_" + companyIndex)),
+							Integer.parseInt(PROPERTIES.get("font_size_" + companyIndex).toString()));
 				} catch (Exception e) {
 					logger.catching(e);
 					return null;

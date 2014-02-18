@@ -105,7 +105,7 @@ public class ConfigurationSetter extends SetterAbstract {
 	@Override
 	public boolean set(Packet packet) {
 		boolean isSet = false;
-		if(packet!=null){
+		if(isAddressEquals(packet)){
 			PacketHeader ph = packet.getHeader();
 			short packetId = getPacketId();
 			if(ph!=null &&

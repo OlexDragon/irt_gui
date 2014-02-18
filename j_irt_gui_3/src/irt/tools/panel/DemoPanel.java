@@ -99,7 +99,7 @@ public class DemoPanel extends Panel {
 
 		font = font.deriveFont(Translation.getValue(Float.class, "verticalLabel.font.size", 18f)).deriveFont(Font.PLAIN);
 
-		verticalLabel.setFont(font);
+		setVerticalLabelFont(font);
 
 		font = font.deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", 14f))
 				.deriveFont(Translation.getValue(Integer.class, "monitor.leds.font.style", Font.BOLD));
@@ -232,9 +232,9 @@ public class DemoPanel extends Panel {
 
 		JLabel lblLogo = new ImageLabel(
 				new ImageIcon(IrtGui.class.getResource(
-						IrtPanel.properties.getProperty("company_logo_"+IrtPanel.companyIndex))
+						IrtPanel.PROPERTIES.getProperty("company_logo_"+IrtPanel.companyIndex))
 				),"");
-		tabbedPane.addTab(IrtPanel.properties.getProperty("tab_title_"+IrtPanel.companyIndex), lblLogo);
+		tabbedPane.addTab(IrtPanel.PROPERTIES.getProperty("tab_title_"+IrtPanel.companyIndex), lblLogo);
 
 		font = font.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));
@@ -434,8 +434,8 @@ public class DemoPanel extends Panel {
 
 		font = font.deriveFont(Translation.getValue(Float.class, "verticalLabel.font.size", 12f)).deriveFont(Font.PLAIN);
 
-		verticalLabel.setFont(font);
-		verticalLabel.setText(Translation.getValue(String.class, "vertical_label_text", "THE UNIT IS NOT CONNECTED"));
+		setVerticalLabelFont(font);
+		setVerticalLabelText(Translation.getValue(String.class, "vertical_label_text", "THE UNIT IS NOT CONNECTED"));
 
 		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f));
 

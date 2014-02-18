@@ -106,7 +106,6 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName(getClass().getSimpleName() + ".lblMute.setBounds");
 				try {
 					int width = Translation.getValue(Integer.class, "control.label.mute.width", 93);
 					return new Rectangle(Translation.getValue(Integer.class, "control.label.mute.x", 48),
@@ -116,7 +115,6 @@ public class ControlPanel extends MonitorPanelAbstract {
 					return null;
 				}
 			}
-
 			@Override
 			protected void done() {
 				try {
@@ -286,13 +284,13 @@ public class ControlPanel extends MonitorPanelAbstract {
 		Thread t;
 		switch(control){
 		case FLAG_GAIN:
-			t = new Thread(ñontroller =  getNewGainController(), "Gain Controller");
+			t = new Thread(ñontroller =  getNewGainController());
 			break;
 		case FLAG_FREQUENCY:
-			t = new Thread(ñontroller = getNewFreqController(), "Frequency Controller");
+			t = new Thread(ñontroller = getNewFreqController());
 			break;
 		default:
-			t = new Thread(ñontroller = getNewAttenController(), "Attenuation Controller");
+			t = new Thread(ñontroller = getNewAttenController());
 		}
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

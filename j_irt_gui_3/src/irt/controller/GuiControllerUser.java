@@ -1,14 +1,11 @@
 package irt.controller;
 
-import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.DemoPanel;
 import irt.tools.panel.DevicePanel;
 import irt.tools.panel.UserPicobucPanel;
-
-import javax.swing.JComboBox;
 
 public class GuiControllerUser extends GuiControllerAbstract {
 
@@ -25,19 +22,21 @@ public class GuiControllerUser extends GuiControllerAbstract {
 			unitsPanel.add(new DemoPanel());
 			unitsPanel.revalidate();
 			unitsPanel.repaint();
-			while(true){
-				JComboBox<String> serialPortSelection = getSerialPortSelection();
-				if(serialPortSelection!=null) {
-					Object selectedItem = serialPortSelection.getSelectedItem();
-					if(selectedItem!=null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString()))
-						getComPortThreadQueue().add(new DeviceInfoGetter(new LinkHeader(getAddress(), (byte)0, (short)0)));
-				}
+		} catch (Exception e) {
+			logger.catching(e);
+		}
+
+		while (true) {
+			try {
+				if (isSerialPortSet())
+					getUnitInfo();
+
 				synchronized (this) {
 					wait(5000);
 				}
+			} catch (Exception e) {
+				logger.catching(e);
 			}
-		} catch (Exception e) {
-			logger.catching(e);
 		}
 	}
 

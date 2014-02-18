@@ -2,7 +2,7 @@ package irt.data.packet;
 
 import java.util.Arrays;
 
-public class LinkHeader {
+public class LinkHeader implements Comparable<LinkHeader>{
 
 	public static final int SIZE = 4;
 
@@ -68,15 +68,16 @@ public class LinkHeader {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj!=null && obj.getClass().getSimpleName().equals("LinkHeader") ?
-				((LinkHeader)obj).getAddr()==addr &&
-						((LinkHeader)obj).getControl()==control &&
-								((LinkHeader)obj).getProtocol()==protocol
-				: false;
+		return obj!=null ? obj.hashCode()==hashCode() : false;
 	}
 
 	@Override
 	public int hashCode() {
-		return addr+control+protocol;
+		return addr+control<<16+protocol<<8;
+	}
+
+	@Override
+	public int compareTo(LinkHeader linkHeader) {
+		return linkHeader!=null ? addr-linkHeader.getAddr() :-1;
 	}
 }

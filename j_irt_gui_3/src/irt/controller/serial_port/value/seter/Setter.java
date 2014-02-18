@@ -44,7 +44,7 @@ public class Setter extends SetterAbstract {
 	public boolean set(Packet packet) {
 		boolean isSet = false;
 
-		if(packet!=null) {
+		if(isAddressEquals(packet)) {
 
 			PacketHeader cph = packet.getHeader();
 

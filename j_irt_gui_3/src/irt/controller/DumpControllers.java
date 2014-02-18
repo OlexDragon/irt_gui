@@ -2,20 +2,21 @@ package irt.controller;
 
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
-import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
+import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.Payload;
 import irt.tools.panel.head.UnitsContainer;
 
-import java.awt.AWTEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
@@ -23,15 +24,15 @@ import org.apache.logging.log4j.MarkerManager;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
-public class DumpControllers extends ValueChangeListenerClass {
+public class DumpControllers{
 
 //	private static final int MAX_FILE_QUANTITY = 50;
 //	private static final int MAX_FILE_SIZE = 5000;
 //	private static final String DUMP = "dump";
 
-	public static final String DUMP_WAIT = "DUMP_WAIT";
+	private static final int PRIORITY = 50;
 
-	private volatile String info;
+	public static final String DUMP_WAIT = "DUMP_WAIT";
 
 	private static LoggerContext ctx = setSysSerialNumber(null);
 	private final Logger logger = (Logger) LogManager.getLogger();
@@ -39,27 +40,50 @@ public class DumpControllers extends ValueChangeListenerClass {
 	public static final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private List<DefaultController> dumpsList = new ArrayList<>();
+	private LinkHeader linkHeader;
 
-	private volatile static Map<Integer, String> variables = new HashMap<>();
+//	private volatile static Map<Integer, String> variables = new HashMap<>();
 
-	private ValueChangeListener valueChangeListener = new ValueChangeListener() {
+	private DeviceInfo deviceInfo;
+	private Timer infoTimer = new Timer(1000*60*20, new ActionListener() {
 		@Override
-		public void valueChanged(ValueChangeEvent valueChangeEvent) {
-			logger.debug("valueChanged({})", valueChangeEvent);
-			new DumpWorker(valueChangeEvent);
+		public void actionPerformed(ActionEvent e) {
+			dumper.info(marker, "\n\t{}\n\t{}\n", linkHeader, deviceInfo);
 		}
-	};
+	});
 
-	public DumpControllers(UnitsContainer unitsPanel, LinkHeader linkHeader, DeviceInfo deviceInfo) {
+	private Object hwFault;
+	private Object underCurrent;
+	private Object outOfLock;
+	private Object owerTemt;
+	private Object owerCurr;
+	private Object redundantFault;
+	private Object summary;
+	private Object redundancyStat;
+	private Object register100;
+	private Object register10;
+	private Object deviceInfo0;
+	private Object deviceInfo1;
+	private Object deviceInfo2;
+	private Object deviceInfo3;
+	private Object deviceInfo4;
+	private Object register1;
+	private Object register2;
+	private Object register7;
+	private Object register3;
+	private Object register4;
+	private Object register5;
+	private Object register6;
 
-		setSysSerialNumber(deviceInfo.getSerialNumber().toString());
-		setInfo(deviceInfo);
+	public DumpControllers(UnitsContainer unitsPanel, LinkHeader linkHeader) {
+
+		this.linkHeader = linkHeader;
 
 		int dumpWaitMinuts = GuiController.getPrefs().getInt(DUMP_WAIT, 10);
 		int waitTime = 1000*60*dumpWaitMinuts;
 
-		logger.trace("new DumpControllers({}, {}, {}, waitTime={} msec({} min))", unitsPanel, linkHeader, deviceInfo, waitTime, dumpWaitMinuts);
-		dumper.info(marker, "******************** Start New Dump Block ********************");
+		logger.trace("new DumpControllers({}, {}, waitTime={} msec({} min))", unitsPanel, linkHeader, waitTime, dumpWaitMinuts);
+		dumper.info(marker, "\n******************** Start New Dump Block for {} ********************", linkHeader);
 
 //		this.parent = unitsPanel;
 
@@ -67,122 +91,329 @@ public class DumpControllers extends ValueChangeListenerClass {
 //		deviceInfoStr = deviceInfo.toString();
 //		new DumpToFile(unitsPanel, file, "Start", deviceInfoStr);
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
-				PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0, 0) { @Override public Integer getPriority() { return 14; }
-		}, waitTime, "DUMP_DEVICE_DEBAG_DEVICE_INFO_0");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
-				PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1, 1) { @Override public Integer getPriority() { return 13; }
-		}, waitTime, "DUMP_DEVICE_DEBAG_DEVICE_INFO_1");
+		addDumpController(
+				new Getter(linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_ALARM,
+						AlarmsController.ALARMS_SUMMARY_STATUS,
+						PacketWork.PACKET_ID_ALARMS_SUMMARY)
+				{
+					private int p = PRIORITY;
+					@Override public Integer getPriority() {
+						return p;
+					}
+					@Override
+					public boolean set(Packet packet) {
+						if(isAddressEquals(packet)){
+							new DumpWorker(packet);
+						}
+						return true;
+					}
+				},
+				3000,
+				"ALARMS_SUMMARY");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
-				PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2, 2) { @Override public Integer getPriority() { return 12; }
-		}, waitTime, "DUMP_DEVICE_DEBAG_DEVICE_INFO_2");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_ALARM,
+						AlarmsController.ALARMS_STATUS,
+						PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE,
+						AlarmsController.OWER_TEMPERATURE,
+						PRIORITY),
+				waitTime,
+				"ALARMS_OWER_TEMPERATURE");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
-				PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3,3) { @Override public Integer getPriority() { return 11; }
-		}, waitTime, "DUMP_DEVICE_DEBAG_DEVICE_INFO_3");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_ALARM,
+						AlarmsController.ALARMS_STATUS,
+						PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT,
+						AlarmsController.HW_FAULT,
+						PRIORITY),
+				waitTime,
+				"ALARMS_HARDWARE_FAULT");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
-				PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4, 4) { @Override public Integer getPriority() { return 10; }
-		}, waitTime, "DUMP_DEVICE_DEBAG_DEVICE_INFO_4");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_ALARM,
+						AlarmsController.ALARMS_STATUS,
+						PacketWork.PACKET_ID_ALARMS_OWER_CURRENT,
+						AlarmsController.OWER_CURRENT,
+						PRIORITY),
+				waitTime,
+				"ALARMS_OWER_CURRENT");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
-				PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10, 10) { @Override public Integer getPriority() { return 9; }
-		}, waitTime, "DUMP_DEVICE_DEBAG_DEVICE_INFO_10");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_ALARM,
+						AlarmsController.ALARMS_STATUS,
+						PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK,
+						AlarmsController.PLL_OUT_OF_LOCK,
+						PRIORITY),
+				waitTime,
+				"ALARMS_PLL_OUT_OF_LOCK");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_1, 1) { @Override public Integer getPriority() { return 8; }
-		}, waitTime, "DUMP_REGISTER_1");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_ALARM,
+						AlarmsController.ALARMS_STATUS,
+						PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT,
+						AlarmsController.UNDER_CURRENT,
+						PRIORITY),
+				waitTime,
+				"ALARMS_UNDER_CURRENT");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_2, 2) { @Override public Integer getPriority() { return 7; }
-		}, waitTime, "DUMP_REGISTER_2");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_ALARM,
+						AlarmsController.ALARMS_STATUS,
+						PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT,
+						AlarmsController.REDUNDANT_FAULT,
+						PRIORITY),
+				waitTime,
+				"ALARMS_REDUNDANT_FAULT");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_7, 7) { @Override public Integer getPriority() { return 6; }
-		}, waitTime, "DUMP_REGISTER_7");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0,
+						0,
+						PRIORITY-1),
+				waitTime,
+				"DUMP_DEVICE_DEBAG_DEVICE_INFO_0");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_3, 3) { @Override public Integer getPriority() { return 5; }
-		}, waitTime, "DUMP_REGISTER_3");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_4, 4) { @Override public Integer getPriority() { return 4; }
-		}, waitTime, "DUMP_REGISTER_4");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1,
+						1,
+						PRIORITY-2),
+				waitTime,
+				"DUMP_DEVICE_DEBAG_DEVICE_INFO_1");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_5, 5) { @Override public Integer getPriority() { return 3; }
-		}, waitTime, "DUMP_REGISTER_5");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_6, 6) { @Override public Integer getPriority() { return 2; }
-		}, waitTime, "DUMP_REGISTER_6");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2,
+						2,
+						PRIORITY-3),
+				waitTime,
+				"DUMP_DEVICE_DEBAG_DEVICE_INFO_2");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
-				PacketWork.PACKET_ID_DUMP_REGISTER_100, 100) { @Override public Integer getPriority() { return 1; }
-		}, waitTime, "DUMP_REGISTER_100");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3,
+						3,
+						PRIORITY-4),
+				waitTime,
+				"DUMP_DEVICE_DEBAG_DEVICE_INFO_3");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS,
-				PacketWork.PACKET_ID_ALARMS_SUMMARY) { @Override public Integer getPriority() { return 50; }
-		}, 1000, "ALARMS_SUMMARY");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4,
+						4,
+						PRIORITY-5),
+				waitTime,
+				"DUMP_DEVICE_DEBAG_DEVICE_INFO_4");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
-				PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE, AlarmsController.OWER_TEMPERATURE) { @Override public Integer getPriority() { return 50; }
-		}, waitTime, "ALARMS_OWER_TEMPERATURE");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10,
+						10,
+						PRIORITY-6),
+				waitTime,
+				"DUMP_DEVICE_DEBAG_DEVICE_INFO_10");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
-				PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT, AlarmsController.HW_FAULT) { @Override public Integer getPriority() { return 50; }
-		}, waitTime, "ALARMS_HARDWARE_FAULT");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_1,
+						1,
+						PRIORITY-7),
+				waitTime,
+				"DUMP_REGISTER_1");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
-				PacketWork.PACKET_ID_ALARMS_OWER_CURRENT, AlarmsController.OWER_CURRENT) { @Override public Integer getPriority() { return 50; }
-		}, waitTime, "ALARMS_OWER_CURRENT");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_2,
+						2,
+						PRIORITY-8),
+				waitTime,
+				"DUMP_REGISTER_2");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
-				PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK, AlarmsController.PLL_OUT_OF_LOCK) { @Override public Integer getPriority() { return 50; }
-		}, waitTime, "ALARMS_PLL_OUT_OF_LOCK");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_7,
+						7,
+						PRIORITY-9),
+				waitTime,
+				"DUMP_REGISTER_7");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
-				PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT, AlarmsController.UNDER_CURRENT) { @Override public Integer getPriority() { return 50; }
-		}, waitTime, "ALARMS_UNDER_CURRENT");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_3,
+						3,
+						PRIORITY-10),
+				waitTime,
+				"DUMP_REGISTER_3");
 
-		addDumpController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_STATUS,
-				PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT, AlarmsController.REDUNDANT_FAULT) { @Override public Integer getPriority() { return 50; }
-		}, waitTime, "ALARMS_REDUNDANT_FAULT");
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_4,
+						4,
+						PRIORITY-11),
+				waitTime,
+				"DUMP_REGISTER_4");
 
-		addDumpController(new Getter(linkHeader,
-				Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
-				Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
-				PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT){ @Override public Integer getPriority() { return 50; }},
-			waitTime,
-			"REDUNDANCY_STAT");
+		addDumpController(
+				newGetter(linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_5,
+						5,
+						PRIORITY-12),
+				waitTime,
+				"DUMP_REGISTER_5");
+
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_6,
+						6,
+						PRIORITY-13),
+				waitTime,
+				"DUMP_REGISTER_6");
+
+		addDumpController(
+				newGetter(
+						linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_REGISTER_100,
+						100,
+						PRIORITY-14),
+				waitTime,
+				"DUMP_REGISTER_100");
+
+		addDumpController(
+				newGetter(linkHeader,
+						Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+						Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
+						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT,
+						PRIORITY-15),
+				waitTime,
+				"REDUNDANCY_STAT");
 	}
 
-	public void setInfo(DeviceInfo deviceInfo) {
-		info = "\n! SN: "+deviceInfo.getSerialNumber();
-		info += "\n! "+deviceInfo.getUnitName();
-		info += "\n! Version: "+deviceInfo.getFirmwareVersion();
-		info += "\n! Built Date: "+deviceInfo.getFirmwareBuildDate();
-		info += "\n! Type: "+deviceInfo.getType();
-		info += "\n! Subtype: "+deviceInfo.getSubtype();
-		info += "\n! Revision: "+deviceInfo.getRevision();
-		info += "\n! count: "+deviceInfo.getFirmwareBuildCounter();
-		logger.debug("deviceInfo: "+info);
+	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, int value, final int priority) {
+		return new Getter(
+				linkHeader,
+				irtSlcpPacketId,
+				irtSlcpParameter,
+				packetId,
+				value)
+		{
+			private int p = priority;
+			@Override public Integer getPriority() {
+				return p;
+			}
+			@Override
+			public boolean set(Packet packet) {
+				return true;
+			}
+		};
 	}
+
+	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, final int priority) {
+		return new Getter(
+				linkHeader,
+				irtSlcpPacketId,
+				irtSlcpParameter,
+				packetId)
+		{
+			private int p = priority;
+			@Override public Integer getPriority() {
+				return p;
+			}
+			@Override
+			public boolean set(Packet packet) {
+				return false;
+			}
+		};
+	}
+//
+//	public void setInfo(DeviceInfo deviceInfo) {
+//		info = "\n! SN: "+deviceInfo.getSerialNumber();
+//		info += "\n! "+deviceInfo.getUnitName();
+//		info += "\n! Version: "+deviceInfo.getFirmwareVersion();
+//		info += "\n! Built Date: "+deviceInfo.getFirmwareBuildDate();
+//		info += "\n! Type: "+deviceInfo.getType();
+//		info += "\n! Subtype: "+deviceInfo.getSubtype();
+//		info += "\n! Revision: "+deviceInfo.getRevision();
+//		info += "\n! count: "+deviceInfo.getFirmwareBuildCounter();
+//		logger.debug("deviceInfo: "+info);
+//	}
 
 	public static LoggerContext setSysSerialNumber(String serialNumber) {
 
 		if(serialNumber==null)
 			serialNumber ="UnknownSerialNumber";
+		else
+			serialNumber = serialNumber.replaceAll("[:\\\\/*?|<>]", "x");
 
 		String sysSerialNumber = System.getProperty("serialNumber");
 
 		if(sysSerialNumber==null || !sysSerialNumber.equals(serialNumber)){
-			System.setProperty("serialNumber", serialNumber.replaceAll("[:\\\\/*?|<>]", "x"));
+
+			if(ctx!=null)
+				dumper.info(marker, "\n***** filename changed to {} *****", serialNumber);
+
+			System.setProperty("serialNumber", serialNumber);
 
 			ctx = (LoggerContext) LogManager.getContext(false);
 			ctx.reconfigure();
+
+			if(sysSerialNumber!=null)
+				dumper.info(marker, "\n***** continuation... beginning in the File {} *****", sysSerialNumber);
 		}
 
 		return ctx;
@@ -190,12 +421,11 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	private void addDumpController(Getter getter, int waitTime, String threadName){
 
-		DefaultController dumpController = new DefaultController(threadName, getter, Style.CHECK_ONCE)
-		{ @Override protected ValueChangeListener addGetterValueChangeListener() { return DumpControllers.this.valueChangeListener; }};
+		DefaultController dumpController = new DefaultController(threadName, getter, Style.CHECK_ONCE);
 
 		dumpController.setWaitTime(waitTime);
 
-		Thread t = new Thread(dumpController, threadName);
+		Thread t = new Thread(dumpController);
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
@@ -207,18 +437,17 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	public void stop() {
 		logger.trace("stop()");
-		super.stop();
 		for(DefaultController dc:dumpsList)
 			dc.setRun(false);
 		dumpsList.clear();
 	}
 
-	@Override
-	protected void finalize() throws Throwable {
-		fireValueChangeListener(new ValueChangeEvent(0, PacketWork.PACKET_ID_ALARMS));
-		dumper.info("Communication Lost");
-		stop();
-	}
+//	@Override
+//	protected void finalize() throws Throwable {
+//		fireValueChangeListener(new ValueChangeEvent(0, PacketWork.PACKET_ID_ALARMS));
+////		dumper.info("Communication Lost");
+//		stop();
+//	}
 
 	public void setWaitTime(int waitTime) {
 		logger.trace("setWaitTime(waitTime={})", waitTime);
@@ -273,11 +502,14 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 	//******************* class DumpWorker *******************************
 	private class DumpWorker extends Thread{
+		private Packet packet;
 
-		private AWTEvent valueChangeEvent;
+		public DumpWorker(Packet packet) {
+			this.packet = packet;
 
-		public DumpWorker(ValueChangeEvent valueChangeEvent) {
-			this.valueChangeEvent = valueChangeEvent;
+			infoTimer.setRepeats(true);
+			infoTimer.start();
+
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				setPriority(priority-1);
@@ -287,43 +519,210 @@ public class DumpControllers extends ValueChangeListenerClass {
 
 		@Override
 		public void run() {
-			int id = valueChangeEvent.getID();
-			Object source = valueChangeEvent.getSource();
-			String sourceStr = source.toString();
+			logger.trace("\n{}", packet);
 
-			String value = variables.get(id);
-			if (value == null || !value.equals(sourceStr)) {
-				if(source instanceof Integer){
-					int integer = (Integer) source;
-					sourceStr = summaryAlarm(id, integer);
-				}else if(source instanceof short[]){
-					byte status = (byte) (((short[])source)[2]&7);
-					switch(id){
-					case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
-					case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
-					case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
-					case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
-					case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
-					case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
-						sourceStr = "*** Alarm "+AlarmsController.getAlarmName((short) id)+" - "+AlarmsController.alarmStatusToString(status)+" ***";
-					}
+			PacketHeader header = packet.getHeader();
+			short packetId = header.getPacketId();
+			byte error = header.getOption();
+
+				switch(packetId){
+
+				case PacketWork.PACKET_DEVICE_INFO:
+						boolean doPrint = deviceInfo==null;
+					
+						deviceInfo = new DeviceInfo(packet);
+						if(doPrint)
+							dumper.info(marker, "\n\t{}\n\t{}\n", linkHeader, deviceInfo);
+					break;
+
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0:
+					if(error==0)
+						deviceInfo0 = dump(deviceInfo0);
+					else
+						deviceInfo0 = dumpError(deviceInfo0);
+					break;
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1:
+					if(error==0)
+						deviceInfo1 = dump(deviceInfo1);
+					else
+						deviceInfo1 = dumpError(deviceInfo1);
+					break;
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2:
+					if(error==0)
+						deviceInfo2 = dump(deviceInfo2);
+					else
+						deviceInfo2 = dumpError(deviceInfo2);
+					break;
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3:
+					if(error==0)
+						deviceInfo3 = dump(deviceInfo3);
+					else
+						deviceInfo3 = dumpError(deviceInfo3);
+					break;
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4:
+					if(error==0)
+						deviceInfo4 = dump(deviceInfo4);
+					else
+						deviceInfo4 = dumpError(deviceInfo4);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_1:
+					if(error==0)
+						register1 = dump(register1);
+					else
+						register1 = dumpError(register1);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_2:
+					if(error==0)
+						register2 = dump(register2);
+					else
+						register2 = dumpError(register2);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_7:
+					if(error==0)
+						register7 = dump( register7);
+					else
+						register7 = dumpError(register7);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_3:
+					if(error==0)
+						register3 = dump(register3);
+					else
+						register3 = dumpError(register3);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_4:
+					if(error==0)
+						register4 = dump(register4);
+					else
+						register4 = dumpError(register4);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_5:
+					if(error==0)
+						register5 = dump(register5);
+					else
+						register5 = dumpError(register5);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_6:
+					if(error==0)
+						register6 = dump(register6);
+					else
+						register6 = dumpError(register6);
+					break;
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10:
+					if(error==0)
+						register10 = dump(register10);
+					else
+						register10 = dumpError(register10);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_100:
+					if(error==0)
+						register100 = dump(register100);
+					else
+						register100 = dumpError(register100);
+					break;
+				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
+					if(error==0)
+						redundancyStat = dump(redundancyStat);
+					else
+						redundancyStat = dumpError(redundancyStat);
+					break;
+				case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+					if (error == 0) {
+						Object dump = dumpHex(summary);
+						if (summary != null && !summary.equals(dump)) {
+							logger.warn("notify()");
+							notifyAllControllers();
+						}
+						summary = dump;
+					}else
+						summary = dumpError(summary);
+					break;
+				case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+					if(error==0)
+						hwFault = dumpHex(hwFault);
+					else
+						hwFault = dumpError(hwFault);
+					break;
+				case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+					if(error==0)
+						owerCurr = dumpHex(owerCurr);
+					else
+						owerCurr = dumpError(owerCurr);
+					break;
+				case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+					if(error==0)
+						owerTemt = dumpHex(owerTemt);
+					else
+						owerTemt = dumpError(owerTemt);
+					break;
+				case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+					if(error==0)
+						outOfLock = dumpHex(outOfLock);
+					else
+						outOfLock = dumpError(outOfLock);
+					break;
+				case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+					if(error==0)
+						underCurrent = dumpHex(underCurrent);
+					else
+						underCurrent = dumpError(underCurrent);
+					break;
+				case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
+					if(error==0)
+						redundantFault = dumpHex(redundantFault);
+					else
+						redundantFault = dumpError(redundantFault);
 				}
-				variables.put(id, sourceStr);
-				dumper.info(marker, "{}:{}\n{}",parseId(id), info, sourceStr);
-			}
+		}
+
+		private Object dumpError(Object obj) {
+
+			PacketHeader header = packet.getHeader();
+			if(obj==null || !obj.equals(header))
+				dumper.warn(marker, "\n\t{}\n\t{}\n", linkHeader, header);
+
+			return header;
+		}
+
+		private Object dumpHex(Object obj) {
+			Payload payload = packet.getPayload(0);
+
+			if(payload!=null){
+				obj = dump(obj, ToHex.bytesToHex(payload.getBuffer()));
+			}else
+				logger.warn("packet.getPayload(0)==null");
+
+			return obj;
+		}
+
+		private Object dump(Object obj) {
+			Payload payload = packet.getPayload(0);
+
+			if(payload!=null){
+				Object o = payload.getStringData();
+				obj = dump(obj, o);
+			}else
+				logger.warn("packet.getPayload(0)==null");
+
+			return obj;
+		}
+
+		private Object dump(Object obj, Object o) {
+			if((obj==null || !obj.equals(o)))
+				dumper.info(marker, "\n\t{}\n\t{}\n{}\n", linkHeader, packet.getHeader(), o);
+			return o;
 		}
 		
 
-		private String summaryAlarm(int id, int integer) {
-			String sourceStr = null;
-			switch(id){
-			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
-				notifyAllControllers();
-				fireValueChangeListener(new ValueChangeEvent(integer, id));
-				sourceStr = AlarmsController.alarmStatusToString((byte) integer);
-			}
-			return "Summary Alarm - "+sourceStr;
-		}
+//		private String summaryAlarm(int id, int integer) {
+//			String sourceStr = null;
+//			switch(id){
+//			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+//				notifyAllControllers();
+////				fireValueChangeListener(new ValueChangeEvent(integer, id));
+//				sourceStr = AlarmsController.alarmStatusToString((byte) integer);
+//			}
+//			return "Summary Alarm - "+sourceStr;
+//		}
 
 		private void notifyAllControllers() {
 			for(DefaultController d:dumpsList)

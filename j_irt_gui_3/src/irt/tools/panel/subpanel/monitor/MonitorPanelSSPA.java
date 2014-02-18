@@ -18,17 +18,17 @@ import javax.swing.SwingWorker;
 @SuppressWarnings("serial")
 public class MonitorPanelSSPA extends MonitorPanelAbstract {
 	protected LED ledMute;
-	protected JLabel lblInputPowerTxt;
 	protected JLabel lblOutputPowerTxt;
 	protected JLabel lblTemperatureTxt;
-	protected JLabel lblInputPower;
 	protected JLabel lblOutputPower;
 	protected JLabel lblTemperature;
-	private boolean isSSPB;
+	private boolean isSSPA;
 
 	public MonitorPanelSSPA(LinkHeader linkHeader) {
 		super(linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 214, 210);
 		
+		isSSPA = getClass().equals(MonitorPanelSSPA.class);
+
 		ledMute = new LED(Color.YELLOW, Translation.getValue(String.class, "mute", "MUTE"));
 		ledMute.setName("Mute");
 		ledMute.setForeground(Color.GREEN);
@@ -64,8 +64,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		add(lblTemperatureTxt);
 		new TextWorker(lblTemperatureTxt, "temperature", "Temperature").execute();
 
-		isSSPB = getClass().equals(MonitorPanelSSPA.class);
-		if(isSSPB)
+		if(isSSPA)
 			swingWorkers();
 	}
 
@@ -74,7 +73,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		new SwingWorker<Font, Void>() {
 			@Override
 			protected Font doInBackground() throws Exception {
-				Thread.currentThread().setName("MonitorPanel.leds.setFont");
 				return Translation.getFont().deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", 12f))
 						.deriveFont(Translation.getValue(Integer.class, "monitor.leds.font.style", Font.PLAIN));
 			}
@@ -93,7 +91,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		new SwingWorker<Font, Void>() {
 			@Override
 			protected Font doInBackground() throws Exception {
-				Thread.currentThread().setName("MonitorPanel.labels.setFont");
 				return Translation.getFont()
 						.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
 						.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));
@@ -102,8 +99,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 			protected void done() {
 				try{
 				Font font = get();
-				lblInputPower.setFont(font);
-				lblInputPowerTxt.setFont(font);
 				lblOutputPower.setFont(font);
 				lblOutputPowerTxt.setFont(font);
 				lblTemperature.setFont(font);
@@ -119,9 +114,9 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName("MonitorPanel.ledMute.setBounds");
-				return new Rectangle(Translation.getValue(Integer.class, isSSPB ? "SSPA.monitor.led.mute.x" : "monitor.led.mute.x", 17)
-						, Translation.getValue(Integer.class, isSSPB ? "SSPA.monitor.led.mute.y" : "monitor.led.mute.y", 138)
+				return new Rectangle(
+						  Translation.getValue(Integer.class, isSSPA ? "SSPA.monitor.led.mute.x" : "monitor.led.mute.x", 17)
+						, Translation.getValue(Integer.class, isSSPA ? "SSPA.monitor.led.mute.y" : "monitor.led.mute.y", 138)
 						, Translation.getValue(Integer.class, "monitor.led.mute.width", 100)
 						, 28);
 			}
@@ -135,7 +130,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 				}
 			}
 		}.execute();
-
 	}
 
 	@Override
@@ -151,7 +145,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		titledBorder.setTitle(Translation.getValue(String.class, "monitor", "Monitor"));
 
 		new TextWorker(ledMute, "mute", "MUTE").execute();
-		new TextWorker(lblInputPowerTxt, "input_power", "Input Power").execute();
 		new TextWorker(lblOutputPowerTxt, "output_power", "Output Power").execute();
 		new TextWorker(lblTemperatureTxt, "temperature", "Temperature").execute();
 
@@ -174,7 +167,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 		@Override
 		protected String doInBackground() throws Exception {
-			Thread.currentThread().setName("MonitorPanel."+key+".setText");
 			return Translation.getValue(String.class, key, defaultValue);
 		}
 

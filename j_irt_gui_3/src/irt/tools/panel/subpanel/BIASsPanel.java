@@ -119,7 +119,7 @@ public class BIASsPanel extends JPanel {
 
 			public void ancestorAdded(AncestorEvent arg0) {
 
-				DeviceInfo deviceInfo = GuiController.getDeviceInfo();
+				DeviceInfo deviceInfo = GuiController.getDeviceInfo(linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0));
 				logger.trace(deviceInfo);
 				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()==2 : true;
 
@@ -251,7 +251,7 @@ public class BIASsPanel extends JPanel {
 
 			private ControllerAbstract addController(ControllerAbstract abstractController){
 
-				Thread t = new Thread(abstractController, abstractController.getName());
+				Thread t = new Thread(abstractController);
 
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)

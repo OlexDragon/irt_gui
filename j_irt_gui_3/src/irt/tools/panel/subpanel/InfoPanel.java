@@ -91,13 +91,13 @@ public class InfoPanel extends JPanel implements Refresh {
 			public void ancestorAdded(AncestorEvent arg0) {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(packetListener);
 			}
-			public void ancestorMoved(AncestorEvent arg0) {	}
 			public void ancestorRemoved(AncestorEvent arg0) {
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 				if(secondsCount!=null)
 					secondsCount.setRunning(false);
 				packetListener = null;
 			}
+			public void ancestorMoved(AncestorEvent arg0) {	}
 		});
 
 		this.linkHeader = linkHeader;
@@ -216,7 +216,7 @@ public class InfoPanel extends JPanel implements Refresh {
 				else
 					transformer.setHeight(WINDOW_MAX_HEIGHT);
 
-				Thread t = new Thread(transformer, "Size Change");
+				Thread t = new Thread(transformer);
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
@@ -300,7 +300,7 @@ public class InfoPanel extends JPanel implements Refresh {
 
 		public SecondsCount(int firmwareBuildCounter){
 			this.firmwareBuildCounter = firmwareBuildCounter;
-			Thread t = new Thread(this, "Firmware Build Counter");
+			Thread t = new Thread(this);
 			int priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				t.setPriority(priority-1);

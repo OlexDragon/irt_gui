@@ -33,7 +33,7 @@ public class BlinkControl implements Runnable {
 		});
 		timer.setRepeats(false);
 
-		Thread t = new Thread(this, "Blink Control");
+		Thread t = new Thread(this);
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

@@ -1,7 +1,5 @@
 package irt.tools.panel.head;
 
-import irt.controller.GuiController;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -19,10 +17,10 @@ public class Console extends JDialog {
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
 
-	private static final int MAX_QUEUE_SIZE = 1024;
+	private static final int MAX_QUEUE_SIZE = 50;
 
 	public static final JTextArea TEXT_AREA = new JTextArea();
-	private static final int MAX_LINE_COUNT = 5000;
+	private static final int MAX_LINE_COUNT = 500;
 	private static ThreadsWorker threadsWorker = new ThreadsWorker();
 
 	public Console(JFrame gui, String string) {
@@ -64,11 +62,10 @@ public class Console extends JDialog {
 	private static class ThreadsWorker extends Thread{
 
 		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
-		private boolean queueIsFull;
 		private Console console;
+		private boolean queueIsFull;
 
 		public ThreadsWorker() {
-			queueIsFull = GuiController.getPrefs().getBoolean("is_slow", true);
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				setPriority(priority-1);
@@ -85,7 +82,7 @@ public class Console extends JDialog {
 					int lineCount = TEXT_AREA.getLineCount();
 					if (lineCount > MAX_LINE_COUNT) {
 						try {
-							TEXT_AREA.replaceRange(null, TEXT_AREA.getLineStartOffset(0), TEXT_AREA.getLineEndOffset(0));
+							TEXT_AREA.replaceRange(null, TEXT_AREA.getLineStartOffset(0), TEXT_AREA.getLineEndOffset(10));
 						} catch (BadLocationException e) {
 							logger.catching(e);
 						}
@@ -101,18 +98,23 @@ public class Console extends JDialog {
 
 		public void append(String string) {
 			try {
-				if (console!=null && stringQueue.size() < MAX_QUEUE_SIZE && (!queueIsFull || console.isVisible())) {
-					if (queueIsFull) {
-						string = "\n*** computer is very slow... Information has been lost... ***\n" + string;
+				if (console!=null && console.isVisible()) {
+					boolean isFull = stringQueue.size() >= MAX_QUEUE_SIZE-1;
+
+					if (isFull){
+						if(!queueIsFull){
+							queueIsFull = true;
+							stringQueue.put("\n*** computer is very slow... Information has been lost... ***\n");
+						}
+					}else{
 						queueIsFull = false;
-						GuiController.getPrefs().putBoolean("is_slow", false);
+						stringQueue.put(string);
 					}
-					stringQueue.add(string);
+
 				} else {
-					if (!queueIsFull) {
-						logger.warn("String Queue is full.");
-						queueIsFull = true;
-						GuiController.getPrefs().putBoolean("is_slow", true);
+					if(TEXT_AREA.getText()!=null){
+						stringQueue.clear();
+						TEXT_AREA.setText(null);
 					}
 				}
 			} catch (Exception e) {

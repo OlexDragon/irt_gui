@@ -151,4 +151,8 @@ public class ProgressBar extends JPanel implements Observer{
 			}
 		}
 	}
+
+	public static void setValue(long value) {
+		ProgressBar.value.setValue(value);
+	}
 }

@@ -2,8 +2,6 @@ package irt.irt_gui;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.GuiControllerUser;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
 
 import java.awt.EventQueue;
 import java.awt.GraphicsDevice;
@@ -16,10 +14,11 @@ import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class UserIrtGui extends IrtGui {
-	public UserIrtGui() {
-	}
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
+
+	public UserIrtGui() {
+	}
 
 	public static void main(String[] args) {
 		
@@ -61,13 +60,7 @@ public class UserIrtGui extends IrtGui {
 	@Override
 	protected GuiControllerAbstract getNewGuiController() {
 		GuiControllerUser guiControllerUser = new GuiControllerUser(this);
-		guiControllerUser.addChangeListener(new ValueChangeListener() {
-
-			@Override
-			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				headPanel.setPowerOn((Boolean)valueChangeEvent.getSource());
-			}
-		});
+		guiControllerUser.addChangeListener(valueChangeListener);
 		return guiControllerUser;
 	}
 }

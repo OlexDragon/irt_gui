@@ -12,7 +12,6 @@ import irt.data.packet.Packet;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -61,7 +60,7 @@ public class AlarmsController extends ControllerAbstract {
 //	private DefaultController alarmController6;
 
 	public AlarmsController(LinkHeader linkHeader, JPanel panel) {
-		super("AlarmsController", new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS), panel, Style.CHECK_ALWAYS);
+		super("AlarmsController", new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs), panel, Style.CHECK_ALWAYS);
 		this.linkHeader = linkHeader;
 	}
 
@@ -83,7 +82,7 @@ public class AlarmsController extends ControllerAbstract {
 
 	private void startController(DefaultController controller, JLabel label) {
 
-		Thread t = new Thread(controller, controller.getName());
+		Thread t = new Thread(controller);
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
@@ -245,7 +244,7 @@ public class AlarmsController extends ControllerAbstract {
 			logger.entry(source);
 			try{
 			if(source !=null && source instanceof short[]){
-				logger.debug("valueChanged(ValueChangeEvent {})", Arrays.toString((short[])source));
+				logger.debug("valueChanged(ValueChangeEvent {})", source);
 				if(isSend())
 					setControllers((short[])source);
 				else
@@ -258,7 +257,7 @@ public class AlarmsController extends ControllerAbstract {
 		}
 
 		private void fillFields(short[] source) {
-			logger.debug("fillFields(Object {})", source);
+			logger.debug("fillFields(short[] {})", source);
 
 			byte status = (byte) (source[2]&7);
 

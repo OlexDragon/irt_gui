@@ -42,12 +42,14 @@
  	<Logger name="irt.tools.panel.UserPicobucPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.PicobucPanel" level="WARN"/>
 
+ 	<Logger name="irt.tools.panel.head.IrtPanel" level="debug"/>
  	<Logger name="irt.tools.panel.head.HeadPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.head.UnitsContainer" level="WARN"/>
 
- 	<Logger name="irt.tools.panel.vizards.address.AddressWizard" level="WARN"/>
+ 	<Logger name="irt.tools.panel.vizards.address.AddressWizard" level="ALL"/>
  	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel$AddressWorker" level="WARN"/>
+ 	<Logger name="irt.tools.panel.vizards.address.ManualAddressPanel" level="ALL"/>
 
   	<Logger name="irt.tools.panel.subpanel.BIASsPanel" level="WARN"/>
   	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="WARN"/>
@@ -59,7 +61,7 @@
 
  	<Logger name="irt.controller.DeviceDebagController" level="WARN"/>
  	<Logger name="irt.controller.DefaultController" level="WARN"/>
- 	<Logger name="irt.controller.DumpControllers" level="WARN"/>
+ 	<Logger name="irt.controller.DumpControllers" level="debug"/>
 
  	<Logger name="irt.controller.translation.Translation" level="WARN"/>
 
@@ -67,6 +69,8 @@
  	<Logger name="irt.controller.GuiControllerAbstract$Remover" level="WARN"/>
  	<Logger name="irt.controller.GuiControllerUser" level="WARN"/>
  
+  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="error"/>
+
   	<Logger name="irt.controller.serial_port.value.getter.Getter" level="WARN"/>
  
   	<Logger name="irt.data.PacketThread" level="WARN"/>
@@ -76,7 +80,7 @@
       <AppenderRef ref="DumpFile" />
     </Logger>
 
-    <Logger name="comPort" level="error">
+    <Logger name="comPort" level="info">
       <AppenderRef ref="communication" />
     </Logger>
 

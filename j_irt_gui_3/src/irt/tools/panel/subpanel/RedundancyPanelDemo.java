@@ -99,12 +99,15 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
 
 		lblRedundancy = new JLabel(Translation.getValue(String.class, "redundancy", "Redundancy"));
+		lblRedundancy.setName("redundancy");
 		lblRedundancy.setFont(font);
 		
 		lblMode = new JLabel(Translation.getValue(String.class, "redundancy.mode", "Mode"));
+		lblMode.setName("redundancy.mode");
 		lblMode.setFont(font);
 		
 		lblUnitName = new JLabel(Translation.getValue(String.class, "redundancy.unit_name", "Unit Name"));
+		lblUnitName.setName("redundancy.unit_name");
 		lblUnitName.setFont(font);
 		
 		lblImage = new ImageLabel(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")), null);
@@ -189,6 +192,7 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 		String text = Translation.getValue(String.class, "SET_ONLINE", "Set Online");
 		lblSetOnline = new VarticalLabel(text, false);
 		lblSetOnline.setToolTipText(text);
+		lblSetOnline.setName("SET_ONLINE");
 		lblSetOnline.setHorizontalAlignment(SwingConstants.CENTER);
 		lblSetOnline.setFont(font);
 		GroupLayout gl_panel = new GroupLayout(panel);
@@ -206,18 +210,17 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 		setLayout(groupLayout);
 	}
 
-
 	@Override
 	public void refresh() {
 		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
 
-		lblRedundancy.setText(Translation.getValue(String.class, "redundancy", "Redundancy"));
+		lblRedundancy.setText(Translation.getValue(String.class, lblRedundancy.getName(), "Redundancy"));
 		lblRedundancy.setFont(font);
 
-		lblMode.setText(Translation.getValue(String.class, "redundancy.mode", "Mode"));
+		lblMode.setText(Translation.getValue(String.class, lblMode.getName(), "Mode"));
 		lblMode.setFont(font);
 
-		lblUnitName.setText(Translation.getValue(String.class, "redundancy.unit_name", "Unit Name"));
+		lblUnitName.setText(Translation.getValue(String.class, lblUnitName.getName(), "Unit Name"));
 		lblUnitName.setFont(font);
 
 		String text = Translation.getValue(String.class, lblSetOnline.getName(), SET_ONLINE);

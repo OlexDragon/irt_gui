@@ -46,7 +46,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 				controller = getNewController();
 				 if(statusListener!=null)
 					 controller.addStatusListener(statusListener);
-				Thread t = new Thread(controller, getClass().getSimpleName());
+				Thread t = new Thread(controller);
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);

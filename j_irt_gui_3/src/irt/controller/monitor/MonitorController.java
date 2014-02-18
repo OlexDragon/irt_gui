@@ -43,23 +43,33 @@ public class MonitorController extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				if(valueChangeEvent.getID()==((GetterAbstract)getPacketWork()).getPacketId()){
 
-					Object source = valueChangeEvent.getSource();
-					ledLock.setToolTipText(source.toString());
-					if(source instanceof Long){
-							Long status = ((Long)source);
+				try {
+					if (valueChangeEvent.getID() == ((GetterAbstract) getPacketWork()).getPacketId()) {
 
-						if((status&LOCK)==0)
-							ledLock.setLedColor(Color.RED);
-						else
-							ledLock.setLedColor(Color.GREEN);
+						Object source = valueChangeEvent.getSource();
 
-						ledMute.setOn((	status&MUTE)>0);
+						if(ledLock!=null)
+							ledLock.setToolTipText(source.toString());
 
-						fireStatusChangeListener(new ValueChangeEvent( status, PacketWork.PACKET_ID_MEASUREMENT_STATUS));
+						if (source instanceof Long) {
+							Long status = ((Long) source);
+
+							if(ledLock!=null){
+								if ((status & LOCK) == 0)
+									ledLock.setLedColor(Color.RED);
+								else
+									ledLock.setLedColor(Color.GREEN);
+							}
+
+							ledMute.setOn((status & MUTE) > 0);
+
+							fireStatusChangeListener(new ValueChangeEvent(status, PacketWork.PACKET_ID_MEASUREMENT_STATUS));
+						}
+						ledMute.setToolTipText("Status flags= " + source);
 					}
-					ledMute.setToolTipText("Status flags= "+source);
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
 			}
 		};
@@ -86,7 +96,7 @@ public class MonitorController extends ControllerAbstract {
 				Value value = new ValueDouble(0, 1);
 				value.setPrefix(prefix);
 				ControllerAbstract abstractController = new MeasurementController(name, ((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_INPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER);
-				t = new Thread(abstractController, name);
+				t = new Thread(abstractController);
 				t.setDaemon(true);
 				t.start();
 				controllerList.add(abstractController);
@@ -95,7 +105,7 @@ public class MonitorController extends ControllerAbstract {
 				value = new ValueDouble(0, 1);
 				value.setPrefix(prefix);
 				abstractController = new MeasurementController(name, ((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_OUTPUT_POWER, value, PacketWork.PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER);
-				t = new Thread(abstractController, name);
+				t = new Thread(abstractController);
 				t.setDaemon(true);
 				t.start();
 				controllerList.add(abstractController);
@@ -105,7 +115,7 @@ public class MonitorController extends ControllerAbstract {
 				value = new ValueDouble(0, 1);
 				value.setPrefix(" C");
 				abstractController = new MeasurementController(name, ((LinkedPacketThread)getPacketWork().getPacketThread()).getLinkHeader(),(JLabel)component, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_25W_BAIS_TEMPERATURE, value, PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE);
-				t = new Thread(abstractController, name);
+				t = new Thread(abstractController);
 				t.setDaemon(true);
 				t.start();
 				controllerList.add(abstractController);

@@ -16,6 +16,8 @@ import javax.swing.SwingWorker;
 @SuppressWarnings("serial")
 public class MonitorPanel extends MonitorPanelSSPA {
 
+	protected JLabel lblInputPowerTxt;
+	protected JLabel lblInputPower;
 	private LED ledLock;
 
 	public MonitorPanel(LinkHeader linkHeader) {
@@ -48,10 +50,28 @@ public class MonitorPanel extends MonitorPanelSSPA {
 	@Override
 	protected void swingWorkers() {
 		super.swingWorkers();
+		//Set LABELS font
 		new SwingWorker<Font, Void>() {
 			@Override
 			protected Font doInBackground() throws Exception {
-				Thread.currentThread().setName("MonitorPanel.leds.setFont");
+				return Translation.getFont()
+						.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
+						.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));
+			}
+			@Override
+			protected void done() {
+				try{
+				Font font = get();
+				lblInputPower.setFont(font);
+				lblInputPowerTxt.setFont(font);
+				}catch(InterruptedException | ExecutionException e){
+					logger.catching(e);
+				}
+			}
+		}.execute();
+		new SwingWorker<Font, Void>() {
+			@Override
+			protected Font doInBackground() throws Exception {
 				return Translation.getFont().deriveFont(Translation.getValue(Float.class, "monitor.leds.font.size", 12f))
 						.deriveFont(Translation.getValue(Integer.class, "monitor.leds.font.style", Font.PLAIN));
 			}
@@ -69,7 +89,6 @@ public class MonitorPanel extends MonitorPanelSSPA {
 
 			@Override
 			protected Rectangle doInBackground() throws Exception {
-				Thread.currentThread().setName("MonitorPanel.ledLock.setBounds");
 				return new Rectangle(Translation.getValue(Integer.class, "monitor.led.lock.x", 17)
 						, Translation.getValue(Integer.class, "monitor.led.lock.y", 138)
 						, Translation.getValue(Integer.class, "monitor.led.lock.width", 100)
@@ -92,6 +111,7 @@ public class MonitorPanel extends MonitorPanelSSPA {
 	public void refresh() {
 		logger.entry();
 		new TextWorker(ledLock, "lock", "LOCK").execute();
+		new TextWorker(lblInputPowerTxt, "input_power", "Input Power").execute();
 		super.refresh();
 		logger.exit();
 	}

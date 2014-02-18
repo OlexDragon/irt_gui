@@ -27,7 +27,7 @@ public abstract class ControllerAbstract implements Runnable{
 		CHECK_ALWAYS
 	}
 	private PacketWork packetWork;
-	private PacketListener packetListener;
+	protected PacketListener packetListener;
 	protected ValueChangeListener valueChangeListener;
 
 	protected volatile boolean run = true;
@@ -39,6 +39,7 @@ public abstract class ControllerAbstract implements Runnable{
 	private JPanel owner;
 
 	protected Observable observable;
+	private String name;
 
 	public ControllerAbstract(String controllerName, PacketWork packetWork, JPanel panel, Style style) {
 		logger.entry(controllerName);
@@ -76,9 +77,10 @@ public abstract class ControllerAbstract implements Runnable{
 	@Override
 	public void run() {
 //		System.out.println("Run - "+ControllerAbstract.this.getClass().getSimpleName());
-		if(packetListener!=null && packetWork!=null){
+		if(packetWork!=null){
 
-			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(packetListener);
+			if(packetListener!=null)
+				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(packetListener);
 
 			while(run){
 				synchronized (this) {
@@ -101,7 +103,8 @@ public abstract class ControllerAbstract implements Runnable{
 				}
 			}
 			logger.trace("{} is stopped", ControllerAbstract.this.getClass().getSimpleName());
-			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
+			if(packetListener!=null)
+				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 			clear();
 		}
 	}
@@ -115,7 +118,7 @@ public abstract class ControllerAbstract implements Runnable{
 	}
 
 	protected void clear(){
-		packetWork.removeVlueChangeListener(valueChangeListener);
+		packetWork.removeVlueChangeListeners();
 		packetWork.clear();
 		packetWork = null;
 	}
@@ -138,11 +141,11 @@ public abstract class ControllerAbstract implements Runnable{
 	protected PacketListener getNewPacketListener() {
 		return new PacketListener() {
 
-			@Override
-			public void packetRecived(Packet packet) {
-				if(setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style==Style.CHECK_ONCE)
-					setSend(false);
-			}
+								@Override
+								public void packetRecived(Packet packet) {
+									if(setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style==Style.CHECK_ONCE)
+										setSend(false);
+								}
 		};
 	}
 
@@ -194,12 +197,11 @@ public abstract class ControllerAbstract implements Runnable{
 	}
 
 	public String getName() {
-		return Thread.currentThread().getName();
+		return name;
 	}
 
 	public void setName(String name) {
-		logger.trace("setName(String {})", name);
-		Thread.currentThread().setName(name);
+		this.name = name;
 	}
 
 	@Override

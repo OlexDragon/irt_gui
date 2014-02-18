@@ -1,6 +1,11 @@
 package irt.data;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 public class StringData {
+
+	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
 
 	private String str;
 
@@ -18,7 +23,7 @@ public class StringData {
 
 	@Override
 	public boolean equals(Object obj) {
-		return str.equals(obj);
+		return obj!=null ? obj.hashCode()==hashCode() : false;
 	}
 
 	@Override

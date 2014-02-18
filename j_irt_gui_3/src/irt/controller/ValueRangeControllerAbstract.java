@@ -129,7 +129,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
 		textSliderController = new TextSliderController(controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
-		Thread t = new Thread(textSliderController, controllerName);
+		Thread t = new Thread(textSliderController);
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

@@ -5,6 +5,7 @@ import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public abstract class GetterAbstract extends ValueChangeListenerClass implements PacketWork {
 
+	private LinkHeader linkHeader;
 	private byte packetType;
 	private byte groupId;
 	private byte packetParameterHeaderCode;
@@ -28,6 +30,7 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId) {
 		logger.trace("packetType={},groupId={},packetParameterHeaderCode={},packetId={}", packetType, groupId, packetParameterHeaderCode, packetId);
+		this.linkHeader = linkHeader;
 		this.packetType = packetType;
 		this.groupId = groupId;
 		this.packetParameterHeaderCode = packetParameterHeaderCode;
@@ -137,5 +140,26 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 	public Integer getPriority() {
 		return 0;
+	}
+
+	public LinkHeader getLinkHeader() {
+		return linkHeader;
+	}
+
+	protected boolean isAddressEquals(Packet packet) {
+		boolean addrEquals;
+
+		if(packet!=null){
+			if(packet instanceof LinkedPacket){
+				byte addr = ((LinkedPacket)packet).getLinkHeader().getAddr();
+				addrEquals = linkHeader.getAddr() == addr;
+			}else if(linkHeader==null)
+				addrEquals = true;
+			else
+				addrEquals = false;
+		}else
+			addrEquals = false;
+
+		return addrEquals;
 	}
 }

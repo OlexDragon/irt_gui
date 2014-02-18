@@ -6,6 +6,7 @@ import irt.tools.label.VarticalLabel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,16 +25,16 @@ public class Panel extends JPanel {
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
-	protected int MIN_WIDTH = 25;
-	protected int MID_WIDTH = 310;
-	protected int MAX_WIDTH = 615;
-	protected int MIN_HEIGHT = 25;
-	protected int MAX_HEIGHT = 444;
-	protected int BTN_WIDTH;
+	public int MIN_WIDTH = 25;
+	public int MID_WIDTH = 310;
+	public int MAX_WIDTH = 615;
+	public int MIN_HEIGHT = 25;
+	public int MAX_HEIGHT = 444;
+	public int BTN_WIDTH;
 
 	protected Color backgroundColor = new Color(0x0B,0x17,0x3B);
 
-	protected VarticalLabel verticalLabel;
+	private VarticalLabel verticalLabel;
 	protected JPanel userPanel;
 	protected JPanel extraPanel;
 
@@ -55,6 +56,7 @@ public class Panel extends JPanel {
 		setLayout(null);
 
 		JButton btnMaxSize = new JButton("");
+		btnMaxSize.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnMaxSize.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -70,6 +72,7 @@ public class Panel extends JPanel {
 		BTN_WIDTH = btnMaxSize.getWidth();
 
 		verticalLabel = new VarticalLabel(verticalLabelText, false);
+		verticalLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		verticalLabel.setBounds(0, MIN_HEIGHT, MIN_WIDTH, getHeight()-MIN_HEIGHT);
 		verticalLabel.setOpaque(true);
 		verticalLabel.setBackground(new Color(0, 153, 255));
@@ -134,6 +137,27 @@ public class Panel extends JPanel {
 	public void setThinSize(){
 		if(getWidth()!=MIN_WIDTH || getHeight()!=MAX_HEIGHT)
 			setSize(MIN_WIDTH, MAX_HEIGHT);
+	}
+
+	public void setVerticalLabelForeground(Color labelForeground) {
+		verticalLabel.setForeground(labelForeground);
+	}
+
+	public void setVerticalLabelBackground(Color labelBackground) {
+		verticalLabel.setBackground(labelBackground);
+		//TODO
+	}
+
+	public void setVerticalLabelFont(Font font) {
+		verticalLabel.setFont(font);
+	}
+
+	public void setVerticalLabelText(String text) {
+		verticalLabel.setText(text);
+	}
+
+	public VarticalLabel getVarticalLabel() {
+		return verticalLabel;
 	}
 
 	public void refresh() {

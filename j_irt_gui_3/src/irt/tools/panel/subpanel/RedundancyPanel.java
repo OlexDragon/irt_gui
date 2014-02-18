@@ -144,7 +144,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE) {
 											@Override
 											public boolean set(Packet packet) {
-												if(packet!=null && packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE)
+												if(isAddressEquals(packet) && packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE)
 													new GetterWorker(packet);
 												return true;
 											}
@@ -156,7 +156,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE){
 											@Override
 											public boolean set(Packet packet) {
-												if(packet!=null
+												if(isAddressEquals(packet)
 														&& packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE)
 													new GetterWorker(packet);
 												return true;
@@ -169,7 +169,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME){
 											@Override
 											public boolean set(Packet packet) {
-												if(packet!=null
+												if(isAddressEquals(packet)
 														&& packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME)
 													new GetterWorker(packet);
 												return true;
@@ -182,7 +182,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT){
 											@Override
 											public boolean set(Packet packet) {
-												if(packet!=null
+												if(isAddressEquals(packet)
 														&& packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT)
 													new GetterWorker(packet);
 												return true;
@@ -360,7 +360,6 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		private Packet packet;
 
 		public GetterWorker(Packet packet) {
-			Thread.currentThread().setName("Packet ID="+packet.getHeader().getPacketId());
 			logger.trace(packet);
 			this.packet = packet;
 			execute();
@@ -368,7 +367,6 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			Thread.currentThread().setName(packet.getHeader().getPacketIdStr());
 			try {
 				switch (packet.getHeader().getPacketId()) {
 				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
