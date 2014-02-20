@@ -68,7 +68,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 				t.start();
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-				networkController.setRun(false);
+				networkController.stop();
 				networkController = null;
 			}
 		});

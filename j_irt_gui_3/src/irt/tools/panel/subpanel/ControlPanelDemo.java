@@ -135,7 +135,7 @@ public class ControlPanelDemo extends JPanel {
 
 			public void ancestorRemoved(AncestorEvent event) {
 				if(ñontroller!=null)
-					ñontroller.setRun(false);
+					ñontroller.stop();
 				ñontroller = null;
 			}
 		});

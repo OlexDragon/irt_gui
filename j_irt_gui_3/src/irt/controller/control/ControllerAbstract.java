@@ -50,8 +50,9 @@ public abstract class ControllerAbstract implements Runnable{
  		setListeners();
 
  		valueChangeListener = addGetterValueChangeListener();
-		if(valueChangeListener!=null && packetWork!=null)
+		if(valueChangeListener!=null && packetWork!=null){
 			packetWork.addVlueChangeListener(valueChangeListener);
+		}
 		packetListener = getNewPacketListener();
 
 		if(panel!=null){
@@ -86,23 +87,21 @@ public abstract class ControllerAbstract implements Runnable{
 				synchronized (this) {
 					try {
 
-						logger.trace(">>> run - {}  : {}", send, getPacketWork().getPacketThread());
 
 						if(send){
 							send();
 							if(isWait())
-								logger.trace("wait({})", waitTime);
 								wait(waitTime);
-						}else{
-							logger.trace("wait()");
+						}else
 							wait();
-						}
+
 					} catch (InterruptedException e) {
 						logger.catching(e);
 					}
 				}
 			}
 			logger.trace("{} is stopped", ControllerAbstract.this.getClass().getSimpleName());
+
 			if(packetListener!=null)
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 			clear();
@@ -141,16 +140,16 @@ public abstract class ControllerAbstract implements Runnable{
 	protected PacketListener getNewPacketListener() {
 		return new PacketListener() {
 
-								@Override
-								public void packetRecived(Packet packet) {
-									if(setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style==Style.CHECK_ONCE)
-										setSend(false);
-								}
+			@Override
+			public void packetRecived(Packet packet) {
+				if (setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style == Style.CHECK_ONCE)
+					setSend(false);
+			}
 		};
 	}
 
-	public synchronized void setRun(boolean run) {
-		this.run = run;
+	public synchronized void stop() {
+		this.run = false;
 		notify();
 	}
 

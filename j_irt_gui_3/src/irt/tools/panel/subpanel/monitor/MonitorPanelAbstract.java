@@ -57,10 +57,9 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 			public void ancestorRemoved(AncestorEvent arg0) {
 				if(controller!=null && controller.isRun())
-					controller.setRun(false);
+					controller.stop();
 			}
 		});
-//TODO		setBackground(new Color(51, 51, 153));
 
 		setOpaque(false);
 

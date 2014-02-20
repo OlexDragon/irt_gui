@@ -78,7 +78,7 @@ public class PLLsPanel extends JPanel {
 			}
 			public void ancestorRemoved(AncestorEvent event) {
 				if(registerController!=null)
-					registerController.setRun(false);
+					registerController.stop();
 				if(selectedTextField!=null)
 					selectedTextField.setBackground(Color.WHITE);
 			}
@@ -327,7 +327,7 @@ public class PLLsPanel extends JPanel {
 
 	private void startController() {
 		if(registerController!=null)
-			registerController.setRun(false);
+			registerController.stop();
 
 		registerController = new DeviceDebagController("PLL reg.N9", txtPllReg,
 									null,

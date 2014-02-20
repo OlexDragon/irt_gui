@@ -9,7 +9,7 @@
     <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.log"
     						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{yyyy-MM-dd}-%i.log.gz"
     						  bufferedIO="false">
-		<PatternLayout pattern="%n%-5p %d%n %M (%F:%L)\n\t%m%n" />
+		<PatternLayout pattern="%n%-5p %d%n %M (%F:%L)%n%m%n" />
 		<Policies>
 			<SizeBasedTriggeringPolicy size="500 MB" />
 		</Policies>
@@ -46,13 +46,13 @@
  	<Logger name="irt.tools.panel.head.HeadPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.head.UnitsContainer" level="WARN"/>
 
- 	<Logger name="irt.tools.panel.vizards.address.AddressWizard" level="ALL"/>
+ 	<Logger name="irt.tools.panel.vizards.address.AddressWizard" level="WARN"/>
  	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel$AddressWorker" level="WARN"/>
- 	<Logger name="irt.tools.panel.vizards.address.ManualAddressPanel" level="ALL"/>
+ 	<Logger name="irt.tools.panel.vizards.address.ManualAddressPanel" level="WARN"/>
 
   	<Logger name="irt.tools.panel.subpanel.BIASsPanel" level="WARN"/>
-  	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="WARN"/>
+  	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="debug"/>
 
   	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="WARN"/>
 
@@ -61,7 +61,7 @@
 
  	<Logger name="irt.controller.DeviceDebagController" level="WARN"/>
  	<Logger name="irt.controller.DefaultController" level="WARN"/>
- 	<Logger name="irt.controller.DumpControllers" level="debug"/>
+ 	<Logger name="irt.controller.DumpControllers" level="WARN"/>
 
  	<Logger name="irt.controller.translation.Translation" level="WARN"/>
 

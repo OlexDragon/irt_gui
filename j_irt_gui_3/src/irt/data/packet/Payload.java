@@ -19,7 +19,7 @@ public class Payload {
 	public static final byte 	DI_DEVICE_TYPE				= 1,
 								DI_FIRMWARE_VERSION			= 2,
 								DI_FIRMWARE_BUILD_DATE		= 3,
-								DI_FIRMWARE_BUILD_COUNTER	= 4,
+								DI_UNIT_UPTIME_COUNTER	= 4,
 								DI_DEVICE_SN 				= 5,
 								DI_UNIT_NAME				= 6,
 								DI_UNIT_PART_NUMBER			= 7;

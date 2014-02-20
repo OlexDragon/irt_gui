@@ -333,8 +333,7 @@ public class DemoPanel extends Panel {
 		AlarmsPanel alarmsPanel = new AlarmsPanel(null);
 		tabbedPane.addTab("alarms", alarmsPanel);
 
-		JPanel panel = new RedundancyPanelDemo();
-		tabbedPane.addTab("redundancy", panel);
+		tabbedPane.addTab("redundancy", new RedundancyPanelDemo());
 
 		int tabCount = tabbedPane.getTabCount();
 		for(int i=0; i<tabCount; i++){

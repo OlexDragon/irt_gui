@@ -81,7 +81,7 @@ public class InfoPanel extends JPanel implements Refresh {
 
 						PacketHeader h = packet.getHeader();
 						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_DEVICE_INFO && h.getType()!=Packet.IRT_SLCP_PACKET_TYPE_REQUEST){
-							int firmwareBuildCounter = new DeviceInfo(packet).getFirmwareBuildCounter();
+							int firmwareBuildCounter = new DeviceInfo(packet).getUptimeCounter();
 							secondsCount.setFirmwareBuildCounter(firmwareBuildCounter);
 						}
 					}
@@ -269,7 +269,7 @@ public class InfoPanel extends JPanel implements Refresh {
 			if(unitPartNumber!=null)
 				lblUnitPartNumber.setText(unitPartNumber.toString());
 
-			int firmwareBuildCounter = deviceInfo.getFirmwareBuildCounter();
+			int firmwareBuildCounter = deviceInfo.getUptimeCounter();
 			lblCount.setText(calculateTime(firmwareBuildCounter));
 			secondsCount = new SecondsCount(firmwareBuildCounter);
 		}

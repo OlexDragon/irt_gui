@@ -96,7 +96,7 @@ public class ComPort extends SerialPort {
 		try {
 
 if(!isRun())
-	setRun(true);
+	setRun(true, "Restart");
 
 do{
 
@@ -188,7 +188,7 @@ do{
 					comPortLogger.warn("isFlagSequence() = false");
 				}
 			}else
-				setRun(false);
+				setRun(false, "run="+run+", data="+data);
 }while(isComfirm && packet.getPayloads()==null && ++runTimes<3 && isRun());//if error repeat up to 3 times
 
 				if(isRun()) {
@@ -204,7 +204,7 @@ do{
 			comPortLogger.catching(e);
 			if(timesTimeout<3){
 				timesTimeout++;
-				setRun(false);
+				setRun(false, "Times Timeout");
 			}
 			Console.appendLn(e.getLocalizedMessage(), "Error");
 		}
@@ -476,8 +476,8 @@ do{
 		return readBytes==null ? null : index==readBytes.length ? readBytes : Arrays.copyOf(readBytes, index);
 	}
 
-	public void setRun(boolean run) {
-		comPortLogger.warn("setRun({})", run);
+	public void setRun(boolean run, String why) {
+		comPortLogger.warn("setRun({}, {})", run, why);
 		synchronized (this) {
 			this.run = run;
 			notify();

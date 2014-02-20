@@ -50,7 +50,7 @@ public class StoreConfigController extends ControllerAbstract {
 					if(	source instanceof Boolean){
 
 						count = 0;
-							setRun(false);
+							stop();
 							JOptionPane.showMessageDialog( null, "The Configuration has been stored.");
 					}else{
 
@@ -60,7 +60,7 @@ public class StoreConfigController extends ControllerAbstract {
 							if(JOptionPane.showConfirmDialog( null, "Could not stor the configuration. Try one more time?", "Store Config", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
 								setSend(true);
 							}else
-								setRun(false);
+								stop();
 						}
 
 						count++;

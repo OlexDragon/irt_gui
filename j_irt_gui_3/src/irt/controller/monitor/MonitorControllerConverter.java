@@ -183,7 +183,7 @@ public class MonitorControllerConverter extends ControllerAbstract {
 	protected void clear() {
 		super.clear();
 		for(ControllerAbstract c:controllerList)
-			c.setRun(false);
+			c.stop();
 		controllerList.clear();
 		controllerList = null;
 		ledLock = null;

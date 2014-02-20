@@ -26,7 +26,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 	private ActionListener timerListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			setRun(false);
+			stop();
 			logger.trace("Timer.actionPerformed, this={}", this);
 		}
 	};
@@ -65,7 +65,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 				synchronized (this) { try { wait(500); } catch (InterruptedException e) { logger.catching(e); } }
 				txtField.setText(str);
 
-				setRun(false);
+				stop();
 			}
 		};
 	}

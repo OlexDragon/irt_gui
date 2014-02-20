@@ -12,10 +12,10 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.swing.event.EventListenerList;
 
+import jssc.SerialPortException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-
-import jssc.SerialPortException;
 
 public class ComPortThreadQueue extends Thread {
 
@@ -127,7 +127,7 @@ public class ComPortThreadQueue extends Thread {
 		if(oldSerialPort!=null){
 			logger.warn("oldSerialPort={}, serialPort={}", oldSerialPort, serialPort);
 			clear();
-			oldSerialPort.setRun(false);
+			oldSerialPort.setRun(false, "Reset Serial Port");
 			try {
 				synchronized (serialPort) {
 					oldSerialPort.closePort();

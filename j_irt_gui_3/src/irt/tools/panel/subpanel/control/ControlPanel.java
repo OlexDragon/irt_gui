@@ -66,7 +66,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 	private JComboBox<String> cbLoSelect;
 	private boolean hasFreqSet;
 	private JLabel lblMute;
-	protected ImageButton btnMute;
+	private ImageButton btnMute;
 	protected ImageButton btnStoreConfig;
 	private int flags;
 
@@ -88,8 +88,13 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnMute.setToolTipText(muteText);
 		btnMute.setName("Button Mute");
 		Point p = getMuteButtonPosition();
+		if(p==null)
+			p = new Point(14, 101);
 		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
-		btnMute.setBounds(p.x, p.y, size, size);
+		btnMute
+		.setBounds(
+				p.x,
+				p.y, size, size);
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
@@ -142,6 +147,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
 		btnStoreConfig.setName("Store");
 		p = getConfigButtonPosition();
+		if(p==null)
+			p = new Point(151, 101);
 		btnStoreConfig.setBounds(p.x, p.y, size, size);
 		add(btnStoreConfig);
 		
@@ -219,7 +226,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 			public void ancestorRemoved(AncestorEvent event) {
 				if(ñontroller!=null)
-					ñontroller.setRun(false);
+					ñontroller.stop();
 				ñontroller = null;
 			}
 		});
@@ -279,7 +286,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 	private void setController(int control) {
 		if(ñontroller!=null)
-			ñontroller.setRun(false);
+			ñontroller.stop();
 
 		Thread t;
 		switch(control){

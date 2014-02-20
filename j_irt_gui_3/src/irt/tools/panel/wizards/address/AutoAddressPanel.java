@@ -126,7 +126,7 @@ public class AutoAddressPanel extends JPanel {
 		logger.debug("*** Stop ***");
 		synchronized (logger) {
 			for(ControllerAbstract c:controllers){
-				c.setRun(false);
+				c.stop();
 			}
 			clear();
 			GuiController.getComPortThreadQueue().clear();
@@ -197,7 +197,7 @@ public class AutoAddressPanel extends JPanel {
 								LinkedPacket lp = (LinkedPacket) packetThread.getPacket();
 
 								if(lp!=null && lp.getLinkHeader().getAddr()==addr){
-									c.setRun(false);
+									c.stop();
 									controllers.remove(c);
 									break;
 								}

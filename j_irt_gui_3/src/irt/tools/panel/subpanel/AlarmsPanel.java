@@ -78,7 +78,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOther = new JLabel(noAlarmTxt);
 		lblOther.setEnabled(false);
 		lblOther.setOpaque(true);
-		lblOther.setName("Other");
+		lblOther.setName(AlarmsController.OTHER);
 		lblOther.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOther.setForeground(new Color(204, 204, 204));
 		lblOther.setFont(font);
@@ -116,7 +116,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblRedundancy = new JLabel(noAlarmTxt);
 		lblRedundancy.setEnabled(false);
 		lblRedundancy.setOpaque(true);
-		lblRedundancy.setName("Redundancy");
+		lblRedundancy.setName(AlarmsController.REDUNDANCY);
 		lblRedundancy.setHorizontalAlignment(SwingConstants.CENTER);
 		lblRedundancy.setForeground(new Color(204, 204, 204));
 		lblRedundancy.setFont(font);
@@ -192,7 +192,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverTemperature = new JLabel(noAlarmTxt);
 		lblOverTemperature.setEnabled(false);
 		lblOverTemperature.setOpaque(true);
-		lblOverTemperature.setName("Over-Temperature");
+		lblOverTemperature.setName(AlarmsController.OVER_TEMPERATURE);
 		lblOverTemperature.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOverTemperature.setForeground(new Color(204, 204, 204));
 		lblOverTemperature.setFont(font);
@@ -224,7 +224,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblUnderCurrent = new JLabel(noAlarmTxt);
 		lblUnderCurrent.setEnabled(false);
 		lblUnderCurrent.setOpaque(true);
-		lblUnderCurrent.setName("Under-Current");
+		lblUnderCurrent.setName(AlarmsController.UNDER_CURRENT2);
 		lblUnderCurrent.setHorizontalAlignment(SwingConstants.CENTER);
 		lblUnderCurrent.setForeground(new Color(204, 204, 204));
 		lblUnderCurrent.setFont(font);
@@ -256,7 +256,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverCurrent = new JLabel(noAlarmTxt);
 		lblOverCurrent.setEnabled(false);
 		lblOverCurrent.setOpaque(true);
-		lblOverCurrent.setName("Over-Current");
+		lblOverCurrent.setName(AlarmsController.OVER_CURRENT);
 		lblOverCurrent.setHorizontalAlignment(SwingConstants.CENTER);
 		lblOverCurrent.setForeground(new Color(204, 204, 204));
 		lblOverCurrent.setFont(font);
@@ -289,7 +289,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblPllOutOffLock.setEnabled(false);
 		
 		lblPllOutOffLock.setOpaque(true);
-		lblPllOutOffLock.setName("PLL Out Off Lock");
+		lblPllOutOffLock.setName(AlarmsController.PLL_OUT_OF_LOCK2);
 		lblPllOutOffLock.setHorizontalAlignment(SwingConstants.CENTER);
 		lblPllOutOffLock.setForeground(new Color(204, 204, 204));
 		lblPllOutOffLock.setFont(font);
@@ -332,7 +332,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
 				if(alarmsController!=null){
-					alarmsController.setRun(false);
+					alarmsController.stop();
 					alarmsController = null;
 				}
 			}

@@ -46,7 +46,7 @@ public class DeviceInfo {
 	private StringData serialNumber = new StringData(null);
 	private StringData firmwareVersion;
 	private StringData firmwareBuildDate;
-	private int firmwareBuildCounter;
+	private int uptimeCounter;
 	private StringData unitName;
 	private InfoPanel infoPanel;
 
@@ -134,8 +134,8 @@ public class DeviceInfo {
 					case Payload.DI_FIRMWARE_BUILD_DATE:
 						firmwareBuildDate = pl.getStringData();
 						break;
-					case Payload.DI_FIRMWARE_BUILD_COUNTER:
-						firmwareBuildCounter = pl.getInt(0);
+					case Payload.DI_UNIT_UPTIME_COUNTER:
+						uptimeCounter = pl.getInt(0);
 						break;
 					case Payload.DI_UNIT_NAME:
 						unitName = pl.getStringData();
@@ -174,8 +174,8 @@ public class DeviceInfo {
 		return firmwareBuildDate;
 	}
 
-	public int getFirmwareBuildCounter() {
-		return firmwareBuildCounter;
+	public int getUptimeCounter() {
+		return uptimeCounter;
 	}
 
 	public StringData getUnitName() {
@@ -185,7 +185,7 @@ public class DeviceInfo {
 	@Override
 	public String toString() {
 		return "DeviceInfo [linkHeader=" + linkHeader + ", type=" + type + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber
-				+ ", firmwareVersion=" + firmwareVersion + ", firmwareBuildDate=" + firmwareBuildDate + ", firmwareBuildCounter=" + firmwareBuildCounter + ", unitName="
+				+ ", firmwareVersion=" + firmwareVersion + ", firmwareBuildDate=" + firmwareBuildDate + ", uptimeCounter=" + uptimeCounter + ", unitName="
 				+ unitName + "]";
 	}
 

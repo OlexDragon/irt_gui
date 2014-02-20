@@ -249,7 +249,7 @@ public class DACsPanel extends JPanel {
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
 				for(ControllerAbstract t:threadList){
-					t.setRun(false);
+					t.stop();
 					if(t instanceof DeviceDebagController)
 						((DeviceDebagController)t).removeFocusListener(controllerFocusListener);
 				}

@@ -7,14 +7,17 @@ import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
+import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
+import irt.tools.label.VarticalLabel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
+import irt.tools.panel.subpanel.RedundancyPanelDemo.REDUNDANCY_NAME;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
@@ -23,6 +26,7 @@ import java.awt.Font;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
 
 @SuppressWarnings("serial")
 public class UserPicobucPanel extends DevicePanel {
@@ -64,21 +68,96 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		Getter packetWork = new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs) {
+		Getter packetWork = new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs);
+
+		target = new DefaultController("PACKET_ID_ALARMS_IDs", packetWork, Style.CHECK_ALWAYS){
+
 			@Override
-			public boolean set(Packet packet) {
-				if(isAddressEquals(packet) && packet.getHeader().getPacketId()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE && packet.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_IDs) {
-					byte[] buffer = packet.getPayload(0).getBuffer();
-					if(buffer!=null && buffer[buffer.length-1]==AlarmsController.REDUNDANT_FAULT)
-						showRedundant();
-					target.setRun(false);
-				}
-				return true;
+			protected PacketListener getNewPacketListener() {
+				return new PacketListener() {
+
+					@Override
+					public void packetRecived(Packet packet) {
+						if (getPacketWork().isAddressEquals(packet) && packet.getHeader().getType() == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
+								&& packet.getHeader().getPacketId() == PacketWork.PACKET_ID_ALARMS_IDs) {
+
+							byte[] buffer = packet.getPayload(0).getBuffer();
+							if (buffer != null && buffer[buffer.length - 1] == AlarmsController.REDUNDANT_FAULT) {
+								showRedundant();
+								setRedundancyName();
+							}
+							stop();
+						}
+					}
+
+					private void setRedundancyName() {
+						startThread(
+								new DefaultController(
+										"Redundancy Enable",
+										new Getter(getLinkHeader(),
+												Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+												Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
+												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
+													@Override
+													protected PacketListener getNewPacketListener() {
+														return new PacketListener() {
+
+															private int count = 3;
+															private String text;
+															private REDUNDANCY_NAME name = null;
+
+															@Override
+															public void packetRecived(final Packet packet) {
+																new SwingWorker<String, Void>() {
+
+																	@Override
+																	protected String doInBackground() throws Exception {
+																		if(
+																				getPacketWork().isAddressEquals(packet) &&
+																				packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+																				packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
+																			)
+																			if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+																				REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
+																				if(n!=null && !n.equals(name)){
+
+																					VarticalLabel varticalLabel = getVarticalLabel();
+																					text = varticalLabel.getText();
+
+																					if(		text.startsWith(REDUNDANCY_NAME.BUC_A.toString()) ||
+																							text.startsWith(REDUNDANCY_NAME.BUC_B.toString()))
+																						text = text.substring(8);
+
+																					name = n;
+																					varticalLabel.setText(n+" : "+text);
+																				}
+																				setSend(false);
+																				count = 3;
+																			}else{
+																				if(--count<=0)
+																					stop();
+																			}
+																		return name.toString();
+																	}
+																}.execute();
+															}
+														};
+													}
+									
+										}
+								);
+					}
+				};
 			}
 		};
+		startThread(target);
+	}
 
-		target = new DefaultController("", packetWork, Style.CHECK_ONCE);
+	private void startThread(Runnable target) {
 		Thread t = new Thread(target);
+		int priority = t.getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			t.setPriority(priority-1);
 		t.setDaemon(true);
 		t.start();
 	}
@@ -113,6 +192,7 @@ public class UserPicobucPanel extends DevicePanel {
 
 	public void showRedundant() {
 		tabbedPane.addTab("redundancy", new RedundancyPanel(getLinkHeader()));
+
 		int index = tabbedPane.getTabCount()-1;
 		String title = tabbedPane.getTitleAt(index);
 		String value = Translation.getValue(String.class, title, null);

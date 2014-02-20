@@ -119,7 +119,7 @@ public class DebagInfoPanel extends JPanel {
 			public void ancestorMoved(AncestorEvent arg0) {
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-				deviceDebagInfoController.setRun(false);
+				deviceDebagInfoController.stop();
 			}
 		});
 	}

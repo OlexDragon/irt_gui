@@ -24,7 +24,7 @@ import javax.swing.border.BevelBorder;
 public class RedundancyPanelDemo extends JPanel implements Refresh{
 	private static final long serialVersionUID = -7179255648628796498L;
 
-//	private static final String UNKNOWN = "'Unknown',";
+	protected static final String UNKNOWN = "'Unknown',";
 	protected static final String STANDBY = "'Standby',";
 	protected static final String ONLINE = "'Online',";
 	protected static final String SET_ONLINE = "Set Online";

@@ -4,10 +4,12 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
+import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.Payload;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -19,7 +21,15 @@ import javax.swing.JPanel;
 
 public class AlarmsController extends ControllerAbstract {
 
+	public static final String REDUNDANCY 		= "Redundancy";
+	public static final String OTHER 			= "Other";
+	public static final String OVER_TEMPERATURE = "Over-Temperature";
+	public static final String UNDER_CURRENT2 	= "Under-Current";
+	public static final String OVER_CURRENT 	= "Over-Current";
+	public static final String PLL_OUT_OF_LOCK2 = "PLL Out Of Lock";
+
 	private static final int PRIORITY = 20;
+	public static final Color WARNING_COLOR = new Color(255, 204, 102);
 
 	public static final short  PLL_OUT_OF_LOCK 	= 1,
 								OWER_CURRENT	= 4,
@@ -51,16 +61,10 @@ public class AlarmsController extends ControllerAbstract {
 
 	private LinkHeader linkHeader;
 
-	private List<DefaultController> alarmControllers = new ArrayList<>();
-//	private DefaultController alarmController1;
-//	private DefaultController alarmController2;
-//	private DefaultController alarmController3;
-//	private DefaultController alarmController4;
-//	private DefaultController alarmController5;
-//	private DefaultController alarmController6;
+	private volatile List<DefaultController> alarmControllers = new ArrayList<>();
 
 	public AlarmsController(LinkHeader linkHeader, JPanel panel) {
-		super("AlarmsController", new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs), panel, Style.CHECK_ALWAYS);
+		super("AlarmsController", new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs), panel, Style.CHECK_ONCE);
 		this.linkHeader = linkHeader;
 	}
 
@@ -70,14 +74,7 @@ public class AlarmsController extends ControllerAbstract {
 
 	@Override
 	protected ValueChangeListener addGetterValueChangeListener() {
-		return new ValueChangeListener() {
-
-			@Override
-			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				logger.debug("valueChanged(ValueChangeEvent {})", valueChangeEvent);
-				new ValueChangeWorker(valueChangeEvent);
-			}
-		};
+		return null;
 	}
 
 	private void startController(DefaultController controller, JLabel label) {
@@ -94,16 +91,25 @@ public class AlarmsController extends ControllerAbstract {
 
 	private void setAlarmController(String name, JLabel label, Getter getter) {
 		logger.entry("setAlarmOwerTemperatureController(name={}, {}, {})", name, label, getter);
-		label.setEnabled(true);
-		DefaultController alarmController = new DefaultController(name, getter,
+		if(label!=null){
+			label.setEnabled(true);
+			DefaultController alarmController = new DefaultController(
+															name,
+															getter,
 															Style.CHECK_ALWAYS){
 
 															@Override
 															protected ValueChangeListener addGetterValueChangeListener() {
-																return AlarmsController.this.valueChangeListener;
+																return null;
+															}
+
+															@Override
+															protected PacketListener getNewPacketListener() {
+																return null;
 															}};
-		startController(alarmController, label);
-		alarmControllers.add(alarmController);
+			startController(alarmController, label);
+			alarmControllers.add(alarmController);
+		}
 		logger.exit();
 	}
 
@@ -117,24 +123,25 @@ public class AlarmsController extends ControllerAbstract {
 
 			for (Component c : p.getComponents()) {
 				String name = c.getName();
+
 				if (name != null)
 					switch (name) {
-					case "PLL Out Off Lock":
+					case PLL_OUT_OF_LOCK2:
 						lblPllOutOfLock = (JLabel) c;
 						break;
-					case "Over-Current":
+					case OVER_CURRENT:
 						lblOwerCurrent = (JLabel) c;
 						break;
-					case "Under-Current":
+					case UNDER_CURRENT2:
 						lblUnderCurrent = (JLabel) c;
 						break;
-					case "Over-Temperature":
+					case OVER_TEMPERATURE:
 						lblOwerTemperature = (JLabel) c;
 						break;
-					case "Other":
+					case OTHER:
 						lblHardware = (JLabel) c;
 						break;
-					case "Redundancy":
+					case REDUNDANCY:
 						lblRedundant = (JLabel) c;
 						break;
 					default:
@@ -144,13 +151,13 @@ public class AlarmsController extends ControllerAbstract {
 			}
 		}
 
-	return isSet;
+		return isSet;
 	}
 
 	@Override
 	protected void clear() {
 		for(DefaultController ac:alarmControllers)
-			ac.setRun(false);
+			ac.stop();
 
 		lblPllOutOfLock = null;
 		lblOwerCurrent = null;
@@ -222,68 +229,106 @@ public class AlarmsController extends ControllerAbstract {
 		return name;
 	}
 
+	@Override
+	protected PacketListener getNewPacketListener() {
+		return new PacketListener() {
+			@Override
+			public void packetRecived(Packet packet) {
+				if (getPacketWork().isAddressEquals(packet) && packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_ALARM)
+					new ValueChangeWorker(packet);
+			}
+		};
+	}
+
 	//********************* class ControllerWorker *****************
 	private class ValueChangeWorker extends Thread {
 
-		private ValueChangeEvent valueChangeEvent;
+		private Packet packet;
+		private byte outOfLock		= -1;
+		private byte owerCurrent	= -1;
+		private byte underCurrent	= -1;
+		private byte owerTemperature= -1;
+		private byte hardware		= -1;
+		private byte redundant		= -1;
 
-		public ValueChangeWorker(ValueChangeEvent valueChangeEvent){
-			logger.entry(valueChangeEvent);
-			this.valueChangeEvent = valueChangeEvent;
+		public ValueChangeWorker(Packet packet){
+			this.packet = packet;
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				setPriority(priority-1);
 			setDaemon(true);
 			start();
-			logger.exit();
 		}
 
 		@Override
 		public void run() {
-			Object source = valueChangeEvent.getSource();
-			logger.entry(source);
-			try{
-			if(source !=null && source instanceof short[]){
-				logger.debug("valueChanged(ValueChangeEvent {})", source);
-				if(isSend())
-					setControllers((short[])source);
-				else
-					fillFields((short[])source);
-			}
-			}catch(Exception ex){
+
+			try {
+				PacketHeader header = packet.getHeader();
+				if (header.getOption() == 0) {
+					short packetId = header.getPacketId();
+
+					Payload payload = packet.getPayload(0);
+					if (payload != null)
+						switch (packetId) {
+						case PacketWork.PACKET_ID_ALARMS_IDs:
+							setControllers(payload.getArrayShort());
+							break;
+						case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
+						case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
+						case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
+						case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
+						case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
+						case PacketWork.PACKET_ID_ALARMS_SUMMARY:
+						case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
+							short[] shorts = payload.getArrayShort();
+							fillFields(shorts);
+						}
+				}
+			} catch (Exception ex) {
 				logger.catching(ex);
 			}
 			logger.exit();
 		}
 
 		private void fillFields(short[] source) {
-			logger.debug("fillFields(short[] {})", source);
+			logger.trace("fillFields(short[] {})", source);
 
-			byte status = (byte) (source[2]&7);
+			if (source != null && source.length == 3) {
+				byte ool = (byte) (source[2] & 7);
 
-			short alarm = source[0];
-			switch(alarm){
-			case PLL_OUT_OF_LOCK:
-				setAlarm(lblPllOutOfLock, status);
-				break;
-			case OWER_CURRENT:
-				setAlarm(lblOwerCurrent, status);
-				break;
-			case UNDER_CURRENT:
-				setAlarm(lblUnderCurrent, status);
-				break;
-			case OWER_TEMPERATURE:
-				setAlarm(lblOwerTemperature, status);
-				break;
-			case HW_FAULT:
-				setAlarm(lblHardware, status);
-				break;
-			case REDUNDANT_FAULT:
-				setAlarm(lblRedundant, status);
+				short alarm = source[0];
+				switch (alarm) {
+				case PLL_OUT_OF_LOCK:
+					if(ool!=outOfLock)
+						setAlarm(lblPllOutOfLock, outOfLock=ool);
+					break;
+				case OWER_CURRENT:
+					if(ool!=owerCurrent)
+						setAlarm(lblOwerCurrent, owerCurrent=ool);
+					break;
+				case UNDER_CURRENT:
+					if(ool!=underCurrent)
+						setAlarm(lblUnderCurrent, underCurrent=ool);
+					break;
+				case OWER_TEMPERATURE:
+					if(ool!=owerTemperature)
+						setAlarm(lblOwerTemperature, owerTemperature=ool);
+					break;
+				case HW_FAULT:
+					if(ool!=hardware)
+						setAlarm(lblHardware, hardware=ool);
+					break;
+				case REDUNDANT_FAULT:
+					if(ool!=redundant)
+						setAlarm(lblRedundant, redundant=ool);
+				}
 			}
 		}
 
 		private void setControllers(short[] source) {
+
+			if(alarmControllers.isEmpty()){
 			logger.trace("setControllers(source={})", source);
 
 			setAlarmController("Alarm Hardware Fault", lblHardware, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT, HW_FAULT)
@@ -308,12 +353,14 @@ public class AlarmsController extends ControllerAbstract {
 					{ @Override public Integer getPriority() { return PRIORITY; }});
 					break;
 				case REDUNDANT_FAULT:
-					lblRedundant.getParent().setVisible(true);
+					if(lblRedundant!=null)
+						lblRedundant.getParent().setVisible(true);
 					setAlarmController("Alarm Redundant", lblRedundant, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT, REDUNDANT_FAULT)
 					{ @Override public Integer getPriority() { return PRIORITY; }});
 				}
 
 			setSend(false);
+			}
 		}
 
 		private void setAlarm(JLabel label, byte status) {
@@ -327,7 +374,7 @@ public class AlarmsController extends ControllerAbstract {
 				break;
 			case ALARMS_STATUS_WARNING:
 			case ALARMS_STATUS_MINOR:
-				label.setBackground(new Color(255, 204, 102));
+				label.setBackground(WARNING_COLOR);
 				label.setForeground(Color.BLACK);
 				label.setText(Translation.getValue(String.class, "warning", "Warning"));
 				break;

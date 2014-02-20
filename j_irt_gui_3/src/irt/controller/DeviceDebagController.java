@@ -337,7 +337,7 @@ public class DeviceDebagController extends ControllerAbstract {
 				dds.preparePacketToSend(registerValue);
 				setSend(true);
 			}else
-				setRun(false);
+				stop();
 		}
 	}
 

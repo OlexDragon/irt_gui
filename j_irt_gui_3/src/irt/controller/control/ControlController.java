@@ -146,13 +146,13 @@ public class ControlController extends ControllerAbstract {
 	@Override
 	protected void clear() {
 		super.clear();
-		muteController.setRun(false);
+		muteController.stop();
 		muteController = null;
 		btnMute = null;
 		lblMute = null;
 
 		if(lnbController!=null){
-			lnbController.setRun(false);
+			lnbController.stop();
 			lnbController = null;
 		}
 	}

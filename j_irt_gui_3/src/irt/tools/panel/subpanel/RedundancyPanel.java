@@ -9,6 +9,7 @@ import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
 import irt.data.StringData;
+import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.irt_gui.IrtGui;
@@ -137,57 +138,46 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				new SwingWorker<Void, Void>() {
 					@Override
 					protected Void doInBackground() throws Exception {
-						runController("Redundancy Enable",
-								new Getter(linkHeader,
-										Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
-										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE) {
-											@Override
-											public boolean set(Packet packet) {
-												if(isAddressEquals(packet) && packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE)
-													new GetterWorker(packet);
-												return true;
-											}
-						});
+						runController(
+								new DefaultController(
+										"Redundancy Enable",
+										new Getter(linkHeader,
+												Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+												Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
+												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE), Style.CHECK_ALWAYS){
+													@Override
+													protected PacketListener getNewPacketListener() {
+														return new PacketListener() {
+															
+															@Override
+															public void packetRecived(Packet packet) {
+																if(
+																		getPacketWork().isAddressEquals(packet) &&
+																		packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+																		packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
+																	)
+																	new GetterWorker(packet);
+															}
+														};
+													}
+									
+										}
+								);
 						runController("Redundancy Mode",
 								new Getter(linkHeader,
 										Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE){
-											@Override
-											public boolean set(Packet packet) {
-												if(isAddressEquals(packet)
-														&& packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE)
-													new GetterWorker(packet);
-												return true;
-											}
-						});
+										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE));
 						runController("Redundancy Name",
 								new Getter(linkHeader,
 										Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME){
-											@Override
-											public boolean set(Packet packet) {
-												if(isAddressEquals(packet)
-														&& packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME)
-													new GetterWorker(packet);
-												return true;
-											}
-						});
+										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME));
 						runController("Redundancy Status",
 								new Getter(linkHeader,
 										Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT){
-											@Override
-											public boolean set(Packet packet) {
-												if(isAddressEquals(packet)
-														&& packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT)
-													new GetterWorker(packet);
-												return true;
-											}
-						});
+										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT));
 						return null;
 					}
 				}.execute();
@@ -199,7 +189,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 					@Override
 					protected Void doInBackground() throws Exception {
 						for(ControllerAbstract c:controllers)
-							c.setRun(false);
+							c.stop();
 						controllers.clear();
 						return null;
 					}	
@@ -209,6 +199,10 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 
 			private void runController(String controllerName, Getter packetWork) {
 				DefaultController defaultController = new DefaultController(controllerName, packetWork, Style.CHECK_ALWAYS);
+				runController(defaultController);
+			}
+
+			private void runController(DefaultController defaultController) {
 				defaultController.setWaitTime(10000);
 				controllers.add(defaultController);
 
@@ -391,10 +385,10 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		private void setRedundancyStatus() throws IOException {
 			StringData s = packet.getPayload(0).getStringData();
 			if(!s.equals(status)){
-				logger.trace("old={}, new={}", status, s);
+				logger.debug("old={}, new={}", status, s);
 				status = s;
 				Properties parseString = parseString(s);
-				boolean online = parseString!=null && parseString.getProperty("ustatus").equals(ONLINE);
+				boolean online = parseString!=null && !parseString.getProperty("ustatus").equals(STANDBY);
 				setEnable(online);
 				setOnlineText(parseString!=null && parseString.getProperty("ustatus").equals(STANDBY), online);
 				setImage();
@@ -404,7 +398,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		private void setRedundancyName() throws IOException {
 			REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
 			if(!n.equals(name)){
-				logger.trace("old={}, new={}", name, n);
+				logger.debug("old={}, new={}", name, n);
 				cmbBxName.setSelectedItem(name = n);
 				setImage();
 			}
@@ -413,7 +407,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		private void setRedundancyMode() throws IOException {
 			REDUNDANCY_MODE m = REDUNDANCY_MODE.values()[packet.getPayload(0).getByte()];
 			if(!m.equals(mode)){
-				logger.trace("old={}, new={}", mode, m);
+				logger.debug("old={}, new={}", mode, m);
 				cmbBxMode.removeItemListener(modeListener);
 				cmbBxMode.setSelectedItem(mode = m);
 				cmbBxMode.addItemListener(modeListener);
@@ -421,9 +415,9 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		}
 
 		private void setRedundancyEnable() throws IOException {
-			REDUNDANCY e = REDUNDANCY.values()[packet.getPayload(0).getByte()] ;
+			REDUNDANCY e = REDUNDANCY.values()[packet.getPayload(0).getByte()];
 			if(e!=enable){
-				logger.trace("old={}, new={}", enable, e);
+				logger.debug("old={}, new={}", enable, e);
 				cmbBxRedundancy.removeItemListener(redundancyListener);
 				cmbBxRedundancy.setSelectedItem( enable = e);
 				cmbBxRedundancy.addItemListener(redundancyListener);

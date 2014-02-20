@@ -5,16 +5,18 @@ import irt.controller.serial_port.value.getter.Getter;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.ToHex;
+import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.Payload;
-import irt.tools.panel.head.UnitsContainer;
+import irt.tools.panel.head.IrtPanel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.Timer;
 
@@ -41,8 +43,6 @@ public class DumpControllers{
 
 	private List<DefaultController> dumpsList = new ArrayList<>();
 	private LinkHeader linkHeader;
-
-//	private volatile static Map<Integer, String> variables = new HashMap<>();
 
 	private DeviceInfo deviceInfo;
 	private Timer infoTimer = new Timer(1000*60*20, new ActionListener() {
@@ -75,14 +75,34 @@ public class DumpControllers{
 	private Object register5;
 	private Object register6;
 
-	public DumpControllers(UnitsContainer unitsPanel, LinkHeader linkHeader) {
+	public DumpControllers(LinkHeader linkHeader, DeviceInfo deviceInfos) {
 
 		this.linkHeader = linkHeader;
+		this.deviceInfo = deviceInfos;
 
-		int dumpWaitMinuts = GuiController.getPrefs().getInt(DUMP_WAIT, 10);
+		infoTimer.setRepeats(true);
+		infoTimer.start();
+
+		int dumpWaitMinuts = 0;
+
+		Properties p = IrtPanel.PROPERTIES;
+		for (Object s : p.keySet()) {
+			String str = (String) s;
+			if(str.equalsIgnoreCase("dumptime")){
+				String waitTime = p.getProperty(str);
+				if(waitTime !=null && !(waitTime = waitTime.replaceAll("\\D", "")).isEmpty()){
+					dumpWaitMinuts = Integer.parseInt(waitTime);
+					GuiController.getPrefs().putInt(DumpControllers.DUMP_WAIT, dumpWaitMinuts);
+				}
+			}
+		}
+
+		if(dumpWaitMinuts==0)
+			dumpWaitMinuts = GuiController.getPrefs().getInt(DUMP_WAIT, 10);
+
 		int waitTime = 1000*60*dumpWaitMinuts;
 
-		logger.trace("new DumpControllers({}, {}, waitTime={} msec({} min))", unitsPanel, linkHeader, waitTime, dumpWaitMinuts);
+		logger.trace("new DumpControllers({}, {}, waitTime={} msec({} min))", linkHeader, waitTime, dumpWaitMinuts);
 		dumper.info(marker, "\n******************** Start New Dump Block for {} ********************", linkHeader);
 
 //		this.parent = unitsPanel;
@@ -93,25 +113,36 @@ public class DumpControllers{
 
 
 		addDumpController(
-				new Getter(linkHeader,
-						Packet.IRT_SLCP_PACKET_ID_ALARM,
-						AlarmsController.ALARMS_SUMMARY_STATUS,
-						PacketWork.PACKET_ID_ALARMS_SUMMARY)
+				new DefaultController(
+						"ALARMS_SUMMARY",
+						new Getter(linkHeader,
+								Packet.IRT_SLCP_PACKET_ID_ALARM,
+								AlarmsController.ALARMS_SUMMARY_STATUS,
+								PacketWork.PACKET_ID_ALARMS_SUMMARY)
+						{
+							private int p = PRIORITY;
+							@Override public Integer getPriority() {
+								return p;
+							}
+						},
+						Style.CHECK_ALWAYS)
 				{
-					private int p = PRIORITY;
-					@Override public Integer getPriority() {
-						return p;
-					}
 					@Override
-					public boolean set(Packet packet) {
-						if(isAddressEquals(packet)){
-							new DumpWorker(packet);
-						}
-						return true;
+					protected PacketListener getNewPacketListener() {
+						return new PacketListener() {
+							@Override
+							public void packetRecived(Packet packet) {
+								byte groupId;
+								if(getPacketWork().isAddressEquals(packet) &&
+										((	groupId = packet.getHeader().getGroupId())==Packet.IRT_SLCP_PACKET_ID_ALARM ||
+										groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG ||
+										groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO))
+									new DumpWorker(packet);
+							}
+						};
 					}
 				},
-				3000,
-				"ALARMS_SUMMARY");
+				3000);
 
 		addDumpController(
 				newGetter(
@@ -342,6 +373,7 @@ public class DumpControllers{
 						PRIORITY-15),
 				waitTime,
 				"REDUNDANCY_STAT");
+
 	}
 
 	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, int value, final int priority) {
@@ -376,22 +408,10 @@ public class DumpControllers{
 			}
 			@Override
 			public boolean set(Packet packet) {
-				return false;
+				return true;
 			}
 		};
 	}
-//
-//	public void setInfo(DeviceInfo deviceInfo) {
-//		info = "\n! SN: "+deviceInfo.getSerialNumber();
-//		info += "\n! "+deviceInfo.getUnitName();
-//		info += "\n! Version: "+deviceInfo.getFirmwareVersion();
-//		info += "\n! Built Date: "+deviceInfo.getFirmwareBuildDate();
-//		info += "\n! Type: "+deviceInfo.getType();
-//		info += "\n! Subtype: "+deviceInfo.getSubtype();
-//		info += "\n! Revision: "+deviceInfo.getRevision();
-//		info += "\n! count: "+deviceInfo.getFirmwareBuildCounter();
-//		logger.debug("deviceInfo: "+info);
-//	}
 
 	public static LoggerContext setSysSerialNumber(String serialNumber) {
 
@@ -421,33 +441,45 @@ public class DumpControllers{
 
 	private void addDumpController(Getter getter, int waitTime, String threadName){
 
-		DefaultController dumpController = new DefaultController(threadName, getter, Style.CHECK_ONCE);
+		DefaultController dumpController = new DefaultController(threadName, getter, Style.CHECK_ALWAYS){
 
+			@Override
+			protected PacketListener getNewPacketListener() {
+				return null;
+			}};
+
+		addDumpController(dumpController, waitTime);
+	}
+
+	public void addDumpController(DefaultController dumpController, int waitTime) {
 		dumpController.setWaitTime(waitTime);
 
-		Thread t = new Thread(dumpController);
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
-
+		startThread(new Thread(dumpController));
 		dumpsList.add(dumpController);
 	}
 
+	private void startThread(Thread thread) {
+		int priority = thread.getPriority();
+		if(priority>Thread.MIN_PRIORITY)
+			thread.setPriority(priority-1);
+		thread.setDaemon(true);
+		thread.start();
+	}
+
 	public void stop() {
-		logger.trace("stop()");
 		for(DefaultController dc:dumpsList)
-			dc.setRun(false);
+			dc.stop();
 		dumpsList.clear();
 	}
 
-//	@Override
-//	protected void finalize() throws Throwable {
-//		fireValueChangeListener(new ValueChangeEvent(0, PacketWork.PACKET_ID_ALARMS));
-////		dumper.info("Communication Lost");
-//		stop();
-//	}
+	@Override
+	protected void finalize() throws Throwable {
+		int uptimeCounter = -1;
+		if(deviceInfo!=null) {
+			uptimeCounter = deviceInfo.getUptimeCounter();
+		}
+		dumper.warn("\n\t{}\n\tUptime Counter = {}\n\tCommunication Lost", linkHeader, uptimeCounter);
+	}
 
 	public void setWaitTime(int waitTime) {
 		logger.trace("setWaitTime(waitTime={})", waitTime);
@@ -507,14 +539,7 @@ public class DumpControllers{
 		public DumpWorker(Packet packet) {
 			this.packet = packet;
 
-			infoTimer.setRepeats(true);
-			infoTimer.start();
-
-			int priority = getPriority();
-			if(priority>Thread.MIN_PRIORITY)
-				setPriority(priority-1);
-			setDaemon(true);
-			start();
+			startThread(this);
 		}
 
 		@Override
@@ -528,11 +553,7 @@ public class DumpControllers{
 				switch(packetId){
 
 				case PacketWork.PACKET_DEVICE_INFO:
-						boolean doPrint = deviceInfo==null;
-					
 						deviceInfo = new DeviceInfo(packet);
-						if(doPrint)
-							dumper.info(marker, "\n\t{}\n\t{}\n", linkHeader, deviceInfo);
 					break;
 
 				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0:
@@ -629,7 +650,7 @@ public class DumpControllers{
 					if (error == 0) {
 						Object dump = dumpHex(summary);
 						if (summary != null && !summary.equals(dump)) {
-							logger.warn("notify()");
+							logger.debug("notifyAllControllers();");
 							notifyAllControllers();
 						}
 						summary = dump;
@@ -677,9 +698,13 @@ public class DumpControllers{
 		private Object dumpError(Object obj) {
 
 			PacketHeader header = packet.getHeader();
-			if(obj==null || !obj.equals(header))
-				dumper.warn(marker, "\n\t{}\n\t{}\n", linkHeader, header);
-
+			if(obj==null || !obj.equals(header)){
+				int uptimeCounter = -1;
+				if(deviceInfo!=null) {
+					uptimeCounter = deviceInfo.getUptimeCounter();
+				}
+				dumper.warn(marker, "\n\t{}\n\tUptime Counter = {}\n\t{}\n", linkHeader, uptimeCounter, header);
+			}
 			return header;
 		}
 
@@ -687,10 +712,14 @@ public class DumpControllers{
 			Payload payload = packet.getPayload(0);
 
 			if(payload!=null){
-				obj = dump(obj, ToHex.bytesToHex(payload.getBuffer()));
+				byte[] buffer = payload.getBuffer();
+				obj = dump(obj, ToHex.bytesToHex(buffer));
+				if(buffer!=null && (buffer.length==4 || buffer.length==6))
+					obj = AlarmsController.alarmStatusToString(buffer[buffer.length-1])+" ( "+obj+")";
 			}else
 				logger.warn("packet.getPayload(0)==null");
 
+			logger.debug(obj);
 			return obj;
 		}
 
@@ -707,8 +736,13 @@ public class DumpControllers{
 		}
 
 		private Object dump(Object obj, Object o) {
-			if((obj==null || !obj.equals(o)))
-				dumper.info(marker, "\n\t{}\n\t{}\n{}\n", linkHeader, packet.getHeader(), o);
+			if((obj==null || !obj.equals(o))){
+				int uptimeCounter = -1;
+				if(deviceInfo!=null) {
+					uptimeCounter = deviceInfo.getUptimeCounter();
+				}
+				dumper.info(marker, "\n\t{};\n\t{};\n\tUptime Counter = {};\n{};\n", linkHeader, packet.getHeader(), uptimeCounter, o);
+			}
 			return o;
 		}
 		
@@ -723,12 +757,16 @@ public class DumpControllers{
 //			}
 //			return "Summary Alarm - "+sourceStr;
 //		}
+	}
 
-		private void notifyAllControllers() {
-			for(DefaultController d:dumpsList)
-				synchronized(d){
-					d.notify();
-				}
-		}
+	public void notifyAllControllers() {
+		for(DefaultController d:dumpsList)
+			synchronized(d){
+				d.notify();
+			}
+	}
+
+	public void doDump(String text) {
+		dumper.info(marker, text);
 	}
 }

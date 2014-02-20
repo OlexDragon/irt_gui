@@ -92,7 +92,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_DUMP_REGISTER_5					= 105,
 								PACKET_ID_DUMP_REGISTER_6					= 106,
 								PACKET_ID_DUMP_REGISTER_7					= 107,
-								PACKET_ID_DUMP_REGISTER_10					= 110;
+								PACKET_ID_DUMP_REGISTER_10					= 110,
+								PACKET_ID_CLEAR_STATISTICS 					= 111;
 
 	public static final short PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE = 120;
 
@@ -117,4 +118,5 @@ public interface PacketWork extends Comparable<PacketWork>{
 	public boolean set(Packet packet);
 	public void clear();
 	public void removeVlueChangeListeners();
+	public boolean isAddressEquals(Packet packet);
 }

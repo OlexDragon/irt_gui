@@ -8,6 +8,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.label.LED;
 import irt.tools.panel.head.Panel;
+import irt.tools.panel.subpanel.DebugPanel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelSSPA;
@@ -39,6 +40,8 @@ import org.apache.logging.log4j.core.Logger;
 @SuppressWarnings("serial")
 public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
+	public static final DebugPanel DEBUG_PANEL = new DebugPanel();
+
 	private static final Color WARNING_COLOR = new Color(255, 204, 102);
 
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
@@ -64,7 +67,6 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	private ValueChangeListener statusChangeListener;
 
 	private int deviceType;
-
 	private int alarm;
 
 	private boolean isMute;
@@ -80,37 +82,6 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 				monitorPanel = getNewMonitorPanel();
 				userPanel.add(monitorPanel);
-//				monitorPanel.addStatusListener(new ValueChangeListener() {
-//					
-//					@Override
-//					public void valueChanged(ValueChangeEvent valueChangeEvent) {
-//						if(PacketWork.PACKET_ID_MEASUREMENT_STATUS==valueChangeEvent.getID()){
-//							logger.error(valueChangeEvent);
-//							Object source = valueChangeEvent.getSource();
-//							int status;
-//
-//							if(source instanceof Long)
-//								status = (int) ((Long) source&(MonitorController.LOCK|MonitorController.MUTE));
-//							else
-//								status = (int)source&(MonitorController.LOCK|MonitorController.MUTE);
-//
-//							logger.error(status);
-//							switch(status){
-//							case MonitorController.LOCK:
-//								led.setLedColor(Color.GREEN);
-//								setVerticalLabelBackground(Color.GREEN);
-//								break;
-//							case MonitorController.MUTE|MonitorController.LOCK:
-//								led.setLedColor(Color.YELLOW);
-//								setVerticalLabelBackground(Color.YELLOW);
-//								break;
-//							default:
-//								led.setLedColor(Color.RED);
-//								setVerticalLabelBackground(Color.RED);
-//							}
-//						}
-//					}
-//				});
 
 				if(statusChangeListener!=null)
 					monitorPanel.addStatusListener(statusChangeListener);
@@ -132,6 +103,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		});
 
 		this.linkHeader = linkHeader;
+		DEBUG_PANEL.setLinkHeader(linkHeader);
 
 		led = new LED(new Color(0, 153, 255), null);
 		led.setName("Status Led");
@@ -285,5 +257,12 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	public int compareTo(DevicePanel o) {
 		LinkHeader lh = o.getLinkHeader();
 		return linkHeader!=null ? linkHeader.compareTo(lh) : lh==null ? 0 : 1;
+	}
+
+	public void showDebugPanel(boolean show) {
+		if(show)
+			tabbedPane.add("Debug", DEBUG_PANEL);
+		else
+			tabbedPane.remove(DEBUG_PANEL);
 	}
 }

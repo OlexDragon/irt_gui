@@ -134,7 +134,8 @@ public class BIASsPanel extends JPanel {
 						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 2" : "Potentiometer 1",isNewBiasBoard ? txtPotentiometer2 : txtPotentiometer1,
 								slider,
 								new Value(0, 0, 896, 0),
-								new DeviceDebagSetter(linkHeader,
+								new DeviceDebagSetter(
+										linkHeader,
 										1,
 										0,
 										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N1,
@@ -242,7 +243,7 @@ public class BIASsPanel extends JPanel {
 
 			public void ancestorRemoved(AncestorEvent arg0) {
 				for(ControllerAbstract t:threadList){
-					t.setRun(false);
+					t.stop();
 					if(t instanceof DeviceDebagController)
 						((DeviceDebagController)t).removeFocusListener(focusListener);
 				}

@@ -55,7 +55,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		logger.trace("clear(), class={}", getClass().getSimpleName());
 
 		if(textSliderController!=null){
-			textSliderController.setRun(false);
+			textSliderController.stop();
 			textSliderController = null;
 		}
 		txtField = null;

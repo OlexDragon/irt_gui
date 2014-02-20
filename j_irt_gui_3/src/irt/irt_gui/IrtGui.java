@@ -25,6 +25,8 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
@@ -69,7 +71,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.055";
+	public static final String VERTION = "- 3.059";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -103,7 +105,7 @@ public class IrtGui extends IrtMainFrame {
 				case AlarmsController.ALARMS_STATUS_WARNING:
 				case AlarmsController.ALARMS_STATUS_MINOR:
 					headPanel.setAlarm(true);
-					headPanel.setAlarmColor(Color.YELLOW);
+					headPanel.setAlarmColor(AlarmsController.WARNING_COLOR);
 					break;
 				case AlarmsController.ALARMS_STATUS_ALARM:
 				case AlarmsController.ALARMS_STATUS_FAULT:
@@ -354,6 +356,25 @@ public class IrtGui extends IrtMainFrame {
 		popupMenu.add(mntmAddressWizard);
 
 		ADDRESS_VIZARD.setOwner(this);
+
+		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
+		manager.addKeyEventDispatcher(new KeyEventDispatcher() {
+			
+			private boolean isPressed;
+			private boolean isShowing;
+
+			@Override
+			public boolean dispatchKeyEvent(KeyEvent e) {
+				if(e.getID() == KeyEvent.KEY_PRESSED){
+					if(!isPressed && e.isControlDown() && e.isAltDown() && e.getKeyCode()==KeyEvent.VK_D){
+						isPressed = true;
+						guiController.showDebugPanel(isShowing = !isShowing);
+					}
+				}else
+					isPressed = false;
+				return false;
+			}
+		});
 	}
 
 	private void setAddressHistory(String historyStr) {

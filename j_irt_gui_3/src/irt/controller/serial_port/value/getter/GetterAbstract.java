@@ -146,7 +146,8 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		return linkHeader;
 	}
 
-	protected boolean isAddressEquals(Packet packet) {
+	@Override
+	public boolean isAddressEquals(Packet packet) {
 		boolean addrEquals;
 
 		if(packet!=null){
