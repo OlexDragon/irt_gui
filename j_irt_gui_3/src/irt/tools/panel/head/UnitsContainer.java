@@ -1,10 +1,10 @@
 package irt.tools.panel.head;
 
-import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.DevicePanel;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.Arrays;
@@ -19,13 +19,12 @@ public class UnitsContainer extends JPanel{
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
-	private int shift;
 	private final int SPACE = 5;
 
-	private static ValueChangeListener statusChangeListener;
 	private static ComponentListener componentListener;
 
 	public UnitsContainer(){
+		setBorder(null);
 		setOpaque(false);
 		setLayout(null);
 		componentListener = new ComponentListener() {
@@ -34,7 +33,7 @@ public class UnitsContainer extends JPanel{
 			@Override public void componentMoved(ComponentEvent arg0) { } 
 			@Override public void componentHidden(ComponentEvent arg0) { }
 			@Override public void componentResized(ComponentEvent componentEvent) {
-				setLocation((Panel)componentEvent.getSource());
+				setLocations();
 			}
 		};
 	}
@@ -75,7 +74,6 @@ public class UnitsContainer extends JPanel{
 					unitPanel = dp;
 				else{
 					remove(unitPanel);
-					unitPanel.setLocation(shift, 0);
 					add((Panel)unitPanel);
 				}
 		}else if(unitPanel instanceof Panel)
@@ -84,68 +82,32 @@ public class UnitsContainer extends JPanel{
 		return unitPanel;
 	}
 
-	private void add(Panel unitPanel) {
+	private void add(Panel panel) {
 
-		setThinSize();
-		unitPanel.setLocation(shift, 0);
-		super.add(unitPanel);
-		if(unitPanel instanceof DevicePanel && statusChangeListener!=null)
-			((DevicePanel)unitPanel).addStatusChangeListener(statusChangeListener);
-		unitPanel.addComponentListener(componentListener);
+		super.add(panel);
+		setLocations();
+		panel.addComponentListener(componentListener);
 	}
 
-	private void setLocation(Panel source) {
-		int width = (int) Math.round(source.getSize().getWidth());
+	private void setLocations() {
+		int x = 0,  height = 0;
+		Dimension containerPreferredSize = getPreferredSize();
 
-		shift = 0;
-		Component[] cs = getComponents();
-		Arrays.sort(cs);
-		for(Component c:cs)
-			if(c instanceof Panel){
-				Panel p = (Panel)c;
-				ComponentListener[] cls = removeComponentListeners(p);
-				
-				if(p!=source){
-					if(width>=p.MAX_WIDTH)
-						p.setThinSize();
-					else if(width>=p.MID_WIDTH)
-						p.setMidSize();
-					else
-						p.setMaxSize();
-				}
+		Component[] components = getComponents();
+		Arrays.sort(components);
 
-				p.setLocation(shift, 0);
-				addComponentListeners(p, cls);
-				shift += SPACE+p.getWidth();
-			}
-	} 
+		for(Component c:components){
+			Dimension preferredSize = c.getPreferredSize();
+			c.setLocation(x, 0);
+			x += SPACE + preferredSize.width;
+			if(height<preferredSize.height)
+				height = preferredSize.height;
+		}
 
-	private void addComponentListeners(Panel p, ComponentListener[] cls) {
-		if(p!=null && cls!=null)
-			for(ComponentListener cl:cls)
-				p.addComponentListener(cl);
-	}
-
-	private ComponentListener[] removeComponentListeners(Panel panel) {
-		ComponentListener[] cls = panel.getComponentListeners();
-		for(ComponentListener cl:cls)
-			panel.removeComponentListener(cl);
-		return cls;
-	}
-
-	private void setThinSize() {
-
-		shift = 0;
-		Component[] cs = getComponents();
-		for(Component c:cs)
-			if(c instanceof Panel){
-				Panel p = (Panel)c;
-				ComponentListener[] cls = removeComponentListeners(p);
-				p.setThinSize();
-				p.setLocation(shift, 0);
-				addComponentListeners(p, cls);
-				shift += SPACE+p.getWidth();
-			}
+			containerPreferredSize.height = height;
+			containerPreferredSize.width = x;
+			setPreferredSize(containerPreferredSize);
+			setSize(containerPreferredSize);
 	}
 
 	public <T> Component getComponent(Class<T> instance) {
@@ -198,10 +160,6 @@ public class UnitsContainer extends JPanel{
 				break;
 			}
 		}
-	}
-
-	public void addStatusListener(ValueChangeListener valueChangeListener) {
-		statusChangeListener = valueChangeListener;
 	}
 
 	public void refresh() {

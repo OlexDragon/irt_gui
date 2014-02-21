@@ -156,8 +156,10 @@ public class AlarmsController extends ControllerAbstract {
 
 	@Override
 	protected void clear() {
-		for(DefaultController ac:alarmControllers)
-			ac.stop();
+		synchronized (this) {
+			for(DefaultController ac:alarmControllers)
+				ac.stop();
+		}
 
 		lblPllOutOfLock = null;
 		lblOwerCurrent = null;
@@ -234,7 +236,11 @@ public class AlarmsController extends ControllerAbstract {
 		return new PacketListener() {
 			@Override
 			public void packetRecived(Packet packet) {
-				if (getPacketWork().isAddressEquals(packet) && packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_ALARM)
+				PacketWork packetWork = getPacketWork();
+				if (	packetWork!=null &&
+						packetWork.isAddressEquals(packet) &&
+						packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_ALARM)
+
 					new ValueChangeWorker(packet);
 			}
 		};

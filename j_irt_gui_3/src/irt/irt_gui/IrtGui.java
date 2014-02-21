@@ -31,6 +31,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
@@ -45,6 +47,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -64,14 +68,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
-@SuppressWarnings("serial")
 public class IrtGui extends IrtMainFrame {
+	private static final long serialVersionUID = 1611718189640547787L;
 
 	public static final int DEFAULT_ADDRESS = 254;
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.059";
+	public static final String VERTION = "- 3.060";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -122,16 +126,14 @@ public class IrtGui extends IrtMainFrame {
 
 	public IrtGui() {
 		super(700, 571);
+		setMinimumSize(new Dimension(700, 571));
 		DumpControllers.setSysSerialNumber(null);
 		logger.trace(ctx);
 
 		UIManager.put("ToolTip.background", Color.WHITE);
 
 		headPanel = new HeadPanel(this);
-		headPanel.setSize(650, 74);
-		headPanel.setLocation(0, 51);
 		headPanel.setVisible(true);
-		getContentPane().add(headPanel);
 
 		try {
 			setHeaderLabel(headPanel);
@@ -145,10 +147,16 @@ public class IrtGui extends IrtMainFrame {
 		lblGui.setBounds(531, 29, 107, 14);
 		headPanel.add(lblGui);
 
-		UnitsContainer unitsPanel = new UnitsContainer();
-		unitsPanel.setBounds(0, 127, getWidth(), 444);
-//		unitsPanel.addStatusListener(headPanel.getStatusChangeListener());
-		getContentPane().add(unitsPanel);
+		final UnitsContainer unitsPanel = new UnitsContainer();
+		unitsPanel.setBorder(null);
+		unitsPanel.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				Point location = unitsPanel.getLocation();
+				Dimension size = unitsPanel.getSize();
+				setSize(size.width, location.y+size.height);
+			}
+		});
 
 		setAddressHistory(prefs.get("address_history", null));
 
@@ -162,8 +170,6 @@ public class IrtGui extends IrtMainFrame {
 		txtAddress.setHorizontalAlignment(SwingConstants.CENTER);
 		txtAddress.setFont(new Font("Tahoma", Font.BOLD, 18));
 		txtAddress.setText(""+address);
-		txtAddress.setBounds(512, 11, 48, 28);
-		getContentPane().add(txtAddress);
 		txtAddress.setColumns(8);
 		txtAddress.addKeyListener(new KeyAdapter() {
 
@@ -318,8 +324,6 @@ public class IrtGui extends IrtMainFrame {
 		});
 		
 		ProgressBar progressBar = new ProgressBar();
-		progressBar.setBounds(540, 0, 110, 50);
-		getContentPane().add(progressBar);
 		
 		JPopupMenu popupMenu = new JPopupMenu();
 		addPopup(progressBar, popupMenu);
@@ -354,6 +358,34 @@ public class IrtGui extends IrtMainFrame {
 			}
 		});
 		popupMenu.add(mntmAddressWizard);
+		GroupLayout groupLayout = new GroupLayout(getContentPane());
+		groupLayout.setHorizontalGroup(
+			groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup()
+					.addGap(512)
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addComponent(txtAddress, 48, 48, 48)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addGap(28)
+							.addComponent(progressBar, 110, 110, 110))))
+				.addComponent(headPanel, 650, 650, 650)
+				.addComponent(unitsPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+		);
+		groupLayout.setVerticalGroup(
+			groupLayout.createParallelGroup(Alignment.LEADING)
+				.addGroup(groupLayout.createSequentialGroup()
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addGap(11)
+							.addComponent(txtAddress, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+						.addComponent(progressBar, 50, 50, 50))
+					.addGap(1)
+					.addComponent(headPanel, 74, 74, 74)
+					.addGap(2)
+					.addComponent(unitsPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addGap(0, 441, Short.MAX_VALUE))
+		);
+		getContentPane().setLayout(groupLayout);
 
 		ADDRESS_VIZARD.setOwner(this);
 
@@ -475,7 +507,20 @@ public class IrtGui extends IrtMainFrame {
 
 
 		comboBoxLanguage.addPopupMenuListener(Listeners.popupMenuListener);
-		comboBoxLanguage.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
+		comboBoxLanguage.setUI(
+				new BasicComboBoxUI(){
+					@Override
+					protected JButton createArrowButton() {
+						return new JButton(){
+							private static final long serialVersionUID = 2896280803201789897L;
+
+							@Override public int getWidth() {
+								return 0;
+							}
+						};
+					}
+				}
+		);
 		comboBoxLanguage.setForeground(Color.WHITE);
 		comboBoxLanguage.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		comboBoxLanguage.setBackground(HeadPanel.BACKGROUND_COLOR.darker().darker());

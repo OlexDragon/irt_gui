@@ -15,7 +15,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 
 @SuppressWarnings("serial")
 public abstract class IrtMainFrame extends JFrame {
@@ -38,7 +37,7 @@ public abstract class IrtMainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		JPanel contentPane = new JPanel();
 		contentPane.setBackground(transparent);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBorder(null);
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 		setLocationRelativeTo(null);

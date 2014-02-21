@@ -1,12 +1,10 @@
 package irt.tools.panel;
 
-import irt.controller.AlarmsController;
 import irt.controller.GuiController;
 import irt.data.DeviceInfo;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.tools.label.LED;
 import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.DebugPanel;
 import irt.tools.panel.subpanel.InfoPanel;
@@ -17,7 +15,6 @@ import irt.tools.panel.subpanel.monitor.MonitorPanel;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
 
-import java.awt.Color;
 import java.awt.HeadlessException;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
@@ -42,14 +39,11 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	public static final DebugPanel DEBUG_PANEL = new DebugPanel();
 
-	private static final Color WARNING_COLOR = new Color(255, 204, 102);
-
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
 	protected final String selectedTab = "selected_tab_"+getClass().getSimpleName();
 
 	private JLabel clickedLabel;
-	private LED led;
 	private InfoPanel infoPanel;
 	private JTabbedPane tabbedPane;
 
@@ -67,13 +61,12 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	private ValueChangeListener statusChangeListener;
 
 	private int deviceType;
-	private int alarm;
-
-	private boolean isMute;
 
 	public DevicePanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
 		super( deviceInfo!=null ? "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName() : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+		setBorder(null);
 		setName("DevicePanel");
+		lblAddress.setText(lblAddress.getText()+(linkHeader.getAddr()&0xFF));
 		if(deviceInfo!=null)
 			this.deviceType = deviceInfo.getType();
 		addAncestorListener(new AncestorListener() {
@@ -104,22 +97,6 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 		this.linkHeader = linkHeader;
 		DEBUG_PANEL.setLinkHeader(linkHeader);
-
-		led = new LED(new Color(0, 153, 255), null);
-		led.setName("Status Led");
-		led.setBounds(0, 0, MIN_WIDTH, MIN_HEIGHT);
-		led.setOn(true);
-		add(led);
-		led.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent mouseEvent) {
-				if(isMinSize())
-					setMidSize();
-				else
-					setMinSize();
-				getParent().getParent().getParent().repaint();
-			}
-		});
 
 		infoPanel = new InfoPanel(linkHeader);
 		infoPanel.setLocation(10, 11);
@@ -221,37 +198,6 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		return infoPanel;
 	}
 
-	public void setAlarm(int alarm) {
-		this.alarm = alarm;
-
-		switch(alarm){
-		case AlarmsController.ALARMS_STATUS_INFO:
-		case AlarmsController.ALARMS_STATUS_NO_ALARM:
-			if(!isMute)
-				setVerticalLabelBackground(Color.GREEN);
-			break;
-		case AlarmsController.ALARMS_STATUS_WARNING:
-		case AlarmsController.ALARMS_STATUS_MINOR:
-			setVerticalLabelBackground(WARNING_COLOR);
-			break;
-		case AlarmsController.ALARMS_STATUS_ALARM:
-		case AlarmsController.ALARMS_STATUS_FAULT:
-			setVerticalLabelBackground(Color.RED);
-			break;
-		}
-	}
-
-	public void setMute(boolean isMute) {
-		this.isMute = isMute;
-		if(isMute){
-			if(alarm<AlarmsController.ALARMS_STATUS_WARNING)
-				setVerticalLabelBackground(Color.YELLOW);
-			if(led.getLedColor()!=Color.YELLOW)
-				led.setLedColor(Color.YELLOW);
-		}else
-			if(led.getLedColor()!=Color.GREEN)
-				led.setLedColor(Color.GREEN);
-	}
 
 	@Override
 	public int compareTo(DevicePanel o) {

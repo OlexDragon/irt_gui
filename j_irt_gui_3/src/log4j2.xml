@@ -52,7 +52,7 @@
  	<Logger name="irt.tools.panel.vizards.address.ManualAddressPanel" level="WARN"/>
 
   	<Logger name="irt.tools.panel.subpanel.BIASsPanel" level="WARN"/>
-  	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="debug"/>
+  	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="WARN"/>
 
   	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="WARN"/>
 
