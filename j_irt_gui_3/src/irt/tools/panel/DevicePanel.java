@@ -66,7 +66,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		super( deviceInfo!=null ? "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName() : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 		setBorder(null);
 		setName("DevicePanel");
-		lblAddress.setText(lblAddress.getText()+(linkHeader.getAddr()&0xFF));
+		lblAddress.setText(lblAddress.getText()+(linkHeader!=null ? (linkHeader.getAddr()&0xFF) : "N/A"));
 		if(deviceInfo!=null)
 			this.deviceType = deviceInfo.getType();
 		addAncestorListener(new AncestorListener() {
@@ -95,7 +95,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 			}
 		});
 
-		this.linkHeader = linkHeader;
+		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
 		DEBUG_PANEL.setLinkHeader(linkHeader);
 
 		infoPanel = new InfoPanel(linkHeader);
@@ -168,7 +168,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	@Override
 	public int hashCode() {
-		return linkHeader!=null ? linkHeader.getAddr() : -1;
+		return linkHeader.getAddr();
 	}
 
 	public JLabel getSource() {
@@ -202,7 +202,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	@Override
 	public int compareTo(DevicePanel o) {
 		LinkHeader lh = o.getLinkHeader();
-		return linkHeader!=null ? linkHeader.compareTo(lh) : lh==null ? 0 : 1;
+		return linkHeader.compareTo(lh);
 	}
 
 	public void showDebugPanel(boolean show) {

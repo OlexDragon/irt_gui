@@ -1,11 +1,19 @@
 package irt.tools.panel.subpanel.monitor;
 
+import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
-import irt.controller.monitor.MonitorControllerConverter;
+import irt.controller.translation.Translation;
+import irt.data.PacketWork;
+import irt.data.packet.Packet;
+import irt.data.packet.ParameterHeader;
+import irt.data.packet.Payload;
+import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -13,17 +21,45 @@ import javax.swing.SwingConstants;
 @SuppressWarnings("serial")
 public class MonitorPanelConverter extends MonitorPanelAbstract {
 
+	public static final int
+			LOCK1			= 1,	//FCM_STATUS_LOCK_DETECT_PLL1
+			LOCK2			= 1<<1,	//FCM_STATUS_LOCK_DETECT_PLL2
+			MUTE			= 1<<2,	//FCM_STATUS_MUTE
+			MUTE_TTL		= 1<<3,	//FCM_STATUS_TTL_MUTE_CONTROL
+			LOCK3			= 1<<4,	//FCM_STATUS_LOCK_DETECT_PLL3
+			LOCK			= 1<<5,	//FCM_STATUS_LOCK_DETECT_SUMMARY
+			INPUT_OWERDRIVE	= 1<<6;	//FCM_STATUS_INPUT_OVERDRIVE
+
+	private JLabel lblOutputPower;
+	private JLabel lbl_13V2Output;
+	private JLabel lbl5V5Output;
+	private JLabel lblUnitTemp;
+	private JLabel lblInputPower;
+	private JLabel lblCpuTemp;
+	private JLabel lbl13V2Output;
+	private LED ledMute;
+	private LED ledLock;
+
+	private int output = Integer.MIN_VALUE;
+	private int temperature = Integer.MIN_VALUE;
+	private int status = Integer.MIN_VALUE;
+	private int input = Integer.MIN_VALUE;
+	private int temperatureCPU = Integer.MIN_VALUE;
+	private int mon_13v2_neg = Integer.MIN_VALUE;
+	private int mon_13v2_pos = Integer.MIN_VALUE;
+	private int mon_5v5 = Integer.MIN_VALUE;
+
 	public MonitorPanelConverter() {
 		super(null, "Monitor", 214, 210);
 		
-		LED ledMute = new LED(Color.YELLOW, "MUTE");
+		ledMute = new LED(Color.YELLOW, "MUTE");
 		ledMute.setName("Mute");
 		ledMute.setForeground(Color.GREEN);
 		ledMute.setFont(new Font("Tahoma", Font.BOLD, 18));
 		ledMute.setBounds(116, 175, 84, 28);
 		add(ledMute);
 		
-		LED ledLock = new LED(Color.GREEN, "LOCK");
+		ledLock = new LED(Color.GREEN, "LOCK");
 		ledLock.setName("Lock");
 		ledLock.setForeground(Color.GREEN);
 		ledLock.setFont(new Font("Tahoma", Font.BOLD, 18));
@@ -38,7 +74,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblCpuTemp_1.setBounds(15, 86, 93, 17);
 		add(lblCpuTemp_1);
 		
-		JLabel lblCpuTemp = new JLabel(":");
+		lblCpuTemp = new JLabel(":");
 		lblCpuTemp.setName("CPU Temp");
 		lblCpuTemp.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblCpuTemp.setForeground(Color.WHITE);
@@ -59,18 +95,18 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		label_3.setHorizontalAlignment(SwingConstants.RIGHT);
 		label_3.setForeground(new Color(153, 255, 255));
 		label_3.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		label_3.setBounds(15, 14, 93, 17);
+		label_3.setBounds(15, 18, 93, 17);
 		add(label_3);
 		
-		JLabel lblInputPower = new JLabel(":");
+		lblInputPower = new JLabel(":");
 		lblInputPower.setName("Input Power");
 		lblInputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblInputPower.setForeground(Color.WHITE);
 		lblInputPower.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		lblInputPower.setBounds(121, 14, 82, 17);
+		lblInputPower.setBounds(121, 18, 82, 17);
 		add(lblInputPower);
 		
-		JLabel lblUnitTemp = new JLabel(":");
+		lblUnitTemp = new JLabel(":");
 		lblUnitTemp.setName("Unit Temp");
 		lblUnitTemp.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblUnitTemp.setForeground(Color.WHITE);
@@ -102,7 +138,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblV.setBounds(15, 110, 93, 17);
 		add(lblV);
 		
-		JLabel lbl5V5Output = new JLabel(":");
+		lbl5V5Output = new JLabel(":");
 		lbl5V5Output.setName("5.5V");
 		lbl5V5Output.setHorizontalAlignment(SwingConstants.RIGHT);
 		lbl5V5Output.setForeground(Color.WHITE);
@@ -110,7 +146,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lbl5V5Output.setBounds(121, 110, 82, 17);
 		add(lbl5V5Output);
 		
-		JLabel lbl13V2Output = new JLabel(":");
+		lbl13V2Output = new JLabel(":");
 		lbl13V2Output.setName("13.2V");
 		lbl13V2Output.setHorizontalAlignment(SwingConstants.RIGHT);
 		lbl13V2Output.setForeground(Color.WHITE);
@@ -118,7 +154,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lbl13V2Output.setBounds(121, 134, 82, 17);
 		add(lbl13V2Output);
 		
-		JLabel lbl_13V2Output = new JLabel(":");
+		lbl_13V2Output = new JLabel(":");
 		lbl_13V2Output.setName("-13.2V");
 		lbl_13V2Output.setHorizontalAlignment(SwingConstants.RIGHT);
 		lbl_13V2Output.setForeground(Color.WHITE);
@@ -134,7 +170,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		lblOutputPower_1.setBounds(15, 38, 93, 17);
 		add(lblOutputPower_1);
 		
-		JLabel lblOutputPower = new JLabel(":");
+		lblOutputPower = new JLabel(":");
 		lblOutputPower.setName("Output Power");
 		lblOutputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblOutputPower.setForeground(Color.WHITE);
@@ -145,6 +181,166 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 
 	@Override
 	protected ControllerAbstract getNewController() {
-		return new MonitorControllerConverter(this);
+		return null;//new MonitorControllerConverter(this);
+	}
+
+	@Override
+	protected List<DefaultController> getControllers() {
+		List<DefaultController> controllers = new ArrayList<>();
+		DefaultController defaultController = startController(
+				"Monitor",
+				Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_ALL,
+				PacketWork.PACKET_ID_MEASUREMENT_ALL);
+		controllers.add(defaultController);
+		return controllers;
+	}
+
+	@Override
+	protected void packetRecived(List<Payload> payloads) {
+		logger.entry(payloads);
+		if(payloads!=null){
+			byte flags = 1;
+			int value = 0;
+
+			for(Payload pl:payloads){
+				ParameterHeader parameterHeader = pl.getParameterHeader();
+				switch(parameterHeader.getSize()){
+				case 2:
+					value = pl.getShort(0);
+					break;
+				case 3:
+					flags = (byte) (pl.getByte()&0x03);
+					value =  pl.getShort((byte)1);
+					break;
+				case 4:
+					value = pl.getInt(0);
+				}
+
+				packetRecived(parameterHeader.getCode(), flags, value);
+			}
+		}
+	}
+
+	private void packetRecived(byte parameter, byte flags, int value) {
+		logger.trace("parameter={}, flags={}, value={}", parameter, flags, value);
+
+		String text;
+		ValueDouble v;
+		switch(parameter){
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
+			if (value != input) {
+				input = value;
+
+				if (flags == 0) {
+					text = "N/A";
+				} else {
+					v = new ValueDouble(value, 1);
+					v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
+					text = getOperator(flags) + v.toString();
+				}
+
+				lblInputPower.setText(text);
+				logger.trace("PARAMETER_MEASUREMENT_PICOBUC_INPUT_POWER, flags={}, value={}", flags, value);
+			}
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_OUTPUT_POWER:
+			if (value != output) {
+				output = value;
+
+				if (flags == 0)
+					text = "N/A";
+				else {
+					v = new ValueDouble(value, 1);
+					v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
+					text = getOperator(flags) + v.toString();
+				}
+
+				lblOutputPower.setText(text);
+				logger.trace("PARAMETER_MEASUREMENT_FCM_OUTPUT_POWER, flags={}, value={}", flags, value);
+			}
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE:
+			if(value!=temperature){
+				temperature = value;
+				v = new ValueDouble(value, 1);
+				v.setPrefix(" C");
+				lblUnitTemp.setText(v.toString());
+				logger.trace("PARAMETER_MEASUREMENT_FCM_TEMPERATURE, flags={}, value={}", flags, value);
+			}
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU:
+			if(value!=temperatureCPU){
+				temperatureCPU = value;
+				v = new ValueDouble(value, 1);
+				v.setPrefix(" C");
+				lblCpuTemp.setText(v.toString());
+				logger.trace("PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU, flags={}, value={}", flags, value);
+			}
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_NEG:
+			if(value!=mon_13v2_neg){
+				mon_13v2_neg = value;
+				v = new ValueDouble(value, 3);
+				v.setPrefix(" V");
+				lbl_13V2Output.setText(v.toString());
+				logger.trace("PARAMETER_MEASUREMENT_FCM_MON_13V2_NEG, flags={}, value={}", flags, value);
+			}
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_POS:
+			if(value!=mon_13v2_pos){
+				mon_13v2_pos = value;
+				v = new ValueDouble(value, 3);
+				v.setPrefix(" V");
+				lbl13V2Output.setText(v.toString());
+				logger.trace("PARAMETER_MEASUREMENT_FCM_MON_13V2_POS, flags={}, value={}", flags, value);
+			}
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_5V5:
+			if(value!=mon_5v5){
+				mon_5v5 = value;
+				v = new ValueDouble(value, 3);
+				v.setPrefix(" V");
+				lbl5V5Output.setText(v.toString());
+				logger.trace("PARAMETER_MEASUREMENT_FCM_MON_5V5, flags={}, value={}", flags, value);
+			}
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS:
+			if(status!=value){
+				status = value;
+				setStatus(value);
+			}
+		}
+	}
+
+	private void setStatus(int status) {
+		logger.entry(status);
+
+		boolean isNotLock = (status&LOCK)==0;
+		boolean isMute = (status&(MUTE|MUTE_TTL)) > 0;
+
+		if(isNotLock){
+			boolean isNotLock1 = (status&LOCK1)==0;
+			boolean isNotLock2 = (status&LOCK2)==0;
+			boolean isNotLock3 = (status&LOCK3)==0;
+			ledLock.setLedColor(Color.RED);
+			String s = (isNotLock1 ? "PLL1; ":"")+(isNotLock2 ? "PLL2;" : "")+(isNotLock3 ? "PLL3;" : "");
+			ledLock.setToolTipText(s);
+		}else{
+			ledLock.setLedColor(Color.GREEN);
+			ledLock.setToolTipText("Locked");
+		}
+
+		ledMute.setOn(isMute);
+		ledMute.setToolTipText("Status flags= "+status);
+
+//		boolean isInputOverdrive = (status&INPUT_OWERDRIVE)==0;
+//			if(isInputOverdrive){
+//				lblInputPower.setForeground(Color.RED);
+//				lblInputPower.setToolTipText("Overdrive");
+//			}else{
+//				lblInputPower.setBackground(Color.BLACK);
+//				lblInputPower.setToolTipText("");
+//			}
+	
 	}
 }

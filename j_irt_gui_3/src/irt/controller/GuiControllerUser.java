@@ -29,7 +29,7 @@ public class GuiControllerUser extends GuiControllerAbstract {
 		while (true) {
 			try {
 				if (isSerialPortSet())
-					getUnitInfo();
+					getUnitsInfo();
 
 				synchronized (this) {
 					wait(5000);
@@ -48,5 +48,10 @@ public class GuiControllerUser extends GuiControllerAbstract {
 	@Override
 	protected DevicePanel getConverterPanel(DeviceInfo di) {
 		return null;
+	}
+
+	@Override
+	public Protocol getDefaultProtocol() {
+		return Protocol.DEMO;
 	}
 }

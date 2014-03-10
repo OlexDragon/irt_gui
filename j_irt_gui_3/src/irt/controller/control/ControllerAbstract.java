@@ -42,7 +42,7 @@ public abstract class ControllerAbstract implements Runnable{
 	private String name;
 
 	public ControllerAbstract(String controllerName, PacketWork packetWork, JPanel panel, Style style) {
-		logger.entry(controllerName);
+		logger.trace(controllerName);
 
 		this.packetWork = packetWork;
 		this.style = style;
@@ -59,7 +59,6 @@ public abstract class ControllerAbstract implements Runnable{
 			setComponents(panel);
 			owner = panel;
 		}
-		logger.exit();
 	}
 
 	protected abstract void setListeners();

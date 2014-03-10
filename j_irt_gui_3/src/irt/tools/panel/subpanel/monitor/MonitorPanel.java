@@ -1,6 +1,8 @@
 package irt.tools.panel.subpanel.monitor;
 import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.Packet;
+import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 
 import java.awt.Color;
@@ -19,6 +21,7 @@ public class MonitorPanel extends MonitorPanelSSPA {
 	protected JLabel lblInputPowerTxt;
 	protected JLabel lblInputPower;
 	private LED ledLock;
+	private int input;
 
 	public MonitorPanel(LinkHeader linkHeader) {
 		super(linkHeader);
@@ -114,5 +117,33 @@ public class MonitorPanel extends MonitorPanelSSPA {
 		new TextWorker(lblInputPowerTxt, "input_power", "Input Power").execute();
 		super.refresh();
 		logger.exit();
+	}
+
+	@Override
+	protected void packetRecived(byte parameter, byte flags, int value) {
+
+		ValueDouble v;
+		switch(parameter){
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_INPUT_POWER:
+			if (value != input) {
+				input = value;
+				v = new ValueDouble(value, 1);
+				v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
+				lblInputPower.setText(getOperator(flags)+v.toString());
+			}
+			break;
+		default:
+			super.packetRecived(parameter, flags, value);
+		}
+	}
+
+	@Override
+	protected void setStatus(int status) {
+		super.setStatus(status);
+
+		if ((status & LOCK) == 0)
+			ledLock.setLedColor(Color.RED);
+		else
+			ledLock.setLedColor(Color.GREEN);
 	}
 }

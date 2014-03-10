@@ -97,31 +97,35 @@ public class MuteController extends ControllerAbstract {
 
 		@Override
 		public void run() {
-			GetterAbstract pw = (GetterAbstract)getPacketWork();
-			long source;
+			try {
+				GetterAbstract pw = (GetterAbstract) getPacketWork();
+				long source;
 
-			if(valueChangeEvent.getSource() instanceof Byte)
-				source = (Byte)valueChangeEvent.getSource();
-			else
-				source = (Long)valueChangeEvent.getSource();
+				if (valueChangeEvent.getSource() instanceof Byte)
+					source = (Byte) valueChangeEvent.getSource();
+				else
+					source = (Long) valueChangeEvent.getSource();
 
-			String text;
-			if(isMute=(source>0)){
-				text = Translation.getValue(String.class, "unmute", "UNMUTE");
-				lblMute.setText(text);
-				btnMute.setToolTipText(text);
-				if(style==Style.CHECK_ALWAYS)
-					pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
-			}else if(source==0){
-				text = Translation.getValue(String.class, "mute", "MUTE");
-				lblMute.setText(text);
-				btnMute.setToolTipText(text);
-				if(style==Style.CHECK_ALWAYS)
-					pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
-			}else{
-				lblMute.setText("error"+source);
-				pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object)null);
-				setSend(true, false);
+				String text;
+				if (isMute = (source > 0)) {
+					text = Translation.getValue(String.class, "unmute", "UNMUTE");
+					lblMute.setText(text);
+					btnMute.setToolTipText(text);
+					if (style == Style.CHECK_ALWAYS)
+						pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object) null);
+				} else if (source == 0) {
+					text = Translation.getValue(String.class, "mute", "MUTE");
+					lblMute.setText(text);
+					btnMute.setToolTipText(text);
+					if (style == Style.CHECK_ALWAYS)
+						pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object) null);
+				} else {
+					lblMute.setText("error" + source);
+					pw.getPacketThread().preparePacket(pw.getPacketParameterHeaderCode(), (Object) null);
+					setSend(true, false);
+				}
+			} catch (Exception ex) {
+				logger.catching(ex);
 			}
 		}
 

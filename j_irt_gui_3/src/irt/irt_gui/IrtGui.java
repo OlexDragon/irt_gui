@@ -75,7 +75,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.060";
+	public static final String VERTION = "- 3.062";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -96,10 +96,7 @@ public class IrtGui extends IrtMainFrame {
 			Object source = valueChangeEvent.getSource();
 
 			switch(valueChangeEvent.getID()){
-			case GuiController.CONNECTION:
-				headPanel.setPowerOn((Boolean)source);
-				ProgressBar.setValue(0);
-				break;
+
 			case GuiController.ALARM:
 				switch((int)source){
 				case AlarmsController.ALARMS_STATUS_INFO:
@@ -118,6 +115,12 @@ public class IrtGui extends IrtMainFrame {
 					break;
 				}
 				break;
+
+			case GuiController.CONNECTION:
+				headPanel.setPowerOn((boolean)source);
+				ProgressBar.setValue(0);
+				break;
+
 			case GuiController.MUTE:
 				headPanel.setMute((boolean) source);
 			}

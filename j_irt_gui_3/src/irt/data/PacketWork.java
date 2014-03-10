@@ -9,16 +9,17 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 	public static final short PACKET_DEVICE_INFO = 1;
 
-	public static final short PACKET_ID_MEASUREMENT_STATUS 					= 10;
-	public static final short PACKET_ID_MEASUREMENT_INPUT_POWER				= 11;
-	public static final short PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER 	= 12;
-	public static final short PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE 	= 13;
-	public static final short PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE		= 14;
-	public static final short PACKET_ID_MEASUREMENT_CPU_TEMPERATURE			= 15;
-	public static final short PACKET_ID_MEASUREMENT_5V5 					= 16;
-	public static final short PACKET_ID_MEASUREMENT_13V2 					= 17;
-	public static final short PACKET_ID_MEASUREMENT_13V2_NEG				= 18;
-	public static final short PACKET_ID_MEASUREMENT_OUTPUT_POWER 			= 19;
+	public static final short PACKET_ID_MEASUREMENT_ALL 					= 9,
+							PACKET_ID_MEASUREMENT_STATUS 					= 10,
+							PACKET_ID_MEASUREMENT_INPUT_POWER				= 11,
+							PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER 	= 12,
+							PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE 		= 13,
+							PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE			= 14,
+							PACKET_ID_MEASUREMENT_CPU_TEMPERATURE			= 15,
+							PACKET_ID_MEASUREMENT_5V5 						= 16,
+							PACKET_ID_MEASUREMENT_13V2 						= 17,
+							PACKET_ID_MEASUREMENT_13V2_NEG					= 18,
+							PACKET_ID_MEASUREMENT_OUTPUT_POWER 				= 19;
 
 	public static final short 	PACKET_ID_CONFIGURATION_LO_BIAS_BOARD		= 20,
 								PACKET_ID_CONFIGURATION_LO_FREQUENCIES 		= 21,
@@ -107,7 +108,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_ALARMS_OWER_TEMPERATURE	= 144,
 								PACKET_ID_ALARMS_PLL_OUT_OF_LOCK	= 145,
 								PACKET_ID_ALARMS_HARDWARE_FAULT		= 146,
-								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 147;
+								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 147,
+								PACKET_ID_ALARMS_test	= 148;
 
 	public static final short	PACKET_ID_PROTOCOL_ADDRESS	= 150;
 

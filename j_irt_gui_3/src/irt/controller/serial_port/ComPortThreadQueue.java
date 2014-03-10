@@ -70,7 +70,7 @@ public class ComPortThreadQueue extends Thread {
 							logger.warn("Serial port or Packet is not ready:\n{}", packetWork);
 						}
 					}else
-						logger.warn("packetThread==null");
+						logger.warn("packetThread==null; ({})", packetWork);
 //					if(comPortQueue.isEmpty()){
 //						serialPort.closePort();
 //					}

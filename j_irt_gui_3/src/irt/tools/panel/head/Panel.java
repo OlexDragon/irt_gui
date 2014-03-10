@@ -63,6 +63,10 @@ public class Panel extends JPanel {
 
 	private JPanel panel;
 
+	private JButton btnLeft;
+
+	private JButton btnRight;
+
 	public Panel( String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		setBorder(null);
 
@@ -96,10 +100,12 @@ public class Panel extends JPanel {
 		userPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentHidden(ComponentEvent e) {
+				btnLeft.setText("[ ]");
 				resize();
 			}
 			@Override
 			public void componentShown(ComponentEvent e) {
+				btnLeft.setText("_");
 				resize();
 			}
 		});
@@ -123,10 +129,12 @@ public class Panel extends JPanel {
 		extraPanel.addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentHidden(ComponentEvent e) {
+				btnRight.setText("[ ]");
 				resize();
 			}
 			@Override
 			public void componentShown(ComponentEvent e) {
+				btnRight.setText("_");
 				resize();
 			}
 		});
@@ -180,27 +188,29 @@ public class Panel extends JPanel {
 		btnMin.setMargin(new Insets(0, 0, 0, 0));
 		btnMin.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
-		final JButton btnLeft = new JButton("<");
+		btnLeft = new JButton("_");
+		btnLeft.setForeground(Color.YELLOW);
 		btnLeft.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				boolean userVisible = !userPanel.isVisible();
+				boolean visible = !userPanel.isVisible();
 
-				if(!userVisible && !extraPanel.isVisible())
+				if(!visible && !extraPanel.isVisible())
 					setAllPanelsVisible(false);
 				else{
-					userPanel.setVisible(userVisible);
-					btnLeft.setToolTipText(userVisible ? "Hide the Monitor Panel" : "Show the Monitor Panel");
+					userPanel.setVisible(visible);
+					btnLeft.setToolTipText(visible ? "Hide the Monitor Panel" : "Show the Monitor Panel");
 				}
 				revalidate();
 				getParent().getParent().getParent().repaint();
 			}
 		});
 		btnLeft.setMargin(new Insets(0, 0, 0, 0));
-		btnLeft.setFont(new Font("Tahoma", Font.BOLD, 14));
-		btnLeft.setBackground(SystemColor.inactiveCaption);
+		btnLeft.setFont(new Font("Tahoma", Font.BOLD, 16));
+		btnLeft.setBackground(color);
 		
-		final JButton btnRight = new JButton(">");
+		btnRight = new JButton("_");
+		btnRight.setForeground(Color.YELLOW);
 		btnRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				boolean visible = !extraPanel.isVisible();
@@ -216,8 +226,8 @@ public class Panel extends JPanel {
 		});
 		btnRight.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnRight.setMargin(new Insets(0, 0, 0, 0));
-		btnRight.setFont(new Font("Tahoma", Font.BOLD, 14));
-		btnRight.setBackground(new Color(154, 205, 50));
+		btnRight.setFont(new Font("Tahoma", Font.BOLD, 16));
+		btnRight.setBackground(new Color(0,0x33,0x33));
 		
 		lblAddress = new JLabel("Address: ");
 		lblAddress.setFont(new Font("Tahoma", Font.BOLD, 14));
@@ -250,7 +260,9 @@ public class Panel extends JPanel {
 	}
 
 	public void setVerticalLabelBackground(Color labelBackground) {
-		verticalLabel.setBackground(labelBackground);
+		if(!verticalLabel.getBackground().equals(labelBackground)){
+			verticalLabel.setBackground(labelBackground);
+		}
 	}
 
 	public void setVerticalLabelFont(Font font) {

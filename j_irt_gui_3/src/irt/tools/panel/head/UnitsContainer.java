@@ -38,7 +38,7 @@ public class UnitsContainer extends JPanel{
 		};
 	}
 
-	public boolean contains(LinkHeader linkHeader){
+	public synchronized boolean contains(LinkHeader linkHeader){
 		logger.entry(linkHeader);
 
 		boolean result = false;
@@ -125,7 +125,8 @@ public class UnitsContainer extends JPanel{
 		return component;
 	}
 
-	public boolean remove(LinkHeader linkHeader) {
+	public synchronized boolean remove(LinkHeader linkHeader) {
+		logger.entry(linkHeader);
 
 		boolean removed = false;
 		Component[] components = getComponents();
@@ -139,7 +140,7 @@ public class UnitsContainer extends JPanel{
 				}
 			}
 
-		return removed;
+		return logger.exit(removed);
 	}
 
 	public <T> void remove(Class<T> classToRemove) {
@@ -152,7 +153,7 @@ public class UnitsContainer extends JPanel{
 		}
 	}
 
-	public void remove(String className) {
+	public synchronized void remove(String className) {
 		Component[] cs = getComponents();
 		for(Component c:cs){
 			if(c.getClass().getSimpleName().equals(className)){
@@ -190,12 +191,14 @@ public class UnitsContainer extends JPanel{
 	}
 
 	private boolean isDevicePanel(LinkHeader linkHeader, Component component){
+		logger.entry(linkHeader, component);
 		boolean isDevicePanel = false;
 
 		if(component instanceof DevicePanel){
 			DevicePanel devicePanel = (DevicePanel)component;
 			LinkHeader lh = devicePanel.getLinkHeader();
-			isDevicePanel = (linkHeader.equals(lh));
+			logger.trace("LinkHeader lh = {}", lh);
+			isDevicePanel = linkHeader!=null ? linkHeader.equals(lh) : lh==null;
 		}
 
 		return isDevicePanel;

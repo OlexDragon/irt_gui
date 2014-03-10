@@ -1,13 +1,20 @@
 package irt.tools.panel.subpanel.monitor;
+import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
-import irt.controller.monitor.MonitorController;
 import irt.controller.translation.Translation;
+import irt.data.PacketWork;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.Packet;
+import irt.data.packet.ParameterHeader;
+import irt.data.packet.Payload;
+import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JLabel;
@@ -17,12 +24,25 @@ import javax.swing.SwingWorker;
 
 @SuppressWarnings("serial")
 public class MonitorPanelSSPA extends MonitorPanelAbstract {
+
+	public static final byte
+			IRT_SLCP_PACKET_ID_MEASUREMENT = Packet.IRT_SLCP_PACKET_ID_MEASUREMENT;
+
+	public static final int
+			MUTE = 1,
+			LOCK = 2;
+
 	protected LED ledMute;
 	protected JLabel lblOutputPowerTxt;
 	protected JLabel lblTemperatureTxt;
 	protected JLabel lblOutputPower;
 	protected JLabel lblTemperature;
 	private boolean isSSPA;
+
+	private int temperature;
+	private int output;
+
+	private int status;
 
 	public MonitorPanelSSPA(LinkHeader linkHeader) {
 		super(linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 214, 210);
@@ -134,7 +154,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 	@Override
 	protected ControllerAbstract getNewController() {
-		return new MonitorController(getLinkHeader(), this) ;
+		return null;//TODO Remove this Method; new MonitorController(getLinkHeader(), this);
 	}
 
 	@Override
@@ -151,6 +171,83 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		swingWorkers();
 
 		logger.exit();
+	}
+
+	@Override
+	protected List<DefaultController> getControllers() {
+		List<DefaultController> controllers = new ArrayList<>();
+		DefaultController defaultController = startController(
+				"Measurement",
+				Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_ALL,
+				PacketWork.PACKET_ID_MEASUREMENT_ALL);
+		controllers.add(defaultController);
+		return controllers;
+	}
+
+
+	@Override
+	protected void packetRecived(List<Payload> payloads) {
+		logger.entry(payloads);
+		if(payloads!=null){
+			byte flags = 1;
+			int value = 0;
+
+			for(Payload pl:payloads){
+				ParameterHeader parameterHeader = pl.getParameterHeader();
+				switch(parameterHeader.getSize()){
+				case 2:
+					value = pl.getShort(0);
+					break;
+				case 3:
+					flags = (byte) (pl.getByte()&0x03);
+					value =  pl.getShort((byte)1);
+					break;
+				case 4:
+					value = pl.getInt(0);
+				}
+
+				packetRecived(parameterHeader.getCode(), flags, value);
+			}
+		}
+	}
+
+	protected void packetRecived(byte parameter, byte flags, int value) {
+		logger.trace("parameter={}, flags={}, value={}", parameter, flags, value);
+
+		ValueDouble v;
+		switch(parameter){
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER:
+			if(flags==0)
+				lblOutputPower.setText("N/A");
+			else if (value != output) {
+				output = value;
+				v = new ValueDouble(value, 1);
+				v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
+				lblOutputPower.setText(getOperator(flags)+v.toString());
+			}
+			logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_TEMPERATURE:
+			if(value!=temperature){
+				temperature = value;
+				v = new ValueDouble(value, 1);
+				v.setPrefix(" C");
+				lblTemperature.setText(v.toString());
+			}
+			logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
+			break;
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS:
+			if(status!=value){
+				status = value;
+				setStatus(value);
+			}
+		}
+	}
+
+	protected void setStatus(int status) {
+		logger.entry(status);
+		ledMute.setOn((status & MUTE) > 0);
+		ledMute.setToolTipText("Status flags= " + Integer.toHexString(status));
 	}
 
 	//***********************************************************************************

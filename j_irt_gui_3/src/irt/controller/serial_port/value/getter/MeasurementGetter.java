@@ -17,13 +17,13 @@ public class MeasurementGetter extends GetterAbstract {
 	 * use to get converter status bits
 	 */
 	public MeasurementGetter() {
-		this(null, Packet.IRT_SLCP_PARAMETER_FCM_MEASUREMENT_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
+		this(null, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
 	}
 	/**
 	 * use to get bias board status bits
 	 */
 	public MeasurementGetter(LinkHeader linkHeader) {
-		this(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_MEASUREMENT_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
+		this(linkHeader, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
 	}
 
 	public MeasurementGetter(byte packetPayloadParameterHeaderCode, short pacetId) {

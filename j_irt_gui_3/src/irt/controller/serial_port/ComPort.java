@@ -69,6 +69,7 @@ public class ComPort extends SerialPort {
 	}
 
 	public Packet send(PacketWork packetWork){
+		logger.entry(packetWork);
 
 		long start = System.currentTimeMillis();
 		PacketThread pt = packetWork.getPacketThread();
@@ -215,7 +216,7 @@ do{
 		Console.appendLn(packet, "Get");
 		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 
-		return packet;
+		return logger.exit(packet);
 	}
 
 	private byte[] getAcknowledge() {
@@ -273,6 +274,7 @@ do{
 		boolean isComfirm = false;
 		int ev = linkHeader!=null ? 11 : 7;
 		int index = ev - 3;
+		logger.debug("linkHeader = {}", linkHeader);
 
 		byte[] readBytes = readBytes(ev,100);
 		this.isComfirm = readBytes!=null && readBytes[0]==Packet.FLAG_SEQUENCE && readBytes[readBytes.length-1]==Packet.FLAG_SEQUENCE;
@@ -521,9 +523,8 @@ do{
 		synchronized (logger) {
 			isOpened = isOpened();
 
-			logger.debug("Port Name={} openPort() is Opened={}, run={}", getPortName(), isOpened, run);
-
 			if (run && !isOpened) {
+				logger.debug("openPort() Port Name={}", getPortName());
 				isOpened = super.openPort();
 				if (isOpened)
 					addEventListener(serialPortEvent);

@@ -166,35 +166,43 @@ public class Payload {
 		return l;
 	}
 
-	public int getInt(int index) {
-		long l = 0;
-		index *= 4;
-
-		if(index+1<buffer.length)
-			l = Packet.shiftAndAdd(Arrays.copyOfRange(buffer, index, index+4));
-
-		return (int) l;
+	/**
+	 * @param startFrom = start from byte index = 'startFrom'*4
+	 * @return	value from 4 bytes (started from 'startFrom'*4) */
+	public int getInt(int startFrom) {
+		return (short) toLong(startFrom*4, 4);
 	}
 
-	public int getInt(byte byteIndex) {
-		long l = 0;
-
-		if(byteIndex+1<buffer.length)
-			l = Packet.shiftAndAdd(Arrays.copyOfRange(buffer, byteIndex, byteIndex+4));
-
-		return (int) l;
+	/**
+	 * @param startFrom = start from byte with index = startFrom
+	 * @return	value from 4 bytes (started from 'startFrom') */
+	public int getInt(byte startFrom) {
+		return (int) toLong(startFrom, 4);
 	}
 
-	public short getShort(int index) {
+	/**
+	 * @param startFrom = start from byte index = 'startFrom'*2
+	 * @return	value from 2 bytes (started from 'startFrom'*2) */
+	public short getShort(int startFrom) {
+		return (short) toLong(startFrom*2, 2);
+	}
 
-		short s = 0;
-		byte[] b = new byte[2];
-		index *= 2;
-		if(buffer!=null && index+1<buffer.length){
-			System.arraycopy(buffer, index, b, 0, 2);
-			s = (short) Packet.shiftAndAdd(b);
-		}
-		return s;
+	/**
+	 * @param startFrom = start from byte with index = startFrom
+	 * @return	value from 2 bytes (started from 'startFrom') */
+	public short getShort(byte startFrom) {
+		return (short) toLong(startFrom, 2);
+	}
+
+	private long toLong(int startFrom, int length){
+
+		long result = 0;
+		int end = startFrom+length;
+
+		if(end<=buffer.length)
+			result = Packet.shiftAndAdd(Arrays.copyOfRange(buffer, startFrom, end));
+
+		return result;
 	}
 
 	public DacValue getDacValue() {

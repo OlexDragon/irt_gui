@@ -1,6 +1,7 @@
 package irt.tools.panel.subpanel.control;
 
 import irt.controller.AttenuationController;
+import irt.controller.DefaultController;
 import irt.controller.FrequencyContriller;
 import irt.controller.GainController;
 import irt.controller.GuiController;
@@ -12,6 +13,7 @@ import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
 import irt.tools.button.ImageButton;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
@@ -27,6 +29,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.DefaultComboBoxModel;
@@ -370,5 +373,17 @@ public class ControlPanel extends MonitorPanelAbstract {
 		comboBox.setModel(model);
 
 		lblChoice.setFont(font);
+	}
+
+	@Override
+	protected List<DefaultController> getControllers() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected void packetRecived(List<Payload> payloads) {
+		// TODO Auto-generated method stub
+		
 	}
 }

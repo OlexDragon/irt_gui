@@ -42,7 +42,7 @@
  	<Logger name="irt.tools.panel.UserPicobucPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.PicobucPanel" level="WARN"/>
 
- 	<Logger name="irt.tools.panel.head.IrtPanel" level="debug"/>
+ 	<Logger name="irt.tools.panel.head.IrtPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.head.HeadPanel" level="WARN"/>
  	<Logger name="irt.tools.panel.head.UnitsContainer" level="WARN"/>
 
@@ -55,23 +55,25 @@
   	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="WARN"/>
 
   	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="WARN"/>
+  	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanelSSPA" level="WARN"/>
+  	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanelConverter" level="WARN"/>
 
   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="WARN"/>
   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelSSPB" level="WARN"/>
+
+ 	<Logger name="irt.controller.GuiController" level="WARN"/>
+ 	<Logger name="irt.controller.GuiControllerUser" level="WARN"/>
 
  	<Logger name="irt.controller.DeviceDebagController" level="WARN"/>
  	<Logger name="irt.controller.DefaultController" level="WARN"/>
  	<Logger name="irt.controller.DumpControllers" level="WARN"/>
 
  	<Logger name="irt.controller.translation.Translation" level="WARN"/>
-
- 	<Logger name="irt.controller.GuiControllerAbstract" level="WARN"/>
- 	<Logger name="irt.controller.GuiControllerAbstract$Remover" level="WARN"/>
- 	<Logger name="irt.controller.GuiControllerUser" level="WARN"/>
  
-  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="error"/>
-
+  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="WARN"/>
+	<Logger name="irt.controller.serial_port.ComPort" level="WARN" />
   	<Logger name="irt.controller.serial_port.value.getter.Getter" level="WARN"/>
+  	<Logger name="irt.controller.serial_port.value.getter.MeasurementGetter" level="WARN"/>
  
   	<Logger name="irt.data.PacketThread" level="WARN"/>
   	<Logger name="irt.data.packet.Payload" level="WARN"/>

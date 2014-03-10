@@ -30,14 +30,14 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId) {
 		logger.trace("packetType={},groupId={},packetParameterHeaderCode={},packetId={}", packetType, groupId, packetParameterHeaderCode, packetId);
-		this.linkHeader = linkHeader;
+		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
 		this.packetType = packetType;
 		this.groupId = groupId;
 		this.packetParameterHeaderCode = packetParameterHeaderCode;
 		this.packetId = packetId;
 		logger.trace(Arrays.toString(getCommand()));
 		logger.trace(linkHeader);
-		packetThread = linkHeader!=null ? new LinkedPacketThread(linkHeader, getCommand(), "LinkedPacketId="+packetId) : new PacketThread(getCommand(), "PacketId="+packetId);
+		packetThread = this.linkHeader.getAddr()!=0 ? new LinkedPacketThread(linkHeader, getCommand(), "LinkedPacketId="+packetId) : new PacketThread(getCommand(), "PacketId="+packetId);
 	}
 
 	public <T> GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, T value) {
@@ -154,7 +154,7 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 			if(packet instanceof LinkedPacket){
 				byte addr = ((LinkedPacket)packet).getLinkHeader().getAddr();
 				addrEquals = linkHeader.getAddr() == addr;
-			}else if(linkHeader==null)
+			}else if(linkHeader==null || linkHeader.getAddr()==0)
 				addrEquals = true;
 			else
 				addrEquals = false;
