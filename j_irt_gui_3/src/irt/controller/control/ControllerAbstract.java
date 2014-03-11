@@ -4,6 +4,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.value.seter.SetterAbstract;
 import irt.data.FireValue;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
@@ -221,7 +222,7 @@ public abstract class ControllerAbstract implements Runnable{
 
 	protected void fireStatusChangeListener(ValueChangeEvent valueChangeEvent) {
 
-		Thread t = new Thread(new FireValue(statusChangeListeners, valueChangeEvent), ControllerAbstract.this.getName());
+		Thread t = new Thread(new FireValue(statusChangeListeners, valueChangeEvent), ControllerAbstract.this.getName()+".FireValue-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

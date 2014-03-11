@@ -8,6 +8,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
@@ -110,7 +111,7 @@ public class AutoAddressPanel extends JPanel {
 								if(run)
 									controllers.add(target);
 							}
-							Thread t = new Thread(target);
+							Thread t = new Thread(target, "AutoAddressPanel."+target.getName()+"-"+new RundomNumber());
 							t.setDaemon(true);
 							t.start();
 						}

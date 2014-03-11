@@ -11,6 +11,7 @@ import irt.controller.serial_port.value.seter.ConfigurationSetter;
 import irt.controller.serial_port.value.seter.DeviceDebagSetter;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ControllerFocusListener;
 import irt.data.packet.LinkHeader;
@@ -99,151 +100,64 @@ public class DACsPanel extends JPanel {
 
 			public void ancestorAdded(AncestorEvent arg0) {
 
-				ControllerAbstract abstractController = linkHeader==null ?
+				startController(linkHeader==null ?
 						new DeviceDebagController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS);
-				Thread t = new Thread(abstractController);
+							new DeviceDebagController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+
+				startController(linkHeader==null ?
+						new DeviceDebagController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebagController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+
+				startController(linkHeader==null ?
+						new DeviceDebagController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebagController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+
+				startController(linkHeader==null ?
+						new DeviceDebagController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebagController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+
+				//Calibration mode
+				startController(new SwitchController("Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_BIAS_DEVICE_DEBAG_CALIBRATION_MODE)));
+
+				if(linkHeader==null){
+					Value value = new Value(0, 0, 4095, 0);
+					startController(new AdcController("Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+
+					value = new Value(0, 0, 4095, 0);
+					startController(new AdcController("Output Power Controller", lblOutputPower, new DeviceDebagGetter(null,  10, 1, PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+
+					value = new Value(0, 0, 4095, 0);
+					startController(new AdcController("Temperature Controller", lblTemperature, new DeviceDebagGetter(null,  10, 2, PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+
+					value = new Value(0, 0, 4095, 0);
+					startController(new AdcController("Current Controller", lblCurrent, new DeviceDebagGetter(null,  10, 4, PacketWork.PACKET_ID_FCM_ADC_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+
+					value = new Value(0, 0, 4095, 0);
+					startController(new AdcController("5.5V Controller", lbl5V5, new DeviceDebagGetter(null,  10, 6, PacketWork.PACKET_ID_FCM_ADC_5V5, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+
+					value = new Value(0, 0, 4095, 0);
+					startController(new AdcController("3.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+
+					value = new Value(0, 0, 4095, 0);
+					startController(new AdcController("-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+
+					value = new Value(0, -100, 100, 0);
+					startController(new TextSliderController("Gain Offset Controller", new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
+				}
+
+			}
+
+			public void startController(ControllerAbstract abstractController) {
+				threadList.add(abstractController);
+				if(abstractController instanceof DeviceDebagController)
+					((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
+
+				Thread t = new Thread(abstractController, "DACsPanel."+abstractController.getName()+"-"+new RundomNumber());
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
 				t.setDaemon(true);
 				t.start();
-				threadList.add(abstractController);
-				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
-
-				abstractController = linkHeader==null ?
-						new DeviceDebagController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS);
-				t = new Thread(abstractController);
-				priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
-				threadList.add(abstractController);
-				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
-
-				abstractController = linkHeader==null ?
-						new DeviceDebagController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS);
-				t = new Thread(abstractController);
-				priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
-				threadList.add(abstractController);
-				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
-
-				abstractController = linkHeader==null ?
-						new DeviceDebagController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS);
-				t = new Thread(abstractController);
-				priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
-				threadList.add(abstractController);
-				((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
-
-				//Calibration mode
-				abstractController =  new SwitchController("Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_BIAS_DEVICE_DEBAG_CALIBRATION_MODE));
-				t = new Thread(abstractController);
-				priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
-				threadList.add(abstractController);
-
-				if(linkHeader==null){
-					Value value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-
-					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Output Power Controller", lblOutputPower, new DeviceDebagGetter(null,  10, 1, PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-
-					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Temperature Controller", lblTemperature, new DeviceDebagGetter(null,  10, 2, PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
-					abstractController.setWaitTime(10000);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-
-					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("Current Controller", lblCurrent, new DeviceDebagGetter(null,  10, 4, PacketWork.PACKET_ID_FCM_ADC_CURRENT, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-
-					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("5.5V Controller", lbl5V5, new DeviceDebagGetter(null,  10, 6, PacketWork.PACKET_ID_FCM_ADC_5V5, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
-					abstractController.setWaitTime(10000);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-
-					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("3.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
-					abstractController.setWaitTime(10000);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-
-					value = new Value(0, 0, 4095, 0);
-					abstractController = new AdcController("-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1);
-					abstractController.setWaitTime(10000);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-
-					value = new Value(0, -100, 100, 0);
-					abstractController = new TextSliderController("Gain Offset Controller", new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE);
-					abstractController.setWaitTime(10000);
-					t = new Thread(abstractController);
-					priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
-					threadList.add(abstractController);
-				}
-
 			}
 			public void ancestorMoved(AncestorEvent arg0) {
 			}

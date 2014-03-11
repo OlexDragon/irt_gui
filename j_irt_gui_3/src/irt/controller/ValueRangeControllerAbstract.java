@@ -3,6 +3,7 @@ package irt.controller;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.seter.ConfigurationSetter;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.value.Value;
 
@@ -15,12 +16,7 @@ import java.awt.event.FocusListener;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
-
 public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
-
-	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private Value stepValue;
 
@@ -129,7 +125,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
 		textSliderController = new TextSliderController(controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
-		Thread t = new Thread(textSliderController);
+		Thread t = new Thread(textSliderController, ValueRangeControllerAbstract.class.getSimpleName()+".TextSliderController-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

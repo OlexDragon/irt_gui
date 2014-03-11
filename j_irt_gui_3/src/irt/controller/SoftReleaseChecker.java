@@ -1,6 +1,7 @@
 package irt.controller;
 
 import irt.data.DeviceInfo;
+import irt.data.RundomNumber;
 
 import java.awt.Color;
 import java.io.File;
@@ -21,6 +22,7 @@ public class SoftReleaseChecker extends Thread {
 	private DeviceInfo deviceInfo;
 
 	private SoftReleaseChecker(){
+		super("SoftReleaseChecker-"+new RundomNumber());
 		logger.entry();
 
 		int priority = getPriority();

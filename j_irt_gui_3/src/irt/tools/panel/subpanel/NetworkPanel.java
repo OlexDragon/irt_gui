@@ -6,6 +6,7 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.tools.panel.ip_address.IpAddressTextField;
@@ -60,7 +61,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 			public void ancestorAdded(AncestorEvent arg0) {
 				networkController = new NetworkController(new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_NETWORK, Packet.IRTSCP_PARAMETER_ID_NETWORK_ADDRESS, PacketWork.PACKET_NETWORK_ADDRESS), NetworkPanel.this, Style.CHECK_ALWAYS);
 				networkController.setWaitTime(15000);
-				Thread t = new Thread(networkController);
+				Thread t = new Thread(networkController, "NetworkPanel.NetworkController-"+new RundomNumber());
 				int priority = t.getPriority();
 				if(priority<Thread.MAX_PRIORITY)
 					t.setPriority(priority-1);

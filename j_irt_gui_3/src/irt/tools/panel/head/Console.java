@@ -1,5 +1,7 @@
 package irt.tools.panel.head;
 
+import irt.data.RundomNumber;
+
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -66,6 +68,7 @@ public class Console extends JDialog {
 		private boolean queueIsFull;
 
 		public ThreadsWorker() {
+			super("Console.ThreadsWorker-"+new RundomNumber().toString()+"-"+new RundomNumber());
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				setPriority(priority-1);

@@ -7,6 +7,7 @@ import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
@@ -154,7 +155,7 @@ public class UserPicobucPanel extends DevicePanel {
 	}
 
 	private void startThread(Runnable target) {
-		Thread t = new Thread(target);
+		Thread t = new Thread(target, "UserPicobucPanel.PACKET_ID_ALARMS_IDs-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

@@ -44,7 +44,7 @@ public class ConfigurationSetter extends SetterAbstract {
 	public ConfigurationSetter(LinkHeader linkHeader) {
 		this(linkHeader,
 				linkHeader!=null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES :
-					Packet.IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY_RANGE,
+					Packet.IRT_SLCP_PARAMETER_CONFIGURATION_FCM_FREQUENCY_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES);
 	}
 

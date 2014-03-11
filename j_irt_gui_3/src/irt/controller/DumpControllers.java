@@ -4,6 +4,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.ToHex;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -454,7 +455,7 @@ public class DumpControllers{
 	public void addDumpController(DefaultController dumpController, int waitTime) {
 		dumpController.setWaitTime(waitTime);
 
-		startThread(new Thread(dumpController));
+		startThread(new Thread(dumpController, "DumpControllers."+dumpController.getName()+"-"+new RundomNumber().toString()));
 		dumpsList.add(dumpController);
 	}
 

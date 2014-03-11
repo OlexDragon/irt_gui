@@ -1,6 +1,7 @@
 package irt.controller.serial_port.value.getter;
 
 import irt.data.FireValue;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 
@@ -29,7 +30,7 @@ public class ValueChangeListenerClass {
 	public void fireValueChangeListener(ValueChangeEvent valueChangeEvent) {
 		logger.trace("fireValueChangeListener(ValueChangeEvent {});", valueChangeListeners);
 
-		Thread t = new Thread(new FireValue(valueChangeListeners, valueChangeEvent));
+		Thread t = new Thread(new FireValue(valueChangeListeners, valueChangeEvent), ValueChangeListenerClass.this.getClass().getSimpleName()+".FireValue-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

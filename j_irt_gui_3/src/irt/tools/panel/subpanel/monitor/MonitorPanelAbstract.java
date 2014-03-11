@@ -6,6 +6,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.controller.translation.Translation;
+import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
@@ -54,14 +55,16 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 			public void ancestorAdded(AncestorEvent arg0) {
 
 				controller = getNewController();
-				 if(statusListener!=null)
-					 controller.addStatusListener(statusListener);
-				Thread t = new Thread(controller);
-				int priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
+				if (controller != null) {
+					if (statusListener != null)
+						controller.addStatusListener(statusListener);
+					Thread t = new Thread(controller, MonitorPanelAbstract.this.getClass().getSimpleName() + "." + controller.getName() + "-" + new RundomNumber());
+					int priority = t.getPriority();
+					if (priority > Thread.MIN_PRIORITY)
+						t.setPriority(priority - 1);
+					t.setDaemon(true);
+					t.start();
+				}
 			}
 			public void ancestorMoved(AncestorEvent arg0) {}
 
@@ -157,7 +160,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 					}
 			
 		};
-		Thread t = new Thread(defaultController);
+		Thread t = new Thread(defaultController, getClass().getSimpleName()+"."+controllerName+"-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

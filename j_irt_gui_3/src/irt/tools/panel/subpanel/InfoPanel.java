@@ -5,6 +5,7 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -216,7 +217,7 @@ public class InfoPanel extends JPanel implements Refresh {
 				else
 					transformer.setHeight(WINDOW_MAX_HEIGHT);
 
-				Thread t = new Thread(transformer);
+				Thread t = new Thread(transformer, "InfoPanel.Transformer-"+new RundomNumber());
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);
@@ -300,7 +301,7 @@ public class InfoPanel extends JPanel implements Refresh {
 
 		public SecondsCount(int firmwareBuildCounter){
 			this.firmwareBuildCounter = firmwareBuildCounter;
-			Thread t = new Thread(this);
+			Thread t = new Thread(this, "InfoPanel.SecondsCount-"+new RundomNumber());
 			int priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				t.setPriority(priority-1);

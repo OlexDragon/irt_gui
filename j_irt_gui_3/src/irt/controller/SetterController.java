@@ -3,6 +3,7 @@ package irt.controller;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.ToDo;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 
@@ -20,7 +21,7 @@ public class SetterController extends ControllerAbstract {
 		super(controllerName, packetWork, null, style);
 		this.toDo = toDo;
 
-		Thread t = new Thread(this);
+		Thread t = new Thread(this, "SetterController-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

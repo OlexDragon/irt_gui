@@ -3,6 +3,7 @@ package irt.controller;
 import irt.controller.control.ControllerAbstract;
 import irt.data.PacketWork;
 import irt.data.RegisterValue;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 
@@ -38,7 +39,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		timer = new Timer(9000, timerListener);
 		timer.start();
 
-		Thread t = new Thread(this);
+		Thread t = new Thread(this, "DeviceDebagSaveController-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

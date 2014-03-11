@@ -8,6 +8,7 @@ import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -206,7 +207,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				defaultController.setWaitTime(10000);
 				controllers.add(defaultController);
 
-				Thread t = new Thread(defaultController);
+				Thread t = new Thread(defaultController, "RedundancyPanel."+defaultController.getName()+"-"+new RundomNumber());
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);

@@ -1,5 +1,6 @@
 package irt.controller;
 
+import irt.data.RundomNumber;
 import irt.tools.label.LED;
 
 import java.awt.event.ActionEvent;
@@ -33,7 +34,7 @@ public class BlinkControl implements Runnable {
 		});
 		timer.setRepeats(false);
 
-		Thread t = new Thread(this);
+		Thread t = new Thread(this, "BlinkControl-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

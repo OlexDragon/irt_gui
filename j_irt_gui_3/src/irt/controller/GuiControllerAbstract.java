@@ -8,6 +8,7 @@ import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.StringData;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
@@ -708,6 +709,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			// LinkHeaderController start in class Remover setLinkHeader(LinkHeader linkHeader);
 			public LinkHeaderController(LinkHeader linkHeader, DeviceInfo deviceInfo){
+				super(GuiControllerAbstract.class.getSimpleName()+".LinkHeaderController-"+new RundomNumber());
 				this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
 				this.deviceInfo = deviceInfo;
 			}

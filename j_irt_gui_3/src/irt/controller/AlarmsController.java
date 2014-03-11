@@ -4,6 +4,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
@@ -79,7 +80,7 @@ public class AlarmsController extends ControllerAbstract {
 
 	private void startController(DefaultController controller, JLabel label) {
 
-		Thread t = new Thread(controller);
+		Thread t = new Thread(controller, "AlarmsController."+controller.getName()+"-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

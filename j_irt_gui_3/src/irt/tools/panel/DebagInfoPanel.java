@@ -5,6 +5,7 @@ import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 
@@ -109,7 +110,7 @@ public class DebagInfoPanel extends JPanel {
 
 				deviceDebagInfoController.setWaitTime(10000);//10 sec
 
-				Thread t = new Thread(deviceDebagInfoController);
+				Thread t = new Thread(deviceDebagInfoController, "DebagInfoPanel.Info Controller-"+new RundomNumber());
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);

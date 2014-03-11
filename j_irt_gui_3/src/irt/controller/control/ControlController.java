@@ -9,6 +9,7 @@ import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.PacketWork;
 import irt.data.Range;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
@@ -49,7 +50,7 @@ public class ControlController extends ControllerAbstract {
 			setSend(false);
 
 		muteController = new MuteController(linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
-		Thread t = new Thread(muteController);
+		Thread t = new Thread(muteController, "ControlController.MuteController-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
@@ -58,7 +59,7 @@ public class ControlController extends ControllerAbstract {
 
 		if(chbxLNB!=null){
 			lnbController = new SwitchController("LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB));
-			t = new Thread(lnbController);
+			t = new Thread(lnbController, "ControlController.SwitchController-"+new RundomNumber().toString());
 			priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)
 				t.setPriority(priority-1);

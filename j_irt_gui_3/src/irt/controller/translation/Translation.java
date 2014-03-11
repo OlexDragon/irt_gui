@@ -1,6 +1,7 @@
 package irt.controller.translation;
 
 import irt.controller.GuiController;
+import irt.data.RundomNumber;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.head.IrtPanel;
 
@@ -58,7 +59,7 @@ public class Translation {
 				getFont(localeStr);
 				LOGGER.exit(locale);
 			}
-		});
+		}, "Translation.setLocale-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

@@ -5,6 +5,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.seter.DeviceDebagSetter;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
@@ -95,7 +96,7 @@ public class DebugPanel extends JPanel{
 			}
 
 			private void startThread(Runnable runnable) {
-				Thread t = new Thread(runnable);
+				Thread t = new Thread(runnable, "DebugPanel.Clear Statistics-"+new RundomNumber());
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)
 					t.setPriority(priority-1);

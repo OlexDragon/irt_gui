@@ -9,6 +9,7 @@ import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
 import irt.data.PacketWork;
 import irt.data.PllRegisterTextFieldSlider;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
@@ -340,7 +341,7 @@ public class PLLsPanel extends JPanel {
 							0,
 							Style.CHECK_ONCE);
 
-		Thread t = new Thread(registerController);
+		Thread t = new Thread(registerController, "PLLsPanel.PLL reg.N9-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);

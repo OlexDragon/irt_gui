@@ -103,6 +103,8 @@ public class MuteController extends ControllerAbstract {
 
 				if (valueChangeEvent.getSource() instanceof Byte)
 					source = (Byte) valueChangeEvent.getSource();
+				else if(valueChangeEvent.getSource() instanceof Integer)
+					source = (Integer) valueChangeEvent.getSource();
 				else
 					source = (Long) valueChangeEvent.getSource();
 

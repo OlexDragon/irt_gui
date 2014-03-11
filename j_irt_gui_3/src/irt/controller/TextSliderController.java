@@ -38,6 +38,7 @@ public class TextSliderController extends ControllerAbstract {
 		slider.setMinimum(value.getRelativeMinValue());
 		slider.setMaximum((int) value.getRelativeMaxValue());
 		this.txtField = txtField;
+		this.txtField.setText(value.toString());
 		txtField.addActionListener(txtActionListener);
 		txtField.addKeyListener(txtKeyListener);
 		txtField.requestFocusInWindow();

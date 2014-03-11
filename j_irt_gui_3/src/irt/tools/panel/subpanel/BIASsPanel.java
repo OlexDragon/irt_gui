@@ -15,6 +15,7 @@ import irt.controller.serial_port.value.seter.Setter;
 import irt.controller.to_do.InitializePicoBuc;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ControllerFocusListener;
 import irt.data.packet.LinkHeader;
@@ -252,7 +253,7 @@ public class BIASsPanel extends JPanel {
 
 			private ControllerAbstract addController(ControllerAbstract abstractController){
 
-				Thread t = new Thread(abstractController);
+				Thread t = new Thread(abstractController, "BIASsPanel."+abstractController.getName()+"-"+new RundomNumber());
 
 				int priority = t.getPriority();
 				if(priority>Thread.MIN_PRIORITY)

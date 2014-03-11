@@ -3,6 +3,7 @@ package irt.tools.panel.subpanel;
 import irt.controller.AlarmsController;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
+import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 
 import java.awt.Color;
@@ -320,7 +321,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			public void ancestorAdded(AncestorEvent arg0) {
 				try {
 					alarmsController = new AlarmsController(linkHeader, AlarmsPanel.this);
-					Thread t = new Thread(alarmsController);
+					Thread t = new Thread(alarmsController, "AlarmsPanel."+alarmsController.getName()+"-"+new RundomNumber());
 					int priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
 						t.setPriority(priority-1);

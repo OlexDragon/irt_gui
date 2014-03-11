@@ -12,6 +12,7 @@ import irt.controller.translation.Translation;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
+import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
@@ -294,13 +295,13 @@ public class ControlPanel extends MonitorPanelAbstract {
 		Thread t;
 		switch(control){
 		case FLAG_GAIN:
-			t = new Thread(ñontroller =  getNewGainController());
+			t = new Thread(ñontroller =  getNewGainController(), "ControlPanel.GainController-"+new RundomNumber());
 			break;
 		case FLAG_FREQUENCY:
-			t = new Thread(ñontroller = getNewFreqController());
+			t = new Thread(ñontroller = getNewFreqController(), "ControlPanel.FreqController-"+new RundomNumber());
 			break;
 		default:
-			t = new Thread(ñontroller = getNewAttenController());
+			t = new Thread(ñontroller = getNewAttenController(), "ControlPanel.AttenController-"+new RundomNumber());
 		}
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

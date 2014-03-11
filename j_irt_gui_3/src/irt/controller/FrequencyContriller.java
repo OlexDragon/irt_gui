@@ -21,19 +21,22 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 	private Style style;
 
 	public FrequencyContriller(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super("Frequency Controller", new ConfigurationSetter(
-				linkHeader,
-				linkHeader==null ? Packet.IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY_RANGE : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY_RANGE,
-						PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super("Frequency Controller",
+				new ConfigurationSetter(
+						linkHeader,
+						linkHeader==null || linkHeader.getIntAddr()==0
+												? Packet.IRT_SLCP_PARAMETER_CONFIGURATION_FCM_FREQUENCY_RANGE
+												: Packet.IRT_SLCP_PARAMETER_CONFIGURATION_PICOBUC_USER_FREQUENCY_RANGE,
+				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 
-		isConverter = linkHeader==null;
+		isConverter = linkHeader==null || linkHeader.getIntAddr()==0;
 		this.style = style;
 	}
 
 	@Override
 	protected ValueChangeListener addGetterValueChangeListener() {
+		
 		return new ValueChangeListener() {
-
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 				int id = valueChangeEvent.getID();

@@ -4,6 +4,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.seter.Setter;
 import irt.data.PacketWork;
+import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
@@ -24,7 +25,7 @@ public class StoreConfigController extends ControllerAbstract {
 
 		this.owner = owner;
 
-		Thread t = new Thread(this);
+		Thread t = new Thread(this, "StoreConfigController-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(priority-1);
