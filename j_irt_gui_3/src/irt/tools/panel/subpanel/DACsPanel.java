@@ -1,7 +1,7 @@
 package irt.tools.panel.subpanel;
 
 import irt.controller.AdcController;
-import irt.controller.DeviceDebagController;
+import irt.controller.DeviceDebugController;
 import irt.controller.SwitchController;
 import irt.controller.TextSliderController;
 import irt.controller.control.ControllerAbstract;
@@ -101,20 +101,20 @@ public class DACsPanel extends JPanel {
 			public void ancestorAdded(AncestorEvent arg0) {
 
 				startController(linkHeader==null ?
-						new DeviceDebagController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				startController(linkHeader==null ?
-						new DeviceDebagController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				startController(linkHeader==null ?
-						new DeviceDebagController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				startController(linkHeader==null ?
-						new DeviceDebagController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebagController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				//Calibration mode
 				startController(new SwitchController("Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_BIAS_DEVICE_DEBAG_CALIBRATION_MODE)));
@@ -149,8 +149,8 @@ public class DACsPanel extends JPanel {
 
 			public void startController(ControllerAbstract abstractController) {
 				threadList.add(abstractController);
-				if(abstractController instanceof DeviceDebagController)
-					((DeviceDebagController)abstractController).addFocusListener(controllerFocusListener);
+				if(abstractController instanceof DeviceDebugController)
+					((DeviceDebugController)abstractController).addFocusListener(controllerFocusListener);
 
 				Thread t = new Thread(abstractController, "DACsPanel."+abstractController.getName()+"-"+new RundomNumber());
 				int priority = t.getPriority();
@@ -164,8 +164,8 @@ public class DACsPanel extends JPanel {
 			public void ancestorRemoved(AncestorEvent arg0) {
 				for(ControllerAbstract t:threadList){
 					t.stop();
-					if(t instanceof DeviceDebagController)
-						((DeviceDebagController)t).removeFocusListener(controllerFocusListener);
+					if(t instanceof DeviceDebugController)
+						((DeviceDebugController)t).removeFocusListener(controllerFocusListener);
 				}
 				threadList.clear();
 			}

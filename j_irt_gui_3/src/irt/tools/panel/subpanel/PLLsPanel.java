@@ -1,6 +1,6 @@
 package irt.tools.panel.subpanel;
 
-import irt.controller.DeviceDebagController;
+import irt.controller.DeviceDebugController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.seter.ConfigurationSetter;
@@ -61,7 +61,7 @@ public class PLLsPanel extends JPanel {
 	private int pllIndex = 5;
 	private Value value = new Value(0, 0, Long.MAX_VALUE, 0);
 
-	private DeviceDebagController registerController;
+	private DeviceDebugController registerController;
 	private JCheckBox chckbxHik;
 	private JTextField selectedTextField;
 	private JSlider slider;
@@ -330,7 +330,7 @@ public class PLLsPanel extends JPanel {
 		if(registerController!=null)
 			registerController.stop();
 
-		registerController = new DeviceDebagController("PLL reg.N9", txtPllReg,
+		registerController = new DeviceDebugController("PLL reg.N9", txtPllReg,
 									null,
 									value,
 									new DeviceDebagSetter(null,

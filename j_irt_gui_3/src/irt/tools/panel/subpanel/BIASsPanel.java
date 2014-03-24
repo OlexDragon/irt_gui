@@ -2,7 +2,7 @@ package irt.tools.panel.subpanel;
 
 import irt.controller.AdcController;
 import irt.controller.AdcCurrentController;
-import irt.controller.DeviceDebagController;
+import irt.controller.DeviceDebugController;
 import irt.controller.GuiController;
 import irt.controller.NGlobalController;
 import irt.controller.SetterController;
@@ -131,8 +131,8 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_NGLOBAL,
 										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
-				((DeviceDebagController)addController(
-						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 2" : "Potentiometer 1",isNewBiasBoard ? txtPotentiometer2 : txtPotentiometer1,
+				((DeviceDebugController)addController(
+						new DeviceDebugController(isNewBiasBoard ? "Potentiometer 2" : "Potentiometer 1",isNewBiasBoard ? txtPotentiometer2 : txtPotentiometer1,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(
@@ -144,8 +144,8 @@ public class BIASsPanel extends JPanel {
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController(
-						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 1" : "Potentiometer 2", isNewBiasBoard ? txtPotentiometer1 : txtPotentiometer2,
+				((DeviceDebugController)addController(
+						new DeviceDebugController(isNewBiasBoard ? "Potentiometer 1" : "Potentiometer 2", isNewBiasBoard ? txtPotentiometer1 : txtPotentiometer2,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -156,8 +156,8 @@ public class BIASsPanel extends JPanel {
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController(
-						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 5" : "Potentiometer 3", isNewBiasBoard ? txtPotentiometer5 : txtPotentiometer3,
+				((DeviceDebugController)addController(
+						new DeviceDebugController(isNewBiasBoard ? "Potentiometer 5" : "Potentiometer 3", isNewBiasBoard ? txtPotentiometer5 : txtPotentiometer3,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -168,8 +168,8 @@ public class BIASsPanel extends JPanel {
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-				((DeviceDebagController)addController(
-						new DeviceDebagController(isNewBiasBoard ? "Potentiometer 6" : "Potentiometer 4", isNewBiasBoard ? txtPotentiometer6 : txtPotentiometer4,
+				((DeviceDebugController)addController(
+						new DeviceDebugController(isNewBiasBoard ? "Potentiometer 6" : "Potentiometer 4", isNewBiasBoard ? txtPotentiometer6 : txtPotentiometer4,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -194,8 +194,8 @@ public class BIASsPanel extends JPanel {
 					lblPotentiometer5.setText("Driver:");
 					lblPotentiometer6.setText("Pred.Dr");
 
-					((DeviceDebagController)addController(
-							new DeviceDebagController(isNewBiasBoard ? "Potentiometer 4" : "Potentiometer 5", isNewBiasBoard ? txtPotentiometer4 : txtPotentiometer5,
+					((DeviceDebugController)addController(
+							new DeviceDebugController(isNewBiasBoard ? "Potentiometer 4" : "Potentiometer 5", isNewBiasBoard ? txtPotentiometer4 : txtPotentiometer5,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -206,8 +206,8 @@ public class BIASsPanel extends JPanel {
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
-					((DeviceDebagController)addController(
-							new DeviceDebagController(isNewBiasBoard ? "Potentiometer 3" : "Potentiometer 6", isNewBiasBoard ? txtPotentiometer3 : txtPotentiometer6,
+					((DeviceDebugController)addController(
+							new DeviceDebugController(isNewBiasBoard ? "Potentiometer 3" : "Potentiometer 6", isNewBiasBoard ? txtPotentiometer3 : txtPotentiometer6,
 								slider,
 								new Value(0, 0, 896, 0),
 								new DeviceDebagSetter(linkHeader,
@@ -245,8 +245,8 @@ public class BIASsPanel extends JPanel {
 			public void ancestorRemoved(AncestorEvent arg0) {
 				for(ControllerAbstract t:threadList){
 					t.stop();
-					if(t instanceof DeviceDebagController)
-						((DeviceDebagController)t).removeFocusListener(focusListener);
+					if(t instanceof DeviceDebugController)
+						((DeviceDebugController)t).removeFocusListener(focusListener);
 				}
 				threadList.clear();
 			}

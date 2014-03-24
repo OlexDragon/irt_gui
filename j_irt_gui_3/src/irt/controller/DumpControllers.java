@@ -13,13 +13,9 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.Payload;
 import irt.tools.panel.head.IrtPanel;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
@@ -46,12 +42,6 @@ public class DumpControllers{
 	private LinkHeader linkHeader;
 
 	private DeviceInfo deviceInfo;
-	private Timer infoTimer = new Timer(1000*60*20, new ActionListener() {
-		@Override
-		public void actionPerformed(ActionEvent e) {
-			dumper.info(marker, "\n\t{}\n\t{}\n", linkHeader, deviceInfo);
-		}
-	});
 
 	private Object hwFault;
 	private Object underCurrent;
@@ -80,9 +70,6 @@ public class DumpControllers{
 
 		this.linkHeader = linkHeader;
 		this.deviceInfo = deviceInfos;
-
-		infoTimer.setRepeats(true);
-		infoTimer.start();
 
 		int dumpWaitMinuts = 0;
 
@@ -742,7 +729,7 @@ public class DumpControllers{
 				if(deviceInfo!=null) {
 					uptimeCounter = deviceInfo.getUptimeCounter();
 				}
-				dumper.info(marker, "\n\t{};\n\t{};\n\tUptime Counter = {};\n{};\n", linkHeader, packet.getHeader(), uptimeCounter, o);
+				dumper.info(marker, "\n\t{};\n\t{};\n\t{};\n\tUptime Counter = {};\n{};\n", linkHeader, deviceInfo, packet.getHeader(), uptimeCounter, o);
 			}
 			return o;
 		}

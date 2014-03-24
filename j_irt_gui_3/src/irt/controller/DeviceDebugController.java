@@ -36,7 +36,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
-public class DeviceDebagController extends ControllerAbstract {
+public class DeviceDebugController extends ControllerAbstract {
 
 	protected Value value;
 
@@ -61,7 +61,7 @@ public class DeviceDebagController extends ControllerAbstract {
 /**
  * @param addrToSave if addrToSave < 0 save command deasn't work
  */
-	public DeviceDebagController(String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
+	public DeviceDebugController(String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
 		super(controllerName, packetWork, null, style);
 		logger.entry(controllerName);
 
@@ -81,7 +81,7 @@ public class DeviceDebagController extends ControllerAbstract {
 		logger.exit();
 	}
 
-	public DeviceDebagController(String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
+	public DeviceDebugController(String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
 		super(controllerName, packetWork, null, null);
 		logger.entry();
 
@@ -115,7 +115,7 @@ public class DeviceDebagController extends ControllerAbstract {
 		return new ValueChangeListener() {
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				new ControllerWorker(DeviceDebagController.this.getName(), valueChangeEvent);
+				new ControllerWorker(DeviceDebugController.this.getName(), valueChangeEvent);
 			}
 		};
 	}
@@ -131,10 +131,10 @@ public class DeviceDebagController extends ControllerAbstract {
 					if(pw!=null){
 						PacketThread pt = pw.getPacketThread();
 						Payload pl = pt.getPacket().getPayload(0);
-						pl.setBuffer(DeviceDebagController.this.cbParameter.getSelectedItem());
+						pl.setBuffer(DeviceDebugController.this.cbParameter.getSelectedItem());
 						pt.preparePacket();
 
-						synchronized (DeviceDebagController.this) {	DeviceDebagController.this.notify(); }
+						synchronized (DeviceDebugController.this) {	DeviceDebugController.this.notify(); }
 					}
 				}
 			}
@@ -148,18 +148,18 @@ public class DeviceDebagController extends ControllerAbstract {
 					GetterAbstract ga = (GetterAbstract)getPacketWork();
 					if(ga!=null){
 						PacketThread pt = ga.getPacketThread();
-						int code = DeviceDebagController.this.cbCommand.getSelectedIndex()+1;
+						int code = DeviceDebugController.this.cbCommand.getSelectedIndex()+1;
 						ga.setPacketParameterHeaderCode((byte)code);
 
 						Payload pl = pt.getPacket().getPayload(0);
 						if(code==Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO)
 							pl.setBuffer(null);
 						else
-							pl.setBuffer(DeviceDebagController.this.cbParameter.getSelectedItem());
+							pl.setBuffer(DeviceDebugController.this.cbParameter.getSelectedItem());
 
 						pt.preparePacket();
 
-						synchronized (DeviceDebagController.this) {	DeviceDebagController.this.notify(); }
+						synchronized (DeviceDebugController.this) {	DeviceDebugController.this.notify(); }
 					}
 				}
 			}
@@ -304,7 +304,7 @@ public class DeviceDebagController extends ControllerAbstract {
 
 		txtActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String s = DeviceDebagController.this.txtField.getText().replaceAll("\\D", "");
+				String s = DeviceDebugController.this.txtField.getText().replaceAll("\\D", "");
 				int value;
 
 				if(s.length()>0){
@@ -312,8 +312,8 @@ public class DeviceDebagController extends ControllerAbstract {
 				}else
 					value = 0;
 
-				DeviceDebagController.this.slider.setValue(value);
-				setValue(DeviceDebagController.this.slider.getValue());
+				DeviceDebugController.this.slider.setValue(value);
+				setValue(DeviceDebugController.this.slider.getValue());
 			}
 		};
 	}

@@ -1,6 +1,6 @@
 package irt.tools.panel;
 
-import irt.controller.DeviceDebagController;
+import irt.controller.DeviceDebugController;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.serial_port.value.getter.Getter;
@@ -29,7 +29,7 @@ import javax.swing.event.AncestorListener;
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel {
 
-	private DeviceDebagController deviceDebagInfoController;
+	private DeviceDebugController deviceDebagInfoController;
 	private LinkHeader linkHeader;
 	private JTextArea textArea;
 	private JComboBox<String> cbCommand;
@@ -98,7 +98,7 @@ public class DebagInfoPanel extends JPanel {
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent arg0) {
 
-				deviceDebagInfoController = new DeviceDebagController("Info Controller",
+				deviceDebagInfoController = new DeviceDebugController("Info Controller",
 																new Getter(
 																		DebagInfoPanel.this.linkHeader,
 																		Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
