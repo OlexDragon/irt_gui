@@ -124,7 +124,7 @@ public class Payload {
 				setBuffer((byte)value);
 				break;
 			default:
-				System.out.println("*TODO Payload setBuffer T value class neme - "+value.getClass().getSimpleName()+"="+value);
+				logger.warn("*TODO Payload setBuffer({} = {})", value.getClass().getSimpleName(), value);
 			}
 		else
 			setBuffer((byte[])null);
@@ -170,7 +170,7 @@ public class Payload {
 	 * @param startFrom = start from byte index = 'startFrom'*4
 	 * @return	value from 4 bytes (started from 'startFrom'*4) */
 	public int getInt(int startFrom) {
-		return (short) toLong(startFrom*4, 4);
+		return (int) toLong(startFrom*4, 4);
 	}
 
 	/**
@@ -212,7 +212,8 @@ public class Payload {
 	}
 
 	public RegisterValue getRegisterValue() {
-		return new RegisterValue( getInt(0), getInt(1), new Value(getInt(2)&Long.MAX_VALUE, 0 , Long.MAX_VALUE, 0));
+		long value = getInt(2)&Long.MAX_VALUE;
+		return new RegisterValue( getInt(0), getInt(1), new Value(value, 0 , Long.MAX_VALUE, 0));
 	}
 
 	public long[] getArrayLong() {

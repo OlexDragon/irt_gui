@@ -18,7 +18,7 @@ public class GuiController extends GuiControllerAbstract{
 
 	@Override
 	protected DevicePanel getConverterPanel(DeviceInfo di) {
-		return new ConverterPanel(di, 0, 0, 0, 0, unitsPanel.getHeight());
+		return new ConverterPanel(di, protocol, unitsPanel.getHeight());
 	}
 
 	@Override

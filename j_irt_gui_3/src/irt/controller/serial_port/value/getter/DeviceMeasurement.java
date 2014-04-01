@@ -37,7 +37,7 @@ public class DeviceMeasurement extends GetterAbstract {
 				short sh;
 				switch(pl.getParameterHeader().getCode()){
 				case Payload.DEVICE_MESUREMENT_SUMMARY_ALARM_BITS:
-					System.out.println("not used: DEVICE_MESUREMENT_SUMMARY_ALARM_BITS");
+					logger.warn("not used: DEVICE_MESUREMENT_SUMMARY_ALARM_BITS");
 					break;
 				case Payload.DEVICE_MESUREMENT_STATUS_BITS		:
 					byte b;

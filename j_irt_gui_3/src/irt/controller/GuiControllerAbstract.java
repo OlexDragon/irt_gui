@@ -74,8 +74,19 @@ public abstract class GuiControllerAbstract extends Thread {
 								ALL,
 								CONVERTER,
 								LINKED,
-								DEMO
-							};
+								DEMO;
+
+								private int deviceType;
+
+								public int getDeviceType() {
+									return deviceType;
+								}
+
+								public Protocol setDeviceType(int deviceType) {
+									this.deviceType = deviceType;
+									return this;
+								}
+	};
 
 	protected static Preferences prefs = Preferences.userRoot().node("IRT Technologies inc.");
 
@@ -132,13 +143,13 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_140_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_KU_TO_140:
 						case DeviceInfo.DEVICE_TYPE_SSPA_CONVERTER:
-							protocol = Protocol.CONVERTER;
+							protocol = Protocol.CONVERTER.setDeviceType(type);
 							break;
 						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
 						case DeviceInfo.DEVICE_TYPE_SSPA:
-							protocol = Protocol.LINKED;
+							protocol = Protocol.LINKED.setDeviceType(type);
 							break;
 						default:
 							if (type > 0) {
@@ -250,7 +261,6 @@ public abstract class GuiControllerAbstract extends Thread {
 				prefs.remove("lastModified");
 			else
 				prefs.put("lastModified", lastModified);
-			logger.error("Addresses={}", addresses);
 
 			if (addresses == null)
 				prefs.remove(AddressWizard.REDUNDANCY_ADDRESSES);
@@ -812,7 +822,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 //TODO			if(a==null || !a.equals(alarm)){
 				vclc.fireValueChangeListener(new ValueChangeEvent(alarm, ALARM));
-				DevicePanel unitPanel = unitsPanel.getDevicePanel(packet instanceof LinkedPacket ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0));
+				DevicePanel unitPanel = unitsPanel.getDevicePanel(linkHeader);
 				if(unitPanel!=null){
 					unitPanel.setAlarm(remover.getController(linkHeader).getAlarm());
 					alarms.put(linkHeader, alarm);
@@ -843,8 +853,9 @@ public abstract class GuiControllerAbstract extends Thread {
 				vclc.fireValueChangeListener(new ValueChangeEvent(isMute, MUTE));
 				mutes.put(linkHeader, isMute);
 //TODO			}
-			DevicePanel unitPanel = unitsPanel.getDevicePanel(packet instanceof LinkedPacket ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0));
-			unitPanel.setMute(remover.isMute(packet));
+			DevicePanel unitPanel = unitsPanel.getDevicePanel(linkHeader);
+			if(unitPanel!=null)
+				unitPanel.setMute(remover.isMute(packet));
 		}
 	}
 

@@ -95,8 +95,12 @@ public class ConfigurationSetter extends SetterAbstract {
 			int v = (int)value;
 			if(v!=0){
 				byte[] bytes = Packet.toBytes(v);
-				System.out.println("data="+Arrays.toString(data)+", bytes="+Arrays.toString(bytes));
+				System.arraycopy(bytes, 0, data, length, bytes.length);
 			}
+
+			data[0] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+			logger.trace("data={}", data);
+			
 			packetThread.setData(data);
 		}else
 			logger.warn("Not Posible to prepare Packet. value is {}", value.getClass());

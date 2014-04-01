@@ -1,7 +1,9 @@
 package irt.tools.panel;
 
+import irt.controller.GuiControllerAbstract.Protocol;
 import irt.data.DeviceInfo;
 import irt.tools.panel.subpanel.DACsPanel;
+import irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9;
 import irt.tools.panel.subpanel.PLLsPanel;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelConverter;
@@ -23,8 +25,8 @@ public class ConverterPanel extends DevicePanel {
 	private boolean hasDcOutput;
 	private boolean hasFreqSet;//Frequency Set(true) or Frequency range(false)
 
-	public ConverterPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight)	throws HeadlessException {
-		super(null, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+	public ConverterPanel(DeviceInfo deviceInfo, Protocol protocol, int maxHeight)	throws HeadlessException {
+		super(null, deviceInfo, 0, 0, 0, 0, maxHeight);
 		converterType = deviceInfo.getType();
 		hasDcOutput = converterType == DeviceInfo.DEVICE_TYPE_L_TO_140 || converterType == DeviceInfo.DEVICE_TYPE_L_TO_70;
 		hasFreqSet 	= converterType == DeviceInfo.DEVICE_TYPE_L_TO_KU || converterType == DeviceInfo.DEVICE_TYPE_L_TO_C;
@@ -33,7 +35,7 @@ public class ConverterPanel extends DevicePanel {
 		getTabbedPane().addTab("DACs", null, dacPanel, null);
 		dacPanel.setLayout(null);
 
-		PLLsPanel registersPanel = new PLLsPanel();
+		JPanel registersPanel = protocol.getDeviceType()== DeviceInfo.DEVICE_TYPE_L_TO_KU ? new PLL_HMC807LP6CE_Reg9() : new PLLsPanel();
 		getTabbedPane().addTab("PLLs", null, registersPanel, null);
 
 //		JPanel registerPanel = new RegistersPanel();
