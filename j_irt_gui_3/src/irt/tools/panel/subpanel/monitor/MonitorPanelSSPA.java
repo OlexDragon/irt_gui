@@ -9,6 +9,7 @@ import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
+import irt.tools.panel.subpanel.progressBar.ProgressBar;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -224,6 +225,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 				v = new ValueDouble(value, 1);
 				v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
 				lblOutputPower.setText(getOperator(flags)+v.toString());
+				ProgressBar.setValue(flags==1 ? v.getValue() : 0);
 			}
 			logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
 			break;
