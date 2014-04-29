@@ -131,7 +131,11 @@ public class ControlController extends ControllerAbstract {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						new StoreConfigController(getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE);
+						try{
+							new StoreConfigController(getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE);
+						}catch(Exception ex){
+							logger.catching(ex);
+						}
 					}
 				});
 				break;

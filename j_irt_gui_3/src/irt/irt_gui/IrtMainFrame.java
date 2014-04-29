@@ -22,7 +22,7 @@ public abstract class IrtMainFrame extends JFrame {
 	protected GuiControllerAbstract guiController;
 
 	public IrtMainFrame(int width, int hight) {
-		super(IrtPanel.PROPERTIES.getProperty("company_name_"+IrtPanel.companyIndex));
+		super(IrtPanel.companyIndex!=null ? IrtPanel.PROPERTIES.getProperty("company_name_"+IrtPanel.companyIndex) : "IRT");
 		setSize(width, hight);
 		ImageIcon imageIcon = new ImageIcon(
 				IrtGui.class.getResource(

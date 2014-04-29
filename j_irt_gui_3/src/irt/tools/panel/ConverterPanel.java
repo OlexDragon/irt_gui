@@ -28,8 +28,14 @@ public class ConverterPanel extends DevicePanel {
 	public ConverterPanel(DeviceInfo deviceInfo, Protocol protocol, int maxHeight)	throws HeadlessException {
 		super(null, deviceInfo, 0, 0, 0, 0, maxHeight);
 		converterType = deviceInfo.getType();
-		hasDcOutput = converterType == DeviceInfo.DEVICE_TYPE_L_TO_140 || converterType == DeviceInfo.DEVICE_TYPE_L_TO_70;
-		hasFreqSet 	= converterType == DeviceInfo.DEVICE_TYPE_L_TO_KU || converterType == DeviceInfo.DEVICE_TYPE_L_TO_C;
+
+		hasDcOutput = 	converterType == DeviceInfo.DEVICE_TYPE_L_TO_140 ||
+						converterType == DeviceInfo.DEVICE_TYPE_L_TO_70;
+
+		hasFreqSet 	= 	converterType == DeviceInfo.DEVICE_TYPE_L_TO_KU ||
+						converterType == DeviceInfo.DEVICE_TYPE_L_TO_C	||
+						converterType == DeviceInfo.DEVICE_TYPE_KU_TO_L	||
+						converterType == DeviceInfo.DEVICE_TYPE_C_TO_L;
 
 		JPanel dacPanel = new DACsPanel(null);
 		getTabbedPane().addTab("DACs", null, dacPanel, null);

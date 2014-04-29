@@ -100,26 +100,26 @@ public class DACsPanel extends JPanel {
 
 			public void ancestorAdded(AncestorEvent arg0) {
 
-				startController(linkHeader==null ?
+				startController(linkHeader==null || linkHeader.getAddr()==0 ?
 						new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
 							new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
-				startController(linkHeader==null ?
+				startController(linkHeader==null || linkHeader.getAddr()==0 ?
 						new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
 							new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
-				startController(linkHeader==null ?
+				startController(linkHeader==null || linkHeader.getAddr()==0 ?
 						new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
 							new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
-				startController(linkHeader==null ?
+				startController(linkHeader==null || linkHeader.getAddr()==0 ?
 						new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
 							new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				//Calibration mode
 				startController(new SwitchController("Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_BIAS_DEVICE_DEBAG_CALIBRATION_MODE)));
 
-				if(linkHeader==null){
+				if(linkHeader==null || linkHeader.getAddr()==0){
 					Value value = new Value(0, 0, 4095, 0);
 					startController(new AdcController("Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
 

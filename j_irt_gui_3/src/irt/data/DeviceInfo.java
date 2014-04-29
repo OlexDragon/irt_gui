@@ -36,6 +36,8 @@ public class DeviceInfo {
 							DEVICE_TYPE_KU_TO_70	= 1008,
 							DEVICE_TYPE_140_TO_KU	= 1009,
 							DEVICE_TYPE_KU_TO_140	= 1010,
+							DEVICE_TYPE_KU_TO_L		= 1011,
+							DEVICE_TYPE_C_TO_L		= 1012,
 							DEVICE_TYPE_SSPA_CONVERTER = 1051;
 
 	private LinkHeader linkHeader;
