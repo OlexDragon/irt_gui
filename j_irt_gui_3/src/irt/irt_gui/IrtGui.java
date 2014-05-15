@@ -75,7 +75,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.064";
+	public static final String VERTION = "- 3.065";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -530,7 +530,7 @@ public class IrtGui extends IrtMainFrame {
 
 		new SwingWorker<Rectangle, Void>() {
 			@Override
-			protected Rectangle doInBackground() throws Exception {
+			protected Rectangle doInBackground(){
 				try{
 
 					String translationProperties = Translation.getTranslationProperties("headPanel_comboBoc_bounds");
@@ -545,7 +545,7 @@ public class IrtGui extends IrtMainFrame {
 							Integer.parseInt(bounds[3]));
 				}catch(Exception e){
 					logger.catching(e);
-					return null;
+					return new Rectangle(530,50,91,17);
 				}
 			}
 

@@ -111,19 +111,19 @@ public class NetworkController extends ControllerAbstract {
 			
 			@Override
 			public void focusLost(FocusEvent e) {
-				IpAddressTextField ipAddressTextField = (IpAddressTextField)e.getSource();
-				String name = ipAddressTextField.getName();
+				IpAddressTextField textField = (IpAddressTextField)e.getSource();
+				String name = textField.getName();
 				logger.debug("KeyAdapter.keyTyped text={}", name);
 				if(networkAddressTmp!=null)
 				switch(name){
 				case "address":
-					networkAddressTmp.setAddress(ipAddressTextField.getText());
+					networkAddressTmp.setAddress(textField.getText());
 					break;
 				case "mask":
-					networkAddressTmp.setMask(ipMask.getText());
+					networkAddressTmp.setMask(textField.getText());
 					break;
 				case "gateway":
-					networkAddressTmp.setGateway(ipGateway.getText());
+					networkAddressTmp.setGateway(textField.getText());
 				}
 
 				setButtonEnabled();
@@ -142,27 +142,7 @@ public class NetworkController extends ControllerAbstract {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				PacketThread packetThread = getPacketWork().getPacketThread();
-				LinkHeader linkHeader = packetThread.getLinkHeader();
-				Packet packet = packetThread.getPacket();
-				PacketHeader header = packet.getHeader();
-				logger.debug(Arrays.toString(packetThread.getData()));
-
-				byte groupId = header.getGroupId();
-				byte packetType = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
-				short packetId = header.getPacketId();
-				byte packetParameterHeaderCode = packet.getPayload(0).getParameterHeader().getCode();
-
-				Setter packetWork = new Setter(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
-				packetThread = packetWork.getPacketThread();
-				packetThread.start();
-				try { packetThread.join(); } catch (InterruptedException e1) { logger.error(e1); }
-				packetThread.getPacket().getPayload(0).setBuffer(networkAddressTmp.asBytes());
-				packetThread.preparePacket();
-
-				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
-				networkAddressTmp =null;
-				setButtonEnabled();
+				saveSettings();
 			}
 		};
 	}
@@ -248,6 +228,36 @@ public class NetworkController extends ControllerAbstract {
 		setButtonEnabled();
 	}
 
+	public void saveSettings() {
+
+		PacketThread packetThread = getPacketWork().getPacketThread();
+		LinkHeader linkHeader = packetThread.getLinkHeader();
+		Packet packet = packetThread.getPacket();
+		PacketHeader header = packet.getHeader();
+		logger.debug(Arrays.toString(packetThread.getData()));
+
+		byte groupId = header.getGroupId();
+		byte packetType = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+		short packetId = header.getPacketId();
+		byte packetParameterHeaderCode = packet.getPayload(0).getParameterHeader().getCode();
+
+		Setter packetWork = new Setter(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
+		packetThread = packetWork.getPacketThread();
+		packetThread.start();
+		try {
+			packetThread.join();
+		} catch (InterruptedException e1) {
+			logger.error(e1);
+		}
+		packetThread.getPacket().getPayload(0).setBuffer(networkAddressTmp.asBytes());
+		packetThread.preparePacket();
+
+		GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+		networkAddressTmp = null;
+		setButtonEnabled();
+
+	}
+
 	//********************* class ControllerWorker *****************
 	private class ControllerWorker extends Thread {
 
@@ -282,5 +292,11 @@ public class NetworkController extends ControllerAbstract {
 			}else
 				logger.error("Wrong ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
 		}
+	}
+
+	public void prepareToSave() {
+		networkAddressTmp.setAddress(ipAddress.getText());
+		networkAddressTmp.setMask(ipMask.getText());
+		networkAddressTmp.setGateway(ipGateway.getText());
 	}
 }

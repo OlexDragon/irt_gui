@@ -7,8 +7,10 @@ import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
+import irt.data.network.NetworkAddress.ADDRESS_TYPE;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.ip_address.IpAddressTextField;
 
 import java.awt.Color;
@@ -16,13 +18,18 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.SystemColor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
@@ -32,30 +39,26 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
-import javax.swing.JButton;
-
 public class NetworkPanel extends JPanel implements Refresh {
 	private static final long serialVersionUID = 69871876592867701L;
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private JLabel lblAddressType;
-
 	private JLabel lblIpAddress;
-
 	private JLabel lblSubnetMask;
-
 	private JLabel lblDefaultMask;
 
 	private JComboBox<String> comboBoxAddressType;
 	private JPanel panel_1;
 	private IpAddressTextField ipAddressTextField;
-	private IpAddressTextField ipAddressTextField_1;
-	private IpAddressTextField ipAddressTextField_2;
+	private IpAddressTextField ipMaskTextField;
+	private IpAddressTextField ipGatewayTextField;
+
+	private NetworkController networkController;
 
 	public NetworkPanel( final LinkHeader linkHeader) {
 		addAncestorListener(new AncestorListener() {
-			private NetworkController networkController;
 
 			public void ancestorMoved(AncestorEvent arg0) {}
 			public void ancestorAdded(AncestorEvent arg0) {
@@ -106,19 +109,67 @@ public class NetworkPanel extends JPanel implements Refresh {
 		
 		panel_1 = new JPanel();
 		panel_1.setName("setting");
+		
+		JButton btnDefault = new JButton("Reset");
+		btnDefault.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+
+				if(JOptionPane.showConfirmDialog(NetworkPanel.this, "Do you really want to change the network settings?", "Network", JOptionPane.YES_NO_OPTION)==JOptionPane.OK_OPTION){
+
+					ADDRESS_TYPE networkAddressType = getNetworkAddressType();
+					switch(networkAddressType){
+					default:
+					//TODO
+						String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
+						ipAddressTextField.setText(tmpStr);
+
+						tmpStr = IrtPanel.PROPERTIES.getProperty("network_mask", "255.255.255.0");
+						ipMaskTextField.setText(tmpStr);
+
+						tmpStr = IrtPanel.PROPERTIES.getProperty("network_gateway", "192.168.0.1");
+						ipGatewayTextField.setText(tmpStr);
+
+						try {
+							Thread.sleep(100);
+						} catch (InterruptedException e1) {
+							logger.catching(e1);
+						}
+
+					case DYNAMIC:
+						comboBoxAddressType.setSelectedIndex(networkAddressType.ordinal()-1);
+					}
+
+					networkController.prepareToSave();
+					networkController.saveSettings();
+				}
+			}
+
+			private ADDRESS_TYPE getNetworkAddressType() {
+				ADDRESS_TYPE networkAddressType = ADDRESS_TYPE.valueOf(
+															IrtPanel.PROPERTIES.getProperty("network_type", "Static").toUpperCase());
+				if(networkAddressType==null)
+					networkAddressType = ADDRESS_TYPE.STATIC;
+				return networkAddressType;
+			}
+		});
+		btnDefault.setMargin(new Insets(3, 3, 3, 3));
+
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(5)
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(lblAddressType, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblIpAddress, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblSubnetMask, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblDefaultMask))
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addGroup(groupLayout.createSequentialGroup()
+							.addGap(5)
+							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+								.addComponent(lblAddressType, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblIpAddress, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblSubnetMask, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblDefaultMask)
+								.addComponent(btnDefault))))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(214, Short.MAX_VALUE))
+					.addContainerGap(200, Short.MAX_VALUE))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -132,7 +183,9 @@ public class NetworkPanel extends JPanel implements Refresh {
 							.addGap(11)
 							.addComponent(lblSubnetMask, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
 							.addGap(11)
-							.addComponent(lblDefaultMask, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE))
+							.addComponent(lblDefaultMask, GroupLayout.PREFERRED_SIZE, 21, GroupLayout.PREFERRED_SIZE)
+							.addGap(14)
+							.addComponent(btnDefault))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(1)
 							.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE)))
@@ -156,47 +209,47 @@ public class NetworkPanel extends JPanel implements Refresh {
 		ipAddressTextField.setMaximumSize(new Dimension(150, 20));
 		panel_1.add(ipAddressTextField);
 		
-		ipAddressTextField_1 = new IpAddressTextField();
-		ipAddressTextField_1.setDisabledTextColor(Color.BLUE);
-		ipAddressTextField_1.setEditable(true);
-		ipAddressTextField_1.setName("mask");
-		ipAddressTextField_1.setBounds(0, 77, 150, 20);
-		GridBagLayout gridBagLayout_1 = (GridBagLayout) ipAddressTextField_1.getLayout();
-		gridBagLayout_1.rowWeights = new double[]{0.0};
-		gridBagLayout_1.rowHeights = new int[]{0};
-		gridBagLayout_1.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-		gridBagLayout_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
-		ipAddressTextField_1.setPreferredSize(new Dimension(150, 20));
-		ipAddressTextField_1.setMinimumSize(new Dimension(150, 20));
-		ipAddressTextField_1.setMaximumSize(new Dimension(150, 20));
-		panel_1.add(ipAddressTextField_1);
+		ipMaskTextField = new IpAddressTextField();
+		ipMaskTextField.setDisabledTextColor(Color.BLUE);
+		ipMaskTextField.setEditable(true);
+		ipMaskTextField.setName("mask");
+		ipMaskTextField.setBounds(0, 77, 150, 20);
+		GridBagLayout gbl_ipMaskTextField = (GridBagLayout) ipMaskTextField.getLayout();
+		gbl_ipMaskTextField.rowWeights = new double[]{0.0};
+		gbl_ipMaskTextField.rowHeights = new int[]{0};
+		gbl_ipMaskTextField.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+		gbl_ipMaskTextField.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
+		ipMaskTextField.setPreferredSize(new Dimension(150, 20));
+		ipMaskTextField.setMinimumSize(new Dimension(150, 20));
+		ipMaskTextField.setMaximumSize(new Dimension(150, 20));
+		panel_1.add(ipMaskTextField);
 		
-		ipAddressTextField_2 = new IpAddressTextField();
-		ipAddressTextField_2.setDisabledTextColor(Color.BLUE);
-		ipAddressTextField_2.setEditable(true);
-		ipAddressTextField_2.setName("gateway");
-		ipAddressTextField_2.setBounds(0, 109, 150, 20);
-		GridBagLayout gridBagLayout_2 = (GridBagLayout) ipAddressTextField_2.getLayout();
-		gridBagLayout_2.rowWeights = new double[]{0.0};
-		gridBagLayout_2.rowHeights = new int[]{0};
-		gridBagLayout_2.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-		gridBagLayout_2.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
-		ipAddressTextField_2.setPreferredSize(new Dimension(150, 20));
-		ipAddressTextField_2.setMinimumSize(new Dimension(150, 20));
-		ipAddressTextField_2.setMaximumSize(new Dimension(150, 20));
-		panel_1.add(ipAddressTextField_2);
+		ipGatewayTextField = new IpAddressTextField();
+		ipGatewayTextField.setDisabledTextColor(Color.BLUE);
+		ipGatewayTextField.setEditable(true);
+		ipGatewayTextField.setName("gateway");
+		ipGatewayTextField.setBounds(0, 109, 150, 20);
+		GridBagLayout gbl_ipGatewayTextField = (GridBagLayout) ipGatewayTextField.getLayout();
+		gbl_ipGatewayTextField.rowWeights = new double[]{0.0};
+		gbl_ipGatewayTextField.rowHeights = new int[]{0};
+		gbl_ipGatewayTextField.columnWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+		gbl_ipGatewayTextField.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
+		ipGatewayTextField.setPreferredSize(new Dimension(150, 20));
+		ipGatewayTextField.setMinimumSize(new Dimension(150, 20));
+		ipGatewayTextField.setMaximumSize(new Dimension(150, 20));
+		panel_1.add(ipGatewayTextField);
 		comboBoxAddressType = new JComboBox<>(boxModel);
 		comboBoxAddressType.setBounds(0, 11, 150, 22);
 		panel_1.add(comboBoxAddressType);
 		comboBoxAddressType.setName("type");
 		comboBoxAddressType.setFont(font);
-		
+
 		JButton btnOk = new JButton("OK");
 		btnOk.setName("ok");
 		btnOk.setEnabled(false);
 		btnOk.setBounds(0, 140, 73, 23);
 		panel_1.add(btnOk);
-		
+
 		JButton btnCansel = new JButton("Cansel");
 		btnCansel.setName("cansel");
 		btnCansel.setEnabled(false);

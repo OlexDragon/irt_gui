@@ -257,7 +257,7 @@ public class IpAddressTextField extends GridbagPanel {
 	}
 
 		public void setText(String version) {
-		    if (version == null || "".equals(version) || "null".equals(version))
+		    if (version == null || version.isEmpty() || "null".equals(version))
 		        reset();
 		    else {           
 		        setVer(version.split("[.]"));
