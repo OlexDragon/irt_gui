@@ -15,6 +15,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
 public class IrtStylePanel extends JPanel {
+	public IrtStylePanel() {
+	}
 	private static final long serialVersionUID = 198707451482153465L;
 
 	private final static Logger logger = (Logger) LogManager.getLogger();

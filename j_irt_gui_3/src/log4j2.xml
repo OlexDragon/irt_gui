@@ -72,7 +72,6 @@
  	<Logger name="irt.controller.translation.Translation" level="WARN"/>
  
   	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="WARN"/>
-	<Logger name="irt.controller.serial_port.ComPort" level="WARN" />
   	<Logger name="irt.controller.serial_port.value.getter.Getter" level="WARN"/>
   	<Logger name="irt.controller.serial_port.value.getter.MeasurementGetter" level="WARN"/>
  
@@ -83,7 +82,7 @@
       <AppenderRef ref="DumpFile" />
     </Logger>
 
-    <Logger name="comPort" level="info">
+     <Logger name="comPort"> <!-- level="info"> Level put programmatically in ComPort class -->
       <AppenderRef ref="communication" />
     </Logger>
 

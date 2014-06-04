@@ -1,6 +1,7 @@
 package irt.controller.serial_port;
 
 import irt.data.Checksum;
+import irt.data.LoggerWorker;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.ToHex;
@@ -11,6 +12,7 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.tools.panel.head.Console;
+import irt.tools.panel.head.IrtPanel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,6 +26,7 @@ import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
@@ -31,8 +34,9 @@ import org.apache.logging.log4j.core.Logger;
 
 public class ComPort extends SerialPort {
 
-	private final Logger logger = (Logger) LogManager.getLogger();
-	private final Logger comPortLogger = (Logger) LogManager.getLogger("comPort");
+	private static final String LOGGER_NAME = "comPort";
+
+	private final Logger comPortLogger = (Logger) LogManager.getLogger(LOGGER_NAME);
 	private final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private boolean run = true;
@@ -49,6 +53,8 @@ public class ComPort extends SerialPort {
 
 	public ComPort(String portName) {
 		super(portName);
+
+		LoggerWorker.setLoggerLevel(LOGGER_NAME, Level.toLevel(IrtPanel.PROPERTIES.getProperty("dump_serialport"), Level.ERROR));
 
 		timer = new Timer(timeout, new ActionListener() {
 			
@@ -69,7 +75,7 @@ public class ComPort extends SerialPort {
 	}
 
 	public Packet send(PacketWork packetWork){
-		logger.entry(packetWork);
+		comPortLogger.entry(packetWork);
 
 		long start = System.currentTimeMillis();
 		PacketThread pt = packetWork.getPacketThread();
@@ -102,7 +108,7 @@ if(!isRun())
 do{
 
 	Checksum checksum = null;
-	logger.trace(ph);
+	comPortLogger.trace(ph);
 	synchronized (this) {
 		if(openPort()){
 			setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
@@ -163,7 +169,7 @@ do{
 								parameterHeader = new ParameterHeader(readData);
 
 								ev = parameterHeader.getSize();
-								logger.trace("parameterHeader.getSize()={}", ev);
+								comPortLogger.trace("parameterHeader.getSize()={}", ev);
 								if(parameterHeader.getCode()>30 || ev>2000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
 									comPortLogger.warn("parameterHeader.getCode()>30 || ev>2000");
@@ -216,11 +222,11 @@ do{
 		Console.appendLn(packet, "Get");
 		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 
-		return logger.exit(packet);
+		return comPortLogger.exit(packet);
 	}
 
 	private byte[] getAcknowledge() {
-		logger.entry();
+		comPortLogger.entry();
 		byte[] b;
 
 		if(linkHeader!=null)
@@ -234,7 +240,7 @@ do{
 		byte[] packetId = Packet.toBytes(this.packetId);
 		System.arraycopy(packetId, 0, b, ++idPosition, 2);
 
-		return logger.exit(PacketThread.preparePacket(b));
+		return comPortLogger.exit(PacketThread.preparePacket(b));
 	}
 
 	private byte[] readLinkHeader() throws SerialPortException {
@@ -274,7 +280,7 @@ do{
 		boolean isComfirm = false;
 		int ev = linkHeader!=null ? 11 : 7;
 		int index = ev - 3;
-		logger.debug("linkHeader = {}", linkHeader);
+		comPortLogger.debug("linkHeader = {}", linkHeader);
 
 		byte[] readBytes = readBytes(ev,100);
 		this.isComfirm = readBytes!=null && readBytes[0]==Packet.FLAG_SEQUENCE && readBytes[readBytes.length-1]==Packet.FLAG_SEQUENCE;
@@ -326,7 +332,7 @@ do{
 		try {
 			closePort();
 		} catch (SerialPortException e) {
-			logger.catching(e);
+			comPortLogger.catching(e);
 		}
 	}
 
@@ -505,7 +511,7 @@ do{
 					comPortLogger.catching(e);
 				}
 
-				logger.trace("isSerialPortEven={}", isSerialPortEven);
+				comPortLogger.trace("isSerialPortEven={}", isSerialPortEven);
 				isSerialPortEven = false;
 			}
 		};
@@ -520,11 +526,11 @@ do{
 		
 		boolean isOpened;
 
-		synchronized (logger) {
+		synchronized (comPortLogger) {
 			isOpened = isOpened();
 
 			if (run && !isOpened) {
-				logger.debug("openPort() Port Name={}", getPortName());
+				comPortLogger.debug("openPort() Port Name={}", getPortName());
 				isOpened = super.openPort();
 				if (isOpened)
 					addEventListener(serialPortEvent);
@@ -537,10 +543,10 @@ do{
 	public boolean closePort() throws SerialPortException {
 
 		boolean isClosed = !isOpened();
-		logger.debug("1) Port Name={} closePort()is Closed={}", getPortName(), isClosed);
+		comPortLogger.debug("1) Port Name={} closePort()is Closed={}", getPortName(), isClosed);
 
 		run = false;
-		synchronized (logger) {
+		synchronized (comPortLogger) {
 			if (!isClosed) {
 				try {
 					removeEventListener();
@@ -550,7 +556,7 @@ do{
 				}
 				boolean isPurged = purgePort(PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
 				isClosed = super.closePort();
-				logger.debug("2) closePort()is Closed={}, is purged={}",isClosed, isPurged);
+				comPortLogger.debug("2) closePort()is Closed={}, is purged={}",isClosed, isPurged);
 			}
 		}
 

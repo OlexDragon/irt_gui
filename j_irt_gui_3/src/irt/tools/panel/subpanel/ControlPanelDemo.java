@@ -37,7 +37,7 @@ public class ControlPanelDemo extends JPanel {
 	private JTextField txtStep;
 	private JCheckBox chckbxStep;
 
-	private ControllerAbstract ñontroller;
+	private ControllerAbstract controller;
 	protected Cursor cursor;
 	protected Color color;
 
@@ -134,9 +134,9 @@ public class ControlPanelDemo extends JPanel {
 			public void ancestorMoved(AncestorEvent event) {}
 
 			public void ancestorRemoved(AncestorEvent event) {
-				if(ñontroller!=null)
-					ñontroller.stop();
-				ñontroller = null;
+				if(controller!=null)
+					controller.stop();
+				controller = null;
 			}
 		});
 	}

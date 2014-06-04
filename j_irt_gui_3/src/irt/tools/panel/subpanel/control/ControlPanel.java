@@ -63,7 +63,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 	private JComboBox<IdValue> comboBox;
 	private JLabel lblChoice;
 
-	private ControllerAbstract ñontroller;
+	private ControllerAbstract controller;
 	protected Cursor cursor;
 	protected Color color;
 	private IdValue selection;
@@ -229,9 +229,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 			public void ancestorMoved(AncestorEvent event) {}
 
 			public void ancestorRemoved(AncestorEvent event) {
-				if(ñontroller!=null)
-					ñontroller.stop();
-				ñontroller = null;
+				if(controller!=null)
+					controller.stop();
+				controller = null;
 			}
 		});
 
@@ -289,19 +289,19 @@ public class ControlPanel extends MonitorPanelAbstract {
 	}
 
 	private void setController(int control) {
-		if(ñontroller!=null)
-			ñontroller.stop();
+		if(controller!=null)
+			controller.stop();
 
 		Thread t;
 		switch(control){
 		case FLAG_GAIN:
-			t = new Thread(ñontroller =  getNewGainController(), "ControlPanel.GainController-"+new RundomNumber());
+			t = new Thread(controller =  getNewGainController(), "ControlPanel.GainController-"+new RundomNumber());
 			break;
 		case FLAG_FREQUENCY:
-			t = new Thread(ñontroller = getNewFreqController(), "ControlPanel.FreqController-"+new RundomNumber());
+			t = new Thread(controller = getNewFreqController(), "ControlPanel.FreqController-"+new RundomNumber());
 			break;
 		default:
-			t = new Thread(ñontroller = getNewAttenController(), "ControlPanel.AttenController-"+new RundomNumber());
+			t = new Thread(controller = getNewAttenController(), "ControlPanel.AttenController-"+new RundomNumber());
 		}
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
