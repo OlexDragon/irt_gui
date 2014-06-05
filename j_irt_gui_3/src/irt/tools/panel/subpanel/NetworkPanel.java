@@ -119,7 +119,6 @@ public class NetworkPanel extends JPanel implements Refresh {
 					ADDRESS_TYPE networkAddressType = getNetworkAddressType();
 					switch(networkAddressType){
 					default:
-					//TODO
 						String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
 						ipAddressTextField.setText(tmpStr);
 
@@ -152,24 +151,22 @@ public class NetworkPanel extends JPanel implements Refresh {
 				return networkAddressType;
 			}
 		});
-		btnDefault.setMargin(new Insets(3, 3, 3, 3));
+		btnDefault.setMargin(new Insets(0, 3, 0, 3));
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
-						.addGroup(groupLayout.createSequentialGroup()
-							.addGap(5)
-							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-								.addComponent(lblAddressType, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addComponent(lblIpAddress, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addComponent(lblSubnetMask, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addComponent(lblDefaultMask)
-								.addComponent(btnDefault))))
+					.addGap(5)
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+						.addComponent(lblAddressType, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(lblIpAddress, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(lblSubnetMask, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(lblDefaultMask)
+						.addComponent(btnDefault))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(200, Short.MAX_VALUE))
+					.addContainerGap(212, Short.MAX_VALUE))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)

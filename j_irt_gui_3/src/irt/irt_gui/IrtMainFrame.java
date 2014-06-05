@@ -4,6 +4,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.data.Listeners;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
+import irt.tools.panel.wizards.serial_port.SerialPortWizard;
 
 import java.awt.Color;
 import java.awt.Point;
@@ -15,6 +16,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 @SuppressWarnings("serial")
 public abstract class IrtMainFrame extends JFrame {
@@ -53,6 +59,17 @@ public abstract class IrtMainFrame extends JFrame {
 		serialPortSelection.addPopupMenuListener(Listeners.popupMenuListener);
 		serialPortSelection.setBounds(comboBoxBounds());
 		getContentPane().add(serialPortSelection);
+		
+		JPopupMenu popupMenu = new JPopupMenu();
+		IrtGui.addPopup(serialPortSelection, popupMenu);
+		
+		JMenuItem mntmBaudrate = new JMenuItem("Baudrate");
+		mntmBaudrate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new SerialPortWizard().setVisible(true);
+			}
+		});
+		popupMenu.add(mntmBaudrate);
 
 		addComponentListener(new ComponentAdapter() {
 

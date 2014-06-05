@@ -39,6 +39,43 @@ public class ComPort extends SerialPort {
 	private final Logger comPortLogger = (Logger) LogManager.getLogger(LOGGER_NAME);
 	private final Marker marker = MarkerManager.getMarker("FileWork");
 
+	public enum Baudrate{
+		BAUDRATE_9600	(SerialPort.BAUDRATE_9600),
+		BAUDRATE_19200	(SerialPort.BAUDRATE_19200),
+		BAUDRATE_38400	(SerialPort.BAUDRATE_38400),
+		BAUDRATE_57600	(SerialPort.BAUDRATE_57600),
+		BAUDRATE_115200	(SerialPort.BAUDRATE_115200);
+
+		private int baudrate;
+
+		private Baudrate(int baudrate){
+			this.baudrate = baudrate;
+		}
+
+		public int getBaudrate() {
+			return baudrate;
+		}
+
+		@Override
+		public String toString(){
+			return ""+baudrate;
+		}
+
+		public static Baudrate valueOf(int baudrate) {
+			Baudrate result = null;
+
+			for(Baudrate b:values())
+				if(b.getBaudrate()==baudrate){
+					result = b;
+					break;
+				}
+
+			return result;
+		}
+	}
+
+	private static int baudrate = BAUDRATE_115200;
+
 	private boolean run = true;
 	private int timeout = 3000;
 	private int timesTimeout;
@@ -109,11 +146,6 @@ do{
 
 	Checksum checksum = null;
 	comPortLogger.trace(ph);
-	synchronized (this) {
-		if(openPort()){
-			setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-		}
-	}
 
 			timer.restart();
 			clear();
@@ -532,8 +564,10 @@ do{
 			if (run && !isOpened) {
 				comPortLogger.debug("openPort() Port Name={}", getPortName());
 				isOpened = super.openPort();
-				if (isOpened)
+				if (isOpened){
 					addEventListener(serialPortEvent);
+					setBaudrate();
+				}
 			}
 		}
 		return isOpened;
@@ -576,5 +610,22 @@ do{
 			}
 		}
 		
+	}
+
+	public static int getBaudrate() {
+		return baudrate;
+	}
+
+	public void setBaudrate(int baudrate){
+		ComPort.baudrate = baudrate;
+		try {
+			setBaudrate();
+		} catch (SerialPortException e) {
+			comPortLogger.catching(e);
+		}
+	}
+
+	public void setBaudrate() throws SerialPortException {
+		setParams(baudrate, DATABITS_8, STOPBITS_1, PARITY_NONE);
 	}
 }

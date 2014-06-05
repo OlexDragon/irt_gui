@@ -129,16 +129,25 @@ public class ComPortThreadQueue extends Thread {
 			clear();
 			oldSerialPort.setRun(false, "Reset Serial Port");
 			try {
-				synchronized (serialPort) {
+				synchronized (ComPortThreadQueue.serialPort) {
 					oldSerialPort.closePort();
 				}
 			} catch (SerialPortException e) {
 				logger.catching(e);
-				Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:setSerialPort");
+				Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:setSerialPort 1");
 			}
 		}
 
 		ComPortThreadQueue.serialPort = serialPort;
+
+		try {
+
+			serialPort.openPort();
+
+		} catch (SerialPortException e) {
+			logger.catching(e);
+			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:setSerialPort 2");
+		}
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	private EventListenerList packetListeners = new EventListenerList();
