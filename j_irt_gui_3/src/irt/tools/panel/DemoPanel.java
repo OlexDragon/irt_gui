@@ -230,11 +230,10 @@ public class DemoPanel extends Panel {
 		tabbedPane.setBounds(10, 123, 286, 296);
 		extraPanel.add(tabbedPane);
 
-		JLabel lblLogo = new ImageLabel(
-				new ImageIcon(IrtGui.class.getResource(
-						IrtPanel.PROPERTIES.getProperty("company_logo_"+IrtPanel.companyIndex))
-				),"");
-		tabbedPane.addTab(IrtPanel.PROPERTIES.getProperty("tab_title_"+IrtPanel.companyIndex), lblLogo);
+
+		JLabel lblLogo = new ImageLabel(IrtPanel.logoIcon,"");
+
+		tabbedPane.addTab(IrtPanel.PROPERTIES.getProperty("tab_title"), lblLogo);
 
 		font = font.deriveFont(Translation.getValue(Float.class, "monitor.labels.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "monitor.labels.font.style", Font.PLAIN));

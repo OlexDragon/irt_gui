@@ -11,7 +11,6 @@ import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
-import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
 import irt.tools.panel.head.IrtPanel;
@@ -24,7 +23,6 @@ import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
 import java.awt.Font;
 
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
@@ -42,7 +40,7 @@ public class UserPicobucPanel extends DevicePanel {
 			tabbedPane = getTabbedPane();
 
 			if (getClass().equals(UserPicobucPanel.class)) {
-				JLabel lblNewLabel = new ImageLabel(new ImageIcon(IrtGui.class.getResource(IrtPanel.PROPERTIES.getProperty("company_logo_" + IrtPanel.companyIndex))), "");
+				JLabel lblNewLabel = new ImageLabel(IrtPanel.logoIcon, "");
 				tabbedPane.addTab("IRT", lblNewLabel);
 			}
 

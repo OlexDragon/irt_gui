@@ -1,17 +1,19 @@
 package irt.tools.panel.ip_address;
 
 import irt.controller.text.document.DocumentsFactory;
+import irt.irt_gui.IrtGui;
 
 import java.awt.Color;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +22,6 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.FocusManager;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
@@ -36,9 +37,19 @@ import org.apache.logging.log4j.core.Logger;
 
 public class IpAddressTextField extends GridbagPanel {
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	private static final long serialVersionUID = -4163874955176718452L;
+
+	private static Font font;
+	static{
+		try {
+			font = Font.createFont(Font.TRUETYPE_FONT, IrtGui.class.getResource("fonts/TAHOMA.TTF").openStream());
+			font = font.deriveFont(Font.PLAIN, 12f);
+		} catch (FontFormatException | IOException e) {
+			logger.catching(e);
+		}
+	}
 		/**
 		 * a text fields for each byte
 		 */
@@ -84,9 +95,10 @@ public class IpAddressTextField extends GridbagPanel {
 		public IpAddressTextField() {
 
 		    textFields = new JTextField[4];
-		    for (int i = 0; i < textFields.length; i++) {
-		        textFields[i] = new JTextField(3);
-
+		    for (int i = 0; i < textFields.length; i++){
+		    	JTextField jTextField = new JTextField(3);
+				jTextField.setFont(font);
+				textFields[i] = jTextField;
 		    }
 
 		    List<JLabel> dotsLabelsList = new ArrayList<JLabel>();
@@ -160,8 +172,8 @@ public class IpAddressTextField extends GridbagPanel {
 		}
 
 		public synchronized void addKeyListener(KeyListener l) {
-		    super.addKeyListener(l);
-		    keyListenersList.add(l);
+			    super.addKeyListener(l);
+			    keyListenersList.add(l);
 		}
 
 		public synchronized void addFocusListener(FocusListener l) {
@@ -197,7 +209,6 @@ public class IpAddressTextField extends GridbagPanel {
 		    setBackground(sampleTextField.getBackground());
 		    setForeground(sampleTextField.getForeground());
 		    setBorder(sampleTextField.getBorder());
-
 		}
 
 		public void requestFocus() {
@@ -293,22 +304,18 @@ public class IpAddressTextField extends GridbagPanel {
 		    @Override
 		    public void insertUpdate(DocumentEvent e) {
 		        Document document = e.getDocument();
-		        try {
 		            JTextField textField = (JTextField) FocusManager.getCurrentManager().getFocusOwner();
 
-		            String s = document.getText(0, document.getLength());
+		            String s;
+					try {
+						s = document.getText(0, document.getLength());
 
-		            if (s.length() == 4){ // && textField.getCaretPosition() == 2) {
-		                textField.transferFocus();
-
-
-		            }
-
-		        } catch (BadLocationException e1) {
-		            logger.catching(e1);;
-		            return;
-		        }
-
+			            if (s.length() == 4){ // && textField.getCaretPosition() == 2) {
+			                textField.transferFocus();
+			            }
+					} catch (BadLocationException ex) {
+						logger.catching(ex);
+					}
 		    }
 
 		    public void removeUpdate(DocumentEvent e) {
@@ -384,7 +391,7 @@ public class IpAddressTextField extends GridbagPanel {
 		 */
 		public String getText()  {
 		    StringBuffer buffer = new StringBuffer();
-		    String ipResult;
+		    String ipResult = null;
 		    for (int i = 0; i < textFields.length; i++) {
 		        JTextField textField = textFields[i];
 		        logger.trace("textField.getText()={}", textField.getText());
@@ -490,19 +497,19 @@ public class IpAddressTextField extends GridbagPanel {
 			ctr.selectAll();
 		}
 	}
-
-	public static void main(String[] args) {
-
-		JFrame frame = new JFrame("test");
-		IpAddressTextField ipTextField = new IpAddressTextField();
-		ipTextField.setText("9.1.23.147");
-		Container contentPane = frame.getContentPane();
-		contentPane.setLayout(new FlowLayout());
-		contentPane.add(ipTextField);
-		frame.pack();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
-	}
+//
+//	public static void main(String[] args) {
+//
+//		JFrame frame = new JFrame("test");
+//		IpAddressTextField ipTextField = new IpAddressTextField();
+//		ipTextField.setText("9.1.23.147");
+//		Container contentPane = frame.getContentPane();
+//		contentPane.setLayout(new FlowLayout());
+//		contentPane.add(ipTextField);
+//		frame.pack();
+//		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//		frame.setVisible(true);
+//	}
 
 	public void setDisabledTextColor(Color color) {
 		for(JTextField tf:textFields)

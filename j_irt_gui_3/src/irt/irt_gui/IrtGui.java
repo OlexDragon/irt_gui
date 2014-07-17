@@ -76,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.067";
+	public static final String VERTION = "- 3.069";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -423,7 +423,7 @@ public class IrtGui extends IrtMainFrame {
 	}
 
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {
-		final JLabel lblIrtTechnologies = new JLabel(IrtPanel.PROPERTIES.getProperty("company_name_"+IrtPanel.companyIndex));
+		final JLabel lblIrtTechnologies = new JLabel(IrtPanel.PROPERTIES.getProperty("company_name"));
 		lblIrtTechnologies.setForeground(Color.WHITE);
 		lblIrtTechnologies.setBounds(531, 10, 107, 14);
 		headPanel.add(lblIrtTechnologies);
@@ -431,8 +431,8 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected Font doInBackground() throws Exception {
 				try {
-					return new Font(IrtPanel.PROPERTIES.getProperty("font_name_" + IrtPanel.companyIndex), IrtPanel.parseFontStyle(IrtPanel.PROPERTIES
-							.getProperty("font_style_" + IrtPanel.companyIndex)), 12);
+					return new Font(IrtPanel.PROPERTIES.getProperty("font_name"), IrtPanel.parseFontStyle(IrtPanel.PROPERTIES
+							.getProperty("font_style")), 12);
 				} catch (Exception e) {
 					logger.catching(e);
 					return null;
