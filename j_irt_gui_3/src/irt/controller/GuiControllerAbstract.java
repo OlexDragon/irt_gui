@@ -145,6 +145,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_KU_TO_L:
 						case DeviceInfo.DEVICE_TYPE_C_TO_L:
 						case DeviceInfo.DEVICE_TYPE_SSPA_CONVERTER:
+						case 1052: /* Temporarly added by Alex @ 19-09-2014 */
 							protocol = Protocol.CONVERTER.setDeviceType(type);
 							break;
 						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:

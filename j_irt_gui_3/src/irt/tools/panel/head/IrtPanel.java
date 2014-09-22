@@ -55,7 +55,7 @@ public class IrtPanel extends MainPanel {
 			PROPERTIES = new Properties();
 			PROPERTIES.load(IrtGui.class.getResourceAsStream("irt.properties"));
 
-			File f = new File(System.getProperty("user.dir")+File.separator+"irtGui.properties");
+			File f = new File(System.getProperty("user.dir")+File.separator+"gui.properties");
 			if(f.exists() && !f.isDirectory()){
 				PROPERTIES.load(new FileInputStream(f));
 				PROPERTIES.put("lastModified", ""+f.lastModified());
@@ -87,7 +87,6 @@ public class IrtPanel extends MainPanel {
 		setBackground(new Color(0x3B, 0x4A, 0x8B, 100));
 
 		String companyName = PROPERTIES.getProperty("company_name");
-
 
 		final JLabel lblIrtTechnologies = new ImageLabel(logoIcon, companyName);
 		lblIrtTechnologies.setHorizontalAlignment(SwingConstants.RIGHT);

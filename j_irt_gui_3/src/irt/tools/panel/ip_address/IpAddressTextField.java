@@ -98,6 +98,7 @@ public class IpAddressTextField extends GridbagPanel {
 		    for (int i = 0; i < textFields.length; i++){
 		    	JTextField jTextField = new JTextField(3);
 				jTextField.setFont(font);
+				jTextField.setMinimumSize(new Dimension(33, 12));
 				textFields[i] = jTextField;
 		    }
 
