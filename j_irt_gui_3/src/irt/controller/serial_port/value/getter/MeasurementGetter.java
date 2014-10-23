@@ -42,10 +42,10 @@ public class MeasurementGetter extends GetterAbstract {
 			PacketHeader ph = packet.getHeader();
 			if(ph!=null){
 				short packetId = ph.getPacketId();
-				if(ph.getGroupId()==Packet.IRT_SLCP_PACKET_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
+				if(ph.getParameter()==Packet.IRT_SLCP_PACKET_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
 					Object source = null;
 					byte option = ph.getOption();
-					if(option>0 || ph.getType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+					if(option>0 || ph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 						source = new Byte((byte) (option>0 ? -option : -20));//-20 no answer
 					}else{
 						Payload pl = packet.getPayload(packetPayloadParameterHeaderCode);

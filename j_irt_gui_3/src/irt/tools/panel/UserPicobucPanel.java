@@ -77,7 +77,7 @@ public class UserPicobucPanel extends DevicePanel {
 
 					@Override
 					public void packetRecived(Packet packet) {
-						if (getPacketWork().isAddressEquals(packet) && packet.getHeader().getType() == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
+						if (getPacketWork().isAddressEquals(packet) && packet.getHeader().getPacketType() == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
 								&& packet.getHeader().getPacketId() == PacketWork.PACKET_ID_ALARMS_IDs) {
 
 							byte[] buffer = packet.getPayload(0).getBuffer();
@@ -113,10 +113,10 @@ public class UserPicobucPanel extends DevicePanel {
 																	protected String doInBackground() throws Exception {
 																		if(
 																				getPacketWork().isAddressEquals(packet) &&
-																				packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+																				packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
 																				packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
 																			)
-																			if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+																			if(packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 																				REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
 																				if(n!=null && !n.equals(name)){
 

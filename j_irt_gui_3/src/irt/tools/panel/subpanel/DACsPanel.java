@@ -31,6 +31,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,23 +102,23 @@ public class DACsPanel extends JPanel {
 			public void ancestorAdded(AncestorEvent arg0) {
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+							new DeviceDebugController("DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				//Calibration mode
-				startController(new SwitchController("Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_BIAS_DEVICE_DEBAG_CALIBRATION_MODE)));
+				startController(new SwitchController("Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE)));
 
 				if(linkHeader==null || linkHeader.getAddr()==0){
 					Value value = new Value(0, 0, 4095, 0);
@@ -198,68 +199,70 @@ public class DACsPanel extends JPanel {
 		txtDAC1 = new JTextField();
 		txtDAC1.setText("0");
 		txtDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC1.setFont(font);
 		txtDAC1.setColumns(10);
 		txtDAC1.setBounds(186, 16, 55, 20);
 		add(txtDAC1);
+		txtDAC1.setFont(font);
 
 		txtDAC2 = new JTextField();
 		txtDAC2.setEnabled(false);
 		txtDAC2.setText("0");
 		txtDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC2.setFont(font);
 		txtDAC2.setColumns(10);
 		txtDAC2.setBounds(186, 44, 55, 20);
 		add(txtDAC2);
+		txtDAC2.setFont(font);
 
 		txtDAC3 = new JTextField();
 		txtDAC3.setText("0");
 		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC3.setFont(font);
 		txtDAC3.setColumns(10);
 		txtDAC3.setBounds(186, 72, 55, 20);
 		add(txtDAC3);
+		txtDAC3.setFont(font);
 
 		txtDAC4 = new JTextField();
 		txtDAC4.setText("0");
 		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtDAC4.setFont(font);
 		txtDAC4.setColumns(10);
 		txtDAC4.setBounds(187, 100, 55, 20);
 		add(txtDAC4);
+		txtDAC4.setFont(font);
 
 		font = font.deriveFont(12f);
 
 		lblDAC4 = new JLabel("DAC 4:");
 		lblDAC4.setRequestFocusEnabled(false);
 		lblDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC4.setFont(font);
 		lblDAC4.setBounds(112, 102, 73, 17);
 		add(lblDAC4);
+		lblDAC4.setFont(font);
 
 		lblDAC1 = new JLabel("Gain DAC:");
 		lblDAC1.setRequestFocusEnabled(false);
 		lblDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC1.setFont(font);
 		lblDAC1.setBounds(112, 18, 73, 17);
 		add(lblDAC1);
+		lblDAC1.setFont(font);
 
 		lblDAC2 = new JLabel("Comp DAC:");
 		lblDAC2.setRequestFocusEnabled(false);
 		lblDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC2.setFont(font);
 		lblDAC2.setBounds(112, 46, 73, 17);
 		add(lblDAC2);
+		lblDAC2.setFont(font);
 
 		lblDAC3 = new JLabel("DAC 3:");
 		lblDAC3.setRequestFocusEnabled(false);
 		lblDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblDAC3.setFont(font);
 		lblDAC3.setBounds(112, 74, 73, 17);
 		add(lblDAC3);
+		lblDAC3.setFont(font);
 
-		Image offImage = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/switch_off.png")).getImage();
-		Image onImage = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png")).getImage();
+		URL resource = IrtGui.class.getResource("/irt/irt_gui/images/switch_off.png");
+		Image offImage = resource!=null ? new ImageIcon(resource).getImage() : null;
+		resource = IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png");
+		Image onImage = resource!=null ? new ImageIcon(resource).getImage() : null;
 		switchBoxCalibrationModeswitchBox = new SwitchBox(offImage, onImage);
 		switchBoxCalibrationModeswitchBox.setEnabled(false);
 		switchBoxCalibrationModeswitchBox.addItemListener(new ItemListener() {
@@ -275,9 +278,9 @@ public class DACsPanel extends JPanel {
 
 		JLabel lblCalibrationMode = new JLabel("Calibration Mode");
 		lblCalibrationMode.setRequestFocusEnabled(false);
-		lblCalibrationMode.setFont(font);
 		lblCalibrationMode.setBounds(6, 8, 107, 17);
 		add(lblCalibrationMode);
+		lblCalibrationMode.setFont(font);
 		
 		chckbxStep = new JCheckBox("Step:");
 		chckbxStep.addActionListener(new ActionListener() {
@@ -287,14 +290,13 @@ public class DACsPanel extends JPanel {
 			}
 		});
 		chckbxStep.setOpaque(false);
-		chckbxStep.setFont(font.deriveFont(12f));
 		chckbxStep.setBounds(6, 80, 59, 23);
 		add(chckbxStep);
+		chckbxStep.setFont(font.deriveFont(12f));
 		
 		txtStep = new JTextField();
 		txtStep.setText("1");
 		txtStep.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtStep.setFont(font);
 		txtStep.setColumns(10);
 		txtStep.setBounds(59, 81, 34, 20);
 		txtStep.addFocusListener(new FocusAdapter() {
@@ -310,6 +312,7 @@ public class DACsPanel extends JPanel {
 			}
 		});
 		add(txtStep);
+		txtStep.setFont(font);
 
 		if(true){//linkHeader==null){
 			
@@ -324,116 +327,116 @@ public class DACsPanel extends JPanel {
 			label.setRequestFocusEnabled(false);
 			label.setHorizontalAlignment(SwingConstants.RIGHT);
 			label.setForeground(Color.BLACK);
-			label.setFont(font);
 			label.setBounds(9, 19, 23, 17);
 			panel.add(label);
+			label.setFont(font);
 			
 			lblInputPower = new JLabel(":");
 			lblInputPower.setRequestFocusEnabled(false);
 			lblInputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblInputPower.setForeground(Color.BLUE);
-			lblInputPower.setFont(font);
 			lblInputPower.setBounds(31, 19, 60, 17);
 			panel.add(lblInputPower);
+			lblInputPower.setFont(font);
 			
 			lblOutputPower = new JLabel(":");
 			lblOutputPower.setRequestFocusEnabled(false);
 			lblOutputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblOutputPower.setForeground(Color.BLUE);
-			lblOutputPower.setFont(font);
 			lblOutputPower.setBounds(31, 42, 60, 17);
 			panel.add(lblOutputPower);
+			lblOutputPower.setFont(font);
 			
 			label_3 = new JLabel("OP:");
 			label_3.setToolTipText("Output Power");
 			label_3.setRequestFocusEnabled(false);
 			label_3.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_3.setForeground(Color.BLACK);
-			label_3.setFont(font);
 			label_3.setBounds(9, 42, 23, 17);
 			panel.add(label_3);
+			label_3.setFont(font);
 			
 			lblTemperature = new JLabel(":");
 			lblTemperature.setRequestFocusEnabled(false);
 			lblTemperature.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblTemperature.setForeground(Color.BLUE);
-			lblTemperature.setFont(font);
 			lblTemperature.setBounds(31, 65, 60, 17);
 			panel.add(lblTemperature);
+			lblTemperature.setFont(font);
 			
 			lblTm = new JLabel("T:");
 			lblTm.setToolTipText("Temperature");
 			lblTm.setRequestFocusEnabled(false);
 			lblTm.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblTm.setForeground(Color.BLACK);
-			lblTm.setFont(font);
 			lblTm.setBounds(9, 65, 23, 17);
 			panel.add(lblTm);
+			lblTm.setFont(font);
 			
 			lblCurrent = new JLabel(":");
 			lblCurrent.setRequestFocusEnabled(false);
 			lblCurrent.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblCurrent.setForeground(Color.BLUE);
-			lblCurrent.setFont(font);
 			lblCurrent.setBounds(31, 88, 60, 17);
 			panel.add(lblCurrent);
+			lblCurrent.setFont(font);
 			
 			lblCu = new JLabel("Cu:");
 			lblCu.setToolTipText("Current");
 			lblCu.setRequestFocusEnabled(false);
 			lblCu.setHorizontalAlignment(SwingConstants.RIGHT);
 			lblCu.setForeground(Color.BLACK);
-			lblCu.setFont(font);
 			lblCu.setBounds(9, 88, 23, 17);
 			panel.add(lblCu);
+			lblCu.setFont(font);
 			
 			lbl5V5 = new JLabel(":");
 			lbl5V5.setRequestFocusEnabled(false);
 			lbl5V5.setHorizontalAlignment(SwingConstants.RIGHT);
 			lbl5V5.setForeground(Color.BLUE);
-			lbl5V5.setFont(font);
 			lbl5V5.setBounds(156, 21, 60, 17);
 			panel.add(lbl5V5);
+			lbl5V5.setFont(font);
 			
 			label_9 = new JLabel("5.5 V:");
 			label_9.setRequestFocusEnabled(false);
 			label_9.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_9.setForeground(Color.BLACK);
-			label_9.setFont(font);
 			label_9.setBounds(106, 21, 50, 17);
 			panel.add(label_9);
+			label_9.setFont(font);
 			
 			lbl13V2 = new JLabel(":");
 			lbl13V2.setRequestFocusEnabled(false);
 			lbl13V2.setHorizontalAlignment(SwingConstants.RIGHT);
 			lbl13V2.setForeground(Color.BLUE);
-			lbl13V2.setFont(font);
 			lbl13V2.setBounds(156, 48, 60, 17);
 			panel.add(lbl13V2);
+			lbl13V2.setFont(font);
 			
 			label_11 = new JLabel("13.2 V:");
 			label_11.setRequestFocusEnabled(false);
 			label_11.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_11.setForeground(Color.BLACK);
-			label_11.setFont(font);
 			label_11.setBounds(106, 48, 50, 17);
 			panel.add(label_11);
+			label_11.setFont(font);
 			
 			lbl13V2_neg = new JLabel(":");
 			lbl13V2_neg.setRequestFocusEnabled(false);
 			lbl13V2_neg.setHorizontalAlignment(SwingConstants.RIGHT);
 			lbl13V2_neg.setForeground(Color.BLUE);
-			lbl13V2_neg.setFont(font);
 			lbl13V2_neg.setBounds(155, 75, 60, 17);
 			panel.add(lbl13V2_neg);
+			lbl13V2_neg.setFont(font);
 			
 			label_13 = new JLabel("-13.2 V:");
 			label_13.setRequestFocusEnabled(false);
 			label_13.setHorizontalAlignment(SwingConstants.RIGHT);
 			label_13.setForeground(Color.BLACK);
-			label_13.setFont(font);
 			label_13.setBounds(105, 75, 50, 17);
 			panel.add(label_13);
+			label_13.setFont(font);
 			
 			JSeparator separator = new JSeparator();
 			separator.setOrientation(SwingConstants.VERTICAL);
@@ -449,17 +452,17 @@ public class DACsPanel extends JPanel {
 			JLabel lblGainOffset = new JLabel("Gain Offset:");
 			lblGainOffset.setRequestFocusEnabled(false);
 			lblGainOffset.setHorizontalAlignment(SwingConstants.RIGHT);
-			lblGainOffset.setFont(font.deriveFont(12f));
 			lblGainOffset.setBounds(8, 119, 72, 15);
 			add(lblGainOffset);
+			lblGainOffset.setFont(font.deriveFont(12f));
 			
 			txtGainOffset = new JTextField();
 			txtGainOffset.setText("0");
 			txtGainOffset.setHorizontalAlignment(SwingConstants.RIGHT);
-			txtGainOffset.setFont(font);
 			txtGainOffset.setColumns(10);
 			txtGainOffset.setBounds(79, 116, 42, 20);
 			add(txtGainOffset);
+			txtGainOffset.setFont(font);
 		}
 	}
 

@@ -52,12 +52,12 @@ public class Setter extends SetterAbstract {
 			Packet up = upt.getPacket();
 
 			if(cph!=null && up!=null &&
-					cph.getGroupId()==up.getHeader().getGroupId() &&
+					cph.getParameter()==up.getHeader().getParameter() &&
 							cph.getPacketId()==getPacketId()){
 
 				Object source = null;
 
-				if(cph.getOption()>0 || cph.getType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+				if(cph.getOption()>0 || cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 					source = new Byte((byte) -cph.getOption());
 					if((byte)source==0)
 						source=-20;

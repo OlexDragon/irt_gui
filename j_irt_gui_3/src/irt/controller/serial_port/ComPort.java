@@ -118,7 +118,7 @@ public class ComPort extends SerialPort {
 		PacketThread pt = packetWork.getPacketThread();
 		Packet p = pt.getPacket();
 		PacketHeader ph = p.getHeader();
-		byte groupId = ph.getGroupId();
+		byte groupId = ph.getParameter();
 		packetId = ph.getPacketId();
 		Packet packet;
 
@@ -181,7 +181,7 @@ do{
 
 						packetHeader = new PacketHeader(readData);
 
-						if (packetHeader.asBytes() != null && packetHeader.getGroupId()==groupId) {
+						if (packetHeader.asBytes() != null && packetHeader.getParameter()==groupId) {
 							packet.setHeader(packetHeader);
 							payloadsList = new ArrayList<>();
 

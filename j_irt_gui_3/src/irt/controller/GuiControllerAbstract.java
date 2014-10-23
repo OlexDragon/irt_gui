@@ -122,11 +122,11 @@ public abstract class GuiControllerAbstract extends Thread {
 			if (packet != null && packet.getHeader() != null) {
 				PacketHeader header = packet.getHeader();
 
-				byte packetType = header.getType();
+				byte packetType = header.getPacketType();
 				if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
 
 					DeviceInfo deviceInfo;
-					switch (header.getGroupId()) {
+					switch (header.getParameter()) {
 					case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
 						deviceInfo = new DeviceInfo(packet);
 
@@ -145,7 +145,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_KU_TO_L:
 						case DeviceInfo.DEVICE_TYPE_C_TO_L:
 						case DeviceInfo.DEVICE_TYPE_SSPA_CONVERTER:
-						case 1052: /* Temporarly added by Alex @ 19-09-2014 */
+						case  DeviceInfo.DEVICE_TYPE_MODUL: /* Temporarly added by Alex @ 19-09-2014 */
 							protocol = Protocol.CONVERTER.setDeviceType(type);
 							break;
 						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
@@ -602,7 +602,7 @@ public abstract class GuiControllerAbstract extends Thread {
 			if(packet!=null){
 				PacketHeader header = packet.getHeader();
 
-				if (header != null && header.getGroupId()==Packet.IRT_SLCP_PACKET_ID_MEASUREMENT && header.getOption()==0) {
+				if (header != null && header.getParameter()==Packet.IRT_SLCP_PACKET_ID_MEASUREMENT && header.getOption()==0) {
 
 					logger.debug(packet);
 					byte mesurementStatus = packet.getClass().equals(Packet.class)

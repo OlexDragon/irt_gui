@@ -240,7 +240,7 @@ public class AlarmsController extends ControllerAbstract {
 				PacketWork packetWork = getPacketWork();
 				if (	packetWork!=null &&
 						packetWork.isAddressEquals(packet) &&
-						packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_ALARM)
+						packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_ALARM)
 
 					new ValueChangeWorker(packet);
 			}

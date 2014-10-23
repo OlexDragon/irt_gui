@@ -230,4 +230,10 @@ public abstract class ControllerAbstract implements Runnable{
 		t.start();
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	@Override
+	public String toString() {
+		return "ControllerAbstract [name=" + name + ", packetWork=" + packetWork + ", run=" + run + ", send=" + send + ", style=" + style + ", waitTime=" + waitTime
+				+ "]";
+	}
 }

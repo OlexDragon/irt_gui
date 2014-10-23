@@ -26,6 +26,7 @@ public class PacketThread extends Thread {
 	public PacketThread(byte[] packetSetting, String threadName) {
 		super(threadName);
 		data = packetSetting;
+		setDaemon(true);
 	}
 
 	public PacketThread(byte[] packetSetting) {
@@ -131,7 +132,7 @@ public class PacketThread extends Thread {
 
 	public void setPacketHeaderType(byte packetType) {
 		PacketHeader header = packet.getHeader();
-		if(header.getType()!=packetType){
+		if(header.getPacketType()!=packetType){
 			header.setType(packetType);
 		}
 	}

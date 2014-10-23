@@ -59,7 +59,7 @@ public class ComPortThreadQueue extends Thread {
 
 							if(send==null || send.getHeader()==null)
 								StaticComponents.getLedRx().setLedColor(Color.WHITE);
-							else if(send.getHeader().getType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
+							else if(send.getHeader().getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
 								StaticComponents.getLedRx().setLedColor(Color.RED);
 							else
 								StaticComponents.getLedRx().setLedColor(Color.GREEN);
@@ -90,9 +90,7 @@ public class ComPortThreadQueue extends Thread {
 				if (comPortQueue.size() < 300)
 					if (!comPortQueue.contains(packetWork)) {
 
-						PacketThread pt = packetWork.getPacketThread();
-						pt.setDaemon(true);
-						pt.start();
+						packetWork.getPacketThread().start();
 
 						comPortQueue.add(packetWork);
 						logger.trace("<<< is added - {}", packetWork);

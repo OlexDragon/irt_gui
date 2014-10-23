@@ -28,8 +28,8 @@ public class DeviceDebagGetter extends GetterAbstract {
 
 				Object source = value;
 
-				if(cph.getOption()>0 || cph.getType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
-					if(cph.getType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
+				if(cph.getOption()>0 || cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+					if(cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
 						source=new Byte((byte) -20);
 					else
 						source = new Byte((byte)-cph.getOption());

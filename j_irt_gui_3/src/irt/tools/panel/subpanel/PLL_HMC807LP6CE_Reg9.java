@@ -122,7 +122,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 										PacketHeader header = packet.getHeader();
 										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG){
 
-											if(header.getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+											if(header.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 												Payload payload = packet.getPayload(Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE);
 												if(payload!=null){
 													RegisterValue value = payload.getRegisterValue();

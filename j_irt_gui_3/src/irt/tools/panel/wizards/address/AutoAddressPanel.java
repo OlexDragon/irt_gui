@@ -158,7 +158,7 @@ public class AutoAddressPanel extends JPanel {
 				LinkedPacket lp = (LinkedPacket)packet;
 				PacketHeader header = lp.getHeader();
 				byte addr = lp.getLinkHeader().getAddr();
-				if(header.getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
+				if(header.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
 					address.add(addr);
 				new StopController(addr);
 				int size;

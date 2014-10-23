@@ -148,7 +148,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 										PacketHeader header = packet.getHeader();
 
 										if (	getPacketWork().isAddressEquals(packet) &&
-												header.getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
+												header.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
 												header.getPacketId() == packetId)
 
 											MonitorPanelAbstract.this.packetRecived(packet.getPayloads());

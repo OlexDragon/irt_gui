@@ -38,9 +38,12 @@ public class DeviceInfo {
 							DEVICE_TYPE_KU_TO_140	= 1010,
 							DEVICE_TYPE_KU_TO_L		= 1011,
 							DEVICE_TYPE_C_TO_L		= 1012,
-							DEVICE_TYPE_SSPA_CONVERTER = 1051;
+							DEVICE_TYPE_SSPA_CONVERTER = 1051,
+							DEVICE_TYPE_MODUL		= 1052;
 
-	private LinkHeader linkHeader;
+	public static final int DEVICE_TYPE_BAIS_BOARD_MODUL	= 2001;
+
+			private LinkHeader linkHeader;
 	private int type;
 	private int revision;
 	private int subtype;
@@ -118,7 +121,7 @@ public class DeviceInfo {
 
 	public boolean set(Packet packet) {
 		boolean isSet = false;
-		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO){
+		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO){
 			linkHeader = packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null;
 			List<Payload> payloads = packet.getPayloads();
 			if(payloads!=null){

@@ -76,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.071";
+	public static final String VERTION = "- 3.073";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;

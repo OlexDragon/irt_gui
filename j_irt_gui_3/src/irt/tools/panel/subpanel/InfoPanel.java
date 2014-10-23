@@ -81,7 +81,7 @@ public class InfoPanel extends JPanel implements Refresh {
 							lh = ((LinkedPacket)packet).getLinkHeader();
 
 						PacketHeader h = packet.getHeader();
-						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_DEVICE_INFO && h.getType()!=Packet.IRT_SLCP_PACKET_TYPE_REQUEST){
+						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_DEVICE_INFO && h.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_REQUEST){
 							int firmwareBuildCounter = new DeviceInfo(packet).getUptimeCounter();
 							secondsCount.setFirmwareBuildCounter(firmwareBuildCounter);
 						}

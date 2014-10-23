@@ -22,9 +22,17 @@ public class PicobucPanel extends UserPicobucPanel {
 
 		tabbedPane = getTabbedPane();
 
-		JPanel baisPanel = new BIASsPanel(linkHeader);
+		JPanel baisPanel = new BIASsPanel(linkHeader, true);
 		baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
 		tabbedPane.addTab("BAISs", baisPanel);
+
+		if(	deviceInfo.getType()>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD
+				&& deviceInfo.getType()<=DeviceInfo.DEVICE_TYPE_SSPA
+				&& deviceInfo.getSubtype()==10){
+			baisPanel = new BIASsPanel(linkHeader, false);
+			baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
+			tabbedPane.addTab("BAISs#2", baisPanel);
+		}
 
 		JPanel converterPanel = new DACsPanel(linkHeader);
 		converterPanel.setBackground(new Color(0xD1,0xD1,0xD1));

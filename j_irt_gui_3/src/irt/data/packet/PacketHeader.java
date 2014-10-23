@@ -27,9 +27,9 @@ public class PacketHeader{
 	private byte 	code; 		6
 */
 	public byte[]	asBytes()		{ return packetHeader;		}
-	public byte		getType	()		{ return packetHeader[0];	}
+	public byte		getPacketType	()		{ return packetHeader[0];	}
 	public short	getPacketId()	{ return (short) Packet.shiftAndAdd(Arrays.copyOfRange(packetHeader, 1, 3));	}
-	public byte		getGroupId()	{ return packetHeader[3];	}
+	public byte		getParameter()	{ return packetHeader[3];	}
 	public short	getReserved()	{ return (short) Packet.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6));	}
 	public byte		getOption()		{ return packetHeader[6];	}
 
@@ -58,51 +58,51 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE:
 				packetIdStr = "Mute("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N1:
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N1_SET:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N1_SET:
 				packetIdStr = "Potentiometer_N1("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N2:
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N2_SET:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N2:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N2_SET:
 				packetIdStr = "Potentiometer_N2("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N3:
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N3_SET:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N3:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N3_SET:
 				packetIdStr = "Potentiometer_ N3("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N4:
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N4_SET:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N4:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N4_SET:
 				packetIdStr = "Potentiometer_N4("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N5:
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N5_SET:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N5:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N5_SET:
 				packetIdStr = "Potentiometer_N5("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTENTIOMETER_N6:
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_POTRNTIOMETER_N6_SET:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N6:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N6_SET:
 				packetIdStr = "Potentiometer_N6("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N1:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N1:
 				packetIdStr = "Switch_N1("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_SWITCH_N2:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N2:
 				packetIdStr = "Switch_N2("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS1_CURRENT:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_HS1_CURRENT:
 				packetIdStr = "HS1_Current("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_HS2_CURRENT:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_HS2_CURRENT:
 				packetIdStr = "HS2_Current("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_OUTPUT_POWER:
 			case PacketWork.PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER:
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_OUTPUT_POWER:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_OUTPUT_POWER:
 				packetIdStr = "OutputPower("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_TEMPERATURE:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_TEMPERATURE:
 				packetIdStr = "Temperature("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_NGLOBAL:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_NGLOBAL:
 				packetIdStr = "nGlobal("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER:
@@ -162,16 +162,16 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS:
 				packetIdStr = "FCM FLAGS("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC1:
+			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1:
 				packetIdStr = "DAC 1("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC2:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2:
 				packetIdStr = "DAC 2("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC3:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3:
 				packetIdStr = "DAC 3("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_DAC4:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4:
 				packetIdStr = "DAC 4("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_13V2:
@@ -183,13 +183,13 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_MEASUREMENT_5V5:
 				packetIdStr = "5.5V("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_DEVICE_DEBAG_CALIBRATION_MODE:
+			case PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE:
 				packetIdStr = "CalibrationMode("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_PLL_1:
+			case PacketWork.PACKET_ID_DEVICE_DEVICE_DEBAG_CONVERTER_PLL_1:
 				packetIdStr = "PLL 1("+packetId+")";
 				break;
-			case PacketWork.PACKET_BIAS_25W_DEVICE_DEBAG_CONVERTER_PLL_2:
+			case PacketWork.PACKET_ID_DEVICE_DEVICE_DEBAG_CONVERTER_PLL_2:
 				packetIdStr = "Pll 2("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY:
@@ -344,7 +344,7 @@ public class PacketHeader{
 	public String getTypeStr() {
 		String typeStr = null;
 		if(packetHeader!=null)
-		switch(getType()){
+		switch(getPacketType()){
 		case Packet.IRT_SLCP_PACKET_TYPE_SPONTANEOUS:
 			typeStr = "Spontaneous("+ Packet.IRT_SLCP_PACKET_TYPE_SPONTANEOUS+")";
 			break;
@@ -361,7 +361,7 @@ public class PacketHeader{
 			typeStr = "Acknowledgement("+ Packet.IRT_SLCP_PACKET_TYPE_ACK+")";
 			break;
 		default:
-			typeStr = ""+(getType()&0xFF);
+			typeStr = ""+(getPacketType()&0xFF);
 		}
 		return typeStr;
 	}
@@ -369,7 +369,7 @@ public class PacketHeader{
 	private String getGroupIdStr() {
 		String typeStr = null;
 		if(packetHeader!=null)
-		switch(getGroupId()){
+		switch(getParameter()){
 		case Packet.IRT_SLCP_PACKET_ID_ALARM:
 			typeStr = "Alarm("+ Packet.IRT_SLCP_PACKET_ID_ALARM+")";
 			break;
@@ -401,7 +401,7 @@ public class PacketHeader{
 			typeStr = "Device Debug("+ Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG+")";
 			break;
 		default:
-			typeStr = ""+(getType()&0xFF);
+			typeStr = ""+(getPacketType()&0xFF);
 		}
 		return typeStr;
 	}

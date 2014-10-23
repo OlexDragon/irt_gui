@@ -122,7 +122,7 @@ public class DumpControllers{
 							public void packetRecived(Packet packet) {
 								byte groupId;
 								if(getPacketWork().isAddressEquals(packet) &&
-										((	groupId = packet.getHeader().getGroupId())==Packet.IRT_SLCP_PACKET_ID_ALARM ||
+										((	groupId = packet.getHeader().getParameter())==Packet.IRT_SLCP_PACKET_ID_ALARM ||
 										groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG ||
 										groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO))
 									new DumpWorker(packet);

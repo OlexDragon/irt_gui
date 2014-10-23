@@ -75,7 +75,7 @@ public class DebugPanel extends JPanel{
 												if(getPacketWork().isAddressEquals(packet) &&
 														packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CLEAR_STATISTICS){
 
-													if(packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+													if(packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 														stop();
 														guiControllerAbstract.doDump(linkHeader, "***** Statistics is cleared. *****");
 														JOptionPane.showMessageDialog(null, "Statistics is cleared.");

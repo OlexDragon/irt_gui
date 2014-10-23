@@ -36,8 +36,8 @@ public class Getter extends GetterAbstract {
 
 			short packetId = getPacketId();
 			if(cph!=null && up!=null &&
-					cph.getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
-						cph.getGroupId()==up.getHeader().getGroupId() &&
+					cph.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
+						cph.getParameter()==up.getHeader().getParameter() &&
 							cph.getPacketId()==packetId){
 
 				logger.debug(packet);

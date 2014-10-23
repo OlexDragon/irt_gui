@@ -113,13 +113,13 @@ public class ConfigurationSetter extends SetterAbstract {
 			PacketHeader ph = packet.getHeader();
 			short packetId = getPacketId();
 			if(ph!=null &&
-					ph.getGroupId()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+					ph.getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
 							ph.getPacketId()==packetId && packet.getPayloads()!=null){
 
 				long tmp = value;
 				Object source = null;
 
-				if(ph.getOption()>0 || ph.getType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+				if(ph.getOption()>0 || ph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 
 					tmp = -ph.getOption();
 					if(tmp>=0)

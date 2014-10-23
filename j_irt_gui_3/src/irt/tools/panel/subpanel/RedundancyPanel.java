@@ -154,8 +154,8 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 															public void packetRecived(Packet packet) {
 																if(
 																		getPacketWork().isAddressEquals(packet) &&
-																		packet.getHeader().getGroupId()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
-																		packet.getHeader().getType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
+																		packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+																		packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
 																	)
 																	new GetterWorker(packet);
 															}

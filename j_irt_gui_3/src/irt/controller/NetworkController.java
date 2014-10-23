@@ -236,7 +236,7 @@ public class NetworkController extends ControllerAbstract {
 		PacketHeader header = packet.getHeader();
 		logger.debug(Arrays.toString(packetThread.getData()));
 
-		byte groupId = header.getGroupId();
+		byte groupId = header.getParameter();
 		byte packetType = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
 		short packetId = header.getPacketId();
 		byte packetParameterHeaderCode = packet.getPayload(0).getParameterHeader().getCode();

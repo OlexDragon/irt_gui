@@ -46,7 +46,7 @@ public class DeviceDebagSetter extends SetterAbstract {
 
 				Object source = null;
 
-				if(cph.getOption()>0 || cph.getType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+				if(cph.getOption()>0 || cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 					source = new Byte((byte) -cph.getOption());
 					if((Byte)source==0)
 						source=-20;
