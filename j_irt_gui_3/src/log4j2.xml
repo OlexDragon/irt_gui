@@ -51,9 +51,9 @@
  	<Logger name="irt.tools.panel.vizards.address.AutoAddressPanel$AddressWorker" level="WARN"/>
  	<Logger name="irt.tools.panel.vizards.address.ManualAddressPanel" level="WARN"/>
 
-  	<Logger name="irt.tools.panel.subpanel.BIASsPanel" level="all"/>
+  	<Logger name="irt.tools.panel.subpanel.BIASsPanel" level="WARN"/>
   	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="WARN"/>
-  	<Logger name="irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9" level="debug"/>
+  	<Logger name="irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9" level="WARN"/>
 
   	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="WARN"/>
   	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanelSSPA" level="WARN"/>

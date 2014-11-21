@@ -25,6 +25,7 @@ public class DeviceInfo {
 							DEVICE_TYPE_PICOBUC_L_TO_KU = 100,
 							DEVICE_TYPE_PICOBUC_L_TO_C 	= 101,
 							DEVICE_TYPE_SSPA 			= 102,
+							DEVICE_TYPE_FUTURE_BAIS_BOARD= 199,
 
 							DEVICE_TYPE_70_TO_L		= 1001,
 							DEVICE_TYPE_L_TO_70		= 1002,

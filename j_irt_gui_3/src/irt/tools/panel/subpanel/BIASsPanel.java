@@ -25,7 +25,6 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.Payload;
 import irt.data.value.Value;
 import irt.data.value.ValueDouble;
 import irt.irt_gui.IrtGui;
@@ -557,7 +556,7 @@ public class BIASsPanel extends JPanel {
 
 					@Override
 					protected Void doInBackground() throws Exception {
-						if(isMainBoard)
+						if(false)//isMainBoard)
 							new SetterController("Initialize Controller",
 									new Setter(linkHeader,
 										Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
@@ -571,18 +570,20 @@ public class BIASsPanel extends JPanel {
 							if(controller==null || !controller.isRun()){
 								if(setCalibrationMode(CalibrationMode.ON)){
 
-									if(initialisePotenciometr(1,0))
-										initialisePotenciometr(1,3);
-									if(initialisePotenciometr(1,8))
-										initialisePotenciometr(1,11);
-									if(initialisePotenciometr(2,0))
-										initialisePotenciometr(2,3);
-									if(initialisePotenciometr(2,8))
-										initialisePotenciometr(2,11);
-									if(initialisePotenciometr(7,0))
-										initialisePotenciometr(7,3);
-									if(initialisePotenciometr(7,8))
-										initialisePotenciometr(7,11);
+									initialisePotenciometr(1,0x10, MAX_POTENTIOMETER_VALUE);
+									initialisePotenciometr(1,0x11, MAX_POTENTIOMETER_VALUE);
+									initialisePotenciometr(1,0x12, 0xFFFF);
+									initialisePotenciometr(1,0x13, 0xFFFF);
+
+									initialisePotenciometr(2,0x10, MAX_POTENTIOMETER_VALUE);
+									initialisePotenciometr(2,0x11, MAX_POTENTIOMETER_VALUE);
+									initialisePotenciometr(2,0x12, 0xFFFF);
+									initialisePotenciometr(2,0x13, 0xFFFF);
+
+									initialisePotenciometr(7,0x10, MAX_POTENTIOMETER_VALUE);
+									initialisePotenciometr(7,0x11, MAX_POTENTIOMETER_VALUE);
+									initialisePotenciometr(7,0x12, 0xFFFF);
+									initialisePotenciometr(7,0x13, 0xFFFF);
 
 									setCalibrationMode(CalibrationMode.OFF);
 								}else
@@ -592,11 +593,11 @@ public class BIASsPanel extends JPanel {
 						}
 						return null;
 					}
-				};
+				}.execute();
 			}
 
-			private boolean initialisePotenciometr(int index, int addr) {
-				Value value = new Value(MAX_POTENTIOMETER_VALUE, 0, MAX_POTENTIOMETER_VALUE, 0);
+			private boolean initialisePotenciometr(int index, int addr, int potentiometerValue) {
+				Value value = new Value(MAX_POTENTIOMETER_VALUE, 0, potentiometerValue, 0);
 				RegisterValue registerValue = new RegisterValue(index, addr, value);
 				DeviceDebagSetter setter = new DeviceDebagSetter(linkHeader,
 						index,
@@ -631,7 +632,7 @@ public class BIASsPanel extends JPanel {
 										BIASsPanel.this.logger.info("\n\tPacket recived");
 										stop();
 									}else
-										JOptionPane.showMessageDialog(null, "Some Problem");
+										JOptionPane.showMessageDialog(null, "Some Problem("+header.getOptionStr()+")");
 								}
 							}
 						};
@@ -665,12 +666,12 @@ public class BIASsPanel extends JPanel {
 										packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE){
 
 									logger.trace("\n\t{}", packet);
-									Payload payload = packet.getPayload(0);
-									if(payload!=null && calibrationMode.ordinal()==payload.getInt(0)){
+									PacketHeader header = packet.getHeader();
+									if(header!=null && header.getOption()==0){
 										BIASsPanel.this.logger.info("\n\tPacket recived");
 										stop();
 									}else
-										JOptionPane.showMessageDialog(null, "Some Problem");
+										JOptionPane.showMessageDialog(null, "Some Problem("+header.getOptionStr()+")");
 								}
 							}
 						};

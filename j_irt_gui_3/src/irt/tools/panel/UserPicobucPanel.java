@@ -1,6 +1,5 @@
 package irt.tools.panel;
 
-import irt.controller.AlarmsController;
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
@@ -31,7 +30,6 @@ import javax.swing.SwingWorker;
 public class UserPicobucPanel extends DevicePanel {
 
 	private JTabbedPane tabbedPane;
-	private DefaultController target;
 
 	public UserPicobucPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		super(linkHeader, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
@@ -67,89 +65,70 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		Getter packetWork = new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs);
+		int type = deviceInfo.getType();
+		if(type>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD &&
+				type<=DeviceInfo.DEVICE_TYPE_FUTURE_BAIS_BOARD &&
+				deviceInfo.getRevision()>1)
+			showRedundant();
+			setRedundancyName();
+	}
 
-		target = new DefaultController("PACKET_ID_ALARMS_IDs", packetWork, Style.CHECK_ALWAYS){
+	private void setRedundancyName() {
+		startThread(
+				new DefaultController(
+						"Redundancy Enable",
+						new Getter(getLinkHeader(),
+								Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
+								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
+									@Override
+									protected PacketListener getNewPacketListener() {
+										return new PacketListener() {
 
-			@Override
-			protected PacketListener getNewPacketListener() {
-				return new PacketListener() {
+											private int count = 3;
+											private String text;
+											private REDUNDANCY_NAME name = null;
 
-					@Override
-					public void packetRecived(Packet packet) {
-						if (getPacketWork().isAddressEquals(packet) && packet.getHeader().getPacketType() == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
-								&& packet.getHeader().getPacketId() == PacketWork.PACKET_ID_ALARMS_IDs) {
+											@Override
+											public void packetRecived(final Packet packet) {
+												new SwingWorker<String, Void>() {
 
-							byte[] buffer = packet.getPayload(0).getBuffer();
-							if (buffer != null && buffer[buffer.length - 1] == AlarmsController.REDUNDANT_FAULT) {
-								showRedundant();
-								setRedundancyName();
-							}
-							stop();
-						}
-					}
-
-					private void setRedundancyName() {
-						startThread(
-								new DefaultController(
-										"Redundancy Enable",
-										new Getter(getLinkHeader(),
-												Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
-												Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
-												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
 													@Override
-													protected PacketListener getNewPacketListener() {
-														return new PacketListener() {
+													protected String doInBackground() throws Exception {
+														if(
+																getPacketWork().isAddressEquals(packet) &&
+																packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+																packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
+															)
+															if(packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+																REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
+																if(n!=null && !n.equals(name)){
 
-															private int count = 3;
-															private String text;
-															private REDUNDANCY_NAME name = null;
+																	VarticalLabel varticalLabel = getVarticalLabel();
+																	text = varticalLabel.getText();
 
-															@Override
-															public void packetRecived(final Packet packet) {
-																new SwingWorker<String, Void>() {
+																	if(		text.startsWith(REDUNDANCY_NAME.BUC_A.toString()) ||
+																			text.startsWith(REDUNDANCY_NAME.BUC_B.toString()))
+																		text = text.substring(8);
 
-																	@Override
-																	protected String doInBackground() throws Exception {
-																		if(
-																				getPacketWork().isAddressEquals(packet) &&
-																				packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
-																				packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
-																			)
-																			if(packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
-																				REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
-																				if(n!=null && !n.equals(name)){
-
-																					VarticalLabel varticalLabel = getVarticalLabel();
-																					text = varticalLabel.getText();
-
-																					if(		text.startsWith(REDUNDANCY_NAME.BUC_A.toString()) ||
-																							text.startsWith(REDUNDANCY_NAME.BUC_B.toString()))
-																						text = text.substring(8);
-
-																					name = n;
-																					varticalLabel.setText(n+" : "+text);
-																				}
-																				setSend(false);
-																				count = 3;
-																			}else{
-																				if(--count<=0)
-																					stop();
-																			}
-																		return name.toString();
-																	}
-																}.execute();
+																	name = n;
+																	varticalLabel.setText(n+" : "+text);
+																}
+																setSend(false);
+																count = 3;
+															}else{
+																if(--count<=0)
+																	stop();
 															}
-														};
+														return name.toString();
 													}
-									
-										}
-								);
-					}
-				};
-			}
-		};
-		startThread(target);
+												}.execute();
+											}
+										};
+									}
+					
+						}
+				);
 	}
 
 	private void startThread(Runnable target) {
