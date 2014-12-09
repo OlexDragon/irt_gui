@@ -73,10 +73,10 @@ public class IrtGui extends IrtMainFrame {
 	private static final long serialVersionUID = 1611718189640547787L;
 
 	public static final int DEFAULT_ADDRESS = 254;
-	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for file name setting
+	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.074";
+	public static final String VERTION = "- 3.075";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;

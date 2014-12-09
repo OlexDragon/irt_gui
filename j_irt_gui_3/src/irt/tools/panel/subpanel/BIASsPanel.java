@@ -33,6 +33,7 @@ import irt.tools.button.ImageButton;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -556,7 +557,8 @@ public class BIASsPanel extends JPanel {
 
 					@Override
 					protected Void doInBackground() throws Exception {
-						if(false)//isMainBoard)
+						logger.entry();
+						if(isMainBoard)
 							new SetterController("Initialize Controller",
 									new Setter(linkHeader,
 										Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
@@ -567,29 +569,33 @@ public class BIASsPanel extends JPanel {
 									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
 							);
 						else{
+							logger.trace("\n\t{}", controller);
 							if(controller==null || !controller.isRun()){
 								if(setCalibrationMode(CalibrationMode.ON)){
 
-									initialisePotenciometr(1,0x10, MAX_POTENTIOMETER_VALUE);
-									initialisePotenciometr(1,0x11, MAX_POTENTIOMETER_VALUE);
-									initialisePotenciometr(1,0x12, 0xFFFF);
-									initialisePotenciometr(1,0x13, 0xFFFF);
+									if(	initialisePotenciometr(1,0x10, MAX_POTENTIOMETER_VALUE) &&
+										initialisePotenciometr(1,0x11, MAX_POTENTIOMETER_VALUE) &&
+										initialisePotenciometr(1,0x12, 0xFFFF) &&
+										initialisePotenciometr(1,0x13, 0xFFFF)
+									);
 
-									initialisePotenciometr(2,0x10, MAX_POTENTIOMETER_VALUE);
-									initialisePotenciometr(2,0x11, MAX_POTENTIOMETER_VALUE);
-									initialisePotenciometr(2,0x12, 0xFFFF);
-									initialisePotenciometr(2,0x13, 0xFFFF);
+									if(	initialisePotenciometr(2,0x10, MAX_POTENTIOMETER_VALUE) &&
+										initialisePotenciometr(2,0x11, MAX_POTENTIOMETER_VALUE) &&
+										initialisePotenciometr(2,0x12, 0xFFFF) &&
+										initialisePotenciometr(2,0x13, 0xFFFF)
+									);
 
-									initialisePotenciometr(7,0x10, MAX_POTENTIOMETER_VALUE);
-									initialisePotenciometr(7,0x11, MAX_POTENTIOMETER_VALUE);
-									initialisePotenciometr(7,0x12, 0xFFFF);
-									initialisePotenciometr(7,0x13, 0xFFFF);
+									if(	initialisePotenciometr(7,0x10, MAX_POTENTIOMETER_VALUE) &&
+										initialisePotenciometr(7,0x11, MAX_POTENTIOMETER_VALUE) &&
+										initialisePotenciometr(7,0x12, 0xFFFF) &&
+										initialisePotenciometr(7,0x13, 0xFFFF)
+									);
 
 									setCalibrationMode(CalibrationMode.OFF);
 								}else
-									JOptionPane.showMessageDialog(null, "Set cal. mode 'ON' error.");
+									showMessage("Set Calibration Mode 'ON' error.");
 							}else
-							JOptionPane.showMessageDialog(null, "Operation is not completed");
+								showMessage("Operation is not completed");
 						}
 						return null;
 					}
@@ -597,7 +603,8 @@ public class BIASsPanel extends JPanel {
 			}
 
 			private boolean initialisePotenciometr(int index, int addr, int potentiometerValue) {
-				Value value = new Value(MAX_POTENTIOMETER_VALUE, 0, potentiometerValue, 0);
+				logger.entry( index, addr, potentiometerValue);
+				Value value = new Value( potentiometerValue, 0, MAX_POTENTIOMETER_VALUE, 0);
 				RegisterValue registerValue = new RegisterValue(index, addr, value);
 				DeviceDebagSetter setter = new DeviceDebagSetter(linkHeader,
 						index,
@@ -631,13 +638,22 @@ public class BIASsPanel extends JPanel {
 									if(header!=null && header.getOption()==0){
 										BIASsPanel.this.logger.info("\n\tPacket recived");
 										stop();
-									}else
-										JOptionPane.showMessageDialog(null, "Some Problem("+header.getOptionStr()+")");
+									} else
+										showMessage("Some Problem("+header.getOptionStr()+")");
 								}
 							}
 						};
 					}
 				};
+			}
+
+			private void showMessage(final String message) {
+				EventQueue.invokeLater(new Runnable() {
+				    @Override
+				    public void run() {
+						JOptionPane.showMessageDialog(null, message);
+				    }
+				});
 			}
 
 			private synchronized boolean setCalibrationMode(final CalibrationMode calibrationMode) {
@@ -665,13 +681,17 @@ public class BIASsPanel extends JPanel {
 										packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
 										packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE){
 
-									logger.trace("\n\t{}", packet);
+									BIASsPanel.this.logger.trace("\n\t{}", packet);
+									
 									PacketHeader header = packet.getHeader();
 									if(header!=null && header.getOption()==0){
 										BIASsPanel.this.logger.info("\n\tPacket recived");
 										stop();
-									}else
-										JOptionPane.showMessageDialog(null, "Some Problem("+header.getOptionStr()+")");
+									}else{
+										String optionStr = header.getOptionStr();
+										BIASsPanel.this.logger.warn("\n\theader.getOptionStr() = {}", optionStr);
+										showMessage("Some Problem("+optionStr+")");
+									}
 								}
 							}
 						};
@@ -694,6 +714,7 @@ public class BIASsPanel extends JPanel {
 					Long start = System.currentTimeMillis();
 
 					while(!executor.isShutdown() || controller.isRun()){
+						try { Thread.sleep(100); } catch (InterruptedException e) { logger.catching(e); }
 						if(System.currentTimeMillis()-start>TIMEOUT){
 							controller.stop();
 							logger.warn("Timeout");

@@ -99,7 +99,6 @@ public class DumpControllers{
 //		deviceInfoStr = deviceInfo.toString();
 //		new DumpToFile(unitsPanel, file, "Start", deviceInfoStr);
 
-
 		addDumpController(
 				new DefaultController(
 						"ALARMS_SUMMARY",
@@ -121,10 +120,12 @@ public class DumpControllers{
 							@Override
 							public void packetRecived(Packet packet) {
 								byte groupId;
+
 								if(getPacketWork().isAddressEquals(packet) &&
 										((	groupId = packet.getHeader().getParameter())==Packet.IRT_SLCP_PACKET_ID_ALARM ||
-										groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG ||
-										groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO))
+											groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG ||
+											groupId==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO))
+
 									new DumpWorker(packet);
 							}
 						};
@@ -637,6 +638,7 @@ public class DumpControllers{
 				case PacketWork.PACKET_ID_ALARMS_SUMMARY:
 					if (error == 0) {
 						Object dump = dumpHex(summary);
+//						logger.debug("\n\tdump ={}\n\tsummary ={}", dump, summary);
 						if (summary != null && !summary.equals(dump)) {
 							logger.debug("notifyAllControllers();");
 							notifyAllControllers();
@@ -697,21 +699,26 @@ public class DumpControllers{
 		}
 
 		private Object dumpHex(Object obj) {
+
+			logger.debug("\n\t obj = '{}'", obj);
+
 			Payload payload = packet.getPayload(0);
 
 			if(payload!=null){
 				byte[] buffer = payload.getBuffer();
 				obj = dump(obj, ToHex.bytesToHex(buffer));
-				if(buffer!=null && (buffer.length==4 || buffer.length==6))
-					obj = AlarmsController.alarmStatusToString(buffer[buffer.length-1])+" ( "+obj+")";
+//				if(buffer!=null && (buffer.length==4 || buffer.length==6))
+//					obj = AlarmsController.alarmStatusToString(buffer[buffer.length-1])+" ( "+obj+")";
 			}else
 				logger.warn("packet.getPayload(0)==null");
 
-			logger.debug(obj);
 			return obj;
 		}
 
 		private Object dump(Object obj) {
+
+			logger.debug("\n\t obj = '{}'", obj);
+
 			Payload payload = packet.getPayload(0);
 
 			if(payload!=null){
@@ -724,6 +731,9 @@ public class DumpControllers{
 		}
 
 		private Object dump(Object obj, Object o) {
+
+			logger.debug("\n\t obj = '{}',\n\t o = '{}'", obj, o);
+
 			if((obj==null || !obj.equals(o))){
 				int uptimeCounter = -1;
 				if(deviceInfo!=null) {
@@ -733,13 +743,13 @@ public class DumpControllers{
 			}
 			return o;
 		}
-		
 
 //		private String summaryAlarm(int id, int integer) {
 //			String sourceStr = null;
 //			switch(id){
 //			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
 //				notifyAllControllers();
+		
 ////				fireValueChangeListener(new ValueChangeEvent(integer, id));
 //				sourceStr = AlarmsController.alarmStatusToString((byte) integer);
 //			}

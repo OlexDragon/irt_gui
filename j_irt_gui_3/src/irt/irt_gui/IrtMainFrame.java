@@ -20,14 +20,30 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 @SuppressWarnings("serial")
 public abstract class IrtMainFrame extends JFrame {
+
+	private final Logger logger = (Logger) LogManager.getLogger();
 
 	protected GuiControllerAbstract guiController;
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
+
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+		    @Override
+		    public void run()
+		    {
+		        logger.error("ShutdownHook");
+		    }
+		});
+
 		setSize(width, hight);
+
 		if(IrtPanel.logoIcon!=null)
 			setIconImage(IrtPanel.logoIcon.getImage());
  
