@@ -67,7 +67,7 @@
 
  	<Logger name="irt.controller.DeviceDebagController" level="WARN"/>
  	<Logger name="irt.controller.DefaultController" level="WARN"/>
- 	<Logger name="irt.controller.DumpControllers" level="debug"/>
+ 	<Logger name="irt.controller.DumpControllers" level="WARN"/>
 
  	<Logger name="irt.controller.translation.Translation" level="WARN"/>
  

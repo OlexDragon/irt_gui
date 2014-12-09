@@ -898,7 +898,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 				unitsPanel.add(unitPanel);
 
-				getSoftReleaseChecker();
+				softReleaseChecker =getSoftReleaseChecker();
 				if (softReleaseChecker != null)
 					softReleaseChecker.check(deviceInfo);
 
