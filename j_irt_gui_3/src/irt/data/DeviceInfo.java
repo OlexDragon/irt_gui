@@ -207,4 +207,10 @@ public class DeviceInfo {
 	public StringData getUnitPartNumber() {
 		return unitPartNumber;
 	}
+
+	public boolean hasSlaveBiasBoard() {
+		return 	getType()>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD
+				&& getType()<=DeviceInfo.DEVICE_TYPE_SSPA
+				&& getSubtype()==10;
+	}
 }

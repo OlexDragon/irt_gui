@@ -95,7 +95,11 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_DUMP_REGISTER_6					= 106,
 								PACKET_ID_DUMP_REGISTER_7					= 107,
 								PACKET_ID_DUMP_REGISTER_10					= 110,
-								PACKET_ID_CLEAR_STATISTICS 					= 111;
+								PACKET_ID_CLEAR_STATISTICS 					= 111,
+								PACKET_ID_DUMP_REGISTER_201					= 112,
+								PACKET_ID_DUMP_REGISTER_202					= 113,
+								PACKET_ID_DUMP_REGISTER_207					= 114,
+								PACKET_ID_DUMP_REGISTER_220					= 115;
 
 	public static final short PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE = 120;
 

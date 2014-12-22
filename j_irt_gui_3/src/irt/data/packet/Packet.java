@@ -122,12 +122,12 @@ public class Packet {
 
 	/*Device Debug - IRT_SLCP_PACKET_ID_DEVICE_DEBAG*/
 	public static final byte
-	IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO 		= 1,
-	IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP 		= 2,
-	IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE 	= 3,
-	IRT_SLCP_PARAMETER_DEVICE_DEBAG_INDEX 		= 4,
-	IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE = 5,
-	IRT_SLCP_PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10;
+	IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO 		= 1,		/* device information: parts, firmware and etc. */
+	IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP 		= 2,		/* dump of registers for specified device index */
+	IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE 	= 3,		/* registers read/write operations */
+	IRT_SLCP_PARAMETER_DEVICE_DEBAG_INDEX 		= 4,		/* device index information print */
+	IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE = 5,	/* calibration mode */
+	IRT_SLCP_PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10;	/* operations with environment variables */
 
 	/* Configuration codes. */
 	public static final byte

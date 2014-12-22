@@ -26,9 +26,7 @@ public class PicobucPanel extends UserPicobucPanel {
 		baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
 		tabbedPane.addTab("BAISs", baisPanel);
 
-		if(	deviceInfo.getType()>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD
-				&& deviceInfo.getType()<=DeviceInfo.DEVICE_TYPE_SSPA
-				&& deviceInfo.getSubtype()==10){
+		if(deviceInfo.hasSlaveBiasBoard()){
 			baisPanel = new BIASsPanel(linkHeader, false);
 			baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
 			tabbedPane.addTab("BAISs#2", baisPanel);

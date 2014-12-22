@@ -166,7 +166,7 @@ public class Translation {
 		String[] availableFontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 		for(String s:availableFontNames)
 			if(s.equalsIgnoreCase(fontName)){
-				font = new Font(fontName, fontStyle, fontSize);
+				font = new Font(s, fontStyle, fontSize);
 				break;
 			}
 

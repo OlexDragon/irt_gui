@@ -285,7 +285,7 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_2,
 						2,
-						PRIORITY-8),
+						PRIORITY-9),
 				waitTime,
 				"DUMP_REGISTER_2");
 
@@ -296,7 +296,7 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_7,
 						7,
-						PRIORITY-9),
+						PRIORITY-11),
 				waitTime,
 				"DUMP_REGISTER_7");
 
@@ -307,7 +307,7 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_3,
 						3,
-						PRIORITY-10),
+						PRIORITY-13),
 				waitTime,
 				"DUMP_REGISTER_3");
 
@@ -318,7 +318,7 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_4,
 						4,
-						PRIORITY-11),
+						PRIORITY-14),
 				waitTime,
 				"DUMP_REGISTER_4");
 
@@ -328,7 +328,7 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_5,
 						5,
-						PRIORITY-12),
+						PRIORITY-15),
 				waitTime,
 				"DUMP_REGISTER_5");
 
@@ -339,7 +339,7 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_6,
 						6,
-						PRIORITY-13),
+						PRIORITY-16),
 				waitTime,
 				"DUMP_REGISTER_6");
 
@@ -350,7 +350,7 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_100,
 						100,
-						PRIORITY-14),
+						PRIORITY-17),
 				waitTime,
 				"DUMP_REGISTER_100");
 
@@ -359,10 +359,56 @@ public class DumpControllers{
 						Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
 						Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
 						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT,
-						PRIORITY-15),
+						PRIORITY-18),
 				waitTime,
 				"REDUNDANCY_STAT");
 
+		if(	deviceInfo.hasSlaveBiasBoard()){
+
+			addDumpController(
+					newGetter(
+							linkHeader,
+							Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							PacketWork.PACKET_ID_DUMP_REGISTER_201,
+							201,
+							PRIORITY-8),
+					waitTime,
+					"DUMP_REGISTER_201");
+
+			addDumpController(
+					newGetter(
+							linkHeader,
+							Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							PacketWork.PACKET_ID_DUMP_REGISTER_202,
+							202,
+							PRIORITY-10),
+					waitTime,
+					"DUMP_REGISTER_202");
+
+			addDumpController(
+					newGetter(
+							linkHeader,
+							Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							PacketWork.PACKET_ID_DUMP_REGISTER_207,
+							207,
+							PRIORITY-12),
+					waitTime,
+					"DUMP_REGISTER_207");
+
+			addDumpController(
+					newGetter(
+							linkHeader,
+							Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							PacketWork.PACKET_ID_DUMP_REGISTER_220,
+							220,
+							PRIORITY-19),
+					waitTime,
+					"DUMP_REGISTER_220");
+		}
 	}
 
 	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, int value, final int priority) {
