@@ -59,8 +59,12 @@ public class DumpControllers{
 	private Object deviceInfo3;
 	private Object deviceInfo4;
 	private Object register1;
+	private Object register201;
 	private Object register2;
+	private Object register202;
 	private Object register7;
+	private Object register207;
+	private Object register220;
 	private Object register3;
 	private Object register4;
 	private Object register5;
@@ -554,6 +558,18 @@ public class DumpControllers{
 		case PacketWork.PACKET_ID_DUMP_REGISTER_100:
 			str = "2.100(PaketWork ID="+id+ ")";
 			break;
+		case PacketWork.PACKET_ID_DUMP_REGISTER_201:
+			str = "2.201(PaketWork ID="+id+ ")";
+			break;
+		case PacketWork.PACKET_ID_DUMP_REGISTER_202:
+			str = "2.202(PaketWork ID="+id+ ")";
+			break;
+		case PacketWork.PACKET_ID_DUMP_REGISTER_207:
+			str = "2.207(PaketWork ID="+id+ ")";
+			break;
+		case PacketWork.PACKET_ID_DUMP_REGISTER_220:
+			str = "2.220(PaketWork ID="+id+ ")";
+			break;
 		case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
 			str = "Redundancy Status(PaketWork ID="+id+ ")";
 			break;
@@ -627,17 +643,41 @@ public class DumpControllers{
 					else
 						register1 = dumpError(register1);
 					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_201:
+					if(error==0)
+						register201 = dump(register201);
+					else
+						register201 = dumpError(register201);
+					break;
 				case PacketWork.PACKET_ID_DUMP_REGISTER_2:
 					if(error==0)
 						register2 = dump(register2);
 					else
 						register2 = dumpError(register2);
 					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_202:
+					if(error==0)
+						register202 = dump(register202);
+					else
+						register202 = dumpError(register202);
+					break;
 				case PacketWork.PACKET_ID_DUMP_REGISTER_7:
 					if(error==0)
 						register7 = dump( register7);
 					else
 						register7 = dumpError(register7);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_207:
+					if(error==0)
+						register207 = dump( register207);
+					else
+						register207 = dumpError(register207);
+					break;
+				case PacketWork.PACKET_ID_DUMP_REGISTER_220:
+					if(error==0)
+						register220 = dump( register220);
+					else
+						register220 = dumpError(register220);
 					break;
 				case PacketWork.PACKET_ID_DUMP_REGISTER_3:
 					if(error==0)

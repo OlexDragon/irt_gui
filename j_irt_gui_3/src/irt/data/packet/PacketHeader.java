@@ -260,6 +260,10 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_DUMP_REGISTER_6:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_7:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_100:
+			case PacketWork.PACKET_ID_DUMP_REGISTER_201:
+			case PacketWork.PACKET_ID_DUMP_REGISTER_202:
+			case PacketWork.PACKET_ID_DUMP_REGISTER_207:
+			case PacketWork.PACKET_ID_DUMP_REGISTER_220:
 				packetIdStr = "Dump "+DumpControllers.parseId(packetId);
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
