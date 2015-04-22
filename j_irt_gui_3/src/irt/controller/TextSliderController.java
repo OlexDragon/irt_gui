@@ -1,7 +1,7 @@
 package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.IdValue;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
@@ -32,8 +32,8 @@ public class TextSliderController extends ControllerAbstract {
 	private ActionListener txtActionListener;
 	private KeyListener txtKeyListener;
 
-	public TextSliderController(String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
-		super(controllerName, packetWork, null, style);
+	public TextSliderController(int deviceType, String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
+		super(deviceType, controllerName, packetWork, null, style);
 		this.value = value;
 		slider.setMinimum(value.getRelativeMinValue());
 		slider.setMaximum((int) value.getRelativeMaxValue());
@@ -177,6 +177,7 @@ public class TextSliderController extends ControllerAbstract {
 			ConfigurationSetter cs = (ConfigurationSetter)getPacketWork();
 			short packetId = cs.getPacketId();
 			if( valueChangeEvent.getID()==packetId){
+				logger.trace("valueChangeEvent: {}", valueChangeEvent);
 				Object source = valueChangeEvent.getSource();
 
 				switch(source.getClass().getSimpleName()){

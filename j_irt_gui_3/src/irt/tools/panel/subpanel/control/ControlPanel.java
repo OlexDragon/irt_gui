@@ -9,6 +9,7 @@ import irt.controller.control.ControlController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
@@ -74,8 +75,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 	protected ImageButton btnStoreConfig;
 	private int flags;
 
-	public ControlPanel(LinkHeader linkHeader, int flags) {
-		super(linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
+	public ControlPanel(int deviceType, LinkHeader linkHeader, int flags) {
+		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
 		setName("ControlPanel");
 
 		Font font = Translation.getFont();
@@ -146,20 +147,24 @@ public class ControlPanel extends MonitorPanelAbstract {
 		add(txtGain);
 		txtGain.setColumns(10);
 
-		btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
-		btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
-		btnStoreConfig.setName("Store");
-		p = getConfigButtonPosition();
-		if(p==null)
-			p = new Point(151, 101);
-		btnStoreConfig.setBounds(p.x, p.y, size, size);
-		add(btnStoreConfig);
+		if(deviceType<DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+			btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
+			btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+			btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
+			btnStoreConfig.setName("Store");
+			p = getConfigButtonPosition();
+			if(p==null)//For WindowBilder Editor
+				p = new Point(151, 101);
+			btnStoreConfig.setBounds(p.x, p.y, size, size);
+			add(btnStoreConfig);
+		}
 		
 		comboBox = new JComboBox<>();
 		comboBox.addPopupMenuListener(Listeners.popupMenuListener);
 
-		comboBox.addItem(new IdValueForComboBox(FLAG_ATTENUATION, Translation.getValue(String.class, "attenuation", "ATTENUATION")));
+		IdValueForComboBox item = new IdValueForComboBox(FLAG_ATTENUATION, Translation.getValue(String.class, "attenuation", "ATTENUATION"));
+		if(item!=null)//for WindowBuilder Editor
+			comboBox.addItem(item);
 		if((flags&FLAG_GAIN)>0)
 			comboBox.addItem(new IdValueForComboBox(FLAG_GAIN, Translation.getValue(String.class, "gain", "GAIN")));
 		if((flags&FLAG_FREQUENCY)>0)
@@ -255,7 +260,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));
 
-		chckbxStep = new JCheckBox(Translation.getValue(String.class, "step", "Step")+":");
+		String text = Translation.getValue(String.class, "step", "Step")+":";
+		chckbxStep = new JCheckBox(text);
 		chckbxStep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				slider.setSnapToTicks(chckbxStep.isSelected());
@@ -312,19 +318,19 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 	@Override
 	protected ControllerAbstract getNewController() {
-		return new ControlController(getClass().getSimpleName(), getLinkHeader(),this);
+		return new ControlController(deviceType, getClass().getSimpleName(), getLinkHeader(),this);
 	}
 
 	protected AttenuationController getNewAttenController() {
-		return new AttenuationController(getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+		return new AttenuationController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
 
 	protected GainController getNewGainController() {
-		return new GainController(getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
 
 	protected FrequencyContriller getNewFreqController() {
-		return new FrequencyContriller(getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
 
 	public JSlider getSlider() {

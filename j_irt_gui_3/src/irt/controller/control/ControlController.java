@@ -3,8 +3,8 @@ package irt.controller.control;
 import irt.controller.MuteController;
 import irt.controller.StoreConfigController;
 import irt.controller.SwitchController;
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
-import irt.controller.serial_port.value.seter.SetterAbstract;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.PacketWork;
@@ -44,12 +44,12 @@ public class ControlController extends ControllerAbstract {
 	 * Use for LO control
 	 * @param hasFreqSet 
 	 */
-	public ControlController(String controllerName,LinkHeader linkHeader, ControlPanel panel) {
-		super(controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
+	public ControlController(int deviceType, String controllerName,LinkHeader linkHeader, ControlPanel panel) {
+		super(deviceType, controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
 		if(comboBoxfreqSet==null)
 			setSend(false);
 
-		muteController = new MuteController(linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
+		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
 		Thread t = new Thread(muteController, "ControlController.MuteController-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
@@ -58,7 +58,7 @@ public class ControlController extends ControllerAbstract {
 		t.start();
 
 		if(chbxLNB!=null){
-			lnbController = new SwitchController("LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB));
+			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB));
 			t = new Thread(lnbController, "ControlController.SwitchController-"+new RundomNumber().toString());
 			priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)
@@ -132,7 +132,7 @@ public class ControlController extends ControllerAbstract {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try{
-							new StoreConfigController(getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE);
+							new StoreConfigController(deviceType, getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE);
 						}catch(Exception ex){
 							logger.catching(ex);
 						}

@@ -1,4 +1,4 @@
-package irt.controller.serial_port.value.seter;
+package irt.controller.serial_port.value.setter;
 
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.data.packet.LinkHeader;

@@ -2,7 +2,7 @@ package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.seter.SetterAbstract;
+import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.RegisterValue;
@@ -21,8 +21,8 @@ public class NGlobalController extends ControllerAbstract {
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public NGlobalController(JCheckBox checkBox, PacketWork packetWork) {
-		super("NGlobalController", packetWork, null, null);
+	public NGlobalController(int deviceType, JCheckBox checkBox, PacketWork packetWork) {
+		super(deviceType, "NGlobalController", packetWork, null, null);
 		setListeners();
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);

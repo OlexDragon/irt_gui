@@ -27,6 +27,7 @@ public class DeviceInfo {
 							DEVICE_TYPE_SSPA 			= 102,
 							DEVICE_TYPE_FUTURE_BAIS_BOARD= 199,
 
+							DEVICE_TYPE_L_TO_KU_OUTDOOR = 500,
 							DEVICE_TYPE_70_TO_L		= 1001,
 							DEVICE_TYPE_L_TO_70		= 1002,
 							DEVICE_TYPE_140_TO_L	= 1003,
@@ -122,7 +123,7 @@ public class DeviceInfo {
 
 	public boolean set(Packet packet) {
 		boolean isSet = false;
-		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO){
+		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getGroupId()==Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO){
 			linkHeader = packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null;
 			List<Payload> payloads = packet.getPayloads();
 			if(payloads!=null){

@@ -326,10 +326,10 @@ public class DemoPanel extends Panel {
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		controlPanel.add(cbLoSelect);
 
-		NetworkPanel networkPanel = new NetworkPanel(null);
+		NetworkPanel networkPanel = new NetworkPanel(0, null);
 		tabbedPane.addTab("network", networkPanel);
 
-		AlarmsPanel alarmsPanel = new AlarmsPanel(null);
+		AlarmsPanel alarmsPanel = new AlarmsPanel(0, null);
 		tabbedPane.addTab("alarms", alarmsPanel);
 
 		tabbedPane.addTab("redundancy", new RedundancyPanelDemo());

@@ -1,7 +1,7 @@
 package irt.controller.control;
 
 import irt.controller.GuiControllerAbstract;
-import irt.controller.serial_port.value.seter.SetterAbstract;
+import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.FireValue;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
@@ -41,12 +41,14 @@ public abstract class ControllerAbstract implements Runnable{
 
 	protected Observable observable;
 	private String name;
+	protected int deviceType;
 
-	public ControllerAbstract(String controllerName, PacketWork packetWork, JPanel panel, Style style) {
+	public ControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style) {
 		logger.trace(controllerName);
 
 		this.packetWork = packetWork;
 		this.style = style;
+		this.deviceType = deviceType;
 		setName(controllerName);
  		setListeners();
 
@@ -89,7 +91,7 @@ public abstract class ControllerAbstract implements Runnable{
 
 
 						if(send){
-							send();
+							sendPacketWorker();
 							if(isWait())
 								wait(waitTime);
 						}else
@@ -112,7 +114,7 @@ public abstract class ControllerAbstract implements Runnable{
 		return true;
 	}
 
-	protected void send() {
+	protected void sendPacketWorker() {
 		GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 	}
 

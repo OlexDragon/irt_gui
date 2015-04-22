@@ -22,27 +22,27 @@ public class PicobucPanel extends UserPicobucPanel {
 
 		tabbedPane = getTabbedPane();
 
-		JPanel baisPanel = new BIASsPanel(linkHeader, true);
+		JPanel baisPanel = new BIASsPanel(deviceType, linkHeader, true);
 		baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
 		tabbedPane.addTab("BAISs", baisPanel);
 
 		if(deviceInfo.hasSlaveBiasBoard()){
-			baisPanel = new BIASsPanel(linkHeader, false);
+			baisPanel = new BIASsPanel(deviceType, linkHeader, false);
 			baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
 			tabbedPane.addTab("BAISs#2", baisPanel);
 		}
 
-		JPanel converterPanel = new DACsPanel(linkHeader);
+		JPanel converterPanel = new DACsPanel(deviceType, linkHeader);
 		converterPanel.setBackground(new Color(0xD1,0xD1,0xD1));
 		tabbedPane.addTab("Converter", converterPanel);
 		
-		DebagInfoPanel infoPanel = new DebagInfoPanel(linkHeader, this);
+		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceType, linkHeader, this);
 		getTabbedPane().addTab("Info", infoPanel);
 	}
 
 	@Override
 	protected ControlPanel getNewControlPanel() {
-		ControlPanelPicobuc controlPanel = new ControlPanelPicobuc(getLinkHeader());
+		ControlPanelPicobuc controlPanel = new ControlPanelPicobuc(deviceType, getLinkHeader());
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
 	}

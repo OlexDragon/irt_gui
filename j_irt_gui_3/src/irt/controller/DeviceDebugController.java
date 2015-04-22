@@ -2,7 +2,7 @@ package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.seter.DeviceDebagSetter;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.Listeners;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
@@ -61,8 +61,8 @@ public class DeviceDebugController extends ControllerAbstract {
 /**
  * @param addrToSave if addrToSave < 0 save command deasn't work
  */
-	public DeviceDebugController(String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
-		super(controllerName, packetWork, null, style);
+	public DeviceDebugController(int deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
+		super(deviceType, controllerName, packetWork, null, style);
 		logger.entry(controllerName);
 
 		this.addrToSave = addrToSave;
@@ -81,8 +81,8 @@ public class DeviceDebugController extends ControllerAbstract {
 		logger.exit();
 	}
 
-	public DeviceDebugController(String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
-		super(controllerName, packetWork, null, null);
+	public DeviceDebugController(int deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
+		super(deviceType, controllerName, packetWork, null, null);
 		logger.entry();
 
 		this.cbCommand = cbCommand;
@@ -186,7 +186,7 @@ public class DeviceDebugController extends ControllerAbstract {
 
 								if(addrToSave>=0 && oldValue!=uv.getValue()){
 									int index = urv.getIndex();
-									new DeviceDebagSaveController(txtField, new DeviceDebagSetter(unitPacketThread.getLinkHeader(), index, addrToSave, (short) (((GetterAbstract)unitPacketWork).getPacketId()+1), Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE, 0), Style.CHECK_ONCE);
+									new DeviceDebagSaveController(deviceType, txtField, new DeviceDebagSetter(unitPacketThread.getLinkHeader(), index, addrToSave, (short) (((GetterAbstract)unitPacketWork).getPacketId()+1), Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE, 0), Style.CHECK_ONCE);
 								}
 							} else {
 								Value value = uv;

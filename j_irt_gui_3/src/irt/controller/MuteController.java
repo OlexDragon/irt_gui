@@ -2,9 +2,10 @@ package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
-import irt.controller.serial_port.value.seter.SetterAbstract;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.IdValue;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
@@ -28,8 +29,8 @@ public class MuteController extends ControllerAbstract {
 	private boolean isMute;
 	private ActionListener actionListener;
 
-	public MuteController(LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style) {
-		super("Mute Controller", new ConfigurationSetter(linkHeader, linkHeader!=null && linkHeader.getAddr()!=0 ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL, PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE), null, style);
+	public MuteController(int deviceType, LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style) {
+		super(deviceType, "Mute Controller", new ConfigurationSetter(linkHeader, linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL, PacketWork.PACKET_ID_CONFIGURATION_MUTE), null, style);
 		this.btnMute = btnMute;
 		this.btnMute.addActionListener(actionListener);
 		this.lblMute = lblMute;
@@ -41,8 +42,10 @@ public class MuteController extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				if(valueChangeEvent.getID() == PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE)
+				if(valueChangeEvent.getID() == PacketWork.PACKET_ID_CONFIGURATION_MUTE){
+					logger.trace("valueChangeEvent: {}", valueChangeEvent);
 					new ControllerWorker(valueChangeEvent);
+				}
 			}
 		};
 	}
@@ -71,7 +74,8 @@ public class MuteController extends ControllerAbstract {
 				PacketThread pt = as.getPacketThread();
 				if(pt.getPacket()==null)
 					return;
-				as.preparePacketToSend(new IdValue(PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE, new Boolean(isMute=!isMute)));
+				as.preparePacketToSend(new IdValue(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketWork.PACKET_ID_CONFIGURATION_MUTE : PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR, new Boolean(isMute=!isMute)));
+				logger.trace("PacketThread: {}", pt);
 				setSend(true);
 				if(isMute)
 					MuteController.this.lblMute.setText(Translation.getValue(String.class, "unmute", "UNMUTE"));

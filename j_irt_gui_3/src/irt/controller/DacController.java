@@ -27,8 +27,8 @@ public class DacController extends ControllerAbstract {
 
 	private Value value;
 
-	public DacController(String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
-		super(controllerName, packetWork, null, null);
+	public DacController(int deviceType, String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
+		super(deviceType, controllerName, packetWork, null, null);
 		value = setValue();
 		setListeners();
 		this.dacNumber = dacNumber;

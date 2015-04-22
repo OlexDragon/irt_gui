@@ -37,7 +37,7 @@ import org.apache.logging.log4j.core.Logger;
 @SuppressWarnings("serial")
 public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
-	public static final DebugPanel DEBUG_PANEL = new DebugPanel();
+	public static final DebugPanel DEBUG_PANEL = new DebugPanel(0);
 
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
@@ -60,7 +60,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	private ControlPanel controlPanel;
 	private ValueChangeListener statusChangeListener;
 
-	private int deviceType;
+	protected int deviceType;
 
 	public DevicePanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
 		super( deviceInfo!=null ? "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName() : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
@@ -150,13 +150,13 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	}
 
 	protected MonitorPanelAbstract getNewMonitorPanel() {
-		MonitorPanelAbstract monitorPanel = deviceType==DeviceInfo.DEVICE_TYPE_SSPA ? new MonitorPanelSSPA(linkHeader) : new MonitorPanel(linkHeader);
+		MonitorPanelAbstract monitorPanel = deviceType==DeviceInfo.DEVICE_TYPE_SSPA ? new MonitorPanelSSPA(deviceType, linkHeader) : new MonitorPanel(deviceType, linkHeader);
 		monitorPanel.setLocation(10, 11);
 		return monitorPanel;
 	}
 
 	protected ControlPanel getNewControlPanel(){
-		ControlPanel controlPanel = deviceType==DeviceInfo.DEVICE_TYPE_SSPA ? new ControlPanelSSPA(linkHeader, 0) : new ControlPanelUnit(linkHeader);
+		ControlPanel controlPanel = deviceType==DeviceInfo.DEVICE_TYPE_SSPA ? new ControlPanelSSPA(deviceType, linkHeader, 0) : new ControlPanelUnit(deviceType, linkHeader);
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
 	}

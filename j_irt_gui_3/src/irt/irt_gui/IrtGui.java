@@ -4,7 +4,7 @@ import irt.controller.AlarmsController;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
-import irt.controller.serial_port.value.seter.Setter;
+import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
 import irt.data.PacketWork;
@@ -76,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.077";
+	public static final String VERTION = "- 3.079";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -276,7 +276,7 @@ public class IrtGui extends IrtMainFrame {
 								byte na = (byte)newAddress;
 								Setter packetWork = new Setter(new LinkHeader((byte)address, (byte)0, (short) 0),
 										Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
-										Packet.IRT_SLCP_PACKET_ID_PROTOCOL,
+										Packet.IRT_SLCP_GROUP_ID_PROTOCOL,
 										Packet.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
 										PacketWork.PACKET_ID_PROTOCOL_ADDRESS, na);
 								logger.trace(packetWork);

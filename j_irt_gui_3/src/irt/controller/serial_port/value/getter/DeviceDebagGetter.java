@@ -12,7 +12,7 @@ public class DeviceDebagGetter extends GetterAbstract {
 	private Object value;
 
 	public DeviceDebagGetter(LinkHeader linkHeader, int index, int addr, short packetId, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG, parameterId, packetId);
+		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId);
 	}
 
 	@Override

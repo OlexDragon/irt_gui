@@ -75,24 +75,24 @@ public class Packet {
 	 *   Acknowledgement message always contains ID of the received packet acknowledgement was sent on. */
 	public static final byte
 		IRT_SLCP_PACKET_ID_NONE			= 0,		/* Reserved for special use. */
-		IRT_SLCP_PACKET_ID_ALARM		= 1,		/* Alarm: message content is product specific. */
-		IRT_SLCP_PACKET_ID_CONFIGURATION= 2,		/* Configuration: content is product specific. */
-		IRT_SLCP_PACKET_ID_FILETRANSFER = 3,		/* File transfer: software upgrade command (optional). */
-		IRT_SLCP_PACKET_ID_MEASUREMENT	= 4,		/* Measurement: device status, content is product specific. */
-		IRT_SLCP_PACKET_ID_RESET		= 5,		/* Device reset: generic command. */
-		IRT_SLCP_PACKET_ID_DEVICE_INFO	= 8,		/* Device information: generic command. */
-		IRT_SLCP_PACKET_ID_CONFIG_PROFILE= 9,		/* Save configuration: generic command. */
-		IRT_SLCP_PACKET_ID_DEVICE_DEBAG	= 61,		/* Device Debug. */
+		IRT_SLCP_GROUP_ID_ALARM		= 1,		/* Alarm: message content is product specific. */
+		IRT_SLCP_GROUP_ID_CONFIGURATION= 2,		/* Configuration: content is product specific. */
+		IRT_SLCP_GROUP_ID_FILETRANSFER = 3,		/* File transfer: software upgrade command (optional). */
+		IRT_SLCP_GROUP_ID_MEASUREMENT	= 4,		/* Measurement: device status, content is product specific. */
+		IRT_SLCP_GROUP_ID_RESET		= 5,		/* Device reset: generic command. */
+		IRT_SLCP_GROUP_ID_DEVICE_INFO	= 8,		/* Device information: generic command. */
+		IRT_SLCP_GROUP_ID_CONFIG_PROFILE= 9,		/* Save configuration: generic command. */
+		IRT_SLCP_GROUP_ID_DEVICE_DEBAG	= 61,		/* Device Debug. */
 
 	/* Protocol */
-		IRT_SLCP_PACKET_ID_PROTOCOL = 10, /* Packet protocol parameters configuration and monitoring. */
+		IRT_SLCP_GROUP_ID_PROTOCOL = 10, /* Packet protocol parameters configuration and monitoring. */
 
 	/* Network */
 		IRT_SLCP_PACKET_ID_NETWORK = 11, /* Network configuration. */
 
 	/* backwards compatibility - to be deleted */
 		IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1 = 100,
-		IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1 = 120;
+		IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1 = 120;
 	/* Parameter general types definition. */
 	public static final byte
 		IRT_SLCP_PARAMETER_NONE		= 0,
@@ -266,73 +266,73 @@ public class Packet {
 		switch(optype){
 		case OPTYPE_SHOW_DEVICE:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_DEVICE_INFO,
+											IRT_SLCP_GROUP_ID_DEVICE_INFO,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_PARAMETER_ALL,0,0});
 			break;
 		case OPTYPE_STATUS_GET_ALL:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_MEASUREMENT,
+											IRT_SLCP_GROUP_ID_MEASUREMENT,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_PARAMETER_ALL,0,0});
 			break;
 		case OPTYPE_CONFIG_GET_MUTE:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL,0,0});
 			break;
 		case OPTYPE_CONFIG_SET_MUTE:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_COMMAND,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL,0,0});
 			break;
 		case OPTYPE_CONFIG_GET_FREQUENCY:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY,0,0});
 			break;
 		case OPTYPE_CONFIG_SET_FREQUENCY:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_COMMAND,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY,0,0});
 			break;
 		case OPTYPE_CONFIG_GET_ATTENUATION:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION,0,0});
 			break;
 		case OPTYPE_CONFIG_GET_ATTEN_RANGE:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE,0,0});
 			break;
 		case OPTYPE_CONFIG_SET_ATTENUATION:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_COMMAND,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION,0,0});
 			break;
 		case OPTYPE_CONFIG_SET_GAIN:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1,
+											IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_PARAMETER_DEVELOPER_GENERIC_SET_1_DAC_CONFIG,0,0});
 			break;
 		case OPTYPE_CONFIG_GAIN_RANGE:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,
-											IRT_SLCP_PACKET_ID_CONFIGURATION,
+											IRT_SLCP_GROUP_ID_CONFIGURATION,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_DATA_FCM_CONFIG_GAIN_RANGE ,0,0});
 			break;
 		case OPTYPE_SAVE_CONFIG:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_COMMAND,
-											IRT_SLCP_PACKET_ID_CONFIG_PROFILE,
+											IRT_SLCP_GROUP_ID_CONFIG_PROFILE,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_PACKET_ID_CONFIG_PROFILE_SAVE,0,0});
 			break;
@@ -350,13 +350,13 @@ public class Packet {
 			break;
 		case OPTYPE_DAC_VALUE_GET:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_REQUEST,//TODO
-											IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1,
+											IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_PARAMETER_DEVELOPER_GENERIC_SET_1_DAC_CONFIG,0,0});
 			break;
 		case OPTYPE_DAC_VALUE_SET:
 			packet.set(new byte[]{	IRT_SLCP_PACKET_TYPE_COMMAND,
-											IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1,
+											IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1,
 											IRT_SLCP_PACKET_TYPE_SPONTANEOUS,
 											IRT_SLCP_PARAMETER_DEVELOPER_GENERIC_SET_1_DAC_CONFIG,0,0});
 		}

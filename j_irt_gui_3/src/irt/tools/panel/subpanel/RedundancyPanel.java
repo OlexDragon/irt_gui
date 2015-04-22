@@ -5,7 +5,7 @@ import irt.controller.GuiController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
-import irt.controller.serial_port.value.seter.Setter;
+import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
@@ -78,7 +78,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 
 	private JLabel lblUnitName;
 
-	public RedundancyPanel(final LinkHeader linkHeader) {
+	public RedundancyPanel(final int deviceType, final LinkHeader linkHeader) {
 		setBackground(SystemColor.inactiveCaption);
 		redundancyListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
@@ -86,7 +86,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				if(e.getStateChange()==ItemEvent.SELECTED) {
 					enable = (REDUNDANCY) cmbBxRedundancy.getSelectedItem();
 					Setter packetWork = new Setter(linkHeader,
-							Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+							Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 							Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
 							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE);
 					try {
@@ -103,7 +103,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				if(e.getStateChange()==ItemEvent.SELECTED) {
 					mode = (REDUNDANCY_MODE) cmbBxMode.getSelectedItem();
 					Setter packetWork = new Setter(linkHeader,
-							Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+							Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 							Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
 							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE);
 					try {
@@ -120,7 +120,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				if(e.getStateChange()==ItemEvent.SELECTED) {
 					name = (REDUNDANCY_NAME) cmbBxName.getSelectedItem();
 					Setter packetWork = new Setter(linkHeader,
-							Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+							Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 							Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
 							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME);
 					try {
@@ -141,9 +141,10 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 					protected Void doInBackground() throws Exception {
 						runController(
 								new DefaultController(
+										deviceType,
 										"Redundancy Enable",
 										new Getter(linkHeader,
-												Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+												Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 												Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
 												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE), Style.CHECK_ALWAYS){
 													@Override
@@ -154,7 +155,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 															public void packetRecived(Packet packet) {
 																if(
 																		getPacketWork().isAddressEquals(packet) &&
-																		packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+																		packet.getHeader().getGroupId()==Packet.IRT_SLCP_GROUP_ID_CONFIGURATION &&
 																		packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
 																	)
 																	new GetterWorker(packet);
@@ -166,17 +167,17 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 								);
 						runController("Redundancy Mode",
 								new Getter(linkHeader,
-										Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE));
 						runController("Redundancy Name",
 								new Getter(linkHeader,
-										Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME));
 						runController("Redundancy Status",
 								new Getter(linkHeader,
-										Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT));
 						return null;
@@ -199,7 +200,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 			public void ancestorMoved(AncestorEvent event) {}
 
 			private void runController(String controllerName, Getter packetWork) {
-				DefaultController defaultController = new DefaultController(controllerName, packetWork, Style.CHECK_ALWAYS);
+				DefaultController defaultController = new DefaultController(deviceType, controllerName, packetWork, Style.CHECK_ALWAYS);
 				runController(defaultController);
 			}
 
@@ -321,7 +322,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 						Setter packetWork = new Setter(
 								linkHeader,
 								Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
-								Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+								Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_SET_ONLINE,
 								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE);
 						GuiController.getComPortThreadQueue().add(packetWork);

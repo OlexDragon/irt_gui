@@ -49,8 +49,8 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 	private int mon_13v2_pos = Integer.MIN_VALUE;
 	private int mon_5v5 = Integer.MIN_VALUE;
 
-	public MonitorPanelConverter() {
-		super(null, "Monitor", 214, 210);
+	public MonitorPanelConverter(int deviceType) {
+		super(deviceType, null, "Monitor", 214, 210);
 		
 		ledMute = new LED(Color.YELLOW, "MUTE");
 		ledMute.setName("Mute");

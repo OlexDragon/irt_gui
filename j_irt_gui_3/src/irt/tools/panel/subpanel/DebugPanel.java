@@ -3,7 +3,7 @@ package irt.tools.panel.subpanel;
 import irt.controller.DefaultController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.seter.DeviceDebagSetter;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
@@ -38,7 +38,7 @@ public class DebugPanel extends JPanel{
 	private LinkHeader linkHeader;
 	private GuiControllerAbstract guiControllerAbstract;
 
-	public DebugPanel() {
+	public DebugPanel(final int deviceType) {
 		
 		JButton btnClearStatistic = new JButton("Clear Statistics");
 		btnClearStatistic.addActionListener(new ActionListener() {
@@ -50,6 +50,7 @@ public class DebugPanel extends JPanel{
 
 				startThread(
 						new DefaultController(
+								deviceType,
 								"Clear Statistics",
 								new DeviceDebagSetter(
 										linkHeader,

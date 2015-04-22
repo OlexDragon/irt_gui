@@ -58,11 +58,11 @@ import jssc.SerialPortException;
 import jssc.SerialPortList;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 public abstract class GuiControllerAbstract extends Thread {
 
-	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
+	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	public static final int CONNECTION	= 1;
 	public static final int ALARM		= 2;
@@ -126,8 +126,8 @@ public abstract class GuiControllerAbstract extends Thread {
 				if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
 
 					DeviceInfo deviceInfo;
-					switch (header.getParameter()) {
-					case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
+					switch (header.getGroupId()) {
+					case Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO:
 						deviceInfo = new DeviceInfo(packet);
 
 						int type = deviceInfo.getType();
@@ -152,6 +152,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
 						case DeviceInfo.DEVICE_TYPE_SSPA:
+						case DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR:
 							protocol = Protocol.LINKED.setDeviceType(type);
 							break;
 						default:
@@ -164,11 +165,11 @@ public abstract class GuiControllerAbstract extends Thread {
 
 						new PanelWorker(packet, deviceInfo);
 						break;
-					case Packet.IRT_SLCP_PACKET_ID_ALARM:
+					case Packet.IRT_SLCP_GROUP_ID_ALARM:
 						if(header.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY && header.getOption()==0) 
 							new AlarmWorker(packet);
 						break;
-					case Packet.IRT_SLCP_PACKET_ID_MEASUREMENT:
+					case Packet.IRT_SLCP_GROUP_ID_MEASUREMENT:
 						new MeasurementWorker(packet);
 						break;
 					}
@@ -385,13 +386,13 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	private void reset() {
 
-		logger.debug("reset();");
+		logger.trace("reset();");
 		comPortThreadQueue.clear();
 		gui.setConnected(false);
 		remover.removeAll();
 
 		protocol = getDefaultProtocol();
-		logger.debug("protocol={}", protocol);
+		logger.trace("protocol={}", protocol);
 	}
 
 	protected boolean removePanel(LinkHeader linkHeader) {
@@ -435,7 +436,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	protected void getConverterInfo() {
 		if(protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL ) || protocol.equals(Protocol.CONVERTER)){
-			logger.debug("protocol = {}", protocol);
+			logger.trace("protocol = {}", protocol);
 
 			comPortThreadQueue.add(new DeviceInfoGetter() {
 				@Override
@@ -450,7 +451,7 @@ public abstract class GuiControllerAbstract extends Thread {
 		if (protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL ) || protocol.equals(Protocol.LINKED)) {
 
 			Set<Byte> addresses = getAddresses(address);
-			logger.debug("protocol = {}, addresses = {}", protocol, addresses);
+			logger.trace("protocol = {}, addresses = {}", protocol, addresses);
 
 			for(Byte b:addresses.toArray(new Byte[addresses.size()])){
 				DeviceInfoGetter packetWork = new DeviceInfoGetter(new LinkHeader(b, (byte) 0, (short) 0)) {
@@ -602,10 +603,13 @@ public abstract class GuiControllerAbstract extends Thread {
 			if(packet!=null){
 				PacketHeader header = packet.getHeader();
 
-				if (header != null && header.getParameter()==Packet.IRT_SLCP_PACKET_ID_MEASUREMENT && header.getOption()==0) {
+				if (header != null
+						&& header.getGroupId()==Packet.IRT_SLCP_GROUP_ID_MEASUREMENT
+						&& (header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
+						&& header.getOption()==0) {
 
 					logger.debug(packet);
-					byte mesurementStatus = packet.getClass().equals(Packet.class)
+					byte mesurementStatus = packet.getClass().equals(Packet.class) || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS
 							? Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
 									: Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS;
 
@@ -616,7 +620,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						for (LinkHeaderController c : getControllers()) {
 							LinkHeader lh = c.getLinkHeader();
 							if (linkHeader.equals(lh)) {
-								c.setMute((payload.getInt(0)&(linkHeader.getAddr()==0 ? MonitorPanelConverter.MUTE : MonitorPanelSSPA.MUTE))>0);
+								c.setMute((payload.getInt(0)&(linkHeader.getAddr()==0 || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS ? MonitorPanelConverter.MUTE : MonitorPanelSSPA.MUTE))>0);
 							}
 						}
 					}
@@ -750,7 +754,7 @@ public abstract class GuiControllerAbstract extends Thread {
 							logger.catching(e);
 						}
 					}
-					logger.debug("reset = {}", reset);
+					logger.trace("reset = {}", reset);
 
 				}while(reset);
 
@@ -837,6 +841,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	//************************************ class MeasurementWorker **********************************************
 	private class MeasurementWorker extends Thread{
+		private final Logger logger = LogManager.getLogger();
 
 		private Packet packet;
 
@@ -847,6 +852,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		@Override
 		public void run() {
+			logger.entry(packet);
 			remover.setMute(packet);
 			boolean isMute = remover.isMute();
 			

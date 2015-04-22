@@ -1,6 +1,7 @@
 package irt.tools.panel.subpanel.control;
 
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.Listeners;
 import irt.data.packet.LinkHeader;
 
@@ -18,8 +19,8 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 
 	private JComboBox<String>  cbLoSelect;
 
-	public ControlPanelPicobuc(LinkHeader linkHeader) {
-		super(linkHeader, ControlPanel.FLAG_FREQUENCY);
+	public ControlPanelPicobuc(int deviceType, LinkHeader linkHeader) {
+		super(deviceType, linkHeader, deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? ControlPanel.FLAG_FREQUENCY : ControlPanel.FLAG_ATTENUATION);
 		
 		Font font = Translation.getFont().deriveFont(16f);
 

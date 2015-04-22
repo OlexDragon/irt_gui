@@ -1,4 +1,4 @@
-package irt.controller.serial_port.value.seter;
+package irt.controller.serial_port.value.setter;
 
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.translation.Translation;
@@ -21,12 +21,7 @@ import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
-
 public class ConfigurationSetter extends SetterAbstract {
-
-	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private long value = Integer.MIN_VALUE;
 
@@ -49,11 +44,12 @@ public class ConfigurationSetter extends SetterAbstract {
 	}
 
 	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, short packetId) {
-		super(linkHeader, Packet.IRT_SLCP_PACKET_ID_CONFIGURATION, packetParameterHeaderCode, packetId);
+		super(linkHeader, Packet.IRT_SLCP_GROUP_ID_CONFIGURATION, packetParameterHeaderCode, packetId);
 	}
 
 	@Override
 	public void preparePacketToSend(Object value) {
+		logger.entry(value);
 
 		if (value instanceof IdValue) {
 			short id = ((IdValue) value).getID();
@@ -67,8 +63,9 @@ public class ConfigurationSetter extends SetterAbstract {
 			case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
 				pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE:
-				pt.preparePacket(lh != null ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL,
+			case PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR:
+			case PacketWork.PACKET_ID_CONFIGURATION_MUTE:
+				pt.preparePacket(lh != null && id!=PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL,
 						(byte) (((boolean) ((IdValue) value).getValue()) ? 1 : 0));
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN:
@@ -113,7 +110,7 @@ public class ConfigurationSetter extends SetterAbstract {
 			PacketHeader ph = packet.getHeader();
 			short packetId = getPacketId();
 			if(ph!=null &&
-					ph.getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+					ph.getGroupId()==Packet.IRT_SLCP_GROUP_ID_CONFIGURATION &&
 							ph.getPacketId()==packetId && packet.getPayloads()!=null){
 
 				long tmp = value;

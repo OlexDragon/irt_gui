@@ -44,7 +44,7 @@ public class AutoAddressPanel extends JPanel {
 
 	private volatile boolean run = true;
 
-	public AutoAddressPanel() {
+	public AutoAddressPanel(final int deviceType) {
 		
 		JLabel lblWaitPlease = new JLabel("Wait Please.");
 		lblWaitPlease.setFont(new Font("Tahoma", Font.BOLD, 18));
@@ -92,7 +92,7 @@ public class AutoAddressPanel extends JPanel {
 								break;
 
 							linkHeader = new LinkHeader((byte)i, (byte)0, (short) 0);
-							packetWork = new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY) {
+							packetWork = new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY) {
 								@Override
 								public Integer getPriority() {
 									return Integer.MAX_VALUE;
@@ -106,7 +106,7 @@ public class AutoAddressPanel extends JPanel {
 									return logger.exit(true);
 								}};
 
-							DefaultController target = new DefaultController("Address Checker N"+i, packetWork, Style.CHECK_ONCE);
+							DefaultController target = new DefaultController(deviceType, "Address Checker N"+i, packetWork, Style.CHECK_ONCE);
 							synchronized (logger) {
 								if(run)
 									controllers.add(target);

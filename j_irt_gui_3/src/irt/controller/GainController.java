@@ -1,6 +1,6 @@
 package irt.controller;
 
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.PacketWork;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
@@ -16,8 +16,8 @@ public class GainController extends ValueRangeControllerAbstract {
 
 	private Style style;
 
-	public GainController(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super("Gain Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+	public GainController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+		super(deviceType, "Gain Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 	}
 

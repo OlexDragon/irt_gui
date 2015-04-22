@@ -31,7 +31,7 @@ public class MeasurementGetter extends GetterAbstract {
 	}
 
 	public MeasurementGetter(LinkHeader linkHeader, byte packetPayloadParameterHeaderCode, short pacetId) {
-		super(linkHeader, Packet.IRT_SLCP_PACKET_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId);
+		super(linkHeader, Packet.IRT_SLCP_GROUP_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId);
 		this.packetPayloadParameterHeaderCode = packetPayloadParameterHeaderCode;
 	}
 
@@ -42,7 +42,7 @@ public class MeasurementGetter extends GetterAbstract {
 			PacketHeader ph = packet.getHeader();
 			if(ph!=null){
 				short packetId = ph.getPacketId();
-				if(ph.getParameter()==Packet.IRT_SLCP_PACKET_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
+				if(ph.getGroupId()==Packet.IRT_SLCP_GROUP_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
 					Object source = null;
 					byte option = ph.getOption();
 					if(option>0 || ph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){

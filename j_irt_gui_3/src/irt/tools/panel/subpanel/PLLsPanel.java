@@ -3,8 +3,8 @@ package irt.tools.panel.subpanel;
 import irt.controller.DeviceDebugController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
-import irt.controller.serial_port.value.seter.DeviceDebagSetter;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
 import irt.data.PacketWork;
@@ -69,8 +69,10 @@ public class PLLsPanel extends JPanel {
 	private JCheckBox chckbxUp;
 	private JCheckBox chckbxDn;
 	private DocumentListener documentListener;
+	private int deviceType;
 
-	public PLLsPanel() {
+	public PLLsPanel(int deviceType) {
+		this.deviceType = deviceType;
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
 				startController();
@@ -330,7 +332,7 @@ public class PLLsPanel extends JPanel {
 		if(registerController!=null)
 			registerController.stop();
 
-		registerController = new DeviceDebugController("PLL reg.N9", txtPllReg,
+		registerController = new DeviceDebugController(deviceType, "PLL reg.N9", txtPllReg,
 									null,
 									value,
 									new DeviceDebagSetter(null,

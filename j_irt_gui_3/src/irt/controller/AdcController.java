@@ -22,14 +22,14 @@ public class AdcController extends ControllerAbstract {
 	
 	Value value = new Value(0, 0, 4095, 0);
 
-	public AdcController(String controllerName, JLabel label, PacketWork packetWork, double multiplier) {
-		super(controllerName, packetWork, null, null);
+	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, double multiplier) {
+		super(deviceType, controllerName, packetWork, null, null);
 		this.label = label;
 		this.multiplier = multiplier;
 	}
 
-	public AdcController(String controllerName, JLabel label, PacketWork packetWork, Value value, double multiplier) {
-		this(controllerName, label, packetWork, multiplier);
+	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, Value value, double multiplier) {
+		this(deviceType, controllerName, label, packetWork, multiplier);
 		this.value = value;
 	}
 

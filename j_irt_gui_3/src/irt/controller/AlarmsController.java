@@ -3,6 +3,7 @@ package irt.controller;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
@@ -32,12 +33,17 @@ public class AlarmsController extends ControllerAbstract {
 	private static final int PRIORITY = 20;
 	public static final Color WARNING_COLOR = new Color(255, 204, 102);
 
-	public static final short  PLL_OUT_OF_LOCK 	= 1,
+	public static final short  PLL_OUT_OF_LOCK_OR_OUTDOOR_FCM_HARDWARE_FAULT 	= 1,
 								OWER_CURRENT	= 4,
 								UNDER_CURRENT	= 5,
 								OWER_TEMPERATURE= 7,
 								HW_FAULT		= 10,
-								REDUNDANT_FAULT = 11;
+								REDUNDANT_FAULT_OR_OUTDOOR_FCM_PLL_OUT_OF_LOCK = 11,
+								OUTDOOR_FCM_OVER_TEMPERATURE_WARNING	= 12,
+								OUTDOOR_FCM_OVER_TEMPERATURE_ALARM		= 13,
+								OUTDOOR_FCM_INPUT_OVERDIVE = 14,
+								OUTDOOR_FCM_NO_INPUT_SIGNAL = 15,
+								OUTDOOR_FCM_ALC_ERROR = 16;
 
 	public static final byte 	ALARMS_NUMBER 			= 1,
 								ALARMS_IDS				= 2,
@@ -64,8 +70,8 @@ public class AlarmsController extends ControllerAbstract {
 
 	private volatile List<DefaultController> alarmControllers = new ArrayList<>();
 
-	public AlarmsController(LinkHeader linkHeader, JPanel panel) {
-		super("AlarmsController", new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs), panel, Style.CHECK_ONCE);
+	public AlarmsController(int deviceType, LinkHeader linkHeader, JPanel panel) {
+		super(deviceType, "AlarmsController", new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs), panel, Style.CHECK_ONCE);
 		this.linkHeader = linkHeader;
 	}
 
@@ -95,6 +101,7 @@ public class AlarmsController extends ControllerAbstract {
 		if(label!=null){
 			label.setEnabled(true);
 			DefaultController alarmController = new DefaultController(
+															deviceType,
 															name,
 															getter,
 															Style.CHECK_ALWAYS){
@@ -203,7 +210,7 @@ public class AlarmsController extends ControllerAbstract {
 		String name;
 		switch(alarm){
 		case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
-		case PLL_OUT_OF_LOCK:
+		case PLL_OUT_OF_LOCK_OR_OUTDOOR_FCM_HARDWARE_FAULT:
 			name = "Pll Out of Lock";
 			break;
 		case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
@@ -223,7 +230,7 @@ public class AlarmsController extends ControllerAbstract {
 			name = "HW Fault";
 			break;
 		case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
-		case REDUNDANT_FAULT:
+		case REDUNDANT_FAULT_OR_OUTDOOR_FCM_PLL_OUT_OF_LOCK:
 			name = "Redundant Fault";
 			break;
 		default:
@@ -240,7 +247,7 @@ public class AlarmsController extends ControllerAbstract {
 				PacketWork packetWork = getPacketWork();
 				if (	packetWork!=null &&
 						packetWork.isAddressEquals(packet) &&
-						packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_ALARM)
+						packet.getHeader().getGroupId()==Packet.IRT_SLCP_GROUP_ID_ALARM)
 
 					new ValueChangeWorker(packet);
 			}
@@ -259,6 +266,7 @@ public class AlarmsController extends ControllerAbstract {
 		private byte redundant		= -1;
 
 		public ValueChangeWorker(Packet packet){
+			logger.debug(packet);
 			this.packet = packet;
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)
@@ -306,18 +314,24 @@ public class AlarmsController extends ControllerAbstract {
 
 				short alarm = source[0];
 				switch (alarm) {
-				case PLL_OUT_OF_LOCK:
+				case PLL_OUT_OF_LOCK_OR_OUTDOOR_FCM_HARDWARE_FAULT:
 					if(ool!=outOfLock)
-						setAlarm(lblPllOutOfLock, outOfLock=ool);
+						if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR)
+							setAlarm(lblPllOutOfLock, outOfLock=ool);
+						else
+							setAlarm(lblHardware, outOfLock=ool);
 					break;
+				case OUTDOOR_FCM_NO_INPUT_SIGNAL:
 				case OWER_CURRENT:
 					if(ool!=owerCurrent)
 						setAlarm(lblOwerCurrent, owerCurrent=ool);
 					break;
+				case OUTDOOR_FCM_ALC_ERROR:
 				case UNDER_CURRENT:
 					if(ool!=underCurrent)
 						setAlarm(lblUnderCurrent, underCurrent=ool);
 					break;
+				case OUTDOOR_FCM_OVER_TEMPERATURE_ALARM:
 				case OWER_TEMPERATURE:
 					if(ool!=owerTemperature)
 						setAlarm(lblOwerTemperature, owerTemperature=ool);
@@ -326,9 +340,12 @@ public class AlarmsController extends ControllerAbstract {
 					if(ool!=hardware)
 						setAlarm(lblHardware, hardware=ool);
 					break;
-				case REDUNDANT_FAULT:
+				case REDUNDANT_FAULT_OR_OUTDOOR_FCM_PLL_OUT_OF_LOCK:
 					if(ool!=redundant)
-						setAlarm(lblRedundant, redundant=ool);
+						if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR)
+							setAlarm(lblRedundant, redundant=ool);
+						else
+							setAlarm(lblPllOutOfLock, redundant=ool);
 				}
 			}
 		}
@@ -336,34 +353,80 @@ public class AlarmsController extends ControllerAbstract {
 		private void setControllers(short[] source) {
 
 			if(alarmControllers.isEmpty()){
-			logger.trace("setControllers(source={})", source);
+			logger.debug("setControllers(source={})", source);
 
-			setAlarmController("Alarm Hardware Fault", lblHardware, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT, HW_FAULT)
+			setAlarmController(
+					"Alarm Hardware Fault",
+					deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR
+					? lblHardware
+							: lblUnderCurrent,
+					new Getter(
+							linkHeader,
+							Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_STATUS,
+							PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT,
+							deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR
+							? HW_FAULT
+									: OUTDOOR_FCM_ALC_ERROR)
 			{ @Override public Integer getPriority() { return PRIORITY; }});
 
 			for(short sh:source)
 				switch(sh){
-				case PLL_OUT_OF_LOCK:
-					setAlarmController("Alarm PLL out of lock", lblPllOutOfLock, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK, PLL_OUT_OF_LOCK)
+
+				case PLL_OUT_OF_LOCK_OR_OUTDOOR_FCM_HARDWARE_FAULT:
+					setAlarmController(
+							"Alarm PLL out of lock",
+							deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR
+							? lblPllOutOfLock
+									: lblHardware,
+									new Getter(
+											linkHeader,
+											Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_STATUS,
+											PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK,
+											sh)
 					{ @Override public Integer getPriority() { return PRIORITY; }});
 					break;
+
+				case OUTDOOR_FCM_NO_INPUT_SIGNAL:
 				case OWER_CURRENT:
-					setAlarmController("Alarm Ower Current", lblOwerCurrent, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_OWER_CURRENT, OWER_CURRENT)
+					setAlarmController(
+							"Alarm Ower Current",
+							lblOwerCurrent,
+							new Getter(
+									linkHeader,
+									Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_STATUS,
+									PacketWork.PACKET_ID_ALARMS_OWER_CURRENT,
+									sh)
 					{ @Override public Integer getPriority() { return PRIORITY; }});
 					break;
+
 				case UNDER_CURRENT:
-					setAlarmController("Alarm Under current", lblUnderCurrent, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT, UNDER_CURRENT)
+					setAlarmController(
+							"Alarm Under current",
+							lblUnderCurrent,
+							new Getter(
+									linkHeader,
+									Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_STATUS,
+									PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT,
+									sh)
 					{ @Override public Integer getPriority() { return PRIORITY; }});
 					break;
+
+				case OUTDOOR_FCM_OVER_TEMPERATURE_ALARM:
 				case OWER_TEMPERATURE:
-					setAlarmController("Alarm Ower Temperature", lblOwerTemperature, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE, OWER_TEMPERATURE)
+					setAlarmController("Alarm Ower Temperature", lblOwerTemperature, new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE, sh)
 					{ @Override public Integer getPriority() { return PRIORITY; }});
 					break;
-				case REDUNDANT_FAULT:
-					if(lblRedundant!=null)
-						lblRedundant.getParent().setVisible(true);
-					setAlarmController("Alarm Redundant", lblRedundant, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT, REDUNDANT_FAULT)
-					{ @Override public Integer getPriority() { return PRIORITY; }});
+
+				case REDUNDANT_FAULT_OR_OUTDOOR_FCM_PLL_OUT_OF_LOCK:
+					if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+						if(lblRedundant!=null)
+							lblRedundant.getParent().setVisible(true);
+						setAlarmController("Alarm Redundant", lblRedundant, new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT, sh)
+						{ @Override public Integer getPriority() { return PRIORITY; }});
+					}else{
+						setAlarmController("Alarm PLL out of lock", lblPllOutOfLock, new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT, sh)
+						{ @Override public Integer getPriority() { return PRIORITY; }});
+					}
 				}
 
 			setSend(false);

@@ -1,7 +1,9 @@
 package irt.tools.panel.subpanel.monitor;
+
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
@@ -22,12 +24,11 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 
-
 @SuppressWarnings("serial")
 public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 	public static final byte
-			IRT_SLCP_PACKET_ID_MEASUREMENT = Packet.IRT_SLCP_PACKET_ID_MEASUREMENT;
+			IRT_SLCP_PACKET_ID_MEASUREMENT = Packet.IRT_SLCP_GROUP_ID_MEASUREMENT;
 
 	public static final int
 			MUTE = 1,
@@ -45,8 +46,8 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 	private int status;
 
-	public MonitorPanelSSPA(LinkHeader linkHeader) {
-		super(linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 214, 210);
+	public MonitorPanelSSPA(int deviceType, LinkHeader linkHeader) {
+		super(deviceType, linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 214, 210);
 		
 		isSSPA = getClass().equals(MonitorPanelSSPA.class);
 
@@ -55,20 +56,23 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		ledMute.setForeground(Color.GREEN);
 		add(ledMute);
 
-		lblOutputPower = new JLabel(":");
-		lblOutputPower.setName("Output Power");
-		lblOutputPower.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOutputPower.setForeground(Color.WHITE);
-		lblOutputPower.setBounds(99, 50, 100, 17);
-		add(lblOutputPower);
+		if (deviceType != DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR) {
+			lblOutputPower = new JLabel(":");
+			lblOutputPower.setName("Output Power");
+			lblOutputPower.setHorizontalAlignment(SwingConstants.RIGHT);
+			lblOutputPower.setForeground(Color.WHITE);
+			lblOutputPower.setBounds(99, 50, 100, 17);
+			add(lblOutputPower);
 
-		lblOutputPowerTxt = new JLabel();
-		lblOutputPowerTxt.setName("");
-		lblOutputPowerTxt.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOutputPowerTxt.setForeground(new Color(153, 255, 255));
-		lblOutputPowerTxt.setBounds(2, 50, 104, 17);
-		add(lblOutputPowerTxt);
-		new TextWorker(lblOutputPowerTxt, "output_power", "Output Power").execute();
+			lblOutputPowerTxt = new JLabel();
+			lblOutputPowerTxt.setName("");
+			lblOutputPowerTxt.setHorizontalAlignment(SwingConstants.RIGHT);
+			lblOutputPowerTxt.setForeground(new Color(153, 255, 255));
+			lblOutputPowerTxt.setBounds(2, 50, 104, 17);
+			add(lblOutputPowerTxt);
+			new TextWorker(lblOutputPowerTxt, "output_power", "Output Power")
+					.execute();
+		}
 
 		lblTemperature = new JLabel(":");
 		lblTemperature.setName("Temperature");
@@ -120,8 +124,10 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 			protected void done() {
 				try{
 				Font font = get();
-				lblOutputPower.setFont(font);
-				lblOutputPowerTxt.setFont(font);
+				if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+					lblOutputPower.setFont(font);
+					lblOutputPowerTxt.setFont(font);
+				}
 				lblTemperature.setFont(font);
 				lblTemperatureTxt.setFont(font);
 				}catch(InterruptedException | ExecutionException e){
@@ -174,21 +180,34 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		logger.exit();
 	}
 
+	private static final String[] controllerNames = new String[]{"Measurement_temperature", "Measurement_InputPower","Status"};
+	private static final byte[] parameters = new byte[]{Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_INPUT_POWER, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS};
+	private static final short[] pacetId = new short[]{PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketWork.PACKET_ID_MEASUREMENT_STATUS};
 	@Override
 	protected List<DefaultController> getControllers() {
 		List<DefaultController> controllers = new ArrayList<>();
-		DefaultController defaultController = startController(
-				"Measurement",
-				Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_ALL,
-				PacketWork.PACKET_ID_MEASUREMENT_ALL);
-		controllers.add(defaultController);
+		if(deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+			for(int i=0; i<controllerNames.length; i++){
+				controllers.add(
+						startController(
+								controllerNames[i],
+								parameters[i],
+								pacetId[i]));
+			}
+		}else{
+			controllers.add(
+					startController(
+							"Measurement",
+							Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_ALL,
+							PacketWork.PACKET_ID_MEASUREMENT_ALL));
+		}
 		return controllers;
 	}
 
 
 	@Override
 	protected void packetRecived(List<Payload> payloads) {
-		logger.entry(payloads);
+		logger.debug(payloads);
 		if(payloads!=null){
 			byte flags = 1;
 			int value = 0;
@@ -213,21 +232,25 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 	}
 
 	protected void packetRecived(byte parameter, byte flags, int value) {
-		logger.trace("parameter={}, flags={}, value={}", parameter, flags, value);
+		logger.debug("parameter={}, flags={}, value={}", parameter, flags, value);
 
 		ValueDouble v;
 		switch(parameter){
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER:
-			if(flags==0)
-				lblOutputPower.setText("N/A");
-			else if (value != output) {
-				output = value;
-				v = new ValueDouble(value, 1);
-				v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
-				lblOutputPower.setText(getOperator(flags)+v.toString());
-				ProgressBar.setValue(flags==1 ? v.getValue() : 0);
-			}
-			logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER://or Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
+			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+				if(flags==0)
+					lblOutputPower.setText("N/A");
+				else if (value != output) {
+					output = value;
+					v = new ValueDouble(value, 1);
+					v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
+					lblOutputPower.setText(getOperator(flags)+v.toString());
+					ProgressBar.setValue(flags==1 ? v.getValue() : 0);
+				}
+				logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
+			}else
+				setConverterStatus(value);
+
 			break;
 		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_TEMPERATURE:
 			if(value!=temperature){
@@ -238,18 +261,28 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 			}
 			logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
 			break;
+
 		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS:
-			if(status!=value){
-				status = value;
 				setStatus(value);
-			}
 		}
 	}
 
 	protected void setStatus(int status) {
 		logger.entry(status);
-		ledMute.setOn((status & MUTE) > 0);
-		ledMute.setToolTipText("Status flags= " + Integer.toHexString(status));
+		if(this.status!=status){
+			this.status = status;
+			ledMute.setOn((status & MUTE) > 0);
+			ledMute.setToolTipText("Status flags= 0x" + Integer.toHexString(status));
+		}
+	}
+
+	protected void setConverterStatus(int status) {
+		logger.entry(status);
+		if(this.status!=status){
+			this.status = status;
+			ledMute.setOn((status & MonitorPanelConverter.MUTE) > 0);
+			ledMute.setToolTipText("Status flags= 0x" + Integer.toHexString(status));
+		}
 	}
 
 	//***********************************************************************************

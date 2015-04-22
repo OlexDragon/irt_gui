@@ -8,8 +8,8 @@ import java.awt.Component;
 
 public class DefaultController extends ControllerAbstract {
 
-	public DefaultController(String controllerName, PacketWork packetWork, Style style) {
-		super(controllerName, packetWork, null, style);
+	public DefaultController(int deviceType, String controllerName, PacketWork packetWork, Style style) {
+		super(deviceType, controllerName, packetWork, null, style);
 		logger.trace("DefaultController({}, {})", packetWork, style);
 	}
 

@@ -1,6 +1,6 @@
 package irt.controller;
 
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.PacketWork;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
@@ -20,8 +20,9 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 	private final boolean isConverter;
 	private Style style;
 
-	public FrequencyContriller(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super("Frequency Controller",
+	public FrequencyContriller(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+		super(deviceType,
+				"Frequency Controller",
 				new ConfigurationSetter(
 						linkHeader,
 						linkHeader==null || linkHeader.getIntAddr()==0

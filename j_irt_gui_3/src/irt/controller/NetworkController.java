@@ -1,7 +1,7 @@
 package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.seter.Setter;
+import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
@@ -54,8 +54,8 @@ public class NetworkController extends ControllerAbstract {
 
 	private KeyListener keyListener;
 
-	public NetworkController(PacketWork packetWork, JPanel panel, Style style) {
-		super("Network Controller", packetWork, panel, style);
+	public NetworkController(int deviceType, PacketWork packetWork, JPanel panel, Style style) {
+		super(deviceType, "Network Controller", packetWork, panel, style);
 		logger.trace("NetworkController();");
 	}
 
@@ -236,7 +236,7 @@ public class NetworkController extends ControllerAbstract {
 		PacketHeader header = packet.getHeader();
 		logger.debug(Arrays.toString(packetThread.getData()));
 
-		byte groupId = header.getParameter();
+		byte groupId = header.getGroupId();
 		byte packetType = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
 		short packetId = header.getPacketId();
 		byte packetParameterHeaderCode = packet.getPayload(0).getParameterHeader().getCode();

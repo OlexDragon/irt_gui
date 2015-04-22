@@ -36,7 +36,7 @@ public class DebagInfoPanel extends JPanel {
 	private JComboBox<Integer> cbParameter;
 	private JPanel owner;
 
-	public DebagInfoPanel(LinkHeader linkHeader, JPanel panel) {
+	public DebagInfoPanel(final int deviceType, LinkHeader linkHeader, JPanel panel) {
 		this.linkHeader = linkHeader;
 
 		if(panel!=null)
@@ -98,10 +98,12 @@ public class DebagInfoPanel extends JPanel {
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent arg0) {
 
-				deviceDebagInfoController = new DeviceDebugController("Info Controller",
+				deviceDebagInfoController = new DeviceDebugController(
+																deviceType,
+																"Info Controller",
 																new Getter(
 																		DebagInfoPanel.this.linkHeader,
-																		Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG,
+																		Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
 																		(byte) (cbCommand.getSelectedIndex()+1),
 																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO),
 																cbCommand,

@@ -14,8 +14,8 @@ import javax.swing.SwingConstants;
 @SuppressWarnings("serial")
 public class ControlPanelDownConverter extends ControlPanelConverter {
 
-	public ControlPanelDownConverter() {
-		super(false);
+	public ControlPanelDownConverter(int deviceType) {
+		super(deviceType, false);
 		
 		JLabel lblLnb = new JLabel("DC OMT");
 		lblLnb.setName("");

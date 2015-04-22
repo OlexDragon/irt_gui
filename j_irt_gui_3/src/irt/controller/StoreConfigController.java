@@ -2,7 +2,7 @@ package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.seter.Setter;
+import irt.controller.serial_port.value.setter.Setter;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
@@ -18,8 +18,8 @@ public class StoreConfigController extends ControllerAbstract {
 
 	private Component owner;
 
-	public StoreConfigController(LinkHeader linkHeader, Component owner, Style style) {
-		super("Stor Config Controller", new Setter(linkHeader, Packet.IRT_SLCP_PACKET_ID_CONFIG_PROFILE, Packet.IRT_SLCP_PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style);
+	public StoreConfigController(int deviceType, LinkHeader linkHeader, Component owner, Style style) {
+		super(deviceType, "Stor Config Controller", new Setter(linkHeader, Packet.IRT_SLCP_GROUP_ID_CONFIG_PROFILE, Packet.IRT_SLCP_PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style);
 		setSend(false);
 		getPacketWork().getPacketThread().setDataPacketTypeCommand();
 

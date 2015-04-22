@@ -1,5 +1,6 @@
 package irt.tools.panel.subpanel.monitor;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.value.ValueDouble;
@@ -23,22 +24,23 @@ public class MonitorPanel extends MonitorPanelSSPA {
 	private LED ledLock;
 	private int input;
 
-	public MonitorPanel(LinkHeader linkHeader) {
-		super(linkHeader);
+	public MonitorPanel(int deviceType, LinkHeader linkHeader) {
+		super(deviceType, linkHeader);
 
 
 		lblInputPower = new JLabel(":");
 		lblInputPower.setName("Input Power");
 		lblInputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblInputPower.setForeground(Color.WHITE);
-		lblInputPower.setBounds(99, 22, 100, 17);
+		int y = deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? 22 : 45;
+		lblInputPower.setBounds(99, y, 100, 17);
 		add(lblInputPower);
 
 		lblInputPowerTxt = new JLabel();
 		lblInputPowerTxt.setName("");
 		lblInputPowerTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblInputPowerTxt.setForeground(new Color(153, 255, 255));
-		lblInputPowerTxt.setBounds(2, 22, 104, 17);
+		lblInputPowerTxt.setBounds(2, y, 104, 17);
 		add(lblInputPowerTxt);
 		new TextWorker(lblInputPowerTxt, "input_power", "Input Power").execute();
 
@@ -121,9 +123,15 @@ public class MonitorPanel extends MonitorPanelSSPA {
 
 	@Override
 	protected void packetRecived(byte parameter, byte flags, int value) {
+		logger.debug("parameter={}, flags={}, value={}", parameter, flags, value);
 
 		ValueDouble v;
 		switch(parameter){
+		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
+			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+				super.packetRecived(parameter, flags, value);
+				break;
+			}
 		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_INPUT_POWER:
 			if (value != input) {
 				input = value;
@@ -142,6 +150,16 @@ public class MonitorPanel extends MonitorPanelSSPA {
 		super.setStatus(status);
 
 		if ((status & LOCK) == 0)
+			ledLock.setLedColor(Color.RED);
+		else
+			ledLock.setLedColor(Color.GREEN);
+	}
+
+	@Override
+	protected void setConverterStatus(int status) {
+		super.setConverterStatus(status);
+
+		if ((status & MonitorPanelConverter.LOCK) == 0)
 			ledLock.setLedColor(Color.RED);
 		else
 			ledLock.setLedColor(Color.GREEN);

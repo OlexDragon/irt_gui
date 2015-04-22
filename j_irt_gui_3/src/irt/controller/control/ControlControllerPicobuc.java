@@ -1,6 +1,6 @@
 package irt.controller.control;
 
-import irt.controller.serial_port.value.seter.SetterAbstract;
+import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.IdValueForComboBox;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
@@ -14,8 +14,8 @@ import javax.swing.ComboBoxModel;
 
 public class ControlControllerPicobuc extends ControlController{
 
-	public ControlControllerPicobuc(LinkHeader linkHeader, ControlPanel panel) {
-		super("ControlControllerPicobuc", linkHeader, panel);
+	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, ControlPanel panel) {
+		super(deviceType, "ControlControllerPicobuc", linkHeader, panel);
 	}
 
 	@Override

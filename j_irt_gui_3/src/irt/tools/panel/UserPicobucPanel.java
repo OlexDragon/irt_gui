@@ -42,11 +42,11 @@ public class UserPicobucPanel extends DevicePanel {
 				tabbedPane.addTab("IRT", lblNewLabel);
 			}
 
-			AlarmsPanel alarmPanel = new AlarmsPanel(linkHeader);
+			AlarmsPanel alarmPanel = new AlarmsPanel(deviceType, linkHeader);
 			alarmPanel.setBorder(null);
 			tabbedPane.addTab("alarms", alarmPanel);
 
-			NetworkPanel networkPanel = new NetworkPanel(linkHeader);
+			NetworkPanel networkPanel = new NetworkPanel(deviceType, linkHeader);
 			tabbedPane.addTab("network", networkPanel);
 
 			int tabCount = tabbedPane.getTabCount();
@@ -65,9 +65,8 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		int type = deviceInfo.getType();
-		if(type>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD &&
-				type<=DeviceInfo.DEVICE_TYPE_FUTURE_BAIS_BOARD &&
+		if(deviceType>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD &&
+				deviceType<=DeviceInfo.DEVICE_TYPE_FUTURE_BAIS_BOARD &&
 				deviceInfo.getRevision()>1)
 			showRedundant();
 			setRedundancyName();
@@ -76,9 +75,10 @@ public class UserPicobucPanel extends DevicePanel {
 	private void setRedundancyName() {
 		startThread(
 				new DefaultController(
+						deviceType,
 						"Redundancy Enable",
 						new Getter(getLinkHeader(),
-								Packet.IRT_SLCP_PACKET_ID_CONFIGURATION,
+								Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
 								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
 									@Override
@@ -97,12 +97,12 @@ public class UserPicobucPanel extends DevicePanel {
 													protected String doInBackground() throws Exception {
 														if(
 																getPacketWork().isAddressEquals(packet) &&
-																packet.getHeader().getParameter()==Packet.IRT_SLCP_PACKET_ID_CONFIGURATION &&
+																packet.getHeader().getGroupId()==Packet.IRT_SLCP_GROUP_ID_CONFIGURATION &&
 																packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
 															)
 															if(packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
 																REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
-																if(n!=null && !n.equals(name)){
+																if(n!=null && !n.equals(name) && n!=REDUNDANCY_NAME.NO_NAME){
 
 																	VarticalLabel varticalLabel = getVarticalLabel();
 																	text = varticalLabel.getText();
@@ -142,7 +142,7 @@ public class UserPicobucPanel extends DevicePanel {
 
 	@Override
 	protected ControlPanel getNewControlPanel() {
-		ControlPanelPicobuc controlPanel = new ControlPanelPicobuc(getLinkHeader());
+		ControlPanelPicobuc controlPanel = new ControlPanelPicobuc(deviceType, getLinkHeader());
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
 	}
@@ -169,7 +169,7 @@ public class UserPicobucPanel extends DevicePanel {
 	}
 
 	public void showRedundant() {
-		tabbedPane.addTab("redundancy", new RedundancyPanel(getLinkHeader()));
+		tabbedPane.addTab("redundancy", new RedundancyPanel(deviceType, getLinkHeader()));
 
 		int index = tabbedPane.getTabCount()-1;
 		String title = tabbedPane.getTitleAt(index);

@@ -20,8 +20,8 @@ public class MeasurementController extends ControllerAbstract {
 	private JLabel label;
 	private Value value;
 
-	private MeasurementController(String controllerName, PacketWork packetWork, JLabel label, Value value) {
-		super(controllerName, packetWork, null, null);
+	private MeasurementController(int deviceType, String controllerName, PacketWork packetWork, JLabel label, Value value) {
+		super(deviceType, controllerName, packetWork, null, null);
 		this.label = label;
 		this.value = value;
 	}
@@ -30,8 +30,8 @@ public class MeasurementController extends ControllerAbstract {
 	 * use to get status bits
 	 * @param value 
 	 */
-	public MeasurementController(String controllerName, LinkHeader linkHeader, JLabel label, Value value) {
-		this(controllerName, new MeasurementGetter(linkHeader), label, value);
+	public MeasurementController(int deviceType, String controllerName, LinkHeader linkHeader, JLabel label, Value value) {
+		this(deviceType, controllerName, new MeasurementGetter(linkHeader), label, value);
 	}
 
 	/**
@@ -41,8 +41,8 @@ public class MeasurementController extends ControllerAbstract {
 	 * @param value 
 	 * @param packetId 
 	 */
-	public MeasurementController(String controllerName, JLabel label, byte packetPayloadParameterHeaderCode, Value value, short packetId) { 
-		this(controllerName, new MeasurementGetter(packetPayloadParameterHeaderCode, packetId), label, value);
+	public MeasurementController(int deviceType, String controllerName, JLabel label, byte packetPayloadParameterHeaderCode, Value value, short packetId) { 
+		this(deviceType, controllerName, new MeasurementGetter(packetPayloadParameterHeaderCode, packetId), label, value);
 	}
 
 	/**
@@ -53,8 +53,8 @@ public class MeasurementController extends ControllerAbstract {
 	 * @param value 
 	 * @param packetId 
 	 */
-	public MeasurementController(String controllerName, LinkHeader linkHeader, JLabel label, byte packetPayloadParameterHeaderCode, Value value, short packetId) { 
-		this(controllerName, new MeasurementGetter(linkHeader, packetPayloadParameterHeaderCode, packetId), label, value);
+	public MeasurementController(int deviceType, String controllerName, LinkHeader linkHeader, JLabel label, byte packetPayloadParameterHeaderCode, Value value, short packetId) { 
+		this(deviceType, controllerName, new MeasurementGetter(linkHeader, packetPayloadParameterHeaderCode, packetId), label, value);
 	}
 
 	@Override

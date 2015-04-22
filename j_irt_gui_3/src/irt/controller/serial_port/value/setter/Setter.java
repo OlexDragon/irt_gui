@@ -1,4 +1,4 @@
-package irt.controller.serial_port.value.seter;
+package irt.controller.serial_port.value.setter;
 
 import irt.data.IdValue;
 import irt.data.PacketThread;
@@ -52,7 +52,7 @@ public class Setter extends SetterAbstract {
 			Packet up = upt.getPacket();
 
 			if(cph!=null && up!=null &&
-					cph.getParameter()==up.getHeader().getParameter() &&
+					cph.getGroupId()==up.getHeader().getGroupId() &&
 							cph.getPacketId()==getPacketId()){
 
 				Object source = null;

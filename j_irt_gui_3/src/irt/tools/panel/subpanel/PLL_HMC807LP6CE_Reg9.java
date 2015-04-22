@@ -3,8 +3,8 @@ package irt.tools.panel.subpanel;
 import irt.controller.DefaultController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
-import irt.controller.serial_port.value.seter.DeviceDebagSetter;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
@@ -94,7 +94,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 	private RegisterValue value;
 	private JButton btnClear;
 
-	public PLL_HMC807LP6CE_Reg9() {
+	public PLL_HMC807LP6CE_Reg9(final int deviceType) {
 
 		final ItemListener aListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
@@ -107,7 +107,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 
 			public void ancestorAdded(AncestorEvent event) {
 
-				controller = new DefaultController("PLL reg.N9", new DeviceDebagSetter(null,
+				controller = new DefaultController(deviceType, "PLL reg.N9", new DeviceDebagSetter(null,
 						INDEX,
 						ADDRESS,
 						PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG,

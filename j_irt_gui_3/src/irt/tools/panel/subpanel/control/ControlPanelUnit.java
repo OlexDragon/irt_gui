@@ -2,11 +2,11 @@ package irt.tools.panel.subpanel.control;
 
 import irt.data.packet.LinkHeader;
 
-@SuppressWarnings("serial")
 public class ControlPanelUnit extends ControlPanel {
+	private static final long serialVersionUID = 1L;
 
-	public ControlPanelUnit(LinkHeader linkHeader) {
-		super(linkHeader, ControlPanel.FLAG_ATTENUATION);
+	public ControlPanelUnit(int deviceType, LinkHeader linkHeader) {
+		super(deviceType, linkHeader, ControlPanel.FLAG_ATTENUATION);
 	}
 
 }

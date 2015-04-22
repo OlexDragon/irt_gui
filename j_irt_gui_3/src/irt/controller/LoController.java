@@ -1,8 +1,8 @@
 package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
-import irt.controller.serial_port.value.seter.SetterAbstract;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
@@ -25,8 +25,8 @@ public class LoController extends ControllerAbstract {
 	JComboBox<String> cbLoSelect;
 	private ItemListener itemListener;
 
-	public LoController(LinkHeader linkHeader, JComboBox<String> cbLoSelect, Style stile) {
-		super("LoController", new ConfigurationSetter(linkHeader), null, stile);
+	public LoController(int deviceType, LinkHeader linkHeader, JComboBox<String> cbLoSelect, Style stile) {
+		super(deviceType, "LoController", new ConfigurationSetter(linkHeader), null, stile);
 
 		this.cbLoSelect = cbLoSelect;
 		cbLoSelect.addItemListener(itemListener);

@@ -29,7 +29,7 @@ public class PacketHeader{
 	public byte[]	asBytes()		{ return packetHeader;		}
 	public byte		getPacketType	()		{ return packetHeader[0];	}
 	public short	getPacketId()	{ return (short) Packet.shiftAndAdd(Arrays.copyOfRange(packetHeader, 1, 3));	}
-	public byte		getParameter()	{ return packetHeader[3];	}
+	public byte		getGroupId()	{ return packetHeader[3];	}
 	public short	getReserved()	{ return (short) Packet.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6));	}
 	public byte		getOption()		{ return packetHeader[6];	}
 
@@ -55,7 +55,7 @@ public class PacketHeader{
 		if (packetHeader != null) {
 			short packetId = getPacketId();
 			switch (packetId) {
-			case PacketWork.PACKET_ID_CONFIGURATION_BAIAS_25W_MUTE:
+			case PacketWork.PACKET_ID_CONFIGURATION_MUTE:
 				packetIdStr = "Mute("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1:
@@ -373,36 +373,36 @@ public class PacketHeader{
 	private String getGroupIdStr() {
 		String typeStr = null;
 		if(packetHeader!=null)
-		switch(getParameter()){
-		case Packet.IRT_SLCP_PACKET_ID_ALARM:
-			typeStr = "Alarm("+ Packet.IRT_SLCP_PACKET_ID_ALARM+")";
+		switch(getGroupId()){
+		case Packet.IRT_SLCP_GROUP_ID_ALARM:
+			typeStr = "Alarm("+ Packet.IRT_SLCP_GROUP_ID_ALARM+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_CONFIGURATION:
-			typeStr = "Configuration("+ Packet.IRT_SLCP_PACKET_ID_CONFIGURATION+")";
+		case Packet.IRT_SLCP_GROUP_ID_CONFIGURATION:
+			typeStr = "Configuration("+ Packet.IRT_SLCP_GROUP_ID_CONFIGURATION+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_FILETRANSFER:
-			typeStr = "FileTranster("+ Packet.IRT_SLCP_PACKET_ID_FILETRANSFER+")";
+		case Packet.IRT_SLCP_GROUP_ID_FILETRANSFER:
+			typeStr = "FileTranster("+ Packet.IRT_SLCP_GROUP_ID_FILETRANSFER+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_MEASUREMENT:
-			typeStr = "Measurement("+ Packet.IRT_SLCP_PACKET_ID_MEASUREMENT+")";
+		case Packet.IRT_SLCP_GROUP_ID_MEASUREMENT:
+			typeStr = "Measurement("+ Packet.IRT_SLCP_GROUP_ID_MEASUREMENT+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_RESET:
-			typeStr = "Reset("+ Packet.IRT_SLCP_PACKET_ID_RESET+")";
+		case Packet.IRT_SLCP_GROUP_ID_RESET:
+			typeStr = "Reset("+ Packet.IRT_SLCP_GROUP_ID_RESET+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO:
-			typeStr = "DeviceInfo("+ Packet.IRT_SLCP_PACKET_ID_DEVICE_INFO+")";
+		case Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO:
+			typeStr = "DeviceInfo("+ Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_CONFIG_PROFILE:
-			typeStr = "SaveConfigProfile("+ Packet.IRT_SLCP_PACKET_ID_CONFIG_PROFILE+")";
+		case Packet.IRT_SLCP_GROUP_ID_CONFIG_PROFILE:
+			typeStr = "SaveConfigProfile("+ Packet.IRT_SLCP_GROUP_ID_CONFIG_PROFILE+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_PROTOCOL:
-			typeStr = "Protocol("+ Packet.IRT_SLCP_PACKET_ID_PROTOCOL+")";
+		case Packet.IRT_SLCP_GROUP_ID_PROTOCOL:
+			typeStr = "Protocol("+ Packet.IRT_SLCP_GROUP_ID_PROTOCOL+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1:
-			typeStr = "DeveloperGeneric("+ Packet.IRT_SLCP_PACKET_ID_DEVELOPER_GENERIC_SET_1+")";
+		case Packet.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1:
+			typeStr = "DeveloperGeneric("+ Packet.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG:
-			typeStr = "Device Debug("+ Packet.IRT_SLCP_PACKET_ID_DEVICE_DEBAG+")";
+		case Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG:
+			typeStr = "Device Debug("+ Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG+")";
 			break;
 		default:
 			typeStr = ""+(getPacketType()&0xFF);

@@ -3,6 +3,7 @@ package irt.tools.panel.subpanel;
 import irt.controller.AlarmsController;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 
@@ -45,8 +46,12 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	private JLabel lblOverTemperature;
 	private JLabel lblOther;
 	private JLabel lblRedundancy;
-	
-	public AlarmsPanel(final LinkHeader linkHeader) {
+
+	private int deviceType;
+
+	public AlarmsPanel(final int deviceType, final LinkHeader linkHeader) {
+
+		this.deviceType = deviceType;
 
 		Font font = Translation.getFont().deriveFont(14f);
 
@@ -149,23 +154,22 @@ public class AlarmsPanel extends JPanel implements Refresh{
 					.addContainerGap()
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
 						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(pnlPllOutOffLock, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addComponent(pnlPllOutOffLock, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
 							.addGap(10))
 						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(pnlOverCurrent, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addComponent(pnlOverCurrent, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
 							.addGap(10))
 						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(pnlUnderCurrent, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addComponent(pnlUnderCurrent, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
 							.addGap(10))
 						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(pnlOverTemperature, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
+							.addComponent(pnlOverTemperature, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
 							.addGap(10))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(pnlOther, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-							.addGap(10))
-						.addGroup(groupLayout.createSequentialGroup()
-							.addComponent(pnlRedundancy, GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE)
-							.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+						.addGroup(Alignment.TRAILING, groupLayout.createSequentialGroup()
+							.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+								.addComponent(pnlRedundancy, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+								.addComponent(pnlOther, GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE))
+							.addGap(10))))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -182,7 +186,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 					.addComponent(pnlOther, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(pnlRedundancy, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(67, Short.MAX_VALUE))
+					.addContainerGap(75, Short.MAX_VALUE))
 		);
 		groupLayout.linkSize(SwingConstants.VERTICAL, new Component[] {pnlPllOutOffLock, pnlOverCurrent, pnlUnderCurrent, pnlOverTemperature});
 		
@@ -217,8 +221,11 @@ public class AlarmsPanel extends JPanel implements Refresh{
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		pnlOverTemperature.setLayout(gl_pnlOverTemperature);
-		
-		lblUnderCurrentTxt = new JLabel(Translation.getValue(String.class, "under_current", "Under-Current"));
+
+		lblUnderCurrentTxt = new JLabel(
+				deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR
+				? Translation.getValue(String.class, "under_current", "Under-Current")
+						: Translation.getValue(String.class, "alc_error", "ALC error"));
 		lblUnderCurrentTxt.setForeground(new Color(0, 0, 255));
 		lblUnderCurrentTxt.setFont(font);
 		
@@ -250,7 +257,10 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		);
 		pnlUnderCurrent.setLayout(gl_pnlUnderCurrent);
 		
-		lblOverCurrentTxt = new JLabel(Translation.getValue(String.class, "over_current", "Over-Current"));
+		lblOverCurrentTxt = new JLabel(
+				deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR
+				? Translation.getValue(String.class, "over_current", "Over-Current")
+						: Translation.getValue(String.class, "no_input", "Low input power"));
 		lblOverCurrentTxt.setForeground(new Color(0, 0, 255));
 		lblOverCurrentTxt.setFont(font);
 
@@ -320,7 +330,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 
 			public void ancestorAdded(AncestorEvent arg0) {
 				try {
-					alarmsController = new AlarmsController(linkHeader, AlarmsPanel.this);
+					alarmsController = new AlarmsController(deviceType, linkHeader, AlarmsPanel.this);
 					Thread t = new Thread(alarmsController, "AlarmsPanel."+alarmsController.getName()+"-"+new RundomNumber());
 					int priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)
@@ -347,7 +357,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOverCurrentTxt.setText(Translation.getValue(String.class, "over_current", "Over-Current"));
 		lblUnderCurrentTxt.setText(Translation.getValue(String.class, "under_current", "Under-Current"));
 		lblOverTemperatureTxt.setText(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
-		lblOtherTxt.setText(Translation.getValue(String.class, "other", "Other"));
+		lblOtherTxt.setText(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Translation.getValue(String.class, "other", "Other") : Translation.getValue(String.class, "alc_error", "ALC error"));
 		lblRedundancyTxt.setText(Translation.getValue(String.class, "redundancy", "Redundant"));
 
 		Font font = Translation.getFont().deriveFont(14f);

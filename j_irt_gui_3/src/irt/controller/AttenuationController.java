@@ -1,7 +1,8 @@
 package irt.controller;
 
-import irt.controller.serial_port.value.seter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
@@ -16,10 +17,12 @@ import javax.swing.JTextField;
 public class AttenuationController extends ValueRangeControllerAbstract {
 
 	private Style style;
+	protected int deviceType;
 
-	public AttenuationController(LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super("Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+		super(deviceType, "Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
+		this.deviceType = deviceType;
 	}
 
 	@Override
@@ -63,7 +66,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 
 				ValueDouble value = new ValueDouble(0,r.getMinimum(), r.getMaximum(), 1);
 				value.setPrefix(Translation.getValue(String.class, "db", " dB"));
-				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter ? Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
+				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
 			}
 		}
 

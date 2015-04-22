@@ -40,13 +40,16 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 	protected TitledBorder titledBorder;
 	protected String selectedLanguage;
 
+	protected int deviceType;
+
 //	public MonitorPanelAbstract(LinkHeader linkHeader){
 //		this(linkHeader, "Monitor", 214, 210);
 //	}
 
-	protected MonitorPanelAbstract(LinkHeader linkHeader, String title,int wisth, int height) {
+	protected MonitorPanelAbstract(final int deviceType, LinkHeader linkHeader, String title, int width, int height) {
 		setName("MonitorPanel");
 		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short)0);
+		this.deviceType = deviceType;
 
 		selectedLanguage = Translation.getSelectedLanguage();
 
@@ -80,7 +83,11 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 		titledBorder = new TitledBorder(UIManager.getBorder("TitledBorder.border"), title, TitledBorder.LEADING, TitledBorder.TOP, font, Color.WHITE);
 		setBorder(titledBorder);
-		setSize(wisth, height);
+		if(width==0)
+			width = 200;
+		if(height==0)
+			height = 100;
+		setSize(width, height);
 		setLayout(null);
 
 		addAncestorListener(new AncestorListener() {
@@ -132,6 +139,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 	protected DefaultController startController(String controllerName, byte parameter, final short packetId) {
 		logger.entry(controllerName, parameter, packetId);
 		DefaultController defaultController = new DefaultController(
+				deviceType,
 				controllerName,
 				new MeasurementGetter(getLinkHeader(), parameter, packetId), Style.CHECK_ALWAYS){
 

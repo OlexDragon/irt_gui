@@ -17,8 +17,8 @@ public class SetterController extends ControllerAbstract {
  * @param packetWork should be command 
  * @param style Controller work style 
  */
-	public SetterController(String controllerName, PacketWork packetWork, ToDo toDo, Style style) {
-		super(controllerName, packetWork, null, style);
+	public SetterController(int deviceType, String controllerName, PacketWork packetWork, ToDo toDo, Style style) {
+		super(deviceType, controllerName, packetWork, null, style);
 		this.toDo = toDo;
 
 		Thread t = new Thread(this, "SetterController-"+new RundomNumber().toString());

@@ -1,7 +1,7 @@
 package irt.controller;
 
 import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.seter.SetterAbstract;
+import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.RegisterValue;
@@ -20,8 +20,8 @@ public class SwitchControllerRegister extends ControllerAbstract {
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchControllerRegister(String controllerName, JCheckBox checkBox, PacketWork packetWork) {
-		super(controllerName, packetWork, null, null);
+	public SwitchControllerRegister(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork) {
+		super(deviceType, controllerName, packetWork, null, null);
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);
 	}

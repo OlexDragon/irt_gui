@@ -38,7 +38,7 @@ public class AddressWizard extends JDialog implements Refresh{
 	private static final Logger logger = (Logger) LogManager.getLogger();
 	private static final Preferences prefs = GuiController.getPrefs();
 
-	private static final AddressWizard ADDRESS_VIZARD = new AddressWizard();
+	private static final AddressWizard ADDRESS_VIZARD = new AddressWizard(0);
 
 	public static final int MAX_ADDRESS = 254;
 
@@ -82,7 +82,7 @@ public class AddressWizard extends JDialog implements Refresh{
 		return ADDRESS_VIZARD;
 	}
 
-	private AddressWizard() {
+	private AddressWizard(final int deviceType) {
 		setMinimumSize(new Dimension(350, 220));
 		setLocationRelativeTo(null);
 		getContentPane().setLayout(new BorderLayout(0, 0));
@@ -208,7 +208,7 @@ public class AddressWizard extends JDialog implements Refresh{
 		styleSelectorPanel = new AWStyleSelectorPanel();
 		cardLayoutPanel.add(styleSelectorPanel, Selection.SELECT.name());
 
-		autoAddressPanel = new AutoAddressPanel();
+		autoAddressPanel = new AutoAddressPanel(deviceType);
 		cardLayoutPanel.add(autoAddressPanel, Selection.AUTO.name());
 
 		manually = new ManualAddressPanel();
