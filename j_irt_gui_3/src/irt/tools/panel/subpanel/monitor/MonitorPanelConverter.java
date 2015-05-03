@@ -189,7 +189,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		List<DefaultController> controllers = new ArrayList<>();
 		DefaultController defaultController = startController(
 				"Monitor",
-				Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_ALL,
+				Packet.PARAMETER_MEASUREMENT_FCM_ALL,
 				PacketWork.PACKET_ID_MEASUREMENT_ALL);
 		controllers.add(defaultController);
 		return controllers;
@@ -227,7 +227,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		String text;
 		ValueDouble v;
 		switch(parameter){
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
+		case Packet.PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
 			if (value != input) {
 				input = value;
 
@@ -243,7 +243,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_PICOBUC_INPUT_POWER, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_OUTPUT_POWER:
+		case Packet.PARAMETER_MEASUREMENT_FCM_OUTPUT_POWER:
 			if (value != output) {
 				output = value;
 
@@ -259,7 +259,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_FCM_OUTPUT_POWER, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE:
+		case Packet.PARAMETER_MEASUREMENT_FCM_TEMPERATURE:
 			if(value!=temperature){
 				temperature = value;
 				v = new ValueDouble(value, 1);
@@ -268,7 +268,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_FCM_TEMPERATURE, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU:
+		case Packet.PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU:
 			if(value!=temperatureCPU){
 				temperatureCPU = value;
 				v = new ValueDouble(value, 1);
@@ -277,7 +277,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_NEG:
+		case Packet.PARAMETER_MEASUREMENT_FCM_MON_13V2_NEG:
 			if(value!=mon_13v2_neg){
 				mon_13v2_neg = value;
 				v = new ValueDouble(value, 3);
@@ -286,7 +286,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_FCM_MON_13V2_NEG, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_13V2_POS:
+		case Packet.PARAMETER_MEASUREMENT_FCM_MON_13V2_POS:
 			if(value!=mon_13v2_pos){
 				mon_13v2_pos = value;
 				v = new ValueDouble(value, 3);
@@ -295,7 +295,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_FCM_MON_13V2_POS, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_MON_5V5:
+		case Packet.PARAMETER_MEASUREMENT_FCM_MON_5V5:
 			if(value!=mon_5v5){
 				mon_5v5 = value;
 				v = new ValueDouble(value, 3);
@@ -304,7 +304,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_FCM_MON_5V5, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS:
+		case Packet.PARAMETER_MEASUREMENT_FCM_STATUS:
 			if(status!=value){
 				status = value;
 				setStatus(value);

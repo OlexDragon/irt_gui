@@ -16,6 +16,8 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.logging.log4j.LogManager;
+
 public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
 
 	private static final int MAXIMUM = 127;
@@ -30,6 +32,7 @@ public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
 	private FocusListener focusListener;
 
 	public PllRegisterTextFieldSlider(int id, JTextField textField, JSlider slider, int multiplier) {
+		super(LogManager.getLogger());
 		setListeners();
 		this.id = id;
 		this.multiplier = multiplier;

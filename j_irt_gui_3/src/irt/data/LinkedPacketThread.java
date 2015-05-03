@@ -6,22 +6,19 @@ import irt.data.packet.Packet;
 
 import java.util.Arrays;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 public class LinkedPacketThread extends PacketThread {
 
-	private static final Logger logger = (Logger) LogManager.getLogger();
-
 	private LinkHeader linkHeader;
 
-	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting) {
-		super(packetSetting);
+	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting, Logger logger) {
+		super(packetSetting, logger);
 		setLinkHeader(linkHeader);
 	}
 
-	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting, String threadName) {
-		super(packetSetting, threadName);
+	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting, String threadName, Logger logger) {
+		super(packetSetting, threadName, logger);
 		setLinkHeader(linkHeader);
 		logger.trace(linkHeader);
 	}
@@ -35,7 +32,6 @@ public class LinkedPacketThread extends PacketThread {
 				b = Arrays.copyOf(b, LinkHeader.SIZE+data.length);
 				System.arraycopy(data, 0, b, LinkHeader.SIZE, data.length);
 				data = b;
-				logger.trace(Arrays.toString(b));
 				logger.trace(Arrays.toString(data));
 			}
 		}

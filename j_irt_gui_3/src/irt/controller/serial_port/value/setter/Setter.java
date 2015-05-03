@@ -1,5 +1,7 @@
 package irt.controller.serial_port.value.setter;
 
+import org.apache.logging.log4j.LogManager;
+
 import irt.data.IdValue;
 import irt.data.PacketThread;
 import irt.data.event.ValueChangeEvent;
@@ -13,15 +15,18 @@ public class Setter extends SetterAbstract {
 	private int value = Integer.MIN_VALUE;
 
 	public Setter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId) {
-		super(linkHeader, groupId, packetParameterHeaderCode, packetId);
+		super(linkHeader, groupId, packetParameterHeaderCode, packetId,
+				LogManager.getLogger());
 	}
 
 	public Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId) {
-		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
+		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId,
+				LogManager.getLogger());
 	}
 
 	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId, T value) {
-		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value);
+		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value,
+				LogManager.getLogger());
 	}
 
 	public Setter(byte groupId, byte packetParameterHeaderCode,	short packetId) {

@@ -1,5 +1,7 @@
 package irt.controller.serial_port.value.getter;
 
+import org.apache.logging.log4j.LogManager;
+
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
@@ -12,7 +14,8 @@ public class DeviceDebagGetter extends GetterAbstract {
 	private Object value;
 
 	public DeviceDebagGetter(LinkHeader linkHeader, int index, int addr, short packetId, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId);
+		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
+				LogManager.getLogger());
 	}
 
 	@Override

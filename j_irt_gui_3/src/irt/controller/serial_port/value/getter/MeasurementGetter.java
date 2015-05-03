@@ -1,5 +1,7 @@
 package irt.controller.serial_port.value.getter;
 
+import org.apache.logging.log4j.LogManager;
+
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
@@ -17,7 +19,7 @@ public class MeasurementGetter extends GetterAbstract {
 	 * use to get converter status bits
 	 */
 	public MeasurementGetter() {
-		this(null, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
+		this(null, Packet.PARAMETER_MEASUREMENT_FCM_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
 	}
 	/**
 	 * use to get bias board status bits
@@ -31,7 +33,8 @@ public class MeasurementGetter extends GetterAbstract {
 	}
 
 	public MeasurementGetter(LinkHeader linkHeader, byte packetPayloadParameterHeaderCode, short pacetId) {
-		super(linkHeader, Packet.IRT_SLCP_GROUP_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId);
+		super(linkHeader, Packet.IRT_SLCP_GROUP_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId,
+				LogManager.getLogger());
 		this.packetPayloadParameterHeaderCode = packetPayloadParameterHeaderCode;
 	}
 

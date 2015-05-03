@@ -152,7 +152,7 @@ public class DeviceDebugController extends ControllerAbstract {
 						ga.setPacketParameterHeaderCode((byte)code);
 
 						Payload pl = pt.getPacket().getPayload(0);
-						if(code==Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO)
+						if(code==Packet.PARAMETER_DEVICE_DEBAG_INFO)
 							pl.setBuffer(null);
 						else
 							pl.setBuffer(DeviceDebugController.this.cbParameter.getSelectedItem());
@@ -186,7 +186,7 @@ public class DeviceDebugController extends ControllerAbstract {
 
 								if(addrToSave>=0 && oldValue!=uv.getValue()){
 									int index = urv.getIndex();
-									new DeviceDebagSaveController(deviceType, txtField, new DeviceDebagSetter(unitPacketThread.getLinkHeader(), index, addrToSave, (short) (((GetterAbstract)unitPacketWork).getPacketId()+1), Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE, 0), Style.CHECK_ONCE);
+									new DeviceDebagSaveController(deviceType, txtField, new DeviceDebagSetter(unitPacketThread.getLinkHeader(), index, addrToSave, (short) (((GetterAbstract)unitPacketWork).getPacketId()+1), Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE, 0), Style.CHECK_ONCE);
 								}
 							} else {
 								Value value = uv;

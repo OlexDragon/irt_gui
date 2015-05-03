@@ -8,13 +8,12 @@ import irt.data.value.Value;
 
 import java.util.Arrays;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 
 public class PacketThread extends Thread {
 
-	private static final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger;
 
 	public static final byte FLAG_SEQUENCE	= 0x7E;
 	public static final byte CONTROL_ESCAPE= 0x7D;
@@ -23,19 +22,21 @@ public class PacketThread extends Thread {
 	private Packet packet;
 	private Object value;
 
-	public PacketThread(byte[] packetSetting, String threadName) {
+	public PacketThread(byte[] packetSetting, String threadName, Logger logger) {
 		super(threadName);
+		this.logger = logger;
 		data = packetSetting;
 		setDaemon(true);
 	}
 
-	public PacketThread(byte[] packetSetting) {
+	public PacketThread(byte[] packetSetting, Logger logger) {
+		this.logger = logger;
 		data = packetSetting;
 	}
 
 	@Override
 	public void run() {
-		logger.trace("Start with data={}", Arrays.toString(data));
+		logger.trace("\n\tStart with data={}", Arrays.toString(data));
 		if (packet == null && data != null) {
 			try {
 				packet = newPacket();
@@ -45,15 +46,16 @@ public class PacketThread extends Thread {
 						Payload pl = packet.getPayload(0);
 						pl.setBuffer(value);
 					}
-					logger.trace("packet={}", packet);
+					logger.trace("\n\tpacket={}", packet);
 
 					data = preparePacket(packet);
-					logger.trace("result={}", Arrays.toString(data));
+					logger.trace("\n\tresult={}", Arrays.toString(data));
 				}
 			} catch (Exception ex) {
 				logger.catching(ex);
 			}
-		}
+		}else
+			logger.warn("\n\t!!!\tNo Change\t!!!");
 	}
 
 	protected Packet newPacket() {

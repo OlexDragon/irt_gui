@@ -62,7 +62,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 
 			public void ancestorMoved(AncestorEvent arg0) {}
 			public void ancestorAdded(AncestorEvent arg0) {
-				networkController = new NetworkController(deviceType, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_NETWORK, Packet.IRTSCP_PARAMETER_ID_NETWORK_ADDRESS, PacketWork.PACKET_NETWORK_ADDRESS), NetworkPanel.this, Style.CHECK_ALWAYS);
+				networkController = new NetworkController(deviceType, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_NETWORK, Packet.IRTSCP_PARAMETER_ID_NETWORK_ADDRESS, PacketWork.PACKET_NETWORK_ADDRESS, logger), NetworkPanel.this, Style.CHECK_ALWAYS);
 				networkController.setWaitTime(15000);
 				Thread t = new Thread(networkController, "NetworkPanel.NetworkController-"+new RundomNumber());
 				int priority = t.getPriority();

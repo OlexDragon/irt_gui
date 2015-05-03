@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.logging.log4j.Logger;
+
 public abstract class GetterAbstract extends ValueChangeListenerClass implements PacketWork {
 
 	private LinkHeader linkHeader;
@@ -24,24 +26,35 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 	protected PacketThread packetThread;
 
-	public GetterAbstract(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId) {
-		this(linkHeader, Packet.IRT_SLCP_PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId);
+	public GetterAbstract(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId, Logger logger) {
+		this(linkHeader, Packet.IRT_SLCP_PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, logger);
 	}
 
-	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId) {
-		logger.trace("packetType={},groupId={},packetParameterHeaderCode={},packetId={}", packetType, groupId, packetParameterHeaderCode, packetId);
+	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, Logger logger) {
+		super(logger);
 		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
 		this.packetType = packetType;
 		this.groupId = groupId;
 		this.packetParameterHeaderCode = packetParameterHeaderCode;
 		this.packetId = packetId;
-		logger.trace(Arrays.toString(getCommand()));
-		logger.trace(linkHeader);
-		packetThread = this.linkHeader.getAddr()!=0 ? new LinkedPacketThread(linkHeader, getCommand(), "LinkedPacketId="+packetId) : new PacketThread(getCommand(), "PacketId="+packetId);
+		byte[] command = getCommand();
+		logger.trace("\n\tpacketType=\t{},\n\t"
+				+ "groupId=\t{},\n\t"
+				+ "packetParameterHeaderCode=\t{},\n\t"
+				+ "packetId=\t{},\n\t"
+				+ "getCommand()=\t{},\n\t"
+				+ "linkHeader=\t{}",
+				packetType,
+				groupId,
+				packetParameterHeaderCode,
+				packetId,
+				Arrays.toString(command),
+				linkHeader);
+		packetThread = this.linkHeader.getAddr()!=0 ? new LinkedPacketThread(linkHeader, command, "LinkedPacketId="+packetId, logger) : new PacketThread(command, "PacketId="+packetId, logger);
 	}
 
-	public <T> GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, T value) {
-		this(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
+	public <T> GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, T value, Logger logger) {
+		this(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, logger);
 		byte[] data = packetThread.getData();
 		byte[] bytesValue = Packet.toBytes(value);
 		int length = data.length;
@@ -51,8 +64,8 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		packetThread.setData(data);
 	}
 
-	public GetterAbstract(LinkHeader linkHeader, RegisterValue registerValue, byte groupId, byte packetParameterHeaderCode, short packetId) {
-		this(linkHeader, groupId, packetParameterHeaderCode, packetId);
+	public GetterAbstract(LinkHeader linkHeader, RegisterValue registerValue, byte groupId, byte packetParameterHeaderCode, short packetId, Logger logger) {
+		this(linkHeader, groupId, packetParameterHeaderCode, packetId,logger);
 		packetThread.setValue(registerValue);
 	}
 

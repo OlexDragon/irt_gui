@@ -39,7 +39,11 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_CONFIGURATION_REDUNDANCY_NAME		= 35,
 								PACKET_ID_CONFIGURATION_REDUNDANCY_STAT		= 36,
 								PACKET_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE= 37,
-								PACKET_ID_CONFIGURATION_MUTE_OUTDOOR		= 38;
+								PACKET_ID_CONFIGURATION_MUTE_OUTDOOR		= 38,
+								PACKET_ID_CONFIGURATION_ALC_ENABLE			= 39,
+								PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND	= 170,
+								PACKET_ID_CONFIGURATION_ALC_LEVEL			= 171,
+								PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE		= 172;
 
 	public static final short 	PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1 		= 40,
 								PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N1_SET 	= 41,
@@ -120,6 +124,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 								
 
 	public static final short	PACKET_ID_PROTOCOL_ADDRESS	= 150;
+
+	/*		reserved for configuration from 170 to 180		*/
 
 	public Integer getPriority();
 	public PacketThread getPacketThread();

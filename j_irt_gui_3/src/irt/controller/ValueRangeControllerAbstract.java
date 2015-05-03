@@ -124,7 +124,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
-		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
+		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId, logger), value, txtField, slider, style);
 		Thread t = new Thread(textSliderController, ValueRangeControllerAbstract.class.getSimpleName()+".TextSliderController-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
@@ -133,7 +133,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		t.start();
 
 		setSend(false);
-		setWaitTime(1000000);
+		setWaitTime(Integer.MAX_VALUE);
 	}
 
 	public TextSliderController getTextSliderController() {

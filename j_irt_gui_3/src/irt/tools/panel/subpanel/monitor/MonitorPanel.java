@@ -127,7 +127,7 @@ public class MonitorPanel extends MonitorPanelSSPA {
 
 		ValueDouble v;
 		switch(parameter){
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
+		case Packet.PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
 			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
 				super.packetRecived(parameter, flags, value);
 				break;

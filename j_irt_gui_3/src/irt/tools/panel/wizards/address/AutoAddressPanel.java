@@ -92,7 +92,7 @@ public class AutoAddressPanel extends JPanel {
 								break;
 
 							linkHeader = new LinkHeader((byte)i, (byte)0, (short) 0);
-							packetWork = new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY) {
+							packetWork = new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY, logger) {
 								@Override
 								public Integer getPriority() {
 									return Integer.MAX_VALUE;

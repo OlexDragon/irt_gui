@@ -30,6 +30,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
+import org.apache.logging.log4j.LogManager;
+
 public class ControlController extends ControllerAbstract {
 	private JButton btnMute;
 	private JLabel lblMute;
@@ -44,8 +46,8 @@ public class ControlController extends ControllerAbstract {
 	 * Use for LO control
 	 * @param hasFreqSet 
 	 */
-	public ControlController(int deviceType, String controllerName,LinkHeader linkHeader, ControlPanel panel) {
-		super(deviceType, controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
+	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, ControlPanel panel) {
+		super(deviceType, controllerName, new ConfigurationSetter(linkHeader, LogManager.getLogger()), panel, Style.CHECK_ALWAYS);
 		if(comboBoxfreqSet==null)
 			setSend(false);
 
@@ -58,7 +60,7 @@ public class ControlController extends ControllerAbstract {
 		t.start();
 
 		if(chbxLNB!=null){
-			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB));
+			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB, logger));
 			t = new Thread(lnbController, "ControlController.SwitchController-"+new RundomNumber().toString());
 			priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)

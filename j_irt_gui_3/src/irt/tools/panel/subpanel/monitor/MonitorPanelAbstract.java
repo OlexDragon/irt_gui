@@ -35,7 +35,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
 	protected ControllerAbstract controller;
-	private LinkHeader linkHeader;
+	protected LinkHeader linkHeader;
 	private ValueChangeListener statusListener;
 	protected TitledBorder titledBorder;
 	protected String selectedLanguage;

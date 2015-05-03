@@ -110,7 +110,7 @@ public class DumpControllers{
 						new Getter(linkHeader,
 								Packet.IRT_SLCP_GROUP_ID_ALARM,
 								AlarmsController.ALARMS_SUMMARY_STATUS,
-								PacketWork.PACKET_ID_ALARMS_SUMMARY)
+								PacketWork.PACKET_ID_ALARMS_SUMMARY, logger)
 						{
 							private int p = PRIORITY;
 							@Override public Integer getPriority() {
@@ -208,7 +208,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0,
 						0,
 						PRIORITY-1),
@@ -220,7 +220,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1,
 						1,
 						PRIORITY-2),
@@ -232,7 +232,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2,
 						2,
 						PRIORITY-3),
@@ -243,7 +243,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3,
 						3,
 						PRIORITY-4),
@@ -254,7 +254,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4,
 						4,
 						PRIORITY-5),
@@ -265,7 +265,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_INFO,
+						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10,
 						10,
 						PRIORITY-6),
@@ -276,7 +276,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_1,
 						1,
 						PRIORITY-7),
@@ -287,7 +287,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_2,
 						2,
 						PRIORITY-9),
@@ -298,7 +298,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_7,
 						7,
 						PRIORITY-11),
@@ -309,7 +309,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_3,
 						3,
 						PRIORITY-13),
@@ -320,7 +320,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_4,
 						4,
 						PRIORITY-14),
@@ -330,7 +330,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_5,
 						5,
 						PRIORITY-15),
@@ -341,7 +341,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_6,
 						6,
 						PRIORITY-16),
@@ -352,7 +352,7 @@ public class DumpControllers{
 				newGetter(
 						linkHeader,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_100,
 						100,
 						PRIORITY-17),
@@ -374,7 +374,7 @@ public class DumpControllers{
 					newGetter(
 							linkHeader,
 							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_201,
 							201,
 							PRIORITY-8),
@@ -385,7 +385,7 @@ public class DumpControllers{
 					newGetter(
 							linkHeader,
 							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_202,
 							202,
 							PRIORITY-10),
@@ -396,7 +396,7 @@ public class DumpControllers{
 					newGetter(
 							linkHeader,
 							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_207,
 							207,
 							PRIORITY-12),
@@ -407,7 +407,7 @@ public class DumpControllers{
 					newGetter(
 							linkHeader,
 							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-							Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_DUMP,
+							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_220,
 							220,
 							PRIORITY-19),
@@ -422,7 +422,7 @@ public class DumpControllers{
 				irtSlcpPacketId,
 				irtSlcpParameter,
 				packetId,
-				value)
+				value, logger)
 		{
 			private int p = priority;
 			@Override public Integer getPriority() {
@@ -440,7 +440,7 @@ public class DumpControllers{
 				linkHeader,
 				irtSlcpPacketId,
 				irtSlcpParameter,
-				packetId)
+				packetId, logger)
 		{
 			private int p = priority;
 			@Override public Integer getPriority() {

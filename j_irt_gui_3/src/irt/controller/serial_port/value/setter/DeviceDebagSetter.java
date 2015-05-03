@@ -1,5 +1,7 @@
 package irt.controller.serial_port.value.setter;
 
+import org.apache.logging.log4j.LogManager;
+
 import irt.data.PacketThread;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
@@ -18,11 +20,13 @@ public class DeviceDebagSetter extends SetterAbstract {
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader, int index, int addr, short packetId, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId);
+		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
+				LogManager.getLogger());
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader,int index, int addr, short packetId, byte parameterId, int value) {
-		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), Packet.IRT_SLCP_PACKET_TYPE_COMMAND, Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId);
+		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), Packet.IRT_SLCP_PACKET_TYPE_COMMAND, Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
+				LogManager.getLogger());
 	}
 
 	@Override

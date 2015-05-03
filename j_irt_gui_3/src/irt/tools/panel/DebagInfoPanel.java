@@ -26,6 +26,8 @@ import javax.swing.JTextArea;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel {
 
@@ -105,7 +107,7 @@ public class DebagInfoPanel extends JPanel {
 																		DebagInfoPanel.this.linkHeader,
 																		Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
 																		(byte) (cbCommand.getSelectedIndex()+1),
-																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO),
+																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO, LogManager.getLogger()),
 																cbCommand,
 																cbParameter,
 																DebagInfoPanel.this.textArea);

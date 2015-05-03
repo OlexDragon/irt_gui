@@ -4,6 +4,7 @@ import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.translation.Translation;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
+import irt.data.LinkedPacketThread;
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.Range;
@@ -21,6 +22,8 @@ import java.util.List;
 
 import javax.swing.DefaultComboBoxModel;
 
+import org.apache.logging.log4j.Logger;
+
 public class ConfigurationSetter extends SetterAbstract {
 
 	private long value = Integer.MIN_VALUE;
@@ -28,23 +31,23 @@ public class ConfigurationSetter extends SetterAbstract {
 	/**
 	 * @param packetParameterHeaderCode by default set to Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY
 	 */
-	public ConfigurationSetter() {
-		this(null);
+	public ConfigurationSetter(Logger logger) {
+		this(null, logger);
 	}
 
 	/**
 	 * @param linkHeader - address
 	 * @param packetParameterHeaderCode by default set to Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_LO_FREQUENCIES
 	 */
-	public ConfigurationSetter(LinkHeader linkHeader) {
+	public ConfigurationSetter(LinkHeader linkHeader, Logger logger) {
 		this(linkHeader,
 				linkHeader!=null && linkHeader.getAddr()!=0 ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES :
-					Packet.IRT_SLCP_PARAMETER_CONFIGURATION_FCM_FREQUENCY_RANGE,
-						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES);
+					Packet.PARAMETER_CONFIGURATION_FCM_FREQUENCY_RANGE,
+						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES, logger);
 	}
 
-	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, short packetId) {
-		super(linkHeader, Packet.IRT_SLCP_GROUP_ID_CONFIGURATION, packetParameterHeaderCode, packetId);
+	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, short packetId, Logger logger) {
+		super(linkHeader, Packet.IRT_SLCP_GROUP_ID_CONFIGURATION, packetParameterHeaderCode, packetId, logger);
 	}
 
 	@Override
@@ -72,6 +75,7 @@ public class ConfigurationSetter extends SetterAbstract {
 				Value v = (Value) ((IdValue) value).getValue();
 				pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, v != null ? (short) v.getValue() : null);
 				break;
+			case PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL:
 			case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION:
 				v = (Value) ((IdValue) value).getValue();
 				pt.preparePacket(((GetterAbstract) this).getPacketParameterHeaderCode(), v != null ? (short) v.getValue() : null);
@@ -95,10 +99,29 @@ public class ConfigurationSetter extends SetterAbstract {
 				System.arraycopy(bytes, 0, data, length, bytes.length);
 			}
 
-			data[0] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+			if(packetThread instanceof LinkedPacketThread)
+				data[4] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+			else
+				data[0] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+
 			logger.trace("data={}", data);
-			
+
 			packetThread.setData(data);
+		}else if(value instanceof Byte){
+			byte[] data = packetThread.getData();
+			int length = data.length;
+			data[length-1] = 1;
+			data = Arrays.copyOf(data, length+1);
+			data[length] = (byte)value;
+
+			if(packetThread instanceof LinkedPacketThread)
+				data[4] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+			else
+				data[0] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+
+			packetThread.setData(data);
+
+			logger.trace("\n\tpacketThread={}", packetThread);
 		}else
 			logger.warn("Not Posible to prepare Packet. value is {}", value.getClass());
 	}

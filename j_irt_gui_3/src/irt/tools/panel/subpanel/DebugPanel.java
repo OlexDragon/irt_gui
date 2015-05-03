@@ -57,7 +57,7 @@ public class DebugPanel extends JPanel{
 										0,
 										0,
 										PacketWork.PACKET_ID_CLEAR_STATISTICS,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE,
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE,
 										0
 								){
 									@Override

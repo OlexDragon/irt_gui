@@ -3,7 +3,6 @@ package irt.tools.panel.subpanel.control;
 import irt.controller.control.ControlControllerPicobuc;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 
 import java.awt.Color;
@@ -16,27 +15,24 @@ import javax.swing.SwingConstants;
 @SuppressWarnings("serial")
 public class ControlPanelSSPA extends ControlPanel {
 
-	private JLabel lblSave;
+	protected JLabel lblSave;
 
 	public ControlPanelSSPA(int deviceType, LinkHeader linkHeader, int flags) {
-		super(deviceType, linkHeader, ControlPanel.FLAG_ATTENUATION|flags);
+		super(deviceType, linkHeader, (short)ActionFlags.FLAG_ATTENUATION.ordinal()|flags);
 		
 		Font font = Translation.getFont().deriveFont(16f)
 				.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 
-		if(deviceType<DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
-
-			lblSave = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
-			lblSave.setHorizontalAlignment(SwingConstants.LEFT);
-			lblSave.setForeground(Color.YELLOW);
-			lblSave.setFont(font);
-			int x = Translation.getValue(Integer.class, "control.label.save.x", 153);
-			int y = Translation.getValue(Integer.class, "control.label.save.y", 107);
-			int width = Translation.getValue(Integer.class, "control.label.save.width", 61);
-			lblSave.setBounds(x, y, width, 20);
-			add(lblSave);
-		}
+		lblSave = new JLabel(Translation.getValue(String.class, "save", "SAVE"));
+		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
+		lblSave.setForeground(Color.YELLOW);
+		lblSave.setFont(font);
+		int x = Translation.getValue(Integer.class, "control.label.save.x", 153);
+		int y = Translation.getValue(Integer.class, "control.label.save.y", 107);
+		int width = Translation.getValue(Integer.class, "control.label.save.width", 61);
+		lblSave.setBounds(x, y, width, 20);
+		add(lblSave);
 	}
 
 	@Override

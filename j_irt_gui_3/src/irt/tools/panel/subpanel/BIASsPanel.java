@@ -142,7 +142,7 @@ public class BIASsPanel extends JPanel {
 										isMainBoard ? 6 : 206,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_NGLOBAL,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE)));
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
 				int index = isMainBoard ? 1 :201;
 				((DeviceDebugController)addController(
@@ -154,7 +154,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
@@ -166,7 +166,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										8,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N2,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
@@ -179,7 +179,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N3,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
@@ -191,7 +191,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										8,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N4,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
@@ -218,7 +218,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N5,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
@@ -230,7 +230,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										8,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N6,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
 						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 					multiplier = 10.8;
@@ -246,7 +246,7 @@ public class BIASsPanel extends JPanel {
 										linkHeader,
 										isMainBoard ? 3 : 203,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N1,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								)
 						)
 				);
@@ -259,7 +259,7 @@ public class BIASsPanel extends JPanel {
 										linkHeader,
 										isMainBoard ? 4 : 204,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N2,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								)
 						)
 				);
@@ -276,7 +276,7 @@ public class BIASsPanel extends JPanel {
 								index,
 								1,
 								PacketWork.PACKET_ID_DEVICE_DEBAG_HS1_CURRENT,
-								Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE
+								Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 						),
 						value,
 						multiplier)
@@ -294,7 +294,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										2,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_HS2_CURRENT,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
 								multiplier
@@ -313,7 +313,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										3,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_OUTPUT_POWER,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
 								1
@@ -332,7 +332,7 @@ public class BIASsPanel extends JPanel {
 										index,
 										4,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_TEMPERATURE,
-										Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
 								1
@@ -616,7 +616,7 @@ public class BIASsPanel extends JPanel {
 						index,
 						addr,
 						PacketWork.PACKET_ID_DEVICE_POTENTIOMETERS_INIT,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_READ_WRITE);
+						Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE);
 				PacketThread packetThread = setter.getPacketThread();
 				packetThread.start();
 				try { packetThread.join(); } catch (InterruptedException e) { logger.catching(e); }
@@ -669,7 +669,7 @@ public class BIASsPanel extends JPanel {
 						linkHeader,
 						Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
 						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
-						Packet.IRT_SLCP_PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE,
+						Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE,
 						PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE,
 						(Integer)calibrationMode.ordinal()
 						

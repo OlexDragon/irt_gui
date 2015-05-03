@@ -14,13 +14,15 @@ import irt.data.value.ValueDouble;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
+import org.apache.logging.log4j.LogManager;
+
 public class AttenuationController extends ValueRangeControllerAbstract {
 
 	private Style style;
 	protected int deviceType;
 
 	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(deviceType, "Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super(deviceType, "Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 		this.deviceType = deviceType;
 	}
@@ -56,16 +58,18 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 			boolean isConverter = getPacketWork().getPacketThread().getLinkHeader()==null;
 			Object source = valueChangeEvent.getSource();
 			if(source instanceof Range){
-				Range r = (Range) source;
+				String prefix = Translation.getValue(String.class, "db", " dB");
+
+				Range r = (Range)source;
 
 				long minimum = r.getMinimum();
 				long maximum = r.getMaximum();
 				ValueDouble stepValue = new ValueDouble(1, 1, maximum-minimum, 1);
-				stepValue.setPrefix("dB");
+				stepValue.setPrefix(prefix);
 				setStepValue(stepValue);
 
-				ValueDouble value = new ValueDouble(0,r.getMinimum(), r.getMaximum(), 1);
-				value.setPrefix(Translation.getValue(String.class, "db", " dB"));
+				ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
+				value.setPrefix(prefix);
 				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
 			}
 		}

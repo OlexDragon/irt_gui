@@ -99,7 +99,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	protected JComboBox<KeyValue<String, String>> languageComboBox;
 	protected HeadPanel headPanel;
 
-	protected VCLC vclc =  new VCLC();
+	protected VCLC vclc =  new VCLC(logger);
 	protected SoftReleaseChecker softReleaseChecker = getSoftReleaseChecker();
 	protected Protocol protocol = getDefaultProtocol();
 
@@ -512,6 +512,10 @@ public abstract class GuiControllerAbstract extends Thread {
 	// ***********************************************************************
 	protected class VCLC extends ValueChangeListenerClass {
 
+		public VCLC(Logger logger) {
+			super(logger);
+		}
+
 		@Override
 		public void fireValueChangeListener(ValueChangeEvent valueChangeEvent) {
 			super.fireValueChangeListener(valueChangeEvent);
@@ -610,7 +614,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 					logger.debug(packet);
 					byte mesurementStatus = packet.getClass().equals(Packet.class) || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS
-							? Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
+							? Packet.PARAMETER_MEASUREMENT_FCM_STATUS
 									: Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS;
 
 					Payload payload = packet.getPayload(mesurementStatus);

@@ -146,7 +146,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 										new Getter(linkHeader,
 												Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 												Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
-												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE), Style.CHECK_ALWAYS){
+												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE, logger), Style.CHECK_ALWAYS){
 													@Override
 													protected PacketListener getNewPacketListener() {
 														return new PacketListener() {
@@ -169,17 +169,17 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 								new Getter(linkHeader,
 										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE));
+										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE, logger));
 						runController("Redundancy Name",
 								new Getter(linkHeader,
 										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME));
+										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME, logger));
 						runController("Redundancy Status",
 								new Getter(linkHeader,
 										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT));
+										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT, logger));
 						return null;
 					}
 				}.execute();

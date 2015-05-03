@@ -49,7 +49,7 @@ public class ComPortThreadQueue extends Thread {
 					if(packetThread!=null){
 						packetThread.join();
 
-						if(serialPort.getPortName().startsWith("COM") && packetThread.isReadyToSend()) {
+						if(serialPort.isOpened() && packetThread.isReadyToSend()) {
 							sent = false;
 
 							logger.trace("Data to send - {}", packetWork);
@@ -94,8 +94,11 @@ public class ComPortThreadQueue extends Thread {
 
 						comPortQueue.add(packetWork);
 						logger.trace("<<< is added - {}", packetWork);
-					} else
-						logger.warn("Already contains " + packetWork);
+					} else{
+						comPortQueue.remove(packetWork);
+						comPortQueue.add(packetWork);
+						logger.warn("Already contains. Is Replaced" + packetWork);
+					}
 				else
 					logger.warn("comPortQueue is FULL");
 			else
@@ -138,6 +141,7 @@ public class ComPortThreadQueue extends Thread {
 
 		ComPortThreadQueue.serialPort = serialPort;
 
+		if(serialPort.getPortName().startsWith("COM"))
 		try {
 
 			serialPort.openPort();

@@ -17,11 +17,11 @@ import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 public abstract class ControllerAbstract implements Runnable{
 
-	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
+	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	public enum Style{
 		CHECK_ONCE,

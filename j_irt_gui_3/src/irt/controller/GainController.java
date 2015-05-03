@@ -12,12 +12,14 @@ import irt.data.value.ValueDouble;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
+import org.apache.logging.log4j.LogManager;
+
 public class GainController extends ValueRangeControllerAbstract {
 
 	private Style style;
 
 	public GainController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(deviceType, "Gain Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super(deviceType, "Gain Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE, PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 	}
 

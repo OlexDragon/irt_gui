@@ -10,10 +10,10 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.value.ValueFrequency;
 
-import java.awt.Component;
-
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+
+import org.apache.logging.log4j.LogManager;
 
 public class FrequencyContriller extends ValueRangeControllerAbstract {
 
@@ -26,9 +26,9 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 				new ConfigurationSetter(
 						linkHeader,
 						linkHeader==null || linkHeader.getIntAddr()==0
-												? Packet.IRT_SLCP_PARAMETER_CONFIGURATION_FCM_FREQUENCY_RANGE
+												? Packet.PARAMETER_CONFIGURATION_FCM_FREQUENCY_RANGE
 												: Packet.IRT_SLCP_PARAMETER_CONFIGURATION_PICOBUC_USER_FREQUENCY_RANGE,
-				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE);
 
 		isConverter = linkHeader==null || linkHeader.getIntAddr()==0;
 		this.style = style;
@@ -45,11 +45,6 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 					new ControllerWorker(valueChangeEvent);
 			}
 		};
-	}
-
-	@Override
-	protected boolean setComponent(Component component) {
-		return false;
 	}
 
 	//********************* class ControllerWorker *****************

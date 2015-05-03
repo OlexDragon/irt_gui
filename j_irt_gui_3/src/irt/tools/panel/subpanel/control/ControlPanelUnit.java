@@ -6,7 +6,7 @@ public class ControlPanelUnit extends ControlPanel {
 	private static final long serialVersionUID = 1L;
 
 	public ControlPanelUnit(int deviceType, LinkHeader linkHeader) {
-		super(deviceType, linkHeader, ControlPanel.FLAG_ATTENUATION);
+		super(deviceType, linkHeader, (short)ActionFlags.FLAG_ATTENUATION.ordinal());
 	}
 
 }

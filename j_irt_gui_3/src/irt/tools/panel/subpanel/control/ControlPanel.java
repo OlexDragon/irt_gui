@@ -33,6 +33,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -52,16 +53,21 @@ import javax.swing.plaf.basic.BasicComboBoxUI;
 @SuppressWarnings("serial")
 public class ControlPanel extends MonitorPanelAbstract {
 
-	public static final short FLAG_ATTENUATION= 0;
-	public static final short FLAG_GAIN			= 1;
-	public static final short FLAG_FREQUENCY 	= 1<<1;
-	public static final short FLAG_FREQUENCY_SET= 1<<2;
+	public enum ActionFlags{
+		FLAG_ATTENUATION,
+		FLAG_GAIN,
+		FLAG_FREQUENCY,
+		FLAG_FREQUENCY_SET,
+		FLAG_ALC
+	}
+
+	private static final Preferences prefs = GuiController.getPrefs();
 
 	protected JTextField txtGain;
 	protected JSlider slider;
-	private JTextField txtStep;
+	protected JTextField txtStep;
 	private JCheckBox chckbxStep;
-	private JComboBox<IdValue> comboBox;
+	protected JComboBox<IdValue> cbActionSelector;
 	private JLabel lblChoice;
 
 	private ControllerAbstract controller;
@@ -75,14 +81,15 @@ public class ControlPanel extends MonitorPanelAbstract {
 	protected ImageButton btnStoreConfig;
 	private int flags;
 
-	public ControlPanel(int deviceType, LinkHeader linkHeader, int flags) {
+	@SuppressWarnings("unused")
+	public ControlPanel(final int deviceType, LinkHeader linkHeader, int flags) {
 		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
 		setName("ControlPanel");
 
-		Font font = Translation.getFont();
+		Font font = Translation.getFont();			
 
 		this.flags = flags;
-		hasFreqSet = (flags & ControlPanel.FLAG_FREQUENCY_SET)>0;
+		hasFreqSet = (flags & (short)ActionFlags.FLAG_FREQUENCY_SET.ordinal())>0;
 
 		color = new Color(0x0B,0x17,0x3B);
 		cursor = new Cursor(Cursor.HAND_CURSOR);
@@ -136,6 +143,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 		}.execute();
 
 		font = font.deriveFont(16f);
+		if(font == null)//This is for WindowBuilder Editor
+			font = new Font("Tahoma", Font.PLAIN, 12);
 		txtGain = new JTextField();
 		txtGain.setForeground(Color.YELLOW);
 		txtGain.setBackground(color);
@@ -158,33 +167,44 @@ public class ControlPanel extends MonitorPanelAbstract {
 			btnStoreConfig.setBounds(p.x, p.y, size, size);
 			add(btnStoreConfig);
 		}
-		
-		comboBox = new JComboBox<>();
-		comboBox.addPopupMenuListener(Listeners.popupMenuListener);
 
-		IdValueForComboBox item = new IdValueForComboBox(FLAG_ATTENUATION, Translation.getValue(String.class, "attenuation", "ATTENUATION"));
+		cbActionSelector = new JComboBox<>();
+		cbActionSelector.addPopupMenuListener(Listeners.popupMenuListener);
+
+		IdValueForComboBox item = new IdValueForComboBox((short) ActionFlags.FLAG_ATTENUATION.ordinal(), Translation.getValue(String.class, "attenuation", "ATTENUATION"));
 		if(item!=null)//for WindowBuilder Editor
-			comboBox.addItem(item);
-		if((flags&FLAG_GAIN)>0)
-			comboBox.addItem(new IdValueForComboBox(FLAG_GAIN, Translation.getValue(String.class, "gain", "GAIN")));
-		if((flags&FLAG_FREQUENCY)>0)
-			comboBox.addItem(new IdValueForComboBox(FLAG_FREQUENCY, Translation.getValue(String.class, "frequency", "FREQUENCY")));
-		comboBox.setBounds(14, 19, 98, 20);
-		comboBox.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
-		comboBox.setBackground(color);
-		comboBox.setForeground(Color.YELLOW);
-		comboBox.setFont(font.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 14f))
+			cbActionSelector.addItem(item);
+		if((flags&(short) ActionFlags.FLAG_GAIN.ordinal())>0)
+			cbActionSelector.addItem(new IdValueForComboBox((short) ActionFlags.FLAG_GAIN.ordinal(), Translation.getValue(String.class, "gain", "GAIN")));
+		if((flags&(short) ActionFlags.FLAG_FREQUENCY.ordinal())>0)
+			cbActionSelector.addItem(new IdValueForComboBox((short) ActionFlags.FLAG_FREQUENCY.ordinal(), Translation.getValue(String.class, "frequency", "FREQUENCY")));
+		cbActionSelector.setBounds(14, 19, 98, 20);
+		cbActionSelector.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
+		cbActionSelector.setBackground(color);
+		cbActionSelector.setForeground(Color.YELLOW);
+		cbActionSelector.setFont(font.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 14f))
 				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD)));
-		comboBox.setCursor(cursor);
-		add(comboBox);
-		
-		lblChoice = new JLabel("");
+		cbActionSelector.setCursor(cursor);
+		add(cbActionSelector);
+
+		lblChoice = new JLabel(prefs.get("choice"+deviceType, ""));
 		lblChoice.setFont(font);
 		lblChoice.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
 				if(selection!=null)
-					comboBox.setSelectedItem(selection);
+					cbActionSelector.setSelectedItem(selection);
+				else if(!lblChoice.getText().isEmpty()){
+					int itemCount = cbActionSelector.getItemCount();
+					for(int i=0; i<itemCount; i++){
+						IdValue itemAt = cbActionSelector.getItemAt(i);
+						if(itemAt.getValue().equals(lblChoice.getText())){
+							selection = itemAt;
+							cbActionSelector.setSelectedItem(itemAt);
+							break;
+						}
+					}
+				}
 			}
 		});
 		lblChoice.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -201,9 +221,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 			private IdValue selectedItem;
 
 			public void ancestorAdded(AncestorEvent event) {
-				short control = (short) GuiController.getPrefs().getInt("Control", FLAG_ATTENUATION);
+				short control = (short) prefs.getInt("Control", (short) ActionFlags.FLAG_ATTENUATION.ordinal());
 
-				comboBox.addItemListener(new ItemListener() {
+				cbActionSelector.addItemListener(new ItemListener() {
 
 					@SuppressWarnings("unchecked")
 					@Override
@@ -215,20 +235,22 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 							if(selectedItem!=null){
 								selection = selectedItem;
-								lblChoice.setText(selection.toString());
+								String string = selection.toString();
+								lblChoice.setText(string);
+								prefs.put("choice"+deviceType, string);
 							}
 
 							selectedItem = (IdValue) source.getSelectedItem();
 							setController(selectedItem.getID());
-							GuiController.getPrefs().putInt("Control", selectedItem.getID());
+							prefs.putInt("Control", selectedItem.getID());
 						}
 					}
 				});
 
-				comboBox.setSelectedItem(new IdValue(control, null));
-				selectedItem = (IdValue) comboBox.getSelectedItem();
+				cbActionSelector.setSelectedItem(new IdValue(control, null));
+				selectedItem = (IdValue) cbActionSelector.getSelectedItem();
 
-				setController(((IdValue)comboBox.getSelectedItem()).getID());
+				setController(((IdValue)cbActionSelector.getSelectedItem()).getID());
 			}
 
 			public void ancestorMoved(AncestorEvent event) {}
@@ -261,6 +283,8 @@ public class ControlPanel extends MonitorPanelAbstract {
 				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));
 
 		String text = Translation.getValue(String.class, "step", "Step")+":";
+		if(text==null)// this if for WindowBuilder Editor
+			text = "Error";
 		chckbxStep = new JCheckBox(text);
 		chckbxStep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -299,12 +323,16 @@ public class ControlPanel extends MonitorPanelAbstract {
 			controller.stop();
 
 		Thread t;
-		switch(control){
+		ActionFlags a = ActionFlags.values()[control];
+		switch(a){
 		case FLAG_GAIN:
 			t = new Thread(controller =  getNewGainController(), "ControlPanel.GainController-"+new RundomNumber());
 			break;
 		case FLAG_FREQUENCY:
 			t = new Thread(controller = getNewFreqController(), "ControlPanel.FreqController-"+new RundomNumber());
+			break;
+		case FLAG_ALC:
+			t = new Thread(controller = getNewAlcController(), "ControlPanel.AttenController-"+new RundomNumber());
 			break;
 		default:
 			t = new Thread(controller = getNewAttenController(), "ControlPanel.AttenController-"+new RundomNumber());
@@ -331,6 +359,10 @@ public class ControlPanel extends MonitorPanelAbstract {
 
 	protected FrequencyContriller getNewFreqController() {
 		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+	}
+
+	protected ControllerAbstract getNewAlcController() {
+		return null;
 	}
 
 	public JSlider getSlider() {
@@ -369,15 +401,15 @@ public class ControlPanel extends MonitorPanelAbstract {
 		chckbxStep.setFont(font);
 
 		DefaultComboBoxModel<IdValue> model = new DefaultComboBoxModel<>();
-		model.addElement(new IdValueForComboBox(FLAG_ATTENUATION, Translation.getValue(String.class, "attenuation", "ATTENUATION")));
-		if((flags&FLAG_GAIN)>0)
-			model.addElement(new IdValueForComboBox(FLAG_GAIN, Translation.getValue(String.class, "gain", "GAIN")));
-		if((flags&FLAG_FREQUENCY)>0)
-			model.addElement(new IdValueForComboBox(FLAG_FREQUENCY, Translation.getValue(String.class, "frequency", "FREQUENCY")));
-		comboBox.setFont(font
+		model.addElement(new IdValueForComboBox((short)ActionFlags.FLAG_ATTENUATION.ordinal(), Translation.getValue(String.class, "attenuation", "ATTENUATION")));
+		if((flags&(short)ActionFlags.FLAG_GAIN.ordinal())>0)
+			model.addElement(new IdValueForComboBox((short)ActionFlags.FLAG_GAIN.ordinal(), Translation.getValue(String.class, "gain", "GAIN")));
+		if((flags&(short)ActionFlags.FLAG_FREQUENCY.ordinal())>0)
+			model.addElement(new IdValueForComboBox((short)ActionFlags.FLAG_FREQUENCY.ordinal(), Translation.getValue(String.class, "frequency", "FREQUENCY")));
+		cbActionSelector.setFont(font
 				.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 18f))
 				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD)));
-		comboBox.setModel(model);
+		cbActionSelector.setModel(model);
 
 		lblChoice.setFont(font);
 	}

@@ -8,6 +8,8 @@ import irt.data.packet.Payload;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+
 public class DeviceMeasurement extends GetterAbstract {
 
 	private short unitTemperature;
@@ -21,7 +23,8 @@ public class DeviceMeasurement extends GetterAbstract {
 	private short current;
 
 	public DeviceMeasurement(PacketThread packetThread) {
-		super(null, (byte)0, (byte)0, PacketWork.PACKET_UNNECESSARY);
+		super(null, (byte)0, (byte)0, PacketWork.PACKET_UNNECESSARY,
+				LogManager.getLogger());
 	}
 
 	@Override

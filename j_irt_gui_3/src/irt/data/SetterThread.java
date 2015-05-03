@@ -5,12 +5,9 @@ import irt.data.packet.Payload;
 
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
 public class SetterThread extends PacketThread {
-
-	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final int BYTE = 1;
 	public static final int LONG = 2;
@@ -18,8 +15,8 @@ public class SetterThread extends PacketThread {
 	private long valueToSend;
 	private int valueType;
 
-	public SetterThread(byte[] packetSetting, int valueToSend, int valueType) {
-		super(packetSetting);
+	public SetterThread(byte[] packetSetting, int valueToSend, int valueType, Logger logger) {
+		super(packetSetting, logger);
 		this.valueToSend = valueToSend;
 		this.valueType = valueType;
 	}

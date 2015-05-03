@@ -181,7 +181,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 	}
 
 	private static final String[] controllerNames = new String[]{"Measurement_temperature", "Measurement_InputPower","Status"};
-	private static final byte[] parameters = new byte[]{Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_TEMPERATURE, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_INPUT_POWER, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS};
+	private static final byte[] parameters = new byte[]{Packet.PARAMETER_MEASUREMENT_FCM_TEMPERATURE, Packet.PARAMETER_MEASUREMENT_FCM_INPUT_POWER, Packet.PARAMETER_MEASUREMENT_FCM_STATUS};
 	private static final short[] pacetId = new short[]{PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketWork.PACKET_ID_MEASUREMENT_STATUS};
 	@Override
 	protected List<DefaultController> getControllers() {

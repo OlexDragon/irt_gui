@@ -17,9 +17,13 @@ import irt.data.packet.Packet;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+
+import org.apache.logging.log4j.LogManager;
 
 public class MuteController extends ControllerAbstract {
 
@@ -28,12 +32,44 @@ public class MuteController extends ControllerAbstract {
 	
 	private boolean isMute;
 	private ActionListener actionListener;
+	private final MouseListener mouseListener = new MouseListener() {
+		
+		@Override
+		public void mouseReleased(MouseEvent e) {
+		}
+		
+		@Override
+		public void mousePressed(MouseEvent e) {
+		}
+		
+		@Override
+		public void mouseExited(MouseEvent e) {
+		}
+		
+		@Override
+		public void mouseEntered(MouseEvent e) {
+		}
+		
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			setMuteUnmute();
+		}
+	};
 
 	public MuteController(int deviceType, LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style) {
-		super(deviceType, "Mute Controller", new ConfigurationSetter(linkHeader, linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL, PacketWork.PACKET_ID_CONFIGURATION_MUTE), null, style);
+		super(deviceType,
+				"Mute Controller",
+				new ConfigurationSetter(
+						linkHeader,
+						linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL,
+								PacketWork.PACKET_ID_CONFIGURATION_MUTE,
+								LogManager.getLogger()),
+								null,
+								style);
 		this.btnMute = btnMute;
 		this.btnMute.addActionListener(actionListener);
 		this.lblMute = lblMute;
+		this.lblMute.addMouseListener(mouseListener);
 	}
 
 	@Override
@@ -60,6 +96,7 @@ public class MuteController extends ControllerAbstract {
 		super.clear();
 		btnMute.removeActionListener(actionListener);
 		btnMute = null;
+		lblMute.removeMouseListener(mouseListener);
 		lblMute = null;
 		actionListener = null;
 	}
@@ -70,19 +107,23 @@ public class MuteController extends ControllerAbstract {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SetterAbstract as = (SetterAbstract) getPacketWork();
-				PacketThread pt = as.getPacketThread();
-				if(pt.getPacket()==null)
-					return;
-				as.preparePacketToSend(new IdValue(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketWork.PACKET_ID_CONFIGURATION_MUTE : PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR, new Boolean(isMute=!isMute)));
-				logger.trace("PacketThread: {}", pt);
-				setSend(true);
-				if(isMute)
-					MuteController.this.lblMute.setText(Translation.getValue(String.class, "unmute", "UNMUTE"));
-				else
-					MuteController.this.lblMute.setText(Translation.getValue(String.class, "mute", "MUTE"));
+				setMuteUnmute();
 			}
 		};
+	}
+
+	private void setMuteUnmute() {
+		SetterAbstract as = (SetterAbstract) getPacketWork();
+		PacketThread pt = as.getPacketThread();
+		if(pt.getPacket()==null)
+			return;
+		as.preparePacketToSend(new IdValue(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketWork.PACKET_ID_CONFIGURATION_MUTE : PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR, new Boolean(isMute=!isMute)));
+		logger.trace("PacketThread: {}", pt);
+		setSend(true);
+		if(isMute)
+			MuteController.this.lblMute.setText(Translation.getValue(String.class, "unmute", "UNMUTE"));
+		else
+			MuteController.this.lblMute.setText(Translation.getValue(String.class, "mute", "MUTE"));
 	}
 
 	//********************* class ControllerWorker *****************
