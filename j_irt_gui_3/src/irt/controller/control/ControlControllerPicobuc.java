@@ -8,13 +8,13 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
-import irt.tools.panel.subpanel.control.ControlPanel;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 import javax.swing.ComboBoxModel;
 
 public class ControlControllerPicobuc extends ControlController{
 
-	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, ControlPanel panel) {
+	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, MonitorPanelAbstract panel) {
 		super(deviceType, "ControlControllerPicobuc", linkHeader, panel);
 	}
 
@@ -45,7 +45,7 @@ public class ControlControllerPicobuc extends ControlController{
 							setSend(false);
 						else {
 							packetThread.getPacket().getPayload(0).setBuffer(null);
-							packetThread.getPacket().getHeader().setType(Packet.IRT_SLCP_PACKET_TYPE_REQUEST);
+							packetThread.getPacket().getHeader().setType(Packet.PACKET_TYPE_REQUEST);
 							packetThread.preparePacket();
 						}
 					}

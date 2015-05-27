@@ -1,6 +1,5 @@
 package irt.tools.panel.subpanel.monitor;
 
-import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -28,7 +27,7 @@ import javax.swing.SwingWorker;
 public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 	public static final byte
-			IRT_SLCP_PACKET_ID_MEASUREMENT = Packet.IRT_SLCP_GROUP_ID_MEASUREMENT;
+			IRT_SLCP_PACKET_ID_MEASUREMENT = Packet.GROUP_ID_MEASUREMENT;
 
 	public static final int
 			MUTE = 1,
@@ -160,11 +159,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 	}
 
 	@Override
-	protected ControllerAbstract getNewController() {
-		return null;//TODO Remove this Method; new MonitorController(getLinkHeader(), this);
-	}
-
-	@Override
 	public void refresh() {
 		super.refresh();
 		logger.entry();
@@ -181,22 +175,22 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 	}
 
 	private static final String[] controllerNames = new String[]{"Measurement_temperature", "Measurement_InputPower","Status"};
-	private static final byte[] parameters = new byte[]{Packet.PARAMETER_MEASUREMENT_FCM_TEMPERATURE, Packet.PARAMETER_MEASUREMENT_FCM_INPUT_POWER, Packet.PARAMETER_MEASUREMENT_FCM_STATUS};
+	private static final byte[] parameters = new byte[]{Packet.PARAMETER_MEASUREMENT_TEMPERATURE, Packet.PARAMETER_MEASUREMENT_FCM_INPUT_POWER, Packet.PARAMETER_MEASUREMENT_FCM_STATUS};
 	private static final short[] pacetId = new short[]{PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketWork.PACKET_ID_MEASUREMENT_STATUS};
 	@Override
-	protected List<DefaultController> getControllers() {
-		List<DefaultController> controllers = new ArrayList<>();
+	protected List<ControllerAbstract> getControllers() {
+		List<ControllerAbstract> controllers = new ArrayList<>();
 		if(deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
 			for(int i=0; i<controllerNames.length; i++){
 				controllers.add(
-						startController(
+						getController(
 								controllerNames[i],
 								parameters[i],
 								pacetId[i]));
 			}
 		}else{
 			controllers.add(
-					startController(
+					getController(
 							"Measurement",
 							Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_ALL,
 							PacketWork.PACKET_ID_MEASUREMENT_ALL));
@@ -236,7 +230,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 		ValueDouble v;
 		switch(parameter){
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER://or Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
+		case Packet.PARAMETER_MEASUREMENT_OUTPUT_POWER://or Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
 			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
 				if(flags==0)
 					lblOutputPower.setText("N/A");
@@ -252,7 +246,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 				setConverterStatus(value);
 
 			break;
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_TEMPERATURE:
+		case Packet.PARAMETER_MEASUREMENT_TEMPERATURE:
 			if(value!=temperature){
 				temperature = value;
 				v = new ValueDouble(value, 1);
@@ -262,7 +256,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 			logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
 			break;
 
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS:
+		case Packet.PARAMETER_MEASUREMENT_STATUS:
 				setStatus(value);
 		}
 	}

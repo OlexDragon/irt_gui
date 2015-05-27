@@ -132,7 +132,7 @@ public class MonitorPanel extends MonitorPanelSSPA {
 				super.packetRecived(parameter, flags, value);
 				break;
 			}
-		case Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_INPUT_POWER:
+		case Packet.PARAMETER_MEASUREMENT_INPUT_POWER:
 			if (value != input) {
 				input = value;
 				v = new ValueDouble(value, 1);

@@ -116,6 +116,11 @@ public class ComPort extends SerialPort {
 
 		long start = System.currentTimeMillis();
 		PacketThread pt = packetWork.getPacketThread();
+		try {
+			pt.join(500);
+		} catch (InterruptedException e1) {
+			comPortLogger.catching(e1);
+		}
 		Packet p = pt.getPacket();
 		PacketHeader ph = p.getHeader();
 		byte groupId = ph.getGroupId();

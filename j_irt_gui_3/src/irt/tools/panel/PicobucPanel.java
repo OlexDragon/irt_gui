@@ -4,8 +4,9 @@ import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.subpanel.BIASsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
-import irt.tools.panel.subpanel.control.ControlPanel;
+import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 import java.awt.Color;
 
@@ -41,8 +42,17 @@ public class PicobucPanel extends UserPicobucPanel {
 	}
 
 	@Override
-	protected ControlPanel getNewControlPanel() {
-		ControlPanelPicobuc controlPanel = new ControlPanelPicobuc(deviceType, getLinkHeader());
+	protected MonitorPanelAbstract getNewControlPanel() {
+		MonitorPanelAbstract controlPanel;
+
+		switch(deviceType){
+		case DeviceInfo.DEVICE_TYPE_DLRS:
+			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+			break;
+		default:
+			controlPanel = new ControlPanelPicobuc(deviceType, linkHeader);
+		}
+
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
 	}

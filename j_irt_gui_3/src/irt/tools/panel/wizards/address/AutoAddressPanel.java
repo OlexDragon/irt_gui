@@ -92,7 +92,7 @@ public class AutoAddressPanel extends JPanel {
 								break;
 
 							linkHeader = new LinkHeader((byte)i, (byte)0, (short) 0);
-							packetWork = new Getter(linkHeader, Packet.IRT_SLCP_GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY, logger) {
+							packetWork = new Getter(linkHeader, Packet.GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY, logger) {
 								@Override
 								public Integer getPriority() {
 									return Integer.MAX_VALUE;
@@ -158,7 +158,7 @@ public class AutoAddressPanel extends JPanel {
 				LinkedPacket lp = (LinkedPacket)packet;
 				PacketHeader header = lp.getHeader();
 				byte addr = lp.getLinkHeader().getAddr();
-				if(header.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
+				if(header.getPacketType()==Packet.PACKET_TYPE_RESPONSE)
 					address.add(addr);
 				new StopController(addr);
 				int size;

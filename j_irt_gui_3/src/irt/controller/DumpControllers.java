@@ -108,7 +108,7 @@ public class DumpControllers{
 						deviceInfo.getType(),
 						"ALARMS_SUMMARY",
 						new Getter(linkHeader,
-								Packet.IRT_SLCP_GROUP_ID_ALARM,
+								Packet.GROUP_ID_ALARM,
 								AlarmsController.ALARMS_SUMMARY_STATUS,
 								PacketWork.PACKET_ID_ALARMS_SUMMARY, logger)
 						{
@@ -127,9 +127,9 @@ public class DumpControllers{
 								byte groupId;
 
 								if(getPacketWork().isAddressEquals(packet) &&
-										((	groupId = packet.getHeader().getGroupId())==Packet.IRT_SLCP_GROUP_ID_ALARM ||
-											groupId==Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG ||
-											groupId==Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO))
+										((	groupId = packet.getHeader().getGroupId())==Packet.GROUP_ID_ALARM ||
+											groupId==Packet.GROUP_ID_DEVICE_DEBAG ||
+											groupId==Packet.GROUP_ID_DEVICE_INFO))
 
 									new DumpWorker(packet);
 							}
@@ -141,7 +141,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_ALARM,
+						Packet.GROUP_ID_ALARM,
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE,
 						AlarmsController.OWER_TEMPERATURE,
@@ -152,7 +152,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_ALARM,
+						Packet.GROUP_ID_ALARM,
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT,
 						AlarmsController.HW_FAULT,
@@ -163,7 +163,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_ALARM,
+						Packet.GROUP_ID_ALARM,
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_OWER_CURRENT,
 						AlarmsController.OWER_CURRENT,
@@ -174,7 +174,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_ALARM,
+						Packet.GROUP_ID_ALARM,
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK,
 						AlarmsController.PLL_OUT_OF_LOCK_OR_OUTDOOR_FCM_HARDWARE_FAULT,
@@ -185,7 +185,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_ALARM,
+						Packet.GROUP_ID_ALARM,
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT,
 						AlarmsController.UNDER_CURRENT,
@@ -196,7 +196,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_ALARM,
+						Packet.GROUP_ID_ALARM,
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT,
 						AlarmsController.REDUNDANT_FAULT_OR_OUTDOOR_FCM_PLL_OUT_OF_LOCK,
@@ -207,7 +207,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0,
 						0,
@@ -219,7 +219,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1,
 						1,
@@ -231,7 +231,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2,
 						2,
@@ -242,7 +242,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3,
 						3,
@@ -253,7 +253,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4,
 						4,
@@ -264,7 +264,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10,
 						10,
@@ -275,7 +275,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_1,
 						1,
@@ -286,7 +286,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_2,
 						2,
@@ -297,7 +297,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_7,
 						7,
@@ -308,7 +308,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_3,
 						3,
@@ -319,7 +319,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_4,
 						4,
@@ -329,7 +329,7 @@ public class DumpControllers{
 
 		addDumpController(
 				newGetter(linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_5,
 						5,
@@ -340,7 +340,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_6,
 						6,
@@ -351,7 +351,7 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_100,
 						100,
@@ -361,7 +361,7 @@ public class DumpControllers{
 
 		addDumpController(
 				newGetter(linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+						Packet.GROUP_ID_CONFIGURATION,
 						Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
 						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT,
 						PRIORITY-18),
@@ -373,7 +373,7 @@ public class DumpControllers{
 			addDumpController(
 					newGetter(
 							linkHeader,
-							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+							Packet.GROUP_ID_DEVICE_DEBAG,
 							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_201,
 							201,
@@ -384,7 +384,7 @@ public class DumpControllers{
 			addDumpController(
 					newGetter(
 							linkHeader,
-							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+							Packet.GROUP_ID_DEVICE_DEBAG,
 							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_202,
 							202,
@@ -395,7 +395,7 @@ public class DumpControllers{
 			addDumpController(
 					newGetter(
 							linkHeader,
-							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+							Packet.GROUP_ID_DEVICE_DEBAG,
 							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_207,
 							207,
@@ -406,7 +406,7 @@ public class DumpControllers{
 			addDumpController(
 					newGetter(
 							linkHeader,
-							Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+							Packet.GROUP_ID_DEVICE_DEBAG,
 							Packet.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_220,
 							220,

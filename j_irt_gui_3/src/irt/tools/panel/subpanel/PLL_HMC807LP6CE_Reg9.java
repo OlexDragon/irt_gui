@@ -122,7 +122,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 										PacketHeader header = packet.getHeader();
 										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG){
 
-											if(header.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+											if(header.getPacketType()==Packet.PACKET_TYPE_RESPONSE){
 												Payload payload = packet.getPayload(Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE);
 												if(payload!=null){
 													RegisterValue value = payload.getRegisterValue();
@@ -266,7 +266,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 		btnClear.setMargin(new Insets(0, 0, 0, 0));
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ConfigurationSetter packetWork = new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS, logger);
+				ConfigurationSetter packetWork = new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS, logger);
 				packetWork.preparePacketToSend(0);
 				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 			}

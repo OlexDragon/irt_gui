@@ -141,7 +141,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
 				packetIdStr = "Redundancy Fault ("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE:
+			case PacketWork.PACKET_ID_MEASUREMENT_TEMPERATURE:
 				packetIdStr = "Bias Temperature("+packetId+")";
 				break;
 			case PacketWork.PACKET_DEVICE_INFO:
@@ -349,20 +349,20 @@ public class PacketHeader{
 		String typeStr = null;
 		if(packetHeader!=null)
 		switch(getPacketType()){
-		case Packet.IRT_SLCP_PACKET_TYPE_SPONTANEOUS:
-			typeStr = "Spontaneous("+ Packet.IRT_SLCP_PACKET_TYPE_SPONTANEOUS+")";
+		case Packet.PACKET_TYPE_SPONTANEOUS:
+			typeStr = "Spontaneous("+ Packet.PACKET_TYPE_SPONTANEOUS+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_TYPE_RESPONSE:
-			typeStr = "Response("+ Packet.IRT_SLCP_PACKET_TYPE_RESPONSE+")";
+		case Packet.PACKET_TYPE_RESPONSE:
+			typeStr = "Response("+ Packet.PACKET_TYPE_RESPONSE+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_TYPE_REQUEST:
-			typeStr = "Request("+ Packet.IRT_SLCP_PACKET_TYPE_REQUEST+")";
+		case Packet.PACKET_TYPE_REQUEST:
+			typeStr = "Request("+ Packet.PACKET_TYPE_REQUEST+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_TYPE_COMMAND:
-			typeStr = "Command("+ Packet.IRT_SLCP_PACKET_TYPE_COMMAND+")";
+		case Packet.PACKET_TYPE_COMMAND:
+			typeStr = "Command("+ Packet.PACKET_TYPE_COMMAND+")";
 			break;
-		case Packet.IRT_SLCP_PACKET_TYPE_ACK:
-			typeStr = "Acknowledgement("+ Packet.IRT_SLCP_PACKET_TYPE_ACK+")";
+		case Packet.PACKET_TYPE_ACK:
+			typeStr = "Acknowledgement("+ Packet.PACKET_TYPE_ACK+")";
 			break;
 		default:
 			typeStr = ""+(getPacketType()&0xFF);
@@ -374,26 +374,26 @@ public class PacketHeader{
 		String typeStr = null;
 		if(packetHeader!=null)
 		switch(getGroupId()){
-		case Packet.IRT_SLCP_GROUP_ID_ALARM:
-			typeStr = "Alarm("+ Packet.IRT_SLCP_GROUP_ID_ALARM+")";
+		case Packet.GROUP_ID_ALARM:
+			typeStr = "Alarm("+ Packet.GROUP_ID_ALARM+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_CONFIGURATION:
-			typeStr = "Configuration("+ Packet.IRT_SLCP_GROUP_ID_CONFIGURATION+")";
+		case Packet.GROUP_ID_CONFIGURATION:
+			typeStr = "Configuration("+ Packet.GROUP_ID_CONFIGURATION+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_FILETRANSFER:
-			typeStr = "FileTranster("+ Packet.IRT_SLCP_GROUP_ID_FILETRANSFER+")";
+		case Packet.GROUP_ID_FILETRANSFER:
+			typeStr = "FileTranster("+ Packet.GROUP_ID_FILETRANSFER+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_MEASUREMENT:
-			typeStr = "Measurement("+ Packet.IRT_SLCP_GROUP_ID_MEASUREMENT+")";
+		case Packet.GROUP_ID_MEASUREMENT:
+			typeStr = "Measurement("+ Packet.GROUP_ID_MEASUREMENT+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_RESET:
-			typeStr = "Reset("+ Packet.IRT_SLCP_GROUP_ID_RESET+")";
+		case Packet.GROUP_ID_RESET:
+			typeStr = "Reset("+ Packet.GROUP_ID_RESET+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO:
-			typeStr = "DeviceInfo("+ Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO+")";
+		case Packet.GROUP_ID_DEVICE_INFO:
+			typeStr = "DeviceInfo("+ Packet.GROUP_ID_DEVICE_INFO+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_CONFIG_PROFILE:
-			typeStr = "SaveConfigProfile("+ Packet.IRT_SLCP_GROUP_ID_CONFIG_PROFILE+")";
+		case Packet.GROUP_ID_CONFIG_PROFILE:
+			typeStr = "SaveConfigProfile("+ Packet.GROUP_ID_CONFIG_PROFILE+")";
 			break;
 		case Packet.IRT_SLCP_GROUP_ID_PROTOCOL:
 			typeStr = "Protocol("+ Packet.IRT_SLCP_GROUP_ID_PROTOCOL+")";
@@ -401,8 +401,8 @@ public class PacketHeader{
 		case Packet.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1:
 			typeStr = "DeveloperGeneric("+ Packet.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG:
-			typeStr = "Device Debug("+ Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG+")";
+		case Packet.GROUP_ID_DEVICE_DEBAG:
+			typeStr = "Device Debug("+ Packet.GROUP_ID_DEVICE_DEBAG+")";
 			break;
 		default:
 			typeStr = ""+(getPacketType()&0xFF);

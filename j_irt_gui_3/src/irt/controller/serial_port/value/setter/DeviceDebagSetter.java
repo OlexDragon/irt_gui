@@ -20,12 +20,12 @@ public class DeviceDebagSetter extends SetterAbstract {
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader, int index, int addr, short packetId, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
+		super(linkHeader, new RegisterValue(index, addr, null), Packet.GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
 				LogManager.getLogger());
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader,int index, int addr, short packetId, byte parameterId, int value) {
-		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), Packet.IRT_SLCP_PACKET_TYPE_COMMAND, Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
+		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), Packet.PACKET_TYPE_COMMAND, Packet.GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
 				LogManager.getLogger());
 	}
 
@@ -50,7 +50,7 @@ public class DeviceDebagSetter extends SetterAbstract {
 
 				Object source = null;
 
-				if(cph.getOption()>0 || cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+				if(cph.getOption()>0 || cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
 					source = new Byte((byte) -cph.getOption());
 					if((Byte)source==0)
 						source=-20;

@@ -14,7 +14,7 @@ public class DeviceDebagGetter extends GetterAbstract {
 	private Object value;
 
 	public DeviceDebagGetter(LinkHeader linkHeader, int index, int addr, short packetId, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
+		super(linkHeader, new RegisterValue(index, addr, null), Packet.GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
 				LogManager.getLogger());
 	}
 
@@ -31,8 +31,8 @@ public class DeviceDebagGetter extends GetterAbstract {
 
 				Object source = value;
 
-				if(cph.getOption()>0 || cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
-					if(cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
+				if(cph.getOption()>0 || cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
+					if(cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE)
 						source=new Byte((byte) -20);
 					else
 						source = new Byte((byte)-cph.getOption());

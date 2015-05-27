@@ -15,7 +15,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.value.ValueFrequency;
-import irt.tools.panel.subpanel.control.ControlPanel;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -46,7 +46,7 @@ public class ControlController extends ControllerAbstract {
 	 * Use for LO control
 	 * @param hasFreqSet 
 	 */
-	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, ControlPanel panel) {
+	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel) {
 		super(deviceType, controllerName, new ConfigurationSetter(linkHeader, LogManager.getLogger()), panel, Style.CHECK_ALWAYS);
 		if(comboBoxfreqSet==null)
 			setSend(false);
@@ -60,7 +60,7 @@ public class ControlController extends ControllerAbstract {
 		t.start();
 
 		if(chbxLNB!=null){
-			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB, logger));
+			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB, logger));
 			t = new Thread(lnbController, "ControlController.SwitchController-"+new RundomNumber().toString());
 			priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)
@@ -87,14 +87,14 @@ public class ControlController extends ControllerAbstract {
 							comboBoxfreqSet.setModel(comboBoxModel);
 
 							pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY);
-							pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_DATA_FCM_CONFIG_FREQUENCY);
+							pw.setPacketParameterHeaderCode(Packet.PARAMETER_CONFIG_FCM_FREQUENCY);
 							pw.getPacketThread().preparePacket();
 							setSend(true, false);
 						}else if(source instanceof Long){
 							setSend(false);
 							ValueFrequency vf = new ValueFrequency((Long)source, Long.MIN_VALUE, Long.MAX_VALUE);
 
-							pw.setPacketType(Packet.IRT_SLCP_PACKET_TYPE_COMMAND);
+							pw.setPacketType(Packet.PACKET_TYPE_COMMAND);
 
 							comboBoxfreqSet.setSelectedItem(vf.toString());
 							comboBoxfreqSet.addItemListener(itemListenerComboBox);

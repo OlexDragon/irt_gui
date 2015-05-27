@@ -86,7 +86,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				if(e.getStateChange()==ItemEvent.SELECTED) {
 					enable = (REDUNDANCY) cmbBxRedundancy.getSelectedItem();
 					Setter packetWork = new Setter(linkHeader,
-							Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+							Packet.GROUP_ID_CONFIGURATION,
 							Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
 							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE);
 					try {
@@ -103,7 +103,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				if(e.getStateChange()==ItemEvent.SELECTED) {
 					mode = (REDUNDANCY_MODE) cmbBxMode.getSelectedItem();
 					Setter packetWork = new Setter(linkHeader,
-							Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+							Packet.GROUP_ID_CONFIGURATION,
 							Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
 							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE);
 					try {
@@ -120,7 +120,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 				if(e.getStateChange()==ItemEvent.SELECTED) {
 					name = (REDUNDANCY_NAME) cmbBxName.getSelectedItem();
 					Setter packetWork = new Setter(linkHeader,
-							Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+							Packet.GROUP_ID_CONFIGURATION,
 							Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
 							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME);
 					try {
@@ -144,7 +144,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 										deviceType,
 										"Redundancy Enable",
 										new Getter(linkHeader,
-												Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+												Packet.GROUP_ID_CONFIGURATION,
 												Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
 												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE, logger), Style.CHECK_ALWAYS){
 													@Override
@@ -155,8 +155,8 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 															public void packetRecived(Packet packet) {
 																if(
 																		getPacketWork().isAddressEquals(packet) &&
-																		packet.getHeader().getGroupId()==Packet.IRT_SLCP_GROUP_ID_CONFIGURATION &&
-																		packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE
+																		packet.getHeader().getGroupId()==Packet.GROUP_ID_CONFIGURATION &&
+																		packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE
 																	)
 																	new GetterWorker(packet);
 															}
@@ -167,17 +167,17 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 								);
 						runController("Redundancy Mode",
 								new Getter(linkHeader,
-										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+										Packet.GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE, logger));
 						runController("Redundancy Name",
 								new Getter(linkHeader,
-										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+										Packet.GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME, logger));
 						runController("Redundancy Status",
 								new Getter(linkHeader,
-										Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+										Packet.GROUP_ID_CONFIGURATION,
 										Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
 										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT, logger));
 						return null;
@@ -321,8 +321,8 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 						logger.debug("Click");
 						Setter packetWork = new Setter(
 								linkHeader,
-								Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
-								Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+								Packet.PACKET_TYPE_COMMAND,
+								Packet.GROUP_ID_CONFIGURATION,
 								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_SET_ONLINE,
 								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE);
 						GuiController.getComPortThreadQueue().add(packetWork);

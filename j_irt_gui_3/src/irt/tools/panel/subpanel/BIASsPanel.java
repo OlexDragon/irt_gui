@@ -567,9 +567,9 @@ public class BIASsPanel extends JPanel {
 						if(isMainBoard)
 							new SetterController(deviceType, "Initialize Controller",
 									new Setter(linkHeader,
-										Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
+										Packet.PACKET_TYPE_COMMAND,
 										Packet.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1,
-										Packet.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
+										Packet.PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
 										PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE
 									),
 									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
@@ -636,7 +636,7 @@ public class BIASsPanel extends JPanel {
 							public void packetRecived(Packet packet) {
 
 								if(		getPacketWork().isAddressEquals(packet) &&
-										packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
+										packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
 										packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_POTENTIOMETERS_INIT){
 
 									BIASsPanel.this.logger.trace("\n\t{}", packet);
@@ -667,12 +667,12 @@ public class BIASsPanel extends JPanel {
 
 				Setter setter = new Setter(
 						linkHeader,
-						Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
-						Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+						Packet.PACKET_TYPE_COMMAND,
+						Packet.GROUP_ID_DEVICE_DEBAG,
 						Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE,
 						PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE,
-						(Integer)calibrationMode.ordinal()
-						
+						(Integer)calibrationMode.ordinal(),
+						logger
 				);
 				controller = new DefaultController(deviceType, "CalibrationMode", setter, Style.CHECK_ONCE){
 
@@ -684,7 +684,7 @@ public class BIASsPanel extends JPanel {
 							public void packetRecived(Packet packet) {
 
 								if(		getPacketWork().isAddressEquals(packet) &&
-										packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
+										packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
 										packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE){
 
 									BIASsPanel.this.logger.trace("\n\t{}", packet);

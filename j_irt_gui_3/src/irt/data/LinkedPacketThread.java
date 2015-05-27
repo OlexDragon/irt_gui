@@ -43,13 +43,12 @@ public class LinkedPacketThread extends PacketThread {
 
 	@Override
 	protected Packet newPacket() {
-		logger.trace("newPacket() = new LinkedPacket()");
 		return new LinkedPacket();
 	}
 
 	@Override
 	public void setDataPacketTypeCommand() {
 		if(data!=null)
-			data[4] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+			data[4] = Packet.PACKET_TYPE_COMMAND;
 	}
 }

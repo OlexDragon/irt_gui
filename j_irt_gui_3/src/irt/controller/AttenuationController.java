@@ -22,7 +22,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 	protected int deviceType;
 
 	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(deviceType, "Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE);
+		super(deviceType, "Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE);
 		this.style = style;
 		this.deviceType = deviceType;
 	}
@@ -70,7 +70,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 
 				ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
 				value.setPrefix(prefix);
-				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_DATA_FCM_CONFIG_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
+				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.PARAMETER_CONFIG_FCM_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
 			}
 		}
 

@@ -182,7 +182,7 @@ public class DeviceDebugController extends ControllerAbstract {
 							RegisterValue urv = (RegisterValue)unitPacketThread.getValue();
 							Value uv = urv.getValue();
 
-							if(c.equals(Color.WHITE)&& up!=null &&  up.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_COMMAND){
+							if(c.equals(Color.WHITE)&& up!=null &&  up.getHeader().getPacketType()==Packet.PACKET_TYPE_COMMAND){
 
 								if(addrToSave>=0 && oldValue!=uv.getValue()){
 									int index = urv.getIndex();

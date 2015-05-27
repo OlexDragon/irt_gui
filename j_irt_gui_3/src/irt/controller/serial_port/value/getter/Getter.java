@@ -18,11 +18,11 @@ public class Getter extends GetterAbstract {
 	private long value;
 
 	public Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId, Logger logger) {
-		super(linkHeader, Packet.IRT_SLCP_PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, logger);
+		super(linkHeader, Packet.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, logger);
 	}
 
 	public <T> Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId, T value, Logger logger) {
-		super(linkHeader, Packet.IRT_SLCP_PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, value, logger);
+		super(linkHeader, Packet.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, value, logger);
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class Getter extends GetterAbstract {
 
 			short packetId = getPacketId();
 			if(cph!=null && up!=null &&
-					cph.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
+					cph.getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
 						cph.getGroupId()==up.getHeader().getGroupId() &&
 							cph.getPacketId()==packetId){
 

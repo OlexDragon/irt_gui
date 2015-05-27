@@ -1,7 +1,6 @@
 package irt.tools.panel.subpanel.control;
 
 import irt.controller.AttenuationController;
-import irt.controller.DefaultController;
 import irt.controller.FrequencyContriller;
 import irt.controller.GainController;
 import irt.controller.GuiController;
@@ -31,6 +30,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
@@ -344,11 +344,6 @@ public class ControlPanel extends MonitorPanelAbstract {
 		t.start();
 	}
 
-	@Override
-	protected ControllerAbstract getNewController() {
-		return new ControlController(deviceType, getClass().getSimpleName(), getLinkHeader(),this);
-	}
-
 	protected AttenuationController getNewAttenController() {
 		return new AttenuationController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
@@ -415,9 +410,10 @@ public class ControlPanel extends MonitorPanelAbstract {
 	}
 
 	@Override
-	protected List<DefaultController> getControllers() {
-		// TODO Auto-generated method stub
-		return null;
+	protected List<ControllerAbstract> getControllers() {
+		List<ControllerAbstract> controllers = new ArrayList<>();
+		controllers.add(new ControlController(deviceType, getClass().getSimpleName(), getLinkHeader(),this));
+		return controllers;
 	}
 
 	@Override

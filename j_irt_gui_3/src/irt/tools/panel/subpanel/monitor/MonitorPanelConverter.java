@@ -180,14 +180,9 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 	}
 
 	@Override
-	protected ControllerAbstract getNewController() {
-		return null;//new MonitorControllerConverter(this);
-	}
-
-	@Override
-	protected List<DefaultController> getControllers() {
-		List<DefaultController> controllers = new ArrayList<>();
-		DefaultController defaultController = startController(
+	protected List<ControllerAbstract> getControllers() {
+		List<ControllerAbstract> controllers = new ArrayList<>();
+		DefaultController defaultController = getController(
 				"Monitor",
 				Packet.PARAMETER_MEASUREMENT_FCM_ALL,
 				PacketWork.PACKET_ID_MEASUREMENT_ALL);
@@ -259,7 +254,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 				logger.trace("PARAMETER_MEASUREMENT_FCM_OUTPUT_POWER, flags={}, value={}", flags, value);
 			}
 			break;
-		case Packet.PARAMETER_MEASUREMENT_FCM_TEMPERATURE:
+		case Packet.PARAMETER_MEASUREMENT_TEMPERATURE:
 			if(value!=temperature){
 				temperature = value;
 				v = new ValueDouble(value, 1);

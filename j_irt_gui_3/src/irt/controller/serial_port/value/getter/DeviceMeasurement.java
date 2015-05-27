@@ -31,8 +31,8 @@ public class DeviceMeasurement extends GetterAbstract {
 	public boolean set(Packet packet) {
 		boolean isSet = false;
 		if(isAddressEquals(packet) && packet.getHeader()!=null &&
-				packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
-					packet.getHeader().getGroupId()==Packet.IRT_SLCP_GROUP_ID_MEASUREMENT &&
+				packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
+					packet.getHeader().getGroupId()==Packet.GROUP_ID_MEASUREMENT &&
 						packet.getHeader().getPacketId()==getPacketId()){
 			List<Payload> payloads = packet.getPayloads();
 			if(payloads!=null)

@@ -8,6 +8,8 @@ import irt.data.packet.LinkHeader;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -36,8 +38,10 @@ public class ControlPanelSSPA extends ControlPanel {
 	}
 
 	@Override
-	protected ControllerAbstract getNewController() {
-		return new ControlControllerPicobuc(deviceType, getLinkHeader(),this);
+	protected List<ControllerAbstract> getControllers() {
+		List<ControllerAbstract> controllers = new ArrayList<>();
+		controllers.add(new ControlControllerPicobuc(deviceType, getLinkHeader(),this));
+		return controllers;
 	}
 
 	@Override

@@ -76,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.080";
+	public static final String VERTION = "- 3.083";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -275,10 +275,12 @@ public class IrtGui extends IrtMainFrame {
 
 								byte na = (byte)newAddress;
 								Setter packetWork = new Setter(new LinkHeader((byte)address, (byte)0, (short) 0),
-										Packet.IRT_SLCP_PACKET_TYPE_COMMAND,
+										Packet.PACKET_TYPE_COMMAND,
 										Packet.IRT_SLCP_GROUP_ID_PROTOCOL,
 										Packet.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
-										PacketWork.PACKET_ID_PROTOCOL_ADDRESS, na);
+										PacketWork.PACKET_ID_PROTOCOL_ADDRESS,
+										na,
+										logger);
 								logger.trace(packetWork);
 								guiController.setAddress(na);
 								GuiController.getComPortThreadQueue().add(packetWork);

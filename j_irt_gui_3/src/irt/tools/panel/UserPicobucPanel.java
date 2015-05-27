@@ -17,8 +17,9 @@ import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
 import irt.tools.panel.subpanel.RedundancyPanelDemo.REDUNDANCY_NAME;
-import irt.tools.panel.subpanel.control.ControlPanel;
+import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 import java.awt.Font;
 
@@ -78,7 +79,7 @@ public class UserPicobucPanel extends DevicePanel {
 						deviceType,
 						"Redundancy Enable",
 						new Getter(getLinkHeader(),
-								Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+								Packet.GROUP_ID_CONFIGURATION,
 								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
 								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME, logger), Style.CHECK_ALWAYS){
 									@Override
@@ -97,10 +98,10 @@ public class UserPicobucPanel extends DevicePanel {
 													protected String doInBackground() throws Exception {
 														if(
 																getPacketWork().isAddressEquals(packet) &&
-																packet.getHeader().getGroupId()==Packet.IRT_SLCP_GROUP_ID_CONFIGURATION &&
+																packet.getHeader().getGroupId()==Packet.GROUP_ID_CONFIGURATION &&
 																packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
 															)
-															if(packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+															if(packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE){
 																REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
 																if(n!=null && !n.equals(name) && n!=REDUNDANCY_NAME.NO_NAME){
 
@@ -141,8 +142,17 @@ public class UserPicobucPanel extends DevicePanel {
 	}
 
 	@Override
-	protected ControlPanel getNewControlPanel() {
-		ControlPanelPicobuc controlPanel = new ControlPanelPicobuc(deviceType, getLinkHeader());
+	protected MonitorPanelAbstract getNewControlPanel() {
+		MonitorPanelAbstract controlPanel;
+
+		switch(deviceType){
+		case DeviceInfo.DEVICE_TYPE_DLRS:
+			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+			break;
+		default:
+			controlPanel = new ControlPanelPicobuc(deviceType, linkHeader);
+		}
+
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
 	}

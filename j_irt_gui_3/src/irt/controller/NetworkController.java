@@ -237,7 +237,7 @@ public class NetworkController extends ControllerAbstract {
 		logger.debug(Arrays.toString(packetThread.getData()));
 
 		byte groupId = header.getGroupId();
-		byte packetType = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+		byte packetType = Packet.PACKET_TYPE_COMMAND;
 		short packetId = header.getPacketId();
 		byte packetParameterHeaderCode = packet.getPayload(0).getParameterHeader().getCode();
 
@@ -255,7 +255,6 @@ public class NetworkController extends ControllerAbstract {
 		GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 		networkAddressTmp = null;
 		setButtonEnabled();
-
 	}
 
 	//********************* class ControllerWorker *****************

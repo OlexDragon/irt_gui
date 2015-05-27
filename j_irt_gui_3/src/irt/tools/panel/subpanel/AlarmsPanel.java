@@ -40,7 +40,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	private JLabel lblOtherTxt;
 	private JLabel lblRedundancyTxt;
 
-	private JLabel lblPllOutOffLock;
+	private JLabel lblPllOutOfLock;
 	private JLabel lblOverCurrent;
 	private JLabel lblUnderCurrent;
 	private JLabel lblOverTemperature;
@@ -58,7 +58,8 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		JPanel pnlPllOutOffLock = new JPanel();
 		pnlPllOutOffLock.setBorder(new LineBorder(new Color(0, 0, 0)));
 		pnlPllOutOffLock.setName("PLL Out Off Lock");
-		
+		pnlPllOutOffLock.setVisible(deviceType!=DeviceInfo.DEVICE_TYPE_DLRS);
+
 		JPanel pnlOverCurrent = new JPanel();
 		pnlOverCurrent.setBorder(new LineBorder(new Color(0, 0, 0)));
 		pnlOverCurrent.setName("Over-Current");
@@ -72,7 +73,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		pnlOverTemperature.setName("Over-Temperature");
 		
 		JPanel pnlOther = new JPanel();
-		pnlOther.setName("Over-Temperature");
+		pnlOther.setName("Other");
 		pnlOther.setBorder(new LineBorder(new Color(0, 0, 0)));
 		
 		lblOtherTxt = new JLabel(Translation.getValue(String.class, "other", "Other"));
@@ -190,7 +191,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		);
 		groupLayout.linkSize(SwingConstants.VERTICAL, new Component[] {pnlPllOutOffLock, pnlOverCurrent, pnlUnderCurrent, pnlOverTemperature});
 		
-		lblOverTemperatureTxt = new JLabel(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
+		lblOverTemperatureTxt = new JLabel(deviceType!=DeviceInfo.DEVICE_TYPE_DLRS ? Translation.getValue(String.class, "over_temperatute", "Over-Temperature") : Translation.getValue(String.class, "switch.waveguide", "Waveguide switch"));
 		lblOverTemperatureTxt.setForeground(new Color(0, 0, 255));
 		lblOverTemperatureTxt.setFont(font);
 		
@@ -292,18 +293,19 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		);
 		pnlOverCurrent.setLayout(gl_pnlOverCurrent);
 
-		lblPllOutOfLockTxt = new JLabel(Translation.getValue(String.class, "pll_out_of_lock", "PLL Out of Lock"));
+		String labelText = Translation.getValue(String.class, "pll_out_of_lock", "PLL Out of Lock");
+		lblPllOutOfLockTxt = new JLabel(labelText);
 		lblPllOutOfLockTxt.setForeground(new Color(0, 0, 255));
 		lblPllOutOfLockTxt.setFont(font);
 		
-		lblPllOutOffLock = new JLabel(noAlarmTxt);
-		lblPllOutOffLock.setEnabled(false);
+		lblPllOutOfLock = new JLabel(noAlarmTxt);
+		lblPllOutOfLock.setEnabled(false);
 		
-		lblPllOutOffLock.setOpaque(true);
-		lblPllOutOffLock.setName(AlarmsController.PLL_OUT_OF_LOCK2);
-		lblPllOutOffLock.setHorizontalAlignment(SwingConstants.CENTER);
-		lblPllOutOffLock.setForeground(new Color(204, 204, 204));
-		lblPllOutOffLock.setFont(font);
+		lblPllOutOfLock.setOpaque(true);
+		lblPllOutOfLock.setName(AlarmsController.PLL_OUT_OF_LOCK2);
+		lblPllOutOfLock.setHorizontalAlignment(SwingConstants.CENTER);
+		lblPllOutOfLock.setForeground(new Color(204, 204, 204));
+		lblPllOutOfLock.setFont(font);
 		GroupLayout gl_pnlPllOutOffLock = new GroupLayout(pnlPllOutOffLock);
 		gl_pnlPllOutOffLock.setHorizontalGroup(
 			gl_pnlPllOutOffLock.createParallelGroup(Alignment.TRAILING)
@@ -311,7 +313,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 					.addContainerGap()
 					.addComponent(lblPllOutOfLockTxt, GroupLayout.DEFAULT_SIZE, 212, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(lblPllOutOffLock, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
+					.addComponent(lblPllOutOfLock, ALARMS_WIDTH, ALARMS_WIDTH, ALARMS_WIDTH)
 					)
 		);
 		gl_pnlPllOutOffLock.setVerticalGroup(
@@ -320,7 +322,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 					.addGap(2)
 					.addGroup(gl_pnlPllOutOffLock.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblPllOutOfLockTxt)
-						.addComponent(lblPllOutOffLock))
+						.addComponent(lblPllOutOfLock))
 					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		pnlPllOutOffLock.setLayout(gl_pnlPllOutOffLock);
@@ -356,7 +358,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblPllOutOfLockTxt.setText(Translation.getValue(String.class, "pll_out_of_lock", "PLL Out of Lock"));
 		lblOverCurrentTxt.setText(Translation.getValue(String.class, "over_current", "Over-Current"));
 		lblUnderCurrentTxt.setText(Translation.getValue(String.class, "under_current", "Under-Current"));
-		lblOverTemperatureTxt.setText(Translation.getValue(String.class, "over_temperatute", "Over-Temperature"));
+		lblOverTemperatureTxt.setText(deviceType!=DeviceInfo.DEVICE_TYPE_DLRS ? Translation.getValue(String.class, "over_temperatute", "Over-Temperature") : Translation.getValue(String.class, "switch.waveguide", "Waveguide switch"));
 		lblOtherTxt.setText(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Translation.getValue(String.class, "other", "Other") : Translation.getValue(String.class, "alc_error", "ALC error"));
 		lblRedundancyTxt.setText(Translation.getValue(String.class, "redundancy", "Redundant"));
 
@@ -369,7 +371,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		lblOtherTxt.setFont(font);
 		lblRedundancyTxt.setFont(font);
 
-		lblPllOutOffLock.setFont(font);
+		lblPllOutOfLock.setFont(font);
 		lblOverCurrent.setFont(font);
 		lblUnderCurrent.setFont(font);
 		lblOverTemperature.setFont(font);

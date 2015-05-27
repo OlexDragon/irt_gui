@@ -269,7 +269,7 @@ public class PLLsPanel extends JPanel {
 		JButton btnClear = new JButton("Clear The Flags");
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ConfigurationSetter packetWork = new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS,
+				ConfigurationSetter packetWork = new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS,
 						LogManager.getLogger());
 				packetWork.preparePacketToSend(0);
 				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);

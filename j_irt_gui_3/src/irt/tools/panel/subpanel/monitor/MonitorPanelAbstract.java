@@ -6,9 +6,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.controller.translation.Translation;
-import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
-import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
@@ -34,9 +32,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
-	protected ControllerAbstract controller;
 	protected LinkHeader linkHeader;
-	private ValueChangeListener statusListener;
 	protected TitledBorder titledBorder;
 	protected String selectedLanguage;
 
@@ -53,30 +49,6 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 
 		selectedLanguage = Translation.getSelectedLanguage();
 
-		addAncestorListener(new AncestorListener() {
-
-			public void ancestorAdded(AncestorEvent arg0) {
-
-				controller = getNewController();
-				if (controller != null) {
-					if (statusListener != null)
-						controller.addStatusListener(statusListener);
-					Thread t = new Thread(controller, MonitorPanelAbstract.this.getClass().getSimpleName() + "." + controller.getName() + "-" + new RundomNumber());
-					int priority = t.getPriority();
-					if (priority > Thread.MIN_PRIORITY)
-						t.setPriority(priority - 1);
-					t.setDaemon(true);
-					t.start();
-				}
-			}
-			public void ancestorMoved(AncestorEvent arg0) {}
-
-			public void ancestorRemoved(AncestorEvent arg0) {
-				if(controller!=null && controller.isRun())
-					controller.stop();
-			}
-		});
-
 		setOpaque(false);
 
 		Font font = getTitledBorderFont();
@@ -91,15 +63,27 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 		setLayout(null);
 
 		addAncestorListener(new AncestorListener() {
-			private List<DefaultController> defaultControllers;
+			private List<ControllerAbstract> defaultControllers;
 			public void ancestorAdded(AncestorEvent event) {
 				defaultControllers = getControllers();
+				startControllers(defaultControllers);
+			}
+			private void startControllers( List<ControllerAbstract> controllers) {
+				if(controllers!=null)
+					for(ControllerAbstract ca:controllers){
+						Thread t = new Thread(ca);
+						int priority = t.getPriority();
+						if(priority>Thread.MIN_PRIORITY)
+							t.setPriority(priority-1);
+						t.setDaemon(true);
+						t.start();
+					}
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 			public void ancestorRemoved(AncestorEvent event) {
 				if(defaultControllers!=null){
-					for(Iterator<DefaultController> c=defaultControllers.iterator(); c.hasNext();){
-						DefaultController next = c.next();
+					for(Iterator<ControllerAbstract> c=defaultControllers.iterator(); c.hasNext();){
+						ControllerAbstract next = c.next();
 						next.stop();
 					}
 					defaultControllers = null;
@@ -108,7 +92,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 		});
 	}
 
-	protected abstract List<DefaultController> getControllers();
+	protected abstract List<ControllerAbstract> getControllers();
 
 	private Font getTitledBorderFont() {
 		return Translation.getFont()
@@ -116,16 +100,8 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD));
 	}
 
-	protected abstract ControllerAbstract getNewController();
-
 	public LinkHeader getLinkHeader() {
 		return linkHeader;
-	}
-
-	public void addStatusListener(ValueChangeListener valueChangeListener) {
-		statusListener = valueChangeListener;
-		if(controller!=null)
-			controller.addStatusListener(valueChangeListener);
 	}
 
 	public void refresh() {
@@ -136,7 +112,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 		titledBorder.setTitleFont(font);
 	}
 
-	protected DefaultController startController(String controllerName, byte parameter, final short packetId) {
+	protected DefaultController getController(String controllerName, byte parameter, final short packetId) {
 		logger.entry(controllerName, parameter, packetId);
 		DefaultController defaultController = new DefaultController(
 				deviceType,
@@ -156,7 +132,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 										PacketHeader header = packet.getHeader();
 
 										if (	getPacketWork().isAddressEquals(packet) &&
-												header.getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE &&
+												header.getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
 												header.getPacketId() == packetId)
 
 											MonitorPanelAbstract.this.packetRecived(packet.getPayloads());
@@ -168,12 +144,6 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 					}
 			
 		};
-		Thread t = new Thread(defaultController, getClass().getSimpleName()+"."+controllerName+"-"+new RundomNumber());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
 		return defaultController;
 	}
 

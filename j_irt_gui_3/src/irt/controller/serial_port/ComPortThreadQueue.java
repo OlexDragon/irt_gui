@@ -59,7 +59,7 @@ public class ComPortThreadQueue extends Thread {
 
 							if(send==null || send.getHeader()==null)
 								StaticComponents.getLedRx().setLedColor(Color.WHITE);
-							else if(send.getHeader().getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE)
+							else if(send.getHeader().getPacketType()!=Packet.PACKET_TYPE_RESPONSE)
 								StaticComponents.getLedRx().setLedColor(Color.RED);
 							else
 								StaticComponents.getLedRx().setLedColor(Color.GREEN);
@@ -141,7 +141,7 @@ public class ComPortThreadQueue extends Thread {
 
 		ComPortThreadQueue.serialPort = serialPort;
 
-		if(serialPort.getPortName().startsWith("COM"))
+		if(serialPort.getPortName().startsWith("COM") || serialPort.getPortName().startsWith("/dev"))
 		try {
 
 			serialPort.openPort();

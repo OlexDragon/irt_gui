@@ -46,10 +46,10 @@ public class PacketThread extends Thread {
 						Payload pl = packet.getPayload(0);
 						pl.setBuffer(value);
 					}
-					logger.trace("\n\tpacket={}", packet);
 
 					data = preparePacket(packet);
-					logger.trace("\n\tresult={}", Arrays.toString(data));
+
+					logger.trace("\n\t{}", data);
 				}
 			} catch (Exception ex) {
 				logger.catching(ex);
@@ -68,7 +68,9 @@ public class PacketThread extends Thread {
 	}
 
 	private byte[] preparePacket(Packet packet) {
+		logger.entry(packet);
 		byte[]data = packet.asBytes();
+		logger.debug("\n\t{}", data);
 		return preparePacket(data);
 	}
 
@@ -95,11 +97,11 @@ public class PacketThread extends Thread {
 
 	public void preparePacket(byte value) {
 		logger.entry(value);
-		setPacketHeaderType(Packet.IRT_SLCP_PACKET_TYPE_COMMAND);
+		setPacketHeaderType(Packet.PACKET_TYPE_COMMAND);
 		Payload payload = packet.getPayload(0);
 		payload.setBuffer(value);
 		data = preparePacket(packet.asBytes());
-		logger.exit();
+		logger.exit(data);
 	}
 
 	public static int checkControlEscape(byte[] surce, int surceIndex, byte[] destination, int destinationIndex) {
@@ -140,15 +142,16 @@ public class PacketThread extends Thread {
 	}
 
 	public void preparePacket(byte irtSlcpParameter, Object value) {
+		logger.entry(irtSlcpParameter, value);
 		Payload pl = packet.getPayload(irtSlcpParameter);
 
 		if(pl!=null){
 			pl.setBuffer(value);
 
 			if(value!=null)
-				setPacketHeaderType(Packet.IRT_SLCP_PACKET_TYPE_COMMAND);
+				setPacketHeaderType(Packet.PACKET_TYPE_COMMAND);
 			else
-				setPacketHeaderType(Packet.IRT_SLCP_PACKET_TYPE_REQUEST);
+				setPacketHeaderType(Packet.PACKET_TYPE_REQUEST);
 
 			preparePacket();
 		}
@@ -161,10 +164,10 @@ public class PacketThread extends Thread {
 
 		if(rv!=null){
 			pl.setBuffer(registerValue.getIndex(), registerValue.getAddr(), (int)rv.getValue());
-			setPacketHeaderType(Packet.IRT_SLCP_PACKET_TYPE_COMMAND);
+			setPacketHeaderType(Packet.PACKET_TYPE_COMMAND);
 		}else{
 			pl.setBuffer(registerValue.getIndex(), registerValue.getAddr());
-			setPacketHeaderType(Packet.IRT_SLCP_PACKET_TYPE_REQUEST);
+			setPacketHeaderType(Packet.PACKET_TYPE_REQUEST);
 		}
 
 		preparePacket();
@@ -208,7 +211,7 @@ public class PacketThread extends Thread {
 
 	public void setDataPacketTypeCommand() {
 		if(data!=null)
-			data[0] = Packet.IRT_SLCP_PACKET_TYPE_COMMAND;
+			data[0] = Packet.PACKET_TYPE_COMMAND;
 	}
 
 	public void setData(byte[] data) {

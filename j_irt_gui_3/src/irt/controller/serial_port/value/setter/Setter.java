@@ -1,6 +1,7 @@
 package irt.controller.serial_port.value.setter;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import irt.data.IdValue;
 import irt.data.PacketThread;
@@ -24,9 +25,8 @@ public class Setter extends SetterAbstract {
 				LogManager.getLogger());
 	}
 
-	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId, T value) {
-		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value,
-				LogManager.getLogger());
+	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId, T value, Logger logger) {
+		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value, logger);
 	}
 
 	public Setter(byte groupId, byte packetParameterHeaderCode,	short packetId) {
@@ -62,7 +62,7 @@ public class Setter extends SetterAbstract {
 
 				Object source = null;
 
-				if(cph.getOption()>0 || cph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+				if(cph.getOption()>0 || cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
 					source = new Byte((byte) -cph.getOption());
 					if((byte)source==0)
 						source=-20;

@@ -39,9 +39,12 @@
   <Loggers>
  	<Logger name="irt.irt_gui.IrtGui" level="WARN"/>
 
- 	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="debug"/>
- 	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc$6" level="debug"/>
- 	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc$7" level="debug"/>
+ 	<Logger name="irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem" level="INFO"/>
+ 	<Logger name="irt.data.PacketThread" level="INFO"/>
+ 	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="INFO"/>
+ 	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc$7" level="INFO"/>
+ 	<Logger name="irt.controller.control.ControlController" level="INFO"/>
+ 	<Logger name="irt.controller.AlarmsController" level="INFO"/>
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

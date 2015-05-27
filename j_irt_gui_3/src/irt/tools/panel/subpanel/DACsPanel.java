@@ -120,7 +120,7 @@ public class DACsPanel extends JPanel {
 							new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				//Calibration mode
-				startController(new SwitchController(deviceType, "Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG, Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE)));
+				startController(new SwitchController(deviceType, "Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.GROUP_ID_DEVICE_DEBAG, Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE)));
 
 				if(linkHeader==null || linkHeader.getAddr()==0){
 					Value value = new Value(0, 0, 4095, 0);
@@ -145,7 +145,7 @@ public class DACsPanel extends JPanel {
 					startController(new AdcController(deviceType, "-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
 
 					value = new Value(0, -100, 100, 0);
-					startController(new TextSliderController(deviceType, "Gain Offset Controller", new ConfigurationSetter(null, Packet.IRT_SLCP_DATA_FCM_CONFIG_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET,
+					startController(new TextSliderController(deviceType, "Gain Offset Controller", new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET,
 							LogManager.getLogger()), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
 				}
 

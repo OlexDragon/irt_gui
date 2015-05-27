@@ -13,13 +13,16 @@ public interface PacketWork extends Comparable<PacketWork>{
 							PACKET_ID_MEASUREMENT_STATUS 					= 10,
 							PACKET_ID_MEASUREMENT_INPUT_POWER				= 11,
 							PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER 	= 12,
-							PACKET_ID_MEASUREMENT_BIAS_25W_TEMPERATURE 		= 13,
+							PACKET_ID_MEASUREMENT_TEMPERATURE 				= 13,
 							PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE			= 14,
 							PACKET_ID_MEASUREMENT_CPU_TEMPERATURE			= 15,
 							PACKET_ID_MEASUREMENT_5V5 						= 16,
 							PACKET_ID_MEASUREMENT_13V2 						= 17,
 							PACKET_ID_MEASUREMENT_13V2_NEG					= 18,
-							PACKET_ID_MEASUREMENT_OUTPUT_POWER 				= 19;
+							PACKET_ID_MEASUREMENT_OUTPUT_POWER 				= 19,
+							PACKET_ID_MEASUREMENT_SNB1_STATUS 				= 180,
+							PACKET_ID_MEASUREMENT_SNB2_STATUS 				= 181,
+							PACKET_ID_MEASUREMENT_WGS_POSITION 				= 182;
 
 	public static final short 	PACKET_ID_CONFIGURATION_LO_BIAS_BOARD		= 20,
 								PACKET_ID_CONFIGURATION_LO_FREQUENCIES 		= 21,
@@ -43,7 +46,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_CONFIGURATION_ALC_ENABLE			= 39,
 								PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND	= 170,
 								PACKET_ID_CONFIGURATION_ALC_LEVEL			= 171,
-								PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE		= 172;
+								PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE		= 172,
+								PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER= 173;
 
 	public static final short 	PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1 		= 40,
 								PACKET_ID_DEVICE_DEBAG_POTRNTIOMETER_N1_SET 	= 41,
@@ -125,7 +129,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 	public static final short	PACKET_ID_PROTOCOL_ADDRESS	= 150;
 
-	/*		reserved for configuration from 170 to 180		*/
+	/*		reserved for configuration from 170 to 179		*/
+	/*		reserved for measurement from 180 to 189		*/
 
 	public Integer getPriority();
 	public PacketThread getPacketThread();

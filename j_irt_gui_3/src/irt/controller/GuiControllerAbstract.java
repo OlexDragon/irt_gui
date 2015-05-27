@@ -123,11 +123,11 @@ public abstract class GuiControllerAbstract extends Thread {
 				PacketHeader header = packet.getHeader();
 
 				byte packetType = header.getPacketType();
-				if (packetType == Packet.IRT_SLCP_PACKET_TYPE_RESPONSE) {
+				if (packetType == Packet.PACKET_TYPE_RESPONSE) {
 
 					DeviceInfo deviceInfo;
 					switch (header.getGroupId()) {
-					case Packet.IRT_SLCP_GROUP_ID_DEVICE_INFO:
+					case Packet.GROUP_ID_DEVICE_INFO:
 						deviceInfo = new DeviceInfo(packet);
 
 						int type = deviceInfo.getType();
@@ -148,6 +148,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case  DeviceInfo.DEVICE_TYPE_MODUL: /* Temporarly added by Alex @ 19-09-2014 */
 							protocol = Protocol.CONVERTER.setDeviceType(type);
 							break;
+						case DeviceInfo.DEVICE_TYPE_DLRS:
 						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
@@ -165,11 +166,11 @@ public abstract class GuiControllerAbstract extends Thread {
 
 						new PanelWorker(packet, deviceInfo);
 						break;
-					case Packet.IRT_SLCP_GROUP_ID_ALARM:
+					case Packet.GROUP_ID_ALARM:
 						if(header.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY && header.getOption()==0) 
 							new AlarmWorker(packet);
 						break;
-					case Packet.IRT_SLCP_GROUP_ID_MEASUREMENT:
+					case Packet.GROUP_ID_MEASUREMENT:
 						new MeasurementWorker(packet);
 						break;
 					}
@@ -608,14 +609,14 @@ public abstract class GuiControllerAbstract extends Thread {
 				PacketHeader header = packet.getHeader();
 
 				if (header != null
-						&& header.getGroupId()==Packet.IRT_SLCP_GROUP_ID_MEASUREMENT
+						&& header.getGroupId()==Packet.GROUP_ID_MEASUREMENT
 						&& (header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
 						&& header.getOption()==0) {
 
 					logger.debug(packet);
 					byte mesurementStatus = packet.getClass().equals(Packet.class) || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS
 							? Packet.PARAMETER_MEASUREMENT_FCM_STATUS
-									: Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS;
+									: Packet.PARAMETER_MEASUREMENT_STATUS;
 
 					Payload payload = packet.getPayload(mesurementStatus);
 					if (payload != null) {

@@ -27,7 +27,7 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 	protected PacketThread packetThread;
 
 	public GetterAbstract(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId, Logger logger) {
-		this(linkHeader, Packet.IRT_SLCP_PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, logger);
+		this(linkHeader, Packet.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, logger);
 	}
 
 	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, Logger logger) {

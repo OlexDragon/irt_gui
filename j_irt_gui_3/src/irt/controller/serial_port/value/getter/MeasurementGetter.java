@@ -25,7 +25,7 @@ public class MeasurementGetter extends GetterAbstract {
 	 * use to get bias board status bits
 	 */
 	public MeasurementGetter(LinkHeader linkHeader) {
-		this(linkHeader, Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
+		this(linkHeader, Packet.PARAMETER_MEASUREMENT_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
 	}
 
 	public MeasurementGetter(byte packetPayloadParameterHeaderCode, short pacetId) {
@@ -33,7 +33,7 @@ public class MeasurementGetter extends GetterAbstract {
 	}
 
 	public MeasurementGetter(LinkHeader linkHeader, byte packetPayloadParameterHeaderCode, short pacetId) {
-		super(linkHeader, Packet.IRT_SLCP_GROUP_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId,
+		super(linkHeader, Packet.GROUP_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId,
 				LogManager.getLogger());
 		this.packetPayloadParameterHeaderCode = packetPayloadParameterHeaderCode;
 	}
@@ -45,10 +45,10 @@ public class MeasurementGetter extends GetterAbstract {
 			PacketHeader ph = packet.getHeader();
 			if(ph!=null){
 				short packetId = ph.getPacketId();
-				if(ph.getGroupId()==Packet.IRT_SLCP_GROUP_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
+				if(ph.getGroupId()==Packet.GROUP_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
 					Object source = null;
 					byte option = ph.getOption();
-					if(option>0 || ph.getPacketType()!=Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+					if(option>0 || ph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
 						source = new Byte((byte) (option>0 ? -option : -20));//-20 no answer
 					}else{
 						Payload pl = packet.getPayload(packetPayloadParameterHeaderCode);

@@ -105,7 +105,7 @@ public class DebagInfoPanel extends JPanel {
 																"Info Controller",
 																new Getter(
 																		DebagInfoPanel.this.linkHeader,
-																		Packet.IRT_SLCP_GROUP_ID_DEVICE_DEBAG,
+																		Packet.GROUP_ID_DEVICE_DEBAG,
 																		(byte) (cbCommand.getSelectedIndex()+1),
 																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO, LogManager.getLogger()),
 																cbCommand,

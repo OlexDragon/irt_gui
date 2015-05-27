@@ -3,14 +3,15 @@ package irt.tools.panel;
 import irt.controller.GuiController;
 import irt.data.DeviceInfo;
 import irt.data.listener.PacketListener;
-import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.DebugPanel;
 import irt.tools.panel.subpanel.InfoPanel;
+import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanel;
 import irt.tools.panel.subpanel.control.ControlPanelSSPA;
 import irt.tools.panel.subpanel.control.ControlPanelUnit;
+import irt.tools.panel.subpanel.monitor.MonitorDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.monitor.MonitorPanel;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
@@ -47,7 +48,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	private InfoPanel infoPanel;
 	private JTabbedPane tabbedPane;
 
-	private LinkHeader linkHeader;
+	protected LinkHeader linkHeader;
 
 	protected final Preferences pref = GuiController.getPrefs();
 
@@ -57,8 +58,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		return monitorPanel;
 	}
 
-	private ControlPanel controlPanel;
-	private ValueChangeListener statusChangeListener;
+	private MonitorPanelAbstract controlPanel;
 
 	protected int deviceType;
 
@@ -76,17 +76,17 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 				monitorPanel = getNewMonitorPanel();
 				userPanel.add(monitorPanel);
 
-				if(statusChangeListener!=null)
-					monitorPanel.addStatusListener(statusChangeListener);
 				controlPanel = getNewControlPanel();
 				userPanel.add(controlPanel);
 
-				JSlider slider = controlPanel.getSlider();
-				slider.setOpaque(false);
-				slider.setOrientation(SwingConstants.VERTICAL);
-				slider.setBounds(230, 11, 33, 400);
-				userPanel.add(slider);
-				userPanel.revalidate();
+				if(controlPanel instanceof ControlPanel){
+					JSlider slider = ((ControlPanel)controlPanel).getSlider();
+					slider.setOpaque(false);
+					slider.setOrientation(SwingConstants.VERTICAL);
+					slider.setBounds(230, 11, 33, 400);
+					userPanel.add(slider);
+					userPanel.revalidate();
+				}
 			}
 			public void ancestorMoved(AncestorEvent event) {
 			}
@@ -106,7 +106,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		
 	}
 
-	public ControlPanel getControlPanel() {
+	public MonitorPanelAbstract getControlPanel() {
 		return controlPanel;
 	}
 
@@ -150,13 +150,37 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	}
 
 	protected MonitorPanelAbstract getNewMonitorPanel() {
-		MonitorPanelAbstract monitorPanel = deviceType==DeviceInfo.DEVICE_TYPE_SSPA ? new MonitorPanelSSPA(deviceType, linkHeader) : new MonitorPanel(deviceType, linkHeader);
+		MonitorPanelAbstract monitorPanel;
+
+		switch(deviceType){
+		case DeviceInfo.DEVICE_TYPE_SSPA:
+			monitorPanel = new MonitorPanelSSPA(deviceType, linkHeader);
+			break;
+		case DeviceInfo.DEVICE_TYPE_DLRS:
+			monitorPanel = new MonitorDownlinkRedundancySystem(deviceType, linkHeader);
+			break;
+		default:
+			monitorPanel = new MonitorPanel(deviceType, linkHeader);
+		}
 		monitorPanel.setLocation(10, 11);
 		return monitorPanel;
 	}
 
-	protected ControlPanel getNewControlPanel(){
-		ControlPanel controlPanel = deviceType==DeviceInfo.DEVICE_TYPE_SSPA ? new ControlPanelSSPA(deviceType, linkHeader, 0) : new ControlPanelUnit(deviceType, linkHeader);
+	protected MonitorPanelAbstract getNewControlPanel(){
+		logger.error("deviceType: {}", deviceType);
+		MonitorPanelAbstract controlPanel;
+
+		switch(deviceType){
+		case DeviceInfo.DEVICE_TYPE_SSPA:
+			controlPanel = new ControlPanelSSPA(deviceType, linkHeader, 0);
+			break;
+		case DeviceInfo.DEVICE_TYPE_DLRS:
+			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+			break;
+		default:
+			controlPanel = new ControlPanelUnit(deviceType, linkHeader);
+		}
+
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
 	}
@@ -185,13 +209,6 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	public LinkHeader getLinkHeader() {
 		return linkHeader;
-	}
-
-	public void addStatusChangeListener(ValueChangeListener valueChangeListener){
-		if(monitorPanel==null)
-			statusChangeListener = valueChangeListener;
-		else
-			monitorPanel.addStatusListener(valueChangeListener);
 	}
 
 	public InfoPanel getInfoPanel() {

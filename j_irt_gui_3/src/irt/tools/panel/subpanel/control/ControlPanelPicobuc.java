@@ -64,7 +64,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 
 						if(packet.getHeader().getPacketId() == PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND){
 
-							if(packet.getHeader().getPacketType()==Packet.IRT_SLCP_PACKET_TYPE_RESPONSE){
+							if(packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE){
 								Boolean enabled = packet.getPayload(0).getByte()==1;
 								logger.trace(packet);
 								fireValueChangeListener(new ValueChangeEvent(enabled, PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND));
@@ -166,7 +166,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 				"ALC",
 				new Getter(
 						linkHeader,
-						Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+						Packet.GROUP_ID_CONFIGURATION,
 						Packet.PARAMETER_CONFIG_FCM_ALC_ENABLED,
 						PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE, logger){
 
@@ -203,7 +203,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 
 		Getter alcRangeGetter = new Getter(
 				linkHeader,
-				Packet.IRT_SLCP_GROUP_ID_CONFIGURATION,
+				Packet.GROUP_ID_CONFIGURATION,
 				Packet.PARAMETER_CONFIG_FCM_ALC_LEVEL_RANGE,
 				PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE, logger){
 

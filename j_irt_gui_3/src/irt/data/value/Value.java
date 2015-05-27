@@ -19,7 +19,7 @@ public class Value extends Observable{
 	}
 	private int type = 0;
 
-	protected long oldValue;
+	protected Long oldValue;
 	protected long value;
 
 	private long minValue;
@@ -200,11 +200,6 @@ public class Value extends Observable{
 		return numberFormat.format(result)+prefix;
 	}
 
-	@Override
-	public String toString() {
-		return toString(value);
-	}
-
 	protected void setMinValue(long minValue) {
 		this.minValue = minValue;
 	}
@@ -251,17 +246,7 @@ public class Value extends Observable{
 		return value;
 	}
 
-	@Override
-	public boolean equals(Object obj) {
-		return obj!=null ? obj.hashCode()==hashCode() : false;
-	}
-
-	@Override
-	public int hashCode() {
-		return new Long(value).hashCode();
-	}
-
-	public long getOldValue() {
+	public Long getOldValue() {
 		return oldValue;
 	}
 
@@ -274,7 +259,7 @@ public class Value extends Observable{
 	}
 
 	public boolean hasChanged() {
-		return oldValue!=value;
+		return oldValue!=null && !oldValue.equals(value);
 	}
 
 	public String getExponentialValue() {
@@ -284,5 +269,20 @@ public class Value extends Observable{
 
 	public boolean isError() {
 		return error;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj!=null ? obj.hashCode()==hashCode() : false;
+	}
+
+	@Override
+	public int hashCode() {
+		return new Long(value).hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return toString(value);
 	}
 }

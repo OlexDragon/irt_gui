@@ -38,7 +38,7 @@ public abstract class IrtMainFrame extends JFrame {
 		    @Override
 		    public void run()
 		    {
-		        logger.error("ShutdownHook");
+		        logger.info("ShutdownHook");
 		    }
 		});
 

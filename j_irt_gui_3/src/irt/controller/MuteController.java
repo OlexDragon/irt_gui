@@ -61,7 +61,7 @@ public class MuteController extends ControllerAbstract {
 				"Mute Controller",
 				new ConfigurationSetter(
 						linkHeader,
-						linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.IRT_SLCP_DATA_FCM_CONFIG_MUTE_CONTROL,
+						linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
 								PacketWork.PACKET_ID_CONFIGURATION_MUTE,
 								LogManager.getLogger()),
 								null,
