@@ -9,7 +9,6 @@ import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
-import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
@@ -26,10 +25,8 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -52,6 +49,13 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 	private static final long serialVersionUID = -3045298115182952527L;
 
 	protected final Logger logger = (Logger) LogManager.getLogger();
+
+	enum RedundancyStatus{
+		UNKNOWN,
+		ONLINE,
+		STANDBY
+	}
+
 	private ItemListener redundancyListener;
 
 	private List<ControllerAbstract> controllers = new ArrayList<>();
@@ -59,7 +63,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 	private REDUNDANCY enable;
 	private REDUNDANCY_MODE mode;
 	private REDUNDANCY_NAME name;
-	private StringData status;
+	private byte status = -1;
 
 	private JComboBox<REDUNDANCY_MODE> cmbBxMode;
 	private JComboBox<REDUNDANCY> cmbBxRedundancy;
@@ -354,6 +358,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 	private class GetterWorker extends SwingWorker<Void, Void>{
 
 		private Packet packet;
+		private RedundancyStatus redundancyStatus;
 
 		public GetterWorker(Packet packet) {
 			logger.trace(packet);
@@ -385,14 +390,13 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		}
 
 		private void setRedundancyStatus() throws IOException {
-			StringData s = packet.getPayload(0).getStringData();
-			if(!s.equals(status)){
-				logger.debug("old={}, new={}", status, s);
+			byte s = packet.getPayload(0).getByte();
+			if(s!=status){
+				logger.debug("\n\tRedundancyStatus:\n\told={}, new={}", status, s);
 				status = s;
-				Properties parseString = parseString(s);
-				boolean online = parseString!=null && !parseString.getProperty("ustatus").equals(STANDBY);
-				setEnable(online);
-				setOnlineText(parseString!=null && parseString.getProperty("ustatus").equals(STANDBY), online);
+				redundancyStatus = RedundancyStatus.values()[s];
+				setEnable(redundancyStatus==RedundancyStatus.STANDBY);
+				setOnlineText(redundancyStatus==RedundancyStatus.STANDBY, redundancyStatus==RedundancyStatus.ONLINE);
 				setImage();
 			}
 		}
@@ -427,35 +431,14 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		}
 
 		private void setImage() throws IOException {
-			Properties p = parseString(status);
-			logger.entry( p, name);
-			boolean online = false;
-			boolean standby = false;
-
-			if(p!=null){
-				String ustatus = p.getProperty("ustatus");
-				if(ustatus!=null){
-					online =  ustatus.equals(ONLINE);
-					standby = ustatus.equals(STANDBY);
-				}
-			}
 			synchronized (logger) {
-				if(online && name==REDUNDANCY_NAME.BUC_A || standby && name==REDUNDANCY_NAME.BUC_B)
+				if(redundancyStatus==RedundancyStatus.ONLINE && name==REDUNDANCY_NAME.BUC_A || redundancyStatus==RedundancyStatus.STANDBY && name==REDUNDANCY_NAME.BUC_B)
 					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
-				else if(standby && name==REDUNDANCY_NAME.BUC_A || online && name==REDUNDANCY_NAME.BUC_B)
+				else if(redundancyStatus==RedundancyStatus.STANDBY && name==REDUNDANCY_NAME.BUC_A || redundancyStatus==RedundancyStatus.ONLINE && name==REDUNDANCY_NAME.BUC_B)
 					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
 				else
 					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")));
 			}
-		}
-
-		private Properties parseString(StringData stringData) throws IOException {
-			Properties p = null;
-			if(stringData!=null){
-				p = new Properties();
-				p.load(new StringReader(stringData.toString()));
-			}
-			return p;
 		}
 
 		private void setEnable(boolean enable) {

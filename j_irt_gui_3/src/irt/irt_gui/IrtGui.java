@@ -76,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.083";
+	public static final String VERTION = "- 3.084";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -555,7 +555,9 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected void done() {
 				try {
-					comboBoxLanguage.setBounds(get());
+					Rectangle get = get();
+					if(get!=null)
+						comboBoxLanguage.setBounds(get);
 				} catch (Exception e) {
 					logger.catching(e);
 				}
