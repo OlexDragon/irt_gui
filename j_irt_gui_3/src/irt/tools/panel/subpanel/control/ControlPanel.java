@@ -156,14 +156,12 @@ public class ControlPanel extends MonitorPanelAbstract {
 		add(txtGain);
 		txtGain.setColumns(10);
 
-		if(deviceType<DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+		if(deviceType>DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
 			btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 			btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
 			btnStoreConfig.setName("Store");
 			p = getConfigButtonPosition();
-			if(p==null)//For WindowBilder Editor
-				p = new Point(151, 101);
 			btnStoreConfig.setBounds(p.x, p.y, size, size);
 			add(btnStoreConfig);
 		}
@@ -332,7 +330,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 			t = new Thread(controller = getNewFreqController(), "ControlPanel.FreqController-"+new RundomNumber());
 			break;
 		case FLAG_ALC:
-			t = new Thread(controller = getNewAlcController(), "ControlPanel.AttenController-"+new RundomNumber());
+			t = new Thread(controller = getNewAlcController(), "ControlPanel.AlcController-"+new RundomNumber());
 			break;
 		default:
 			t = new Thread(controller = getNewAttenController(), "ControlPanel.AttenController-"+new RundomNumber());
