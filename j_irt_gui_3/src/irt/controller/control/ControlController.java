@@ -76,6 +76,7 @@ public class ControlController extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
+				logger.entry("\n\t{}", valueChangeEvent);
 				SetterAbstract pw = (SetterAbstract) getPacketWork();
 
 				if(valueChangeEvent.getID()==pw.getPacketId()){

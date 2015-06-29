@@ -8,8 +8,6 @@ public class Range {
 	private long minimum;
 	private long maximum;
 
-	private int hashCode;
-
 	public Range(Payload pl) {
 		if(pl!=null && pl.getBuffer()!=null){
 			byte[] b = pl.getBuffer();
@@ -22,7 +20,6 @@ public class Range {
 				minimum = pl.getLong(0);
 				maximum = pl.getLong(1);
 			}
-			hashCode = Long.valueOf(minimum^maximum).hashCode();
 		}
 	}
 
@@ -36,12 +33,10 @@ public class Range {
 
 	public void setMinimum(long minimum) {
 		this.minimum = minimum;
-		hashCode = Long.valueOf(minimum^maximum).hashCode();
 	}
 
 	public void setMaximum(long maximum) {
 		this.maximum = maximum;
-		hashCode = Long.valueOf(minimum^maximum).hashCode();
 	}
 
 	@Override
@@ -56,6 +51,6 @@ public class Range {
 
 	@Override
 	public int hashCode() {
-		return hashCode;
+		return Long.valueOf(minimum^maximum).hashCode();
 	}
 }

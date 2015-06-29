@@ -28,7 +28,8 @@ public class ConverterPanel extends DevicePanel {
 		super(null, deviceInfo, 0, 0, 0, 0, maxHeight);
 
 		hasDcOutput = 	deviceType == DeviceInfo.DEVICE_TYPE_L_TO_140 ||
-						deviceType == DeviceInfo.DEVICE_TYPE_L_TO_70;
+						deviceType == DeviceInfo.DEVICE_TYPE_L_TO_70 ||
+						deviceType == DeviceInfo.DEVICE_TYPE_C_TO_L;
 
 		hasFreqSet 	= 	deviceType == DeviceInfo.DEVICE_TYPE_L_TO_KU||
 						deviceType == DeviceInfo.DEVICE_TYPE_L_TO_C	||
