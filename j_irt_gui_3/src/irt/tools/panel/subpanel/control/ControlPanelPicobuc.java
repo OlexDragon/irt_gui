@@ -99,9 +99,25 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 			}
 		};
 	private DefaultController alcEnableGetterController;
+	private JLabel lblSave;
 
 	public ControlPanelPicobuc(int deviceType, LinkHeader linkHeader) {
 		super(deviceType, linkHeader, deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? (short)ActionFlags.FLAG_FREQUENCY.ordinal() : (short)ActionFlags.FLAG_ATTENUATION.ordinal());
+		
+		Font font = Translation.getFont()
+				.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
+				.deriveFont(Font.BOLD);
+
+		lblSave = new JLabel();
+		lblSave.setHorizontalAlignment(SwingConstants.LEFT);
+		lblSave.setForeground(Color.YELLOW);
+		lblSave.setFont(font);
+		int x = Translation.getValue(Integer.class, "control.label.save.x", 153);
+		int y = Translation.getValue(Integer.class, "control.label.save.y", 107);
+		int width = Translation.getValue(Integer.class, "control.label.save.width", 61);
+		lblSave.setBounds(x, y, width, 20);
+		add(lblSave);
+
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
 				startAlcEnableController();
@@ -114,7 +130,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 			}
 		});
 		
-		Font font = Translation.getFont().deriveFont(16f);
+		font = Translation.getFont().deriveFont(16f);
 
 		cbLoSelect = new JComboBox<String>();
 		cbLoSelect.setName("LO Select");
