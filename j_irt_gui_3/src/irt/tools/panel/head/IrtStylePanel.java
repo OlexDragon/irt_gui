@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.geom.Arc2D;
 
 import javax.swing.JPanel;
 
@@ -51,11 +50,6 @@ public class IrtStylePanel extends JPanel {
 			g2.drawRoundRect(2, 2, w - 4, h - 4, cornerWidth, cornerHeight);
 			g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
 			g2.setPaint(new GradientPaint(0, 0, Color.WHITE, 0, getHeight() / 2, Color.BLUE, true));
-			if (isArc) {
-				int arcStart = this.arcStart;
-				for (; arcStart < getWidth(); arcStart += arcStep)
-					g2.draw(new Arc2D.Double(arcStart, 0, arcWidth, getHeight(), -42, 80, Arc2D.OPEN));
-			}
 			paintChildren(g2);
 			g.dispose();
 		}

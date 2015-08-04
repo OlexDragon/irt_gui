@@ -32,7 +32,8 @@ public class ControlControllerPicobuc extends ControlController{
 
 					PacketThread packetThread = pw.getPacketThread();
 					if(source instanceof ComboBoxModel){
-						comboBoxfreqSet.setModel((ComboBoxModel<Object>) source);
+						ComboBoxModel<Object> model = (ComboBoxModel<Object>) source;
+						comboBoxfreqSet.setModel(model);
 						comboBoxfreqSet.addItemListener(itemListenerComboBox);
 
 						pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD);

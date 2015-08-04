@@ -43,7 +43,8 @@
 <!--  	<Logger name="irt.data.PacketThread" level="INFO"/> -->
 <!--  	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc" level="INFO"/> -->
 <!--  	<Logger name="irt.tools.panel.subpanel.control.ControlPanelPicobuc$7" level="INFO"/> -->
-<!--  	<Logger name="irt.controller.control.ControlController" level="ALL"/> -->
+ 	<Logger name="irt.controller.control.ControlController" level="debug"/>
+ 	<Logger name="irt.controller.control.ControlControllerPicobuc" level="all"/>
 <!--  	<Logger name="irt.controller.AlarmsController" level="INFO"/> -->
 <!--  	<Logger name="irt.tools.panel.subpanel.RedundancyPanel" level="debug"/> -->
 

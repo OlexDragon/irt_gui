@@ -129,21 +129,6 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 					alcEnableGetterController.stop();
 			}
 		});
-		
-		font = Translation.getFont().deriveFont(16f);
-
-		cbLoSelect = new JComboBox<String>();
-		cbLoSelect.setName("LO Select");
-		cbLoSelect.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0; }};}});
-		cbLoSelect.addPopupMenuListener(Listeners.popupMenuListener);
-		cbLoSelect.setForeground(Color.YELLOW);
-		cbLoSelect.setBackground(color);
-		cbLoSelect.setCursor(cursor);
-		cbLoSelect.setFont(font);
-		cbLoSelect.setBounds(10, 141, 194, 26);
-		add(cbLoSelect);
-
-		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 
 		if(deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
 
