@@ -9,7 +9,6 @@ import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.IdValueForComboBox;
-import irt.data.Listeners;
 import irt.data.PacketWork;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
@@ -30,18 +29,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
-import javax.swing.plaf.basic.BasicComboBoxUI;
 
 @SuppressWarnings("serial")
 public class ControlPanelPicobuc extends ControlPanelSSPA {
 
-	private JComboBox<String>  cbLoSelect;
 	private SwitchBox switchBox;
 	private DefaultController alcEnableSetterController;
 

@@ -84,7 +84,7 @@ public class IrtPanel extends MainPanel {
 		setSize(1, 46);
 		setArcStart(14);
 		setArcWidth(45);
-		setBackground(new Color(0xFF, 0xFF, 0xFF, 100));
+		setBackground(new Color(0x3B, 0x4A, 0x8B, 100));
 
 		String companyName = PROPERTIES.getProperty("company_name");
 
