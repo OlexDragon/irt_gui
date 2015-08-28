@@ -9,6 +9,8 @@ import irt.data.listener.ValueChangeListener;
 
 import java.awt.Component;
 
+import org.apache.logging.log4j.Logger;
+
 public class SetterController extends ControllerAbstract {
 
 	private ToDo toDo;
@@ -17,8 +19,8 @@ public class SetterController extends ControllerAbstract {
  * @param packetWork should be command 
  * @param style Controller work style 
  */
-	public SetterController(int deviceType, String controllerName, PacketWork packetWork, ToDo toDo, Style style) {
-		super(deviceType, controllerName, packetWork, null, style);
+	public SetterController(int deviceType, String controllerName, PacketWork packetWork, ToDo toDo, Style style, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, style, logger);
 		this.toDo = toDo;
 
 		Thread t = new Thread(this, "SetterController-"+new RundomNumber().toString());

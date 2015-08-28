@@ -16,6 +16,8 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.logging.log4j.Logger;
+
 public class DacController extends ControllerAbstract {
 
 	private int dacNumber;
@@ -27,8 +29,8 @@ public class DacController extends ControllerAbstract {
 
 	private Value value;
 
-	public DacController(int deviceType, String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
-		super(deviceType, controllerName, packetWork, null, null);
+	public DacController(int deviceType, String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, null, logger);
 		value = setValue();
 		setListeners();
 		this.dacNumber = dacNumber;

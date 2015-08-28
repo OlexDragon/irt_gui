@@ -106,7 +106,7 @@ public class AutoAddressPanel extends JPanel {
 									return logger.exit(true);
 								}};
 
-							DefaultController target = new DefaultController(deviceType, "Address Checker N"+i, packetWork, Style.CHECK_ONCE);
+							DefaultController target = new DefaultController(deviceType, "Address Checker N"+i, packetWork, Style.CHECK_ONCE, logger);
 							synchronized (logger) {
 								if(run)
 									controllers.add(target);

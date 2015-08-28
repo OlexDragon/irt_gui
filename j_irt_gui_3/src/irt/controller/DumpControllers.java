@@ -117,7 +117,8 @@ public class DumpControllers{
 								return p;
 							}
 						},
-						Style.CHECK_ALWAYS)
+						Style.CHECK_ALWAYS,
+						logger)
 				{
 					@Override
 					protected PacketListener getNewPacketListener() {
@@ -481,7 +482,7 @@ public class DumpControllers{
 
 	private void addDumpController(Getter getter, int waitTime, String threadName){
 
-		DefaultController dumpController = new DefaultController(deviceInfo.getType(), threadName, getter, Style.CHECK_ALWAYS){
+		DefaultController dumpController = new DefaultController(deviceInfo.getType(), threadName, getter, Style.CHECK_ALWAYS, logger){
 
 			@Override
 			protected PacketListener getNewPacketListener() {

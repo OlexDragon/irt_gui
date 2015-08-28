@@ -45,9 +45,12 @@ import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class PLLsPanel extends JPanel {
+
+	private Logger logger = LogManager.getLogger();
 
 	private static final int DN = 4194304;
 	private static final int UP = 2097152;
@@ -344,7 +347,7 @@ public class PLLsPanel extends JPanel {
 											PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG,
 											Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 							0,
-							Style.CHECK_ONCE);
+							Style.CHECK_ONCE, logger);
 
 		Thread t = new Thread(registerController, "PLLsPanel.PLL reg.N9-"+new RundomNumber());
 		int priority = t.getPriority();

@@ -22,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class AlarmsController extends ControllerAbstract {
 
@@ -73,8 +74,8 @@ public class AlarmsController extends ControllerAbstract {
 
 	private volatile List<DefaultController> alarmControllers = new ArrayList<>();
 
-	public AlarmsController(int deviceType, LinkHeader linkHeader, JPanel panel) {
-		super(deviceType, "AlarmsController", new Getter(linkHeader, Packet.GROUP_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs, LogManager.getLogger()), panel, Style.CHECK_ONCE);
+	public AlarmsController(int deviceType, LinkHeader linkHeader, JPanel panel, Logger logger) {
+		super(deviceType, "AlarmsController", new Getter(linkHeader, Packet.GROUP_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs, LogManager.getLogger()), panel, Style.CHECK_ONCE, logger);
 		this.linkHeader = linkHeader;
 	}
 
@@ -107,7 +108,7 @@ public class AlarmsController extends ControllerAbstract {
 															deviceType,
 															name,
 															getter,
-															Style.CHECK_ALWAYS){
+															Style.CHECK_ALWAYS, logger){
 
 															@Override
 															protected ValueChangeListener addGetterValueChangeListener() {

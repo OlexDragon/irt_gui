@@ -36,6 +36,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.Logger;
+
 public class DeviceDebugController extends ControllerAbstract {
 
 	protected Value value;
@@ -61,8 +63,8 @@ public class DeviceDebugController extends ControllerAbstract {
 /**
  * @param addrToSave if addrToSave < 0 save command deasn't work
  */
-	public DeviceDebugController(int deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
-		super(deviceType, controllerName, packetWork, null, style);
+	public DeviceDebugController(int deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, style, logger);
 		logger.entry(controllerName);
 
 		this.addrToSave = addrToSave;
@@ -81,8 +83,8 @@ public class DeviceDebugController extends ControllerAbstract {
 		logger.exit();
 	}
 
-	public DeviceDebugController(int deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
-		super(deviceType, controllerName, packetWork, null, null);
+	public DeviceDebugController(int deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, null, logger);
 		logger.entry();
 
 		this.cbCommand = cbCommand;
@@ -186,7 +188,15 @@ public class DeviceDebugController extends ControllerAbstract {
 
 								if(addrToSave>=0 && oldValue!=uv.getValue()){
 									int index = urv.getIndex();
-									new DeviceDebagSaveController(deviceType, txtField, new DeviceDebagSetter(unitPacketThread.getLinkHeader(), index, addrToSave, (short) (((GetterAbstract)unitPacketWork).getPacketId()+1), Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE, 0), Style.CHECK_ONCE);
+									new DeviceDebagSaveController(
+											deviceType, txtField,
+											new DeviceDebagSetter(unitPacketThread.getLinkHeader(),
+													index,
+													addrToSave,
+													(short) (((GetterAbstract)unitPacketWork).getPacketId()+1),
+													Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE,
+													0),
+											Style.CHECK_ONCE, logger);
 								}
 							} else {
 								Value value = uv;

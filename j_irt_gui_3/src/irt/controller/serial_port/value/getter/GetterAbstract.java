@@ -69,6 +69,10 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		packetThread.setValue(registerValue);
 	}
 
+	public byte getPacketType() {
+		return packetType;
+	}
+
 	public void setPacketType(byte packetType){
 		packetThread.setType(packetType);
 		packetThread.preparePacket();

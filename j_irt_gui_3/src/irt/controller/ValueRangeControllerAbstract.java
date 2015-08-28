@@ -16,6 +16,8 @@ import java.awt.event.FocusListener;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
+import org.apache.logging.log4j.Logger;
+
 public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 	private Value stepValue;
@@ -31,8 +33,8 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 	protected TextSliderController textSliderController;
 
-	public ValueRangeControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(deviceType, controllerName, packetWork, null, style);
+	public ValueRangeControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, style, logger);
 		this.txtField = txtField;
 		this.slider = slider;
 		this.txtStep = txtStep;
@@ -124,7 +126,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
-		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId, logger), value, txtField, slider, style);
+		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId, logger), value, txtField, slider, style, logger);
 		Thread t = new Thread(textSliderController, ValueRangeControllerAbstract.class.getSimpleName()+".TextSliderController-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

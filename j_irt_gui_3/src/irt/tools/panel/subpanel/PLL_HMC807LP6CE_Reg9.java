@@ -111,7 +111,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 						INDEX,
 						ADDRESS,
 						PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG,
-						Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), Style.CHECK_ONCE){
+						Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), Style.CHECK_ONCE, logger){
 
 							@Override
 							protected PacketListener getNewPacketListener() {

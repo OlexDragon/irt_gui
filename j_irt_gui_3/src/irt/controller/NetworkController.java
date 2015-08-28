@@ -54,8 +54,8 @@ public class NetworkController extends ControllerAbstract {
 
 	private KeyListener keyListener;
 
-	public NetworkController(int deviceType, PacketWork packetWork, JPanel panel, Style style) {
-		super(deviceType, "Network Controller", packetWork, panel, style);
+	public NetworkController(int deviceType, PacketWork packetWork, JPanel panel, Style style, Logger logger) {
+		super(deviceType, "Network Controller", packetWork, panel, style, logger);
 		logger.trace("NetworkController();");
 	}
 

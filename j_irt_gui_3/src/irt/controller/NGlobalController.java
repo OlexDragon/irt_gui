@@ -16,13 +16,15 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
+import org.apache.logging.log4j.Logger;
+
 public class NGlobalController extends ControllerAbstract {
 
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public NGlobalController(int deviceType, JCheckBox checkBox, PacketWork packetWork) {
-		super(deviceType, "NGlobalController", packetWork, null, null);
+	public NGlobalController(int deviceType, JCheckBox checkBox, PacketWork packetWork, Logger logger) {
+		super(deviceType, "NGlobalController", packetWork, null, null, logger);
 		setListeners();
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);

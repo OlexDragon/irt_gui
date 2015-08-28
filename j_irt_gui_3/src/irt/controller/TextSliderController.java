@@ -22,6 +22,8 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.logging.log4j.Logger;
+
 public class TextSliderController extends ControllerAbstract {
 
 	private Value value;
@@ -32,8 +34,8 @@ public class TextSliderController extends ControllerAbstract {
 	private ActionListener txtActionListener;
 	private KeyListener txtKeyListener;
 
-	public TextSliderController(int deviceType, String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
-		super(deviceType, controllerName, packetWork, null, style);
+	public TextSliderController(int deviceType, String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, style, logger);
 		this.value = value;
 		slider.setMinimum(value.getRelativeMinValue());
 		slider.setMaximum((int) value.getRelativeMaxValue());

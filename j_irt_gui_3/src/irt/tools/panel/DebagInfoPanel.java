@@ -27,10 +27,12 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel {
 
+	private final Logger logger = LogManager.getLogger();
 	private DeviceDebugController deviceDebagInfoController;
 	private LinkHeader linkHeader;
 	private JTextArea textArea;
@@ -110,7 +112,7 @@ public class DebagInfoPanel extends JPanel {
 																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO, LogManager.getLogger()),
 																cbCommand,
 																cbParameter,
-																DebagInfoPanel.this.textArea);
+																DebagInfoPanel.this.textArea, logger);
 
 				deviceDebagInfoController.setWaitTime(10000);//10 sec
 

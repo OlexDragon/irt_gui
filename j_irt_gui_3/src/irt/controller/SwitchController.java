@@ -1,27 +1,30 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.IdValue;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
+import org.apache.logging.log4j.Logger;
+
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.getter.GetterAbstract;
+import irt.controller.serial_port.value.setter.Setter;
+import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.data.PacketThread;
+import irt.data.PacketWork;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.packet.Packet;
+
 public class SwitchController extends ControllerAbstract {
 
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchController(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork) {
-		super(deviceType, controllerName, packetWork, null, null);
+	public SwitchController(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, null, logger);
 		this.checkBox = checkBox;
 	}
 
@@ -33,17 +36,50 @@ public class SwitchController extends ControllerAbstract {
 			public void actionPerformed(ActionEvent e) {
 				SetterAbstract as = (SetterAbstract) getPacketWork();
 				PacketThread pt = as.getPacketThread();
-				if(pt.getPacket()!=null){
-					Object value = pt.getValue();
+				if(pt.getPacket()!=null)
+					doSwitch(as, pt.getValue());
+			}
 
-					if(value!=null){
-						if(value instanceof Integer)
-							as.preparePacketToSend(new IdValue(as.getPacketParameterHeaderCode(), ((Integer)value) == 0 ? 1 : 0));
-						else
-							as.preparePacketToSend(new IdValue(as.getPacketParameterHeaderCode(), ((Byte)value) == 0 ? (byte)1 : (byte)0));
+			private void doSwitch(SetterAbstract as, Object value) {
+				logger.error(logger.getName());
 
-						setSend(true);
-					}
+				if(value!=null){
+					if(value instanceof Integer)
+						value = ((Integer)value) == 0 ? 1 : 0;
+					else
+						value = ((Byte)value) == 0 ? (byte)1 : (byte)0;
+
+					setSend(true);
+
+					Setter setter = new Setter(
+							as.getLinkHeader(),
+							Packet.PACKET_TYPE_COMMAND,
+							as.getGroupId(),
+							as.getPacketParameterHeaderCode(),
+							PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER,
+							value,
+							logger);
+					DefaultController controller = new DefaultController(deviceType, "Calibration Mode Controller", setter, Style.CHECK_ONCE, logger){
+
+						@Override
+						protected ValueChangeListener addGetterValueChangeListener() {
+							final DefaultController controller = this;
+
+							return new ValueChangeListener() {
+
+								@Override
+								public void valueChanged(ValueChangeEvent valueChangeEvent) {
+									controller.stop();
+								}
+							};
+						}
+					};
+					Thread t = new Thread(controller);
+					int priority = t.getPriority();
+					if(priority>Thread.MIN_PRIORITY)
+						t.setPriority(priority-1);
+					t.setDaemon(true);
+					t.start();
 				}
 			}
 		};

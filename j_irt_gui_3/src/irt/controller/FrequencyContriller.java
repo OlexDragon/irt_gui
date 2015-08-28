@@ -14,13 +14,14 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class FrequencyContriller extends ValueRangeControllerAbstract {
 
 	private final boolean isConverter;
 	private Style style;
 
-	public FrequencyContriller(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+	public FrequencyContriller(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style, Logger logger) {
 		super(deviceType,
 				"Frequency Controller",
 				new ConfigurationSetter(
@@ -28,7 +29,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 						linkHeader==null || linkHeader.getIntAddr()==0
 												? Packet.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE
 												: Packet.IRT_SLCP_PARAMETER_CONFIGURATION_PICOBUC_USER_FREQUENCY_RANGE,
-				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE);
+				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE, logger);
 
 		isConverter = linkHeader==null || linkHeader.getIntAddr()==0;
 		this.style = style;

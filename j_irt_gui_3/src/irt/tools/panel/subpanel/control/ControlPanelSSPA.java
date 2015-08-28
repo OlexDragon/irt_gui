@@ -19,7 +19,7 @@ public class ControlPanelSSPA extends ControlPanel {
 	@Override
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> controllers = new ArrayList<>();
-		controllers.add(new ControlControllerPicobuc(deviceType, getLinkHeader(),this));
+		controllers.add(new ControlControllerPicobuc(deviceType, getLinkHeader(),this, logger));
 		return controllers;
 	}
 

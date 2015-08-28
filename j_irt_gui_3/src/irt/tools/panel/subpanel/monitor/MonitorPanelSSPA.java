@@ -227,19 +227,21 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 	protected void packetRecived(byte parameter, byte flags, int value) {
 		logger.debug("parameter={}, flags={}, value={}", parameter, flags, value);
+		logger.error(logger.getName());
 
 		ValueDouble v;
 		switch(parameter){
 		case Packet.PARAMETER_MEASUREMENT_OUTPUT_POWER://or Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
 			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+				int hashCode = 31*flags + value;
 				if(flags==0)
 					lblOutputPower.setText("N/A");
-				else if (value != output) {
-					output = value;
+				else if (hashCode != output) {
+					output = hashCode;
 					v = new ValueDouble(value, 1);
 					v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
 					lblOutputPower.setText(getOperator(flags)+v.toString());
-					ProgressBar.setValue(flags==1 ? v.getValue() : 0);
+					ProgressBar.setValue(flags==1 ? v.getValue() : flags==3 ? Long.MAX_VALUE : 0);
 				}
 				logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
 			}else

@@ -48,9 +48,13 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel {
+
+	private final Logger logger = LogManager.getLogger();
+
 	private JTextField txtDAC1;
 	private JTextField txtDAC2;
 	private JTextField txtDAC3;
@@ -85,6 +89,7 @@ public class DACsPanel extends JPanel {
 	private JSlider sliderGainOffset;
 
 	public DACsPanel(final int deviceType, final LinkHeader linkHeader) {
+
 		setLayout(null);
 		addAncestorListener(new AncestorListener() {
 			private List<ControllerAbstract> threadList = new ArrayList<>();
@@ -104,49 +109,49 @@ public class DACsPanel extends JPanel {
 			public void ancestorAdded(AncestorEvent arg0) {
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger) :
+							new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger));
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger) :
+							new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger));
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger) :
+							new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger));
 
 				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+						new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger) :
+							new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS, logger));
 
 				//Calibration mode
-				startController(new SwitchController(deviceType, "Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.GROUP_ID_DEVICE_DEBAG, Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE)));
+				startController(new SwitchController(deviceType, "Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, Packet.GROUP_ID_DEVICE_DEBAG, Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE), logger));
 
 				if(linkHeader==null || linkHeader.getAddr()==0){
 					Value value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1, logger));
 
 					value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "Output Power Controller", lblOutputPower, new DeviceDebagGetter(null,  10, 1, PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "Output Power Controller", lblOutputPower, new DeviceDebagGetter(null,  10, 1, PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1, logger));
 
 					value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "Temperature Controller", lblTemperature, new DeviceDebagGetter(null,  10, 2, PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "Temperature Controller", lblTemperature, new DeviceDebagGetter(null,  10, 2, PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1, logger));
 
 					value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "Current Controller", lblCurrent, new DeviceDebagGetter(null,  10, 4, PacketWork.PACKET_ID_FCM_ADC_CURRENT, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "Current Controller", lblCurrent, new DeviceDebagGetter(null,  10, 4, PacketWork.PACKET_ID_FCM_ADC_CURRENT, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1, logger));
 
 					value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "5.5V Controller", lbl5V5, new DeviceDebagGetter(null,  10, 6, PacketWork.PACKET_ID_FCM_ADC_5V5, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "5.5V Controller", lbl5V5, new DeviceDebagGetter(null,  10, 6, PacketWork.PACKET_ID_FCM_ADC_5V5, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1, logger));
 
 					value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "3.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "3.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1, logger));
 
 					value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1, logger));
 
 					value = new Value(0, -100, 100, 0);
 					startController(new TextSliderController(deviceType, "Gain Offset Controller", new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET,
-							LogManager.getLogger()), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
+							LogManager.getLogger()), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE, logger));
 				}
 
 			}

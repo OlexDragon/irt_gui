@@ -14,12 +14,14 @@ import java.awt.Component;
 
 import javax.swing.JOptionPane;
 
+import org.apache.logging.log4j.Logger;
+
 public class StoreConfigController extends ControllerAbstract {
 
 	private Component owner;
 
-	public StoreConfigController(int deviceType, LinkHeader linkHeader, Component owner, Style style) {
-		super(deviceType, "Stor Config Controller", new Setter(linkHeader, Packet.GROUP_ID_CONFIG_PROFILE, Packet.PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style);
+	public StoreConfigController(int deviceType, LinkHeader linkHeader, Component owner, Style style, Logger logger) {
+		super(deviceType, "Stor Config Controller", new Setter(linkHeader, Packet.GROUP_ID_CONFIG_PROFILE, Packet.PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style, logger);
 		setSend(false);
 		getPacketWork().getPacketThread().setDataPacketTypeCommand();
 

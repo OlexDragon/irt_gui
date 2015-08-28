@@ -123,7 +123,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 							PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER,
 							switchBox.isSelected() ? (byte)1 : (byte)2,
 							logger);
-		controller = new DefaultController(deviceType, "DLRS Controller", setter, Style.CHECK_ALWAYS){
+		controller = new DefaultController(deviceType, "DLRS Controller", setter, Style.CHECK_ALWAYS, logger){
 
 			@Override
 			protected ValueChangeListener addGetterValueChangeListener() {
@@ -186,7 +186,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		DefaultController controller = new DefaultController(deviceType, "DLRS Controller", getter, Style.CHECK_ALWAYS);
+		DefaultController controller = new DefaultController(deviceType, "DLRS Controller", getter, Style.CHECK_ALWAYS, logger);
 		controller.setWaitTime(8000);
 
 		l.add(controller);

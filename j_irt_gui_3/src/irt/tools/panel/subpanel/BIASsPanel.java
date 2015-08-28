@@ -142,7 +142,7 @@ public class BIASsPanel extends JPanel {
 										isMainBoard ? 6 : 206,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_NGLOBAL,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE)));
+										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), logger));
 
 				int index = isMainBoard ? 1 :201;
 				((DeviceDebugController)addController(
@@ -156,7 +156,7 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
-						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
 
 				((DeviceDebugController)addController(
 						new DeviceDebugController(deviceType, isNewBiasBoard ? "Potentiometer 1" : "Potentiometer 2", isNewBiasBoard ? txtPotentiometer1 : txtPotentiometer2,
@@ -168,7 +168,7 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N2,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
-						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
 
 				index = isMainBoard ? 2 : 202;
 				((DeviceDebugController)addController(
@@ -181,7 +181,7 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N3,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
-						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
 
 				((DeviceDebugController)addController(
 						new DeviceDebugController(deviceType, isNewBiasBoard ? "Potentiometer 6" : "Potentiometer 4", isNewBiasBoard ? txtPotentiometer6 : txtPotentiometer4,
@@ -193,7 +193,7 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N4,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
-						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
 
 				lblPotentiometer5.setVisible(isNewBiasBoard);
 				lblPotentiometer6.setVisible(isNewBiasBoard);
@@ -220,7 +220,7 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N5,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
-						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
 
 					((DeviceDebugController)addController(
 							new DeviceDebugController(deviceType, isNewBiasBoard ? "Potentiometer 3" : "Potentiometer 6", isNewBiasBoard ? txtPotentiometer3 : txtPotentiometer6,
@@ -232,7 +232,7 @@ public class BIASsPanel extends JPanel {
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N6,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
-						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
 					multiplier = 10.8;
 				}else
 					multiplier = 5.4;
@@ -247,7 +247,7 @@ public class BIASsPanel extends JPanel {
 										isMainBoard ? 3 : 203,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N1,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
-								)
+								), logger
 						)
 				);
 				addController(
@@ -260,7 +260,7 @@ public class BIASsPanel extends JPanel {
 										isMainBoard ? 4 : 204,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N2,
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
-								)
+								), logger
 						)
 				);
 
@@ -279,7 +279,7 @@ public class BIASsPanel extends JPanel {
 								Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 						),
 						value,
-						multiplier)
+						multiplier, logger)
 				);
 
 				value = new ValueDouble(0, 0, 4095, 0);
@@ -297,7 +297,7 @@ public class BIASsPanel extends JPanel {
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
-								multiplier
+								multiplier, logger
 						)
 				);
 
@@ -316,7 +316,8 @@ public class BIASsPanel extends JPanel {
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
-								1
+								1,
+								logger
 						)
 				);
 
@@ -335,7 +336,8 @@ public class BIASsPanel extends JPanel {
 										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
-								1
+								1,
+								logger
 						)
 				);
 			}
@@ -572,7 +574,7 @@ public class BIASsPanel extends JPanel {
 										Packet.PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
 										PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE
 									),
-									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
+									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE, logger
 							);
 						else{
 							logger.trace("\n\t{}", controller);
@@ -626,7 +628,7 @@ public class BIASsPanel extends JPanel {
 
 			private DefaultController createController(DeviceDebagSetter setter, int index, int address) {
 				logger.entry(setter, index, address);
-				return new DefaultController(deviceType, "Potenciometer index="+index+", address="+address, setter, Style.CHECK_ONCE){
+				return new DefaultController(deviceType, "Potenciometer index="+index+", address="+address, setter, Style.CHECK_ONCE, logger){
 
 					@Override
 					protected PacketListener getNewPacketListener() {
@@ -674,7 +676,7 @@ public class BIASsPanel extends JPanel {
 						(Integer)calibrationMode.ordinal(),
 						logger
 				);
-				controller = new DefaultController(deviceType, "CalibrationMode", setter, Style.CHECK_ONCE){
+				controller = new DefaultController(deviceType, "CalibrationMode", setter, Style.CHECK_ONCE, logger){
 
 					@Override
 					protected PacketListener getNewPacketListener() {

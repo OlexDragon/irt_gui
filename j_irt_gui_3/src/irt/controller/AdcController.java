@@ -1,5 +1,12 @@
 package irt.controller;
 
+import java.awt.Component;
+import java.text.DecimalFormat;
+
+import javax.swing.JLabel;
+
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.data.PacketWork;
@@ -9,11 +16,6 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketHeader;
 import irt.data.value.Value;
 
-import java.awt.Component;
-import java.text.DecimalFormat;
-
-import javax.swing.JLabel;
-
 public class AdcController extends ControllerAbstract {
 
 	private final double multiplier;
@@ -22,14 +24,14 @@ public class AdcController extends ControllerAbstract {
 	
 	Value value = new Value(0, 0, 4095, 0);
 
-	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, double multiplier) {
-		super(deviceType, controllerName, packetWork, null, null);
+	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, double multiplier, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, null, logger);
 		this.label = label;
 		this.multiplier = multiplier;
 	}
 
-	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, Value value, double multiplier) {
-		this(deviceType, controllerName, label, packetWork, multiplier);
+	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, Value value, double multiplier, Logger logger) {
+		this(deviceType, controllerName, label, packetWork, multiplier, logger);
 		this.value = value;
 	}
 

@@ -12,10 +12,12 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 import javax.swing.ComboBoxModel;
 
+import org.apache.logging.log4j.Logger;
+
 public class ControlControllerPicobuc extends ControlController{
 
-	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, MonitorPanelAbstract panel) {
-		super(deviceType, "ControlControllerPicobuc", linkHeader, panel);
+	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, MonitorPanelAbstract panel, Logger logger) {
+		super(deviceType, "ControlControllerPicobuc", linkHeader, panel, logger);
 	}
 
 	@Override

@@ -343,15 +343,15 @@ public class ControlPanel extends MonitorPanelAbstract {
 	}
 
 	protected AttenuationController getNewAttenController() {
-		return new AttenuationController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+		return new AttenuationController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS, logger);
 	}
 
 	protected GainController getNewGainController() {
-		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS, logger);
 	}
 
 	protected FrequencyContriller getNewFreqController() {
-		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS, logger);
 	}
 
 	protected ControllerAbstract getNewAlcController() {
@@ -410,7 +410,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 	@Override
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> controllers = new ArrayList<>();
-		controllers.add(new ControlController(deviceType, getClass().getSimpleName(), getLinkHeader(),this));
+		controllers.add(new ControlController(deviceType, getClass().getSimpleName(), getLinkHeader(),this, logger));
 		return controllers;
 	}
 

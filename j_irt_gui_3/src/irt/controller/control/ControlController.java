@@ -31,6 +31,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ControlController extends ControllerAbstract {
 	private JButton btnMute;
@@ -46,12 +47,12 @@ public class ControlController extends ControllerAbstract {
 	 * Use for LO control
 	 * @param hasFreqSet 
 	 */
-	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel) {
-		super(deviceType, controllerName, new ConfigurationSetter(linkHeader, LogManager.getLogger()), panel, Style.CHECK_ALWAYS);
+	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel, Logger logger) {
+		super(deviceType, controllerName, new ConfigurationSetter(linkHeader, LogManager.getLogger()), panel, Style.CHECK_ALWAYS, logger);
 		if(comboBoxfreqSet==null)
 			setSend(false);
 
-		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
+		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS, logger);
 		Thread t = new Thread(muteController, "ControlController.MuteController-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
@@ -60,7 +61,7 @@ public class ControlController extends ControllerAbstract {
 		t.start();
 
 		if(chbxLNB!=null){
-			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB, logger));
+			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB, logger), logger);
 			t = new Thread(lnbController, "ControlController.SwitchController-"+new RundomNumber().toString());
 			priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)
@@ -135,7 +136,7 @@ public class ControlController extends ControllerAbstract {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try{
-							new StoreConfigController(deviceType, getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE);
+							new StoreConfigController(deviceType, getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE, logger);
 						}catch(Exception ex){
 							logger.catching(ex);
 						}

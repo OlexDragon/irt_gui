@@ -35,8 +35,8 @@ public class HeadPanel extends MainPanel {
 		setSize(Translation.getValue(Integer.class, "headPanel.width", 650), Translation.getValue(Integer.class, "headPanel.height", 74));
 		setBackground(BACKGROUND_COLOR);
 		setCorner(35);
-		setArcStart(140);
-		setArcStep(355);
+		setArcStart(-40);
+		setArcStep(155);
 		setArcWidth(80);
 
 		ledPowerOn = new LED(Color.GREEN, Translation.getValue(String.class, "power_on", "POWER ON"));

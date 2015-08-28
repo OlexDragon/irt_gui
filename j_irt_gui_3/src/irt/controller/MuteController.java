@@ -24,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class MuteController extends ControllerAbstract {
 
@@ -56,7 +57,7 @@ public class MuteController extends ControllerAbstract {
 		}
 	};
 
-	public MuteController(int deviceType, LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style) {
+	public MuteController(int deviceType, LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style, Logger logger) {
 		super(deviceType,
 				"Mute Controller",
 				new ConfigurationSetter(
@@ -65,7 +66,7 @@ public class MuteController extends ControllerAbstract {
 								PacketWork.PACKET_ID_CONFIGURATION_MUTE,
 								LogManager.getLogger()),
 								null,
-								style);
+								style, logger);
 		this.btnMute = btnMute;
 		this.btnMute.addActionListener(actionListener);
 		this.lblMute = lblMute;

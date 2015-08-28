@@ -1,12 +1,5 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.data.PacketWork;
-import irt.data.RegisterValue;
-import irt.data.RundomNumber;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,12 +7,16 @@ import java.awt.event.ActionListener;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
+
+import irt.controller.control.ControllerAbstract;
+import irt.data.PacketWork;
+import irt.data.RegisterValue;
+import irt.data.RundomNumber;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
 
 public class DeviceDebagSaveController extends ControllerAbstract {
-
-	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private JTextField txtField;
 	private Timer timer;
@@ -32,8 +29,8 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		}
 	};
 
-	public DeviceDebagSaveController(int deviceType, JTextField txtField, PacketWork packetWork, Style stile) {
-		super(deviceType, "DeviceDebagSaveController", packetWork, null, stile);
+	public DeviceDebagSaveController(int deviceType, JTextField txtField, PacketWork packetWork, Style stile, Logger logger) {
+		super(deviceType, "DeviceDebagSaveController", packetWork, null, stile, logger);
 		this.txtField = txtField;
 
 		timer = new Timer(9000, timerListener);

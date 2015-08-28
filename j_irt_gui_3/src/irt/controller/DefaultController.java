@@ -6,10 +6,12 @@ import irt.data.listener.ValueChangeListener;
 
 import java.awt.Component;
 
+import org.apache.logging.log4j.Logger;
+
 public class DefaultController extends ControllerAbstract {
 
-	public DefaultController(int deviceType, String controllerName, PacketWork packetWork, Style style) {
-		super(deviceType, controllerName, packetWork, null, style);
+	public DefaultController(int deviceType, String controllerName, PacketWork packetWork, Style style, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, style, logger);
 		logger.trace("DefaultController({}, {})", packetWork, style);
 	}
 

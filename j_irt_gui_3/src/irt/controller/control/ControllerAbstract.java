@@ -1,5 +1,13 @@
 package irt.controller.control;
 
+import java.awt.Component;
+import java.util.Observable;
+
+import javax.swing.JPanel;
+import javax.swing.event.EventListenerList;
+
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.FireValue;
@@ -10,18 +18,9 @@ import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
 
-import java.awt.Component;
-import java.util.Observable;
-
-import javax.swing.JPanel;
-import javax.swing.event.EventListenerList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 public abstract class ControllerAbstract implements Runnable{
 
-	protected final Logger logger = LogManager.getLogger(getClass().getName());
+	protected final Logger logger;
 
 	public enum Style{
 		CHECK_ONCE,
@@ -43,7 +42,8 @@ public abstract class ControllerAbstract implements Runnable{
 	private String name;
 	protected int deviceType;
 
-	public ControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style) {
+	public ControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style, Logger logger) {
+		this.logger = logger;
 		logger.trace(controllerName);
 
 		this.packetWork = packetWork;

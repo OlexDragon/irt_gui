@@ -117,7 +117,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 		DefaultController defaultController = new DefaultController(
 				deviceType,
 				controllerName,
-				new MeasurementGetter(getLinkHeader(), parameter, packetId), Style.CHECK_ALWAYS){
+				new MeasurementGetter(getLinkHeader(), parameter, packetId), Style.CHECK_ALWAYS, logger){
 
 					@Override
 					protected PacketListener getNewPacketListener() {

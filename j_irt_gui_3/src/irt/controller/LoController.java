@@ -21,14 +21,15 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LoController extends ControllerAbstract {
 
 	JComboBox<String> cbLoSelect;
 	private ItemListener itemListener;
 
-	public LoController(int deviceType, LinkHeader linkHeader, JComboBox<String> cbLoSelect, Style stile) {
-		super(deviceType, "LoController", new ConfigurationSetter(linkHeader, LogManager.getLogger()), null, stile);
+	public LoController(int deviceType, LinkHeader linkHeader, JComboBox<String> cbLoSelect, Style stile, Logger logger) {
+		super(deviceType, "LoController", new ConfigurationSetter(linkHeader, LogManager.getLogger()), null, stile, logger);
 
 		this.cbLoSelect = cbLoSelect;
 		cbLoSelect.addItemListener(itemListener);

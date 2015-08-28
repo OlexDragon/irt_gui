@@ -150,7 +150,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 										new Getter(linkHeader,
 												Packet.GROUP_ID_CONFIGURATION,
 												Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
-												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE, logger), Style.CHECK_ALWAYS){
+												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE, logger), Style.CHECK_ALWAYS, logger){
 													@Override
 													protected PacketListener getNewPacketListener() {
 														return new PacketListener() {
@@ -204,7 +204,7 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 			public void ancestorMoved(AncestorEvent event) {}
 
 			private void runController(String controllerName, Getter packetWork) {
-				DefaultController defaultController = new DefaultController(deviceType, controllerName, packetWork, Style.CHECK_ALWAYS);
+				DefaultController defaultController = new DefaultController(deviceType, controllerName, packetWork, Style.CHECK_ALWAYS, logger);
 				runController(defaultController);
 			}
 

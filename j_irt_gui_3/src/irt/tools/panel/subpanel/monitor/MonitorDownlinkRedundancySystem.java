@@ -147,7 +147,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		return new DefaultController(deviceType, "MEASUREMENT_LNB", getter, Style.CHECK_ALWAYS);
+		return new DefaultController(deviceType, "MEASUREMENT_LNB", getter, Style.CHECK_ALWAYS, logger);
 	}
 
 	private ControllerAbstract getWGSController() {
@@ -179,7 +179,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		return new DefaultController(deviceType, "WGS_POSITION", getter, Style.CHECK_ALWAYS);
+		return new DefaultController(deviceType, "WGS_POSITION", getter, Style.CHECK_ALWAYS, logger);
 	}
 
 	private ControllerAbstract getTemperaturController() {
@@ -202,7 +202,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		return new DefaultController(deviceType, "DLRS Temperatur", getter, Style.CHECK_ALWAYS);
+		return new DefaultController(deviceType, "DLRS Temperatur", getter, Style.CHECK_ALWAYS, logger);
 	}
 
 	@Override

@@ -1,5 +1,10 @@
 package irt.controller;
 
+import javax.swing.JSlider;
+import javax.swing.JTextField;
+
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -11,18 +16,23 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.value.ValueDouble;
 
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-
-import org.apache.logging.log4j.LogManager;
-
 public class AttenuationController extends ValueRangeControllerAbstract {
 
 	private Style style;
 	protected int deviceType;
 
-	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
-		super(deviceType, "Attenuation Controller", new ConfigurationSetter(linkHeader, Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE, LogManager.getLogger()), txtField, slider, txtStep, Style.CHECK_ONCE);
+	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style, Logger logger) {
+		super(deviceType,
+				"Attenuation Controller",
+				new ConfigurationSetter(linkHeader,
+						Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE,
+						PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE,
+						logger),
+				txtField,
+				slider,
+				txtStep,
+				Style.CHECK_ONCE,
+				logger);
 		this.style = style;
 		this.deviceType = deviceType;
 	}

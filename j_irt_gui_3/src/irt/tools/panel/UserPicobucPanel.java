@@ -81,7 +81,7 @@ public class UserPicobucPanel extends DevicePanel {
 						new Getter(getLinkHeader(),
 								Packet.GROUP_ID_CONFIGURATION,
 								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
-								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME, logger), Style.CHECK_ALWAYS){
+								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME, logger), Style.CHECK_ALWAYS, logger){
 									@Override
 									protected PacketListener getNewPacketListener() {
 										return new PacketListener() {

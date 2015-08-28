@@ -332,7 +332,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 
 			public void ancestorAdded(AncestorEvent arg0) {
 				try {
-					alarmsController = new AlarmsController(deviceType, linkHeader, AlarmsPanel.this);
+					alarmsController = new AlarmsController(deviceType, linkHeader, AlarmsPanel.this, logger);
 					Thread t = new Thread(alarmsController, "AlarmsPanel."+alarmsController.getName()+"-"+new RundomNumber());
 					int priority = t.getPriority();
 					if(priority>Thread.MIN_PRIORITY)

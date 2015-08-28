@@ -75,7 +75,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 					
 				};
 				configurationSetter.preparePacketToSend(switchBox.isSelected() ? (byte)1 : (byte)0);
-				alcEnableSetterController = new DefaultController(deviceType, "Command SET ALC", configurationSetter, Style.CHECK_ALWAYS){
+				alcEnableSetterController = new DefaultController(deviceType, "Command SET ALC", configurationSetter, Style.CHECK_ALWAYS, logger){
 
 					@Override
 					protected ValueChangeListener addGetterValueChangeListener() {
@@ -181,7 +181,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 						return false;
 					}
 				},
-				Style.CHECK_ALWAYS);
+				Style.CHECK_ALWAYS, logger);
 	}
 
 	private void startThread(DefaultController controller) {
@@ -222,7 +222,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 				txtGain,
 				slider,
 				txtStep,
-				Style.CHECK_ALWAYS){
+				Style.CHECK_ALWAYS, logger){
 
 					@Override
 					protected ValueChangeListener addGetterValueChangeListener() {

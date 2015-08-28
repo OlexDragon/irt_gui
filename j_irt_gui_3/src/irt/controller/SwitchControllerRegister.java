@@ -15,13 +15,15 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
+import org.apache.logging.log4j.Logger;
+
 public class SwitchControllerRegister extends ControllerAbstract {
 
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchControllerRegister(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork) {
-		super(deviceType, controllerName, packetWork, null, null);
+	public SwitchControllerRegister(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork, Logger logger) {
+		super(deviceType, controllerName, packetWork, null, null, logger);
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);
 	}
