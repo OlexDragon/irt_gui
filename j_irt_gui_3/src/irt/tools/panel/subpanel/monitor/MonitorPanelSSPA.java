@@ -227,7 +227,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 	protected void packetRecived(byte parameter, byte flags, int value) {
 		logger.debug("parameter={}, flags={}, value={}", parameter, flags, value);
-		logger.error(logger.getName());
 
 		ValueDouble v;
 		switch(parameter){

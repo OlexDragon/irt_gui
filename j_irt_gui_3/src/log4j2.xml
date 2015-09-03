@@ -38,7 +38,7 @@
 
   <Loggers>
  
-  	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="all"/>
+<!--   	<Logger name="irt.tools.panel.subpanel.monitor.MonitorPanel" level="all"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />
