@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="resource/jssc-2.8.0.jar"/>
+	<classpathentry kind="lib" path="resource/jssc-2.8.0.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/scream3r/jssc/2.8.0/jssc-2.8.0-sources.jar"/>
 	<classpathentry kind="lib" path="resource/log4j-api-2.3.jar" sourcepath="resource/log4j-api-2.3-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/workspace/irt_gui_3/resource/log4j-api-2.0-rc2-javadoc.jar!/"/>

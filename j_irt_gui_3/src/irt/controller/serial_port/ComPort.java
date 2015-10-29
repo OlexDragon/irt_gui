@@ -98,13 +98,9 @@ public class ComPort extends SerialPort {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 
-				try {
-					Console.appendLn("Timeout", "Timer");
-					synchronized (ComPort.this) {
-						closePort();
-					}
-				} catch (SerialPortException e) {
-					comPortLogger.catching(e);
+				Console.appendLn("Timeout", "Timer");
+				synchronized (ComPort.this) {
+					closePort();
 				}
 			}
 		});
@@ -366,11 +362,7 @@ do{
 
 	@Override
 	protected void finalize(){
-		try {
 			closePort();
-		} catch (SerialPortException e) {
-			comPortLogger.catching(e);
-		}
 	}
 
 	public byte[] clear() throws SerialPortException {
@@ -579,7 +571,7 @@ do{
 	}
 
 	@Override
-	public boolean closePort() throws SerialPortException {
+	public boolean closePort(){
 
 		boolean isClosed = !isOpened();
 		comPortLogger.debug("1) Port Name={} closePort()is Closed={}", getPortName(), isClosed);
@@ -588,14 +580,15 @@ do{
 		synchronized (comPortLogger) {
 			if (!isClosed) {
 				try {
+
 					removeEventListener();
+					boolean isPurged = purgePort(PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
+					isClosed = super.closePort();
+					comPortLogger.debug("2) closePort()is Closed={}, is purged={}",isClosed, isPurged);
+
 				} catch (Exception e) {
-					
 					comPortLogger.catching(e);
 				}
-				boolean isPurged = purgePort(PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
-				isClosed = super.closePort();
-				comPortLogger.debug("2) closePort()is Closed={}, is purged={}",isClosed, isPurged);
 			}
 		}
 

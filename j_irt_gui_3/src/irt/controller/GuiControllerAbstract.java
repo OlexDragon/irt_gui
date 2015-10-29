@@ -1,5 +1,32 @@
 package irt.controller;
 
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.InputEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.prefs.Preferences;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.serial_port.ComPort;
 import irt.controller.serial_port.ComPortPriorities;
 import irt.controller.serial_port.ComPortThreadQueue;
@@ -29,36 +56,7 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelConverter;
 import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.panel.wizards.address.AddressWizard;
-
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.event.InputEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.prefs.Preferences;
-
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import jssc.SerialPortException;
 import jssc.SerialPortList;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public abstract class GuiControllerAbstract extends Thread {
 
@@ -154,6 +152,9 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
 						case DeviceInfo.DEVICE_TYPE_SSPA:
 						case DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR:
+						case DeviceInfo.DEVICE_TYPE_HPB_L_TO_KU:
+						case DeviceInfo.DEVICE_TYPE_HPB_L_TO_C:
+						case DeviceInfo.DEVICE_TYPE_HPB_SSPA:
 							protocol = Protocol.LINKED.setDeviceType(type);
 							break;
 						default:
@@ -368,11 +369,8 @@ public abstract class GuiControllerAbstract extends Thread {
 	protected void setSerialPort(String serialPortName) {
 
 		if (serialPortName == null || serialPortName.isEmpty())
-			try {
 				comPortThreadQueue.getSerialPort().closePort();
-			} catch (SerialPortException e) {
-				logger.catching(e);
-			}
+
 		else {
 			comPortThreadQueue.setSerialPort(new ComPort(serialPortName));
 			prefs.put(SERIAL_PORT, serialPortName);

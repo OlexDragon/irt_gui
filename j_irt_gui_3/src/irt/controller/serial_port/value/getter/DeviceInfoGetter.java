@@ -12,8 +12,7 @@ public class DeviceInfoGetter extends GetterAbstract{
 //	private DeviceInfo deviceInfo = new DeviceInfo();
 
 	public DeviceInfoGetter(LinkHeader linkHeader){
-		super(linkHeader, Packet.GROUP_ID_DEVICE_INFO, Packet.IRT_SLCP_PARAMETER_ALL, PacketWork.PACKET_DEVICE_INFO,
-				LogManager.getLogger());
+		super(linkHeader, Packet.GROUP_ID_DEVICE_INFO, Packet.IRT_SLCP_PARAMETER_ALL, PacketWork.PACKET_DEVICE_INFO, LogManager.getLogger());
 		getPacketThread().setPriority(1);
 	}
 

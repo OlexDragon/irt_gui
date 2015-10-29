@@ -129,13 +129,9 @@ public class ComPortThreadQueue extends Thread {
 			logger.warn("oldSerialPort={}, serialPort={}", oldSerialPort, serialPort);
 			clear();
 			oldSerialPort.setRun(false, "Reset Serial Port");
-			try {
-				synchronized (ComPortThreadQueue.serialPort) {
-					oldSerialPort.closePort();
-				}
-			} catch (SerialPortException e) {
-				logger.catching(e);
-				Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:setSerialPort 1");
+
+			synchronized (ComPortThreadQueue.serialPort) {
+				oldSerialPort.closePort();
 			}
 		}
 
@@ -146,7 +142,7 @@ public class ComPortThreadQueue extends Thread {
 
 			serialPort.openPort();
 
-		} catch (SerialPortException e) {
+		} catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:setSerialPort 2");
 		}
