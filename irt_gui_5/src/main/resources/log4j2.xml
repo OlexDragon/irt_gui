@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+	<Appenders>
+		<RollingFile name="DumpFile" fileName="${sys:user.home}/irt/irtGui.5.0.log" filePattern="%d{yyyy-MM-dd}-%i.log.gz" bufferedIO="false">
+			<PatternLayout pattern="%n%-5p %d%n %M (%F:%L)%n%m%n" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingFile>
+
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %d [%t] %C{2} %M (%F:%L) - %m%xEx%n" />
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<!-- <logger name="irt.gui.data.DeviceInfo" level="ALL"/> -->
+		<!-- <logger name="irt.gui.data.LinkedPacketChecksum" level="ALL"/> -->
+
+		<!-- <logger name="irt.gui.data.packet.PacketHeader" level="ALL"/> -->
+
+<!-- 		<logger name="irt.gui.data.packet.observable.alarms.AlarmIDsPacket" level="ALL"/> -->
+		<!-- <logger name="irt.gui.data.packet.observable.PacketAbstract" level="ALL"/> -->
+		<!-- <logger name="irt.gui.data.packet.observable.InfoPacket" level="all"/> -->
+		<!-- <logger name="irt.gui.data.packet.observable.BaisPacket" level="debug"/> -->
+		<!-- <logger name="irt.gui.data.packet.observable.CallibrationModePacket" level="debug"/> -->
+
+<!-- 		<logger name="irt.gui.controllers.components.AlarmFieldController" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.AlarmsPanelController" level="ALL"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.ValuePanel" level="ALL"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.ValueController" level="ALL"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.RegisterView" level="ALL"/> -->
+
+		<!-- <logger name="irt.gui.controllers.IrtGuiController" level="ALL"/> -->
+		<!-- <logger name="irt.gui.controllers.LinkedPacketsQueue" level="ALL"/> -->
+		<logger name="irt.gui.controllers.LinkedPacketSender" level="ALL"/>
+
+<!-- 		<logger name="irt.gui.controllers.monitor.InfoController" level="ALL"/> -->
+<!-- 		<logger name="irt.gui.controllers.monitor.MeasurementController" level="ALL"/> -->
+
+
+		<!-- <logger name="irt.gui.controllers.leftside.setup.SerialPortController" level="all"/> -->
+
+		<!-- <logger name="irt.gui.components.RegisterController" level="all"/> -->
+		<!-- <logger name="irt.gui.controllers.rightside.bais.RegisterController$ValueChangeAnalyzer" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.rightside.bais.BaisController" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.rightside.converter.ConverterController" level="all"/> -->
+
+		<Root level="ERROR">
+			<AppenderRef ref="DumpFile" />
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+
+</Configuration>

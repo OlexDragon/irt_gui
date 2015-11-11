@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<TitledPane text="Measurements" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.leftside.monitor.MeasurementController" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+   <content>
+      <VBox prefHeight="200.0" prefWidth="100.0">
+         <children>
+            <fx:include fx:id="temperature" source="../../../components/ValueView.fxml" />
+            <fx:include fx:id="value1" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value2" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value3" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value4" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value5" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value6" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value7" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value8" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value9" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value10" source="../../../components/RegisterView.fxml" />
+            <fx:include fx:id="value11" source="../../../components/RegisterView.fxml" />
+         </children>
+      </VBox>
+   </content>
+</TitledPane>
