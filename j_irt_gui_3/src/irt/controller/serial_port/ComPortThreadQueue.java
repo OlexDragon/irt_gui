@@ -1,21 +1,21 @@
 package irt.controller.serial_port;
 
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.listener.PacketListener;
-import irt.data.packet.Packet;
-import irt.data.value.StaticComponents;
-import irt.tools.panel.head.Console;
-
 import java.awt.Color;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import javax.swing.event.EventListenerList;
 
-import jssc.SerialPortException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.listener.PacketListener;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
+import irt.data.value.StaticComponents;
+import irt.tools.panel.head.Console;
+import jssc.SerialPortException;
 
 public class ComPortThreadQueue extends Thread {
 
@@ -44,7 +44,7 @@ public class ComPortThreadQueue extends Thread {
 				PacketWork packetWork = comPortQueue.take();
 
 				if(serialPort!=null){
-					PacketThread packetThread = packetWork.getPacketThread();
+					PacketThreadWorker packetThread = packetWork.getPacketThread();
 
 					if(packetThread!=null){
 						packetThread.join();
@@ -59,7 +59,7 @@ public class ComPortThreadQueue extends Thread {
 
 							if(send==null || send.getHeader()==null)
 								StaticComponents.getLedRx().setLedColor(Color.WHITE);
-							else if(send.getHeader().getPacketType()!=Packet.PACKET_TYPE_RESPONSE)
+							else if(send.getHeader().getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
 								StaticComponents.getLedRx().setLedColor(Color.RED);
 							else
 								StaticComponents.getLedRx().setLedColor(Color.GREEN);
@@ -97,7 +97,7 @@ public class ComPortThreadQueue extends Thread {
 					} else{
 						comPortQueue.remove(packetWork);
 						comPortQueue.add(packetWork);
-						logger.warn("Already contains. Is Replaced" + packetWork);
+						logger.warn("Already contains. It was Replaced whith" + packetWork);
 					}
 				else
 					logger.warn("comPortQueue is FULL");
@@ -159,6 +159,8 @@ public class ComPortThreadQueue extends Thread {
 	}
 
 	public void firePacketListener(Packet packet) {
+//		if(packet.getHeader().getGroupId()==PacketImp.IRT_SLCP_PACKET_ID_NETWORK)
+//			logger.error("\n\t{}\n", packet);
 		Object[] listeners = packetListeners.getListenerList();
 		for (int i = 0; i < listeners.length; i++) {
 			Object l = listeners[i];

@@ -31,7 +31,7 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 
 	public int getSize() {
 		return (int) (parameterHeader!=null && parameterHeader.length>=SIZE
-				? Packet.shiftAndAdd(Arrays.copyOfRange(parameterHeader, 1, parameterHeader.length))
+				? PacketImp.shiftAndAdd(Arrays.copyOfRange(parameterHeader, 1, parameterHeader.length))
 						: 0);
 	}
 
@@ -41,7 +41,7 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 						: parameterHeader;
 	}
 
-	public byte[]	getParameterHeader(){ return parameterHeader;	}
+	public byte[]	toBytes(){ return parameterHeader;	}
 	public byte		getCode()			{ return parameterHeader[0];}
 
 	public void setCode(byte code) { parameterHeader[0] = code;}
@@ -59,8 +59,8 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 	private String getCodeStr() {
 		String codeStr = null;
 				switch(getCode()){
-				case Packet.IRT_SLCP_PARAMETER_ALL:
-					codeStr = "All("+Packet.IRT_SLCP_PARAMETER_ALL+")";
+				case PacketImp.IRT_SLCP_PARAMETER_ALL:
+					codeStr = "All("+PacketImp.IRT_SLCP_PARAMETER_ALL+")";
 					break;
 				default:
 					codeStr = ""+getCode();

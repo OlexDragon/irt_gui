@@ -1,14 +1,13 @@
 package irt.controller.serial_port.value.getter;
 
+import java.util.List;
+
 import irt.data.PacketThread;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
-
-import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
 
 public class DeviceMeasurement extends GetterAbstract {
 
@@ -23,16 +22,15 @@ public class DeviceMeasurement extends GetterAbstract {
 	private short current;
 
 	public DeviceMeasurement(PacketThread packetThread) {
-		super(null, (byte)0, (byte)0, PacketWork.PACKET_UNNECESSARY,
-				LogManager.getLogger());
+		super(null, (byte)0, (byte)0, PacketWork.PACKET_UNNECESSARY);
 	}
 
 	@Override
 	public boolean set(Packet packet) {
 		boolean isSet = false;
 		if(isAddressEquals(packet) && packet.getHeader()!=null &&
-				packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
-					packet.getHeader().getGroupId()==Packet.GROUP_ID_MEASUREMENT &&
+				packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
+					packet.getHeader().getGroupId()==PacketImp.GROUP_ID_MEASUREMENT &&
 						packet.getHeader().getPacketId()==getPacketId()){
 			List<Payload> payloads = packet.getPayloads();
 			if(payloads!=null)

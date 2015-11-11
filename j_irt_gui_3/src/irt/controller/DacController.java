@@ -1,12 +1,5 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.data.DacValue;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.value.Value;
-
 import java.awt.Component;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -16,7 +9,12 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.logging.log4j.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.data.DacValue;
+import irt.data.PacketWork;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.value.Value;
 
 public class DacController extends ControllerAbstract {
 
@@ -29,8 +27,8 @@ public class DacController extends ControllerAbstract {
 
 	private Value value;
 
-	public DacController(int deviceType, String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, null, logger);
+	public DacController(int deviceType, String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
+		super(deviceType, controllerName, packetWork, null, null);
 		value = setValue();
 		setListeners();
 		this.dacNumber = dacNumber;

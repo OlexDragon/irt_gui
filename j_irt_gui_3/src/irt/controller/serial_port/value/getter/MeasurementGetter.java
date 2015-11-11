@@ -1,12 +1,11 @@
 package irt.controller.serial_port.value.getter;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 
@@ -19,13 +18,13 @@ public class MeasurementGetter extends GetterAbstract {
 	 * use to get converter status bits
 	 */
 	public MeasurementGetter() {
-		this(null, Packet.PARAMETER_MEASUREMENT_FCM_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
+		this(null, PacketImp.PARAMETER_MEASUREMENT_FCM_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
 	}
 	/**
 	 * use to get bias board status bits
 	 */
 	public MeasurementGetter(LinkHeader linkHeader) {
-		this(linkHeader, Packet.PARAMETER_MEASUREMENT_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
+		this(linkHeader, PacketImp.PARAMETER_MEASUREMENT_STATUS, PacketWork.PACKET_ID_MEASUREMENT_STATUS);
 	}
 
 	public MeasurementGetter(byte packetPayloadParameterHeaderCode, short pacetId) {
@@ -33,8 +32,7 @@ public class MeasurementGetter extends GetterAbstract {
 	}
 
 	public MeasurementGetter(LinkHeader linkHeader, byte packetPayloadParameterHeaderCode, short pacetId) {
-		super(linkHeader, Packet.GROUP_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId,
-				LogManager.getLogger());
+		super(linkHeader, PacketImp.GROUP_ID_MEASUREMENT, packetPayloadParameterHeaderCode, pacetId);
 		this.packetPayloadParameterHeaderCode = packetPayloadParameterHeaderCode;
 	}
 
@@ -45,10 +43,10 @@ public class MeasurementGetter extends GetterAbstract {
 			PacketHeader ph = packet.getHeader();
 			if(ph!=null){
 				short packetId = ph.getPacketId();
-				if(ph.getGroupId()==Packet.GROUP_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
+				if(ph.getGroupId()==PacketImp.GROUP_ID_MEASUREMENT && packet.getPayloads()!=null && packetId==getPacketId()){
 					Object source = null;
 					byte option = ph.getOption();
-					if(option>0 || ph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
+					if(option>0 || ph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 						source = new Byte((byte) (option>0 ? -option : -20));//-20 no answer
 					}else{
 						Payload pl = packet.getPayload(packetPayloadParameterHeaderCode);

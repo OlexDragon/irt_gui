@@ -1,19 +1,5 @@
 package irt.tools.panel.subpanel;
 
-import irt.controller.GuiControllerAbstract;
-import irt.controller.interfaces.Refresh;
-import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
-import irt.data.PacketWork;
-import irt.data.RundomNumber;
-import irt.data.StringData;
-import irt.data.listener.PacketListener;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.LinkedPacket;
-import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-import irt.tools.Transformer;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -34,6 +20,21 @@ import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import irt.controller.GuiControllerAbstract;
+import irt.controller.interfaces.Refresh;
+import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
+import irt.data.PacketWork;
+import irt.data.RundomNumber;
+import irt.data.StringData;
+import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.LinkedPacket;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
+import irt.tools.Transformer;
 
 @SuppressWarnings("serial")
 public class InfoPanel extends JPanel implements Refresh {
@@ -81,7 +82,7 @@ public class InfoPanel extends JPanel implements Refresh {
 							lh = ((LinkedPacket)packet).getLinkHeader();
 
 						PacketHeader h = packet.getHeader();
-						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_DEVICE_INFO && h.getPacketType()!=Packet.PACKET_TYPE_REQUEST){
+						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_DEVICE_INFO && h.getPacketType()!=PacketImp.PACKET_TYPE_REQUEST){
 							int firmwareBuildCounter = new DeviceInfo(packet).getUptimeCounter();
 							secondsCount.setFirmwareBuildCounter(firmwareBuildCounter);
 						}

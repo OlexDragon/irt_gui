@@ -1,29 +1,27 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.RegisterValue;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.value.Value;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
-import org.apache.logging.log4j.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.RegisterValue;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.value.Value;
 
 public class SwitchControllerRegister extends ControllerAbstract {
 
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchControllerRegister(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, null, logger);
+	public SwitchControllerRegister(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork) {
+		super(deviceType, controllerName, packetWork, null, null);
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);
 	}
@@ -47,7 +45,7 @@ public class SwitchControllerRegister extends ControllerAbstract {
 			public void actionPerformed(ActionEvent e) {
 				SetterAbstract as = (SetterAbstract) getPacketWork();
 				if(as!=null){
-					PacketThread pt = as.getPacketThread();
+					PacketThreadWorker pt = as.getPacketThread();
 					if(pt.getPacket()!=null){
 						RegisterValue rv = ((RegisterValue)pt.getValue());
 						Value v = rv.getValue();

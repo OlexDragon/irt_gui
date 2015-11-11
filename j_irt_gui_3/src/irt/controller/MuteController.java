@@ -1,19 +1,5 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
-import irt.data.IdValue;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,8 +9,19 @@ import java.awt.event.MouseListener;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.getter.GetterAbstract;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
+import irt.data.IdValue;
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketImp;
 
 public class MuteController extends ControllerAbstract {
 
@@ -57,16 +54,15 @@ public class MuteController extends ControllerAbstract {
 		}
 	};
 
-	public MuteController(int deviceType, LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style, Logger logger) {
+	public MuteController(int deviceType, LinkHeader linkHeader, JButton btnMute, JLabel lblMute, Style style) {
 		super(deviceType,
 				"Mute Controller",
 				new ConfigurationSetter(
 						linkHeader,
-						linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
-								PacketWork.PACKET_ID_CONFIGURATION_MUTE,
-								LogManager.getLogger()),
+						linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
+								PacketWork.PACKET_ID_CONFIGURATION_MUTE),
 								null,
-								style, logger);
+								style);
 		this.btnMute = btnMute;
 		this.btnMute.addActionListener(actionListener);
 		this.lblMute = lblMute;
@@ -115,7 +111,7 @@ public class MuteController extends ControllerAbstract {
 
 	private void setMuteUnmute() {
 		SetterAbstract as = (SetterAbstract) getPacketWork();
-		PacketThread pt = as.getPacketThread();
+		PacketThreadWorker pt = as.getPacketThread();
 		if(pt.getPacket()==null)
 			return;
 		as.preparePacketToSend(new IdValue(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketWork.PACKET_ID_CONFIGURATION_MUTE : PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR, new Boolean(isMute=!isMute)));

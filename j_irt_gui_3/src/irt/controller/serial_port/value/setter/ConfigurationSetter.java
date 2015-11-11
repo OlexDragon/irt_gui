@@ -1,5 +1,11 @@
 package irt.controller.serial_port.value.setter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.DefaultComboBoxModel;
+
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.translation.Translation;
 import irt.data.IdValue;
@@ -12,17 +18,10 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.value.Value;
 import irt.data.value.ValueFrequency;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.swing.DefaultComboBoxModel;
-
-import org.apache.logging.log4j.Logger;
 
 public class ConfigurationSetter extends SetterAbstract {
 
@@ -31,23 +30,23 @@ public class ConfigurationSetter extends SetterAbstract {
 	/**
 	 * @param packetParameterHeaderCode by default set to Packet.IRT_SLCP_PARAMETER_FCM_CONFIG_FREQUENCY
 	 */
-	public ConfigurationSetter(Logger logger) {
-		this(null, logger);
+	public ConfigurationSetter() {
+		this(null);
 	}
 
 	/**
 	 * @param linkHeader - address
 	 * @param packetParameterHeaderCode by default set to Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_LO_FREQUENCIES
 	 */
-	public ConfigurationSetter(LinkHeader linkHeader, Logger logger) {
+	public ConfigurationSetter(LinkHeader linkHeader) {
 		this(linkHeader,
-				linkHeader!=null && linkHeader.getAddr()!=0 ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES :
-					Packet.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
-						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES, logger);
+				linkHeader!=null && linkHeader.getAddr()!=0 ? PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES :
+					PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
+						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES);
 	}
 
-	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, short packetId, Logger logger) {
-		super(linkHeader, Packet.GROUP_ID_CONFIGURATION, packetParameterHeaderCode, packetId, logger);
+	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, short packetId) {
+		super(linkHeader, PacketImp.GROUP_ID_CONFIGURATION, packetParameterHeaderCode, packetId);
 	}
 
 	@Override
@@ -61,21 +60,21 @@ public class ConfigurationSetter extends SetterAbstract {
 
 			switch (id) {
 			case PacketWork.PACKET_ID_CONFIGURATION_LNB:
-			case Packet.PARAMETER_CONFIG_BUC_ENABLE:
+			case PacketImp.PARAMETER_CONFIG_BUC_ENABLE:
 				logger.trace(pt.getClass().getSimpleName());
-				pt.preparePacket(Packet.PARAMETER_CONFIG_BUC_ENABLE, (byte) ((IdValue) value).getValue());
+				pt.preparePacket(PacketImp.PARAMETER_CONFIG_BUC_ENABLE, (byte) ((IdValue) value).getValue());
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
-				pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);
+				pt.preparePacket(PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR:
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE:
-				pt.preparePacket(lh != null && id!=PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR ? Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : Packet.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
+				pt.preparePacket(lh != null && id!=PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR ? PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
 						(byte) (((boolean) ((IdValue) value).getValue()) ? 1 : 0));
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN:
 				Value v = (Value) ((IdValue) value).getValue();
-				pt.preparePacket(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, v != null ? (short) v.getValue() : null);
+				pt.preparePacket(PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, v != null ? (short) v.getValue() : null);
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL:
 			case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION:
@@ -97,14 +96,14 @@ public class ConfigurationSetter extends SetterAbstract {
 			data = Arrays.copyOf(data, length+4);
 			int v = (int)value;
 			if(v!=0){
-				byte[] bytes = Packet.toBytes(v);
+				byte[] bytes = PacketImp.toBytes(v);
 				System.arraycopy(bytes, 0, data, length, bytes.length);
 			}
 
 			if(packetThread instanceof LinkedPacketThread)
-				data[4] = Packet.PACKET_TYPE_COMMAND;
+				data[4] = PacketImp.PACKET_TYPE_COMMAND;
 			else
-				data[0] = Packet.PACKET_TYPE_COMMAND;
+				data[0] = PacketImp.PACKET_TYPE_COMMAND;
 
 			logger.trace("data={}", data);
 
@@ -117,9 +116,9 @@ public class ConfigurationSetter extends SetterAbstract {
 			data[length] = (byte)value;
 
 			if(packetThread instanceof LinkedPacketThread)
-				data[4] = Packet.PACKET_TYPE_COMMAND;
+				data[4] = PacketImp.PACKET_TYPE_COMMAND;
 			else
-				data[0] = Packet.PACKET_TYPE_COMMAND;
+				data[0] = PacketImp.PACKET_TYPE_COMMAND;
 
 			packetThread.setData(data);
 
@@ -135,13 +134,13 @@ public class ConfigurationSetter extends SetterAbstract {
 			PacketHeader ph = packet.getHeader();
 			short packetId = getPacketId();
 			if(ph!=null &&
-					ph.getGroupId()==Packet.GROUP_ID_CONFIGURATION &&
+					ph.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
 							ph.getPacketId()==packetId && packet.getPayloads()!=null){
 
 				long tmp = value;
 				Object source = null;
 
-				if(ph.getOption()>0 || ph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
+				if(ph.getOption()>0 || ph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 
 					tmp = -ph.getOption();
 					if(tmp>=0)

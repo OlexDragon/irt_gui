@@ -5,7 +5,7 @@ import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.PacketWork;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.value.ValueDouble;
@@ -27,7 +27,7 @@ import javax.swing.SwingWorker;
 public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 	public static final byte
-			IRT_SLCP_PACKET_ID_MEASUREMENT = Packet.GROUP_ID_MEASUREMENT;
+			IRT_SLCP_PACKET_ID_MEASUREMENT = PacketImp.GROUP_ID_MEASUREMENT;
 
 	public static final int
 			MUTE = 1,
@@ -175,7 +175,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 	}
 
 	private static final String[] controllerNames = new String[]{"Measurement_temperature", "Measurement_InputPower","Status"};
-	private static final byte[] parameters = new byte[]{Packet.PARAMETER_MEASUREMENT_TEMPERATURE, Packet.PARAMETER_MEASUREMENT_FCM_INPUT_POWER, Packet.PARAMETER_MEASUREMENT_FCM_STATUS};
+	private static final byte[] parameters = new byte[]{PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE, PacketImp.PARAMETER_MEASUREMENT_FCM_INPUT_POWER, PacketImp.PARAMETER_MEASUREMENT_FCM_STATUS};
 	private static final short[] pacetId = new short[]{PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketWork.PACKET_ID_MEASUREMENT_STATUS};
 	@Override
 	protected List<ControllerAbstract> getControllers() {
@@ -192,7 +192,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 			controllers.add(
 					getController(
 							"Measurement",
-							Packet.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_ALL,
+							PacketImp.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_ALL,
 							PacketWork.PACKET_ID_MEASUREMENT_ALL));
 		}
 		return controllers;
@@ -230,7 +230,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 
 		ValueDouble v;
 		switch(parameter){
-		case Packet.PARAMETER_MEASUREMENT_OUTPUT_POWER://or Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
+		case PacketImp.PARAMETER_MEASUREMENT_OUTPUT_POWER://or Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
 			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
 				int hashCode = 31*flags + value;
 				if(flags==0)
@@ -247,7 +247,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 				setConverterStatus(value);
 
 			break;
-		case Packet.PARAMETER_MEASUREMENT_TEMPERATURE:
+		case PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE:
 			if(value!=temperature){
 				temperature = value;
 				v = new ValueDouble(value, 1);
@@ -257,7 +257,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 			logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
 			break;
 
-		case Packet.PARAMETER_MEASUREMENT_STATUS:
+		case PacketImp.PARAMETER_MEASUREMENT_STATUS:
 				setStatus(value);
 		}
 	}

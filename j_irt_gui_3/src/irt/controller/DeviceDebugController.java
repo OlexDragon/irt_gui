@@ -1,19 +1,5 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.data.Listeners;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.RegisterValue;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ControllerFocusListener;
-import irt.data.listener.ValueChangeListener;
-import irt.data.packet.Packet;
-import irt.data.packet.Payload;
-import irt.data.value.Value;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -36,7 +22,20 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
-import org.apache.logging.log4j.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.getter.GetterAbstract;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
+import irt.data.Listeners;
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.RegisterValue;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ControllerFocusListener;
+import irt.data.listener.ValueChangeListener;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
+import irt.data.packet.Payload;
+import irt.data.value.Value;
 
 public class DeviceDebugController extends ControllerAbstract {
 
@@ -63,8 +62,8 @@ public class DeviceDebugController extends ControllerAbstract {
 /**
  * @param addrToSave if addrToSave < 0 save command deasn't work
  */
-	public DeviceDebugController(int deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, style, logger);
+	public DeviceDebugController(int deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
+		super(deviceType, controllerName, packetWork, null, style);
 		logger.entry(controllerName);
 
 		this.addrToSave = addrToSave;
@@ -83,21 +82,21 @@ public class DeviceDebugController extends ControllerAbstract {
 		logger.exit();
 	}
 
-	public DeviceDebugController(int deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, null, logger);
+	public DeviceDebugController(int deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
+		super(deviceType, controllerName, packetWork, null, null);
 		logger.entry();
 
 		this.cbCommand = cbCommand;
 		this.cbParameter = cbParameter;
 		this.textArea = textArea;
 
-		PacketThread packetThread = getPacketWork().getPacketThread();
+		PacketThreadWorker packetThread = getPacketWork().getPacketThread();
 
 		byte[] d = packetThread.getData();
 		int l = d.length;
 
 		int selectedItem = (int) cbParameter.getSelectedItem();
-		byte[] b = Packet.toBytes(selectedItem);
+		byte[] b = PacketImp.toBytes(selectedItem);
 
 		d[l-1] = (byte) b.length;
 		d =  Arrays.copyOf(d, l+b.length);
@@ -131,7 +130,7 @@ public class DeviceDebugController extends ControllerAbstract {
 				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
 					PacketWork pw = getPacketWork();
 					if(pw!=null){
-						PacketThread pt = pw.getPacketThread();
+						PacketThreadWorker pt = pw.getPacketThread();
 						Payload pl = pt.getPacket().getPayload(0);
 						pl.setBuffer(DeviceDebugController.this.cbParameter.getSelectedItem());
 						pt.preparePacket();
@@ -149,12 +148,12 @@ public class DeviceDebugController extends ControllerAbstract {
 				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
 					GetterAbstract ga = (GetterAbstract)getPacketWork();
 					if(ga!=null){
-						PacketThread pt = ga.getPacketThread();
+						PacketThreadWorker pt = ga.getPacketThread();
 						int code = DeviceDebugController.this.cbCommand.getSelectedIndex()+1;
 						ga.setPacketParameterHeaderCode((byte)code);
 
 						Payload pl = pt.getPacket().getPayload(0);
-						if(code==Packet.PARAMETER_DEVICE_DEBAG_INFO)
+						if(code==PacketImp.PARAMETER_DEVICE_DEBAG_INFO)
 							pl.setBuffer(null);
 						else
 							pl.setBuffer(DeviceDebugController.this.cbParameter.getSelectedItem());
@@ -179,12 +178,12 @@ public class DeviceDebugController extends ControllerAbstract {
 						Color c = (Color) pchl.getNewValue();
 						PacketWork unitPacketWork = getPacketWork();
 						if(unitPacketWork!=null){
-							PacketThread unitPacketThread = unitPacketWork.getPacketThread();
+							PacketThreadWorker unitPacketThread = unitPacketWork.getPacketThread();
 							Packet up = unitPacketThread.getPacket();
 							RegisterValue urv = (RegisterValue)unitPacketThread.getValue();
 							Value uv = urv.getValue();
 
-							if(c.equals(Color.WHITE)&& up!=null &&  up.getHeader().getPacketType()==Packet.PACKET_TYPE_COMMAND){
+							if(c.equals(Color.WHITE)&& up!=null &&  up.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND){
 
 								if(addrToSave>=0 && oldValue!=uv.getValue()){
 									int index = urv.getIndex();
@@ -194,9 +193,9 @@ public class DeviceDebugController extends ControllerAbstract {
 													index,
 													addrToSave,
 													(short) (((GetterAbstract)unitPacketWork).getPacketId()+1),
-													Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE,
+													PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE,
 													0),
-											Style.CHECK_ONCE, logger);
+											Style.CHECK_ONCE);
 								}
 							} else {
 								Value value = uv;
@@ -340,7 +339,7 @@ public class DeviceDebugController extends ControllerAbstract {
 		this.value.setRelativeValue(value);
 		DeviceDebagSetter dds = (DeviceDebagSetter)getPacketWork();
 		if(dds!=null){
-			PacketThread packetThread = dds.getPacketThread();
+			PacketThreadWorker packetThread = dds.getPacketThread();
 			if(packetThread!=null){
 				RegisterValue registerValue = (RegisterValue) packetThread.getValue();
 				registerValue.setValue(this.value);
@@ -441,7 +440,7 @@ public class DeviceDebugController extends ControllerAbstract {
 				int id = valueChangeEvent.getID();
 
 				GetterAbstract pw = (GetterAbstract) getPacketWork();
-				PacketThread pt = pw.getPacketThread();
+				PacketThreadWorker pt = pw.getPacketThread();
 				if (id == pw.getPacketId()) {
 
 					RegisterValue rv = (RegisterValue) pt.getValue();
@@ -478,7 +477,8 @@ public class DeviceDebugController extends ControllerAbstract {
 						}
 						break;
 					default:
-						textArea.setText(source != null ? source.toString() : null);
+						if(textArea!=null)
+							textArea.setText(source != null ? source.toString() : null);
 					}
 				}
 			} catch (Exception ex) {

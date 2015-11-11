@@ -18,6 +18,7 @@ public class PacketHeader{
 	}
 
 	public PacketHeader() {
+		packetHeader = new byte[SIZE];
 	}
 
 /*	private byte	type;		0
@@ -26,11 +27,11 @@ public class PacketHeader{
 	private short 	reserved;	4,5
 	private byte 	code; 		6
 */
-	public byte[]	asBytes()		{ return packetHeader;		}
+	public byte[]	toBytes()		{ return packetHeader;		}
 	public byte		getPacketType	()		{ return packetHeader[0];	}
-	public short	getPacketId()	{ return (short) Packet.shiftAndAdd(Arrays.copyOfRange(packetHeader, 1, 3));	}
+	public short	getPacketId()	{ return (short) PacketImp.shiftAndAdd(new byte[]{packetHeader[1], packetHeader[2]});	}
 	public byte		getGroupId()	{ return packetHeader[3];	}
-	public short	getReserved()	{ return (short) Packet.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6));	}
+	public short	getReserved()	{ return (short) PacketImp.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6));	}
 	public byte		getOption()		{ return packetHeader[6];	}
 
 	public byte[] set(byte[]data){
@@ -41,7 +42,7 @@ public class PacketHeader{
 	}
 
 	public void setType		(byte type) 				{ packetHeader[0] = type;}
-	public void setPacketId	(short irtSlcpPacketId)		{ System.arraycopy(Packet.toBytes(irtSlcpPacketId), 0, packetHeader, 1, 2);	}
+	public void setPacketId	(short irtSlcpPacketId)		{ System.arraycopy(PacketImp.toBytes(irtSlcpPacketId), 0, packetHeader, 1, 2);	}
 	public void setGroupId	(byte irtSlcpPacketGroupId) { packetHeader[3] = irtSlcpPacketGroupId;}
 	public void setOption	(byte option)			 	{ packetHeader[6] = option;	}
 
@@ -300,7 +301,7 @@ public class PacketHeader{
 
 		String codeStr = null;
 		switch (code) {
-		case Packet.ERROR_NO_ERROR:
+		case PacketImp.ERROR_NO_ERROR:
 			codeStr = "No error(" + code + ")";
 			break;
 		case 1:
@@ -330,7 +331,7 @@ public class PacketHeader{
 		case 9:
 			codeStr = "Not enough memory (" + code + ")";
 			break;
-		case Packet.ERROR_REQUESTED_ELEMENT_NOT_FOUND:
+		case PacketImp.ERROR_REQUESTED_ELEMENT_NOT_FOUND:
 			codeStr = "Requested element not found(" + code + ")";
 			break;
 		case 11:
@@ -349,20 +350,20 @@ public class PacketHeader{
 		String typeStr = null;
 		if(packetHeader!=null)
 		switch(getPacketType()){
-		case Packet.PACKET_TYPE_SPONTANEOUS:
-			typeStr = "Spontaneous("+ Packet.PACKET_TYPE_SPONTANEOUS+")";
+		case PacketImp.PACKET_TYPE_SPONTANEOUS:
+			typeStr = "Spontaneous("+ PacketImp.PACKET_TYPE_SPONTANEOUS+")";
 			break;
-		case Packet.PACKET_TYPE_RESPONSE:
-			typeStr = "Response("+ Packet.PACKET_TYPE_RESPONSE+")";
+		case PacketImp.PACKET_TYPE_RESPONSE:
+			typeStr = "Response("+ PacketImp.PACKET_TYPE_RESPONSE+")";
 			break;
-		case Packet.PACKET_TYPE_REQUEST:
-			typeStr = "Request("+ Packet.PACKET_TYPE_REQUEST+")";
+		case PacketImp.PACKET_TYPE_REQUEST:
+			typeStr = "Request("+ PacketImp.PACKET_TYPE_REQUEST+")";
 			break;
-		case Packet.PACKET_TYPE_COMMAND:
-			typeStr = "Command("+ Packet.PACKET_TYPE_COMMAND+")";
+		case PacketImp.PACKET_TYPE_COMMAND:
+			typeStr = "Command("+ PacketImp.PACKET_TYPE_COMMAND+")";
 			break;
-		case Packet.PACKET_TYPE_ACK:
-			typeStr = "Acknowledgement("+ Packet.PACKET_TYPE_ACK+")";
+		case PacketImp.PACKET_TYPE_ACK:
+			typeStr = "Acknowledgement("+ PacketImp.PACKET_TYPE_ACK+")";
 			break;
 		default:
 			typeStr = ""+(getPacketType()&0xFF);
@@ -374,35 +375,35 @@ public class PacketHeader{
 		String typeStr = null;
 		if(packetHeader!=null)
 		switch(getGroupId()){
-		case Packet.GROUP_ID_ALARM:
-			typeStr = "Alarm("+ Packet.GROUP_ID_ALARM+")";
+		case PacketImp.GROUP_ID_ALARM:
+			typeStr = "Alarm("+ PacketImp.GROUP_ID_ALARM+")";
 			break;
-		case Packet.GROUP_ID_CONFIGURATION:
-			typeStr = "Configuration("+ Packet.GROUP_ID_CONFIGURATION+")";
+		case PacketImp.GROUP_ID_CONFIGURATION:
+			typeStr = "Configuration("+ PacketImp.GROUP_ID_CONFIGURATION+")";
 			break;
-		case Packet.GROUP_ID_FILETRANSFER:
-			typeStr = "FileTranster("+ Packet.GROUP_ID_FILETRANSFER+")";
+		case PacketImp.GROUP_ID_FILETRANSFER:
+			typeStr = "FileTranster("+ PacketImp.GROUP_ID_FILETRANSFER+")";
 			break;
-		case Packet.GROUP_ID_MEASUREMENT:
-			typeStr = "Measurement("+ Packet.GROUP_ID_MEASUREMENT+")";
+		case PacketImp.GROUP_ID_MEASUREMENT:
+			typeStr = "Measurement("+ PacketImp.GROUP_ID_MEASUREMENT+")";
 			break;
-		case Packet.GROUP_ID_RESET:
-			typeStr = "Reset("+ Packet.GROUP_ID_RESET+")";
+		case PacketImp.GROUP_ID_RESET:
+			typeStr = "Reset("+ PacketImp.GROUP_ID_RESET+")";
 			break;
-		case Packet.GROUP_ID_DEVICE_INFO:
-			typeStr = "DeviceInfo("+ Packet.GROUP_ID_DEVICE_INFO+")";
+		case PacketImp.GROUP_ID_DEVICE_INFO:
+			typeStr = "DeviceInfo("+ PacketImp.GROUP_ID_DEVICE_INFO+")";
 			break;
-		case Packet.GROUP_ID_CONFIG_PROFILE:
-			typeStr = "SaveConfigProfile("+ Packet.GROUP_ID_CONFIG_PROFILE+")";
+		case PacketImp.GROUP_ID_CONFIG_PROFILE:
+			typeStr = "SaveConfigProfile("+ PacketImp.GROUP_ID_CONFIG_PROFILE+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_PROTOCOL:
-			typeStr = "Protocol("+ Packet.IRT_SLCP_GROUP_ID_PROTOCOL+")";
+		case PacketImp.IRT_SLCP_GROUP_ID_PROTOCOL:
+			typeStr = "Protocol("+ PacketImp.IRT_SLCP_GROUP_ID_PROTOCOL+")";
 			break;
-		case Packet.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1:
-			typeStr = "DeveloperGeneric("+ Packet.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1+")";
+		case PacketImp.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1:
+			typeStr = "DeveloperGeneric("+ PacketImp.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1+")";
 			break;
-		case Packet.GROUP_ID_DEVICE_DEBAG:
-			typeStr = "Device Debug("+ Packet.GROUP_ID_DEVICE_DEBAG+")";
+		case PacketImp.GROUP_ID_DEVICE_DEBAG:
+			typeStr = "Device Debug("+ PacketImp.GROUP_ID_DEVICE_DEBAG+")";
 			break;
 		default:
 			typeStr = ""+(getPacketType()&0xFF);

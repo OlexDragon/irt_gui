@@ -6,25 +6,23 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
-import org.apache.logging.log4j.Logger;
-
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.PacketThread;
+import irt.data.PacketThreadWorker;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 
 public class SwitchController extends ControllerAbstract {
 
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchController(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, null, logger);
+	public SwitchController(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork) {
+		super(deviceType, controllerName, packetWork, null, null);
 		this.checkBox = checkBox;
 	}
 
@@ -35,7 +33,7 @@ public class SwitchController extends ControllerAbstract {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				SetterAbstract as = (SetterAbstract) getPacketWork();
-				PacketThread pt = as.getPacketThread();
+				PacketThreadWorker pt = as.getPacketThread();
 				if(pt.getPacket()!=null)
 					doSwitch(as, pt.getValue());
 			}
@@ -53,13 +51,12 @@ public class SwitchController extends ControllerAbstract {
 
 					Setter setter = new Setter(
 							as.getLinkHeader(),
-							Packet.PACKET_TYPE_COMMAND,
+							PacketImp.PACKET_TYPE_COMMAND,
 							as.getGroupId(),
 							as.getPacketParameterHeaderCode(),
 							PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER,
-							value,
-							logger);
-					DefaultController controller = new DefaultController(deviceType, "Calibration Mode Controller", setter, Style.CHECK_ONCE, logger){
+							value);
+					DefaultController controller = new DefaultController(deviceType, "Calibration Mode Controller", setter, Style.CHECK_ONCE){
 
 						@Override
 						protected ValueChangeListener addGetterValueChangeListener() {
@@ -131,7 +128,7 @@ public class SwitchController extends ControllerAbstract {
 			GetterAbstract as = (GetterAbstract)getPacketWork();
 			if(id==as.getPacketId()){
 
-				PacketThread pt = as.getPacketThread();
+				PacketThreadWorker pt = as.getPacketThread();
 				pt.setValue(source);
 				if(source instanceof Byte){
 					checkBox.setSelected(((Byte)source)>0);

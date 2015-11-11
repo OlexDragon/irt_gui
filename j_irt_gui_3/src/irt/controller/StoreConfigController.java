@@ -1,5 +1,9 @@
 package irt.controller;
 
+import java.awt.Component;
+
+import javax.swing.JOptionPane;
+
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.Setter;
@@ -8,20 +12,14 @@ import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-
-import java.awt.Component;
-
-import javax.swing.JOptionPane;
-
-import org.apache.logging.log4j.Logger;
+import irt.data.packet.PacketImp;
 
 public class StoreConfigController extends ControllerAbstract {
 
 	private Component owner;
 
-	public StoreConfigController(int deviceType, LinkHeader linkHeader, Component owner, Style style, Logger logger) {
-		super(deviceType, "Stor Config Controller", new Setter(linkHeader, Packet.GROUP_ID_CONFIG_PROFILE, Packet.PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style, logger);
+	public StoreConfigController(int deviceType, LinkHeader linkHeader, Component owner, Style style) {
+		super(deviceType, "Stor Config Controller", new Setter(linkHeader, PacketImp.GROUP_ID_CONFIG_PROFILE, PacketImp.PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style);
 		setSend(false);
 		getPacketWork().getPacketThread().setDataPacketTypeCommand();
 

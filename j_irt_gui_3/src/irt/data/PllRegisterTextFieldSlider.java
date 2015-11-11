@@ -1,9 +1,5 @@
 package irt.data;
 
-import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
-import irt.data.event.ValueChangeEvent;
-import irt.data.value.Value;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -16,7 +12,9 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.logging.log4j.LogManager;
+import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
+import irt.data.event.ValueChangeEvent;
+import irt.data.value.Value;
 
 public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
 
@@ -32,7 +30,6 @@ public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
 	private FocusListener focusListener;
 
 	public PllRegisterTextFieldSlider(int id, JTextField textField, JSlider slider, int multiplier) {
-		super(LogManager.getLogger());
 		setListeners();
 		this.id = id;
 		this.multiplier = multiplier;

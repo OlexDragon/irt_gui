@@ -48,6 +48,7 @@ public class Payload {
 	}
 
 	public Payload() {
+		parameterHeader = new ParameterHeader((byte)0);
 	}
 
 	public byte[] setPayload(byte[] data){
@@ -66,11 +67,11 @@ public class Payload {
 	public StringData 		getStringData()		{ return new StringData(buffer);}
 	public ParameterHeader	getParameterHeader(){ return parameterHeader;		}
 	public byte[]			getBuffer()			{ return buffer;				}
-	public byte[] 			getPayloadAsBytes()	{ return Packet.concat(parameterHeader.getParameterHeader(), buffer);}
+	public byte[] 			getPayloadAsBytes()	{ return PacketImp.concat(parameterHeader.toBytes(), buffer);}
 
 	public byte	getByte() { return getByte(0);	}
 	public byte getByte(int b) { return buffer!=null && buffer.length>b ? buffer[b] : 0;}
-	public long	getLong() { return Packet.shiftAndAdd(buffer);	}
+	public long	getLong() { return PacketImp.shiftAndAdd(buffer);	}
 	public DeviceId getDeviceId() { return buffer!=null  ? new DeviceId(buffer) : null;	}
 
 	public void setParameterHeader	(ParameterHeader parameterHeader)	{ this.parameterHeader= parameterHeader;			}
@@ -82,19 +83,19 @@ public class Payload {
 	}
 	public void setBuffer(byte value	)					{ setBuffer(new byte[]{value});			}
 	public void setBuffer(short value	)					{ setBuffer(new byte[]{(byte) (value>>8),	(byte) value});		}
-	public void setBuffer(int value		)					{ setBuffer(Packet.toBytes(value));		}
-	public void setBuffer(long value	)					{ setBuffer(Packet.toBytes(value));		}
+	public void setBuffer(int value		)					{ setBuffer(PacketImp.toBytes(value));		}
+	public void setBuffer(long value	)					{ setBuffer(PacketImp.toBytes(value));		}
 	public void setBuffer(byte dacNumber, short dacValue)				{ byte[] buffer = new byte[3];
 																			buffer[0] = dacNumber;
-																			byte[] b = Packet.toBytes(dacValue);
+																			byte[] b = PacketImp.toBytes(dacValue);
 																			System.arraycopy(b, 0, buffer, 1, b.length);
 																			setBuffer(buffer);}
-	public void setBuffer(int index, int addr)	 						{	byte[] b = Arrays.copyOf(Packet.toBytes(index), 8);
-																			System.arraycopy(Packet.toBytes(addr), 0, b, 4, 4);
+	public void setBuffer(int index, int addr)	 						{	byte[] b = Arrays.copyOf(PacketImp.toBytes(index), 8);
+																			System.arraycopy(PacketImp.toBytes(addr), 0, b, 4, 4);
 																			setBuffer(b);}
-	public void setBuffer(int index, int addr, int value) 				{	byte[] b = Arrays.copyOf(Packet.toBytes(index), 12);
-																			System.arraycopy(Packet.toBytes(addr), 0, b, 4, 4);
-																			System.arraycopy(Packet.toBytes(value), 0, b, 8, 4);
+	public void setBuffer(int index, int addr, int value) 				{	byte[] b = Arrays.copyOf(PacketImp.toBytes(index), 12);
+																			System.arraycopy(PacketImp.toBytes(addr), 0, b, 4, 4);
+																			System.arraycopy(PacketImp.toBytes(value), 0, b, 8, 4);
 																			setBuffer(b);}
 	public void setBuffer(Object value) 								{
 		if(value!=null)
@@ -140,8 +141,8 @@ public class Payload {
 	}
 
 	public void add(int value) {
-		byte[] v = Packet.toBytes(value);
-		buffer = Packet.concat(buffer, v);
+		byte[] v = PacketImp.toBytes(value);
+		buffer = PacketImp.concat(buffer, v);
 		parameterHeader.setSize((short)buffer.length);
 	}
 
@@ -150,7 +151,7 @@ public class Payload {
 
 		int end = firstByteOfLong+8;
 		if(end<=buffer.length)
-			l = Packet.shiftAndAdd(Arrays.copyOfRange(buffer, firstByteOfLong, end));
+			l = PacketImp.shiftAndAdd(Arrays.copyOfRange(buffer, firstByteOfLong, end));
 
 		return l;
 	}
@@ -161,7 +162,7 @@ public class Payload {
 		int end = index+8;
 
 		if(end<=buffer.length)
-			l = Packet.shiftAndAdd(Arrays.copyOfRange(buffer, index, end));
+			l = PacketImp.shiftAndAdd(Arrays.copyOfRange(buffer, index, end));
 
 		return l;
 	}
@@ -200,7 +201,7 @@ public class Payload {
 		int end = startFrom+length;
 
 		if(end<=buffer.length)
-			result = Packet.shiftAndAdd(Arrays.copyOfRange(buffer, startFrom, end));
+			result = PacketImp.shiftAndAdd(Arrays.copyOfRange(buffer, startFrom, end));
 
 		return result;
 	}
@@ -238,5 +239,21 @@ public class Payload {
 		}
 
 		return shorts;
+	}
+
+	public byte[] toBytes() {
+
+		byte[] result = parameterHeader.toBytes();
+		final int size = parameterHeader.getSize();
+
+		if(size>0){
+			if(buffer==null )
+				result = PacketImp.concat(result, new byte[size]);
+			else if(size!=buffer.length)
+				result = PacketImp.concat(result, Arrays.copyOf(buffer, size));
+			else
+				result = PacketImp.concat(result, buffer);
+		}
+		return result;
 	}
 }

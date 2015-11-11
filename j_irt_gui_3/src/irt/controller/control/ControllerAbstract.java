@@ -6,6 +6,7 @@ import java.util.Observable;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
@@ -20,7 +21,7 @@ import irt.data.packet.Packet;
 
 public abstract class ControllerAbstract implements Runnable{
 
-	protected final Logger logger;
+	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	public enum Style{
 		CHECK_ONCE,
@@ -42,9 +43,7 @@ public abstract class ControllerAbstract implements Runnable{
 	private String name;
 	protected int deviceType;
 
-	public ControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style, Logger logger) {
-		this.logger = logger;
-		logger.trace(controllerName);
+	public ControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style) {
 
 		this.packetWork = packetWork;
 		this.style = style;
@@ -64,8 +63,9 @@ public abstract class ControllerAbstract implements Runnable{
 		}
 	}
 
-	protected abstract void setListeners();
-	protected abstract ValueChangeListener addGetterValueChangeListener();
+	protected abstract void 				setListeners();
+	protected abstract boolean 				setComponent(Component component);
+	protected abstract ValueChangeListener 	addGetterValueChangeListener();
 
 	private void setComponents(JPanel panel) {
 		Component[] cs = panel.getComponents();
@@ -75,11 +75,10 @@ public abstract class ControllerAbstract implements Runnable{
 					setComponent(c);
 	}
 
-	protected abstract boolean setComponent(Component component);
-
 	@Override
 	public void run() {
-//		System.out.println("Run - "+ControllerAbstract.this.getClass().getSimpleName());
+		logger.entry(run, packetListener);
+
 		if(packetWork!=null){
 
 			if(packetListener!=null)
@@ -108,6 +107,8 @@ public abstract class ControllerAbstract implements Runnable{
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 			clear();
 		}
+
+		logger.exit();
 	}
 
 	protected boolean isWait() {
@@ -235,7 +236,8 @@ public abstract class ControllerAbstract implements Runnable{
 
 	@Override
 	public String toString() {
-		return "ControllerAbstract [name=" + name + ", packetWork=" + packetWork + ", run=" + run + ", send=" + send + ", style=" + style + ", waitTime=" + waitTime
+		return "\n\t" + getClass().getSimpleName()
+				+ " [name=" + name + ", packetWork=" + packetWork + ", run=" + run + ", send=" + send + ", style=" + style + ", waitTime=" + waitTime
 				+ "]";
 	}
 }

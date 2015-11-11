@@ -44,6 +44,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
@@ -97,7 +98,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	protected JComboBox<KeyValue<String, String>> languageComboBox;
 	protected HeadPanel headPanel;
 
-	protected VCLC vclc =  new VCLC(logger);
+	protected VCLC vclc =  new VCLC();
 	protected SoftReleaseChecker softReleaseChecker = getSoftReleaseChecker();
 	protected Protocol protocol = getDefaultProtocol();
 
@@ -121,12 +122,13 @@ public abstract class GuiControllerAbstract extends Thread {
 				PacketHeader header = packet.getHeader();
 
 				byte packetType = header.getPacketType();
-				if (packetType == Packet.PACKET_TYPE_RESPONSE) {
+				if (packetType == PacketImp.PACKET_TYPE_RESPONSE) {
 
 					DeviceInfo deviceInfo;
 					switch (header.getGroupId()) {
-					case Packet.GROUP_ID_DEVICE_INFO:
+					case PacketImp.GROUP_ID_DEVICE_INFO:
 						deviceInfo = new DeviceInfo(packet);
+						logger.debug("{}\n", deviceInfo);
 
 						int type = deviceInfo.getType();
 						switch (type) {
@@ -162,16 +164,16 @@ public abstract class GuiControllerAbstract extends Thread {
 								JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + type + ")");
 								logger.warn("The Device is not Supported.(device Id={})", type);
 							} else
-								logger.warn("Can not connect");
+								logger.warn("Can not connect. {}", packet);
 						}
 
 						new PanelWorker(packet, deviceInfo);
 						break;
-					case Packet.GROUP_ID_ALARM:
+					case PacketImp.GROUP_ID_ALARM:
 						if(header.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY && header.getOption()==0) 
 							new AlarmWorker(packet);
 						break;
-					case Packet.GROUP_ID_MEASUREMENT:
+					case PacketImp.GROUP_ID_MEASUREMENT:
 						new MeasurementWorker(packet);
 						break;
 					}
@@ -219,7 +221,6 @@ public abstract class GuiControllerAbstract extends Thread {
 				headPanel = (HeadPanel)c;
 				Component[] cms = headPanel.getComponents();
 				for(Component cm:cms){
-					logger.trace("HeadPanel: component class={}, name={}",cm.getClass(), cm.getName());
 					String n = cm.getName();
 					if(n!=null && n.equals("Language")){
 						setComboBox(cm);
@@ -439,7 +440,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			comPortThreadQueue.add(new DeviceInfoGetter() {
 				@Override
-				public Integer getPriority() {
+				public int getPriority() {
 					return ComPortPriorities.INFO_CONVERTER;
 				}
 			});
@@ -450,16 +451,14 @@ public abstract class GuiControllerAbstract extends Thread {
 		if (protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL ) || protocol.equals(Protocol.LINKED)) {
 
 			Set<Byte> addresses = getAddresses(address);
-			logger.trace("protocol = {}, addresses = {}", protocol, addresses);
 
 			for(Byte b:addresses.toArray(new Byte[addresses.size()])){
 				DeviceInfoGetter packetWork = new DeviceInfoGetter(new LinkHeader(b, (byte) 0, (short) 0)) {
 					@Override
-					public Integer getPriority() {
+					public int getPriority() {
 						return ComPortPriorities.INFO_UNIT;
 					}
 				};
-				logger.trace(packetWork);
 				comPortThreadQueue.add(packetWork);
 			}
 		}
@@ -510,10 +509,6 @@ public abstract class GuiControllerAbstract extends Thread {
 
 	// ***********************************************************************
 	protected class VCLC extends ValueChangeListenerClass {
-
-		public VCLC(Logger logger) {
-			super(logger);
-		}
 
 		@Override
 		public void fireValueChangeListener(ValueChangeEvent valueChangeEvent) {
@@ -607,14 +602,14 @@ public abstract class GuiControllerAbstract extends Thread {
 				PacketHeader header = packet.getHeader();
 
 				if (header != null
-						&& header.getGroupId()==Packet.GROUP_ID_MEASUREMENT
+						&& header.getGroupId()==PacketImp.GROUP_ID_MEASUREMENT
 						&& (header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
 						&& header.getOption()==0) {
 
 					logger.debug(packet);
-					byte mesurementStatus = packet.getClass().equals(Packet.class) || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS
-							? Packet.PARAMETER_MEASUREMENT_FCM_STATUS
-									: Packet.PARAMETER_MEASUREMENT_STATUS;
+					byte mesurementStatus = packet.getClass().equals(PacketImp.class) || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS
+							? PacketImp.PARAMETER_MEASUREMENT_FCM_STATUS
+									: PacketImp.PARAMETER_MEASUREMENT_STATUS;
 
 					Payload payload = packet.getPayload(mesurementStatus);
 					if (payload != null) {

@@ -1,19 +1,5 @@
 package irt.tools.panel.wizards.address;
 
-import irt.controller.AlarmsController;
-import irt.controller.DefaultController;
-import irt.controller.GuiController;
-import irt.controller.control.ControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.getter.Getter;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.RundomNumber;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.LinkedPacket;
-import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-
 import java.awt.Font;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -31,6 +17,22 @@ import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.controller.AlarmsController;
+import irt.controller.DefaultController;
+import irt.controller.GuiController;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.value.getter.Getter;
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.RundomNumber;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.LinkedPacket;
+import irt.data.packet.LinkedPacketImp;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 
 public class AutoAddressPanel extends JPanel {
 	private static final long serialVersionUID = -2493955599780162739L;
@@ -92,9 +94,9 @@ public class AutoAddressPanel extends JPanel {
 								break;
 
 							linkHeader = new LinkHeader((byte)i, (byte)0, (short) 0);
-							packetWork = new Getter(linkHeader, Packet.GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY, logger) {
+							packetWork = new Getter(linkHeader, PacketImp.GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY) {
 								@Override
-								public Integer getPriority() {
+								public int getPriority() {
 									return Integer.MAX_VALUE;
 								}
 
@@ -106,7 +108,7 @@ public class AutoAddressPanel extends JPanel {
 									return logger.exit(true);
 								}};
 
-							DefaultController target = new DefaultController(deviceType, "Address Checker N"+i, packetWork, Style.CHECK_ONCE, logger);
+							DefaultController target = new DefaultController(deviceType, "Address Checker N"+i, packetWork, Style.CHECK_ONCE);
 							synchronized (logger) {
 								if(run)
 									controllers.add(target);
@@ -152,13 +154,12 @@ public class AutoAddressPanel extends JPanel {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			logger.error(logger.getName());
 			logger.trace(packet);
 			if(packet!=null && packet instanceof LinkedPacket){
-				LinkedPacket lp = (LinkedPacket)packet;
+				LinkedPacketImp lp = (LinkedPacketImp)packet;
 				PacketHeader header = lp.getHeader();
 				byte addr = lp.getLinkHeader().getAddr();
-				if(header.getPacketType()==Packet.PACKET_TYPE_RESPONSE)
+				if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 					address.add(addr);
 				new StopController(addr);
 				int size;
@@ -193,9 +194,9 @@ public class AutoAddressPanel extends JPanel {
 
 						PacketWork packetWork = c.getPacketWork();
 						if(packetWork!=null){
-							PacketThread packetThread = packetWork.getPacketThread();
+							PacketThreadWorker packetThread = packetWork.getPacketThread();
 							if(packetThread!=null){
-								LinkedPacket lp = (LinkedPacket) packetThread.getPacket();
+								LinkedPacketImp lp = (LinkedPacketImp) packetThread.getPacket();
 
 								if(lp!=null && lp.getLinkHeader().getAddr()==addr){
 									c.stop();

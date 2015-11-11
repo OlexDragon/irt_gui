@@ -1,5 +1,11 @@
 package irt.tools.panel;
 
+import java.awt.Font;
+
+import javax.swing.JLabel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
+
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
@@ -10,6 +16,7 @@ import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
 import irt.tools.panel.head.IrtPanel;
@@ -20,12 +27,6 @@ import irt.tools.panel.subpanel.RedundancyPanelDemo.REDUNDANCY_NAME;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-
-import java.awt.Font;
-
-import javax.swing.JLabel;
-import javax.swing.JTabbedPane;
-import javax.swing.SwingWorker;
 
 @SuppressWarnings("serial")
 public class UserPicobucPanel extends DevicePanel {
@@ -79,9 +80,9 @@ public class UserPicobucPanel extends DevicePanel {
 						deviceType,
 						"Redundancy Enable",
 						new Getter(getLinkHeader(),
-								Packet.GROUP_ID_CONFIGURATION,
-								Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
-								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME, logger), Style.CHECK_ALWAYS, logger){
+								PacketImp.GROUP_ID_CONFIGURATION,
+								PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
+								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
 									@Override
 									protected PacketListener getNewPacketListener() {
 										return new PacketListener() {
@@ -98,10 +99,10 @@ public class UserPicobucPanel extends DevicePanel {
 													protected String doInBackground() throws Exception {
 														if(
 																getPacketWork().isAddressEquals(packet) &&
-																packet.getHeader().getGroupId()==Packet.GROUP_ID_CONFIGURATION &&
+																packet.getHeader().getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
 																packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
 															)
-															if(packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE){
+															if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 																REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
 																if(n!=null && !n.equals(name) && n!=REDUNDANCY_NAME.NO_NAME){
 

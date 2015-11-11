@@ -3,8 +3,6 @@ package irt.controller;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import org.apache.logging.log4j.Logger;
-
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -13,7 +11,7 @@ import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.value.ValueDouble;
 
 public class AttenuationController extends ValueRangeControllerAbstract {
@@ -21,18 +19,16 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 	private Style style;
 	protected int deviceType;
 
-	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style, Logger logger) {
+	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType,
 				"Attenuation Controller",
 				new ConfigurationSetter(linkHeader,
-						Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE,
-						PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE,
-						logger),
+						PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE,
+						PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE),
 				txtField,
 				slider,
 				txtStep,
-				Style.CHECK_ONCE,
-				logger);
+				Style.CHECK_ONCE);
 		this.style = style;
 		this.deviceType = deviceType;
 	}
@@ -80,7 +76,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 
 				ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
 				value.setPrefix(prefix);
-				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? Packet.PARAMETER_CONFIG_FCM_ATTENUATION : Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
+				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION : PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
 			}
 		}
 

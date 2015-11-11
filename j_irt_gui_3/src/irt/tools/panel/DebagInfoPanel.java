@@ -1,14 +1,5 @@
 package irt.tools.panel;
 
-import irt.controller.DeviceDebugController;
-import irt.controller.DumpControllers;
-import irt.controller.GuiController;
-import irt.controller.serial_port.value.getter.Getter;
-import irt.data.PacketWork;
-import irt.data.RundomNumber;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
@@ -27,12 +18,19 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import irt.controller.DeviceDebugController;
+import irt.controller.DumpControllers;
+import irt.controller.GuiController;
+import irt.controller.serial_port.value.getter.Getter;
+import irt.data.PacketWork;
+import irt.data.RundomNumber;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketImp;
 
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel {
 
-	private final Logger logger = LogManager.getLogger();
 	private DeviceDebugController deviceDebagInfoController;
 	private LinkHeader linkHeader;
 	private JTextArea textArea;
@@ -107,12 +105,12 @@ public class DebagInfoPanel extends JPanel {
 																"Info Controller",
 																new Getter(
 																		DebagInfoPanel.this.linkHeader,
-																		Packet.GROUP_ID_DEVICE_DEBAG,
+																		PacketImp.GROUP_ID_DEVICE_DEBAG,
 																		(byte) (cbCommand.getSelectedIndex()+1),
-																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO, LogManager.getLogger()),
+																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO),
 																cbCommand,
 																cbParameter,
-																DebagInfoPanel.this.textArea, logger);
+																DebagInfoPanel.this.textArea);
 
 				deviceDebagInfoController.setWaitTime(10000);//10 sec
 

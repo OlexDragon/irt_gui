@@ -1,5 +1,20 @@
 package irt.tools.panel.subpanel.control;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+
 import irt.controller.DefaultController;
 import irt.controller.ValueRangeControllerAbstract;
 import irt.controller.control.ControllerAbstract;
@@ -15,24 +30,10 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.value.ValueDouble;
 import irt.tools.CheckBox.SwitchBox;
-
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.event.AncestorEvent;
-import javax.swing.event.AncestorListener;
 
 @SuppressWarnings("serial")
 public class ControlPanelPicobuc extends ControlPanelSSPA {
@@ -50,7 +51,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 					alcEnableSetterController.stop();
 				}
 
-				ConfigurationSetter configurationSetter = new ConfigurationSetter(linkHeader, Packet.PARAMETER_CONFIG_FCM_ALC_ENABLED, PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND, logger){
+				ConfigurationSetter configurationSetter = new ConfigurationSetter(linkHeader, PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED, PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND){
 
 					private int times;
 
@@ -59,7 +60,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 
 						if(packet.getHeader().getPacketId() == PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND){
 
-							if(packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE){
+							if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 								Boolean enabled = packet.getPayload(0).getByte()==1;
 								logger.trace(packet);
 								fireValueChangeListener(new ValueChangeEvent(enabled, PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND));
@@ -75,7 +76,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 					
 				};
 				configurationSetter.preparePacketToSend(switchBox.isSelected() ? (byte)1 : (byte)0);
-				alcEnableSetterController = new DefaultController(deviceType, "Command SET ALC", configurationSetter, Style.CHECK_ALWAYS, logger){
+				alcEnableSetterController = new DefaultController(deviceType, "Command SET ALC", configurationSetter, Style.CHECK_ALWAYS){
 
 					@Override
 					protected ValueChangeListener addGetterValueChangeListener() {
@@ -162,9 +163,9 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 				"ALC",
 				new Getter(
 						linkHeader,
-						Packet.GROUP_ID_CONFIGURATION,
-						Packet.PARAMETER_CONFIG_FCM_ALC_ENABLED,
-						PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE, logger){
+						PacketImp.GROUP_ID_CONFIGURATION,
+						PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED,
+						PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE){
 
 					@Override
 					public boolean set(Packet packet) {
@@ -181,7 +182,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 						return false;
 					}
 				},
-				Style.CHECK_ALWAYS, logger);
+				Style.CHECK_ALWAYS);
 	}
 
 	private void startThread(DefaultController controller) {
@@ -199,8 +200,8 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 
 		Getter alcRangeGetter = new Getter(
 				linkHeader,
-				Packet.GROUP_ID_CONFIGURATION,
-				Packet.PARAMETER_CONFIG_FCM_ALC_LEVEL_RANGE,
+				PacketImp.GROUP_ID_CONFIGURATION,
+				PacketImp.PARAMETER_CONFIG_FCM_ALC_LEVEL_RANGE,
 				PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE, logger){
 
 					@Override
@@ -222,7 +223,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 				txtGain,
 				slider,
 				txtStep,
-				Style.CHECK_ALWAYS, logger){
+				Style.CHECK_ALWAYS){
 
 					@Override
 					protected ValueChangeListener addGetterValueChangeListener() {
@@ -244,7 +245,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 
 									ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
 									value.setPrefix(prefix);
-									startTextSliderController(ControlPanelPicobuc.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL, Packet.PARAMETER_CONFIG_FCM_ALC_LEVEL, style);
+									startTextSliderController(ControlPanelPicobuc.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL, PacketImp.PARAMETER_CONFIG_FCM_ALC_LEVEL, style);
 								}
 							}
 						};

@@ -1,14 +1,14 @@
 package irt.controller.serial_port.value.setter;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import irt.data.IdValue;
-import irt.data.PacketThread;
+import irt.data.PacketThreadWorker;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 
 public class Setter extends SetterAbstract {
@@ -16,8 +16,7 @@ public class Setter extends SetterAbstract {
 	private int value = Integer.MIN_VALUE;
 
 	public Setter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId) {
-		super(linkHeader, groupId, packetParameterHeaderCode, packetId,
-				LogManager.getLogger());
+		super(linkHeader, groupId, packetParameterHeaderCode, packetId);
 	}
 
 	public Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId) {
@@ -25,8 +24,8 @@ public class Setter extends SetterAbstract {
 				LogManager.getLogger());
 	}
 
-	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId, T value, Logger logger) {
-		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value, logger);
+	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, short packetId, T value) {
+		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, value);
 	}
 
 	public Setter(byte groupId, byte packetParameterHeaderCode,	short packetId) {
@@ -39,7 +38,7 @@ public class Setter extends SetterAbstract {
 	}
 
 	public void preparePacketToSend(byte value) throws InterruptedException {
-		PacketThread packetThread = getPacketThread();
+		PacketThreadWorker packetThread = getPacketThread();
 		packetThread.start();
 		packetThread.join();
 		packetThread.preparePacket(value);
@@ -53,7 +52,7 @@ public class Setter extends SetterAbstract {
 
 			PacketHeader cph = packet.getHeader();
 
-			PacketThread upt = getPacketThread();
+			PacketThreadWorker upt = getPacketThread();
 			Packet up = upt.getPacket();
 
 			if(cph!=null && up!=null &&
@@ -62,7 +61,7 @@ public class Setter extends SetterAbstract {
 
 				Object source = null;
 
-				if(cph.getOption()>0 || cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
+				if(cph.getOption()>0 || cph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 					source = new Byte((byte) -cph.getOption());
 					if((byte)source==0)
 						source=-20;

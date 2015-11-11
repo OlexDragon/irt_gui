@@ -11,7 +11,7 @@ import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.tools.KeyValue;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
@@ -76,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.091";
+	public static final String VERTION = "- 3.092";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -275,12 +275,11 @@ public class IrtGui extends IrtMainFrame {
 
 								byte na = (byte)newAddress;
 								Setter packetWork = new Setter(new LinkHeader((byte)address, (byte)0, (short) 0),
-										Packet.PACKET_TYPE_COMMAND,
-										Packet.IRT_SLCP_GROUP_ID_PROTOCOL,
-										Packet.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
+										PacketImp.PACKET_TYPE_COMMAND,
+										PacketImp.IRT_SLCP_GROUP_ID_PROTOCOL,
+										PacketImp.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
 										PacketWork.PACKET_ID_PROTOCOL_ADDRESS,
-										na,
-										logger);
+										na);
 								logger.trace(packetWork);
 								guiController.setAddress(na);
 								GuiController.getComPortThreadQueue().add(packetWork);
@@ -418,7 +417,11 @@ public class IrtGui extends IrtMainFrame {
 	private void setAddressHistory(String historyStr) {
 		if(historyStr!=null){
 			for(String s:historyStr.split(","))
-				addressHistory.add(Integer.parseInt(s.replaceAll("\\D", "")));
+				try{
+					addressHistory.add(Integer.parseInt(s.replaceAll("\\D", "")));
+				}catch(Exception e){
+					logger.catching(e);
+				}
 
 			logger.debug("History={}", addressHistory);
 		}

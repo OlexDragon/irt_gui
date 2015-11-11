@@ -1,19 +1,21 @@
 package irt.data;
 
+import java.util.Arrays;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.value.Value;
 
-import java.util.Arrays;
 
-import org.apache.logging.log4j.Logger;
+public class PacketThread extends Thread implements PacketThreadWorker {
 
-
-public class PacketThread extends Thread {
-
-	protected final Logger logger;
+	protected final Logger logger = LogManager.getLogger();
 
 	public static final byte FLAG_SEQUENCE	= 0x7E;
 	public static final byte CONTROL_ESCAPE= 0x7D;
@@ -22,15 +24,13 @@ public class PacketThread extends Thread {
 	private Packet packet;
 	private Object value;
 
-	public PacketThread(byte[] packetSetting, String threadName, Logger logger) {
+	public PacketThread(byte[] packetSetting, String threadName) {
 		super(threadName);
-		this.logger = logger;
 		data = packetSetting;
 		setDaemon(true);
 	}
 
-	public PacketThread(byte[] packetSetting, Logger logger) {
-		this.logger = logger;
+	public PacketThread(byte[] packetSetting) {
 		data = packetSetting;
 	}
 
@@ -60,7 +60,7 @@ public class PacketThread extends Thread {
 
 	protected Packet newPacket() {
 		logger.trace("newPacket() = new Packet()");
-		return new Packet();
+		return new PacketImp();
 	}
 
 	public byte[] getData() {
@@ -69,7 +69,7 @@ public class PacketThread extends Thread {
 
 	private byte[] preparePacket(Packet packet) {
 		logger.entry(packet);
-		byte[]data = packet.asBytes();
+		byte[]data = packet.toBytes();
 		logger.debug("\n\t{}", data);
 		return preparePacket(data);
 	}
@@ -83,7 +83,7 @@ public class PacketThread extends Thread {
 				index = checkControlEscape(data, i, p, index);
 			}
 
-			byte[] csTmp = Packet.toBytes((short)new Checksum(data).getChecksum());
+			byte[] csTmp = PacketImp.toBytes((short)new Checksum(data).getChecksum());
 			for(int i=1; i>=0; i--, index ++)
 				index = checkControlEscape(csTmp, i, p, index);
 
@@ -97,10 +97,10 @@ public class PacketThread extends Thread {
 
 	public void preparePacket(byte value) {
 		logger.entry(value);
-		setPacketHeaderType(Packet.PACKET_TYPE_COMMAND);
+		setPacketHeaderType(PacketImp.PACKET_TYPE_COMMAND);
 		Payload payload = packet.getPayload(0);
 		payload.setBuffer(value);
-		data = preparePacket(packet.asBytes());
+		data = preparePacket(packet.toBytes());
 		logger.exit(data);
 	}
 
@@ -149,9 +149,9 @@ public class PacketThread extends Thread {
 			pl.setBuffer(value);
 
 			if(value!=null)
-				setPacketHeaderType(Packet.PACKET_TYPE_COMMAND);
+				setPacketHeaderType(PacketImp.PACKET_TYPE_COMMAND);
 			else
-				setPacketHeaderType(Packet.PACKET_TYPE_REQUEST);
+				setPacketHeaderType(PacketImp.PACKET_TYPE_REQUEST);
 
 			preparePacket();
 		}
@@ -164,10 +164,10 @@ public class PacketThread extends Thread {
 
 		if(rv!=null){
 			pl.setBuffer(registerValue.getIndex(), registerValue.getAddr(), (int)rv.getValue());
-			setPacketHeaderType(Packet.PACKET_TYPE_COMMAND);
+			setPacketHeaderType(PacketImp.PACKET_TYPE_COMMAND);
 		}else{
 			pl.setBuffer(registerValue.getIndex(), registerValue.getAddr());
-			setPacketHeaderType(Packet.PACKET_TYPE_REQUEST);
+			setPacketHeaderType(PacketImp.PACKET_TYPE_REQUEST);
 		}
 
 		preparePacket();
@@ -206,12 +206,12 @@ public class PacketThread extends Thread {
 	}
 
 	public boolean isReadyToSend() {
-		return packet!=null && packet.getHeader().asBytes()!=null && data!=null;
+		return packet!=null && packet.getHeader().toBytes()!=null && data!=null;
 	}
 
 	public void setDataPacketTypeCommand() {
 		if(data!=null)
-			data[0] = Packet.PACKET_TYPE_COMMAND;
+			data[0] = PacketImp.PACKET_TYPE_COMMAND;
 	}
 
 	public void setData(byte[] data) {

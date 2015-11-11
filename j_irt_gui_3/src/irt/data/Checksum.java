@@ -1,6 +1,6 @@
 package irt.data;
 
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 
 public class Checksum {
 
@@ -59,7 +59,7 @@ public class Checksum {
 	}
 
 	public byte[] getChecksumAsBytes(){
-		return new byte[]{ Packet.getByte(fcs, 0), Packet.getByte(fcs, 1)};
+		return new byte[]{ PacketImp.getByte(fcs, 0), PacketImp.getByte(fcs, 1)};
 	}
 
 	public int getChecksum() {

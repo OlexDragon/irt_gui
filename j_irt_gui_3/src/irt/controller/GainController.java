@@ -1,36 +1,31 @@
 package irt.controller;
 
+import javax.swing.JSlider;
+import javax.swing.JTextField;
+
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.PacketWork;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.value.ValueDouble;
-
-import javax.swing.JSlider;
-import javax.swing.JTextField;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class GainController extends ValueRangeControllerAbstract {
 
 	private Style style;
 
-	public GainController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style, Logger logger) {
+	public GainController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType,
 				"Gain Controller",
 				new ConfigurationSetter(linkHeader,
-						Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE,
-						PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE,
-						LogManager.getLogger()),
+						PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE,
+						PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE),
 				txtField,
 				slider,
 				txtStep,
-				Style.CHECK_ONCE,
-				logger);
+				Style.CHECK_ONCE);
 		this.style = style;
 	}
 
@@ -67,7 +62,7 @@ public class GainController extends ValueRangeControllerAbstract {
 				Range r = (Range) source;
 				ValueDouble value = new ValueDouble(0, r.getMinimum(), r.getMaximum(), 1);
 				value.setPrefix(" dB");
-				startTextSliderController(GainController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, style);
+				startTextSliderController(GainController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, style);
 			}
 		}
 

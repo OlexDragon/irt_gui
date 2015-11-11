@@ -1,23 +1,21 @@
 package irt.controller.control;
 
+import javax.swing.ComboBoxModel;
+
 import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.IdValueForComboBox;
-import irt.data.PacketThread;
+import irt.data.PacketThreadWorker;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-
-import javax.swing.ComboBoxModel;
-
-import org.apache.logging.log4j.Logger;
 
 public class ControlControllerPicobuc extends ControlController{
 
-	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, MonitorPanelAbstract panel, Logger logger) {
-		super(deviceType, "ControlControllerPicobuc", linkHeader, panel, logger);
+	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, MonitorPanelAbstract panel) {
+		super(deviceType, "ControlControllerPicobuc", linkHeader, panel);
 	}
 
 	@Override
@@ -32,14 +30,14 @@ public class ControlControllerPicobuc extends ControlController{
 				if(comboBoxfreqSet!= null && valueChangeEvent.getID()==pw.getPacketId()){
 					Object source = valueChangeEvent.getSource();
 
-					PacketThread packetThread = pw.getPacketThread();
+					PacketThreadWorker packetThread = pw.getPacketThread();
 					if(source instanceof ComboBoxModel){
 						ComboBoxModel<Object> model = (ComboBoxModel<Object>) source;
 						comboBoxfreqSet.setModel(model);
 						comboBoxfreqSet.addItemListener(itemListenerComboBox);
 
 						pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD);
-						pw.setPacketParameterHeaderCode(Packet.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET);
+						pw.setPacketParameterHeaderCode(PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET);
 						packetThread.preparePacket();
 						setSend(true);
 					}else{
@@ -48,7 +46,7 @@ public class ControlControllerPicobuc extends ControlController{
 							setSend(false);
 						else {
 							packetThread.getPacket().getPayload(0).setBuffer(null);
-							packetThread.getPacket().getHeader().setType(Packet.PACKET_TYPE_REQUEST);
+							packetThread.getPacket().getHeader().setType(PacketImp.PACKET_TYPE_REQUEST);
 							packetThread.preparePacket();
 						}
 					}

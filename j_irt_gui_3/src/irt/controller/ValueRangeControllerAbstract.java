@@ -1,12 +1,5 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.PacketWork;
-import irt.data.RundomNumber;
-import irt.data.packet.LinkHeader;
-import irt.data.value.Value;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +9,12 @@ import java.awt.event.FocusListener;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import org.apache.logging.log4j.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.data.PacketWork;
+import irt.data.RundomNumber;
+import irt.data.packet.LinkHeader;
+import irt.data.value.Value;
 
 public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
@@ -33,8 +31,8 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 	protected TextSliderController textSliderController;
 
-	public ValueRangeControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, style, logger);
+	public ValueRangeControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+		super(deviceType, controllerName, packetWork, null, style);
 		this.txtField = txtField;
 		this.slider = slider;
 		this.txtStep = txtStep;
@@ -126,7 +124,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
-		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId, logger), value, txtField, slider, style, logger);
+		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
 		Thread t = new Thread(textSliderController, ValueRangeControllerAbstract.class.getSimpleName()+".TextSliderController-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

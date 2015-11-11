@@ -1,21 +1,5 @@
 package irt.tools.panel.subpanel;
 
-import irt.controller.DefaultController;
-import irt.controller.GuiControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.data.IdValue;
-import irt.data.IdValueForComboBox;
-import irt.data.Listeners;
-import irt.data.PacketWork;
-import irt.data.RegisterValue;
-import irt.data.listener.PacketListener;
-import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-import irt.data.packet.Payload;
-import irt.data.value.Value;
-
 import java.awt.Component;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -41,6 +25,23 @@ import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.controller.DefaultController;
+import irt.controller.GuiControllerAbstract;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
+import irt.data.IdValue;
+import irt.data.IdValueForComboBox;
+import irt.data.Listeners;
+import irt.data.PacketWork;
+import irt.data.RegisterValue;
+import irt.data.listener.PacketListener;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
+import irt.data.packet.Payload;
+import irt.data.value.Value;
 
 public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 	private static final int ADDRESS = 9;
@@ -111,7 +112,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 						INDEX,
 						ADDRESS,
 						PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG,
-						Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), Style.CHECK_ONCE, logger){
+						PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), Style.CHECK_ONCE){
 
 							@Override
 							protected PacketListener getNewPacketListener() {
@@ -122,8 +123,8 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 										PacketHeader header = packet.getHeader();
 										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG){
 
-											if(header.getPacketType()==Packet.PACKET_TYPE_RESPONSE){
-												Payload payload = packet.getPayload(Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE);
+											if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+												Payload payload = packet.getPayload(PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE);
 												if(payload!=null){
 													RegisterValue value = payload.getRegisterValue();
 													RegisterValue oldValue = PLL_HMC807LP6CE_Reg9.this.value;
@@ -266,7 +267,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 		btnClear.setMargin(new Insets(0, 0, 0, 0));
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ConfigurationSetter packetWork = new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS, logger);
+				ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
 				packetWork.preparePacketToSend(0);
 				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 			}

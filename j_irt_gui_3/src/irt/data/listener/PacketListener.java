@@ -1,8 +1,8 @@
 package irt.data.listener;
 
-import irt.data.packet.Packet;
-
 import java.util.EventListener;
+
+import irt.data.packet.Packet;
 
 public interface PacketListener extends EventListener{
 

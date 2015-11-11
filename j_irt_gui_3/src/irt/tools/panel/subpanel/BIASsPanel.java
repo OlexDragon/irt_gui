@@ -1,36 +1,5 @@
 package irt.tools.panel.subpanel;
 
-import irt.controller.AdcController;
-import irt.controller.AdcCurrentController;
-import irt.controller.DefaultController;
-import irt.controller.DeviceDebugController;
-import irt.controller.GuiController;
-import irt.controller.NGlobalController;
-import irt.controller.SetterController;
-import irt.controller.SwitchControllerRegister;
-import irt.controller.control.ControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.getter.DeviceDebagGetter;
-import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.controller.serial_port.value.setter.Setter;
-import irt.controller.to_do.InitializePicoBuc;
-import irt.data.DeviceInfo;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.RegisterValue;
-import irt.data.RundomNumber;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ControllerFocusListener;
-import irt.data.listener.PacketListener;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-import irt.data.value.Value;
-import irt.data.value.ValueDouble;
-import irt.irt_gui.IrtGui;
-import irt.tools.CheckBox.SwitchBox;
-import irt.tools.button.ImageButton;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -62,6 +31,38 @@ import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.controller.AdcController;
+import irt.controller.AdcCurrentController;
+import irt.controller.DefaultController;
+import irt.controller.DeviceDebugController;
+import irt.controller.GuiController;
+import irt.controller.NGlobalController;
+import irt.controller.SetterController;
+import irt.controller.SwitchControllerRegister;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.value.getter.DeviceDebagGetter;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
+import irt.controller.serial_port.value.setter.Setter;
+import irt.controller.to_do.InitializePicoBuc;
+import irt.data.DeviceInfo;
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.RegisterValue;
+import irt.data.RundomNumber;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ControllerFocusListener;
+import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
+import irt.data.value.Value;
+import irt.data.value.ValueDouble;
+import irt.irt_gui.IrtGui;
+import irt.tools.CheckBox.SwitchBox;
+import irt.tools.button.ImageButton;
 
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel {
@@ -142,7 +143,7 @@ public class BIASsPanel extends JPanel {
 										isMainBoard ? 6 : 206,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_NGLOBAL,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE), logger));
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE)));
 
 				int index = isMainBoard ? 1 :201;
 				((DeviceDebugController)addController(
@@ -154,9 +155,9 @@ public class BIASsPanel extends JPanel {
 										index,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
-						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
 				((DeviceDebugController)addController(
 						new DeviceDebugController(deviceType, isNewBiasBoard ? "Potentiometer 1" : "Potentiometer 2", isNewBiasBoard ? txtPotentiometer1 : txtPotentiometer2,
@@ -166,9 +167,9 @@ public class BIASsPanel extends JPanel {
 										index,
 										8,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N2,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
-						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
 				index = isMainBoard ? 2 : 202;
 				((DeviceDebugController)addController(
@@ -179,9 +180,9 @@ public class BIASsPanel extends JPanel {
 										index,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N3,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
-						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
 				((DeviceDebugController)addController(
 						new DeviceDebugController(deviceType, isNewBiasBoard ? "Potentiometer 6" : "Potentiometer 4", isNewBiasBoard ? txtPotentiometer6 : txtPotentiometer4,
@@ -191,9 +192,9 @@ public class BIASsPanel extends JPanel {
 										index,
 										8,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N4,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
-						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
 				lblPotentiometer5.setVisible(isNewBiasBoard);
 				lblPotentiometer6.setVisible(isNewBiasBoard);
@@ -218,9 +219,9 @@ public class BIASsPanel extends JPanel {
 										index,
 										0,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N5,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						3,
-						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 
 					((DeviceDebugController)addController(
 							new DeviceDebugController(deviceType, isNewBiasBoard ? "Potentiometer 3" : "Potentiometer 6", isNewBiasBoard ? txtPotentiometer3 : txtPotentiometer6,
@@ -230,9 +231,9 @@ public class BIASsPanel extends JPanel {
 										index,
 										8,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N6,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 						11,
-						Style.CHECK_ALWAYS, logger))).addFocusListener(focusListener);
+						Style.CHECK_ALWAYS))).addFocusListener(focusListener);
 					multiplier = 10.8;
 				}else
 					multiplier = 5.4;
@@ -246,8 +247,8 @@ public class BIASsPanel extends JPanel {
 										linkHeader,
 										isMainBoard ? 3 : 203,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N1,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
-								), logger
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE
+								)
 						)
 				);
 				addController(
@@ -259,8 +260,8 @@ public class BIASsPanel extends JPanel {
 										linkHeader,
 										isMainBoard ? 4 : 204,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_SWITCH_N2,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
-								), logger
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE
+								)
 						)
 				);
 
@@ -276,10 +277,10 @@ public class BIASsPanel extends JPanel {
 								index,
 								1,
 								PacketWork.PACKET_ID_DEVICE_DEBAG_HS1_CURRENT,
-								Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
+								PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE
 						),
 						value,
-						multiplier, logger)
+						multiplier)
 				);
 
 				value = new ValueDouble(0, 0, 4095, 0);
@@ -294,10 +295,10 @@ public class BIASsPanel extends JPanel {
 										index,
 										2,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_HS2_CURRENT,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
-								multiplier, logger
+								multiplier
 						)
 				);
 
@@ -313,11 +314,10 @@ public class BIASsPanel extends JPanel {
 										index,
 										3,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_OUTPUT_POWER,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
-								1,
-								logger
+								1
 						)
 				);
 
@@ -333,11 +333,10 @@ public class BIASsPanel extends JPanel {
 										index,
 										4,
 										PacketWork.PACKET_ID_DEVICE_DEBAG_TEMPERATURE,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE
 								),
 								value,
-								1,
-								logger
+								1
 						)
 				);
 			}
@@ -569,12 +568,12 @@ public class BIASsPanel extends JPanel {
 						if(isMainBoard)
 							new SetterController(deviceType, "Initialize Controller",
 									new Setter(linkHeader,
-										Packet.PACKET_TYPE_COMMAND,
-										Packet.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1,
-										Packet.PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
+										PacketImp.PACKET_TYPE_COMMAND,
+										PacketImp.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1,
+										PacketImp.PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
 										PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE
 									),
-									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE, logger
+									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
 							);
 						else{
 							logger.trace("\n\t{}", controller);
@@ -618,8 +617,8 @@ public class BIASsPanel extends JPanel {
 						index,
 						addr,
 						PacketWork.PACKET_ID_DEVICE_POTENTIOMETERS_INIT,
-						Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE);
-				PacketThread packetThread = setter.getPacketThread();
+						PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE);
+				PacketThreadWorker packetThread = setter.getPacketThread();
 				packetThread.start();
 				try { packetThread.join(); } catch (InterruptedException e) { logger.catching(e); }
 				setter.preparePacketToSend(registerValue);
@@ -628,7 +627,7 @@ public class BIASsPanel extends JPanel {
 
 			private DefaultController createController(DeviceDebagSetter setter, int index, int address) {
 				logger.entry(setter, index, address);
-				return new DefaultController(deviceType, "Potenciometer index="+index+", address="+address, setter, Style.CHECK_ONCE, logger){
+				return new DefaultController(deviceType, "Potenciometer index="+index+", address="+address, setter, Style.CHECK_ONCE){
 
 					@Override
 					protected PacketListener getNewPacketListener() {
@@ -638,7 +637,7 @@ public class BIASsPanel extends JPanel {
 							public void packetRecived(Packet packet) {
 
 								if(		getPacketWork().isAddressEquals(packet) &&
-										packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
+										packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
 										packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_POTENTIOMETERS_INIT){
 
 									BIASsPanel.this.logger.trace("\n\t{}", packet);
@@ -669,14 +668,13 @@ public class BIASsPanel extends JPanel {
 
 				Setter setter = new Setter(
 						linkHeader,
-						Packet.PACKET_TYPE_COMMAND,
-						Packet.GROUP_ID_DEVICE_DEBAG,
-						Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE,
+						PacketImp.PACKET_TYPE_COMMAND,
+						PacketImp.GROUP_ID_DEVICE_DEBAG,
+						PacketImp.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE,
 						PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE,
-						(Integer)calibrationMode.ordinal(),
-						logger
+						(Integer)calibrationMode.ordinal()
 				);
-				controller = new DefaultController(deviceType, "CalibrationMode", setter, Style.CHECK_ONCE, logger){
+				controller = new DefaultController(deviceType, "CalibrationMode", setter, Style.CHECK_ONCE){
 
 					@Override
 					protected PacketListener getNewPacketListener() {
@@ -686,7 +684,7 @@ public class BIASsPanel extends JPanel {
 							public void packetRecived(Packet packet) {
 
 								if(		getPacketWork().isAddressEquals(packet) &&
-										packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
+										packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
 										packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE){
 
 									BIASsPanel.this.logger.trace("\n\t{}", packet);

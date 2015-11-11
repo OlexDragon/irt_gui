@@ -1,24 +1,5 @@
 package irt.tools.panel.subpanel.control;
 
-import irt.controller.AttenuationController;
-import irt.controller.FrequencyContriller;
-import irt.controller.GainController;
-import irt.controller.GuiController;
-import irt.controller.control.ControlController;
-import irt.controller.control.ControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
-import irt.data.IdValue;
-import irt.data.IdValueForComboBox;
-import irt.data.Listeners;
-import irt.data.RundomNumber;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Payload;
-import irt.irt_gui.IrtGui;
-import irt.tools.button.ImageButton;
-import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -48,6 +29,25 @@ import javax.swing.SwingWorker;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+
+import irt.controller.AttenuationController;
+import irt.controller.FrequencyContriller;
+import irt.controller.GainController;
+import irt.controller.GuiController;
+import irt.controller.control.ControlController;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
+import irt.data.IdValue;
+import irt.data.IdValueForComboBox;
+import irt.data.Listeners;
+import irt.data.RundomNumber;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.Payload;
+import irt.irt_gui.IrtGui;
+import irt.tools.button.ImageButton;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 
 @SuppressWarnings("serial")
@@ -343,15 +343,15 @@ public class ControlPanel extends MonitorPanelAbstract {
 	}
 
 	protected AttenuationController getNewAttenController() {
-		return new AttenuationController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS, logger);
+		return new AttenuationController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
 
 	protected GainController getNewGainController() {
-		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS, logger);
+		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
 
 	protected FrequencyContriller getNewFreqController() {
-		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS, logger);
+		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
 
 	protected ControllerAbstract getNewAlcController() {
@@ -410,7 +410,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 	@Override
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> controllers = new ArrayList<>();
-		controllers.add(new ControlController(deviceType, getClass().getSimpleName(), getLinkHeader(),this, logger));
+		controllers.add(new ControlController(deviceType, getClass().getSimpleName(), getLinkHeader(),this));
 		return controllers;
 	}
 

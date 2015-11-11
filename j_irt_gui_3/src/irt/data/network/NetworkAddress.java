@@ -1,10 +1,10 @@
 package irt.data.network;
 
-import irt.data.packet.Packet;
-import irt.data.packet.Payload;
-
 import java.util.Arrays;
 import java.util.List;
+
+import irt.data.packet.Packet;
+import irt.data.packet.Payload;
 
 public class NetworkAddress {
 

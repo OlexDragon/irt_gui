@@ -29,7 +29,6 @@ public class GuiController extends GuiControllerAbstract{
 	@Override
 	public void run() {
 		while (true) {
-			logger.debug("run while (true)");
 			try {
 				if (isSerialPortSet()) {
 					getConverterInfo();

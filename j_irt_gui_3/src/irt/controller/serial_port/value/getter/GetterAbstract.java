@@ -1,20 +1,20 @@
 package irt.controller.serial_port.value.getter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import irt.data.LinkedPacketThread;
 import irt.data.PacketThread;
+import irt.data.PacketThreadWorker;
 import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.apache.logging.log4j.Logger;
 
 public abstract class GetterAbstract extends ValueChangeListenerClass implements PacketWork {
 
@@ -26,12 +26,11 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 	protected PacketThread packetThread;
 
-	public GetterAbstract(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId, Logger logger) {
-		this(linkHeader, Packet.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, logger);
+	public GetterAbstract(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId) {
+		this(linkHeader, PacketImp.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId);
 	}
 
-	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, Logger logger) {
-		super(logger);
+	public GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId) {
 		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
 		this.packetType = packetType;
 		this.groupId = groupId;
@@ -50,13 +49,13 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 				packetId,
 				Arrays.toString(command),
 				linkHeader);
-		packetThread = this.linkHeader.getAddr()!=0 ? new LinkedPacketThread(linkHeader, command, "LinkedPacketId="+packetId, logger) : new PacketThread(command, "PacketId="+packetId, logger);
+		packetThread = this.linkHeader.getAddr()!=0 ? new LinkedPacketThread(linkHeader, command, "LinkedPacketId="+packetId) : new PacketThread(command, "PacketId="+packetId);
 	}
 
-	public <T> GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, T value, Logger logger) {
-		this(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId, logger);
+	public <T> GetterAbstract(LinkHeader linkHeader, byte packetType, byte groupId, byte packetParameterHeaderCode, short packetId, T value) {
+		this(linkHeader, packetType, groupId, packetParameterHeaderCode, packetId);
 		byte[] data = packetThread.getData();
-		byte[] bytesValue = Packet.toBytes(value);
+		byte[] bytesValue = PacketImp.toBytes(value);
 		int length = data.length;
 		data[length-1] = (byte) bytesValue.length;
 		data = Arrays.copyOf(data, length+bytesValue.length);
@@ -64,8 +63,8 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		packetThread.setData(data);
 	}
 
-	public GetterAbstract(LinkHeader linkHeader, RegisterValue registerValue, byte groupId, byte packetParameterHeaderCode, short packetId, Logger logger) {
-		this(linkHeader, groupId, packetParameterHeaderCode, packetId,logger);
+	public GetterAbstract(LinkHeader linkHeader, RegisterValue registerValue, byte groupId, byte packetParameterHeaderCode, short packetId) {
+		this(linkHeader, groupId, packetParameterHeaderCode, packetId);
 		packetThread.setValue(registerValue);
 	}
 
@@ -80,7 +79,7 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 	protected byte[] getCommand() {
 
-		byte[] packetId = Packet.toBytes(this.packetId);
+		byte[] packetId = PacketImp.toBytes(this.packetId);
 
 		return new byte[]{	packetType,		// Packet Type
 				packetId[0],
@@ -88,7 +87,7 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 				groupId,
 				0,							// Reserved
 				0,							// Reserved
-				Packet.ERROR_NO_ERROR,		// Error
+				PacketImp.ERROR_NO_ERROR,		// Error
 				packetParameterHeaderCode,	// Parameter Header Code (Payload's Header Code)
 				0,0};						// Payload's buffer size
 	}
@@ -108,7 +107,8 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		return packetId+tmp;
 	}
 
-	public PacketThread getPacketThread() {
+	@Override
+	public PacketThreadWorker getPacketThread() {
 		return packetThread;
 	}
 
@@ -155,7 +155,7 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		return getPriority()<o.getPriority() ? 1 : getPriority()>o.getPriority() ? -1 : 0;
 	}
 
-	public Integer getPriority() {
+	public int getPriority() {
 		return 0;
 	}
 

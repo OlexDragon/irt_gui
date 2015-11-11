@@ -1,30 +1,28 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.getter.GetterAbstract;
-import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.RegisterValue;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.value.Value;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JCheckBox;
 
-import org.apache.logging.log4j.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.getter.GetterAbstract;
+import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.RegisterValue;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.value.Value;
 
 public class NGlobalController extends ControllerAbstract {
 
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public NGlobalController(int deviceType, JCheckBox checkBox, PacketWork packetWork, Logger logger) {
-		super(deviceType, "NGlobalController", packetWork, null, null, logger);
+	public NGlobalController(int deviceType, JCheckBox checkBox, PacketWork packetWork) {
+		super(deviceType, "NGlobalController", packetWork, null, null);
 		setListeners();
 		this.checkBox = checkBox;
 		checkBox.addActionListener(actionListener);
@@ -50,7 +48,7 @@ public class NGlobalController extends ControllerAbstract {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				SetterAbstract as = (SetterAbstract) getPacketWork();
-				PacketThread pt = as.getPacketThread();
+				PacketThreadWorker pt = as.getPacketThread();
 				if(pt.getPacket()==null)
 					return;
 				RegisterValue rv = ((RegisterValue)pt.getValue());

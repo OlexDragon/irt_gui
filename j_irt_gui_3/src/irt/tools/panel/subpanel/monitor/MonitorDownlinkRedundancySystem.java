@@ -1,5 +1,12 @@
 package irt.tools.panel.subpanel.monitor;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
@@ -8,18 +15,12 @@ import irt.controller.translation.Translation;
 import irt.data.PacketWork;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.value.Value;
 import irt.data.value.ValueBoolean;
 import irt.data.value.ValueDouble;
 import irt.data.value.ValueThreeState;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
 
 
 public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
@@ -112,15 +113,15 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 		List<ControllerAbstract> controllers = new ArrayList<>();
 		controllers.add(getTemperaturController());
 		controllers.add(getWGSController());
-		controllers.add(getLNBStatusController(lblLNB1Status, Packet.PARAMETER_MEASUREMENT_LNB1_STATUS, PacketWork.PACKET_ID_MEASUREMENT_SNB1_STATUS));
-		controllers.add(getLNBStatusController(lblLNB2Status, Packet.PARAMETER_MEASUREMENT_LNB2_STATUS, PacketWork.PACKET_ID_MEASUREMENT_SNB2_STATUS));
+		controllers.add(getLNBStatusController(lblLNB1Status, PacketImp.PARAMETER_MEASUREMENT_LNB1_STATUS, PacketWork.PACKET_ID_MEASUREMENT_SNB1_STATUS));
+		controllers.add(getLNBStatusController(lblLNB2Status, PacketImp.PARAMETER_MEASUREMENT_LNB2_STATUS, PacketWork.PACKET_ID_MEASUREMENT_SNB2_STATUS));
 		return controllers;
 	}
 
 
 	private ControllerAbstract getLNBStatusController(final JLabel lblLNBStatus, byte parameterMeasurement, final short packetIdMeasurement) {
 
-		Getter getter = new Getter(linkHeader, Packet.GROUP_ID_MEASUREMENT, parameterMeasurement, packetIdMeasurement, logger){
+		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_MEASUREMENT, parameterMeasurement, packetIdMeasurement, logger){
 
 			private final Value value = new ValueBoolean(Translation.getValue(String.class, "ready.not", "Not Ready"), Translation.getValue(String.class, "ready", "Ready"));
 
@@ -147,12 +148,12 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		return new DefaultController(deviceType, "MEASUREMENT_LNB", getter, Style.CHECK_ALWAYS, logger);
+		return new DefaultController(deviceType, "MEASUREMENT_LNB", getter, Style.CHECK_ALWAYS);
 	}
 
 	private ControllerAbstract getWGSController() {
 
-		Getter getter = new Getter(linkHeader, Packet.GROUP_ID_MEASUREMENT, Packet.PARAMETER_MEASUREMENT_WGS_POSITION, PacketWork.PACKET_ID_MEASUREMENT_WGS_POSITION, logger){
+		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_MEASUREMENT, PacketImp.PARAMETER_MEASUREMENT_WGS_POSITION, PacketWork.PACKET_ID_MEASUREMENT_WGS_POSITION, logger){
 
 			private final ValueThreeState value = new ValueThreeState("Unknown", "LNB1", "LNB2");
 
@@ -179,12 +180,12 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		return new DefaultController(deviceType, "WGS_POSITION", getter, Style.CHECK_ALWAYS, logger);
+		return new DefaultController(deviceType, "WGS_POSITION", getter, Style.CHECK_ALWAYS);
 	}
 
 	private ControllerAbstract getTemperaturController() {
 
-		Getter getter = new Getter(linkHeader, Packet.GROUP_ID_MEASUREMENT, Packet.PARAMETER_MEASUREMENT_TEMPERATURE, PacketWork.PACKET_ID_MEASUREMENT_TEMPERATURE, logger){
+		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_MEASUREMENT, PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE, PacketWork.PACKET_ID_MEASUREMENT_TEMPERATURE, logger){
 
 			@Override
 			public boolean set(Packet packet) {
@@ -202,7 +203,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		return new DefaultController(deviceType, "DLRS Temperatur", getter, Style.CHECK_ALWAYS, logger);
+		return new DefaultController(deviceType, "DLRS Temperatur", getter, Style.CHECK_ALWAYS);
 	}
 
 	@Override

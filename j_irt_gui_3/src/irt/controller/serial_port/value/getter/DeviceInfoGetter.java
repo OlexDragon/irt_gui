@@ -1,18 +1,17 @@
 package irt.controller.serial_port.value.getter;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.data.PacketWork;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 
 public class DeviceInfoGetter extends GetterAbstract{
 
 //	private DeviceInfo deviceInfo = new DeviceInfo();
 
 	public DeviceInfoGetter(LinkHeader linkHeader){
-		super(linkHeader, Packet.GROUP_ID_DEVICE_INFO, Packet.IRT_SLCP_PARAMETER_ALL, PacketWork.PACKET_DEVICE_INFO, LogManager.getLogger());
+		super(linkHeader, PacketImp.GROUP_ID_DEVICE_INFO, PacketImp.IRT_SLCP_PARAMETER_ALL, PacketWork.PACKET_DEVICE_INFO);
 		getPacketThread().setPriority(1);
 	}
 

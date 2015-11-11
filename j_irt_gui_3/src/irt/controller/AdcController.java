@@ -5,8 +5,6 @@ import java.text.DecimalFormat;
 
 import javax.swing.JLabel;
 
-import org.apache.logging.log4j.Logger;
-
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.data.PacketWork;
@@ -24,14 +22,14 @@ public class AdcController extends ControllerAbstract {
 	
 	Value value = new Value(0, 0, 4095, 0);
 
-	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, double multiplier, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, null, logger);
+	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, double multiplier) {
+		super(deviceType, controllerName, packetWork, null, null);
 		this.label = label;
 		this.multiplier = multiplier;
 	}
 
-	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, Value value, double multiplier, Logger logger) {
-		this(deviceType, controllerName, label, packetWork, multiplier, logger);
+	public AdcController(int deviceType, String controllerName, JLabel label, PacketWork packetWork, Value value, double multiplier) {
+		this(deviceType, controllerName, label, packetWork, multiplier);
 		this.value = value;
 	}
 

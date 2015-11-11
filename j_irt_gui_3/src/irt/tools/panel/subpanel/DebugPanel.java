@@ -29,6 +29,7 @@ import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 
 public class DebugPanel extends JPanel{
 	private static final long serialVersionUID = 6314140030152046415L;
@@ -57,15 +58,15 @@ public class DebugPanel extends JPanel{
 										0,
 										0,
 										PacketWork.PACKET_ID_CLEAR_STATISTICS,
-										Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE,
+										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE,
 										0
 								){
 									@Override
-									public Integer getPriority() {
+									public int getPriority() {
 										return 30;
 									}
 								},
-								Style.CHECK_ALWAYS, logger){
+								Style.CHECK_ALWAYS){
 
 									@Override
 									protected PacketListener getNewPacketListener() {
@@ -76,7 +77,7 @@ public class DebugPanel extends JPanel{
 												if(getPacketWork().isAddressEquals(packet) &&
 														packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CLEAR_STATISTICS){
 
-													if(packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE){
+													if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 														stop();
 														guiControllerAbstract.doDump(linkHeader, "***** Statistics is cleared. *****");
 														JOptionPane.showMessageDialog(null, "Statistics is cleared.");

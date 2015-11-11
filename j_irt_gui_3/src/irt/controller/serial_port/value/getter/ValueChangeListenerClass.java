@@ -7,15 +7,13 @@ import irt.data.listener.ValueChangeListener;
 
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 
 public class ValueChangeListenerClass {
 
-	protected final Logger logger;
-	public ValueChangeListenerClass(Logger logger){
-		this.logger = logger;
-	}
+	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	private EventListenerList valueChangeListeners = new EventListenerList();

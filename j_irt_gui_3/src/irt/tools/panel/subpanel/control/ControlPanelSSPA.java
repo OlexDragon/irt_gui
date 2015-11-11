@@ -1,13 +1,13 @@
 package irt.tools.panel.subpanel.control;
 
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
+
 import irt.controller.control.ControlControllerPicobuc;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
-
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
 
 @SuppressWarnings("serial")
 public class ControlPanelSSPA extends ControlPanel {
@@ -19,7 +19,7 @@ public class ControlPanelSSPA extends ControlPanel {
 	@Override
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> controllers = new ArrayList<>();
-		controllers.add(new ControlControllerPicobuc(deviceType, getLinkHeader(),this, logger));
+		controllers.add(new ControlControllerPicobuc(deviceType, getLinkHeader(),this));
 		return controllers;
 	}
 

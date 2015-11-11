@@ -1,5 +1,19 @@
 package irt.tools.panel.subpanel.control;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
@@ -11,26 +25,11 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.label.LED;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.ImageIcon;
-
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-
-import javax.swing.JLabel;
 
 public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 	private static final long serialVersionUID = 1L;
@@ -117,13 +116,13 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 	private void switchLNB(final int deviceType, final LinkHeader linkHeader) {
 		Setter setter = new Setter(
 							linkHeader,
-							Packet.PACKET_TYPE_COMMAND,
-							Packet.GROUP_ID_CONFIGURATION,
-							Packet.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER,
+							PacketImp.PACKET_TYPE_COMMAND,
+							PacketImp.GROUP_ID_CONFIGURATION,
+							PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER,
 							PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER,
-							switchBox.isSelected() ? (byte)1 : (byte)2,
-							logger);
-		controller = new DefaultController(deviceType, "DLRS Controller", setter, Style.CHECK_ALWAYS, logger){
+							switchBox.isSelected() ? (byte)1 : (byte)2
+							);
+		controller = new DefaultController(deviceType, "DLRS Controller", setter, Style.CHECK_ALWAYS){
 
 			@Override
 			protected ValueChangeListener addGetterValueChangeListener() {
@@ -150,11 +149,11 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> l = new ArrayList<>();
 
-		Getter getter = new Getter(linkHeader, Packet.GROUP_ID_CONFIGURATION, Packet.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER, logger){
+		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_CONFIGURATION, PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER){
 
 			@Override
 			public boolean set(Packet packet) {
-				if(packet.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_WGS_POSITION && packet.getHeader().getPacketType()==Packet.PACKET_TYPE_RESPONSE){
+				if(packet.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_WGS_POSITION && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 					Payload payload = packet.getPayload(0);
 					if (payload != null) {
 						switch (payload.getByte()) {
@@ -186,7 +185,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 			
 		};
 
-		DefaultController controller = new DefaultController(deviceType, "DLRS Controller", getter, Style.CHECK_ALWAYS, logger);
+		DefaultController controller = new DefaultController(deviceType, "DLRS Controller", getter, Style.CHECK_ALWAYS);
 		controller.setWaitTime(8000);
 
 		l.add(controller);

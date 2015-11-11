@@ -1,18 +1,5 @@
 package irt.tools.panel.subpanel;
 
-import irt.controller.NetworkController;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.interfaces.Refresh;
-import irt.controller.serial_port.value.getter.Getter;
-import irt.controller.translation.Translation;
-import irt.data.PacketWork;
-import irt.data.RundomNumber;
-import irt.data.network.NetworkAddress.ADDRESS_TYPE;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-import irt.tools.panel.head.IrtPanel;
-import irt.tools.panel.ip_address.IpAddressTextField;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -39,6 +26,19 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
+import irt.controller.NetworkController;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.interfaces.Refresh;
+import irt.controller.serial_port.value.getter.Getter;
+import irt.controller.translation.Translation;
+import irt.data.PacketWork;
+import irt.data.RundomNumber;
+import irt.data.network.NetworkAddress.ADDRESS_TYPE;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketImp;
+import irt.tools.panel.head.IrtPanel;
+import irt.tools.panel.ip_address.IpAddressTextField;
+
 public class NetworkPanel extends JPanel implements Refresh {
 	private static final long serialVersionUID = 69871876592867701L;
 
@@ -62,7 +62,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 
 			public void ancestorMoved(AncestorEvent arg0) {}
 			public void ancestorAdded(AncestorEvent arg0) {
-				networkController = new NetworkController(deviceType, new Getter(linkHeader, Packet.IRT_SLCP_PACKET_ID_NETWORK, Packet.IRTSCP_PARAMETER_ID_NETWORK_ADDRESS, PacketWork.PACKET_NETWORK_ADDRESS, logger), NetworkPanel.this, Style.CHECK_ALWAYS, logger);
+				networkController = new NetworkController(deviceType, new NetworkWorker(linkHeader), NetworkPanel.this, Style.CHECK_ALWAYS);
 				networkController.setWaitTime(15000);
 				Thread t = new Thread(networkController, "NetworkPanel.NetworkController-"+new RundomNumber());
 				int priority = t.getPriority();
@@ -253,6 +253,7 @@ public class NetworkPanel extends JPanel implements Refresh {
 		btnCansel.setBounds(77, 140, 73, 23);
 		panel_1.add(btnCansel);
 		setLayout(groupLayout);
+
 	}
 
 	@Override
@@ -278,5 +279,13 @@ public class NetworkPanel extends JPanel implements Refresh {
 		comboBoxAddressType.setFont(font);
 		comboBoxAddressType.setModel(boxModel);
 		logger.debug("comboBoxAddressType.getSelectedItem()={}", comboBoxAddressType.getSelectedItem());
+	}
+
+	//******************************************   NetworkWorker   *******************************************************
+	private class NetworkWorker extends Getter{
+
+		public NetworkWorker(LinkHeader linkHeader) {
+			super(linkHeader, PacketImp.IRT_SLCP_PACKET_ID_NETWORK, PacketImp.IRTSCP_PARAMETER_ID_NETWORK_ADDRESS, PacketWork.PACKET_NETWORK_ADDRESS);
+		}
 	}
 }

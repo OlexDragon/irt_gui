@@ -1,22 +1,5 @@
 package irt.controller.control;
 
-import irt.controller.MuteController;
-import irt.controller.StoreConfigController;
-import irt.controller.SwitchController;
-import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.IdValue;
-import irt.data.IdValueForComboBox;
-import irt.data.PacketWork;
-import irt.data.Range;
-import irt.data.RundomNumber;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-import irt.data.value.ValueFrequency;
-import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,8 +13,22 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import irt.controller.MuteController;
+import irt.controller.StoreConfigController;
+import irt.controller.SwitchController;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.data.IdValue;
+import irt.data.IdValueForComboBox;
+import irt.data.PacketWork;
+import irt.data.Range;
+import irt.data.RundomNumber;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketImp;
+import irt.data.value.ValueFrequency;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 public class ControlController extends ControllerAbstract {
 	private JButton btnMute;
@@ -47,12 +44,12 @@ public class ControlController extends ControllerAbstract {
 	 * Use for LO control
 	 * @param hasFreqSet 
 	 */
-	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel, Logger logger) {
-		super(deviceType, controllerName, new ConfigurationSetter(linkHeader, LogManager.getLogger()), panel, Style.CHECK_ALWAYS, logger);
+	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel) {
+		super(deviceType, controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
 		if(comboBoxfreqSet==null)
 			setSend(false);
 
-		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS, logger);
+		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
 		Thread t = new Thread(muteController, "ControlController.MuteController-"+new RundomNumber().toString());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
@@ -61,7 +58,7 @@ public class ControlController extends ControllerAbstract {
 		t.start();
 
 		if(chbxLNB!=null){
-			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB, logger), logger);
+			lnbController = new SwitchController(deviceType, "LNB Controller", chbxLNB, new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_BUC_ENABLE, PacketWork.PACKET_ID_CONFIGURATION_LNB));
 			t = new Thread(lnbController, "ControlController.SwitchController-"+new RundomNumber().toString());
 			priority = t.getPriority();
 			if(priority>Thread.MIN_PRIORITY)
@@ -89,14 +86,14 @@ public class ControlController extends ControllerAbstract {
 							comboBoxfreqSet.setModel(comboBoxModel);
 
 							pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY);
-							pw.setPacketParameterHeaderCode(Packet.PARAMETER_CONFIG_FCM_FREQUENCY);
+							pw.setPacketParameterHeaderCode(PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY);
 							pw.getPacketThread().preparePacket();
 							setSend(true, false);
 						}else if(source instanceof Long){
 							setSend(false);
 							ValueFrequency vf = new ValueFrequency((Long)source, Long.MIN_VALUE, Long.MAX_VALUE);
 
-							pw.setPacketType(Packet.PACKET_TYPE_COMMAND);
+							pw.setPacketType(PacketImp.PACKET_TYPE_COMMAND);
 
 							comboBoxfreqSet.setSelectedItem(vf.toString());
 							comboBoxfreqSet.addItemListener(itemListenerComboBox);
@@ -136,7 +133,7 @@ public class ControlController extends ControllerAbstract {
 					@Override
 					public void actionPerformed(ActionEvent e) {
 						try{
-							new StoreConfigController(deviceType, getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE, logger);
+							new StoreConfigController(deviceType, getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE);
 						}catch(Exception ex){
 							logger.catching(ex);
 						}

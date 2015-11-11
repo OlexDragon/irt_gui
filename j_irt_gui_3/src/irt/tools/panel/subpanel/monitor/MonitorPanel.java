@@ -2,7 +2,7 @@ package irt.tools.panel.subpanel.monitor;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 
@@ -127,12 +127,12 @@ public class MonitorPanel extends MonitorPanelSSPA {
 
 		ValueDouble v;
 		switch(parameter){
-		case Packet.PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
+		case PacketImp.PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
 			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
 				super.packetRecived(parameter, flags, value);
 				break;
 			}
-		case Packet.PARAMETER_MEASUREMENT_INPUT_POWER:
+		case PacketImp.PARAMETER_MEASUREMENT_INPUT_POWER:
 			if (value != input) {
 				input = value;
 				v = new ValueDouble(value, 1);

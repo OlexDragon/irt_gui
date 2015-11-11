@@ -1,11 +1,9 @@
 package irt.data;
 
-import irt.data.packet.Packet;
-import irt.data.packet.Payload;
-
 import java.util.List;
 
-import org.apache.logging.log4j.core.Logger;
+import irt.data.packet.Packet;
+import irt.data.packet.Payload;
 
 public class SetterThread extends PacketThread {
 
@@ -15,8 +13,8 @@ public class SetterThread extends PacketThread {
 	private long valueToSend;
 	private int valueType;
 
-	public SetterThread(byte[] packetSetting, int valueToSend, int valueType, Logger logger) {
-		super(packetSetting, logger);
+	public SetterThread(byte[] packetSetting, int valueToSend, int valueType) {
+		super(packetSetting);
 		this.valueToSend = valueToSend;
 		this.valueType = valueType;
 	}

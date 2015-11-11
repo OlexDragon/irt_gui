@@ -7,8 +7,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
-import org.apache.logging.log4j.Logger;
-
 import irt.controller.control.ControllerAbstract;
 import irt.data.PacketWork;
 import irt.data.RegisterValue;
@@ -29,8 +27,8 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		}
 	};
 
-	public DeviceDebagSaveController(int deviceType, JTextField txtField, PacketWork packetWork, Style stile, Logger logger) {
-		super(deviceType, "DeviceDebagSaveController", packetWork, null, stile, logger);
+	public DeviceDebagSaveController(int deviceType, JTextField txtField, PacketWork packetWork, Style stile) {
+		super(deviceType, "DeviceDebagSaveController", packetWork, null, stile);
 		this.txtField = txtField;
 
 		timer = new Timer(9000, timerListener);

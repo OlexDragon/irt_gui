@@ -1,13 +1,12 @@
 package irt.controller.serial_port.value.setter;
 
-import org.apache.logging.log4j.LogManager;
-
-import irt.data.PacketThread;
+import irt.data.PacketThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.value.Value;
 
@@ -20,19 +19,17 @@ public class DeviceDebagSetter extends SetterAbstract {
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader, int index, int addr, short packetId, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), Packet.GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
-				LogManager.getLogger());
+		super(linkHeader, new RegisterValue(index, addr, null), PacketImp.GROUP_ID_DEVICE_DEBAG, parameterId, packetId);
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader,int index, int addr, short packetId, byte parameterId, int value) {
-		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), Packet.PACKET_TYPE_COMMAND, Packet.GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
-				LogManager.getLogger());
+		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), PacketImp.PACKET_TYPE_COMMAND, PacketImp.GROUP_ID_DEVICE_DEBAG, parameterId, packetId);
 	}
 
 	@Override
 	public void preparePacketToSend(Object value) {
 
-		PacketThread pt = getPacketThread();
+		PacketThreadWorker pt = getPacketThread();
 		pt.preparePacket(getPacketParameterHeaderCode(), (RegisterValue)value);
 	}
 
@@ -43,14 +40,14 @@ public class DeviceDebagSetter extends SetterAbstract {
 
 			PacketHeader cph = packet.getHeader();
 
-			PacketThread upt = getPacketThread();
+			PacketThreadWorker upt = getPacketThread();
 			Packet up = upt.getPacket();
 
 			if(cph!=null && up!=null && up.getHeader().getPacketId()==cph.getPacketId()){
 
 				Object source = null;
 
-				if(cph.getOption()>0 || cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
+				if(cph.getOption()>0 || cph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 					source = new Byte((byte) -cph.getOption());
 					if((Byte)source==0)
 						source=-20;

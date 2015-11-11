@@ -1,18 +1,5 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.setter.Setter;
-import irt.controller.translation.Translation;
-import irt.data.PacketThread;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.network.NetworkAddress;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-import irt.tools.panel.ip_address.IpAddressTextField;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,12 +15,21 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.setter.Setter;
+import irt.controller.translation.Translation;
+import irt.data.PacketThreadWorker;
+import irt.data.PacketWork;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.network.NetworkAddress;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
+import irt.tools.panel.ip_address.IpAddressTextField;
 
 public class NetworkController extends ControllerAbstract {
-
-	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	private JComboBox<String> comboBoxAddressType;
 	private IpAddressTextField ipAddress;
@@ -54,9 +50,8 @@ public class NetworkController extends ControllerAbstract {
 
 	private KeyListener keyListener;
 
-	public NetworkController(int deviceType, PacketWork packetWork, JPanel panel, Style style, Logger logger) {
-		super(deviceType, "Network Controller", packetWork, panel, style, logger);
-		logger.trace("NetworkController();");
+	public NetworkController(int deviceType, PacketWork packetWork, JPanel panel, Style style) {
+		super(deviceType, "Network Controller", packetWork, panel, style);
 	}
 
 	@Override
@@ -149,11 +144,11 @@ public class NetworkController extends ControllerAbstract {
 
 	@Override
 	protected ValueChangeListener addGetterValueChangeListener() {
+		logger.entry();
 		return new ValueChangeListener() {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				logger.trace("ValueChangeListener.valueChangeEvent: "+valueChangeEvent);
 				new ControllerWorker(valueChangeEvent);
 			}
 		};
@@ -230,14 +225,14 @@ public class NetworkController extends ControllerAbstract {
 
 	public void saveSettings() {
 
-		PacketThread packetThread = getPacketWork().getPacketThread();
+		PacketThreadWorker packetThread = getPacketWork().getPacketThread();
 		LinkHeader linkHeader = packetThread.getLinkHeader();
 		Packet packet = packetThread.getPacket();
 		PacketHeader header = packet.getHeader();
 		logger.debug(Arrays.toString(packetThread.getData()));
 
 		byte groupId = header.getGroupId();
-		byte packetType = Packet.PACKET_TYPE_COMMAND;
+		byte packetType = PacketImp.PACKET_TYPE_COMMAND;
 		short packetId = header.getPacketId();
 		byte packetParameterHeaderCode = packet.getPayload(0).getParameterHeader().getCode();
 

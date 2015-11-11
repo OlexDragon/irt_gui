@@ -1,22 +1,5 @@
 package irt.tools.panel.subpanel;
 
-import irt.controller.DeviceDebugController;
-import irt.controller.GuiControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.data.IdValueForComboBox;
-import irt.data.Listeners;
-import irt.data.PacketWork;
-import irt.data.PllRegisterTextFieldSlider;
-import irt.data.RundomNumber;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.packet.Packet;
-import irt.data.value.Value;
-import irt.irt_gui.IrtGui;
-import irt.tools.button.ImageButton;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -44,13 +27,25 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import irt.controller.DeviceDebugController;
+import irt.controller.GuiControllerAbstract;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.controller.serial_port.value.setter.DeviceDebagSetter;
+import irt.data.IdValueForComboBox;
+import irt.data.Listeners;
+import irt.data.PacketWork;
+import irt.data.PllRegisterTextFieldSlider;
+import irt.data.RundomNumber;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.packet.PacketImp;
+import irt.data.value.Value;
+import irt.irt_gui.IrtGui;
+import irt.tools.button.ImageButton;
 
 @SuppressWarnings("serial")
 public class PLLsPanel extends JPanel {
-
-	private Logger logger = LogManager.getLogger();
 
 	private static final int DN = 4194304;
 	private static final int UP = 2097152;
@@ -272,8 +267,7 @@ public class PLLsPanel extends JPanel {
 		JButton btnClear = new JButton("Clear The Flags");
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ConfigurationSetter packetWork = new ConfigurationSetter(null, Packet.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS,
-						LogManager.getLogger());
+				ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
 				packetWork.preparePacketToSend(0);
 				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 			}
@@ -345,9 +339,9 @@ public class PLLsPanel extends JPanel {
 											pllIndex,
 											9,
 											PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG,
-											Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+											PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
 							0,
-							Style.CHECK_ONCE, logger);
+							Style.CHECK_ONCE);
 
 		Thread t = new Thread(registerController, "PLLsPanel.PLL reg.N9-"+new RundomNumber());
 		int priority = t.getPriority();

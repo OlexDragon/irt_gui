@@ -1,24 +1,22 @@
 package irt.data;
 
-import irt.data.packet.LinkHeader;
-import irt.data.packet.LinkedPacket;
-import irt.data.packet.Packet;
-
 import java.util.Arrays;
 
-import org.apache.logging.log4j.Logger;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.LinkedPacketImp;
+import irt.data.packet.PacketImp;
 
 public class LinkedPacketThread extends PacketThread {
 
 	private LinkHeader linkHeader;
 
-	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting, Logger logger) {
-		super(packetSetting, logger);
+	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting) {
+		super(packetSetting);
 		setLinkHeader(linkHeader);
 	}
 
-	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting, String threadName, Logger logger) {
-		super(packetSetting, threadName, logger);
+	public LinkedPacketThread(LinkHeader linkHeader, byte[] packetSetting, String threadName) {
+		super(packetSetting, threadName);
 		setLinkHeader(linkHeader);
 		logger.trace(linkHeader);
 	}
@@ -28,7 +26,7 @@ public class LinkedPacketThread extends PacketThread {
 		synchronized (data) {
 			this.linkHeader = linkHeader;
 			if(linkHeader!=null){
-				byte[] b = linkHeader.asBytes();
+				byte[] b = linkHeader.toBytes();
 				b = Arrays.copyOf(b, LinkHeader.SIZE+data.length);
 				System.arraycopy(data, 0, b, LinkHeader.SIZE, data.length);
 				data = b;
@@ -42,13 +40,13 @@ public class LinkedPacketThread extends PacketThread {
 	}
 
 	@Override
-	protected Packet newPacket() {
-		return new LinkedPacket();
+	protected PacketImp newPacket() {
+		return new LinkedPacketImp();
 	}
 
 	@Override
 	public void setDataPacketTypeCommand() {
 		if(data!=null)
-			data[4] = Packet.PACKET_TYPE_COMMAND;
+			data[4] = PacketImp.PACKET_TYPE_COMMAND;
 	}
 }

@@ -1,17 +1,5 @@
 package irt.tools.panel.subpanel.monitor;
 
-import irt.controller.DefaultController;
-import irt.controller.control.ControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.interfaces.Refresh;
-import irt.controller.serial_port.value.getter.MeasurementGetter;
-import irt.controller.translation.Translation;
-import irt.data.listener.PacketListener;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-import irt.data.packet.Payload;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.util.Iterator;
@@ -26,6 +14,19 @@ import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.controller.DefaultController;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.interfaces.Refresh;
+import irt.controller.serial_port.value.getter.MeasurementGetter;
+import irt.controller.translation.Translation;
+import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
+import irt.data.packet.Payload;
 
 @SuppressWarnings("serial")
 public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
@@ -117,7 +118,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 		DefaultController defaultController = new DefaultController(
 				deviceType,
 				controllerName,
-				new MeasurementGetter(getLinkHeader(), parameter, packetId), Style.CHECK_ALWAYS, logger){
+				new MeasurementGetter(getLinkHeader(), parameter, packetId), Style.CHECK_ALWAYS){
 
 					@Override
 					protected PacketListener getNewPacketListener() {
@@ -132,7 +133,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 										PacketHeader header = packet.getHeader();
 
 										if (	getPacketWork().isAddressEquals(packet) &&
-												header.getPacketType()==Packet.PACKET_TYPE_RESPONSE &&
+												header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
 												header.getPacketId() == packetId)
 
 											MonitorPanelAbstract.this.packetRecived(packet.getPayloads());

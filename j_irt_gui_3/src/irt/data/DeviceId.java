@@ -1,6 +1,6 @@
 package irt.data;
 
-import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
 
 import java.util.Arrays;
 
@@ -19,9 +19,9 @@ public class DeviceId {
 	private int sn;
 
 	public DeviceId(byte[] buffer) {
-		type = (int) Packet.shiftAndAdd(Arrays.copyOf(buffer, 4));
-		revision = (int) Packet.shiftAndAdd(Arrays.copyOfRange(buffer, 4, 8));
-		subtype = (int) Packet.shiftAndAdd(Arrays.copyOfRange(buffer, 8, SIZE));
+		type = (int) PacketImp.shiftAndAdd(Arrays.copyOf(buffer, 4));
+		revision = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(buffer, 4, 8));
+		subtype = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(buffer, 8, SIZE));
 	}
 
 	/*
@@ -38,9 +38,9 @@ public class DeviceId {
 
 	public byte[] set(byte[]data){
 		if(data!=null && data.length>=SIZE){
-			type = (int) Packet.shiftAndAdd(Arrays.copyOf(data, REVISION));
-			revision = (int) Packet.shiftAndAdd(Arrays.copyOfRange(data, REVISION,SUBTYPE));
-			subtype = (int) Packet.shiftAndAdd(Arrays.copyOfRange(data, SUBTYPE,SIZE));
+			type = (int) PacketImp.shiftAndAdd(Arrays.copyOf(data, REVISION));
+			revision = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(data, REVISION,SUBTYPE));
+			subtype = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(data, SUBTYPE,SIZE));
 		}
 
 		return data!=null && data.length>SIZE ? Arrays.copyOfRange(data, SIZE, data.length) : null;

@@ -1,12 +1,11 @@
 package irt.controller.serial_port.value.getter;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 
 public class DeviceDebagGetter extends GetterAbstract {
@@ -14,8 +13,7 @@ public class DeviceDebagGetter extends GetterAbstract {
 	private Object value;
 
 	public DeviceDebagGetter(LinkHeader linkHeader, int index, int addr, short packetId, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), Packet.GROUP_ID_DEVICE_DEBAG, parameterId, packetId,
-				LogManager.getLogger());
+		super(linkHeader, new RegisterValue(index, addr, null), PacketImp.GROUP_ID_DEVICE_DEBAG, parameterId, packetId);
 	}
 
 	@Override
@@ -31,8 +29,8 @@ public class DeviceDebagGetter extends GetterAbstract {
 
 				Object source = value;
 
-				if(cph.getOption()>0 || cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE){
-					if(cph.getPacketType()!=Packet.PACKET_TYPE_RESPONSE)
+				if(cph.getOption()>0 || cph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
+					if(cph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
 						source=new Byte((byte) -20);
 					else
 						source = new Byte((byte)-cph.getOption());

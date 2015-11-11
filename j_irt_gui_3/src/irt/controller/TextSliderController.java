@@ -1,14 +1,5 @@
 package irt.controller;
 
-import irt.controller.control.ControllerAbstract;
-import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.IdValue;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.packet.PacketHeader;
-import irt.data.value.Value;
-
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,7 +13,14 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import org.apache.logging.log4j.Logger;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.data.IdValue;
+import irt.data.PacketWork;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.packet.PacketHeader;
+import irt.data.value.Value;
 
 public class TextSliderController extends ControllerAbstract {
 
@@ -34,8 +32,8 @@ public class TextSliderController extends ControllerAbstract {
 	private ActionListener txtActionListener;
 	private KeyListener txtKeyListener;
 
-	public TextSliderController(int deviceType, String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style, Logger logger) {
-		super(deviceType, controllerName, packetWork, null, style, logger);
+	public TextSliderController(int deviceType, String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
+		super(deviceType, controllerName, packetWork, null, style);
 		this.value = value;
 		slider.setMinimum(value.getRelativeMinValue());
 		slider.setMaximum((int) value.getRelativeMaxValue());
