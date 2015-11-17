@@ -5,16 +5,15 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.interfaces.AlarmPacket;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 
-public class AlarmStatusPacket extends PacketAbstract implements AlarmPacket{
+public class AlarmStatusPacket extends RegirterAbstractPacket{
 
 	public static final PacketId PACKET_ID = PacketId.ALARM_STATUS;
 
 	public AlarmStatusPacket(short alarmId) throws PacketParsingException {
-		this(PACKET_ID, "Get Summary Status", alarmId);
+		this(PACKET_ID, "Get Status", alarmId);
 	}
 
 	protected AlarmStatusPacket(PacketId packetId, String detils, short alarmId) throws PacketParsingException {

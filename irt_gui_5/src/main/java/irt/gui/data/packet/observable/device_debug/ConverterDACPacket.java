@@ -9,10 +9,10 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 
-public class ConverterDACPacket extends PacketAbstract {
+public class ConverterDACPacket extends RegirterAbstractPacket {
 
 	public static final PacketId PACKET_ID = PacketId.DEVICE_DEBAG_CONVERTER_DAC;
 

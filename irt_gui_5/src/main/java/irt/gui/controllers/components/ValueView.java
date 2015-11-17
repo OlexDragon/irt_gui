@@ -1,10 +1,9 @@
 package irt.gui.controllers.components;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import irt.gui.controllers.FieldsControllerAbstract;
-import irt.gui.controllers.ScheduledServices;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
@@ -19,11 +18,13 @@ public class ValueView extends FieldsControllerAbstract {
 	@FXML private Label titleLabel;
 	@FXML private Label valueLabel;
 
-	public void initialize(LinkedPacket packet){
+	@Override
+	protected Duration getPeriod() {
+		return Duration.ofSeconds(3);
+	}
 
-		packetSender.addPacketToSend(packet);
-		packetSender.setSend(true);
-		ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, 3, TimeUnit.SECONDS);
+	public void initialize(LinkedPacket packet){
+		addLinkedPacket(packet);
 	}
 
 	@Override

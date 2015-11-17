@@ -5,11 +5,10 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.PacketAbstract;
 import irt.gui.errors.PacketParsingException;
 
-public class AttenuationPacket extends PacketAbstract implements LinkedPacket {
+public class AttenuationPacket extends PacketAbstract {
 
 	public static final PacketId PACKET_ID = PacketId.CONFIGURATION_ATTENUATION;
 
@@ -27,7 +26,6 @@ public class AttenuationPacket extends PacketAbstract implements LinkedPacket {
 						new ParameterHeader(
 								PACKET_ID),
 						value!=null ? Packet.toBytes(value) : null));
-
 	}
 
 	public AttenuationPacket(byte[] answer) throws PacketParsingException {

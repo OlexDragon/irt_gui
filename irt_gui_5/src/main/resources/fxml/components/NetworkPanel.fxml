@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="157.0" prefWidth="327.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.NetworkPanelController">
+   <children>
+      <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <right>
+            <VBox minWidth="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+               <children>
+                  <AnchorPane>
+                     <children>
+                        <ComboBox fx:id="addressType" onAction="#typeChangeAction" prefWidth="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+                  <Pane prefWidth="200.0">
+                     <children>
+                        <VBox prefWidth="200.0">
+                           <children>
+                              <fx:include fx:id="address" source="NetworkField.fxml" />
+                              <fx:include fx:id="mask" source="NetworkField.fxml" />
+                              <fx:include fx:id="gateway" source="NetworkField.fxml" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </Pane>
+               </children>
+               <BorderPane.margin>
+                  <Insets right="5.0" top="5.0" />
+               </BorderPane.margin>
+            </VBox>
+         </right>
+         <center>
+            <VBox BorderPane.alignment="CENTER">
+               <children>
+                  <Label minHeight="28.0" text="Address Type" />
+                  <Label minHeight="28.0" text="IP Address" />
+                  <Label minHeight="28.0" text="Subnet Mask" />
+                  <Label minHeight="28.0" text="Default Gateway" />
+               </children>
+               <BorderPane.margin>
+                  <Insets left="5.0" top="5.0" />
+               </BorderPane.margin>
+            </VBox>
+         </center>
+         <bottom>
+            <ButtonBar BorderPane.alignment="CENTER">
+              <buttons>
+                <Button fx:id="saveButton" defaultButton="true" disable="true" mnemonicParsing="false" onAction="#saveAction" text="Save" />
+                  <Button fx:id="canselButton" cancelButton="true" disable="true" mnemonicParsing="false" onAction="#canselAction" text="Cansel" />
+                  <Button fx:id="resetButton" mnemonicParsing="false" text="Reset" />
+              </buttons>
+            </ButtonBar>
+         </bottom>
+         <padding>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+         </padding>
+      </BorderPane>
+   </children>
+</AnchorPane>

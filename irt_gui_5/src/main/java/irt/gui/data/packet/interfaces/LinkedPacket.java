@@ -22,7 +22,10 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 
 	byte[] 			getAcknowledgement();
 
-	void 			addObserver(Observer observer);
+	void 			 addObserver	(Observer observer);
+	void 			 deleteObserver	(Observer observer);
+	void 			 deleteObservers();
+	Observer[] getObservers	() throws Exception;
 
 	public static final int PACKET_ACKNOWLEDGEMENT_SIZE = 11;
 
@@ -49,11 +52,15 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		//DEVICE_INFO
 		DEVICE_INFO		(	PacketGroupId.DEVICE_INFO,		ParameterHeaderCode.DI_ALL),
 		//DEVICE_DEBAG
-		DEVICE_DEBAG_POTENTIOMETER		(	PacketGroupId.DEVICE_DEBAG,		ParameterHeaderCode.DD_READ_WRITE		),
-		DEVICE_DEBAG_CALIBRATION_MODE	(	PacketGroupId.DEVICE_DEBAG,		ParameterHeaderCode.DD_CALIBRATION_MODE	),
+		DEVICE_DEBAG_POTENTIOMETER		(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_READ_WRITE			),
+		DEVICE_DEBAG_CALIBRATION_MODE	(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_CALIBRATION_MODE	),
+		DEVICE_DEBAG_INFO				(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_INFO				),
+		DEVICE_DEBAG_DUMP				(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_DUMP				),
+		DEVICE_DEBAG_REGISTER_INDEXES	(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_REGISTER_INDEXES	),
 		//CONFIGURATION
-		CONFIGURATION_ATTENUATION		(	PacketGroupId.CONFIGURATION,	ParameterHeaderCode.CONF_ATTENURATION		),
-		CONFIGURATION_ATTENUATION_RANGE	(	PacketGroupId.CONFIGURATION,	ParameterHeaderCode.CONF_ATTENURATION_RABGE	),
+		CONFIGURATION_ATTENUATION		(	PacketGroupId.CONFIGURATION	,	ParameterHeaderCode.CONF_ATTENURATION		),
+		CONFIGURATION_ATTENUATION_RANGE	(	PacketGroupId.CONFIGURATION	, ParameterHeaderCode.CONF_ATTENURATION_RANGE	),
+		CONFIGURATION_NETWORK_ADDRESS	(	PacketGroupId.NETWORK		, ParameterHeaderCode.CONF_NETWORK_ADDRESS	),
 		//Alarms
 		ALARMS					(	PacketGroupId.ALARM,		ParameterHeaderCode.ALARM_IDs			),
 		ALARM_SUMMARY_STATUS	(	PacketGroupId.ALARM,		ParameterHeaderCode.ALARM_SUMMARY_STATUS),
@@ -92,15 +99,17 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 	}
 
 	public enum PacketGroupId{
-		NONE			((byte) 0),		/* Reserved for special use. */
-		ALARM			((byte) 1),		/* Alarm: message content is product specific. */
-		CONFIGURATION	((byte) 2),		/* Configuration: content is product specific. */
-		FILETRANSFER	((byte) 3),		/* File transfer: software upgrade command (optional). */
-		MEASUREMENT		((byte) 4),		/* Measurement: device status, content is product specific. */
-		RESET			((byte) 5),		/* Device reset: generic command. */
-		DEVICE_INFO		((byte) 8),		/* Device information: generic command. */
-		CONFIG_PROFILE	((byte) 9),		/* Save configuration: generic command. */
-		DEVICE_DEBAG	((byte)61);		/* Device Debug. */
+		NONE			((byte) 0x00),		/* Reserved for special use. */
+		ALARM			((byte) 0x01),		/* Alarm: message content is product specific. */
+		CONFIGURATION	((byte) 0x02),		/* Configuration: content is product specific. */
+		FILETRANSFER	((byte) 0x03),		/* File transfer: software upgrade command (optional). */
+		MEASUREMENT		((byte) 0x04),		/* Measurement: device status, content is product specific. */
+		RESET			((byte) 0x05),		/* Device reset: generic command. */
+		DEVICE_INFO		((byte) 0x08),		/* Device information: generic command. */
+		CONFIG_PROFILE	((byte) 0x09),		/* Save configuration: generic command. */
+		PROTOCOL		((byte) 0x0A),
+		NETWORK			((byte) 0x0B),
+		DEVICE_DEBAG	((byte)61);		/* 0x3D Device Debug. */
 
 		byte value = 0; 			public byte getValue() { return value; }
 
@@ -116,31 +125,37 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 
 	public enum ParameterHeaderCode{
 		//Device debug
-		DD_READ_WRITE			(	Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE			, PacketGroupId.DEVICE_DEBAG	),
-		DD_CALIBRATION_MODE		(	Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE		, PacketGroupId.DEVICE_DEBAG	),
+		DD_READ_WRITE			(	Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE		, PacketGroupId.DEVICE_DEBAG ),
+		DD_CALIBRATION_MODE		(	Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE	, PacketGroupId.DEVICE_DEBAG ),
+		DD_INFO					(	Packet.PARAMETER_DEVICE_DEBAG_INFO				, PacketGroupId.DEVICE_DEBAG ),
+		DD_DUMP					(	Packet.PARAMETER_DEVICE_DEBAG_DUMP				, PacketGroupId.DEVICE_DEBAG ),
+		DD_REGISTER_INDEXES		(	Packet.PARAMETER_DEVICE_DEBAG_INDEX				, PacketGroupId.DEVICE_DEBAG ),
 		//device info
-		DI_DEVICE_TYPE			(	Payload.DI_DEVICE_TYPE				, PacketGroupId.DEVICE_INFO		),
-		DI_DEVICE_SN			(	Payload.DI_DEVICE_SN				, PacketGroupId.DEVICE_INFO		),
-		DI_FIRMWARE_VERSION		(	Payload.DI_FIRMWARE_VERSION			, PacketGroupId.DEVICE_INFO		),
-		DI_FIRMWARE_BUILD_DATE	(	Payload.DI_FIRMWARE_BUILD_DATE		, PacketGroupId.DEVICE_INFO		),
-		DI_UNIT_UPTIME_COUNTER	(	Payload.DI_UNIT_UPTIME_COUNTER		, PacketGroupId.DEVICE_INFO		),
-		DI_UNIT_NAME			(	Payload.DI_UNIT_NAME				, PacketGroupId.DEVICE_INFO		),
-		DI_UNIT_PART_NUMBER		(	Payload.DI_UNIT_PART_NUMBER			, PacketGroupId.DEVICE_INFO		),
-		DI_ALL					(	Packet.IRT_SLCP_PARAMETER_ALL		, PacketGroupId.DEVICE_INFO		),
+		DI_DEVICE_TYPE			(	Payload.DI_DEVICE_TYPE				, PacketGroupId.DEVICE_INFO	),
+		DI_DEVICE_SN			(	Payload.DI_DEVICE_SN				, PacketGroupId.DEVICE_INFO	),
+		DI_FIRMWARE_VERSION		(	Payload.DI_FIRMWARE_VERSION			, PacketGroupId.DEVICE_INFO	),
+		DI_FIRMWARE_BUILD_DATE	(	Payload.DI_FIRMWARE_BUILD_DATE		, PacketGroupId.DEVICE_INFO	),
+		DI_UNIT_UPTIME_COUNTER	(	Payload.DI_UNIT_UPTIME_COUNTER		, PacketGroupId.DEVICE_INFO	),
+		DI_UNIT_NAME			(	Payload.DI_UNIT_NAME				, PacketGroupId.DEVICE_INFO	),
+		DI_UNIT_PART_NUMBER		(	Payload.DI_UNIT_PART_NUMBER			, PacketGroupId.DEVICE_INFO	),
+		DI_ALL					(	Packet.IRT_SLCP_PARAMETER_ALL		, PacketGroupId.DEVICE_INFO	),
 		//Configuration
-		CONF_ATTENURATION_RABGE	(	Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE		, PacketGroupId.CONFIGURATION	),
-		CONF_ATTENURATION		(	Packet.PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION	, PacketGroupId.CONFIGURATION	),
+		CONF_ATTENURATION_RANGE	(	Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE		, PacketGroupId.CONFIGURATION ),
+		CONF_ATTENURATION		(	Packet.PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION	, PacketGroupId.CONFIGURATION ),
+		//Network
+		CONF_NETWORK_ADDRESS	(	Packet.PARAMETER_ID_NETWORK_ADDRESS		, PacketGroupId.NETWORK	),
+		SNMP_ENABLE				(	Packet.PARAMETER_ID_NETWORK_SNMP_ENABLE	, PacketGroupId.NETWORK	),
 		//Alarms
-		ALARM_IDs				(	Packet.ALARMS_IDs				, PacketGroupId.ALARM),
-		ALARM_SUMMARY_STATUS	(	Packet.ALARM_SUMMARY_STATUS		, PacketGroupId.ALARM),
-		ALARM_CONFIG			(	Packet.ALARM_CONFIG				, PacketGroupId.ALARM),
-		ALARM_STATUS			(	Packet.ALARM_STATUS				, PacketGroupId.ALARM),
-		ALARM_NAME				(	Packet.ALARM_NAME				, PacketGroupId.ALARM),
-		ALARM_DESCRIPTION		(	Packet.ALARM_DESCRIPTION		, PacketGroupId.ALARM),
+		ALARM_IDs				(	Packet.ALARMS_IDs				, PacketGroupId.ALARM ),
+		ALARM_SUMMARY_STATUS	(	Packet.ALARM_SUMMARY_STATUS		, PacketGroupId.ALARM ),
+		ALARM_CONFIG			(	Packet.ALARM_CONFIG				, PacketGroupId.ALARM ),
+		ALARM_STATUS			(	Packet.ALARM_STATUS				, PacketGroupId.ALARM ),
+		ALARM_NAME				(	Packet.ALARM_NAME				, PacketGroupId.ALARM ),
+		ALARM_DESCRIPTION		(	Packet.ALARM_DESCRIPTION		, PacketGroupId.ALARM ),
 		//Converter
-		DD_CONVERTER_DAC	(Packet.PARAMETER_CONVERTER_DAC		, PacketGroupId.DEVICE_DEBAG),
+		DD_CONVERTER_DAC	(Packet.PARAMETER_CONVERTER_DAC		, PacketGroupId.DEVICE_DEBAG ),
 		//Measurement
-		M_TEMPERATURE	(Packet.PARAMETER_MEASUREMENT_TEMPERATURE	, PacketGroupId.MEASUREMENT);
+		M_TEMPERATURE	(Packet.PARAMETER_MEASUREMENT_TEMPERATURE	, PacketGroupId.MEASUREMENT );
 
 		private byte value; 			public byte 			getValue() 	{ return value; 	}
 		private PacketGroupId groupId;	public PacketGroupId 	getGroupId(){ return groupId; 	}

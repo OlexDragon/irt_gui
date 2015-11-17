@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TitledPane fx:id="infoPanel" animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Info" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.InfoController">
+	<content>
+				<GridPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+					<columnConstraints>
+						<ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="164.0" minWidth="10.0" prefWidth="93.00000762939453" />
+						<ColumnConstraints hgrow="SOMETIMES" maxWidth="244.99999237060547" minWidth="10.0" prefWidth="244.99999237060547" />
+					</columnConstraints>
+					<rowConstraints>
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+					</rowConstraints>
+					<children>
+						<Label text="SN:">
+							<GridPane.margin>
+								<Insets right="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label text="Part Number:" GridPane.rowIndex="1">
+							<GridPane.margin>
+								<Insets right="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label text="Count:" GridPane.rowIndex="2">
+							<GridPane.margin>
+								<Insets right="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label text="Built Date:" GridPane.rowIndex="3">
+							<GridPane.margin>
+								<Insets right="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label text="Version:" GridPane.rowIndex="4">
+							<GridPane.margin>
+								<Insets right="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label text="Type" GridPane.rowIndex="5">
+							<GridPane.margin>
+								<Insets right="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label fx:id="typeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Type" GridPane.columnIndex="1" GridPane.rowIndex="5">
+							<GridPane.margin>
+								<Insets left="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label fx:id="versionLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="version" GridPane.columnIndex="1" GridPane.rowIndex="4">
+							<GridPane.margin>
+								<Insets left="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label fx:id="builtDateLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="builtDate" GridPane.columnIndex="1" GridPane.rowIndex="3">
+							<GridPane.margin>
+								<Insets left="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label fx:id="countLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="count" GridPane.columnIndex="1" GridPane.rowIndex="2">
+							<GridPane.margin>
+								<Insets left="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label fx:id="pnLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="pn" GridPane.columnIndex="1" GridPane.rowIndex="1">
+							<GridPane.margin>
+								<Insets left="5.0" />
+							</GridPane.margin>
+						</Label>
+						<Label fx:id="snLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="sn" GridPane.columnIndex="1">
+							<GridPane.margin>
+								<Insets left="5.0" />
+							</GridPane.margin>
+						</Label>
+            <Label text="Subtype" GridPane.rowIndex="6">
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+            </Label>
+            <Label fx:id="subtypeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Subtype" GridPane.columnIndex="1" GridPane.rowIndex="6">
+               <GridPane.margin>
+                  <Insets left="5.0" />
+               </GridPane.margin>
+            </Label>
+					</children>
+				</GridPane>
+	</content>
+</TitledPane>

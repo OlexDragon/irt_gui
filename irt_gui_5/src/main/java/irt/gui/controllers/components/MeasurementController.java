@@ -1,15 +1,14 @@
-package irt.gui.controllers.leftside.monitor;
+package irt.gui.controllers.components;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.gui.controllers.components.RegisterView;
-import irt.gui.controllers.components.ValueView;
+import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.observable.measurement.TemperaturePacket;
 import javafx.fxml.FXML;
 
-public class MeasurementController {
+public class MeasurementController implements FieldController{
 
 	private final Logger logger = LogManager.getLogger();
 
@@ -75,5 +74,21 @@ public class MeasurementController {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+	}
+
+	@Override
+	public void doUpdate(boolean doUpdate) {
+		temperatureController.doUpdate(true);
+		value1Controller.doUpdate(true);
+		value2Controller.doUpdate(true);
+		value3Controller.doUpdate(true);
+		value4Controller.doUpdate(true);
+		value5Controller.doUpdate(true);
+		value6Controller.doUpdate(true);
+		value7Controller.doUpdate(true);
+		value8Controller.doUpdate(true);
+		value9Controller.doUpdate(true);
+		value10Controller.doUpdate(true);
+		value11Controller.doUpdate(true);
 	}
 }

@@ -1,7 +1,9 @@
 
 package irt.gui.data.packet.observable.configuration;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -10,11 +12,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import irt.gui.data.NetworkAddress;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
-import irt.gui.data.packet.observable.configuration.AttenuationPacket;
 import irt.gui.errors.PacketParsingException;
 
 public class AttenuationPacketTest {
@@ -56,4 +58,15 @@ public class AttenuationPacketTest {
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
 	}
 
+	@Test
+	public void equalsTest() throws PacketParsingException{
+		assertThat(new AttenuationPacket()							, is(new AttenuationPacket()));
+		assertThat(new AttenuationRangePackege()					, is(new AttenuationRangePackege()));
+		assertThat(new NetworkAddressPacket((NetworkAddress)null)	, is(new NetworkAddressPacket((NetworkAddress)null)));
+
+		assertThat(new AttenuationPacket()							, not(new AttenuationRangePackege()));
+		assertThat(new AttenuationPacket()							, not(new NetworkAddressPacket((NetworkAddress)null)));
+
+		assertThat(new AttenuationRangePackege()					, not(new NetworkAddressPacket((NetworkAddress)null)));
+	}
 }

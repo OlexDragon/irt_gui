@@ -1,4 +1,4 @@
-package irt.gui.controllers.leftside.setup;
+package irt.gui.controllers.components;
 
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;

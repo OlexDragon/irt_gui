@@ -19,6 +19,7 @@ public class LinkedPacketsQueue implements Runnable {
 		ScheduledServices.services.scheduleAtFixedRate(this, 1, 20, TimeUnit.MILLISECONDS);
 	}
 
+	private boolean warnReported;
 	@Override
 	public void run() {
 		logger.entry();
@@ -31,9 +32,12 @@ public class LinkedPacketsQueue implements Runnable {
 
 				comPort.send(packet);
 				logger.trace("\n\tResived data - {}", packet);
+				warnReported = false;
 
-			} else
+			} else if(!warnReported){
 				logger.warn("serialPort==null");
+				warnReported = true;
+			}
 
 		} catch (Exception e) {
 			logger.catching(e);

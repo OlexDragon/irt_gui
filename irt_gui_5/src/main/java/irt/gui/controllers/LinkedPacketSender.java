@@ -3,7 +3,7 @@ package irt.gui.controllers;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.List;
+import java.util.stream.IntStream;
 
 import javax.swing.Timer;
 
@@ -61,7 +61,6 @@ public class LinkedPacketSender extends SerialPort {
 	volatile private boolean run = true;
 	private int timeout = 3000;
 	private SerialPortEvent serialPortEvent = new SerialPortEvent();
-	private boolean isSerialPortEven;
 
 	public LinkedPacketSender(String portName) {
 		super(portName);
@@ -84,7 +83,7 @@ public class LinkedPacketSender extends SerialPort {
 			Timer timer = setTimer();
 
 			writePacket(packet);
-			byte[] readBytes = readBytes(20);
+			byte[] readBytes = readBytes(5);
 			packet.setAnswer(readBytes);
 			timer.stop();
 
@@ -155,28 +154,17 @@ public class LinkedPacketSender extends SerialPort {
 	@Override
 	public byte[] readBytes( int waitTime) throws SerialPortException{
 		logger.entry(waitTime);
+		if(waitTime<=0) waitTime = 1;
 
 		byte[] readBytes = null;
 		boolean isEnd = false;
 		byte[] tmp = null;
-
-		
-		if(waitTime<=0)
-			waitTime = 1;
+		int count = 20;
 
 		do{
-			try {
-				synchronized (this) {
-					wait(waitTime);
-				}
-			} catch (Exception e) {
-				logger.catching(e);
-			}
-
-			if (getInputBufferBytesCount() > 0) {
+			if (wait(1, waitTime)) {
 
 				tmp = super.readBytes(getInputBufferBytesCount());
-				logger.trace("\n\ttmp: {}", Arrays.toString(tmp));
 
 				if (tmp != null) {
 					if (readBytes == null)
@@ -188,17 +176,22 @@ public class LinkedPacketSender extends SerialPort {
 						System.arraycopy(tmp, 0, readBytes, l, tmpLength);
 					}
 
-					List<byte[]> asList = Arrays.asList(readBytes);
-					int lastIndex = asList.lastIndexOf(Packet.FLAG_SEQUENCE);
-					isEnd =  lastIndex > 22;//ConfirmBytes = 11, link header = 4, packet header = 7 
+					isEnd = getFlagSequences(readBytes);//It should be 4 Packet.FLAG_SEQUENCE
+//					logger.error("\n\t {}\n\t count: {}", length, count);
 				}
 
+//				logger.debug("\n\t tmp: {}\n\t readBytes: {}\n\t isEnd: {}\n\t {}", tmp, readBytes, isEnd, count);
 			} else
-				tmp = null;
+				--count;
 
-		}while(!isEnd && tmp!=null);
+		}while(!isEnd && count>0);
+
 		logger.trace("\n\tEXIT: {}", readBytes);
 		return readBytes;
+	}
+
+	private boolean getFlagSequences(byte[] readBytes) {
+		return IntStream.range(0, readBytes.length).map(i -> readBytes[i]).filter(x->x==(Packet.FLAG_SEQUENCE)).count() >= 4;
 	}
 
 	public synchronized void setRun(boolean run, String why) {
@@ -211,27 +204,20 @@ public class LinkedPacketSender extends SerialPort {
 		return run;
 	}
 
-	public boolean wait(int eventValue, int waitTime) throws SerialPortException {
+	public synchronized boolean wait(int eventValue, int waitTime) throws SerialPortException {
 		logger.entry(eventValue, waitTime);
 		boolean isReady = false;
 		long start = System.currentTimeMillis();
 		long waitTimeL = waitTime*eventValue;
 
 		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTimeL && isRun()){
-			synchronized (this) {
 
 				try {
 					wait(waitTimeL);
 				} catch (Exception e) {
 					logger.catching(e);
 				}
-
-				logger.trace("isSerialPortEven={}", isSerialPortEven);
-				isSerialPortEven = false;
-			}
 		};
-
-		isSerialPortEven = false;
 
 		return logger.exit(isReady);
 	}
@@ -290,7 +276,6 @@ public class LinkedPacketSender extends SerialPort {
 		public void serialEvent(jssc.SerialPortEvent serialPortEvent) {
 
 			synchronized (LinkedPacketSender.this) {
-				isSerialPortEven = true;
 				LinkedPacketSender.this.notify();
 //				Console.appendLn("", "notify");
 			}

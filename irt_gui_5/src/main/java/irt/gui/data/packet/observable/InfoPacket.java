@@ -4,11 +4,10 @@ import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.errors.PacketParsingException;
 
 //*********************************************   InfoPacket   ****************************************************************
-public class InfoPacket extends PacketAbstract implements LinkedPacket {
+public class InfoPacket extends PacketAbstract{
 
 	public static final PacketId PACKET_ID = PacketId.DEVICE_INFO;
 

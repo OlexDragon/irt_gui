@@ -172,7 +172,10 @@ public class Packet {
 
 	/* Network */
 	public static final byte
-		IRTSCP_PARAMETER_ID_NETWORK_ADDRESS = 1; /* Network configuration. */
+		PARAMETER_ID_NETWORK_ADDRESS 	= 1, /* Network configuration. */
+		PARAMETER_ID_NETWORK_SNMP_ENABLE 		= 10,
+		PARAMETER_ID_NETWORK_SNMP_READ_ONLY		= 11,
+		PARAMETER_ID_NETWORK_SNMP_READ_WRITE	= 12;
 
 	protected static final String SAVE_CONFIG = null;
 

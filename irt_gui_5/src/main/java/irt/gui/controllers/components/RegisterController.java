@@ -1,17 +1,13 @@
 package irt.gui.controllers.components;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.FieldsControllerAbstract;
-import irt.gui.controllers.ScheduledServices;
-import irt.gui.controllers.leftside.setup.SerialPortController;
 import irt.gui.data.RegisterValue;
+import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
@@ -35,9 +31,26 @@ public class RegisterController extends FieldsControllerAbstract {
 	@FXML private TextField toSetTextField;
 	@FXML private Slider	toSetSlider;
 
+	@FXML public void onValueChange(){
+		toSetTextField.setText(Long.toString(Math.round(toSetSlider.getValue())));
+	}
+
+	@FXML public void setValue(){
+		try {
+			setValue(toSetTextField.getText());
+		} catch (NumberFormatException | PacketParsingException e) {
+			logger.catching(e);
+		}
+	}
+
 	private RegisterValue registerValue;
 	private int actualValue;
 	private int savedValue;
+
+	@Override
+	protected Duration getPeriod() {
+		return Duration.ofSeconds(3);
+	}
 
 	public void initialize(RegisterValue registerValue, int minValue, int maxValue, boolean checkForChange) throws PacketParsingException {
 
@@ -52,34 +65,36 @@ public class RegisterController extends FieldsControllerAbstract {
 
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				toSetTextField.setText(Integer.toString(newValue.intValue()));
+				Platform.runLater(new Runnable() {
+					
+					@Override
+					public void run() {
+						toSetTextField.setText(Integer.toString(newValue.intValue()));
+					}
+				});
 			}
 		});
 
-		toSetTextField.textProperty().addListener(new ChangeListener<String>() {
+		toSetTextField.textProperty().addListener(new NumericChecker());
 
-			@Override
-			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if(!newValue.matches("\\d*"))
-					toSetTextField.setText(oldValue);
-			}
-		});
-
-		packetSender.addPacketToSend(new PotentiometerPacket(registerValue));
-		ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, 3, TimeUnit.SECONDS);
-		if(checkForChange)
-			ScheduledServices.services.scheduleAtFixedRate(new ValueChangeAnalyzer(), 1, 5, TimeUnit.SECONDS);
+		addLinkedPacket(new PotentiometerPacket(registerValue));
+		if(checkForChange){
+			RegisterValue rv = new RegisterValue(registerValue.getIndex(), registerValue.getAddr()==0 ? 0x10+2 : 0x10+3); //0x10+2 --> RDAC:MEM2; 0x10+3 --> RDAC:MEM3
+			addLinkedPacket(new PotentiometerPacket(rv));
+		}
 	}
 
-	@FXML public void onValueChange(){
-		toSetTextField.setText(Long.toString(Math.round(toSetSlider.getValue())));
-	}
-
-	@FXML public void setValue(){
-		try {
-			setValue(toSetTextField.getText());
-		} catch (NumberFormatException | PacketParsingException e) {
-			logger.catching(e);
+	public void resetValue() throws NumberFormatException, PacketParsingException{
+		if(actualValue!=savedValue){
+			String text = Integer.toString(savedValue);
+			setValue(text);
+			Platform.runLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					toSetTextField.setText(text);
+				}
+			});
 		}
 	}
 
@@ -93,14 +108,6 @@ public class RegisterController extends FieldsControllerAbstract {
 		}
 	}
 
-	public void resetValue() throws NumberFormatException, PacketParsingException{
-		if(actualValue!=savedValue){
-			String text = Integer.toString(savedValue);
-			toSetTextField.setText(text);
-			setValue(text);
-		}
-	}
-
 	public void disable(boolean disable){
 		toSetTextField	.setDisable(disable);
 		toSetSlider		.setDisable(disable);
@@ -111,10 +118,24 @@ public class RegisterController extends FieldsControllerAbstract {
 		logger.trace("\n\tENTRY: {}", packet);
 
 		PotentiometerPacket p = new PotentiometerPacket(packet.getAnswer());
-		List<Payload> payloads = p.getPayloads();
 		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
 
-		if(packetError!=PacketErrors.NO_ERROR){
+		if(packetError==PacketErrors.NO_ERROR){
+
+			final List<Payload> payloads= p.getPayloads();
+			for(Payload pl:payloads)
+				switch(pl.getParameterHeader().getParameterHeaderCode()){
+				case DD_READ_WRITE:
+					if(pl.getInt(1)==registerValue.getAddr()){
+						setValue(pl);
+					}else
+						checkValue(pl);
+					break;
+				default:
+				}
+		}else{
+			logger.warn("\n\tPacket has Error:\n\t sent packet{}\n\n\t received packet{}", packet, p);
+
 			final String text = packetError.toString();
 
 			if(!valueLabel.getText().equals(text))
@@ -124,31 +145,69 @@ public class RegisterController extends FieldsControllerAbstract {
 						valueLabel.setText(text);
 					}
 				});
+		}
+	}
 
-			logger.error("\n\tPacket has Error:\n\t sent packet{}\n\n\t received packet{}", packet, p);
+	private void checkValue(Payload pl) {
+		setTooltip(pl);
+		setColor();
+	}
 
-		}else{
+	private void setColor() {
+		if(savedValue == actualValue)
+			setColor(Color.BLACK);
+		else
+			setColor(Color.RED);
+	}
 
-			if(payloads==null || payloads.isEmpty())
-				throw new PacketParsingException("\n\t Packet parsing error:\n\t Payload is empty\n\t Sent packet: " + packet + "\n\t Resieved packet: " + p);
-
-			Payload payload = payloads.get(0);
-			actualValue = payload.getInt(2);
-			String valueStr = Integer.toString(actualValue);
-
-			if(!valueLabel.getText().equals(valueStr))
-				Platform.runLater(new Runnable() {
+	private void setColor(Paint color) {
+		Paint paint = valueLabel.getTextFill();
+		if(!paint.equals(color))
+			Platform.runLater(new Runnable() {
 				
-					@Override
-					public void run() {
-						valueLabel.setText(valueStr);
-					}
-				});
+				@Override
+				public void run() {
+					valueLabel.setTextFill(color);
+				}
+			});
+	}
 
-			if(toSetTextField.getText().isEmpty()){
-				toSetTextField.setText(valueStr);
-				toSetSlider.setValue(actualValue);
-			}
+	private void setTooltip(Payload pl) {
+		int sv = pl.getInt(2);
+		if(sv!=savedValue){
+			savedValue = sv;
+			Platform.runLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					valueLabel.setTooltip(new Tooltip(Integer.toString(savedValue)));
+				}
+			});
+		}
+	}
+
+	private void setValue(Payload pl) {
+		actualValue = pl.getInt(2);
+		String valueStr = Integer.toString(actualValue);
+
+		if(!valueLabel.getText().equals(valueStr))
+			Platform.runLater(new Runnable() {
+			
+				@Override
+				public void run() {
+					valueLabel.setText(valueStr);
+				}
+			});
+
+		if(toSetTextField.getText().isEmpty()){
+			Platform.runLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					toSetTextField.setText(valueStr);
+					toSetSlider.setValue(actualValue);
+				}
+			});
 		}
 	}
 
@@ -192,103 +251,6 @@ public class RegisterController extends FieldsControllerAbstract {
 					t.start();
 				}
 			});
-			SerialPortController.QUEUE.add(packet);
-		}
-	}
-
-	//*********************************************   ValueChangeAnalyzer   ****************************************************************
-	private final class ValueChangeAnalyzer implements Runnable {
-
-		protected final Logger logger = LogManager.getLogger();
-
-		private PotentiometerPacket packet;
-
-		public ValueChangeAnalyzer() throws PacketParsingException {
-			RegisterValue rv = new RegisterValue(registerValue.getIndex(), registerValue.getAddr()==0 ? 0x10+2 : 0x10+3); //0x10+2 --> RDAC:MEM2; 0x10+3 --> RDAC:MEM3
-			packet = new PotentiometerPacket(rv);
-			packet.addObserver(new Observer() {
-				
-				@Override
-				public void update(Observable observable, Object object) {
-					logger.entry(observable, object);
-					final Thread t = new Thread(new Runnable() {
-						@Override
-						public void run() {
-
-							if(observable instanceof LinkedPacket) {
-								LinkedPacket lp = (LinkedPacket) observable;
-
-								if( lp.getAnswer()!=null){
-
-									try {
-
-										PotentiometerPacket p = new PotentiometerPacket(lp.getAnswer());
-										List<Payload> payloads = p.getPayloads();
-										PacketErrors packetError = p.getPacketHeader().getPacketErrors();
-
-										if(packetError!=PacketErrors.NO_ERROR){
-
-											final String text = "Packet has Error: " + packetError;
-											if(!toSetTextField.getText().equals(text))
-												Platform.runLater(new Runnable() {
-													
-													@Override
-													public void run() {
-														toSetTextField.setTooltip(new Tooltip(text));
-													}
-												});
-											logger.error("\n\tPacket has Error:\n\t sent packet{}\n\n\t received packet{}", packet, p);
-
-										}else{
-
-											if(payloads==null || payloads.isEmpty())
-												throw new PacketParsingException("\n\t Packet parsing error:\n\t Payload is empty\n\t Sent packet: " + packet + "\n\t Resieved packet: " + p);
-
-											setTooltip(payloads);
-											setColor();
-										}
-									} catch (Exception e) {
-										logger.catching(e);
-									}
-								}
-								else
-									logger.warn("No Answer");
-							}
-						}
-
-						private void setTooltip(List<Payload> payloads) {
-							Payload payload = payloads.get(0);
-							int sv = payload.getInt(2);
-							if(sv!=savedValue){
-								savedValue = sv;
-								valueLabel.setTooltip(new Tooltip(Integer.toString(savedValue)));
-							}
-						}
-
-						private void setColor() {
-							if(savedValue == actualValue)
-								setColor(Color.BLACK);
-							else
-								setColor(Color.RED);
-						}
-
-						private void setColor(Paint color) {
-							Paint paint = valueLabel.getTextFill();
-							if(!paint.equals(color))
-								valueLabel.setTextFill(color);
-						}
-					});
-					int priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(--priority);
-					t.setDaemon(true);
-					t.start();
-				}
-			});
-		}
-
-		@Override
-		public void run() {
 			SerialPortController.QUEUE.add(packet);
 		}
 	}

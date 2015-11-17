@@ -6,7 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.ScheduledServices;
-import irt.gui.controllers.leftside.setup.SerialPortController;
+import irt.gui.controllers.components.SerialPortController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

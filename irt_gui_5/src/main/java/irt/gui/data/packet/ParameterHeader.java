@@ -11,26 +11,10 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 //	private Logger logger = LogManager.getLogger();
 
 	public static final int SIZE = 3;
-//	private byte[] parameterHeader;
+
 	private ParameterHeaderCode parameterHeaderCode;
 	private PayloadSize payloadSize;
 
-	/*	private short code;			//irtstcp_parameter_code (uint8_t)
-	private int dataSize;		//irtstcp_parameter_size (uint16_t)
-*/
-//	public ParameterHeader(byte[] data) throws PacketParsingException {
-//		logger.trace("\n\tENTRY: {}", data);
-//		if(data!=null && data.length>=3){
-//			for(ParameterHeaderCode phc:ParameterHeaderCode.values())
-//				if(phc.getValue()==data[0]){
-//					parameterHeaderCode = phc;
-//					break;
-//				}
-//			payloadSize = new PayloadSize((short)Packet.shiftAndAdd(new byte[]{data[1], data[2]}));
-////			parameterHeader = Arrays.copyOf(data, SIZE);
-//		}else
-//			throw new PacketParsingException("Parameter is to short or null(" + ToHex.bytesToHex(data) + ")");
-//	}
 
 	public ParameterHeader(PacketId packetId) throws PacketParsingException {
 		this(packetId, new PayloadSize((short) 0));

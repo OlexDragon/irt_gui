@@ -61,9 +61,14 @@ public class InfoPacketTest {
 
 					PacketAbstract bp = new PacketAbstract(InfoPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){};
 					logger.debug("\n\t new PacketAbstract: {}\n", bp);
+					assertNotNull(packet.getAnswer());
+
+					LinkedPacket p = new InfoPacket(packet.getAnswer());
+					logger.trace(p);
 
 				} catch (PacketParsingException e) {
 					logger.catching(e);
+					assertTrue("Packet Parsing error", false);
 				}
 			}
 		});

@@ -1,51 +1,85 @@
 package irt.gui.controllers;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.gui.controllers.leftside.setup.SerialPortController;
+import irt.gui.controllers.components.SerialPortController;
+import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.errors.PacketParsingException;
 
-public abstract class FieldsControllerAbstract implements Observer {
+public abstract class FieldsControllerAbstract implements Observer, FieldController  {
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
-	private 			Observer 		observer 	= this;
-	protected final 	PacketSender 	packetSender 	= new PacketSender();
+	private static boolean wasShown;
 
-	protected abstract 	void 			updateFields(LinkedPacket packet) throws PacketParsingException;
+	protected abstract void 	updateFields(LinkedPacket packet) throws Exception;
+	protected abstract Duration getPeriod();
 
-	public void receive(boolean receive) {
-		packetSender.setSend(receive);
+	protected 		Observer 		observer 		= this;
+	private final 	PacketSender 	packetSender 	= new PacketSender();
+	private ScheduledFuture<?> 		scheduleAtFixedRate;
+
+	public void addLinkedPacket(LinkedPacket linkedPacket){
+		packetSender.addPacketToSend(linkedPacket);
+	}
+
+	public void removeLinkedPacket(LinkedPacket linkedPacket){
+		packetSender.removePacketToSend(linkedPacket);
+	}
+
+	/** update = true - start sending the packages to the device, false - stop*/
+	public void doUpdate(boolean update) {
+		logger.entry(update);
+		if(update) {
+			if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+				scheduleAtFixedRate = ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);
+		}else
+			scheduleAtFixedRate.cancel(false);
 	}
 
 	@Override
 	public void update(Observable observable, Object object) {
 		logger.entry(observable, object);
-		final Thread t = new Thread(new Runnable() {
+		startThread(new Thread(new Runnable() {
+
 			@Override
 			public void run() {
 				if(observable instanceof LinkedPacket) {
 					LinkedPacket p = (LinkedPacket) observable;
 
 					if( p.getAnswer()!=null)
-						new Thread(	new FieldsUpdater(p)).run();
-					else
+						try {
+							wasShown = false;
+
+							updateFields(p);
+
+						} catch (Exception e) {
+							logger.catching(e);
+						}
+					else if(!wasShown){
+						wasShown = true;
 						logger.warn("No Answer");
+					}
 				}
 			}
-		});
-		int priority = t.getPriority();
+		}));
+	}
+
+	private void startThread(final Thread thread) {
+		int priority = thread.getPriority();
 		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(--priority);
-		t.setDaemon(true);
-		t.start();
+			thread.setPriority(--priority);
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	//*********************************************   InfoPacketSender   ****************************************************************
@@ -58,39 +92,24 @@ public abstract class FieldsControllerAbstract implements Observer {
 		}		
 
 		public void addPacketToSend(LinkedPacket linkedPacket){
-			packetsToSend.add(linkedPacket);
-			linkedPacket.addObserver(observer);
+
+			if(!packetsToSend.contains(linkedPacket)){
+
+				packetsToSend.add(linkedPacket);
+				linkedPacket.addObserver(observer);
+			}
+		}
+		public void removePacketToSend(LinkedPacket linkedPacket) {
+			packetsToSend.remove(linkedPacket);
+			linkedPacket.deleteObserver(observer);
 		}
 
 		@Override
 		public void run(){
+			logger.entry();
 
-			if(send)
-				for(LinkedPacket packet:packetsToSend)
+			for(LinkedPacket packet:packetsToSend)
 					SerialPortController.QUEUE.add(packet);
 		}
-	}
-
-	//*********************************************   FieldsUpdater   ****************************************************************
-
-	public class FieldsUpdater implements Runnable {
-
-		private LinkedPacket packet;
-
-		public FieldsUpdater(LinkedPacket packet) {
-			this.packet = packet;
-		}
-
-		@Override
-		public void run() {
-			try {
-
-				updateFields(packet);
-
-			} catch (Exception e) {
-				logger.catching(e);
-			}
-		}
-
 	}
 }

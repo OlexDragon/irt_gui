@@ -1,9 +1,8 @@
 
 package irt.gui.data.packet.observable.alarms;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 import java.util.Arrays;
 import java.util.Observable;
@@ -107,5 +106,31 @@ public class AlarmSummaryStatusTest {
 		}
 
 		logger.exit();
+	}
+
+	@Test
+	public void comparPacketsTest() throws PacketParsingException{
+
+		assertThat(new AlarmSummaryStatusPacket()		, is(new AlarmSummaryStatusPacket()));
+		assertThat(new AlarmStatusPacket((short) 1)		, is(new AlarmStatusPacket((short) 1)));
+		assertThat(new AlarmIDsPacket()					, is(new AlarmIDsPacket()));
+		assertThat(new AlarmDescriptionPacket((short) 1), is(new AlarmDescriptionPacket((short) 1)));
+		assertThat(new AlarmNamePacket((short) 1)		, is(new AlarmNamePacket((short) 1)));
+
+		assertThat(new AlarmSummaryStatusPacket()		, not(new AlarmStatusPacket((short) 1)));
+		assertThat(new AlarmSummaryStatusPacket()		, not(new AlarmIDsPacket()));
+		assertThat(new AlarmSummaryStatusPacket()		, not(new AlarmDescriptionPacket((short) 1)));
+		assertThat(new AlarmSummaryStatusPacket()		, not(new AlarmNamePacket((short) 1)));
+
+		assertThat(new AlarmStatusPacket((short) 4)		, not(new AlarmStatusPacket((short) 1)));
+		assertThat(new AlarmStatusPacket((short) 4)		, not(new AlarmIDsPacket()));
+		assertThat(new AlarmStatusPacket((short) 4)		, not(new AlarmDescriptionPacket((short) 4)));
+		assertThat(new AlarmStatusPacket((short) 4)		, not(new AlarmNamePacket((short) 4)));
+
+		assertThat(new AlarmIDsPacket()					, not(new AlarmNamePacket((short) 1)));
+		assertThat(new AlarmIDsPacket()					, not(new AlarmNamePacket((short) 4)));
+
+		assertThat(new AlarmDescriptionPacket((short) 4), not(new AlarmDescriptionPacket((short) 1)));
+		assertThat(new AlarmDescriptionPacket((short) 4), not(new AlarmNamePacket((short) 4)));
 	}
 }

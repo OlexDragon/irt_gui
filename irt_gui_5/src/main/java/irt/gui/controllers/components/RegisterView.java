@@ -1,10 +1,9 @@
 package irt.gui.controllers.components;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import irt.gui.controllers.FieldsControllerAbstract;
-import irt.gui.controllers.ScheduledServices;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -20,11 +19,14 @@ public class RegisterView extends FieldsControllerAbstract {
 	@FXML private Label titleLabel;
 	@FXML private Label valueLabel;
 
+	@Override
+	protected Duration getPeriod() {
+		return Duration.ofSeconds(3);
+	}
+
 	public void initialize(RegisterValue registerValue) throws PacketParsingException {
 		
-		packetSender.addPacketToSend(new PotentiometerPacket(registerValue));
-		packetSender.setSend(true);
-		ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, 3, TimeUnit.SECONDS);
+		addLinkedPacket(new PotentiometerPacket(registerValue));
 	}
 
 	@Override

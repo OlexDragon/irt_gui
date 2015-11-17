@@ -1,8 +1,8 @@
 
 package irt.gui.data.packet.observable.device_debug;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -120,5 +120,14 @@ public class PotentiometerPacketTest {
 		}
 
 		logger.exit();
+	}
+
+	@Test
+	public void equalsTest() throws PacketParsingException{
+		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), is(new PotentiometerPacket(new RegisterValue(1, 5))));
+
+		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), not(new PotentiometerPacket(new RegisterValue(1, 5, 0))));
+		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), not(new PotentiometerPacket(new RegisterValue(1, 7))));
+		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), not(new PotentiometerPacket(new RegisterValue(2, 5))));
 	}
 }

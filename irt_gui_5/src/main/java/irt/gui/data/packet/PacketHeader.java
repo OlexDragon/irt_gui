@@ -102,6 +102,32 @@ public class PacketHeader{
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = prime  + ((packetIdDetails == null) ? 0 : packetIdDetails.hashCode());
+		result = prime * result + ((packetType == null) ? 0 : packetType.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PacketHeader other = (PacketHeader) obj;
+		if (packetIdDetails == null) {
+			if (other.packetIdDetails != null)
+				return false;
+		} else if (!packetIdDetails.equals(other.packetIdDetails))
+			return false;
+		if (packetType != other.packetType)
+			return false;
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "\n\t PacketHeader [packetType=" + packetType + ", packetIdDetails=" + packetIdDetails + ", reserved=" + Arrays.toString(reserved) + ", packetAlarms=" + packetError + "]";
 	}

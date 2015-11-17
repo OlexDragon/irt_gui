@@ -1,12 +1,9 @@
 
-package irt.gui.controllers.rightside.converter;
+package irt.gui.controllers.components;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import irt.gui.controllers.FieldsControllerAbstract;
-import irt.gui.controllers.ScheduledServices;
-import irt.gui.controllers.components.RegisterController;
-import irt.gui.controllers.leftside.setup.SerialPortController;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket;
@@ -28,6 +25,11 @@ public class ConverterController extends FieldsControllerAbstract {
 
     private CalibrationMode callibrationMode;
 
+	@Override
+	protected Duration getPeriod() {
+		return Duration.ofSeconds(3);
+	}
+
 	public void initialize( int minValue, int maxValue, RegisterValue... registerValues) throws PacketParsingException {
 
 		logger.trace("\n\t min:{}\n\t max:{}\n\t{}", minValue, maxValue, registerValues);
@@ -37,8 +39,7 @@ public class ConverterController extends FieldsControllerAbstract {
 		for(int i=0; i<controllers.length && i<registerValues.length; i++)
 			controllers[i].initialize(registerValues[i], minValue, maxValue, false);
 
-		packetSender.addPacketToSend(new CallibrationModePacket((CalibrationMode)null));
-		ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, 3, TimeUnit.SECONDS);
+		addLinkedPacket(new CallibrationModePacket((CalibrationMode)null));
 	}
 
 	@FXML public void changeCallibrationMode(){
@@ -76,13 +77,13 @@ public class ConverterController extends FieldsControllerAbstract {
 	}
 
 	@Override
-	public void receive(boolean receive) {
+	public void doUpdate(boolean receive) {
 		logger.entry(receive);
 
-		super.receive(receive);
+		super.doUpdate(receive);
 		if(controllers!=null)
 			for(RegisterController vc:controllers)
-				vc.receive(receive);
+				vc.doUpdate(receive);
 	}
 
 	public void disable(boolean disable){

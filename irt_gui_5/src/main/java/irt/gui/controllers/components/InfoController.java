@@ -1,9 +1,8 @@
-package irt.gui.controllers.leftside.monitor;
+package irt.gui.controllers.components;
 
-import java.util.concurrent.TimeUnit;
+import java.time.Duration;
 
 import irt.gui.controllers.FieldsControllerAbstract;
-import irt.gui.controllers.ScheduledServices;
 import irt.gui.data.DeviceInfo;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
@@ -27,13 +26,17 @@ public class InfoController extends FieldsControllerAbstract {
 
 	@FXML public void initialize() {
 		try {
-			packetSender.addPacketToSend(new InfoPacket());
-			packetSender.setSend(true);
-			ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, 10, TimeUnit.SECONDS);
+			addLinkedPacket(new InfoPacket());
+			doUpdate(true);
 
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+	}
+
+	@Override
+	protected Duration getPeriod() {
+		return Duration.ofSeconds(5);
 	}
 
 	@Override

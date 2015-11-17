@@ -6,12 +6,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<TitledPane fx:id="valuePanel" animated="false" text="untitled" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ValuePanel" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-  <content>
-    <AnchorPane>
-         <children>
-            <fx:include fx:id="value" source="ValueController.fxml" />
-         </children>
-      </AnchorPane>
-  </content>
-</TitledPane>
+<VBox xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ValuePanelController">
+   <children>
+      <fx:include fx:id="value" source="ValueController.fxml" />
+   </children>
+</VBox>

@@ -1,10 +1,13 @@
 
 package irt.gui.data.packet.observable;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
+import java.util.Observer;
+import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -258,6 +261,15 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		return result;
 	}
 
+	@SuppressWarnings("unchecked")
+	public Observer[] getObservers() throws Exception{
+
+		final Field obs = Observable.class.getDeclaredField("obs");
+		obs.setAccessible(true);
+		final Vector<Observer> vector = (Vector<Observer>) obs.get(this);
+		return vector.toArray(new Observer[vector.size()]);
+	}
+
 	@Override
 	public int hashCode() {
 		return 31 + ((packetHeader == null) ? 0 : packetHeader.hashCode());
@@ -277,7 +289,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 				return false;
 		} else if (!packetHeader.equals(other.packetHeader))
 			return false;
-		return true;
+		return this==obj || (obj instanceof PacketAbstract ? hashCode()==obj.hashCode() : false);
 	}
 
 	@Override
@@ -286,7 +298,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		byte v1 = packetHeader.getPacketType().getValue();
 		byte v2 = packet.getPacketHeader().getPacketType().getValue();
 
-		return Byte.compare(v1, v2);
+		return Byte.compare(v2, v1);
 	}
 
 	@Override

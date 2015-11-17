@@ -9,10 +9,10 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 
-public class PotentiometerPacket extends PacketAbstract {
+public class PotentiometerPacket extends RegirterAbstractPacket {
 
 	public static final PacketId PACKET_ID = PacketId.DEVICE_DEBAG_POTENTIOMETER;
 
@@ -25,7 +25,6 @@ public class PotentiometerPacket extends PacketAbstract {
 				new Payload(
 						new ParameterHeader(PACKET_ID),
 						getBuffer(registerValue.getIndex(), registerValue.getAddr(), registerValue.getValue())));
-
 	}
 
 	public PotentiometerPacket(byte[] answer) throws PacketParsingException {

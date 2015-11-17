@@ -8,12 +8,11 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 
 //*********************************************   InfoPacket   ****************************************************************
-public class CallibrationModePacket extends PacketAbstract implements LinkedPacket {
+public class CallibrationModePacket extends RegirterAbstractPacket {
 
 	public enum CalibrationMode{
 		OFF,

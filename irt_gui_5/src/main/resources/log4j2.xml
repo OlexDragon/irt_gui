@@ -16,8 +16,13 @@
 	</Appenders>
 
 	<Loggers>
+		<logger name="irt.gui.controllers.components.RegisterController" level="error"/>
+		<logger name="irt.gui.controllers.components.RegisterController$ValueChangeAnalyzer" level="error"/>
+		<logger name="irt.gui.controllers.components.RegisterView" level="error"/>
+
 		<!-- <logger name="irt.gui.data.DeviceInfo" level="ALL"/> -->
 		<!-- <logger name="irt.gui.data.LinkedPacketChecksum" level="ALL"/> -->
+<!-- 		<logger name="irt.gui.data.LinkedPacketPriorityBlockingQueue" level="info"/> -->
 
 		<!-- <logger name="irt.gui.data.packet.PacketHeader" level="ALL"/> -->
 
@@ -29,26 +34,24 @@
 
 <!-- 		<logger name="irt.gui.controllers.components.AlarmFieldController" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.AlarmsPanelController" level="ALL"/> -->
-<!-- 		<logger name="irt.gui.controllers.components.ValuePanel" level="ALL"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.ValuePanelController" level="ALL"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ValueController" level="ALL"/> -->
-<!-- 		<logger name="irt.gui.controllers.components.RegisterView" level="ALL"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.DebugInfoController" level="ALL"/> -->
 
 		<!-- <logger name="irt.gui.controllers.IrtGuiController" level="ALL"/> -->
 		<!-- <logger name="irt.gui.controllers.LinkedPacketsQueue" level="ALL"/> -->
-		<logger name="irt.gui.controllers.LinkedPacketSender" level="ALL"/>
+<!-- 		<logger name="irt.gui.controllers.LinkedPacketSender" level="ALL"/> -->
 
 <!-- 		<logger name="irt.gui.controllers.monitor.InfoController" level="ALL"/> -->
 <!-- 		<logger name="irt.gui.controllers.monitor.MeasurementController" level="ALL"/> -->
 
 
-		<!-- <logger name="irt.gui.controllers.leftside.setup.SerialPortController" level="all"/> -->
+		<!-- <logger name="irt.gui.controllers.components.SerialPortController" level="all"/> -->
 
-		<!-- <logger name="irt.gui.components.RegisterController" level="all"/> -->
-		<!-- <logger name="irt.gui.controllers.rightside.bais.RegisterController$ValueChangeAnalyzer" level="all"/> -->
-<!-- 		<logger name="irt.gui.controllers.rightside.bais.BaisController" level="all"/> -->
-<!-- 		<logger name="irt.gui.controllers.rightside.converter.ConverterController" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.BaisController" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.ConverterController" level="all"/> -->
 
-		<Root level="ERROR">
+		<Root level="warn">
 			<AppenderRef ref="DumpFile" />
 			<AppenderRef ref="STDOUT" />
 		</Root>

@@ -5,11 +5,11 @@ import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.RangePacket;
 import irt.gui.data.packet.observable.PacketAbstract;
 import irt.gui.errors.PacketParsingException;
 
-public class AttenuationRangePackege extends PacketAbstract implements LinkedPacket{
+public class AttenuationRangePackege extends PacketAbstract implements RangePacket{
 
 	public static final PacketId PACKET_ID = PacketId.CONFIGURATION_ATTENUATION_RANGE;
 

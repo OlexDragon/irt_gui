@@ -4,6 +4,7 @@ package irt.gui.data.packet.observable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
+import java.util.Observer;
 
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
@@ -66,5 +67,10 @@ public class TestPacket  extends Observable implements LinkedPacket {
 	@Override
 	public String toString() {
 		return "\n\tTestPacket [\n\tpacketWithoutChecksum=" + ToHex.bytesToHex(packetWithoutChecksum) + ", \n\tanswer=" + ToHex.bytesToHex(answer) + "]";
+	}
+
+	@Override
+	public Observer[] getObservers() throws Exception {
+		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 }

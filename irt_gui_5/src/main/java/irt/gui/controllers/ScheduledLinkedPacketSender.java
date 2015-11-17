@@ -1,7 +1,7 @@
 
 package irt.gui.controllers;
 
-import irt.gui.controllers.leftside.setup.SerialPortController;
+import irt.gui.controllers.components.SerialPortController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
