@@ -24,6 +24,8 @@ public abstract class FieldsControllerAbstract implements Observer, FieldControl
 	protected abstract void 	updateFields(LinkedPacket packet) throws Exception;
 	protected abstract Duration getPeriod();
 
+	private 		String 			name; 			public String getName() { return name; } 		public void setName(String name) { this.name = name; }
+
 	protected 		Observer 		observer 		= this;
 	private final 	PacketSender 	packetSender 	= new PacketSender();
 	private ScheduledFuture<?> 		scheduleAtFixedRate;

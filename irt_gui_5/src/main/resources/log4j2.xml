@@ -29,7 +29,7 @@
 <!-- 		<logger name="irt.gui.data.packet.observable.alarms.AlarmIDsPacket" level="ALL"/> -->
 		<!-- <logger name="irt.gui.data.packet.observable.PacketAbstract" level="ALL"/> -->
 		<!-- <logger name="irt.gui.data.packet.observable.InfoPacket" level="all"/> -->
-		<!-- <logger name="irt.gui.data.packet.observable.BaisPacket" level="debug"/> -->
+		<!-- <logger name="irt.gui.data.packet.observable.BiasPacket" level="debug"/> -->
 		<!-- <logger name="irt.gui.data.packet.observable.CallibrationModePacket" level="debug"/> -->
 
 <!-- 		<logger name="irt.gui.controllers.components.AlarmFieldController" level="all"/> -->
@@ -48,7 +48,7 @@
 
 		<!-- <logger name="irt.gui.controllers.components.SerialPortController" level="all"/> -->
 
-<!-- 		<logger name="irt.gui.controllers.components.BaisController" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.BiasController" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ConverterController" level="all"/> -->
 
 		<Root level="warn">

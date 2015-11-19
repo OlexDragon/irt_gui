@@ -19,7 +19,6 @@
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 					</rowConstraints>
 					<children>
 						<Label text="SN:">
@@ -82,16 +81,6 @@
 								<Insets left="5.0" />
 							</GridPane.margin>
 						</Label>
-            <Label text="Subtype" GridPane.rowIndex="6">
-               <GridPane.margin>
-                  <Insets right="5.0" />
-               </GridPane.margin>
-            </Label>
-            <Label fx:id="subtypeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Subtype" GridPane.columnIndex="1" GridPane.rowIndex="6">
-               <GridPane.margin>
-                  <Insets left="5.0" />
-               </GridPane.margin>
-            </Label>
 					</children>
 				</GridPane>
 	</content>

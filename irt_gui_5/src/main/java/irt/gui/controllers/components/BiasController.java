@@ -1,10 +1,16 @@
 
 package irt.gui.controllers.components;
 
+import java.net.URL;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
+import irt.gui.IrtCuiProperties;
 import irt.gui.controllers.FieldsControllerAbstract;
-import irt.gui.data.RegisterValue;
+import irt.gui.controllers.ScheduledServices;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
@@ -13,10 +19,12 @@ import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.layout.VBox;
 
-public class BaisController extends FieldsControllerAbstract {
+public class BiasController extends FieldsControllerAbstract {
 
-    @FXML private Button calibModeButton;
+	@FXML private VBox biasVBox;
+	@FXML private Button calibModeButton;
     @FXML private Button saveButton;
     @FXML private Button resetButton;
     @FXML private RegisterController value1Controller;
@@ -29,22 +37,23 @@ public class BaisController extends FieldsControllerAbstract {
 	private RegisterController[] controllers;
 
     private CalibrationMode callibrationMode;
+	private ScheduledFuture<?> scheduleAtFixedRate;
 
 	@Override
 	protected Duration getPeriod() {
 		return Duration.ofSeconds(3);
 	}
 
-	public void initialize( int minValue, int maxValue, RegisterValue... registerValues) throws PacketParsingException {
-
-		logger.entry(minValue, maxValue, registerValues);
+	public void initialize( String name) throws PacketParsingException {
 
 		controllers = new RegisterController[]{value1Controller,value2Controller,value3Controller,value4Controller,value5Controller,value6Controller,value7Controller};
 
-		for(int i=0; i<controllers.length && i<registerValues.length; i++)
-			controllers[i].initialize(registerValues[i], minValue, maxValue, true);
+		setName(name);
+		for(int i=0; i<controllers.length; i++)
+			controllers[i].initialize( name+i);
 
 		addLinkedPacket(new CallibrationModePacket((CalibrationMode)null));
+		 scheduleAtFixedRate = ScheduledServices.services.scheduleAtFixedRate(new CSSWorker(), 500, 100, TimeUnit.MILLISECONDS);
 	}
 
 	@FXML public void changeCallibrationMode(){
@@ -92,14 +101,10 @@ public class BaisController extends FieldsControllerAbstract {
 		CallibrationModePacket p = new CallibrationModePacket(packet.getAnswer());
 		callibrationMode = p.getCallibrationMode();
 		final String text = "Callibration Mode is " + callibrationMode;
+
 		if(!calibModeButton.getText().equals(text))
-			Platform.runLater(new Runnable() {
-			
-				@Override
-				public void run() {
-					calibModeButton.setText(text);
-				}
-			});
+			Platform.runLater(()->calibModeButton.setText(text));
+
 		disable(callibrationMode==CalibrationMode.OFF);
 	}
 
@@ -121,8 +126,66 @@ public class BaisController extends FieldsControllerAbstract {
 				vc.disable(disable);
 	}
 
-	public void setTitle(int controllerIndex, String title){
-		if(controllerIndex>=0 && controllerIndex<controllers.length)
-			controllers[controllerIndex].setTitle(title);
-	}
+    public class CSSWorker implements Runnable {
+
+		private static final String RESOURCE = "Resource:";
+
+		@Override
+		public void run() {
+
+			try {
+
+				final Integer deviceID = InfoController.getDeviceType();
+
+				if (deviceID != null) {
+					scheduleAtFixedRate.cancel(true);
+
+					final String cssFilePath = String.format(IrtCuiProperties.PANEL_PROPERTIES, BiasController.this.getName(), "css." + deviceID);
+					final Optional<String> optionalCssPath = Optional.ofNullable(IrtCuiProperties.getProperty(cssFilePath));
+
+					setCss(optionalCssPath);
+				}
+			} catch (Exception e) {
+				logger.catching(e);
+			}
+		}
+
+		private void setCss(Optional<String> optionalCssPath) {
+
+			final Optional<String[]> pathArray = optionalCssPath
+
+					.filter(
+							s -> !s.isEmpty())
+
+					.map(
+							s -> s.contains(",")
+							? s.split(",")
+									: new String[] { s });
+
+			// if path does not exists do nothing
+			if (pathArray.isPresent())
+
+				Arrays.stream(pathArray.get())
+
+				.map(
+						p -> p.startsWith(RESOURCE)
+						? getClass().getResource(p.substring(RESOURCE.length()))
+								: newUrl(p))
+
+				.forEach(
+						u -> Platform.runLater(() -> biasVBox.getStylesheets().add(u.toString())));
+		}
+
+		private URL newUrl(String p) {
+			URL url = null;
+
+			try {
+				url = new URL(p);
+			} catch (Exception e) {
+				logger.catching(e);
+			}
+
+			return url;
+		}
+    }
 }

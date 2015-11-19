@@ -3,7 +3,6 @@ package irt.gui.data.packet.observable.configuration;
 
 import irt.gui.data.NetworkAddress;
 import irt.gui.data.PacketIdDetails;
-import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;

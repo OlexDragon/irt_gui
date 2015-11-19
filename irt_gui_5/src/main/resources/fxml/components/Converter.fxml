@@ -13,10 +13,10 @@
             <Button fx:id="calibModeButton" mnemonicParsing="false" onAction="#changeCallibrationMode" text="Button" />
          </children>
       </HBox>
-      <fx:include fx:id="value1" source="../../../components/RegisterController.fxml" />
-      <fx:include fx:id="value2" source="../../../components/RegisterController.fxml" />
-      <fx:include fx:id="value3" source="../../../components/RegisterController.fxml" />
-      <fx:include fx:id="value4" source="../../../components/RegisterController.fxml" />
+      <fx:include fx:id="value1" source="RegisterController.fxml" />
+      <fx:include fx:id="value2" source="RegisterController.fxml" />
+      <fx:include fx:id="value3" source="RegisterController.fxml" />
+      <fx:include fx:id="value4" source="RegisterController.fxml" />
    </children>
    <padding>
       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

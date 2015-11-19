@@ -4,7 +4,9 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 
+import irt.gui.IrtCuiProperties;
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.listeners.NumericChecker;
@@ -52,33 +54,47 @@ public class RegisterController extends FieldsControllerAbstract {
 		return Duration.ofSeconds(3);
 	}
 
-	public void initialize(RegisterValue registerValue, int minValue, int maxValue, boolean checkForChange) throws PacketParsingException {
+	public void initialize(String name) throws PacketParsingException {
 
-		logger.trace("\n\t min:{}\n\t max:{}\n\t{}", minValue, maxValue, registerValue);
+		setName(Optional.of(name).get());
 
-		this.registerValue = registerValue;
+		//setTitle
+		String titleProp = String.format(IrtCuiProperties.PANEL_PROPERTIES, getName(),"title");
+		titleLabel.setText(Optional.ofNullable(IrtCuiProperties.getProperty(titleProp)).orElse("Title"));
 
-		toSetSlider.setMin(minValue);
-		toSetSlider.setMax(maxValue);
+		//set Register packet
+		final String indexProp 	= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "index");
+		final String addrProp 	= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "address");
+		final String valueProp 		= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "value");
+
+		final int index 	= Optional.of(IrtCuiProperties.getLong(indexProp))	.map(i->i.intValue()).get();
+		final int address 	= Optional.of(IrtCuiProperties.getLong(addrProp))	.map(a->a.intValue()).get();
+
+		final Optional<Long> vLong = Optional.ofNullable(IrtCuiProperties.getLong(valueProp));
+		registerValue = vLong.map(val -> new RegisterValue(index, address, val.intValue())).orElse(new RegisterValue(index, address));
+
+		//set min max values
+		final String minValueProp 		= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "value.min");
+		final String maxValueProp		= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "value.max");
+
+		toSetSlider.setMin(Optional.ofNullable(IrtCuiProperties.getLong(minValueProp)).orElse(0L));
+		toSetSlider.setMax(Optional.ofNullable(IrtCuiProperties.getLong(maxValueProp)).orElse(4095L));
 
 		toSetSlider.valueProperty().addListener(new ChangeListener<Number>() {
 
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				Platform.runLater(new Runnable() {
-					
-					@Override
-					public void run() {
-						toSetTextField.setText(Integer.toString(newValue.intValue()));
-					}
-				});
+				Platform.runLater(()->toSetTextField.setText(Integer.toString(newValue.intValue())));
 			}
 		});
 
 		toSetTextField.textProperty().addListener(new NumericChecker());
 
 		addLinkedPacket(new PotentiometerPacket(registerValue));
-		if(checkForChange){
+	
+		final String showTooltipProp 	= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "show.tooltip");
+		if(IrtCuiProperties.getBoolean(showTooltipProp)){
+
 			RegisterValue rv = new RegisterValue(registerValue.getIndex(), registerValue.getAddr()==0 ? 0x10+2 : 0x10+3); //0x10+2 --> RDAC:MEM2; 0x10+3 --> RDAC:MEM3
 			addLinkedPacket(new PotentiometerPacket(rv));
 		}
@@ -88,13 +104,7 @@ public class RegisterController extends FieldsControllerAbstract {
 		if(actualValue!=savedValue){
 			String text = Integer.toString(savedValue);
 			setValue(text);
-			Platform.runLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					toSetTextField.setText(text);
-				}
-			});
+			Platform.runLater(()->toSetTextField.setText(text));
 		}
 	}
 
@@ -139,12 +149,7 @@ public class RegisterController extends FieldsControllerAbstract {
 			final String text = packetError.toString();
 
 			if(!valueLabel.getText().equals(text))
-				Platform.runLater(new Runnable() {
-					@Override
-					public void run() {
-						valueLabel.setText(text);
-					}
-				});
+				Platform.runLater(()->valueLabel.setText(text));
 		}
 	}
 
@@ -163,26 +168,14 @@ public class RegisterController extends FieldsControllerAbstract {
 	private void setColor(Paint color) {
 		Paint paint = valueLabel.getTextFill();
 		if(!paint.equals(color))
-			Platform.runLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					valueLabel.setTextFill(color);
-				}
-			});
+			Platform.runLater(()->valueLabel.setTextFill(color));
 	}
 
 	private void setTooltip(Payload pl) {
 		int sv = pl.getInt(2);
 		if(sv!=savedValue){
 			savedValue = sv;
-			Platform.runLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					valueLabel.setTooltip(new Tooltip(Integer.toString(savedValue)));
-				}
-			});
+			Platform.runLater(()->valueLabel.setTooltip(new Tooltip(Integer.toString(savedValue))));
 		}
 	}
 
@@ -191,23 +184,12 @@ public class RegisterController extends FieldsControllerAbstract {
 		String valueStr = Integer.toString(actualValue);
 
 		if(!valueLabel.getText().equals(valueStr))
-			Platform.runLater(new Runnable() {
-			
-				@Override
-				public void run() {
-					valueLabel.setText(valueStr);
-				}
-			});
+			Platform.runLater(()->valueLabel.setText(valueStr));
 
 		if(toSetTextField.getText().isEmpty()){
-			Platform.runLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					toSetTextField.setText(valueStr);
-					toSetSlider.setValue(actualValue);
-				}
-			});
+			Platform.runLater(()->{
+				toSetTextField.setText(valueStr);
+				toSetSlider.setValue(actualValue);});
 		}
 	}
 

@@ -48,7 +48,7 @@
                         <content>
                           <AnchorPane>
                                  <children>
-                                    <fx:include fx:id="bais1" source="rightside/tabs/bais/Bais.fxml" />
+                                    <fx:include fx:id="bias1" source="components/Bias.fxml" />
                                  </children>
                               </AnchorPane>
                         </content>
@@ -57,7 +57,7 @@
                         <content>
                           <AnchorPane>
                                  <children>
-                                    <fx:include fx:id="bais2" source="rightside/tabs/bais/Bais.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <fx:include fx:id="bias2" source="components/Bias.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children></AnchorPane>
                         </content>
                       </Tab>
@@ -65,7 +65,7 @@
                           <content>
                             <AnchorPane>
                                  <children>
-                                    <fx:include fx:id="converter" source="rightside/tabs/converter/Converter.fxml" />
+                                    <fx:include fx:id="converter" source="components/Converter.fxml" />
                                  </children></AnchorPane>
                           </content>
                         </Tab>

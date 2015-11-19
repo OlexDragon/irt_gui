@@ -6,11 +6,13 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.DebugInfoController">
    <top>
-      <ToolBar focusTraversable="false" maxHeight="40.0" minHeight="40.0" onMouseClicked="#onMouseDoubleClick" prefHeight="40.0">
+      <ToolBar focusTraversable="false" maxHeight="40.0" minHeight="40.0" prefHeight="40.0">
         <items>
             <ComboBox fx:id="commandComboBox" onAction="#onAction" />
             <ComboBox fx:id="parameterComboBox" editable="true" minWidth="60.0" onAction="#onAction" prefWidth="60.0" />
-            <Button fx:id="plussButton" mnemonicParsing="false" onAction="#plussButtonAction" text="+" />
+            <Button mnemonicParsing="false" onAction="#hButtonVction" text="H" />
+            <Pane HBox.hgrow="ALWAYS" />
+     	    <Button fx:id="plussButton" mnemonicParsing="false" onAction="#plussButtonAction" text="+" />
         </items>
       </ToolBar>
    </top>

@@ -5,6 +5,8 @@ import java.net.URL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.sun.javafx.application.LauncherImpl;
+
 import irt.gui.controllers.ScheduledServices;
 import irt.gui.controllers.components.SerialPortController;
 import javafx.application.Application;
@@ -14,6 +16,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jssc.SerialPort;
 
+@SuppressWarnings("restriction")
 public class IrtGuiApp extends Application {
 
 	private final Logger logger = LogManager.getLogger();
@@ -51,10 +54,9 @@ public class IrtGuiApp extends Application {
 				serialPort.closePort();
 	}
 
-
 	public static void main(String[] args) {
-		launch(args);
-//		LauncherImpl.launchApplication(IrtGuiApp.class, IrtGuiPreloader.class, args);
+//		launch(args);
+		LauncherImpl.launchApplication(IrtGuiApp.class, IrtGuiPreloader.class, args);
 
 	}
 }

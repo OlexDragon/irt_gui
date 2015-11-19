@@ -4,7 +4,6 @@ package irt.gui.controllers.components;
 import java.time.Duration;
 
 import irt.gui.controllers.FieldsControllerAbstract;
-import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
@@ -30,14 +29,12 @@ public class ConverterController extends FieldsControllerAbstract {
 		return Duration.ofSeconds(3);
 	}
 
-	public void initialize( int minValue, int maxValue, RegisterValue... registerValues) throws PacketParsingException {
-
-		logger.trace("\n\t min:{}\n\t max:{}\n\t{}", minValue, maxValue, registerValues);
+	public void initialize() throws PacketParsingException {
 
 		controllers = new RegisterController[]{value1Controller,value2Controller,value3Controller,value4Controller};
 
-		for(int i=0; i<controllers.length && i<registerValues.length; i++)
-			controllers[i].initialize(registerValues[i], minValue, maxValue, false);
+		for(int i=0; i<controllers.length; i++)
+			controllers[i].initialize("converter"+1);
 
 		addLinkedPacket(new CallibrationModePacket((CalibrationMode)null));
 	}

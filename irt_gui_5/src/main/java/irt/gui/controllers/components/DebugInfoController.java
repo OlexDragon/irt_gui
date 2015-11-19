@@ -36,7 +36,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -102,12 +101,9 @@ public class DebugInfoController extends FieldsControllerAbstract {
 		}  
 	}
 
-	@FXML public void onMouseDoubleClick(MouseEvent mouseEvent){
-		if(mouseEvent.getClickCount() > 1){
-			doUpdate(false);
-			textArea.setText(commandComboBox.getTooltip().getText());
-		}
-
+	@FXML public void hButtonVction(ActionEvent event){
+		doUpdate(false);
+		textArea.setText(commandComboBox.getTooltip().getText());
 	}
 
 	@Override

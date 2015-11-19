@@ -15,6 +15,8 @@ import javafx.scene.control.TitledPane;
 
 public class InfoController extends FieldsControllerAbstract {
 
+	private static Integer DEVICE_TYPE;
+
 	@FXML private TitledPane infoPanel;
 	@FXML private Label snLabel;
 	@FXML private Label pnLabel;
@@ -22,7 +24,6 @@ public class InfoController extends FieldsControllerAbstract {
 	@FXML private Label builtDateLabel;
 	@FXML private Label versionLabel;
 	@FXML private Label typeLabel;
-	@FXML private Label subtypeLabel;
 
 	@FXML public void initialize() {
 		try {
@@ -61,8 +62,8 @@ public class InfoController extends FieldsControllerAbstract {
 					builtDateLabel	.setText( deviceInfo.getFirmwareBuildDate()	.toString());
 					versionLabel	.setText( deviceInfo.getFirmwareVersion()	.toString());
 
-					typeLabel		.setText( Integer.toString(deviceInfo.getType()));
-					subtypeLabel	.setText( Integer.toString(deviceInfo.getSubtype()));
+					DEVICE_TYPE = deviceInfo.getType();
+					typeLabel		.setText(DEVICE_TYPE+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype());
 					countLabel		.setText( Integer.toString(deviceInfo.getUptimeCounter()));
 				}
 			});
@@ -70,5 +71,9 @@ public class InfoController extends FieldsControllerAbstract {
 		}else
 			logger.warn("\n\tInfoPacket has ERROR:{}", p);
 
+	}
+
+	public static Integer getDeviceType() {
+		return DEVICE_TYPE;
 	}
 }
