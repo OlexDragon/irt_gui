@@ -1,21 +1,19 @@
 package irt.tools.panel.head;
 
-import irt.controller.translation.Translation;
-import irt.data.value.StaticComponents;
-import irt.tools.label.LED;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
-import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.JFrame;
 import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.controller.translation.Translation;
+import irt.data.value.StaticComponents;
+import irt.tools.label.LED;
 
 @SuppressWarnings("serial")
 public class HeadPanel extends MainPanel {
@@ -66,7 +64,7 @@ public class HeadPanel extends MainPanel {
 			properties = new Properties();
 			try {
 				properties.load(HeadPanel.class.getResourceAsStream("HeadPanel.properties"));
-			} catch (IOException e) {
+			} catch (Exception e) {
 				logger.catching(e);
 			}
 		}
@@ -134,7 +132,7 @@ public class HeadPanel extends MainPanel {
 			protected void done() {
 				try {
 					ledPowerOn.setText(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -151,7 +149,7 @@ public class HeadPanel extends MainPanel {
 			protected void done() {
 				try {
 					ledAlarm.setText(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -168,7 +166,7 @@ public class HeadPanel extends MainPanel {
 			protected void done() {
 				try {
 					ledMute.setText(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -192,7 +190,7 @@ public class HeadPanel extends MainPanel {
 			protected void done() {
 				try {
 					ledPowerOn.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -208,7 +206,7 @@ public class HeadPanel extends MainPanel {
 			protected void done() {
 				try {
 					ledAlarm.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -224,7 +222,7 @@ public class HeadPanel extends MainPanel {
 			protected void done() {
 				try {
 					ledMute.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -244,7 +242,7 @@ public class HeadPanel extends MainPanel {
 					ledPowerOn.setFont(font);
 					ledAlarm.setFont(font);
 					ledMute.setFont(font);
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}

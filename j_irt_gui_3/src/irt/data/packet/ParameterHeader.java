@@ -17,16 +17,11 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 			parameterHeader = null;
 	}
 
-	public ParameterHeader(byte code, byte[] size) {
-		parameterHeader = new byte[SIZE];
-		setCode(code);
-		parameterHeader[1] = size[0];
-		parameterHeader[2] = size[1];
-	}
-
 	public ParameterHeader(byte code) {
 		parameterHeader = new byte[SIZE];
 		setCode(code);
+		parameterHeader[1] = 0;
+		parameterHeader[2] = 0;
 	}
 
 	public int getSize() {

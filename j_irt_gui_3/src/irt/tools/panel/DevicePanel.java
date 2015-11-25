@@ -1,21 +1,5 @@
 package irt.tools.panel;
 
-import irt.controller.GuiController;
-import irt.data.DeviceInfo;
-import irt.data.listener.PacketListener;
-import irt.data.packet.LinkHeader;
-import irt.tools.panel.head.Panel;
-import irt.tools.panel.subpanel.DebugPanel;
-import irt.tools.panel.subpanel.InfoPanel;
-import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
-import irt.tools.panel.subpanel.control.ControlPanel;
-import irt.tools.panel.subpanel.control.ControlPanelSSPA;
-import irt.tools.panel.subpanel.control.ControlPanelUnit;
-import irt.tools.panel.subpanel.monitor.MonitorDownlinkRedundancySystem;
-import irt.tools.panel.subpanel.monitor.MonitorPanel;
-import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
-
 import java.awt.HeadlessException;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
@@ -34,6 +18,22 @@ import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.controller.GuiController;
+import irt.controller.interfaces.ControlPanel;
+import irt.data.DeviceInfo;
+import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
+import irt.tools.panel.head.Panel;
+import irt.tools.panel.subpanel.DebugPanel;
+import irt.tools.panel.subpanel.InfoPanel;
+import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
+import irt.tools.panel.subpanel.control.ControlPanelSSPA;
+import irt.tools.panel.subpanel.control.ControlPanelUnit;
+import irt.tools.panel.subpanel.monitor.MonitorDownlinkRedundancySystem;
+import irt.tools.panel.subpanel.monitor.MonitorPanel;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
+import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
 
 @SuppressWarnings("serial")
 public class DevicePanel extends Panel implements Comparable<DevicePanel>{
@@ -58,7 +58,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		return monitorPanel;
 	}
 
-	private MonitorPanelAbstract controlPanel;
+	private JPanel controlPanel;
 
 	protected int deviceType;
 
@@ -106,7 +106,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		
 	}
 
-	public MonitorPanelAbstract getControlPanel() {
+	public JPanel getControlPanel() {
 		return controlPanel;
 	}
 
@@ -166,7 +166,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		return monitorPanel;
 	}
 
-	protected MonitorPanelAbstract getNewControlPanel(){
+	protected JPanel getNewControlPanel(){
 		logger.error("deviceType: {}", deviceType);
 		MonitorPanelAbstract controlPanel;
 

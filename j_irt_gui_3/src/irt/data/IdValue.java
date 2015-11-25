@@ -1,6 +1,6 @@
 package irt.data;
 
-public class IdValue {
+public class IdValue implements Comparable<IdValue>{
 
 	private short id;
 	private Object value;
@@ -31,5 +31,10 @@ public class IdValue {
 	@Override
 	public int hashCode() {
 		return id;
+	}
+
+	@Override
+	public int compareTo(IdValue o) {
+		return id - o.id;
 	}
 }

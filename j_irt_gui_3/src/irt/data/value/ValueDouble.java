@@ -42,10 +42,6 @@ public class ValueDouble extends Value {
 		return nf;
 	}
 
-	public void setValue(double value) {
-		setValue(Math.round(value*factor));
-	}
-
 	@Override
 	public Value getCopy() {
 		return new ValueDouble(this);

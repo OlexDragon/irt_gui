@@ -17,8 +17,6 @@ import javax.swing.JTextArea;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.controller.DeviceDebugController;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;

@@ -36,7 +36,7 @@ public class ConfigurationSetter extends SetterAbstract {
 
 	/**
 	 * @param linkHeader - address
-	 * @param packetParameterHeaderCode by default set to Packet.IRT_SLCP_PARAMETER_25W_BAIS_CONFIGURATION_LO_FREQUENCIES
+	 * @param packetParameterHeaderCode by default set to Packet.IRT_SLCP_PARAMETER_25W_BIAS_CONFIGURATION_LO_FREQUENCIES
 	 */
 	public ConfigurationSetter(LinkHeader linkHeader) {
 		this(linkHeader,
@@ -64,7 +64,7 @@ public class ConfigurationSetter extends SetterAbstract {
 				logger.trace(pt.getClass().getSimpleName());
 				pt.preparePacket(PacketImp.PARAMETER_CONFIG_BUC_ENABLE, (byte) ((IdValue) value).getValue());
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
+			case PacketWork.PACKET_ID_CONFIGURATION_LO:
 				pt.preparePacket(PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR:

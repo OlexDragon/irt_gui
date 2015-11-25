@@ -38,7 +38,7 @@ public class LoController extends ControllerAbstract {
 			@Override
 			public void itemStateChanged(ItemEvent itemEvent) {
 				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-					((SetterAbstract)getPacketWork()).preparePacketToSend(new IdValue(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD, (byte) LoController.this.cbLoSelect.getSelectedIndex()));
+					((SetterAbstract)getPacketWork()).preparePacketToSend(new IdValue(PacketWork.PACKET_ID_CONFIGURATION_LO, (byte) LoController.this.cbLoSelect.getSelectedIndex()));
 					setSend(true);
 				}
 			}
@@ -96,7 +96,7 @@ public class LoController extends ControllerAbstract {
 				if(source instanceof ComboBoxModel){
 					cbLoSelect.setModel((ComboBoxModel<String>) source);
 
-					pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD);
+					pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_LO);
 					pw.setPacketParameterHeaderCode(PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET);
 					pt.preparePacket();
 				}else{

@@ -1,19 +1,14 @@
 package irt.tools.panel.ip_address;
 
-import irt.controller.text.document.DocumentsFactory;
-import irt.irt_gui.IrtGui;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,11 +23,13 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.controller.text.document.DocumentsFactory;
+import irt.irt_gui.IrtGui;
 
 
 public class IpAddressTextField extends GridbagPanel {
@@ -46,7 +43,7 @@ public class IpAddressTextField extends GridbagPanel {
 		try {
 			font = Font.createFont(Font.TRUETYPE_FONT, IrtGui.class.getResource("fonts/TAHOMA.TTF").openStream());
 			font = font.deriveFont(Font.PLAIN, 12f);
-		} catch (FontFormatException | IOException e) {
+		} catch (Exception e) {
 			logger.catching(e);
 		}
 	}
@@ -314,7 +311,7 @@ public class IpAddressTextField extends GridbagPanel {
 			            if (s.length() == 4){ // && textField.getCaretPosition() == 2) {
 			                textField.transferFocus();
 			            }
-					} catch (BadLocationException ex) {
+					} catch (Exception ex) {
 						logger.catching(ex);
 					}
 		    }

@@ -3,11 +3,13 @@ package irt.tools.panel;
 import java.awt.Font;
 
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -26,7 +28,6 @@ import irt.tools.panel.subpanel.RedundancyPanel;
 import irt.tools.panel.subpanel.RedundancyPanelDemo.REDUNDANCY_NAME;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
-import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 @SuppressWarnings("serial")
 public class UserPicobucPanel extends DevicePanel {
@@ -67,9 +68,9 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		if(deviceType>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD &&
-				deviceType<=DeviceInfo.DEVICE_TYPE_FUTURE_BAIS_BOARD &&
-				deviceInfo.getRevision()>1)
+		if(deviceType>=DeviceInfo.DEVICE_TYPE_BIAS_BOARD &&
+				deviceType<=DeviceInfo.DEVICE_TYPE_HPB_SSPA &&
+				(deviceType!=DeviceInfo.DEVICE_TYPE_BIAS_BOARD || deviceInfo.getRevision()>1))
 			showRedundant();
 			setRedundancyName();
 	}
@@ -143,8 +144,8 @@ public class UserPicobucPanel extends DevicePanel {
 	}
 
 	@Override
-	protected MonitorPanelAbstract getNewControlPanel() {
-		MonitorPanelAbstract controlPanel;
+	protected JPanel getNewControlPanel() {
+		JPanel controlPanel;
 
 		switch(deviceType){
 		case DeviceInfo.DEVICE_TYPE_DLRS:
@@ -162,7 +163,7 @@ public class UserPicobucPanel extends DevicePanel {
 	public void refresh() {
 		try{
 		super.refresh();
-		getControlPanel().refresh();
+		((Refresh)getControlPanel()).refresh();
 		getMonitorPanel().refresh();
 
 		int tabCount = tabbedPane.getTabCount();

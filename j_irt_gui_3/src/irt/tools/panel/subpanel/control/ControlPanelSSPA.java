@@ -10,7 +10,7 @@ import irt.controller.translation.Translation;
 import irt.data.packet.LinkHeader;
 
 @SuppressWarnings("serial")
-public class ControlPanelSSPA extends ControlPanel {
+public class ControlPanelSSPA extends ControlPanelImpl {
 
 	public ControlPanelSSPA(int deviceType, LinkHeader linkHeader, int flags) {
 		super(deviceType, linkHeader, (short)ActionFlags.FLAG_ATTENUATION.ordinal()|flags);

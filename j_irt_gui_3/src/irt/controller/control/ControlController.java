@@ -170,7 +170,7 @@ public class ControlController extends ControllerAbstract {
 			@Override
 			public void itemStateChanged(ItemEvent itemEvent) {
 				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-					((SetterAbstract)getPacketWork()).preparePacketToSend(new IdValue(PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD, (byte) ((IdValueForComboBox)comboBoxfreqSet.getSelectedItem()).getID()));
+					((SetterAbstract)getPacketWork()).preparePacketToSend(new IdValue(PacketWork.PACKET_ID_CONFIGURATION_LO, (byte) ((IdValueForComboBox)comboBoxfreqSet.getSelectedItem()).getID()));
 					setSend(true);
 				}
 			}

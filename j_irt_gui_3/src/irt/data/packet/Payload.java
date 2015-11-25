@@ -4,6 +4,7 @@ import irt.data.DacValue;
 import irt.data.DeviceId;
 import irt.data.RegisterValue;
 import irt.data.StringData;
+import irt.data.ToHex;
 import irt.data.value.Value;
 
 import java.util.Arrays;
@@ -45,6 +46,7 @@ public class Payload {
 	public Payload(ParameterHeader parameterHeader, byte[] buffer) {
 		this.parameterHeader = parameterHeader;
 		this.buffer = buffer;
+		parameterHeader.setSize((short) (buffer!=null ? buffer.length : 0));
 	}
 
 	public Payload() {
@@ -133,12 +135,6 @@ public class Payload {
 
 	public boolean isFlag(int pll)	{ return (buffer[buffer.length-1] & pll)!=0;}
 	public boolean isSet() 			{ return parameterHeader!=null;				}
-
-	@Override
-	public String toString() {
-		return "Payload [" + parameterHeader + ", buffer="
-				+ Arrays.toString(buffer) + "]";
-	}
 
 	public void add(int value) {
 		byte[] v = PacketImp.toBytes(value);
@@ -255,5 +251,10 @@ public class Payload {
 				result = PacketImp.concat(result, buffer);
 		}
 		return result;
+	}
+
+	@Override
+	public String toString() {
+		return "Payload [" + parameterHeader + ", buffer=" + ToHex.bytesToHex(buffer) + "]";
 	}
 }

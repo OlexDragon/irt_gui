@@ -1,24 +1,5 @@
 package irt.irt_gui;
 
-import irt.controller.AlarmsController;
-import irt.controller.DumpControllers;
-import irt.controller.GuiController;
-import irt.controller.GuiControllerAbstract;
-import irt.controller.serial_port.value.setter.Setter;
-import irt.controller.translation.Translation;
-import irt.data.Listeners;
-import irt.data.PacketWork;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketImp;
-import irt.tools.KeyValue;
-import irt.tools.panel.head.HeadPanel;
-import irt.tools.panel.head.IrtPanel;
-import irt.tools.panel.head.UnitsContainer;
-import irt.tools.panel.subpanel.progressBar.ProgressBar;
-import irt.tools.panel.wizards.address.AddressWizard;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -44,7 +25,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -69,6 +49,25 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
+import irt.controller.AlarmsController;
+import irt.controller.DumpControllers;
+import irt.controller.GuiController;
+import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.value.setter.Setter;
+import irt.controller.translation.Translation;
+import irt.data.Listeners;
+import irt.data.PacketWork;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketImp;
+import irt.tools.KeyValue;
+import irt.tools.panel.head.HeadPanel;
+import irt.tools.panel.head.IrtPanel;
+import irt.tools.panel.head.UnitsContainer;
+import irt.tools.panel.subpanel.progressBar.ProgressBar;
+import irt.tools.panel.wizards.address.AddressWizard;
+
 public class IrtGui extends IrtMainFrame {
 	private static final long serialVersionUID = 1611718189640547787L;
 
@@ -76,7 +75,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.092";
+	public static final String VERTION = "- 3.093";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -186,6 +185,7 @@ public class IrtGui extends IrtMainFrame {
 
 					int length = values.length-1;
 
+					if(values.length>0)
 					switch (keyEvent.getExtendedKeyCode()) {
 					case KeyEvent.VK_UP:
 						if (key < length)
@@ -448,7 +448,7 @@ public class IrtGui extends IrtMainFrame {
 			protected void done() {
 				try {
 					lblIrtTechnologies.setFont(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -506,7 +506,7 @@ public class IrtGui extends IrtMainFrame {
 			protected void done() {
 				try {
 					comboBoxLanguage.setModel(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 				KeyValue<String, String> keyValue = new KeyValue<>(GuiController.getPrefs().get("locale", "en_US"), null);
@@ -596,7 +596,7 @@ public class IrtGui extends IrtMainFrame {
 					Font f = get();
 					if(f!=null)
 						comboBoxLanguage.setFont(f);
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}

@@ -1,19 +1,18 @@
 package irt.tools.panel.subpanel.monitor;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Rectangle;
+
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
+
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Rectangle;
-import java.util.concurrent.ExecutionException;
-
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
 
 
 @SuppressWarnings("serial")
@@ -69,7 +68,7 @@ public class MonitorPanel extends MonitorPanelSSPA {
 				Font font = get();
 				lblInputPower.setFont(font);
 				lblInputPowerTxt.setFont(font);
-				}catch(InterruptedException | ExecutionException e){
+				}catch(Exception e){
 					logger.catching(e);
 				}
 			}
@@ -84,7 +83,7 @@ public class MonitorPanel extends MonitorPanelSSPA {
 			protected void done() {
 				try {
 					ledLock.setFont(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -104,7 +103,7 @@ public class MonitorPanel extends MonitorPanelSSPA {
 			protected void done() {
 				try {
 					ledLock.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}

@@ -1,8 +1,5 @@
 package irt.tools.panel.head;
 
-import irt.irt_gui.IrtGui;
-import irt.tools.label.ImageLabel;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
@@ -12,7 +9,6 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -22,6 +18,9 @@ import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import irt.irt_gui.IrtGui;
+import irt.tools.label.ImageLabel;
 
 @SuppressWarnings("serial")
 public class IrtPanel extends MainPanel {
@@ -121,7 +120,7 @@ public class IrtPanel extends MainPanel {
 			protected void done() {
 				try {
 					lblIrtTechnologies.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -148,7 +147,7 @@ public class IrtPanel extends MainPanel {
 					lblText.setFont(font);
 					lblShadow.setFont(font);
 
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}

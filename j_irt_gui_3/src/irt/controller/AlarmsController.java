@@ -20,6 +20,7 @@ import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract.Priority;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
@@ -33,7 +34,6 @@ public class AlarmsController extends ControllerAbstract {
 	public static final String OVER_CURRENT 	= "Over-Current";
 	public static final String PLL_OUT_OF_LOCK2 = "PLL Out Of Lock";
 
-	private static final int PRIORITY = 20;
 	public static final Color WARNING_COLOR = new Color(255, 204, 102);
 
 	public static final short  PLL_OUT_OF_LOCK_OR_OUTDOOR_FCM_HARDWARE_FAULT 	= 1,
@@ -369,7 +369,7 @@ public class AlarmsController extends ControllerAbstract {
 							linkHeader,
 							PacketImp.GROUP_ID_ALARM, ALARMS_STATUS,
 							PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT)
-			{ @Override public int getPriority() { return PRIORITY; }});
+			{ @Override public Priority getPriority() { return Priority.ALARM; }});
 
 			for(short sh:source)
 				switch(sh){
@@ -384,7 +384,7 @@ public class AlarmsController extends ControllerAbstract {
 											linkHeader,
 											PacketImp.GROUP_ID_ALARM, ALARMS_STATUS,
 											PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK)
-					{ @Override public int getPriority() { return PRIORITY; }});
+					{ @Override public Priority getPriority() { return Priority.ALARM; }});
 					break;
 
 				case OUTDOOR_FCM_NO_INPUT_SIGNAL:
@@ -396,7 +396,7 @@ public class AlarmsController extends ControllerAbstract {
 									linkHeader,
 									PacketImp.GROUP_ID_ALARM, ALARMS_STATUS,
 									PacketWork.PACKET_ID_ALARMS_OWER_CURRENT)
-					{ @Override public int getPriority() { return PRIORITY; }});
+					{ @Override public Priority getPriority() { return Priority.ALARM; }});
 					break;
 
 				case UNDER_CURRENT:
@@ -407,14 +407,14 @@ public class AlarmsController extends ControllerAbstract {
 									linkHeader,
 									PacketImp.GROUP_ID_ALARM, ALARMS_STATUS,
 									PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT)
-					{ @Override public int getPriority() { return PRIORITY; }});
+					{ @Override public Priority getPriority() { return Priority.ALARM; }});
 					break;
 
 				case OUTDOOR_FCM_OVER_TEMPERATURE_ALARM:
 				case WAVEGUIDE_SWITCH:
 				case OWER_TEMPERATURE:
 					setAlarmController("Alarm Ower Temperature", lblOwerTemperature, new Getter(linkHeader, PacketImp.GROUP_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE)
-					{ @Override public int getPriority() { return PRIORITY; }});
+					{ @Override public Priority getPriority() { return Priority.ALARM; }});
 					break;
 
 				case REDUNDANT_FAULT_OR_OUTDOOR_FCM_PLL_OUT_OF_LOCK:
@@ -422,10 +422,10 @@ public class AlarmsController extends ControllerAbstract {
 						if(lblRedundant!=null)
 							lblRedundant.getParent().setVisible(true);
 						setAlarmController("Alarm Redundant", lblRedundant, new Getter(linkHeader, PacketImp.GROUP_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT)
-						{ @Override public int getPriority() { return PRIORITY; }});
+						{ @Override public Priority getPriority() { return Priority.ALARM; }});
 					}else{
 						setAlarmController("Alarm PLL out of lock", lblPllOutOfLock, new Getter(linkHeader, PacketImp.GROUP_ID_ALARM, ALARMS_STATUS, PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT)
-						{ @Override public int getPriority() { return PRIORITY; }});
+						{ @Override public Priority getPriority() { return Priority.ALARM; }});
 					}
 				}
 

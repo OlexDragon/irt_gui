@@ -41,7 +41,7 @@ public class GuiControllerUser extends GuiControllerAbstract {
 	}
 
 	@Override
-	protected DevicePanel getNewBaisPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight,	int maxHeight) {
+	protected DevicePanel getNewBiasPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight,	int maxHeight) {
 		return new UserPicobucPanel(linkHeader, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 	}
 

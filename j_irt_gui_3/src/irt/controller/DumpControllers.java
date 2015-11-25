@@ -19,6 +19,7 @@ import irt.data.ToHex;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract.Priority;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
@@ -29,8 +30,6 @@ public class DumpControllers{
 //	private static final int MAX_FILE_QUANTITY = 50;
 //	private static final int MAX_FILE_SIZE = 5000;
 //	private static final String DUMP = "dump";
-
-	private static final int PRIORITY = 50;
 
 	public static final String DUMP_WAIT = "DUMP_WAIT";
 
@@ -113,9 +112,8 @@ public class DumpControllers{
 								AlarmsController.ALARMS_SUMMARY_STATUS,
 								PacketWork.PACKET_ID_ALARMS_SUMMARY)
 						{
-							private int p = PRIORITY;
-							@Override public int getPriority() {
-								return p;
+							@Override public Priority getPriority() {
+								return Priority.ALARM;
 							}
 						},
 						Style.CHECK_ALWAYS)
@@ -146,7 +144,7 @@ public class DumpControllers{
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE,
 						AlarmsController.OWER_TEMPERATURE,
-						PRIORITY),
+						Priority.ALARM),
 				waitTime,
 				"ALARMS_OWER_TEMPERATURE");
 
@@ -157,7 +155,7 @@ public class DumpControllers{
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT,
 						AlarmsController.HW_FAULT,
-						PRIORITY),
+						Priority.ALARM),
 				waitTime,
 				"ALARMS_HARDWARE_FAULT");
 
@@ -168,7 +166,7 @@ public class DumpControllers{
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_OWER_CURRENT,
 						AlarmsController.OWER_CURRENT,
-						PRIORITY),
+						Priority.ALARM),
 				waitTime,
 				"ALARMS_OWER_CURRENT");
 
@@ -179,7 +177,7 @@ public class DumpControllers{
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK,
 						AlarmsController.PLL_OUT_OF_LOCK_OR_OUTDOOR_FCM_HARDWARE_FAULT,
-						PRIORITY),
+						Priority.ALARM),
 				waitTime,
 				"ALARMS_PLL_OUT_OF_LOCK");
 
@@ -190,7 +188,7 @@ public class DumpControllers{
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT,
 						AlarmsController.UNDER_CURRENT,
-						PRIORITY),
+						Priority.ALARM),
 				waitTime,
 				"ALARMS_UNDER_CURRENT");
 
@@ -201,7 +199,7 @@ public class DumpControllers{
 						AlarmsController.ALARMS_STATUS,
 						PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT,
 						AlarmsController.REDUNDANT_FAULT_OR_OUTDOOR_FCM_PLL_OUT_OF_LOCK,
-						PRIORITY),
+						Priority.ALARM),
 				waitTime,
 				"ALARMS_REDUNDANT_FAULT");
 
@@ -212,7 +210,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0,
 						0,
-						PRIORITY-1),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_DEVICE_DEBAG_DEVICE_INFO_0");
 
@@ -224,7 +222,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1,
 						1,
-						PRIORITY-2),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_DEVICE_DEBAG_DEVICE_INFO_1");
 
@@ -236,7 +234,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2,
 						2,
-						PRIORITY-3),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_DEVICE_DEBAG_DEVICE_INFO_2");
 
@@ -247,7 +245,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3,
 						3,
-						PRIORITY-4),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_DEVICE_DEBAG_DEVICE_INFO_3");
 
@@ -258,7 +256,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4,
 						4,
-						PRIORITY-5),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_DEVICE_DEBAG_DEVICE_INFO_4");
 
@@ -269,7 +267,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
 						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10,
 						10,
-						PRIORITY-6),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_DEVICE_DEBAG_DEVICE_INFO_10");
 
@@ -280,7 +278,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_1,
 						1,
-						PRIORITY-7),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_1");
 
@@ -291,7 +289,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_2,
 						2,
-						PRIORITY-9),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_2");
 
@@ -302,7 +300,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_7,
 						7,
-						PRIORITY-11),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_7");
 
@@ -313,7 +311,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_3,
 						3,
-						PRIORITY-13),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_3");
 
@@ -324,7 +322,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_4,
 						4,
-						PRIORITY-14),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_4");
 
@@ -334,7 +332,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_5,
 						5,
-						PRIORITY-15),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_5");
 
@@ -345,7 +343,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_6,
 						6,
-						PRIORITY-16),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_6");
 
@@ -356,7 +354,7 @@ public class DumpControllers{
 						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 						PacketWork.PACKET_ID_DUMP_REGISTER_100,
 						100,
-						PRIORITY-17),
+						Priority.ALARM),
 				waitTime,
 				"DUMP_REGISTER_100");
 
@@ -365,7 +363,7 @@ public class DumpControllers{
 						PacketImp.GROUP_ID_CONFIGURATION,
 						PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
 						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT,
-						PRIORITY-18),
+						Priority.ALARM),
 				waitTime,
 				"REDUNDANCY_STAT");
 
@@ -378,7 +376,7 @@ public class DumpControllers{
 							PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_201,
 							201,
-							PRIORITY-8),
+							Priority.ALARM),
 					waitTime,
 					"DUMP_REGISTER_201");
 
@@ -389,7 +387,7 @@ public class DumpControllers{
 							PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_202,
 							202,
-							PRIORITY-10),
+							Priority.ALARM),
 					waitTime,
 					"DUMP_REGISTER_202");
 
@@ -400,7 +398,7 @@ public class DumpControllers{
 							PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_207,
 							207,
-							PRIORITY-12),
+							Priority.ALARM),
 					waitTime,
 					"DUMP_REGISTER_207");
 
@@ -411,13 +409,13 @@ public class DumpControllers{
 							PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
 							PacketWork.PACKET_ID_DUMP_REGISTER_220,
 							220,
-							PRIORITY-19),
+							Priority.ALARM),
 					waitTime,
 					"DUMP_REGISTER_220");
 		}
 	}
 
-	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, int value, final int priority) {
+	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, int value, final Priority priority) {
 		return new Getter(
 				linkHeader,
 				irtSlcpPacketId,
@@ -425,8 +423,8 @@ public class DumpControllers{
 				packetId,
 				value)
 		{
-			private int p = priority;
-			@Override public int getPriority() {
+			private Priority p = priority;
+			@Override public Priority getPriority() {
 				return p;
 			}
 			@Override
@@ -436,15 +434,15 @@ public class DumpControllers{
 		};
 	}
 
-	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, final int priority) {
+	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, final Priority priority) {
 		return new Getter(
 				linkHeader,
 				irtSlcpPacketId,
 				irtSlcpParameter,
 				packetId)
 		{
-			private int p = priority;
-			@Override public int getPriority() {
+			private Priority p = priority;
+			@Override public Priority getPriority() {
 				return p;
 			}
 			@Override

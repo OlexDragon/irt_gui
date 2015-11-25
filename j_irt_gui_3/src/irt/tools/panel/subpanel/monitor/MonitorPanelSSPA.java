@@ -1,5 +1,15 @@
 package irt.tools.panel.subpanel.monitor;
 
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
+
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -11,17 +21,6 @@ import irt.data.packet.Payload;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
-
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-
-import javax.swing.JLabel;
-import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
 
 @SuppressWarnings("serial")
 public class MonitorPanelSSPA extends MonitorPanelAbstract {
@@ -46,7 +45,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 	private int status;
 
 	public MonitorPanelSSPA(int deviceType, LinkHeader linkHeader) {
-		super(deviceType, linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 214, 210);
+		super(deviceType, linkHeader, Translation.getValue(String.class, "monitor", "IrtControllPanel"), 214, 210);
 		
 		isSSPA = getClass().equals(MonitorPanelSSPA.class);
 
@@ -105,7 +104,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 				try {
 					Font font = get();
 					ledMute.setFont(font);
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -129,7 +128,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 				}
 				lblTemperature.setFont(font);
 				lblTemperatureTxt.setFont(font);
-				}catch(InterruptedException | ExecutionException e){
+				}catch(Exception e){
 					logger.catching(e);
 				}
 			}
@@ -151,7 +150,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 			protected void done() {
 				try {
 					ledMute.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -163,7 +162,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		super.refresh();
 		logger.entry();
 
-		titledBorder.setTitle(Translation.getValue(String.class, "monitor", "Monitor"));
+		titledBorder.setTitle(Translation.getValue(String.class, "monitor", "IrtControllPanel"));
 
 		new TextWorker(ledMute, "mute", "MUTE").execute();
 		new TextWorker(lblOutputPowerTxt, "output_power", "Output Power").execute();
@@ -301,10 +300,9 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract {
 		protected void done() {
 			try {
 				label.setText(get());
-			} catch (InterruptedException | ExecutionException e) {
+			} catch (Exception e) {
 				logger.catching(e);
 			}
 		}
-		
 	}
 }

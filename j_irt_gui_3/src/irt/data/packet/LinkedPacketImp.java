@@ -58,4 +58,29 @@ public class LinkedPacketImp extends PacketImp implements LinkedPacket{
 		return linkHeader;
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((linkHeader == null) ? 0 : linkHeader.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (!(obj instanceof LinkedPacket))
+			return false;
+		LinkedPacket other = (LinkedPacket) obj;
+		if (linkHeader == null) {
+			if (other.getLinkHeader() != null)
+				return false;
+		} else if (!linkHeader.equals(other.getLinkHeader()))
+			return false;
+		return true;
+	}
+
 }

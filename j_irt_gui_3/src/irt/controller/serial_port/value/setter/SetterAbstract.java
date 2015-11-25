@@ -3,6 +3,7 @@ package irt.controller.serial_port.value.setter;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract.Priority;
 
 public abstract class SetterAbstract extends GetterAbstract{
 
@@ -38,7 +39,7 @@ public abstract class SetterAbstract extends GetterAbstract{
 	}
 
 	@Override
-	public int getPriority() {
-		return 1000;
+	public Priority getPriority() {
+		return Priority.COMMAND;
 	}
 }

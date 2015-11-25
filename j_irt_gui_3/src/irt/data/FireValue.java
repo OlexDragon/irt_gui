@@ -1,12 +1,12 @@
 package irt.data;
 
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
-
 import javax.swing.event.EventListenerList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
 
 	
 	public class FireValue implements Runnable{

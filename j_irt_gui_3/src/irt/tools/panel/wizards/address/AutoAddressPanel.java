@@ -31,6 +31,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract.Priority;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 
@@ -96,8 +97,8 @@ public class AutoAddressPanel extends JPanel {
 							linkHeader = new LinkHeader((byte)i, (byte)0, (short) 0);
 							packetWork = new Getter(linkHeader, PacketImp.GROUP_ID_ALARM, AlarmsController.ALARMS_SUMMARY_STATUS, PacketWork.PACKET_ID_ALARMS_SUMMARY) {
 								@Override
-								public int getPriority() {
-									return Integer.MAX_VALUE;
+								public Priority getPriority() {
+									return Priority.COMMAND;
 								}
 
 								@Override

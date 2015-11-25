@@ -50,7 +50,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 	private int mon_5v5 = Integer.MIN_VALUE;
 
 	public MonitorPanelConverter(int deviceType) {
-		super(deviceType, null, "Monitor", 214, 210);
+		super(deviceType, null, "IrtControllPanel", 214, 210);
 		
 		ledMute = new LED(Color.YELLOW, "MUTE");
 		ledMute.setName("Mute");
@@ -183,7 +183,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> controllers = new ArrayList<>();
 		DefaultController defaultController = getController(
-				"Monitor",
+				"IrtControllPanel",
 				PacketImp.PARAMETER_MEASUREMENT_FCM_ALL,
 				PacketWork.PACKET_ID_MEASUREMENT_ALL);
 		controllers.add(defaultController);

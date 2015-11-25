@@ -19,6 +19,9 @@ public class Range {
 			case 16:
 				minimum = pl.getLong(0);
 				maximum = pl.getLong(1);
+				break;
+			default:
+				throw new IllegalStateException();
 			}
 		}
 	}

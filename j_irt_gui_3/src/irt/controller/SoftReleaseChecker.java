@@ -1,11 +1,7 @@
 package irt.controller;
 
-import irt.data.DeviceInfo;
-import irt.data.RundomNumber;
-
 import java.awt.Color;
 import java.io.File;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -13,6 +9,9 @@ import javax.swing.JOptionPane;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+
+import irt.data.DeviceInfo;
+import irt.data.RundomNumber;
 
 public class SoftReleaseChecker extends Thread {
 
@@ -51,7 +50,7 @@ public class SoftReleaseChecker extends Thread {
 				Calendar calendar = simpleDateFormat.getCalendar();
 				try {
 					calendar.setTime(simpleDateFormat.parse(deviceInfo.getFirmwareBuildDate().toString()));
-				} catch (ParseException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 					JOptionPane.showMessageDialog(null, e.getLocalizedMessage());
 				}

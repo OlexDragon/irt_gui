@@ -60,12 +60,7 @@ public class DebugPanel extends JPanel{
 										PacketWork.PACKET_ID_CLEAR_STATISTICS,
 										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE,
 										0
-								){
-									@Override
-									public int getPriority() {
-										return 30;
-									}
-								},
+								),
 								Style.CHECK_ALWAYS){
 
 									@Override

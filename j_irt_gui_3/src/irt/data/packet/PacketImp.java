@@ -134,23 +134,27 @@ public class PacketImp implements Packet{
 	/* Configuration codes. */
 	public static final byte
 		PARAMETER_CONFIG_FCM_NONE = (IRT_SLCP_PARAMETER_NONE),
-		PARAMETER_CONFIG_FCM_GAIN				= 1,
-		PARAMETER_CONFIG_FCM_ATTENUATION			= 2,
-		PARAMETER_CONFIG_FCM_FREQUENCY			= 3,
-		PARAMETER_CONFIG_FCM_FREQUENCY_RANGE			= 4,
-		PARAMETER_CONFIG_FCM_GAIN_RANGE			= 5,
-		PARAMETER_CONFIG_FCM_ATTENUATION_RANGE	= 6,
-		PARAMETER_CONFIG_FCM_MUTE_CONTROL		= 7,
-		PARAMETER_CONFIG_BUC_ENABLE		= 8,
-		PARAMETER_CONFIG_FCM_FLAGS 				= 9,
-		PARAMETER_CONFIG_FCM_GAIN_OFFSET			= 10,
-		PARAMETER_CONFIG_FCM_ALC_ENABLED				= 12,
-		PARAMETER_CONFIG_FCM_ALC_LEVEL					= 13,
-		PARAMETER_CONFIG_FCM_ALC_LEVEL_RANGE			= 14,
-		PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER			= 14,
-		PARAMETER_CONFIG_FCM_ALC_OVERDRIVE_PROTECTION_ENABLED	= 15,
-		PARAMETER_CONFIG_FCM_ALC_OVERDRIVE_PROTECTION_THRESHOLD	= 16,
-		PARAMETER_CONFIG_FCM_ALC_OVERDRIVE_PROTECTION_THRESHOLD_RANGE= 17,
+		PARAMETER_CONFIG_FCM_GAIN										= 1,
+		PARAMETER_CONFIG_FCM_ATTENUATION								= 2,
+		PARAMETER_CONFIG_FCM_FREQUENCY									= 3,
+		PARAMETER_CONFIG_FCM_FREQUENCY_RANGE							= 4,
+		PARAMETER_CONFIG_FCM_GAIN_RANGE									= 5,
+		PARAMETER_CONFIG_ATTENUATION_RANGE								= 6,
+		PARAMETER_CONFIG_FCM_MUTE_CONTROL								= 7,
+		PARAMETER_CONFIG_BUC_ENABLE										= 8,
+		PARAMETER_CONFIG_FCM_FLAGS 										= 9,
+		PARAMETER_CONFIG_FCM_GAIN_OFFSET								= 10,
+		PARAMETER_CONFIG_FCM_ALC_ENABLED								= 12,
+		PARAMETER_CONFIG_FCM_ALC_LEVEL									= 13,
+		PARAMETER_CONFIG_FCM_ALC_RANGE									= 14,
+		PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER							= 14,
+		PARAMETER_CONFIG_FCM_ALC_OVERDRIVE_PROTECTION_ENABLED			= 15,
+		PARAMETER_CONFIG_FCM_ALC_OVERDRIVE_PROTECTION_THRESHOLD			= 16,
+		PARAMETER_CONFIG_FCM_ALC_OVERDRIVE_PROTECTION_THRESHOLD_RANGE	= 17,
+		PARAMETER_CONFIG_BUC_APC_ENABLE                					= 110,     /* APC enable */
+		PARAMETER_CONFIG_BUC_APC_LEVEL		          					= 111,     /* APC target power level */
+		PARAMETER_CONFIG_BUC_APC_RANGE        		  					= 112,     /* APC target power range */
+
 		PARAMETER_CONFIG_FCM_ALL = IRT_SLCP_PARAMETER_ALL;		/* Read all available parameters. */
 
 	/* Test. */
@@ -194,11 +198,11 @@ public class PacketImp implements Packet{
 	public static final byte IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET 		= 1,
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE 			= 2,
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN 			= 3,
-							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION 	= 4,
+							PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION 	= 4,
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE 	= 5,
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES	= 7,
-							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY = 8,
-							IRT_SLCP_PARAMETER_CONFIGURATION_PICOBUC_USER_FREQUENCY_RANGE = 9,
+							PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY = 8,
+							PARAMETER_CONFIGURATION_PICOBUC_USER_FREQUENCY_RANGE = 9,
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE	= 10,
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE	= 11,
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME	= 12,
@@ -328,7 +332,7 @@ public class PacketImp implements Packet{
 			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
 											GROUP_ID_CONFIGURATION,
 											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_ATTENUATION_RANGE,0,0});
+											PARAMETER_CONFIG_ATTENUATION_RANGE,0,0});
 			break;
 		case OPTYPE_CONFIG_SET_ATTENUATION:
 			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
@@ -503,6 +507,36 @@ public class PacketImp implements Packet{
 		bs[0] = (byte) (value>>8);
 
 		return bs;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = prime + ((header == null) ? 0 : header.getPacketId());
+		result = prime * result + ((payloads == null) ? 0 : payloads.get(0).getParameterHeader().getCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Packet))
+			return false;
+		Packet other = (Packet) obj;
+		if (header == null) {
+			if (other.getHeader() != null)
+				return false;
+		} else if (header.getPacketId()!=other.getHeader().getPacketId())
+			return false;
+		if (payloads == null) {
+			if (other.getPayloads() != null)
+				return false;
+		} else if (payloads.get(0).getParameterHeader().getCode()!=(other.getPayloads().get(0).getParameterHeader().getCode()))
+			return false;
+		return true;
 	}
 
 	@Override

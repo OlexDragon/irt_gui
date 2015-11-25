@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 public class Value extends Observable{
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = LogManager.getLogger();
 
 	public enum Status{
 				IN_RANGE,
@@ -27,7 +27,7 @@ public class Value extends Observable{
 	protected int factor;
 	protected String prefix;
 
-	private boolean error;
+	protected boolean error;
 
 	protected Value(){}
 
@@ -115,7 +115,29 @@ public class Value extends Observable{
 		setMaxValue(max);
 	}
 
-	public void setValue(long value) {
+	public void setValue(Object value){
+		if(value != null){
+			switch(value.getClass().getSimpleName()){
+			case "String":
+				setValue((String)value);
+				break;
+			case "Short":
+			case "Integer":
+			case "Long":
+				setValue(((Number)value).longValue());
+				break;
+			case "Double":
+				setValue((double)value);
+				break;
+			default:
+				throw new IllegalStateException("The class " + value.getClass().getSimpleName() + " is not acceptable");
+			}
+		}
+	}
+	private void setValue(Long value) {
+
+		if(value==null)
+			return;
 
 		if (this.value != value || value<minValue || value>maxValue) {
 			oldValue = this.value;
@@ -134,15 +156,16 @@ public class Value extends Observable{
 				this.value = value;
 				notifyObservers(Status.IN_RANGE);
 			}
-		}
+		}else
+			error = false;
 	}
 
-	public void setValue(String text) {
+	private void setValue(String text) {
 		setValue(parseLong(text));
 	}
 
-	public void setValue(double value) {
-		// TODO Auto-generated method stub
+	private void setValue(Double value) {
+		this.value = (long) (value * factor);
 	}
 
 	public long getValue() {
@@ -165,22 +188,33 @@ public class Value extends Observable{
 	}
 
 	public long parseLong(String text) {
-		long value = 0;
+
+		long value;
+
 		if(text==null || text.trim().isEmpty()){
+
+			value = this.value;
 			error = true;
 		}else{
+
 			text = text.toUpperCase().replaceAll("[^\\d.E-]", "");
 
 			if(!text.isEmpty() && Character.isDigit(text.charAt(text.length()-1)))
 				try {
+
 					value = Math.round(Double.parseDouble(text)*factor);
 					error = false;
-				} catch (NumberFormatException e) {
+
+				} catch (Exception e) {
+
+					value = this.value;
 					error = true;
 					logger.catching(e);
 				}
-			else
+			else{
+				value = this.value;
 				error = true;
+			}
 
 		}
 		return value;
@@ -259,7 +293,7 @@ public class Value extends Observable{
 	}
 
 	public boolean hasChanged() {
-		return oldValue!=null && !oldValue.equals(value);
+		return oldValue!=null && oldValue!=value;
 	}
 
 	public String getExponentialValue() {
@@ -272,13 +306,13 @@ public class Value extends Observable{
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return obj!=null ? obj.hashCode()==hashCode() : false;
+	public int hashCode() {
+		return new Long(value).hashCode();
 	}
 
 	@Override
-	public int hashCode() {
-		return new Long(value).hashCode();
+	public boolean equals(Object obj) {
+		return obj instanceof Value ? ((Value)obj).value==value : false;
 	}
 
 	@Override

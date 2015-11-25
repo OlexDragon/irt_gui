@@ -2,6 +2,10 @@ package irt.tools.panel.subpanel;
 
 import java.awt.GridLayout;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
@@ -22,10 +26,17 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 
 public class AlarmsPanel extends JPanel implements Refresh{
-
 	private static final long serialVersionUID = -3029893758378178725L;
 
 	protected final Logger logger = (Logger) LogManager.getLogger();
+
+	private final 	ComPortThreadQueue 		cptq 					= GuiControllerAbstract.getComPortThreadQueue();
+	private final 	ScheduledExecutorService scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
+	private final 	ScheduledFuture<?> 		scheduleAtFixedRate;
+	private final 	PacketSender 			alarmGetter 			= new PacketSender();
+
+	private final AlarmsIDsPacket packetWork;
+
 	private final byte 			linkAddr;
 	private final AlarmsPanel 	thisPanel;
 
@@ -35,51 +46,43 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		setLayout(new GridLayout(0, 1, 0, 0));
 		linkAddr = linkHeader!=null ? linkHeader.getAddr() : 0;
 
+		packetWork = new AlarmsIDsPacket(linkAddr);
+
 		addAncestorListener(new AncestorListener() {
 			public void ancestorMoved(AncestorEvent arg0) { }
 
 			public void ancestorAdded(AncestorEvent arg0) {
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
+				scheduleAtFixedRate.cancel(true);
 			}
 		});
 
-		new AlarmGetter();
-		new AlarmIDsListener();
+		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(alarmGetter, 1, 1000, TimeUnit.MILLISECONDS);
+		new AlarmIDsGetter();
 	}
 
 	@Override
 	public void refresh() {
 	}
 
-	//********************************   AlarmSetter   ******************************************
-	public class AlarmGetter extends Thread{
-
-		public AlarmGetter() {
-
-			int priority = getPriority();
-			if(priority>Thread.MIN_PRIORITY)
-				setPriority(--priority);
-			setDaemon(true);
-			start();
-		}
+	//********************************   PacketSender   ******************************************
+	private class PacketSender implements Runnable{
 
 		@Override
 		public void run() {
-			final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
-			comPortThreadQueue.add(new AlarmsIDsPacket(linkAddr));
 			
-			
+			cptq.add(packetWork);
+
 		}
 
 	}
 
 	//********************************   AlarmSetter   ******************************************
-	private class AlarmIDsListener implements PacketListener {
-		final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
+	private class AlarmIDsGetter implements PacketListener {
 
-		public AlarmIDsListener() {
-			comPortThreadQueue.addPacketListener(this);
+		public AlarmIDsGetter() {
+			cptq.addPacketListener(this);
 		}
 
 		@Override
@@ -110,6 +113,8 @@ public class AlarmsPanel extends JPanel implements Refresh{
 						final short[] ids = payload.getArrayShort();
 						for(Short id:ids)
 							publish(id);
+
+						scheduleAtFixedRate.cancel(true);
 					}
 
 				}else

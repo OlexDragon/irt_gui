@@ -1,7 +1,5 @@
 package irt.tools.panel.head;
 
-import irt.data.RundomNumber;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -9,10 +7,11 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import javax.swing.text.BadLocationException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import irt.data.RundomNumber;
 
 @SuppressWarnings("serial")
 public class Console extends JDialog {
@@ -86,7 +85,7 @@ public class Console extends JDialog {
 					if (lineCount > MAX_LINE_COUNT) {
 						try {
 							TEXT_AREA.replaceRange(null, TEXT_AREA.getLineStartOffset(0), TEXT_AREA.getLineEndOffset(10));
-						} catch (BadLocationException e) {
+						} catch (Exception e) {
 							logger.catching(e);
 						}
 					}

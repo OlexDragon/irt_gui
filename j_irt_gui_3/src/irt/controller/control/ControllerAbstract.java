@@ -96,7 +96,7 @@ public abstract class ControllerAbstract implements Runnable{
 						}else
 							wait();
 
-					} catch (InterruptedException e) {
+					} catch (Exception e) {
 						logger.catching(e);
 					}
 				}

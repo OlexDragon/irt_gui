@@ -1,17 +1,17 @@
 package irt.tools.panel;
 
+import java.awt.Color;
+
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+
 import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.subpanel.BIASsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
+import irt.tools.panel.subpanel.control.ControlPanelHPB;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
-import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-
-import java.awt.Color;
-
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 
 @SuppressWarnings("serial")
 public class PicobucPanel extends UserPicobucPanel {
@@ -23,14 +23,14 @@ public class PicobucPanel extends UserPicobucPanel {
 
 		tabbedPane = getTabbedPane();
 
-		JPanel baisPanel = new BIASsPanel(deviceType, linkHeader, true);
-		baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
-		tabbedPane.addTab("BAISs", baisPanel);
+		JPanel biasPanel = new BIASsPanel(deviceType, linkHeader, true);
+		biasPanel.setBackground(new Color(0xD1,0xD1,0xD1));
+		tabbedPane.addTab("BIASs", biasPanel);
 
 		if(deviceInfo.hasSlaveBiasBoard()){
-			baisPanel = new BIASsPanel(deviceType, linkHeader, false);
-			baisPanel.setBackground(new Color(0xD1,0xD1,0xD1));
-			tabbedPane.addTab("BAISs#2", baisPanel);
+			biasPanel = new BIASsPanel(deviceType, linkHeader, false);
+			biasPanel.setBackground(new Color(0xD1,0xD1,0xD1));
+			tabbedPane.addTab("BIASs#2", biasPanel);
 		}
 
 		JPanel converterPanel = new DACsPanel(deviceType, linkHeader);
@@ -42,12 +42,17 @@ public class PicobucPanel extends UserPicobucPanel {
 	}
 
 	@Override
-	protected MonitorPanelAbstract getNewControlPanel() {
-		MonitorPanelAbstract controlPanel;
+	protected JPanel getNewControlPanel() {
+		JPanel controlPanel;
 
 		switch(deviceType){
 		case DeviceInfo.DEVICE_TYPE_DLRS:
 			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+			break;
+		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_C:
+		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_KU:
+		case DeviceInfo.DEVICE_TYPE_HPB_SSPA:
+			controlPanel = new ControlPanelHPB(linkHeader.getAddr());
 			break;
 		default:
 			controlPanel = new ControlPanelPicobuc(deviceType, linkHeader);

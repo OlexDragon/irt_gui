@@ -36,7 +36,7 @@ import irt.data.value.ValueDouble;
 import irt.tools.CheckBox.SwitchBox;
 
 @SuppressWarnings("serial")
-public class ControlPanelPicobuc extends ControlPanelSSPA {
+public class ControlPanelPicobuc extends ControlPanelSSPA{
 
 	private SwitchBox switchBox;
 	private DefaultController alcEnableSetterController;
@@ -201,16 +201,16 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 		Getter alcRangeGetter = new Getter(
 				linkHeader,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				PacketImp.PARAMETER_CONFIG_FCM_ALC_LEVEL_RANGE,
-				PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE, logger){
+				PacketImp.PARAMETER_CONFIG_FCM_ALC_RANGE,
+				PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE, logger){
 
 					@Override
 					public boolean set(Packet packet) {
-						if(packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE){
+						if(packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE){
 							logger.debug(packet);
 							Payload payload = packet.getPayload(0);
 							if(payload!=null)
-								fireValueChangeListener(new ValueChangeEvent(new Range(payload), PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE));
+								fireValueChangeListener(new ValueChangeEvent(new Range(payload), PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE));
 						}
 						return false;
 					}
@@ -231,7 +231,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA {
 							
 							@Override
 							public void valueChanged(ValueChangeEvent valueChangeEvent) {
-								if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE && valueChangeEvent.getSource() instanceof Range){
+								if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE && valueChangeEvent.getSource() instanceof Range){
 									logger.debug(valueChangeEvent);
 									String prefix = Translation.getValue(String.class, "dbm", " dBm");
 

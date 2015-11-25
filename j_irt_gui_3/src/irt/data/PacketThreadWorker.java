@@ -18,7 +18,7 @@ public interface PacketThreadWorker{
 	void 	preparePacket(byte packetParameterHeaderCode, Object value);
 	void 	setDataPacketTypeCommand();
 	void 	setValue(Object source);
-	void 	setPriority(int priority);
+	void 	setPriority(int priority);		//function of java.lang.Thread
 	void 	preparePacket(byte value);
 
 }

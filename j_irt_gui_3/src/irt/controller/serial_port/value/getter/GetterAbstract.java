@@ -12,6 +12,7 @@ import irt.data.RegisterValue;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract.Priority;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
@@ -152,11 +153,11 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 	@Override
 	public int compareTo(PacketWork o) {
-		return getPriority()<o.getPriority() ? 1 : getPriority()>o.getPriority() ? -1 : 0;
+		return getPriority().compareTo(o.getPriority());
 	}
 
-	public int getPriority() {
-		return 0;
+	public Priority getPriority() {
+		return Priority.REQUEST;
 	}
 
 	public LinkHeader getLinkHeader() {

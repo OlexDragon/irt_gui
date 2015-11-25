@@ -34,7 +34,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
 	private JLabel labelLNB2Status;
 
 	public MonitorDownlinkRedundancySystem(int deviceType, LinkHeader linkHeader) {
-		super(deviceType, linkHeader, Translation.getValue(String.class, "monitor", "Monitor"), 250, 210);
+		super(deviceType, linkHeader, Translation.getValue(String.class, "monitor", "IrtControllPanel"), 250, 210);
 		
 		lblTemperature = new JLabel(":");
 		lblTemperature.setHorizontalAlignment(SwingConstants.RIGHT);

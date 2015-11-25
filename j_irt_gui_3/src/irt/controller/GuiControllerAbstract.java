@@ -28,7 +28,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.serial_port.ComPort;
-import irt.controller.serial_port.ComPortPriorities;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
@@ -43,6 +42,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract.Priority;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
@@ -149,7 +149,7 @@ public abstract class GuiControllerAbstract extends Thread {
 							protocol = Protocol.CONVERTER.setDeviceType(type);
 							break;
 						case DeviceInfo.DEVICE_TYPE_DLRS:
-						case DeviceInfo.DEVICE_TYPE_BAIS_BOARD:
+						case DeviceInfo.DEVICE_TYPE_BIAS_BOARD:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_PICOBUC_L_TO_C:
 						case DeviceInfo.DEVICE_TYPE_SSPA:
@@ -227,7 +227,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						break;
 					}
 				}
-			case "IrtPanel":
+			case "IrtControllPanel":
 				c.addMouseListener(new MouseListener() {
 
 					@Override
@@ -287,7 +287,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	protected abstract DevicePanel getConverterPanel(DeviceInfo di);
-	protected abstract DevicePanel getNewBaisPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
+	protected abstract DevicePanel getNewBiasPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
 
 	public static ComPortThreadQueue getComPortThreadQueue() {
 		return comPortThreadQueue;
@@ -440,8 +440,8 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			comPortThreadQueue.add(new DeviceInfoGetter() {
 				@Override
-				public int getPriority() {
-					return ComPortPriorities.INFO_CONVERTER;
+				public Priority getPriority() {
+					return Priority.ALARM;
 				}
 			});
 		}
@@ -455,8 +455,8 @@ public abstract class GuiControllerAbstract extends Thread {
 			for(Byte b:addresses.toArray(new Byte[addresses.size()])){
 				DeviceInfoGetter packetWork = new DeviceInfoGetter(new LinkHeader(b, (byte) 0, (short) 0)) {
 					@Override
-					public int getPriority() {
-						return ComPortPriorities.INFO_UNIT;
+					public Priority getPriority() {
+						return Priority.ALARM;
 					}
 				};
 				comPortThreadQueue.add(packetWork);
@@ -898,7 +898,7 @@ public abstract class GuiControllerAbstract extends Thread {
 				if (protocol == Protocol.CONVERTER)
 					unitPanel = getConverterPanel(deviceInfo);
 				else
-					unitPanel = getNewBaisPanel(linkHeader, deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
+					unitPanel = getNewBiasPanel(linkHeader, deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
 
 				unitsPanel.add(unitPanel);
 

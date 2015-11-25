@@ -23,11 +23,11 @@ public class DeviceInfo {
 	public static final int SUBTYPE_FIRST_BYTE 	= 8;
 	public static final int SIZE 				= 12;
 
-	public static final int DEVICE_TYPE_BAIS_BOARD		= 2,
+	public static final int DEVICE_TYPE_BIAS_BOARD		= 2,
 							DEVICE_TYPE_PICOBUC_L_TO_KU = 100,
 							DEVICE_TYPE_PICOBUC_L_TO_C 	= 101,
 							DEVICE_TYPE_SSPA 			= 102,
-							DEVICE_TYPE_FUTURE_BAIS_BOARD= 199,
+							DEVICE_TYPE_FUTURE_BIAS_BOARD= 199,
 							DEVICE_TYPE_HPB_L_TO_KU		= 200,
 							DEVICE_TYPE_HPB_L_TO_C		= 201,
 							DEVICE_TYPE_HPB_SSPA		= 202,
@@ -50,7 +50,7 @@ public class DeviceInfo {
 							DEVICE_TYPE_SSPA_CONVERTER = 1051,
 							DEVICE_TYPE_MODUL		= 1052;
 
-	public static final int DEVICE_TYPE_BAIS_BOARD_MODUL	= 2001;
+	public static final int DEVICE_TYPE_BIAS_BOARD_MODUL	= 2001;
 
 			private LinkHeader linkHeader;
 	private int type;
@@ -210,7 +210,7 @@ public class DeviceInfo {
 	}
 
 	public boolean hasSlaveBiasBoard() {
-		return 	getType()>=DeviceInfo.DEVICE_TYPE_BAIS_BOARD
+		return 	getType()>=DeviceInfo.DEVICE_TYPE_BIAS_BOARD
 				&& getType()<=DeviceInfo.DEVICE_TYPE_SSPA
 				&& getSubtype()>=10;
 	}

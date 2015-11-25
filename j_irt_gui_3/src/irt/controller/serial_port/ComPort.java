@@ -24,8 +24,8 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacket;
 import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.Packet;
-import irt.data.packet.PacketImp;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.tools.panel.head.Console;
@@ -116,7 +116,7 @@ public class ComPort extends SerialPort {
 		PacketThreadWorker pt = packetWork.getPacketThread();
 		try {
 			pt.join(500);
-		} catch (InterruptedException e1) {
+		} catch (Exception e1) {
 			logger.catching(e1);
 		}
 		Packet p = pt.getPacket();
@@ -205,9 +205,9 @@ do{
 
 								ev = parameterHeader.getSize();
 								logger.trace("parameterHeader.getSize()={}", ev);
-								if(parameterHeader.getCode()>30 || ev>2000){
+								if(parameterHeader.getCode()>300 || ev>2000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
-									logger.warn("parameterHeader.getCode()>30 || ev>2000");
+									logger.error("parameterHeader.getCode()>300({}) || ev>2000({})", parameterHeader.getCode(), ev);
 									break;
 								}
 								Console.appendLn("", "Payload ");
@@ -451,7 +451,7 @@ do{
 				synchronized (this) {
 					wait(waitTime);
 				}
-			} catch (InterruptedException e) {
+			} catch (Exception e) {
 				logger.catching(e);
 			}
 
@@ -537,7 +537,7 @@ do{
 
 				try {
 					wait(waitTimeL);
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 
@@ -619,7 +619,7 @@ do{
 		ComPort.baudrate = baudrate;
 		try {
 			setBaudrate();
-		} catch (SerialPortException e) {
+		} catch (Exception e) {
 			logger.catching(e);
 		}
 	}

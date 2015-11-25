@@ -68,7 +68,7 @@ public class DemoPanel extends Panel {
 		Font font = Translation.getFont();
 		monitorTitledBorder = new TitledBorder(
 				UIManager.getBorder("TitledBorder.border"),
-				Translation.getValue(String.class, "monitor", "Monitor"),
+				Translation.getValue(String.class, "monitor", "IrtControllPanel"),
 				TitledBorder.LEADING,
 				TitledBorder.TOP,
 				font ,
@@ -365,7 +365,7 @@ public class DemoPanel extends Panel {
 	public void refresh() {
 		super.refresh();
 
-		monitorTitledBorder.setTitle(Translation.getValue(String.class, "monitor", "Monitor"));
+		monitorTitledBorder.setTitle(Translation.getValue(String.class, "monitor", "IrtControllPanel"));
 		Font font =Translation.getFont();
 		monitorTitledBorder.setTitleFont(font);
 		controlTitledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));

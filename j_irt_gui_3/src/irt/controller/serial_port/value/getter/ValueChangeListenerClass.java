@@ -1,14 +1,16 @@
 package irt.controller.serial_port.value.getter;
 
-import irt.data.FireValue;
-import irt.data.RundomNumber;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.event.EventListenerList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import irt.data.FireValue;
+import irt.data.event.ValueChangeEvent;
+import irt.data.listener.ValueChangeListener;
 
 
 public class ValueChangeListenerClass {
@@ -16,9 +18,11 @@ public class ValueChangeListenerClass {
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	private EventListenerList valueChangeListeners = new EventListenerList();
+	protected 	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
+	private 	final 	EventListenerList 			valueChangeListeners 	= new EventListenerList();
 
 	public void addVlueChangeListener(ValueChangeListener valueChangeListener) {
+
 		valueChangeListeners.add(ValueChangeListener.class, valueChangeListener);
 	}
 
@@ -28,16 +32,8 @@ public class ValueChangeListenerClass {
 	}
 
 	public void fireValueChangeListener(ValueChangeEvent valueChangeEvent) {
-		logger.trace("fireValueChangeListener(ValueChangeEvent {});", valueChangeListeners);
 
-		Thread t = new Thread(new FireValue(valueChangeListeners, valueChangeEvent), ValueChangeListenerClass.this.getClass().getSimpleName()+".FireValue-"+new RundomNumber().toString());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
-
-//		System.out.println("Class-"+getClass().getSimpleName()+" Fire valueChangeEvent: "+valueChangeEvent);
+		scheduledThreadPool.execute(new FireValue(valueChangeListeners, valueChangeEvent));
 	}
 
 	public void removeVlueChangeListeners() {

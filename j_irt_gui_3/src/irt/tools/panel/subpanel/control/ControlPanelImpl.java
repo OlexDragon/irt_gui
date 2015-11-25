@@ -13,7 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -37,6 +36,7 @@ import irt.controller.GuiController;
 import irt.controller.control.ControlController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.interfaces.ControlPanel;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.IdValue;
@@ -51,7 +51,7 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 
 @SuppressWarnings("serial")
-public class ControlPanel extends MonitorPanelAbstract {
+public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPanel {
 
 	public enum ActionFlags{
 		FLAG_ATTENUATION,
@@ -82,9 +82,9 @@ public class ControlPanel extends MonitorPanelAbstract {
 	private int flags;
 
 	@SuppressWarnings("unused")
-	public ControlPanel(final int deviceType, LinkHeader linkHeader, int flags) {
+	public ControlPanelImpl(final int deviceType, LinkHeader linkHeader, int flags) {
 		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
-		setName("ControlPanel");
+		setName("ControlPanelImpl");
 
 		Font font = Translation.getFont();			
 
@@ -136,7 +136,7 @@ public class ControlPanel extends MonitorPanelAbstract {
 			protected void done() {
 				try {
 					lblMute.setBounds(get());
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}
@@ -324,16 +324,16 @@ public class ControlPanel extends MonitorPanelAbstract {
 		ActionFlags a = ActionFlags.values()[control];
 		switch(a){
 		case FLAG_GAIN:
-			t = new Thread(controller =  getNewGainController(), "ControlPanel.GainController-"+new RundomNumber());
+			t = new Thread(controller =  getNewGainController(), "ControlPanelImpl.GainController-"+new RundomNumber());
 			break;
 		case FLAG_FREQUENCY:
-			t = new Thread(controller = getNewFreqController(), "ControlPanel.FreqController-"+new RundomNumber());
+			t = new Thread(controller = getNewFreqController(), "ControlPanelImpl.FreqController-"+new RundomNumber());
 			break;
 		case FLAG_ALC:
-			t = new Thread(controller = getNewAlcController(), "ControlPanel.AlcController-"+new RundomNumber());
+			t = new Thread(controller = getNewAlcController(), "ControlPanelImpl.AlcController-"+new RundomNumber());
 			break;
 		default:
-			t = new Thread(controller = getNewAttenController(), "ControlPanel.AttenController-"+new RundomNumber());
+			t = new Thread(controller = getNewAttenController(), "ControlPanelImpl.AttenController-"+new RundomNumber());
 		}
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

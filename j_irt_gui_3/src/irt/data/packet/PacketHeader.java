@@ -27,12 +27,12 @@ public class PacketHeader{
 	private short 	reserved;	4,5
 	private byte 	code; 		6
 */
-	public byte[]	toBytes()		{ return packetHeader;		}
-	public byte		getPacketType	()		{ return packetHeader[0];	}
-	public short	getPacketId()	{ return (short) PacketImp.shiftAndAdd(new byte[]{packetHeader[1], packetHeader[2]});	}
-	public byte		getGroupId()	{ return packetHeader[3];	}
-	public short	getReserved()	{ return (short) PacketImp.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6));	}
-	public byte		getOption()		{ return packetHeader[6];	}
+	public byte[]	toBytes		()	{ return packetHeader;		}
+	public byte		getPacketType()	{ return packetHeader[0];	}
+	public short	getPacketId	()	{ return (short) PacketImp.shiftAndAdd(new byte[]{packetHeader[1], packetHeader[2]});	}
+	public byte		getGroupId	()	{ return packetHeader[3];	}
+	public short	getReserved	()	{ return (short) PacketImp.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6));	}
+	public byte		getOption	()	{ return packetHeader[6];	}
 
 	public byte[] set(byte[]data){
 		if(data!=null && data.length>=SIZE)
@@ -199,8 +199,8 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE:
 				packetIdStr = "FrequencyRange("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION_LO_BIAS_BOARD:
-				packetIdStr = "LO Bais Board("+packetId+")";
+			case PacketWork.PACKET_ID_CONFIGURATION_LO:
+				packetIdStr = "LO Bias Board("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES:
 				packetIdStr = "LO Frequencies("+packetId+")";

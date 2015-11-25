@@ -1,6 +1,7 @@
 
 package irt.data.packet;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import irt.data.PacketThread;
@@ -10,35 +11,36 @@ import irt.data.listener.ValueChangeListener;
 
 public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPacket{
 
-	private int priority;
+	private Priority priority;
 
 	private final LinkHeader linkHeader;
 	private final PacketHeader header;
 	private final Payload payload;
 
-	protected PacketAbstract(byte addr, byte packetType, byte groupId, byte command, Short alarmId, int priority){
-		linkHeader = new LinkHeader(addr, (byte)0, (short)0);
+	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte command, Number parameterId, Priority priority){
+		linkHeader = new LinkHeader(linkAddr, (byte)0, (short)0);
 		header = new PacketHeader();
 		header.setType(packetType);
 		header.setGroupId(groupId);
-		header.setPacketId((short) PacketImp.shiftAndAdd(addr, command));
-		payload = new Payload( new ParameterHeader( command, PacketImp.toBytes((short)2)), alarmId!=null ? PacketImp.toBytes(alarmId) : null );
+		header.setPacketId(packetId);
+		payload = new Payload( new ParameterHeader( command), parameterId!=null ? PacketImp.toBytes(parameterId) : null );
 		this.priority = priority;
 	}
 
 	@Override
 	public int compareTo(PacketWork packetWork) {
-		return Integer.compare(priority, packetWork.getPriority());
+		return priority.compareTo(packetWork.getPriority());
 	}
 
 	@Override
-	public int getPriority() {
+	public Priority getPriority() {
 		return priority;
 	}
 
-	@Override
+	@Override	// function of java.lang.Thread
 	public void setPriority(int priority) {
-		this.priority = priority;
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
@@ -172,14 +174,15 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public List<Payload> getPayloads() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		final ArrayList<Payload> arrayList = new ArrayList<>();
+		if(payload!=null)
+			arrayList.add(payload);
+		return arrayList;
 	}
 
 	@Override
 	public Payload getPayload(int i) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		return payload;
 	}
 
 	@Override
@@ -189,16 +192,8 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	}
 
 	@Override
-	public String toString() {
-		return "\n\t" + getClass().getSimpleName()
-				+ " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payload="
-				+ payload + "]";
-	}
-
-	@Override
 	public byte[] toBytes() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		return getData();
 	}
 
 	@Override
@@ -211,5 +206,55 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	public Payload getPayload(byte parameterId) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = prime + ((header == null) ? 0 : header.getPacketId());
+		result = prime * result + ((payload == null) ? 0 : payload.getParameterHeader().getCode());
+		return prime * result + ((linkHeader == null) ? 0 : linkHeader.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+
+		if (!(obj instanceof LinkedPacket))
+			return false;
+		LinkedPacket other = (LinkedPacket) obj;
+		if (header == null) {
+			if (other.getHeader() != null)
+				return false;
+		} else if (header.getPacketId()!=other.getHeader().getPacketId())
+			return false;
+		if (linkHeader == null) {
+			if (other.getLinkHeader() != null)
+				return false;
+		} else if (!linkHeader.equals(other.getLinkHeader()))
+			return false;
+		if (payload == null) {
+			if (other.getPayloads().isEmpty())
+				return false;
+		} else if (payload.getParameterHeader().getCode()!=(other.getPayloads().get(0).getParameterHeader().getCode()))
+			return false;
+		
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "\n\t" + getClass().getSimpleName()
+				+ " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payload=" + payload + "]";
+	}
+
+	public enum Priority {
+		REQUEST,
+		RANGE,
+		ALARM,
+		COMMAND
 	}
 }

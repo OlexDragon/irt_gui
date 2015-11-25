@@ -103,7 +103,7 @@ public class ComPortThreadQueue extends Thread {
 					logger.warn("comPortQueue is FULL");
 			else
 				logger.warn("packetWork!=null");
-		} catch (IllegalStateException e) {
+		} catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:add");
 		}

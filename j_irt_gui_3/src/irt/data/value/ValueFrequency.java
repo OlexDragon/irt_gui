@@ -47,31 +47,39 @@ public class ValueFrequency extends Value {
 	@Override
 	public long parseLong(String text) {
 
-		int multiplier = 1;
-		text = text.toUpperCase();
-		String str = text.replaceAll("[\\d., +]", "");
+		long result;
+		if (text == null || text.trim().isEmpty()) {
+			result = value;
+			error = true;
+		} else {
 
-		if (!str.isEmpty())
-			switch(str.charAt(0)){
-			case 'K':
-				multiplier = 1000;
-				break;
-			case 'M':
-				multiplier = 1000000;
-				break;
-			case 'G':
-				multiplier = 1000000000;
-				break;
-			case 'E':
-				String[] split = text.split("E");
-				text = split[0];
-				str = split[1].replaceAll("[^\\d.-]", "");
-				multiplier = (int) Math.round(Math.pow(10, Integer.parseInt(str)));
-			}
+			int multiplier = 1;
+			text = text.toUpperCase();
+			String str = text.replaceAll("[\\d., +]", "");
 
-		text = text.replaceAll("[^\\d.-]", "");
+			if (!str.isEmpty())
+				switch (str.charAt(0)) {
+				case 'K':
+					multiplier = 1000;
+					break;
+				case 'M':
+					multiplier = 1000000;
+					break;
+				case 'G':
+					multiplier = 1000000000;
+					break;
+				case 'E':
+					String[] split = text.split("E");
+					text = split[0];
+					str = split[1].replaceAll("[^\\d.-]", "");
+					multiplier = (int) Math.round(Math.pow(10, Integer.parseInt(str)));
+				}
 
-		return text.isEmpty() ? 0 : Math.round(Double.parseDouble(text)*multiplier);
+			text = text.replaceAll("[^\\d.-]", "");
+
+			result = text.isEmpty() ? 0 : Math.round(Double.parseDouble(text) * multiplier);
+		}
+		return result;
 	}
 
 	@Override

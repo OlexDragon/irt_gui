@@ -2,6 +2,7 @@ package irt.data;
 
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract.Priority;
 
 public interface PacketWork extends Comparable<PacketWork>{
 
@@ -24,7 +25,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 							PACKET_ID_MEASUREMENT_SNB2_STATUS 				= 181,
 							PACKET_ID_MEASUREMENT_WGS_POSITION 				= 182;
 
-	public static final short 	PACKET_ID_CONFIGURATION_LO_BIAS_BOARD		= 20,
+	public static final short 	PACKET_ID_CONFIGURATION_LO		= 20,
 								PACKET_ID_CONFIGURATION_LO_FREQUENCIES 		= 21,
 								PACKET_ID_CONFIGURATION_MUTE 				= 22,
 								PACKET_ID_CONFIGURATION_GAIN				= 23,
@@ -46,7 +47,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_CONFIGURATION_ALC_ENABLE			= 39,
 								PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND	= 170,
 								PACKET_ID_CONFIGURATION_ALC_LEVEL			= 171,
-								PACKET_ID_CONFIGURATION_ALC_LEVEL_RANGE		= 172,
+								PACKET_ID_CONFIGURATION_ALC_RANGE			= 172,
 								PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER= 173,
 								PACKET_ID_CONFIGURATION_SET_DLRS_WGS_SWITCHOVER = 174;
 
@@ -133,7 +134,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 	/*		reserved for configuration from 170 to 179		*/
 	/*		reserved for measurement from 180 to 189		*/
 
-	public int 					getPriority();
+	public Priority 			getPriority();
 	public PacketThreadWorker 	getPacketThread();
 	public void 				addVlueChangeListener(ValueChangeListener valueChangeListener);
 	public void 				removeVlueChangeListener(ValueChangeListener valuechangelistener);

@@ -5,7 +5,7 @@ import irt.data.DeviceInfo;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9;
 import irt.tools.panel.subpanel.PLLsPanel;
-import irt.tools.panel.subpanel.control.ControlPanel;
+import irt.tools.panel.subpanel.control.ControlPanelImpl;
 import irt.tools.panel.subpanel.control.ControlPanelConverter;
 import irt.tools.panel.subpanel.control.ControlPanelDownConverter;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
@@ -58,7 +58,7 @@ public class ConverterPanel extends DevicePanel {
 	}
 
 	@Override
-	protected ControlPanel getNewControlPanel() {
+	protected ControlPanelImpl getNewControlPanel() {
 		ControlPanelConverter controlPanel = hasDcOutput ? new ControlPanelDownConverter(deviceType) : new ControlPanelConverter(deviceType, hasFreqSet);
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
