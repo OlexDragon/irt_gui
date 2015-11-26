@@ -313,16 +313,21 @@ public class DeviceDebugController extends ControllerAbstract {
 
 		txtActionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String s = DeviceDebugController.this.txtField.getText().replaceAll("\\D", "");
-				int value;
+				try{
+					String s = DeviceDebugController.this.txtField.getText().replaceAll("\\D", "");
+					int value;
 
-				if(s.length()>0){
-					value = Integer.parseInt(s);
-				}else
-					value = 0;
+					if (s.length() > 0) {
+						value = Integer.parseInt(s);
+					} else
+						value = 0;
 
-				DeviceDebugController.this.slider.setValue(value);
-				setValue(DeviceDebugController.this.slider.getValue());
+					DeviceDebugController.this.slider.setValue(value);
+					setValue(DeviceDebugController.this.slider.getValue());
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
+
 			}
 		};
 	}

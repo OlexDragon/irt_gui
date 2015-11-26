@@ -9,7 +9,7 @@ import irt.data.value.ValueFrequency;
 public class FrequencySet extends DescriptionPacketValueImpl {
 
 	public FrequencySet( byte linkAddr) {
-		super("Frequency", new FrequencyRangePacket(linkAddr), new FrequencyPacket(linkAddr, null));
+		super("frequency", new FrequencyRangePacket(linkAddr), new FrequencyPacket(linkAddr, null));
 	}
 
 	@Override

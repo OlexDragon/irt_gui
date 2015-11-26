@@ -100,9 +100,13 @@ public class ComPort extends SerialPort {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 
-				Console.appendLn("Timeout", "Timer");
-				synchronized (ComPort.this) {
-					closePort();
+				try{
+					Console.appendLn("Timeout", "Timer");
+					synchronized (ComPort.this) {
+						closePort();
+					}
+				}catch(Exception ex){
+					logger.catching(ex);
 				}
 			}
 		});

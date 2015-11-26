@@ -137,7 +137,8 @@ public class AlarmField extends JPanel {
 									
 									@Override
 									public void run() {
-										lblTitle.setText(payload.getStringData().toString());
+										final String text = payload.getStringData().toString();
+										lblTitle.setText(Translation.getValue(String.class, text, text));
 									}
 								});
 							}

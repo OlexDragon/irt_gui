@@ -58,7 +58,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			}
 		});
 
-		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(alarmGetter, 1, 1000, TimeUnit.MILLISECONDS);
+		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(alarmGetter, 1, 1, TimeUnit.MILLISECONDS);
 		new AlarmIDsGetter();
 	}
 
@@ -103,22 +103,25 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		@Override
 		protected Void doInBackground() throws Exception {
 
-			if(packet!=null && packet.getHeader().getGroupId()==PacketImp.GROUP_ID_ALARM)
-				if(packet.getHeader().getOption()==PacketImp.NO_ERROR){
-					final Payload payload = packet.getPayload(0);
+			synchronized (logger) {
+				if(!scheduleAtFixedRate.isCancelled())
+					if(packet!=null && packet.getHeader().getGroupId()==PacketImp.GROUP_ID_ALARM)
+						if(packet.getHeader().getOption()==PacketImp.NO_ERROR){
+							final Payload payload = packet.getPayload(0);
 
-					if(payload.getParameterHeader().getCode()==PacketImp.ALARMS_IDs){
-						logger.trace(packet);
+							if(payload.getParameterHeader().getCode()==PacketImp.ALARMS_IDs){
+								logger.trace(packet);
 
-						final short[] ids = payload.getArrayShort();
-						for(Short id:ids)
-							publish(id);
+								final short[] ids = payload.getArrayShort();
+								for(Short id:ids)
+									publish(id);
 
-						scheduleAtFixedRate.cancel(true);
-					}
+								scheduleAtFixedRate.cancel(true);
+							}
 
-				}else
-					logger.warn("\n\t The Packet has error: {}", packet);
+						}else
+							logger.warn("\n\t The Packet has error: {}", packet);
+			}
 			return null;
 		}
 

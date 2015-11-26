@@ -86,7 +86,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
 		setName("ControlPanelImpl");
 
-		Font font = Translation.getFont();			
+		Font font = Translation.getFont();
 
 		this.flags = flags;
 		hasFreqSet = (flags & (short)ActionFlags.FLAG_FREQUENCY_SET.ordinal())>0;
@@ -370,8 +370,8 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f));
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
-		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
 		btnMute.setToolTipText(muteText);
+		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
 		btnMute.setSize(size, size);
 		btnMute.setLocation(getMuteButtonPosition());
 

@@ -98,8 +98,12 @@ public class AddressWizard extends JDialog implements Refresh{
 		btnBack = new JButton("<"+Translation.getValue(String.class, "back", "Back"));
 		btnBack.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				nextPanel = Selection.SELECT;
-				showPanel();
+				try {
+					nextPanel = Selection.SELECT;
+					showPanel();
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		toolBar.add(btnBack);
@@ -107,47 +111,49 @@ public class AddressWizard extends JDialog implements Refresh{
 		btnNext = new JButton(Translation.getValue(String.class, "next", "Next")+">");
 		btnNext.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				logger.trace(visiblePanel);
-				new SwingWorker<Void, Void>() {
+				try {
+					logger.trace(visiblePanel);
+					new SwingWorker<Void, Void>() {
 
-					@Override
-					protected Void doInBackground() throws Exception {
-						switch(visiblePanel){
-						case DEFAULT:
-							break;
-						case AUTO:
-							break;
-						case MANUALLY:
-							manualActionPerformed();
-							break;
-						case SELECT:
-							selectActionPerformed();
-						case NON:
+						@Override
+						protected Void doInBackground() throws Exception {
+							switch (visiblePanel) {
+							case DEFAULT:
+								break;
+							case AUTO:
+								break;
+							case MANUALLY:
+								manualActionPerformed();
+								break;
+							case SELECT:
+								selectActionPerformed();
+							case NON:
+							}
+							showPanel();
+							return null;
 						}
-						showPanel();
-						return null;
-					}
 
-					private void selectActionPerformed() {
-						nextPanel = styleSelectorPanel.getSelection();
-						if(nextPanel==Selection.NON){
-							boolean addresses = prefs.get(REDUNDANCY_ADDRESSES, null)!=null;
-							if(addresses
-									&& JOptionPane.showConfirmDialog(
-										owner,
-										"Do you really want to delete addresses "+addresses,"Delete Adddresses",
-										JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION)
-								prefs.remove(REDUNDANCY_ADDRESSES);
+						private void selectActionPerformed() {
+							nextPanel = styleSelectorPanel.getSelection();
+							if (nextPanel == Selection.NON) {
+								boolean addresses = prefs.get(REDUNDANCY_ADDRESSES, null) != null;
+								if (addresses && JOptionPane.showConfirmDialog(owner,
+										"Do you really want to delete addresses " + addresses, "Delete Adddresses",
+										JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION)
+									prefs.remove(REDUNDANCY_ADDRESSES);
 
-							EventQueue.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									setVisible(false);
-								}
-							});
+								EventQueue.invokeLater(new Runnable() {
+									@Override
+									public void run() {
+										setVisible(false);
+									}
+								});
+							}
 						}
-					}
-				}.execute();
+					}.execute();
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 
 			private void manualActionPerformed() {

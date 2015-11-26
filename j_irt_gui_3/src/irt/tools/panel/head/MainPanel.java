@@ -10,8 +10,13 @@ import java.awt.event.MouseEvent;
 import javax.swing.JFrame;
 import javax.swing.Timer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 @SuppressWarnings("serial")
 public class MainPanel extends IrtStylePanel {
+
+	private final Logger logger = LogManager.getLogger();
 
 	private final int PANEL_WIDTH;
 
@@ -63,6 +68,7 @@ public class MainPanel extends IrtStylePanel {
 
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
+					try{
 					int width = getWidth();
 
 					setSize(width+(increase ? 8 : -8), getHeight());
@@ -73,6 +79,9 @@ public class MainPanel extends IrtStylePanel {
 							setUnvisible();
 						else
 							setSize(PANEL_WIDTH, getHeight());
+					}
+					}catch(Exception ex){
+						logger.catching(ex);
 					}
 				}
 

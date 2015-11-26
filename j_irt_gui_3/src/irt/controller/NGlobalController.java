@@ -47,20 +47,24 @@ public class NGlobalController extends ControllerAbstract {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SetterAbstract as = (SetterAbstract) getPacketWork();
-				PacketThreadWorker pt = as.getPacketThread();
-				if(pt.getPacket()==null)
-					return;
-				RegisterValue rv = ((RegisterValue)pt.getValue());
-				Value v = rv.getValue();
+				try {
+					SetterAbstract as = (SetterAbstract) getPacketWork();
+					PacketThreadWorker pt = as.getPacketThread();
+					if (pt.getPacket() == null)
+						return;
+					RegisterValue rv = ((RegisterValue) pt.getValue());
+					Value v = rv.getValue();
 
-				if(v==null)
-					rv.setValue(new Value(NGlobalController.this.checkBox.isSelected() ? 1 : 0, 0, 1, 0));
-				else
-					v.setValue(NGlobalController.this.checkBox.isSelected() ? 1 : 0);
+					if (v == null)
+						rv.setValue(new Value(NGlobalController.this.checkBox.isSelected() ? 1 : 0, 0, 1, 0));
+					else
+						v.setValue(NGlobalController.this.checkBox.isSelected() ? 1 : 0);
 
-				as.preparePacketToSend(rv);
-				setSend(true);
+					as.preparePacketToSend(rv);
+					setSend(true);
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		};
 	}

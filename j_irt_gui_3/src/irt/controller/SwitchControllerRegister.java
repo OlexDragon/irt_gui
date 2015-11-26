@@ -43,21 +43,26 @@ public class SwitchControllerRegister extends ControllerAbstract {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SetterAbstract as = (SetterAbstract) getPacketWork();
-				if(as!=null){
-					PacketThreadWorker pt = as.getPacketThread();
-					if(pt.getPacket()!=null){
-						RegisterValue rv = ((RegisterValue)pt.getValue());
-						Value v = rv.getValue();
+				try {
+					SetterAbstract as = (SetterAbstract) getPacketWork();
+					if (as != null) {
+						PacketThreadWorker pt = as.getPacketThread();
+						if (pt.getPacket() != null) {
+							RegisterValue rv = ((RegisterValue) pt.getValue());
+							Value v = rv.getValue();
 
-						if(v==null)
-							rv.setValue(new Value(SwitchControllerRegister.this.checkBox.isSelected() ? 3 : 2, 0, 783, 0));
-						else
-							v.setValue(SwitchControllerRegister.this.checkBox.isSelected() ? 3 : 2);
+							if (v == null)
+								rv.setValue(new Value(SwitchControllerRegister.this.checkBox.isSelected() ? 3 : 2, 0,
+										783, 0));
+							else
+								v.setValue(SwitchControllerRegister.this.checkBox.isSelected() ? 3 : 2);
 
-						as.preparePacketToSend(rv);
-						setSend(true);
+							as.preparePacketToSend(rv);
+							setSend(true);
+						}
 					}
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
 			}
 		};

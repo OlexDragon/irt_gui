@@ -1,6 +1,7 @@
 package irt.data;
 
 import irt.controller.interfaces.DescriptionPacketValue;
+import irt.controller.translation.Translation;
 import irt.data.packet.RangePacket;
 import irt.data.value.Value;
 
@@ -35,6 +36,6 @@ public abstract class DescriptionPacketValueImpl implements Comparable<Descripti
 
 	@Override
 	public String toString() {
-		return description;
+		return Translation.getValue(String.class, description, description);
 	}
 }

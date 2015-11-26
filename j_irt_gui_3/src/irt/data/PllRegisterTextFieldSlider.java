@@ -65,11 +65,15 @@ public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (PllRegisterTextFieldSlider.this.textField != null) {
-					String text = PllRegisterTextFieldSlider.this.textField.getText().replaceAll("\\D", "");
-					value.setValue(text.isEmpty() ? 0 : Integer.parseInt(text) / multiplier);
-					slider.setValue(value.getRelativeValue());
-					setText();
+				try {
+					if (PllRegisterTextFieldSlider.this.textField != null) {
+						String text = PllRegisterTextFieldSlider.this.textField.getText().replaceAll("\\D", "");
+						value.setValue(text.isEmpty() ? 0 : Integer.parseInt(text) / multiplier);
+						slider.setValue(value.getRelativeValue());
+						setText();
+					}
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
 			}
 		};

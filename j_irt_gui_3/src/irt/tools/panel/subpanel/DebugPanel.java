@@ -45,6 +45,7 @@ public class DebugPanel extends JPanel{
 		btnClearStatistic.addActionListener(new ActionListener() {
 			int count;
 			public void actionPerformed(ActionEvent e) {
+				try{
 
 				count = 3;
 				guiControllerAbstract.doDump(linkHeader);
@@ -90,6 +91,9 @@ public class DebugPanel extends JPanel{
 					
 						}
 				);
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 
 			private void startThread(Runnable runnable) {

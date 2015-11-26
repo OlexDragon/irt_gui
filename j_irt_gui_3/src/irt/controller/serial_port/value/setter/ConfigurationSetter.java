@@ -69,7 +69,7 @@ public class ConfigurationSetter extends SetterAbstract {
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR:
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE:
-				pt.preparePacket(lh != null && id!=PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR ? PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
+				pt.preparePacket(lh != null && id!=PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR ? PacketImp.PARAMETER_PICOBUC_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
 						(byte) (((boolean) ((IdValue) value).getValue()) ? 1 : 0));
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN:

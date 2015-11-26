@@ -22,9 +22,8 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.interfaces.IrtController;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.translation.Translation;
 import irt.data.IdValue;
-import irt.data.IdValueForComboBox;
+import irt.data.LOIdValue;
 import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LOFrequenciesPacket;
@@ -95,7 +94,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 						List<IdValue> list = new ArrayList<>();
 						for(byte i=0; i<size; i+=8) {
 							byte id = pl.getByte(i++);
-							IdValue iv = new IdValueForComboBox(id, Translation.getValue(String.class, "lo", "LO")+":"+id+" - "+new ValueFrequency(pl.getLong(i), 0, Long.MAX_VALUE).toString());
+							IdValue iv = new LOIdValue(id, new ValueFrequency(pl.getLong(i), 0, Long.MAX_VALUE));
 							list.add(iv);
 						}
 

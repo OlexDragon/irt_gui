@@ -32,10 +32,14 @@ public class SwitchController extends ControllerAbstract {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SetterAbstract as = (SetterAbstract) getPacketWork();
-				PacketThreadWorker pt = as.getPacketThread();
-				if(pt.getPacket()!=null)
-					doSwitch(as, pt.getValue());
+				try {
+					SetterAbstract as = (SetterAbstract) getPacketWork();
+					PacketThreadWorker pt = as.getPacketThread();
+					if (pt.getPacket() != null)
+						doSwitch(as, pt.getValue());
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 
 			private void doSwitch(SetterAbstract as, Object value) {

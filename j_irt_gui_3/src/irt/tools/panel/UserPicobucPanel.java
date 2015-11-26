@@ -27,6 +27,7 @@ import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
 import irt.tools.panel.subpanel.RedundancyPanelDemo.REDUNDANCY_NAME;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
+import irt.tools.panel.subpanel.control.ControlPanelHPB;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
 @SuppressWarnings("serial")
@@ -150,6 +151,11 @@ public class UserPicobucPanel extends DevicePanel {
 		switch(deviceType){
 		case DeviceInfo.DEVICE_TYPE_DLRS:
 			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+			break;
+		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_C:
+		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_KU:
+		case DeviceInfo.DEVICE_TYPE_HPB_SSPA:
+			controlPanel = new ControlPanelHPB(linkHeader.getAddr());
 			break;
 		default:
 			controlPanel = new ControlPanelPicobuc(deviceType, linkHeader);

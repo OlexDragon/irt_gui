@@ -22,8 +22,12 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 	private ActionListener timerListener = new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			stop();
-			logger.trace("Timer.actionPerformed, this={}", this);
+			try {
+				stop();
+				logger.trace("Timer.actionPerformed, this={}", this);
+			} catch (Exception ex) {
+				logger.catching(ex);
+			}
 		}
 	};
 

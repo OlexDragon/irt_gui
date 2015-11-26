@@ -27,8 +27,12 @@ public class BlinkControl implements Runnable {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(blink){
-					blink = false;
+				try {
+					if (blink) {
+						blink = false;
+					}
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
 			}
 		});

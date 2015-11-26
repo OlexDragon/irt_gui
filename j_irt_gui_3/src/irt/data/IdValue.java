@@ -19,11 +19,6 @@ public class IdValue implements Comparable<IdValue>{
 	}
 
 	@Override
-	public String toString() {
-		return "IdValue [id=" + id + ", value=" + value + "]";
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		return obj!=null ? obj.hashCode()==hashCode() : false;
 	}
@@ -36,5 +31,10 @@ public class IdValue implements Comparable<IdValue>{
 	@Override
 	public int compareTo(IdValue o) {
 		return id - o.id;
+	}
+
+	@Override
+	public String toString() {
+		return "IdValue [id=" + id + ", value=" + value + "]";
 	}
 }

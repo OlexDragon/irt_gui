@@ -259,7 +259,11 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 		JButton btnSet = new JButton("Set");
 		btnSet.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				send();
+				try{
+					send();
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		});
 		
@@ -267,9 +271,14 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 		btnClear.setMargin(new Insets(0, 0, 0, 0));
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
-				packetWork.preparePacketToSend(0);
-				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+				try {
+					ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS,
+							PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
+					packetWork.preparePacketToSend(0);
+					GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 

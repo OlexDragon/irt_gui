@@ -1,10 +1,5 @@
 package irt.tools.panel.wizards.address;
 
-import irt.controller.GuiController;
-import irt.controller.interfaces.Refresh;
-import irt.controller.translation.Translation;
-import irt.tools.panel.wizards.address.AddressWizard.Selection;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -23,7 +18,17 @@ import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingWorker;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import irt.controller.GuiController;
+import irt.controller.interfaces.Refresh;
+import irt.controller.translation.Translation;
+import irt.tools.panel.wizards.address.AddressWizard.Selection;
+
 public class AWStyleSelectorPanel extends JPanel implements Refresh{
+
+	private final Logger logger = LogManager.getLogger();
 
 	private final String MIN_MAX_UNIT_COUNT;
 
@@ -50,8 +55,12 @@ public class AWStyleSelectorPanel extends JPanel implements Refresh{
 		rdbtnFindAddressAutomatically.setEnabled(false);
 		rdbtnFindAddressAutomatically.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				selection = Selection.AUTO;
-				setUnitsCount();
+				try {
+					selection = Selection.AUTO;
+					setUnitsCount();
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		rdbtnFindAddressAutomatically.setFont(font);
@@ -61,8 +70,12 @@ public class AWStyleSelectorPanel extends JPanel implements Refresh{
 		rdbtnSetManually.setSelected(true);
 		rdbtnSetManually.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				selection = Selection.MANUALLY;
-				setUnitsCount();
+				try {
+					selection = Selection.MANUALLY;
+					setUnitsCount();
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		rdbtnSetManually.setFont(font);

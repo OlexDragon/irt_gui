@@ -83,8 +83,12 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 	private void setStepListener() {
 		actionListener = new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				setStep();
-				txtField.requestFocusInWindow();
+				try {
+					setStep();
+					txtField.requestFocusInWindow();
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 
 		};

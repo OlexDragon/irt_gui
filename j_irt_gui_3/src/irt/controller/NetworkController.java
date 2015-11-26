@@ -129,7 +129,11 @@ public class NetworkController extends ControllerAbstract {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				cansel();
+				try{
+					cansel();
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		};
 //**** btnOkActionListener
@@ -137,7 +141,11 @@ public class NetworkController extends ControllerAbstract {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				saveSettings();
+				try{
+					saveSettings();
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		};
 	}

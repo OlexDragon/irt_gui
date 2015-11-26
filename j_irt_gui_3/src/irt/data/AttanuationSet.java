@@ -9,7 +9,7 @@ import irt.data.value.ValueDouble;
 public class AttanuationSet extends DescriptionPacketValueImpl {
 
 	public AttanuationSet( byte linkAddr) {
-		super("Attenuation", new AttenuationRangePacket(linkAddr), new AttenuationPacket(linkAddr, null));
+		super("attenuation", new AttenuationRangePacket(linkAddr), new AttenuationPacket(linkAddr, null));
 	}
 
 	@Override

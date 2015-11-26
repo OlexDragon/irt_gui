@@ -59,7 +59,7 @@ public class MuteController extends ControllerAbstract {
 				"Mute Controller",
 				new ConfigurationSetter(
 						linkHeader,
-						linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
+						linkHeader!=null && linkHeader.getAddr()!=0 && deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketImp.PARAMETER_PICOBUC_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
 								PacketWork.PACKET_ID_CONFIGURATION_MUTE),
 								null,
 								style);
@@ -104,7 +104,11 @@ public class MuteController extends ControllerAbstract {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				setMuteUnmute();
+				try{
+					setMuteUnmute();
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		};
 	}

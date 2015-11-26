@@ -26,7 +26,7 @@ import irt.data.packet.Payload;
 public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	private static final long serialVersionUID = 5927791917430153433L;
 
-	protected final Logger logger = LogManager.getLogger(getClass().getName());
+	protected final Logger logger = LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
 	private	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
@@ -76,7 +76,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	@Override
 	public void packetRecived(Packet packet) {
 		try{
-			if(packet.equals(this.packet) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+			if(packet.equals(this.packet) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE && packet.getHeader().getOption()==PacketImp.NO_ERROR){
 				logger.trace(packet);
 
 				final Payload payload = packet.getPayload(0);

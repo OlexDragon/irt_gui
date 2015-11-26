@@ -87,8 +87,12 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 		switchBox.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				if(controller==null || !controller.isRun())
-					switchLNB(deviceType, linkHeader);
+				try {
+					if (controller == null || !controller.isRun())
+						switchLNB(deviceType, linkHeader);
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		switchBox.setName("Switch LNB");

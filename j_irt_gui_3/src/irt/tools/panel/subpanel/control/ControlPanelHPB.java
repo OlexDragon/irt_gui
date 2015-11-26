@@ -39,6 +39,7 @@ import irt.controller.ValueController;
 import irt.controller.interfaces.ControlPanel;
 import irt.controller.interfaces.DescriptionPacketValue;
 import irt.controller.interfaces.Refresh;
+import irt.controller.translation.Translation;
 import irt.data.ALCSet;
 import irt.data.AttanuationSet;
 import irt.data.FrequencySet;
@@ -50,7 +51,7 @@ import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
 import irt.tools.ALCComboBox;
 import irt.tools.IrtComboBox;
-import irt.tools.button.ImageButton;
+import irt.tools.MuteButton;
 
 public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Observer{
 	private static final String ACTION = "Action";
@@ -67,6 +68,9 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 	private static final Color BG_COLOR = new Color(11, 23, 59);
 
+
+	private final TitledBorder 	titledBorder;
+	private final MuteButton 	btnMute;
 	private final JSlider 		slider 			= new JSlider();
 	private final JTextField 	valueTextField;
 	private final JTextField 	stepTextField;
@@ -76,6 +80,10 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 	private final ValueController 		valueController;
 	private boolean presetDone;
+
+	private JLabel lblMute;
+
+	private JComboBox<IdValue> cbLoSelect;
 
 	public ControlPanelHPB(byte linkAddr) {
 		addAncestorListener(new AncestorListener() {
@@ -88,25 +96,24 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 				removeListeners();
 			}
 		});
-		setBorder(new TitledBorder(null, "Control", TitledBorder.LEADING, TitledBorder.TOP, getFont().deriveFont(Font.BOLD, 18), Color.WHITE));
+		titledBorder = new TitledBorder(null, "Control", TitledBorder.LEADING, TitledBorder.TOP, getFont().deriveFont(Font.BOLD, 18), Color.WHITE);
+		setBorder(titledBorder);
 		setOpaque(false);
 		setLayout(null);
 		setSize(new Dimension(214, 180));
 
-		ImageButton imageButton = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
-		imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		imageButton.setToolTipText("Mute");
-		imageButton.setName("Button Mute");
-		imageButton.setBounds(8, 99, 35, 35);
-		add(imageButton);
+		btnMute = new MuteButton(linkAddr, new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
+		btnMute.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnMute.setBounds(16, 99, 35, 35);
+		add(btnMute);
 		
-		JLabel lblMute = new JLabel("Mute");
-		lblMute.setName("Label Mute");
+		lblMute = new JLabel("Mute");
+		lblMute.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
-		lblMute.setFont(new Font("Tahoma", Font.BOLD, 12));
-		lblMute.setBounds(48, 105, 40, 23);
+		lblMute.setBounds(53, 99, 127, 35);
 		add(lblMute);
+		btnMute.addLabel(lblMute);
 
 		valueTextField = new JTextField();
 		valueTextField.setName("Text Gain");
@@ -126,17 +133,9 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		actionComboBox.setBackground(BG_COLOR);
 		actionComboBox.setBounds(8, 23, 98, 20);
 		actionComboBox.addItem(	new AttanuationSet	(linkAddr));
-		actionComboBox.addItem(	new FrequencySet		(linkAddr));
+		actionComboBox.addItem(	new FrequencySet	(linkAddr));
 		actionComboBox.addItem(	new ALCSet			(linkAddr));
 		add(actionComboBox);
-
-		JLabel label_1 = new JLabel("");
-		label_1.setName("Label Choice");
-		label_1.setHorizontalAlignment(SwingConstants.LEFT);
-		label_1.setForeground(Color.LIGHT_GRAY);
-		label_1.setFont(null);
-		label_1.setBounds(112, 23, 85, 20);
-		add(label_1);
 
 		chckbxStep = new JCheckBox(STEP);
 		chckbxStep.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -157,7 +156,7 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		stepTextField.setBounds(69, 69, 127, 20);
 		add(stepTextField);
 
-		JComboBox<IdValue> cbLoSelect = new IrtComboBox<>();
+		cbLoSelect = new IrtComboBox<>();
 		cbLoSelect.setForeground(Color.YELLOW);
 		cbLoSelect.setBackground( new Color(0x0B,0x17,0x3B));
 		cbLoSelect.setCursor( Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -167,12 +166,15 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		
 		chckbxEnableAlc = new ALCComboBox("Enable ALC", linkAddr);
-		chckbxEnableAlc.setBounds(97, 105, 97, 23);
+		chckbxEnableAlc.setName("enable.alc");
+		chckbxEnableAlc.setBounds(112, 20, 102, 23);
 		chckbxEnableAlc.setOpaque(false);
 		chckbxEnableAlc.setForeground(Color.YELLOW);
 		add(chckbxEnableAlc);
 
+		refresh();
 		selectAction();
+
 		final LOComboBoxController loComboBoxController = new LOComboBoxController(cbLoSelect, linkAddr);
 		loComboBoxController.addObserver(this);
 		valueController = new ValueController(linkAddr, actionComboBox);
@@ -239,6 +241,33 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 	@Override
 	public void refresh() {
+
+		setText();
+		setFont();
+	}
+
+	private void setText() {
+		titledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));
+
+		String muteText = Translation.getValue(String.class, btnMute.getName(), "Mute");
+		btnMute.setToolTipText(muteText);
+		lblMute.setText(muteText);
+
+		chckbxEnableAlc.setText(Translation.getValue(String.class, "enable.alc", "Enable ALC"));
+
+		chckbxStep.setText(Translation.getValue(String.class, "step", "Step"));
+	}
+
+	private void setFont() {
+		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size.hp", 12f)).deriveFont(Font.BOLD);
+		lblMute.setFont(font);
+		btnMute.setFont(font);
+
+		actionComboBox.setFont(font.deriveFont(14F));
+
+		font = font.deriveFont(12F);
+		cbLoSelect.setFont(font);
+		chckbxStep.setFont(font);
 	}
 
 	@Override
@@ -366,14 +395,19 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 	};
 	private final ActionListener 	actionComboBoxListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			logger.entry();
-			if(valueController!=null){
-				valueController.reset(actionComboBox);
-				presetDone = false;
+			try {
+				logger.entry();
+				if (valueController != null) {
+					valueController.reset(actionComboBox);
+					presetDone = false;
 
-				final DescriptionPacketValue selectedItem = (DescriptionPacketValue) actionComboBox.getSelectedItem();
-				final String simpleName = selectedItem.getClass().getSimpleName();
-				prefs.put(ACTION, simpleName);
+					final DescriptionPacketValue selectedItem = (DescriptionPacketValue) actionComboBox
+							.getSelectedItem();
+					final String simpleName = selectedItem.getClass().getSimpleName();
+					prefs.put(ACTION, simpleName);
+				}
+			} catch (Exception ex) {
+				logger.catching(ex);
 			}
 		}
 	};
@@ -390,7 +424,11 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 	private final ActionListener 	stepCheckBoxActionListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			setStepEnabled(chckbxStep.isSelected());
+			try{
+				setStepEnabled(chckbxStep.isSelected());
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
 		}
 	};
 	private final FocusAdapter 		stepFocuseListener = new FocusAdapter() {
@@ -402,7 +440,11 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 	private final ActionListener 	stepTextFieldActionListener = new ActionListener() {
 
 		public void actionPerformed(ActionEvent e) {
-			setStepValue();
+			try{
+				setStepValue();
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
 		}
 	};
 

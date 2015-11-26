@@ -113,33 +113,38 @@ public class NetworkPanel extends JPanel implements Refresh {
 		JButton btnDefault = new JButton("Reset");
 		btnDefault.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
+					if (JOptionPane.showConfirmDialog(NetworkPanel.this,
+							"Do you really want to change the network settings?", "Network",
+							JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
 
-				if(JOptionPane.showConfirmDialog(NetworkPanel.this, "Do you really want to change the network settings?", "Network", JOptionPane.YES_NO_OPTION)==JOptionPane.OK_OPTION){
+						ADDRESS_TYPE networkAddressType = getNetworkAddressType();
+						switch (networkAddressType) {
+						default:
+							String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
+							ipAddressTextField.setText(tmpStr);
 
-					ADDRESS_TYPE networkAddressType = getNetworkAddressType();
-					switch(networkAddressType){
-					default:
-						String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
-						ipAddressTextField.setText(tmpStr);
+							tmpStr = IrtPanel.PROPERTIES.getProperty("network_mask", "255.255.255.0");
+							ipMaskTextField.setText(tmpStr);
 
-						tmpStr = IrtPanel.PROPERTIES.getProperty("network_mask", "255.255.255.0");
-						ipMaskTextField.setText(tmpStr);
+							tmpStr = IrtPanel.PROPERTIES.getProperty("network_gateway", "192.168.0.1");
+							ipGatewayTextField.setText(tmpStr);
 
-						tmpStr = IrtPanel.PROPERTIES.getProperty("network_gateway", "192.168.0.1");
-						ipGatewayTextField.setText(tmpStr);
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e1) {
+								logger.catching(e1);
+							}
 
-						try {
-							Thread.sleep(100);
-						} catch (InterruptedException e1) {
-							logger.catching(e1);
+						case DYNAMIC:
+							comboBoxAddressType.setSelectedIndex(networkAddressType.ordinal() - 1);
 						}
 
-					case DYNAMIC:
-						comboBoxAddressType.setSelectedIndex(networkAddressType.ordinal()-1);
+						networkController.prepareToSave();
+						networkController.saveSettings();
 					}
-
-					networkController.prepareToSave();
-					networkController.saveSettings();
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
 			}
 

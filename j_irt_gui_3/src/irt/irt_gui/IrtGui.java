@@ -75,7 +75,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.093";
+	public static final String VERTION = "- 3.094";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -230,9 +230,13 @@ public class IrtGui extends IrtMainFrame {
 		mntmClear = new JMenuItem(Translation.getValue(String.class, "clear", "Clear"));
 		mntmClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				txtAddress.setText(""+DEFAULT_ADDRESS);
-				prefs.remove("address_history");
-				prefs.putInt("address", DEFAULT_ADDRESS);
+				try {
+					txtAddress.setText("" + DEFAULT_ADDRESS);
+					prefs.remove("address_history");
+					prefs.putInt("address", DEFAULT_ADDRESS);
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		popupMenu_1.add(mntmClear);
@@ -240,16 +244,20 @@ public class IrtGui extends IrtMainFrame {
 		mntmRemove = new JMenuItem(Translation.getValue(String.class, "remove", "Remove"));
 		mntmRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String text = txtAddress.getText();
-				if(text!=null && !(text = text.replaceAll("\\D", "")).isEmpty()){
-					addressHistory.remove(Integer.parseInt(text));
-					prefs.put("address_history", addressHistory.toString());
-					if(addressHistory.isEmpty())
-						txtAddress.setText(""+DEFAULT_ADDRESS);
-					else
-						txtAddress.setText(""+addressHistory.iterator().next());
+				try {
+					String text = txtAddress.getText();
+					if (text != null && !(text = text.replaceAll("\\D", "")).isEmpty()) {
+						addressHistory.remove(Integer.parseInt(text));
+						prefs.put("address_history", addressHistory.toString());
+						if (addressHistory.isEmpty())
+							txtAddress.setText("" + DEFAULT_ADDRESS);
+						else
+							txtAddress.setText("" + addressHistory.iterator().next());
 
-					txtAddress.setToolTipText(addressHistory.toString());
+						txtAddress.setToolTipText(addressHistory.toString());
+					}
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
 			}
 		});
@@ -259,71 +267,80 @@ public class IrtGui extends IrtMainFrame {
 		mntmSet.setVisible(false);
 		mntmSet.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				try {
+					String newAddressStr = txtAddress.getText();
+					logger.trace("Address = {}", newAddressStr);
 
-				String newAddressStr = txtAddress.getText();
-				logger.trace("Address = {}", newAddressStr);
+					if (newAddressStr != null && !(newAddressStr = newAddressStr.replaceAll("\\D", "")).isEmpty()) {
+						int newAddress = Integer.parseInt(newAddressStr);
 
-				if(newAddressStr!=null && !(newAddressStr=newAddressStr.replaceAll("\\D", "")).isEmpty()){
-					int newAddress = Integer.parseInt(newAddressStr);
+						if (newAddress > 0 && newAddress <= AddressWizard.MAX_ADDRESS) {
+							if (newAddress != address) {
+								if (JOptionPane.showConfirmDialog(IrtGui.this,
+										"Are you really want to change the address '" + address + "' to '" + newAddress
+												+ "'.",
+										"Address Change", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
 
-					if(newAddress>0 && newAddress<=AddressWizard.MAX_ADDRESS){
-						if(newAddress!=address){
-							if(JOptionPane.showConfirmDialog(
-									IrtGui.this,
-									"Are you really want to change the address '"+address+"' to '"+newAddress+"'.","Address Change",
-									JOptionPane.OK_CANCEL_OPTION)==JOptionPane.OK_OPTION){
-
-								byte na = (byte)newAddress;
-								Setter packetWork = new Setter(new LinkHeader((byte)address, (byte)0, (short) 0),
-										PacketImp.PACKET_TYPE_COMMAND,
-										PacketImp.IRT_SLCP_GROUP_ID_PROTOCOL,
-										PacketImp.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
-										PacketWork.PACKET_ID_PROTOCOL_ADDRESS,
-										na);
-								logger.trace(packetWork);
-								guiController.setAddress(na);
-								GuiController.getComPortThreadQueue().add(packetWork);
-								prefs.putInt("address", address);
-							}else
-								txtAddress.setText(""+address);
-						}else
-							JOptionPane.showMessageDialog(IrtGui.this, "First type the new address");
-					}else
-						JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
-				}else
-					JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
+									byte na = (byte) newAddress;
+									Setter packetWork = new Setter(new LinkHeader((byte) address, (byte) 0, (short) 0),
+											PacketImp.PACKET_TYPE_COMMAND, PacketImp.IRT_SLCP_GROUP_ID_PROTOCOL,
+											PacketImp.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
+											PacketWork.PACKET_ID_PROTOCOL_ADDRESS, na);
+									logger.trace(packetWork);
+									guiController.setAddress(na);
+									GuiController.getComPortThreadQueue().add(packetWork);
+									prefs.putInt("address", address);
+								} else
+									txtAddress.setText("" + address);
+							} else
+								JOptionPane.showMessageDialog(IrtGui.this, "First type the new address");
+						} else
+							JOptionPane.showMessageDialog(IrtGui.this,
+									"The address of unit should be between 0 and " + (AddressWizard.MAX_ADDRESS + 1));
+					} else
+						JOptionPane.showMessageDialog(IrtGui.this,
+								"The address of unit should be between 0 and " + (AddressWizard.MAX_ADDRESS + 1));
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		popupMenu_1.add(mntmSet);
 		txtAddress.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String text = txtAddress.getText();
-				logger.trace("Address={}", text);
+				try {
+					String text = txtAddress.getText();
+					logger.trace("Address={}", text);
 
-				if(text==null || (text=text.replaceAll("\\D", "")).isEmpty() || (address=Integer.parseInt(text))<1 || address>AddressWizard.MAX_ADDRESS)
-					JOptionPane.showMessageDialog(IrtGui.this, "The address of unit should be between 0 and "+(AddressWizard.MAX_ADDRESS+1));
-				else{
-					new SwingWorker<Void, Void>() {
-						@Override
-						protected Void doInBackground() throws Exception {
-							try{
-								logger.debug("Set Address to {}", address);
-								if(addressHistory.add(address)){
-									prefs.put("address_history", addressHistory.toString());
-									logger.debug("address history = {}", addressHistory);
-									txtAddress.setToolTipText(addressHistory.toString());
+					if (text == null || (text = text.replaceAll("\\D", "")).isEmpty()
+							|| (address = Integer.parseInt(text)) < 1 || address > AddressWizard.MAX_ADDRESS)
+						JOptionPane.showMessageDialog(IrtGui.this,
+								"The address of unit should be between 0 and " + (AddressWizard.MAX_ADDRESS + 1));
+					else {
+						new SwingWorker<Void, Void>() {
+							@Override
+							protected Void doInBackground() throws Exception {
+								try {
+									logger.debug("Set Address to {}", address);
+									if (addressHistory.add(address)) {
+										prefs.put("address_history", addressHistory.toString());
+										logger.debug("address history = {}", addressHistory);
+										txtAddress.setToolTipText(addressHistory.toString());
+									}
+
+									prefs.putInt("address", address);
+									txtAddress.setText("" + address);
+									guiController.setAddress((byte) address);
+									logger.debug("Address is set to {}", address);
+								} catch (Exception ex) {
+									logger.catching(ex);
 								}
-
-								prefs.putInt("address", address);
-								txtAddress.setText(""+address);
-								guiController.setAddress((byte) address);
-								logger.debug("Address is set to {}", address);
-							}catch(Exception ex){
-								logger.catching(ex);
+								return null;
 							}
-							return null;
-						}
-					}.execute();
+						}.execute();
+					}
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
 			}
 		});

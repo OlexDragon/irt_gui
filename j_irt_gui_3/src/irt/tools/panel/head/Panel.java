@@ -181,7 +181,12 @@ public class Panel extends JPanel {
 		btnMin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnMin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setAllPanelsVisible(!(userPanel.isVisible() || extraPanel.isVisible()));
+				try{
+					setAllPanelsVisible(!(userPanel.isVisible() || extraPanel.isVisible()));
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
+
 			}
 		});
 		btnMin.setBackground(SystemColor.info);
@@ -193,16 +198,20 @@ public class Panel extends JPanel {
 		btnLeft.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnLeft.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				boolean visible = !userPanel.isVisible();
+				try {
+					boolean visible = !userPanel.isVisible();
 
-				if(!visible && !extraPanel.isVisible())
-					setAllPanelsVisible(false);
-				else{
-					userPanel.setVisible(visible);
-					btnLeft.setToolTipText(visible ? "Hide the Monitor Panel" : "Show the Monitor Panel");
+					if (!visible && !extraPanel.isVisible())
+						setAllPanelsVisible(false);
+					else {
+						userPanel.setVisible(visible);
+						btnLeft.setToolTipText(visible ? "Hide the Monitor Panel" : "Show the Monitor Panel");
+					}
+					revalidate();
+					getParent().getParent().getParent().repaint();
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
-				revalidate();
-				getParent().getParent().getParent().repaint();
 			}
 		});
 		btnLeft.setMargin(new Insets(0, 0, 0, 0));
@@ -213,15 +222,19 @@ public class Panel extends JPanel {
 		btnRight.setForeground(Color.YELLOW);
 		btnRight.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				boolean visible = !extraPanel.isVisible();
-				if(!visible && !userPanel.isVisible())
-					setAllPanelsVisible(false);
-				else{
-					extraPanel.setVisible(visible);
-					btnRight.setToolTipText(visible ? "Hide the Info Panel" : "Show the Info Panel");
+				try {
+					boolean visible = !extraPanel.isVisible();
+					if (!visible && !userPanel.isVisible())
+						setAllPanelsVisible(false);
+					else {
+						extraPanel.setVisible(visible);
+						btnRight.setToolTipText(visible ? "Hide the Info Panel" : "Show the Info Panel");
+					}
+					revalidate();
+					getParent().getParent().getParent().repaint();
+				} catch (Exception ex) {
+					logger.catching(ex);
 				}
-				revalidate();
-				getParent().getParent().getParent().repaint();
 			}
 		});
 		btnRight.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));

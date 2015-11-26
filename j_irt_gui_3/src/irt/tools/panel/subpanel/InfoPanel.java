@@ -208,22 +208,26 @@ public class InfoPanel extends JPanel implements Refresh {
 		btnPanelSize.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
-				Transformer transformer = new Transformer();
-				transformer.setComponent(InfoPanel.this);
-				transformer.addProcessingComponent(Transformer.ACTION_SHOW, lblVersion);
-				transformer.addProcessingComponent(Transformer.ACTION_SHOW, lblVersionTxt);
+				try {
+					Transformer transformer = new Transformer();
+					transformer.setComponent(InfoPanel.this);
+					transformer.addProcessingComponent(Transformer.ACTION_SHOW, lblVersion);
+					transformer.addProcessingComponent(Transformer.ACTION_SHOW, lblVersionTxt);
 
-				if(getHeight()>WINDOW_MIN_HEIGHT)
-					transformer.setHeight(WINDOW_MIN_HEIGHT);
-				else
-					transformer.setHeight(WINDOW_MAX_HEIGHT);
+					if (getHeight() > WINDOW_MIN_HEIGHT)
+						transformer.setHeight(WINDOW_MIN_HEIGHT);
+					else
+						transformer.setHeight(WINDOW_MAX_HEIGHT);
 
-				Thread t = new Thread(transformer, "InfoPanel.Transformer-"+new RundomNumber());
-				int priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
+					Thread t = new Thread(transformer, "InfoPanel.Transformer-" + new RundomNumber());
+					int priority = t.getPriority();
+					if (priority > Thread.MIN_PRIORITY)
+						t.setPriority(priority - 1);
+					t.setDaemon(true);
+					t.start();
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		btnPanelSize.setBounds(271, 91, 10, 10);

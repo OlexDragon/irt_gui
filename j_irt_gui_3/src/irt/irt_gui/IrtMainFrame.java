@@ -78,7 +78,11 @@ public abstract class IrtMainFrame extends JFrame {
 		JMenuItem mntmBaudrate = new JMenuItem("Baudrate");
 		mntmBaudrate.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				new SerialPortWizard().setVisible(true);
+				try{
+					new SerialPortWizard().setVisible(true);
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		});
 		popupMenu.add(mntmBaudrate);

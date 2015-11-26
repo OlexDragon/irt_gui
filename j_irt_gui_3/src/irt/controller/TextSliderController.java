@@ -90,10 +90,15 @@ public class TextSliderController extends ControllerAbstract {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				value.setValue(txtField.getText());
-				((ConfigurationSetter)getPacketWork()).preparePacketToSend(new IdValue(getPacketWork().getPacketThread().getPacket().getHeader().getPacketId(), value));
-				setSend(true);
-				slider.setValue(value.getRelativeValue());
+				try {
+					value.setValue(txtField.getText());
+					((ConfigurationSetter) getPacketWork()).preparePacketToSend(new IdValue(
+							getPacketWork().getPacketThread().getPacket().getHeader().getPacketId(), value));
+					setSend(true);
+					slider.setValue(value.getRelativeValue());
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		};
 

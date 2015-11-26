@@ -27,6 +27,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.DeviceDebugController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
@@ -46,6 +49,8 @@ import irt.tools.button.ImageButton;
 
 @SuppressWarnings("serial")
 public class PLLsPanel extends JPanel {
+
+	private final Logger logger = LogManager.getLogger();
 
 	private static final int DN = 4194304;
 	private static final int UP = 2097152;
@@ -146,7 +151,11 @@ public class PLLsPanel extends JPanel {
 		chckbxHik = new JCheckBox("HiK");
 		chckbxHik.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setFlag((JCheckBox)ae.getSource(), HIK);
+				try{
+					setFlag((JCheckBox)ae.getSource(), HIK);
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		});
 		chckbxHik.setFont(new Font("Tahoma", Font.BOLD, 14));
@@ -158,7 +167,11 @@ public class PLLsPanel extends JPanel {
 		chckbxUp = new JCheckBox("UP");
 		chckbxUp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setFlag((JCheckBox)ae.getSource(), UP);
+				try{
+					setFlag((JCheckBox)ae.getSource(), UP);
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		});
 		chckbxUp.setFont(new Font("Tahoma", Font.BOLD, 14));
@@ -170,9 +183,13 @@ public class PLLsPanel extends JPanel {
 		ImageButton imageButton = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
 		imageButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				DeviceDebagSetter packetWork = (DeviceDebagSetter)registerController.getPacketWork();
-				packetWork.preparePacketToSend(packetWork.getPacketThread().getValue());
-				registerController.setSend(true);
+				try {
+					DeviceDebagSetter packetWork = (DeviceDebagSetter) registerController.getPacketWork();
+					packetWork.preparePacketToSend(packetWork.getPacketThread().getValue());
+					registerController.setSend(true);
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -184,7 +201,11 @@ public class PLLsPanel extends JPanel {
 		chckbxDn = new JCheckBox("DN");
 		chckbxDn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				setFlag((JCheckBox)ae.getSource(), DN);
+				try{
+					setFlag((JCheckBox)ae.getSource(), DN);
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
 		});
 		chckbxDn.setOpaque(false);
@@ -267,9 +288,14 @@ public class PLLsPanel extends JPanel {
 		JButton btnClear = new JButton("Clear The Flags");
 		btnClear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS, PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
-				packetWork.preparePacketToSend(0);
-				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+				try {
+					ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS,
+							PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
+					packetWork.preparePacketToSend(0);
+					GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+				} catch (Exception ex) {
+					logger.catching(ex);
+				}
 			}
 		});
 		btnClear.setMargin(new Insets(0, 0, 0, 0));
