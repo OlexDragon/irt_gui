@@ -1,6 +1,7 @@
 package irt.tools.panel.subpanel;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ItemEvent;
@@ -31,7 +32,6 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
-import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
@@ -49,12 +49,16 @@ import irt.data.packet.RedundancyStatusPacket.RedundancyStatus;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
-import java.awt.Cursor;
 
 public class RedundancyPanel extends RedundancyPanelDemo implements PacketListener, Runnable{
+
 	private static final long serialVersionUID = -3045298115182952527L;
 
 	protected final Logger logger = LogManager.getLogger();
+
+	private static final ImageIcon ICON_BUC_X = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg"));
+	private static final ImageIcon ICON_BUC_B = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg"));
+	private static final ImageIcon ICON_BUC_A = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg"));
 
 	private final 	ComPortThreadQueue 			cptq 		= GuiControllerAbstract.getComPortThreadQueue();
 	public  final 	ScheduledExecutorService 	services 	= Executors.newScheduledThreadPool(1);
@@ -141,7 +145,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		lblUnitName = new JLabel(Translation.getValue(String.class, "redundancy.unit_name", "Unit Name"));
 		lblUnitName.setFont(font);
 		
-		lblImage = new ImageLabel(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")), null);
+		lblImage = new ImageLabel(ICON_BUC_X, null);
 
 		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));
 
@@ -302,61 +306,65 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	public void packetRecived(Packet packet) {
 
 		final PacketHeader header = packet.getHeader();
-		if(
-				header.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION && (
 
-						header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE
-						|| header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE
-						|| header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
-						|| header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS))
+		if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE  && header.getOption()==PacketImp.ERROR_NO_ERROR){
 
-			if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE  && header.getOption()==PacketImp.ERROR_NO_ERROR){
+			byte b = packet.getPayload(0).getByte();
+			if(packet.equals(redundancyEnablePacket)){
 
-				byte b = packet.getPayload(0).getByte();
-				switch(header.getPacketId()){
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
-					final RedundancyEnable redundancyEnable = RedundancyEnable.values()[b];
-					cmbBxRedundancy.setSelectedItem(redundancyEnable);
-					break;
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME:
-					final RedundancyName redundancyName = RedundancyName.values()[b];
-					cmbBxName.setSelectedItem(redundancyName);
-				break;
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE:
-					final RedundancyMode redundancyMode = RedundancyMode.values()[b];
-					cmbBxMode.setSelectedItem(redundancyMode);
-					break;
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS:
+				//Set Enable status
 
-					final RedundancyStatus redundancyStatus = RedundancyStatus.values()[b];
-					final RedundancyName selectedItem = (RedundancyName) cmbBxName.getSelectedItem();
+				final RedundancyEnable redundancyEnable = RedundancyEnable.values()[b];
+				cmbBxRedundancy.setSelectedItem(redundancyEnable);
 
-					if(redundancyStatus==RedundancyStatus.STANDBY){
+			}else if(packet.equals(redundancyModePacket)){
+			
+				// Set redundancy mode
 
-						lblSetOnline.setEnabled(true);
-						lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				final RedundancyMode redundancyMode = RedundancyMode.values()[b];
+				cmbBxMode.setSelectedItem(redundancyMode);
 
-						if(selectedItem==RedundancyName.BUC_B)
-							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
-						else
-							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
+			}else if(packet.equals(redundancyNamePacket)){
 
-					}else if(redundancyStatus==RedundancyStatus.ONLINE){
+				// Set BUC Name
+				final RedundancyName redundancyName = RedundancyName.values()[b];
+				cmbBxName.setSelectedItem(redundancyName);
+			
+			}else if(packet.equals(redundancyStatusPacket)){
+			
+				// Set Status and background image
+	
+				final RedundancyStatus redundancyStatus = RedundancyStatus.values()[b];
+				final RedundancyName selectedItem = (RedundancyName) cmbBxName.getSelectedItem();
 
-						lblSetOnline.setEnabled(false);
-						lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				if(redundancyStatus==RedundancyStatus.STANDBY){
 
-						if(selectedItem==RedundancyName.BUC_A)
-							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
-						else
-							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
-					}else{
-						lblSetOnline.setEnabled(false);
-						lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")));
-					}
+					lblSetOnline.setEnabled(true);
+					lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+					if(selectedItem==RedundancyName.BUC_B)
+						lblImage.setIcon(ICON_BUC_A);
+					else
+						lblImage.setIcon(ICON_BUC_B);
+
+				}else if(redundancyStatus==RedundancyStatus.ONLINE){
+
+					lblSetOnline.setEnabled(false);
+					lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+					if(selectedItem==RedundancyName.BUC_A)
+						lblImage.setIcon(ICON_BUC_A);
+					else
+						lblImage.setIcon(ICON_BUC_B);
+
+				}else{
+
+					lblSetOnline.setEnabled(false);
+					lblImage.setIcon(ICON_BUC_X);
 				}
-			}else
-				logger.warn(packet);
+			}
+		}
+
 	}
 
 	@Override
