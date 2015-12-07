@@ -19,13 +19,13 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.RedundancyNamePacket.RedundancyName;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
-import irt.tools.panel.subpanel.RedundancyPanelDemo.REDUNDANCY_NAME;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanelHPB;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
@@ -83,7 +83,7 @@ public class UserPicobucPanel extends DevicePanel {
 						"Redundancy Enable",
 						new Getter(getLinkHeader(),
 								PacketImp.GROUP_ID_CONFIGURATION,
-								PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
+								PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME,
 								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
 									@Override
 									protected PacketListener getNewPacketListener() {
@@ -91,7 +91,7 @@ public class UserPicobucPanel extends DevicePanel {
 
 											private int count = 3;
 											private String text;
-											private REDUNDANCY_NAME name = null;
+											private RedundancyName name = null;
 
 											@Override
 											public void packetRecived(final Packet packet) {
@@ -105,14 +105,14 @@ public class UserPicobucPanel extends DevicePanel {
 																packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
 															)
 															if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
-																REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
-																if(n!=null && !n.equals(name) && n!=REDUNDANCY_NAME.NO_NAME){
+																RedundancyName n = RedundancyName.values()[packet.getPayload(0).getByte()];
+																if(n!=null && !n.equals(name) && n!=RedundancyName.NO_NAME){
 
 																	VarticalLabel varticalLabel = getVarticalLabel();
 																	text = varticalLabel.getText();
 
-																	if(		text.startsWith(REDUNDANCY_NAME.BUC_A.toString()) ||
-																			text.startsWith(REDUNDANCY_NAME.BUC_B.toString()))
+																	if(		text.startsWith(RedundancyName.BUC_A.toString()) ||
+																			text.startsWith(RedundancyName.BUC_B.toString()))
 																		text = text.substring(8);
 
 																	name = n;

@@ -14,7 +14,7 @@ public class ALCPacket extends PacketAbstract {
 				PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_BUC_APC_LEVEL,
-				value,
+				value!=null ? PacketImp.toBytes(value) : null,
 				value!=null
 					? Priority.COMMAND
 					: Priority.REQUEST);

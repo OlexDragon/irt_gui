@@ -159,7 +159,7 @@ public class ComPortThreadQueue extends Thread {
 	}
 
 	public void firePacketListener(Packet packet) {
-//		if(packet.getHeader().getGroupId()==PacketImp.IRT_SLCP_PACKET_ID_NETWORK)
+//		if(packet.getHeader().getGroupId()==PacketImp.GROUP_ID_NETWORK)
 //			logger.error("\n\t{}\n", packet);
 		Object[] listeners = packetListeners.getListenerList();
 		for (int i = 0; i < listeners.length; i++) {

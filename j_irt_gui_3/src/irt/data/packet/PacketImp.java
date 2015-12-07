@@ -88,7 +88,7 @@ public class PacketImp implements Packet{
 		IRT_SLCP_GROUP_ID_PROTOCOL = 10, /* Packet protocol parameters configuration and monitoring. */
 
 	/* Network */
-		IRT_SLCP_PACKET_ID_NETWORK = 11, /* Network configuration. */
+		GROUP_ID_NETWORK = 11, /* Network configuration. */
 
 	/* backwards compatibility - to be deleted */
 		IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1 = 100,
@@ -173,7 +173,7 @@ public class PacketImp implements Packet{
 
 	/* Network */
 	public static final byte
-		IRTSCP_PARAMETER_ID_NETWORK_ADDRESS = 1; /* Network configuration. */
+		PARAMETER_ID_NETWORK_ADDRESS = 1; /* Network configuration. */
 
 	protected static final String SAVE_CONFIG = null;
 
@@ -203,11 +203,11 @@ public class PacketImp implements Packet{
 							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES	= 7,
 							PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY 			= 8,
 							PARAMETER_CONFIGURATION_PICOBUC_USER_FREQUENCY_RANGE 	= 9,
-							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE	= 10,
-							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE	= 11,
-							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME	= 12,
-							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT	= 15,
-							IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_SET_ONLINE= 14;
+							PARAMETER_ID_CONFIGURATION_REDUNDANCY_ENABLE		= 10,
+							PARAMETER_ID_CONFIGURATION_REDUNDANCY_MODE			= 11,
+							PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME			= 12,
+							PARAMETER_ID_CONFIGURATION_REDUNDANCY_STATUS			= 15,
+							PARAMETER_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE	= 14;
 
 	/* PicoBUC production procedures */
 

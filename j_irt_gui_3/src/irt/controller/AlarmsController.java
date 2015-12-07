@@ -8,8 +8,6 @@ import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
@@ -75,7 +73,7 @@ public class AlarmsController extends ControllerAbstract {
 	private volatile List<DefaultController> alarmControllers = new ArrayList<>();
 
 	public AlarmsController(int deviceType, LinkHeader linkHeader, JPanel panel) {
-		super(deviceType, "AlarmsController", new Getter(linkHeader, PacketImp.GROUP_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs, LogManager.getLogger()), panel, Style.CHECK_ONCE);
+		super(deviceType, "AlarmsController", new Getter(linkHeader, PacketImp.GROUP_ID_ALARM, ALARMS_IDS, PacketWork.PACKET_ID_ALARMS_IDs), panel, Style.CHECK_ONCE);
 		this.linkHeader = linkHeader;
 	}
 

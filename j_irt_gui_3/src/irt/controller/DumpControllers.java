@@ -361,8 +361,8 @@ public class DumpControllers{
 		addDumpController(
 				newGetter(linkHeader,
 						PacketImp.GROUP_ID_CONFIGURATION,
-						PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
-						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT,
+						PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_STATUS,
+						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS,
 						Priority.ALARM),
 				waitTime,
 				"REDUNDANCY_STAT");
@@ -570,7 +570,7 @@ public class DumpControllers{
 		case PacketWork.PACKET_ID_DUMP_REGISTER_220:
 			str = "2.220(PaketWork ID="+id+ ")";
 			break;
-		case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
+		case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS:
 			str = "Redundancy Status(PaketWork ID="+id+ ")";
 			break;
 		default:
@@ -715,7 +715,7 @@ public class DumpControllers{
 					else
 						register100 = dumpError(register100);
 					break;
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
+				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS:
 					if(error==0)
 						redundancyStat = dump(redundancyStat);
 					else

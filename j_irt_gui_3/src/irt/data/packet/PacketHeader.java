@@ -244,7 +244,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE:
 				packetIdStr = "Initialize("+packetId+")";
 				break;
-			case PacketWork.PACKET_NETWORK_ADDRESS:
+			case PacketWork.PACKET_ID_NETWORK_ADDRESS:
 				packetIdStr = "Network Address("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0:
@@ -276,7 +276,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME:
 				packetIdStr = "Redundancy Name ("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
+			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS:
 				packetIdStr = "Redundancy Status ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_PROTOCOL_ADDRESS:

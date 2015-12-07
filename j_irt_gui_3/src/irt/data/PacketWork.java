@@ -41,7 +41,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE	= 33,
 								PACKET_ID_CONFIGURATION_REDUNDANCY_MODE		= 34,
 								PACKET_ID_CONFIGURATION_REDUNDANCY_NAME		= 35,
-								PACKET_ID_CONFIGURATION_REDUNDANCY_STAT		= 36,
+								PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS		= 36,
 								PACKET_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE= 37,
 								PACKET_ID_CONFIGURATION_MUTE_OUTDOOR		= 38,
 								PACKET_ID_CONFIGURATION_ALC_ENABLE			= 39,
@@ -114,7 +114,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 	public static final short PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE = 120;
 
-	public static final short PACKET_NETWORK_ADDRESS = 130;
+	public static final short PACKET_ID_NETWORK_ADDRESS = 130;
 
 
 	public static final short 	PACKET_ID_ALARMS_IDs = 140,

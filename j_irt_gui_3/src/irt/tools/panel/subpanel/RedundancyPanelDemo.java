@@ -1,11 +1,5 @@
 package irt.tools.panel.subpanel;
 
-import irt.controller.interfaces.Refresh;
-import irt.controller.translation.Translation;
-import irt.irt_gui.IrtGui;
-import irt.tools.label.ImageLabel;
-import irt.tools.label.VarticalLabel;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.SystemColor;
@@ -21,6 +15,15 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 
+import irt.controller.interfaces.Refresh;
+import irt.controller.translation.Translation;
+import irt.data.packet.RedundancyEnablePacket.RedundancyEnable;
+import irt.data.packet.RedundancyModePacket.RedundancyMode;
+import irt.data.packet.RedundancyNamePacket.RedundancyName;
+import irt.irt_gui.IrtGui;
+import irt.tools.label.ImageLabel;
+import irt.tools.label.VarticalLabel;
+
 public class RedundancyPanelDemo extends JPanel implements Refresh{
 	private static final long serialVersionUID = -7179255648628796498L;
 
@@ -29,63 +32,9 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 	protected static final String ONLINE = "'Online',";
 	protected static final String SET_ONLINE = "Set Online";
 
-	public enum REDUNDANCY{
-		DISABLE("Desable"),
-		ENABLE("Enable");
-		
-		private String redundancy;
-
-		private REDUNDANCY(String redundancy){
-			this.redundancy = redundancy;
-		}
-
-		@Override
-		public String toString() {
-			return redundancy;
-		}
-
-		public void setRedundancy(String redundancy) {
-			this.redundancy = redundancy;
-		}
-	}
-
-	public enum REDUNDANCY_MODE {
-		COLD_STANDBY("Cold Standby"),
-		HOT_STANDBY("Hot Standby");
-
-		private String mode;
-
-		private REDUNDANCY_MODE(String mode){
-			this.mode = mode;
-		}
-		@Override
-		public String toString() {
-			return mode;
-		}
-		public void setMode(String mode) {
-			this.mode = mode;
-		}
-	}
-
-	public enum REDUNDANCY_NAME {
-		NO_NAME(null),
-		BUC_A("BUC A"),
-		BUC_B("BUC B");
-
-		private String name;
-
-		private REDUNDANCY_NAME(String name){
-			this.name = name;
-		}
-		@Override
-		public String toString() {
-			return name;
-		}
-	}
-
-	private JComboBox<REDUNDANCY_MODE> cmbBxMode;
-	private JComboBox<REDUNDANCY> cmbBxRedundancy;
-	private JComboBox<REDUNDANCY_NAME> cmbBxName;
+	private JComboBox<RedundancyMode> cmbBxMode;
+	private JComboBox<RedundancyEnable> cmbBxRedundancy;
+	private JComboBox<RedundancyName> cmbBxName;
 	private ImageLabel lblImage;
 	private VarticalLabel lblSetOnline;
 	private JLabel lblRedundancy;
@@ -98,7 +47,7 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 		
 		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
 
-		lblRedundancy = new JLabel(Translation.getValue(String.class, "redundancy", "Redundancy"));
+		lblRedundancy = new JLabel(Translation.getValue(String.class, "redundancy", "RedundancyEnable"));
 		lblRedundancy.setName("redundancy");
 		lblRedundancy.setFont(font);
 		
@@ -114,9 +63,9 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 
 		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));
 
-		DefaultComboBoxModel<REDUNDANCY_MODE> modeModel = new DefaultComboBoxModel<>();
-		REDUNDANCY_MODE[] values = REDUNDANCY_MODE.values();
-		for(REDUNDANCY_MODE rm:values){
+		DefaultComboBoxModel<RedundancyMode> modeModel = new DefaultComboBoxModel<>();
+		RedundancyMode[] values = RedundancyMode.values();
+		for(RedundancyMode rm:values){
 			String name = rm.name();
 			rm.setMode(Translation.getValue(String.class, name, name));
 			modeModel.addElement(rm);
@@ -124,9 +73,9 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 		cmbBxMode = new JComboBox<>(modeModel);
 		cmbBxMode.setFont(font);
 		
-		DefaultComboBoxModel<REDUNDANCY> redundancyModel = new DefaultComboBoxModel<>();
-		REDUNDANCY[] rs = REDUNDANCY.values();
-		for(REDUNDANCY r:rs){
+		DefaultComboBoxModel<RedundancyEnable> redundancyModel = new DefaultComboBoxModel<>();
+		RedundancyEnable[] rs = RedundancyEnable.values();
+		for(RedundancyEnable r:rs){
 			String name = r.name();
 			r.setRedundancy(Translation.getValue(String.class, name, name));
 			redundancyModel.addElement(r);
@@ -134,9 +83,9 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 		cmbBxRedundancy = new JComboBox<>(redundancyModel);
 		cmbBxRedundancy.setFont(font);
 		
-		DefaultComboBoxModel<REDUNDANCY_NAME> nameModel = new DefaultComboBoxModel<>();
-		REDUNDANCY_NAME[] ns = REDUNDANCY_NAME.values();
-		for(REDUNDANCY_NAME n:ns)
+		DefaultComboBoxModel<RedundancyName> nameModel = new DefaultComboBoxModel<>();
+		RedundancyName[] ns = RedundancyName.values();
+		for(RedundancyName n:ns)
 			nameModel.addElement(n);
 		cmbBxName = new JComboBox<>(nameModel);
 		cmbBxName.setFont(font);
@@ -214,7 +163,7 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 	public void refresh() {
 		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
 
-		lblRedundancy.setText(Translation.getValue(String.class, lblRedundancy.getName(), "Redundancy"));
+		lblRedundancy.setText(Translation.getValue(String.class, lblRedundancy.getName(), "RedundancyEnable"));
 		lblRedundancy.setFont(font);
 
 		lblMode.setText(Translation.getValue(String.class, lblMode.getName(), "Mode"));
@@ -231,14 +180,14 @@ public class RedundancyPanelDemo extends JPanel implements Refresh{
 		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));
 
 		for(int i=0; i<cmbBxMode.getItemCount(); i++){
-			REDUNDANCY_MODE itemAt = cmbBxMode.getItemAt(i);
+			RedundancyMode itemAt = cmbBxMode.getItemAt(i);
 			String name = itemAt.name();
 			itemAt.setMode(Translation.getValue(String.class, name, name));
 		}
 		cmbBxMode.setFont(font);
 
 		for(int i=0; i<cmbBxRedundancy.getItemCount(); i++){
-			REDUNDANCY itemAt = cmbBxRedundancy.getItemAt(i);
+			RedundancyEnable itemAt = cmbBxRedundancy.getItemAt(i);
 			String name = itemAt.name();
 			itemAt.setRedundancy(Translation.getValue(String.class, name, name));
 		}

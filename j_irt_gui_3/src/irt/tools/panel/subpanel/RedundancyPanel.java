@@ -1,16 +1,16 @@
 package irt.tools.panel.subpanel;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -21,54 +21,56 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
-import irt.controller.DefaultController;
-import irt.controller.GuiController;
-import irt.controller.control.ControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
-import irt.controller.serial_port.value.getter.Getter;
-import irt.controller.serial_port.value.setter.Setter;
+import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
 import irt.data.PacketWork;
-import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.RedundancyEnablePacket;
+import irt.data.packet.RedundancyEnablePacket.RedundancyEnable;
+import irt.data.packet.RedundancyModePacket;
+import irt.data.packet.RedundancyModePacket.RedundancyMode;
+import irt.data.packet.RedundancyNamePacket;
+import irt.data.packet.RedundancyNamePacket.RedundancyName;
+import irt.data.packet.RedundancySetOnlinePacket;
+import irt.data.packet.RedundancyStatusPacket;
+import irt.data.packet.RedundancyStatusPacket.RedundancyStatus;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
+import java.awt.Cursor;
 
-public class RedundancyPanel extends RedundancyPanelDemo{
+public class RedundancyPanel extends RedundancyPanelDemo implements PacketListener, Runnable{
 	private static final long serialVersionUID = -3045298115182952527L;
 
-	protected final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = LogManager.getLogger();
 
-	enum RedundancyStatus{
-		UNKNOWN,
-		ONLINE,
-		STANDBY
-	}
+	private final 	ComPortThreadQueue 			cptq 		= GuiControllerAbstract.getComPortThreadQueue();
+	public  final 	ScheduledExecutorService 	services 	= Executors.newScheduledThreadPool(1);
+	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
+
+	private final	RedundancyEnablePacket		redundancyEnablePacket;
+	private final	RedundancyModePacket		redundancyModePacket;
+	private final	RedundancyNamePacket		redundancyNamePacket;
+	private final	RedundancyStatusPacket		redundancyStatusPacket;
+	private final	RedundancySetOnlinePacket	redundancySetOnlinePacket;
 
 	private ItemListener redundancyListener;
 
-	private List<ControllerAbstract> controllers = new ArrayList<>();
-
-	private REDUNDANCY enable;
-	private REDUNDANCY_MODE mode;
-	private REDUNDANCY_NAME name;
-	private byte status = -1;
-
-	private JComboBox<REDUNDANCY_MODE> cmbBxMode;
-	private JComboBox<REDUNDANCY> cmbBxRedundancy;
-	private JComboBox<REDUNDANCY_NAME> cmbBxName;
+	private JComboBox<RedundancyMode> cmbBxMode;
+	private JComboBox<RedundancyEnable> cmbBxRedundancy;
+	private JComboBox<RedundancyName> cmbBxName;
 
 	private ItemListener modeListener;
 	private ItemListener nameListener;
@@ -83,148 +85,54 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 
 	private JLabel lblUnitName;
 
+	//*************************************** constructor RedundancyPanel ********************************************
 	public RedundancyPanel(final int deviceType, final LinkHeader linkHeader) {
+
+		final byte addr = linkHeader.getAddr();
+		redundancyEnablePacket = new RedundancyEnablePacket(addr, null);
+		redundancyModePacket = new RedundancyModePacket(addr, null);
+		redundancyNamePacket = new RedundancyNamePacket(addr, null);
+		redundancyStatusPacket = new RedundancyStatusPacket(addr, null);
+		redundancySetOnlinePacket = new RedundancySetOnlinePacket(addr);
+
 		setBackground(SystemColor.inactiveCaption);
 		redundancyListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 
 				if(e.getStateChange()==ItemEvent.SELECTED) {
-					enable = (REDUNDANCY) cmbBxRedundancy.getSelectedItem();
-					Setter packetWork = new Setter(linkHeader,
-							PacketImp.GROUP_ID_CONFIGURATION,
-							PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
-							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE);
-					try {
-						packetWork.preparePacketToSend((byte)enable.ordinal());
-					} catch (Exception ex) {
-						logger.catching(ex);
-					}
-					GuiController.getComPortThreadQueue().add(packetWork);
+					cptq.add(new RedundancyEnablePacket(redundancyEnablePacket.getLinkHeader().getAddr(), (RedundancyEnable) cmbBxRedundancy.getSelectedItem()));
 				}
 			}
 		};
 		modeListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange()==ItemEvent.SELECTED) {
-					mode = (REDUNDANCY_MODE) cmbBxMode.getSelectedItem();
-					Setter packetWork = new Setter(linkHeader,
-							PacketImp.GROUP_ID_CONFIGURATION,
-							PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
-							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE);
-					try {
-						packetWork.preparePacketToSend((byte)mode.ordinal());
-					} catch (Exception ex) {
-						logger.catching(ex);
-					}
-					GuiController.getComPortThreadQueue().add(packetWork);
+					cptq.add(new RedundancyModePacket(redundancyModePacket.getLinkHeader().getAddr(), (RedundancyMode) cmbBxMode.getSelectedItem()));
 				}
 			}
 		};
 		nameListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange()==ItemEvent.SELECTED) {
-					name = (REDUNDANCY_NAME) cmbBxName.getSelectedItem();
-					Setter packetWork = new Setter(linkHeader,
-							PacketImp.GROUP_ID_CONFIGURATION,
-							PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
-							PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME);
-					try {
-						packetWork.preparePacketToSend((byte)name.ordinal());
-					} catch (Exception ex) {
-						logger.catching(ex);
-					}
-					GuiController.getComPortThreadQueue().add(packetWork);
+					cptq.add(new RedundancyNamePacket(redundancyNamePacket.getLinkHeader().getAddr(), (RedundancyName) cmbBxName.getSelectedItem()));
 				}
 			}
 		};
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
-				logger.entry(event);
-				new SwingWorker<Void, Void>() {
-					@Override
-					protected Void doInBackground() throws Exception {
-						runController(
-								new DefaultController(
-										deviceType,
-										"Redundancy Enable",
-										new Getter(linkHeader,
-												PacketImp.GROUP_ID_CONFIGURATION,
-												PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE,
-												PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE, logger), Style.CHECK_ALWAYS){
-													@Override
-													protected PacketListener getNewPacketListener() {
-														return new PacketListener() {
-															
-															@Override
-															public void packetRecived(Packet packet) {
-																if(
-																		getPacketWork().isAddressEquals(packet) &&
-																		packet.getHeader().getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
-																		packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE
-																	)
-																	new GetterWorker(packet);
-															}
-														};
-													}
-									
-										}
-								);
-						runController("Redundancy Mode",
-								new Getter(linkHeader,
-										PacketImp.GROUP_ID_CONFIGURATION,
-										PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE, logger));
-						runController("Redundancy Name",
-								new Getter(linkHeader,
-										PacketImp.GROUP_ID_CONFIGURATION,
-										PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME, logger));
-						runController("Redundancy Status",
-								new Getter(linkHeader,
-										PacketImp.GROUP_ID_CONFIGURATION,
-										PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_STAT,
-										PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT, logger));
-						return null;
-					}
-				}.execute();
-				logger.exit();
+				start();
 			}
 
 			public void ancestorRemoved(AncestorEvent event) {
-				new SwingWorker<Void, Void>(){
-					@Override
-					protected Void doInBackground() throws Exception {
-						for(ControllerAbstract c:controllers)
-							c.stop();
-						controllers.clear();
-						return null;
-					}	
-				}.execute();
+				stop();
 			}
 			public void ancestorMoved(AncestorEvent event) {}
-
-			private void runController(String controllerName, Getter packetWork) {
-				DefaultController defaultController = new DefaultController(deviceType, controllerName, packetWork, Style.CHECK_ALWAYS);
-				runController(defaultController);
-			}
-
-			private void runController(DefaultController defaultController) {
-				defaultController.setWaitTime(10000);
-				controllers.add(defaultController);
-
-				Thread t = new Thread(defaultController, "RedundancyPanel."+defaultController.getName()+"-"+new RundomNumber());
-				int priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
-			}
 		});
 		
 		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
 
-		lblRedundancy = new JLabel(Translation.getValue(String.class, "redundancy", "Redundancy"));
+		lblRedundancy = new JLabel(Translation.getValue(String.class, "redundancy", "RedundancyEnable"));
 		lblRedundancy.setFont(font);
 		
 		lblMode = new JLabel(Translation.getValue(String.class, "redundancy.mode", "Mode"));
@@ -237,9 +145,9 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 
 		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));
 
-		DefaultComboBoxModel<REDUNDANCY_MODE> modeModel = new DefaultComboBoxModel<>();
-		REDUNDANCY_MODE[] values = REDUNDANCY_MODE.values();
-		for(REDUNDANCY_MODE rm:values){
+		DefaultComboBoxModel<RedundancyMode> modeModel = new DefaultComboBoxModel<>();
+		RedundancyMode[] values = RedundancyMode.values();
+		for(RedundancyMode rm:values){
 			String name = rm.name();
 			rm.setMode(Translation.getValue(String.class, name, name));
 			modeModel.addElement(rm);
@@ -248,9 +156,9 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		cmbBxMode.setFont(font);
 		cmbBxMode.addItemListener(modeListener);
 		
-		DefaultComboBoxModel<REDUNDANCY> redundancyModel = new DefaultComboBoxModel<>();
-		REDUNDANCY[] rs = REDUNDANCY.values();
-		for(REDUNDANCY r:rs){
+		DefaultComboBoxModel<RedundancyEnable> redundancyModel = new DefaultComboBoxModel<>();
+		RedundancyEnable[] rs = RedundancyEnable.values();
+		for(RedundancyEnable r:rs){
 			String name = r.name();
 			r.setRedundancy(Translation.getValue(String.class, name, name));
 			redundancyModel.addElement(r);
@@ -259,9 +167,9 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		cmbBxRedundancy.setFont(font);
 		cmbBxRedundancy.addItemListener(redundancyListener);
 		
-		DefaultComboBoxModel<REDUNDANCY_NAME> nameModel = new DefaultComboBoxModel<>();
-		REDUNDANCY_NAME[] ns = REDUNDANCY_NAME.values();
-		for(REDUNDANCY_NAME n:ns)
+		DefaultComboBoxModel<RedundancyName> nameModel = new DefaultComboBoxModel<>();
+		RedundancyName[] ns = RedundancyName.values();
+		for(RedundancyName n:ns)
 			nameModel.addElement(n);
 		cmbBxName = new JComboBox<>(nameModel);
 		cmbBxName.setFont(font);
@@ -317,25 +225,13 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 
 		String text = Translation.getValue(String.class, "SET_ONLINE", "Set Online");
 		lblSetOnline = new VarticalLabel(text, false);
+		lblSetOnline.setEnabled(false);
 		lblSetOnline.setToolTipText(text);
 		lblSetOnline.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(SET_ONLINE.equals(lblSetOnline.getText())){
-					try{
-						logger.debug("Click");
-						Setter packetWork = new Setter(
-								linkHeader,
-								PacketImp.PACKET_TYPE_COMMAND,
-								PacketImp.GROUP_ID_CONFIGURATION,
-								PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_SET_ONLINE,
-								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_SET_ONLINE);
-						GuiController.getComPortThreadQueue().add(packetWork);
-						logger.debug(packetWork);
-					}catch(Exception ex){
-						logger.catching(ex);
-					}
-				}
+				if(SET_ONLINE.equals(lblSetOnline.getText()))
+					cptq.add(redundancySetOnlinePacket);
 			}
 		});
 		lblSetOnline.setHorizontalAlignment(SwingConstants.CENTER);
@@ -355,126 +251,11 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		setLayout(groupLayout);
 	}
 
-	//*******************************************************************************
-	private class GetterWorker extends SwingWorker<Void, Void>{
-
-		private Packet packet;
-		private RedundancyStatus redundancyStatus;
-
-		public GetterWorker(Packet packet) {
-			logger.trace(packet);
-			this.packet = packet;
-			execute();
-		}
-
-		@Override
-		protected Void doInBackground() throws Exception {
-			try {
-				switch (packet.getHeader().getPacketId()) {
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
-					setRedundancyEnable();
-					break;
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE:
-					setRedundancyMode();
-					break;
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME:
-					setRedundancyName();
-					break;
-				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STAT:
-					setRedundancyStatus();
-					break;
-				}
-			} catch (Exception ex) {
-				logger.catching(ex);
-			}
-			return null;
-		}
-
-		private void setRedundancyStatus() throws IOException {
-			byte s = packet.getPayload(0).getByte();
-			if(s!=status){
-				logger.debug("\n\tRedundancyStatus:\n\told={}, new={}", status, s);
-				status = s;
-				redundancyStatus = RedundancyStatus.values()[s];
-				setEnable(redundancyStatus==RedundancyStatus.STANDBY);
-				setOnlineText(redundancyStatus==RedundancyStatus.STANDBY, redundancyStatus==RedundancyStatus.ONLINE);
-				setImage();
-			}
-		}
-
-		private void setRedundancyName() throws IOException {
-			REDUNDANCY_NAME n = REDUNDANCY_NAME.values()[packet.getPayload(0).getByte()];
-			if(!n.equals(name)){
-				logger.debug("old={}, new={}", name, n);
-				cmbBxName.setSelectedItem(name = n);
-				setImage();
-			}
-		}
-
-		private void setRedundancyMode() throws IOException {
-			REDUNDANCY_MODE m = REDUNDANCY_MODE.values()[packet.getPayload(0).getByte()];
-			if(!m.equals(mode)){
-				logger.debug("old={}, new={}", mode, m);
-				cmbBxMode.removeItemListener(modeListener);
-				cmbBxMode.setSelectedItem(mode = m);
-				cmbBxMode.addItemListener(modeListener);
-			}
-		}
-
-		private void setRedundancyEnable() throws IOException {
-			REDUNDANCY e = REDUNDANCY.values()[packet.getPayload(0).getByte()];
-			if(e!=enable){
-				logger.debug("old={}, new={}", enable, e);
-				cmbBxRedundancy.removeItemListener(redundancyListener);
-				cmbBxRedundancy.setSelectedItem( enable = e);
-				cmbBxRedundancy.addItemListener(redundancyListener);
-			}
-		}
-
-		private void setImage() throws IOException {
-			synchronized (logger) {
-				if(redundancyStatus==RedundancyStatus.ONLINE && name==REDUNDANCY_NAME.BUC_A || redundancyStatus==RedundancyStatus.STANDBY && name==REDUNDANCY_NAME.BUC_B)
-					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
-				else if(redundancyStatus==RedundancyStatus.STANDBY && name==REDUNDANCY_NAME.BUC_A || redundancyStatus==RedundancyStatus.ONLINE && name==REDUNDANCY_NAME.BUC_B)
-					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
-				else
-					lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")));
-			}
-		}
-
-		private void setEnable(boolean enable) {
-			cmbBxRedundancy.setEnabled(enable);
-			cmbBxMode.setEnabled(enable);
-			cmbBxName.setEnabled(enable);
-		}
-
-		private void setOnlineText(boolean standby, boolean online) {
-			if(standby){
-				String text = Translation.getValue(String.class, "SET_ONLINE", SET_ONLINE);
-				lblSetOnline.setText(text);
-				lblSetOnline.setName("SET_ONLINE");
-				lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				lblSetOnline.setToolTipText(text);
-			}else if(online){
-				String text = Translation.getValue(String.class, "ONLINE", ONLINE);
-				lblSetOnline.setText(text);
-				lblSetOnline.setName("ONLINE");
-				lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				lblSetOnline.setToolTipText(text);
-			}else{
-				lblSetOnline.setText("");
-				lblSetOnline.setName("");
-				lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				lblSetOnline.setToolTipText("");
-			}
-		}
-	}
-
 	@Override
 	public void refresh() {
 		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "redundancy.lable.font.size", 14f));
 
-		lblRedundancy.setText(Translation.getValue(String.class, "redundancy", "Redundancy"));
+		lblRedundancy.setText(Translation.getValue(String.class, "redundancy", "RedundancyEnable"));
 		lblRedundancy.setFont(font);
 
 		lblMode.setText(Translation.getValue(String.class, "redundancy.mode", "Mode"));
@@ -491,17 +272,104 @@ public class RedundancyPanel extends RedundancyPanelDemo{
 		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));
 
 		for(int i=0; i<cmbBxMode.getItemCount(); i++){
-			REDUNDANCY_MODE itemAt = cmbBxMode.getItemAt(i);
+			RedundancyMode itemAt = cmbBxMode.getItemAt(i);
 			String name = itemAt.name();
 			itemAt.setMode(Translation.getValue(String.class, name, name));
 		}
 		cmbBxMode.setFont(font);
 
 		for(int i=0; i<cmbBxRedundancy.getItemCount(); i++){
-			REDUNDANCY itemAt = cmbBxRedundancy.getItemAt(i);
+			RedundancyEnable itemAt = cmbBxRedundancy.getItemAt(i);
 			String name = itemAt.name();
 			itemAt.setRedundancy(Translation.getValue(String.class, name, name));
 		}
 		cmbBxRedundancy.setFont(font);
+	}
+
+	private void start() {
+		cptq.addPacketListener(this);
+		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+			scheduleAtFixedRate = services.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+	}
+
+	private void stop() {
+		cptq.removePacketListener(this);
+		if(scheduleAtFixedRate==null)
+			scheduleAtFixedRate.cancel(true);
+	}
+
+	@Override
+	public void packetRecived(Packet packet) {
+
+		final PacketHeader header = packet.getHeader();
+		if(
+				header.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION && (
+
+						header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE
+						|| header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE
+						|| header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
+						|| header.getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS))
+
+			if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE  && header.getOption()==PacketImp.ERROR_NO_ERROR){
+
+				byte b = packet.getPayload(0).getByte();
+				switch(header.getPacketId()){
+				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
+					final RedundancyEnable redundancyEnable = RedundancyEnable.values()[b];
+					cmbBxRedundancy.setSelectedItem(redundancyEnable);
+					break;
+				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME:
+					final RedundancyName redundancyName = RedundancyName.values()[b];
+					cmbBxName.setSelectedItem(redundancyName);
+				break;
+				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE:
+					final RedundancyMode redundancyMode = RedundancyMode.values()[b];
+					cmbBxMode.setSelectedItem(redundancyMode);
+					break;
+				case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS:
+
+					final RedundancyStatus redundancyStatus = RedundancyStatus.values()[b];
+					final RedundancyName selectedItem = (RedundancyName) cmbBxName.getSelectedItem();
+
+					if(redundancyStatus==RedundancyStatus.STANDBY){
+
+						lblSetOnline.setEnabled(true);
+						lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+						if(selectedItem==RedundancyName.BUC_B)
+							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
+						else
+							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
+
+					}else if(redundancyStatus==RedundancyStatus.ONLINE){
+
+						lblSetOnline.setEnabled(false);
+						lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+						if(selectedItem==RedundancyName.BUC_A)
+							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg")));
+						else
+							lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg")));
+					}else{
+						lblSetOnline.setEnabled(false);
+						lblImage.setIcon(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg")));
+					}
+				}
+			}else
+				logger.warn(packet);
+	}
+
+	@Override
+	public void run() {
+		try{
+
+			cptq.add(redundancyEnablePacket);
+			cptq.add(redundancyModePacket);
+			cptq.add(redundancyNamePacket);
+			cptq.add(redundancyStatusPacket);
+
+		}catch(Exception ex){
+			logger.catching(ex);
+		}
 	}
 }

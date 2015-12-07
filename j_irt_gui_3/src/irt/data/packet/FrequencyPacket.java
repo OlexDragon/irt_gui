@@ -14,7 +14,7 @@ public class FrequencyPacket extends PacketAbstract {
 				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				PacketImp.PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY,
-				value,
+				value!=null ? PacketImp.toBytes(value) : null,
 				value!=null ? Priority.COMMAND : Priority.REQUEST);
 	}
 }

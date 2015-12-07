@@ -5,7 +5,6 @@ import java.util.Arrays;
 import irt.data.PacketThreadWorker;
 import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
-import irt.data.network.NetworkAddress;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
@@ -78,11 +77,13 @@ public class Getter extends GetterAbstract {
 								tmp = (Integer) (source = new Integer(pl.getInt(0)));
 								break;
 							case 13:
-								NetworkAddress networkAddress = new NetworkAddress();
-								networkAddress.set(packet);
-								source = networkAddress;
-								tmp = networkAddress.hashCode();
-								break;
+								//Moved to the NetworkPanel
+
+								//								NetworkAddress networkAddress = new NetworkAddress();
+//								networkAddress.set(packet);
+//								source = networkAddress;
+//								tmp = networkAddress.hashCode();
+								return false;
 							default:
 								switch (packetId2) {
 								case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0:

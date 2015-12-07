@@ -8,11 +8,21 @@ import irt.data.packet.Payload;
 
 public class NetworkAddress {
 
-	public enum ADDRESS_TYPE{
-		UNKNOWN,
-		STATIC,
-		DYNAMIC
-		
+	public enum AddressType{
+		UNKNOWN("Unkmown"),
+		STATIC("Static"),
+		DYNAMIC("Dinamic");
+
+		private String description; 	public String getDescription() { return description; } public void setDescription(String description) { this.description = description; }
+
+		AddressType(String description){
+			this.description = description;
+		}
+
+		@Override
+		public String toString(){
+			return description;
+		}
 	}
 	//{address type (1 byte), IP address (4 bytes), Mask (4 bytes), Gateway (4 bytes)}
 	private byte type;
@@ -47,7 +57,7 @@ public class NetworkAddress {
 		return address!=null ? asString(gateway, ".") : null;
 	}
 
-	public byte[] asBytes(){
+	public byte[] toBytes(){
 
 		byte[] copyOf = Arrays.copyOf(new byte[]{type}, 13);
 		System.arraycopy(address, 0, copyOf, 1, address.length);
@@ -74,7 +84,7 @@ public class NetworkAddress {
 	}
 
 	public String getTypeAsString() {
-		return ADDRESS_TYPE.values()[type].toString();
+		return AddressType.values()[type].toString();
 	}
 
 	@Override
@@ -110,9 +120,16 @@ public class NetworkAddress {
 
 	public NetworkAddress getCopy() {
 		NetworkAddress na = new NetworkAddress();
-		na.setAddress(Arrays.copyOf(address, address.length));
-		na.setGateway(Arrays.copyOf(gateway, gateway.length));
-		na.setMask(Arrays.copyOf(mask, mask.length));
+
+		if(address!=null)
+			na.setAddress(Arrays.copyOf(address, address.length));
+
+		if(gateway!=null)
+			na.setGateway(Arrays.copyOf(gateway, gateway.length));
+
+		if(mask!=null)
+			na.setMask(Arrays.copyOf(mask, mask.length));
+
 		na.setType(type);
 		return na;
 	}
@@ -161,7 +178,7 @@ public class NetworkAddress {
 		setValue(gateway, text);	
 	}
 
-	public void setType(ADDRESS_TYPE at) {
+	public void setType(AddressType at) {
 		setType((byte) at.ordinal());
 	}
 

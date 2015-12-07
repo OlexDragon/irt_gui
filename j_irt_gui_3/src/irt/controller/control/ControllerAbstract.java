@@ -1,6 +1,7 @@
 package irt.controller.control;
 
 import java.awt.Component;
+import java.util.Objects;
 import java.util.Observable;
 
 import javax.swing.JPanel;
@@ -44,6 +45,7 @@ public abstract class ControllerAbstract implements Runnable{
 	protected int deviceType;
 
 	public ControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style) {
+		Objects.requireNonNull(packetWork);
 
 		this.packetWork = packetWork;
 		this.style = style;
@@ -130,10 +132,11 @@ public abstract class ControllerAbstract implements Runnable{
 	}
 
 	protected void setPacketWork(PacketWork packetWork) {
+		Objects.requireNonNull(packetWork);
+
 		if(this.packetWork!=null)
 			this.packetWork.removeVlueChangeListener(valueChangeListener);
 		this.packetWork = packetWork;
-		this.packetWork.removeVlueChangeListener(valueChangeListener);
 	}
 
 	public PacketWork getPacketWork() {

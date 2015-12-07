@@ -17,13 +17,13 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	private final PacketHeader header;
 	private final Payload payload;
 
-	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte command, Number parameterId, Priority priority){
+	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte payloadCommand, byte[] payloadData, Priority priority){
 		linkHeader = new LinkHeader(linkAddr, (byte)0, (short)0);
 		header = new PacketHeader();
 		header.setType(packetType);
 		header.setGroupId(groupId);
 		header.setPacketId(packetId);
-		payload = new Payload( new ParameterHeader( command), parameterId!=null ? PacketImp.toBytes(parameterId) : null );
+		payload = new Payload( new ParameterHeader( payloadCommand), payloadData);
 		this.priority = priority;
 	}
 

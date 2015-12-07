@@ -14,7 +14,7 @@ public class ALCEnablePacket extends PacketAbstract {
 				PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_BUC_APC_ENABLE,
-				value,
+				value!=null ? PacketImp.toBytes(value) : null,
 				value!=null
 					? Priority.COMMAND
 					: Priority.REQUEST);

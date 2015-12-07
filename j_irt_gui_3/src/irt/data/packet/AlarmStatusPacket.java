@@ -10,7 +10,13 @@ public class AlarmStatusPacket extends PacketAbstract{
 	}
 
 	protected AlarmStatusPacket(byte linkAddr, byte alarmCommand, short alarmId){
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, (short) (linkAddr + alarmCommand + alarmId), PacketImp.GROUP_ID_ALARM, alarmCommand, alarmId, Priority.ALARM);
+		super(linkAddr,
+				PacketImp.PACKET_TYPE_REQUEST,
+				(short) (linkAddr + alarmCommand + alarmId),
+				PacketImp.GROUP_ID_ALARM,
+				alarmCommand,
+				PacketImp.toBytes(alarmId),
+				Priority.ALARM);
 	}
 
 	public enum AlarmSeverities{

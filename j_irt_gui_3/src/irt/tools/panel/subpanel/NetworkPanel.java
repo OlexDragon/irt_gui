@@ -9,6 +9,16 @@ import java.awt.Insets;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -24,64 +34,127 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
-import irt.controller.NetworkController;
-import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
-import irt.controller.serial_port.value.getter.Getter;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
-import irt.data.PacketWork;
-import irt.data.RundomNumber;
-import irt.data.network.NetworkAddress.ADDRESS_TYPE;
+import irt.data.listener.PacketListener;
+import irt.data.network.NetworkAddress;
+import irt.data.network.NetworkAddress.AddressType;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.NetworkAddressPacket;
+import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.ip_address.IpAddressTextField;
 
-public class NetworkPanel extends JPanel implements Refresh {
+public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketListener {
 	private static final long serialVersionUID = 69871876592867701L;
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private final Logger logger = LogManager.getLogger();
 
-	private JLabel lblAddressType;
-	private JLabel lblIpAddress;
-	private JLabel lblSubnetMask;
-	private JLabel lblDefaultMask;
+	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
+	public  final 	ScheduledExecutorService 	services = Executors.newScheduledThreadPool(1);
+	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
+	private final 	NetworkAddressPacket 		packet;
+	private final 	NetworkAddress				networkAddress = new NetworkAddress();
+	private 	 	NetworkAddress				networkAddressTmp;
 
-	private JComboBox<String> comboBoxAddressType;
+	private final JLabel lblAddressType;
+	private final JLabel lblIpAddress;
+	private final JLabel lblSubnetMask;
+	private final JLabel lblDefaultMask;
+
+	private final JButton btnCansel;
+	private final JButton btnOk;
+
+	private JComboBox<AddressType> comboBoxAddressType;
 	private JPanel panel_1;
 	private IpAddressTextField ipAddressTextField;
 	private IpAddressTextField ipMaskTextField;
 	private IpAddressTextField ipGatewayTextField;
 
-	private NetworkController networkController;
+	private final ActionListener btnOkActionListener = new ActionListener() {
 
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try{
+				saveSettings();
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
+		}
+	};;
+
+	private final ActionListener  btnCanselActionListener = new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try{
+				cansel();
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
+		}
+	};
+
+	private final KeyListener keyListener = new KeyListener() {
+		
+		@Override public void keyReleased(KeyEvent e) {
+			if(e.getKeyCode()==KeyEvent.VK_ESCAPE)
+				cansel();
+		}
+		@Override public void keyPressed(KeyEvent arg0) { }
+		@Override public void keyTyped(KeyEvent e) {}	
+	};
+
+	private FocusListener focusListener = new FocusListener() {
+		
+		@Override public void focusGained(FocusEvent arg0) {
+			stop();
+		}
+		
+		@Override
+		public void focusLost(FocusEvent e) {
+			IpAddressTextField textField = (IpAddressTextField)e.getSource();
+			String name = textField.getName();
+			logger.debug("KeyAdapter.keyTyped text={}", name);
+			if(networkAddressTmp!=null)
+				switch(name){
+				case "address":
+					networkAddressTmp.setAddress(textField.getText());
+					break;
+				case "mask":
+					networkAddressTmp.setMask(textField.getText());
+					break;
+				case "gateway":
+					networkAddressTmp.setGateway(textField.getText());
+				}
+
+			setButtonEnabled();
+		}
+	};
+
+	// ******************************* constructor NetworkPanel   ***************************************************
 	public NetworkPanel(final int deviceType, final LinkHeader linkHeader) {
+
+		packet = new NetworkAddressPacket(linkHeader.getAddr(), null);
+
 		addAncestorListener(new AncestorListener() {
 
 			public void ancestorMoved(AncestorEvent arg0) {}
 			public void ancestorAdded(AncestorEvent arg0) {
-				networkController = new NetworkController(deviceType, new NetworkWorker(linkHeader), NetworkPanel.this, Style.CHECK_ALWAYS);
-				networkController.setWaitTime(15000);
-				Thread t = new Thread(networkController, "NetworkPanel.NetworkController-"+new RundomNumber());
-				int priority = t.getPriority();
-				if(priority<Thread.MAX_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
+				start();
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-				networkController.stop();
-				networkController = null;
+				stop();
 			}
 		});
 
 		Font font = Translation.getFont().deriveFont(13f);
-		
-		DefaultComboBoxModel<String> boxModel = new DefaultComboBoxModel<>(new String[]{
-																					Translation.getValue(String.class, "static", "Static"),
-																					Translation.getValue(String.class, "dynamic", "Dinamic")});
+
 		
 		lblAddressType = new JLabel(Translation.getValue(String.class, "address_type", "Address Type"));
 		lblAddressType.setFocusTraversalKeysEnabled(false);
@@ -114,46 +187,24 @@ public class NetworkPanel extends JPanel implements Refresh {
 		btnDefault.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					if (JOptionPane.showConfirmDialog(NetworkPanel.this,
-							"Do you really want to change the network settings?", "Network",
-							JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
+					if (JOptionPane.showConfirmDialog(NetworkPanel.this, "Do you really want to change the network settings?", "Network", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
 
-						ADDRESS_TYPE networkAddressType = getNetworkAddressType();
-						switch (networkAddressType) {
-						default:
-							String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
-							ipAddressTextField.setText(tmpStr);
+						String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
+						ipAddressTextField.setText(tmpStr);
 
-							tmpStr = IrtPanel.PROPERTIES.getProperty("network_mask", "255.255.255.0");
-							ipMaskTextField.setText(tmpStr);
+						tmpStr = IrtPanel.PROPERTIES.getProperty("network_mask", "255.255.255.0");
+						ipMaskTextField.setText(tmpStr);
 
-							tmpStr = IrtPanel.PROPERTIES.getProperty("network_gateway", "192.168.0.1");
-							ipGatewayTextField.setText(tmpStr);
+						tmpStr = IrtPanel.PROPERTIES.getProperty("network_gateway", "192.168.0.1");
+						ipGatewayTextField.setText(tmpStr);
 
-							try {
-								Thread.sleep(100);
-							} catch (InterruptedException e1) {
-								logger.catching(e1);
-							}
+						comboBoxAddressType.setSelectedItem(AddressType.STATIC);
 
-						case DYNAMIC:
-							comboBoxAddressType.setSelectedIndex(networkAddressType.ordinal() - 1);
-						}
-
-						networkController.prepareToSave();
-						networkController.saveSettings();
+						saveSettings();
 					}
 				} catch (Exception ex) {
 					logger.catching(ex);
 				}
-			}
-
-			private ADDRESS_TYPE getNetworkAddressType() {
-				ADDRESS_TYPE networkAddressType = ADDRESS_TYPE.valueOf(
-															IrtPanel.PROPERTIES.getProperty("network_type", "Static").toUpperCase());
-				if(networkAddressType==null)
-					networkAddressType = ADDRESS_TYPE.STATIC;
-				return networkAddressType;
 			}
 		});
 		btnDefault.setMargin(new Insets(0, 3, 0, 3));
@@ -201,6 +252,9 @@ public class NetworkPanel extends JPanel implements Refresh {
 		ipAddressTextField.setEditable(true);
 		ipAddressTextField.setName("address");
 		ipAddressTextField.setBounds(0, 45, 150, 20);
+		ipAddressTextField.addKeyListener(keyListener);
+		ipAddressTextField.addFocusListener(focusListener);
+
 		GridBagLayout gridBagLayout = (GridBagLayout) ipAddressTextField.getLayout();
 		gridBagLayout.rowWeights = new double[]{0.0};
 		gridBagLayout.rowHeights = new int[]{0};
@@ -216,6 +270,9 @@ public class NetworkPanel extends JPanel implements Refresh {
 		ipMaskTextField.setEditable(true);
 		ipMaskTextField.setName("mask");
 		ipMaskTextField.setBounds(0, 77, 150, 20);
+		ipMaskTextField.addKeyListener(keyListener);
+		ipMaskTextField.addFocusListener(focusListener);
+
 		GridBagLayout gbl_ipMaskTextField = (GridBagLayout) ipMaskTextField.getLayout();
 		gbl_ipMaskTextField.rowWeights = new double[]{0.0};
 		gbl_ipMaskTextField.rowHeights = new int[]{0};
@@ -231,6 +288,9 @@ public class NetworkPanel extends JPanel implements Refresh {
 		ipGatewayTextField.setEditable(true);
 		ipGatewayTextField.setName("gateway");
 		ipGatewayTextField.setBounds(0, 109, 150, 20);
+		ipGatewayTextField.addKeyListener(keyListener);
+		ipGatewayTextField.addFocusListener(focusListener);
+
 		GridBagLayout gbl_ipGatewayTextField = (GridBagLayout) ipGatewayTextField.getLayout();
 		gbl_ipGatewayTextField.rowWeights = new double[]{0.0};
 		gbl_ipGatewayTextField.rowHeights = new int[]{0};
@@ -240,25 +300,80 @@ public class NetworkPanel extends JPanel implements Refresh {
 		ipGatewayTextField.setMinimumSize(new Dimension(150, 20));
 		ipGatewayTextField.setMaximumSize(new Dimension(150, 20));
 		panel_1.add(ipGatewayTextField);
+
+		DefaultComboBoxModel<AddressType> boxModel = getComboboxModel();
 		comboBoxAddressType = new JComboBox<>(boxModel);
+		comboBoxAddressType.addKeyListener(keyListener);
 		comboBoxAddressType.setBounds(0, 11, 150, 22);
 		panel_1.add(comboBoxAddressType);
 		comboBoxAddressType.setName("type");
 		comboBoxAddressType.setFont(font);
+		comboBoxAddressType.addItemListener(new ItemListener() {
+			
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				logger.trace("itemStateChanged({})", e);
+				if(e.getStateChange()==ItemEvent.SELECTED){
 
-		JButton btnOk = new JButton("OK");
+					NetworkAddress.AddressType at;
+
+					boolean isStatic = comboBoxAddressType.getSelectedItem().equals(AddressType.STATIC);
+
+					if(isStatic){
+						ipAddressTextField.setEnabled(true);
+						ipMaskTextField.setEnabled(true);
+						ipGatewayTextField.setEnabled(true);
+						at = NetworkAddress.AddressType.STATIC;
+					}else{
+						ipAddressTextField.setEnabled(false);
+						ipMaskTextField.setEnabled(false);
+						ipGatewayTextField.setEnabled(false);
+						at = NetworkAddress.AddressType.DYNAMIC;
+					}
+
+					logger.trace("itemStateChanged() AddressType={}", at);
+					if(networkAddressTmp!=null){
+						networkAddressTmp.setType(at);
+						setButtonEnabled();
+
+						startStop();
+					}
+				}
+			}
+		});
+
+		btnOk = new JButton("OK");
+		btnOk.addActionListener(btnOkActionListener);
 		btnOk.setName("ok");
 		btnOk.setEnabled(false);
 		btnOk.setBounds(0, 140, 73, 23);
 		panel_1.add(btnOk);
 
-		JButton btnCansel = new JButton("Cansel");
+		btnCansel = new JButton("Cansel");
+		btnCansel.addActionListener(btnCanselActionListener);
 		btnCansel.setName("cansel");
 		btnCansel.setEnabled(false);
 		btnCansel.setBounds(77, 140, 73, 23);
 		panel_1.add(btnCansel);
 		setLayout(groupLayout);
 
+	}
+
+	private DefaultComboBoxModel<AddressType> getComboboxModel() {
+
+		AddressType[] values = AddressType.values();
+		AddressType[] items = new AddressType[2];
+
+		int index = 0;
+		for(int i=0; i<values.length; i++)
+			if(values[i]!=AddressType.UNKNOWN){
+				values[i].setDescription(Translation.getValue(String.class, values[i].name(), values[i].getDescription()));
+				items[index] = values[i];
+				index++;
+			}
+		
+		DefaultComboBoxModel<AddressType> boxModel = new DefaultComboBoxModel<>(items);
+		return boxModel;
 	}
 
 	@Override
@@ -278,19 +393,101 @@ public class NetworkPanel extends JPanel implements Refresh {
 		lblDefaultMask.setFont(font);
 		lblDefaultMask.setText(Translation.getValue(String.class, "default_gateway", "Default Gateway"));
 
-		DefaultComboBoxModel<String> boxModel = new DefaultComboBoxModel<>(new String[]{
-																				Translation.getValue(String.class, "static", "Static"),
-																				Translation.getValue(String.class, "dynamic", "Dinamic")});
 		comboBoxAddressType.setFont(font);
-		comboBoxAddressType.setModel(boxModel);
+		comboBoxAddressType.setModel(getComboboxModel());
 		logger.debug("comboBoxAddressType.getSelectedItem()={}", comboBoxAddressType.getSelectedItem());
 	}
 
-	//******************************************   NetworkWorker   *******************************************************
-	private class NetworkWorker extends Getter{
+	@Override
+	public void run() {
+		try{
+			cptq.add(packet);
 
-		public NetworkWorker(LinkHeader linkHeader) {
-			super(linkHeader, PacketImp.IRT_SLCP_PACKET_ID_NETWORK, PacketImp.IRTSCP_PARAMETER_ID_NETWORK_ADDRESS, PacketWork.PACKET_NETWORK_ADDRESS);
+		}catch(Exception e){
+			logger.catching(e);
 		}
+	}
+
+	@Override
+	public void packetRecived(Packet packet) {
+		try{
+			if(this.packet.equals(packet)){
+
+				if(packet.getHeader().getOption()==PacketImp.NO_ERROR){
+
+					networkAddress.set(packet);
+
+					if (!networkAddress.equals(networkAddressTmp)) {
+
+						final AddressType type = AddressType.values()[networkAddress.getType()];
+						comboBoxAddressType.setSelectedItem(type);
+
+						ipAddressTextField.setText(networkAddress.getAddressAsString());
+						ipMaskTextField.setText(networkAddress.getMaskAsString());
+						ipGatewayTextField.setText(networkAddress.getGatewayAsString());
+
+						networkAddressTmp = networkAddress.getCopy();
+					}
+				}else
+					logger.error(packet);
+			}
+
+		}catch(Exception e){
+			logger.catching(e);
+		}
+	}
+
+	private void setButtonEnabled() {
+		logger.debug("setButtonEnabled() {}, {}", networkAddress, networkAddressTmp);
+
+		if(networkAddressTmp==null || networkAddressTmp.equals(networkAddress)){
+			btnCansel.setEnabled(false);
+			btnOk.setEnabled(false);
+		}else{
+			btnCansel.setEnabled(true);
+			btnOk.setEnabled(true);
+		}
+		startStop();
+	}
+
+	private void cansel() {
+		networkAddressTmp = networkAddress.getCopy();
+		final AddressType type = AddressType.values()[networkAddress.getType()];
+		comboBoxAddressType.setSelectedItem(type);
+		ipAddressTextField.setText(networkAddress.getAddressAsString());
+		ipMaskTextField.setText(networkAddress.getMaskAsString());
+		ipGatewayTextField.setText(networkAddress.getGatewayAsString());
+		setButtonEnabled();
+	}
+
+	public void saveSettings() {
+		networkAddressTmp.setAddress(ipAddressTextField.getText());
+		networkAddressTmp.setMask(ipMaskTextField.getText());
+		networkAddressTmp.setGateway(ipGatewayTextField.getText());
+
+		final NetworkAddressPacket packetWork = new NetworkAddressPacket(packet.getLinkHeader().getAddr(), networkAddressTmp);
+		GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+		networkAddressTmp = null;
+		setButtonEnabled();
+		start();
+	}
+
+	private void startStop() {
+		if(!networkAddress.equals(networkAddressTmp))
+			stop();
+		else
+			start();
+	}
+
+	private void start() {
+		cptq.addPacketListener(this);
+		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+			scheduleAtFixedRate = services.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+	}
+
+	private void stop() {
+		cptq.removePacketListener(this);
+		if(scheduleAtFixedRate==null)
+			scheduleAtFixedRate.cancel(true);
 	}
 }
