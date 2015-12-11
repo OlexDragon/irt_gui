@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -39,16 +40,16 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 	public PacketAbstract(PacketId packetId, byte[] answer) throws PacketParsingException {
 		logger.trace("\n\t ENTRY ({})", answer);
 
-		if(answer!=null && answer.length!=0){
+		answer = Optional
+				.ofNullable(answer)
+				.filter(a->a.length>0)
+				.orElseThrow(()->new PacketParsingException("\n\t Constructor parameter can not be null or empty."));
 
-			byte[] bs  = removeAcknowledgmentAndChecksum(answer);
+		byte[] bs  = removeAcknowledgmentAndChecksum(answer);
 
-			linkHeader = new LinkHeader(bs);
-			packetHeader = new PacketHeader(bs);
-			payloads.addAll(Payload.parsePayloads(packetId, bs));
-
-		}else
-			throw new PacketParsingException("\n\t Constructor parameter can not be null or empty.");
+		linkHeader = new LinkHeader(bs);
+		packetHeader = new PacketHeader(bs);
+		payloads.addAll(Payload.parsePayloads(packetId, bs));
 	}
 
 	private byte[] removeAcknowledgmentAndChecksum(byte[] answer) throws PacketParsingException {
@@ -172,8 +173,10 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 	public void setAnswer(byte[] answer) {
 		this.answer = answer;
 
-		setChanged();
-		notifyObservers();
+		if(answer!=null){
+			setChanged();
+			notifyObservers();
+		}
 	}
 
 	@Override
@@ -268,6 +271,11 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		obs.setAccessible(true);
 		final Vector<Observer> vector = (Vector<Observer>) obs.get(this);
 		return vector.toArray(new Observer[vector.size()]);
+	}
+
+	@Override
+	public void setLinkHeaderAddr(byte addr) {
+		getLinkHeader().setAddr(addr);
 	}
 
 	@Override

@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import irt.gui.IrtCuiProperties;
+import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.ScheduledServices;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -140,8 +140,8 @@ public class BiasController extends FieldsControllerAbstract {
 				if (deviceID != null) {
 					scheduleAtFixedRate.cancel(true);
 
-					final String cssFilePath = String.format(IrtCuiProperties.PANEL_PROPERTIES, BiasController.this.getName(), "css." + deviceID);
-					final Optional<String> optionalCssPath = Optional.ofNullable(IrtCuiProperties.getProperty(cssFilePath));
+					final String cssFilePath = String.format(IrtGuiProperties.PANEL_PROPERTIES, BiasController.this.getName(), "css." + deviceID);
+					final Optional<String> optionalCssPath = Optional.ofNullable(IrtGuiProperties.getProperty(cssFilePath));
 
 					setCss(optionalCssPath);
 				}

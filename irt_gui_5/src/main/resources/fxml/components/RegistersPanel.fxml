@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<GridPane id="bias" fx:id="gridPane" onContextMenuRequested="#gridPanContextMenuRequest" stylesheets="@../../styles/bias.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.RegisterPanel">
+	<children>
+		<Label cacheShape="false" centerShape="false" focusTraversable="false" scaleShape="false" visible="false">
+			<contextMenu>
+				<ContextMenu fx:id="contextMenu">
+					<items>
+						<Menu fx:id="registerMenu" mnemonicParsing="false" text="Add TextField" />
+                  <MenuItem mnemonicParsing="false" onAction="#removeTextFielonActionMenuItems" text="Remove TextField" />
+						<SeparatorMenuItem mnemonicParsing="false" />
+						<MenuItem fx:id="showGridMenuItem" mnemonicParsing="false" onAction="#showGridonActionMenuItems" text="Show Grid" />
+                  <Menu fx:id="alignmentMenu" mnemonicParsing="false" onAction="#alignmentonActionMenuItems" text="Alignment" />
+						<SeparatorMenuItem mnemonicParsing="false" />
+						<MenuItem fx:id="addColumnMenuItem" mnemonicParsing="false" onAction="#addColumnonActionMenuItems" text="Add Column" />
+						<MenuItem fx:id="deleteColumnMenuItem" disable="true" mnemonicParsing="false" onAction="#deleteColumnonActionMenuItems" text="Delete Column" />
+						<SeparatorMenuItem mnemonicParsing="false" />
+						<MenuItem fx:id="addRowMenuItem" mnemonicParsing="false" onAction="#addRowonActionMenuItems" text="Add Row" />
+						<MenuItem fx:id="deleteRowMenuItem" disable="true" mnemonicParsing="false" onAction="#deleteRowonActionMenuItems" text="Delete Row" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <Menu fx:id="backgroundMenu" mnemonicParsing="false" text="Background Image" />
+					</items>
+				</ContextMenu>
+			</contextMenu>
+		</Label>
+		<VBox alignment="CENTER" fillWidth="false" onMouseEntered="#paneMouseEntered" styleClass="mouseOver" />
+	</children>
+	<columnConstraints>
+		<ColumnConstraints hgrow="ALWAYS" />
+	</columnConstraints>
+	<rowConstraints>
+		<RowConstraints vgrow="ALWAYS" />
+	</rowConstraints>
+</GridPane>

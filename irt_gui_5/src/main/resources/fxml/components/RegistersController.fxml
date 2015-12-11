@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<BorderPane prefHeight="290.0" prefWidth="435.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.RegistersController">
+   <right>
+      <HBox>
+         <children>
+            <Slider fx:id="slider" disable="true" onMouseReleased="#sliderMouseReleased" orientation="VERTICAL" showTickLabels="true" showTickMarks="true" />
+         </children>
+      </HBox>
+   </right>
+   <top>
+      <AnchorPane BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_RIGHT" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <fx:include fx:id="calibModeButton" source="CalibrationModeButton.fxml" />
+                  <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveValues" text="Save">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button fx:id="resetButton" mnemonicParsing="false" onAction="#resetValues" text="Reset">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <CheckBox fx:id="stepCheckBox" mnemonicParsing="false" onAction="#stepCheckBoxAction" text="Use Step">
+                     <tooltip>
+                        <Tooltip text="Step" />
+                     </tooltip>
+                  </CheckBox>
+                  <TextField fx:id="stepTextField" onAction="#steponActionTextField" prefColumnCount="3">
+                     <tooltip>
+                        <Tooltip text="Step By" />
+                     </tooltip>
+                  </TextField>
+                  <MenuButton mnemonicParsing="false">
+                    <items>
+                        <Menu fx:id="profileMenu" mnemonicParsing="false" text="Profiles" />
+                      <MenuItem fx:id="saveMenu" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemsSave" text="Save" />
+                      <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemsSaveAs" text="Save as..." />
+                    </items>
+                  </MenuButton>
+               </children>
+               <padding>
+                  <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+               </padding>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </top>
+   <center>
+      <fx:include fx:id="registersPanel" source="RegistersPanel.fxml" />
+   </center>
+</BorderPane>

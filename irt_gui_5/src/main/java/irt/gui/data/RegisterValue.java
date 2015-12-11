@@ -40,12 +40,16 @@ public class RegisterValue {
 
 	@Override
 	public int hashCode() {
+
 		final int prime = 31;
 		int result = prime + addr;
-		result = prime * result + index;
-		return prime * result + ((value == null) ? 0 : value.hashCode());
+
+		return prime * result + index;
 	}
 
+	/**
+	 * compares addr and index. do not compares value
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -58,11 +62,6 @@ public class RegisterValue {
 		if (addr != other.addr)
 			return false;
 		if (index != other.index)
-			return false;
-		if (value == null) {
-			if (other.value != null)
-				return false;
-		} else if (!value.equals(other.value))
 			return false;
 		return true;
 	}

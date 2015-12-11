@@ -21,7 +21,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 
-public class ValueController extends FieldsControllerAbstract {
+public class ValuesController extends FieldsControllerAbstract {
 
 	@FXML private Label		titleLabel;
 	@FXML private Label		valueLabel;

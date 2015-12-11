@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<Label fx:id="label" text="Label" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+   <contextMenu>
+      <ContextMenu>
+         <items>
+            <Menu fx:id="menuValues" mnemonicParsing="false" text="Values">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Action 1" />
+              </items>
+            </Menu>
+         </items>
+      </ContextMenu>
+   </contextMenu>
+</Label>

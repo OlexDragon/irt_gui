@@ -9,11 +9,11 @@ import javafx.scene.control.TitledPane;
 public class ValuePanel {
 
 	@FXML private TitledPane valuePanel;
-	@FXML private ValueController valueController;
+	@FXML private ValuesController valuesController;
 
 	public void initialize(String title, RangePacket rangePacket, LinkedPacket valuePacket) throws PacketParsingException, InterruptedException{
 		valuePanel.setText(title);
-		valueController.setTitle(title);
-		valueController.initialize(rangePacket, valuePacket);
+		valuesController.setTitle(title);
+		valuesController.initialize(rangePacket, valuePacket);
 	}
 }

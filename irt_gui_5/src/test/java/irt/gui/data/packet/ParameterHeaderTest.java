@@ -12,16 +12,16 @@ public class ParameterHeaderTest {
 
 	@Test
 	public void test1() throws PacketParsingException {
-		ParameterHeader ph = new ParameterHeader(PacketId.DEVICE_DEBAG_POTENTIOMETER);
+		ParameterHeader ph = new ParameterHeader(PacketId.DEVICE_DEBAG_REGISTER);
 		ph.setSize((short) 30014);
-		assertEquals(PacketId.DEVICE_DEBAG_POTENTIOMETER.getParameterHeaderCode(), ph.getParameterHeaderCode());
+		assertEquals(PacketId.DEVICE_DEBAG_REGISTER.getParameterHeaderCode(), ph.getParameterHeaderCode());
 		assertEquals((short) 30014, ph.getPayloadSize().getSize());
 	}
 
 	@Test
 	public void test2() throws PacketParsingException {
-		ParameterHeader ph = new ParameterHeader(PacketId.DEVICE_DEBAG_POTENTIOMETER, new PayloadSize((short) 30014));
-		assertEquals(PacketId.DEVICE_DEBAG_POTENTIOMETER.getParameterHeaderCode(), ph.getParameterHeaderCode());
+		ParameterHeader ph = new ParameterHeader(PacketId.DEVICE_DEBAG_REGISTER, new PayloadSize((short) 30014));
+		assertEquals(PacketId.DEVICE_DEBAG_REGISTER.getParameterHeaderCode(), ph.getParameterHeaderCode());
 		assertEquals((short) 30014, ph.getPayloadSize().getSize());
 	}
 
@@ -33,6 +33,6 @@ public class ParameterHeaderTest {
 
 	@Test(expected=PacketParsingException.class)
 	public void tooShortTest() throws PacketParsingException {
-		 new ParameterHeader(PacketId.DEVICE_DEBAG_POTENTIOMETER, null);
+		 new ParameterHeader(PacketId.DEVICE_DEBAG_REGISTER, null);
 	}
 }

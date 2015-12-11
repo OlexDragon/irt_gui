@@ -8,87 +8,101 @@
 <?import javafx.scene.layout.*?>
 
 <AnchorPane id="AnchorPane" prefHeight="530.0" prefWidth="838.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.IrtGuiController">
-   <children>
-      <SplitPane dividerPositions="0.3885416666666667" layoutX="213.0" layoutY="103.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <items>
-          <AnchorPane>
-               <children>
-                  <VBox prefHeight="782.0" prefWidth="962.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <children>
-                        <fx:include fx:id="serialPort" source="components/SerialPortSelector.fxml" />
-                        <fx:include source="components/Info.fxml" />
-                        <fx:include source="components/AlarmsPanel.fxml" />
-                     </children>
-                  </VBox>
-               </children>
-            </AnchorPane>
-          <AnchorPane>
-               <children>
-                  <TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
-                    <tabs>
-                        <Tab fx:id="measurementTab" onSelectionChanged="#selectionChanged" text="Measurement">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+	<children>
+		<SplitPane dividerPositions="0.3885416666666667" layoutX="213.0" layoutY="103.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<items>
+				<AnchorPane>
+					<children>
+						<VBox prefHeight="782.0" prefWidth="962.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+							<children>
+								<fx:include fx:id="serialPort" source="components/SerialPortSelector.fxml" />
+								<fx:include source="components/Info.fxml" />
+								<fx:include source="components/AlarmsPanel.fxml" />
+							</children>
+						</VBox>
+					</children>
+				</AnchorPane>
+				<AnchorPane>
+					<children>
+						<TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
+							<tabs>
+								<Tab fx:id="measurementTab" onSelectionChanged="#selectionChanged" text="Measurement">
+									<content>
+										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+											<children>
+												<fx:include fx:id="measurement" source="components/Measurements.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+											</children>
+										</AnchorPane>
+									</content>
+								</Tab>
+								<Tab fx:id="controlTab" onSelectionChanged="#selectionChanged" text="Control">
+									<content>
+										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+											<children>
+												<fx:include fx:id="control" source="components/ValuePanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+											</children>
+										</AnchorPane>
+									</content>
+								</Tab>
+								<Tab fx:id="bias1Tab" onSelectionChanged="#selectionChanged" text="BIAS 1">
+									<content>
+										<AnchorPane>
+											<children>
+												<fx:include fx:id="bias1" source="components/Bias.fxml" />
+											</children>
+										</AnchorPane>
+									</content>
+								</Tab>
+								<Tab fx:id="bias2Tab" onSelectionChanged="#selectionChanged" text="BIAS 2">
+									<content>
+										<AnchorPane>
+											<children>
+												<fx:include fx:id="bias2" source="components/Bias.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+											</children>
+										</AnchorPane>
+									</content>
+								</Tab>
+								<Tab fx:id="converterTab" onSelectionChanged="#selectionChanged" text="Converter">
+									<content>
+										<AnchorPane>
+											<children>
+												<fx:include fx:id="converter" source="components/Converter.fxml" />
+											</children>
+										</AnchorPane>
+									</content>
+								</Tab>
+								<Tab fx:id="networkTab" onSelectionChanged="#selectionChanged" text="Network">
+									<content>
+										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+											<children>
+												<fx:include fx:id="network" source="components/NetworkPanel.fxml" />
+											</children>
+										</AnchorPane>
+									</content>
+								</Tab>
+								<Tab fx:id="debugInfoTab" onSelectionChanged="#selectionChanged" text="Info">
+									<content>
+										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="0.0" prefWidth="200.0">
+											<children>
+												<fx:include fx:id="debugInfo" source="components/DebugInfoPanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+											</children>
+										</AnchorPane>
+									</content>
+								</Tab>
+								<Tab text="Test Tab">
+									<content>
+										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>
-                                    <fx:include fx:id="measurement" source="components/Measurements.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <fx:include source="components/RegistersController.fxml" />
                                  </children>
-                              </AnchorPane>
-                          </content>
-                        </Tab>
-                        <Tab fx:id="controlTab" onSelectionChanged="#selectionChanged" text="Control">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                 <children>
-                                    <fx:include fx:id="control" source="components/ValuePanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                 </children>
-                              </AnchorPane>
-                          </content>
-                        </Tab>
-                      <Tab fx:id="bias1Tab" onSelectionChanged="#selectionChanged" text="BIAS 1">
-                        <content>
-                          <AnchorPane>
-                                 <children>
-                                    <fx:include fx:id="bias1" source="components/Bias.fxml" />
-                                 </children>
-                              </AnchorPane>
-                        </content>
-                      </Tab>
-                      <Tab fx:id="bias2Tab" onSelectionChanged="#selectionChanged" text="BIAS 2">
-                        <content>
-                          <AnchorPane>
-                                 <children>
-                                    <fx:include fx:id="bias2" source="components/Bias.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                 </children></AnchorPane>
-                        </content>
-                      </Tab>
-                        <Tab fx:id="converterTab" onSelectionChanged="#selectionChanged" text="Converter">
-                          <content>
-                            <AnchorPane>
-                                 <children>
-                                    <fx:include fx:id="converter" source="components/Converter.fxml" />
-                                 </children></AnchorPane>
-                          </content>
-                        </Tab>
-                        <Tab fx:id="networkTab" onSelectionChanged="#selectionChanged" text="Network">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                 <children>
-                                    <fx:include fx:id="network" source="components/NetworkPanel.fxml" />
-                                 </children></AnchorPane>
-                          </content>
-                        </Tab>
-                        <Tab fx:id="debugInfoTab" onSelectionChanged="#selectionChanged" text="Info">
-                          <content>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="0.0" prefWidth="200.0">
-                                 <children>
-                                    <fx:include fx:id="debugInfo" source="components/DebugInfoPanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                 </children></AnchorPane>
-                          </content>
-                        </Tab>
-                    </tabs>
-                  </TabPane>
-               </children></AnchorPane>
-        </items>
-      </SplitPane>
-   </children>
+										</AnchorPane>
+									</content>
+								</Tab>
+							</tabs>
+						</TabPane>
+					</children>
+				</AnchorPane>
+			</items>
+		</SplitPane>
+	</children>
 </AnchorPane>

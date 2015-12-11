@@ -1,7 +1,6 @@
 package irt.gui.data.packet.observable.device_debug;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
@@ -134,6 +133,60 @@ public class CallibrationModePacketTest {
 
 			port.openPort();
 
+			port.send(packet);
+			assertNotNull(packet.getAnswer());
+
+			port.closePort();
+
+		} catch (SerialPortException e) {
+			logger.catching(e);
+		}
+
+		logger.exit();
+	}
+
+	CalibrationMode calibrationMode = CalibrationMode.ON;
+	final Observer observer = new Observer() {
+
+		@Override
+		public void update(Observable o, Object arg) {
+			logger.debug("\n\t Observable: {}\n", o);
+
+			try {
+
+				CallibrationModePacket bp = new CallibrationModePacket(((LinkedPacket)o).getAnswer());
+				logger.debug("\n\t new PacketAbstract: {}\n", bp);
+
+				final CalibrationMode cm = bp.getCallibrationMode();
+				logger.trace(cm);
+
+				assertEquals(calibrationMode, cm);
+
+				calibrationMode = CalibrationMode.OFF;
+
+			} catch (PacketParsingException e) {
+				logger.catching(e);
+			}
+		}
+	};
+	@Test
+	public void testObserverSetOnOff() throws PacketParsingException, InterruptedException {
+		logger.entry();
+
+		LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
+
+
+		try {
+
+			port.openPort();
+
+			CallibrationModePacket packet = new CallibrationModePacket(calibrationMode);
+			packet.addObserver(observer);
+			port.send(packet);
+			assertNotNull(packet.getAnswer());
+
+			packet = new CallibrationModePacket(calibrationMode);
+			packet.addObserver(observer);
 			port.send(packet);
 			assertNotNull(packet.getAnswer());
 

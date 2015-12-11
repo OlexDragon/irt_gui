@@ -8,6 +8,6 @@
 
 <VBox xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ValuePanelController">
    <children>
-      <fx:include fx:id="value" source="ValueController.fxml" />
+      <fx:include fx:id="values" source="ValueController.fxml" />
    </children>
 </VBox>

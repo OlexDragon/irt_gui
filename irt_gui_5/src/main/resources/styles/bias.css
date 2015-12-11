@@ -1,3 +1,9 @@
-#biasVBox{
-	-fx-background-color: #336699;
+#bias{
+	-fx-background-color: #E5E4E2;
+	-fx-background-image: url("/images/register/background/100WCarrir.png");
+	-fx-background-repeat: stretch; 
+	-fx-background-size: stretch ;
+}
+.mouseOver:hover{
+	-fx-background-color: rgba(0, 255, 255, .05) ;
 }

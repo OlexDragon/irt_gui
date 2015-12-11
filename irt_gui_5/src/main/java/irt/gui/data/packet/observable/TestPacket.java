@@ -73,4 +73,10 @@ public class TestPacket  extends Observable implements LinkedPacket {
 	public Observer[] getObservers() throws Exception {
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
+
+	@Override
+	public void setLinkHeaderAddr(byte addr) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Auto-generated method stub");
+	}
 }

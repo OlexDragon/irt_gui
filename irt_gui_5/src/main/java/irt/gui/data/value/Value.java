@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 public class Value extends Observable{
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = LogManager.getLogger();
 
 	public enum Status{
 				IN_RANGE,
@@ -20,18 +20,18 @@ public class Value extends Observable{
 	private int type = 0;
 
 	protected Long oldValue;
-	protected long value;
+	protected Long value;
 
 	private long minValue;
 	private long maxValue;
 	protected int factor;
 	protected String prefix;
 
-	private boolean error;
+	protected boolean error;
 
 	protected Value(){}
 
-	public Value(long value, long minValue, long maxValue, int precision){
+	public Value(Long value, long minValue, long maxValue, int precision){
 		setFactor(precision);
 		setMinMax(minValue, maxValue);
 		setValue(value);
@@ -115,7 +115,31 @@ public class Value extends Observable{
 		setMaxValue(max);
 	}
 
-	public void setValue(long value) {
+	public Value setValue(Object value){
+		if(value != null){
+			switch(value.getClass().getSimpleName()){
+			case "String":
+				setValue((String)value);
+				break;
+			case "Short":
+			case "Integer":
+			case "Long":
+				setValue(((Number)value).longValue());
+				break;
+			case "Double":
+				setValue((double)value);
+				break;
+			default:
+				throw new IllegalStateException("The class " + value.getClass().getSimpleName() + " is not acceptable");
+			}
+		}
+		return this;
+	}
+
+	private void setValue(Long value) {
+
+		if(value==null)
+			return;
 
 		if (this.value != value || value<minValue || value>maxValue) {
 			oldValue = this.value;
@@ -134,18 +158,19 @@ public class Value extends Observable{
 				this.value = value;
 				notifyObservers(Status.IN_RANGE);
 			}
-		}
+		}else
+			error = false;
 	}
 
-	public void setValue(String text) {
+	private void setValue(String text) {
 		setValue(parseLong(text));
 	}
 
-	public void setValue(double value) {
-		// TODO Auto-generated method stub
+	private void setValue(Double value) {
+		this.value = (long) (value * factor);
 	}
 
-	public long getValue() {
+	public Long getValue() {
 		return value;
 	}
 
@@ -154,33 +179,44 @@ public class Value extends Observable{
 	}
 
 	/**
-	 * @return value - minValue
+	 * @return 'value - minValue'. if value==null return 'minValue'
 	 */
 	public int getRelativeValue() {
-		return (int) (value - minValue);
+		return (int) (value!=null ? value - minValue : minValue);
 	}
 
 	public void setRelativeValue(int relValue) {
 		setValue(relValue + minValue);
 	}
 
-	public long parseLong(String text) {
-		long value = 0;
+	public Long parseLong(String text) {
+
+		Long value;
+
 		if(text==null || text.trim().isEmpty()){
+
+			value = this.value;
 			error = true;
 		}else{
+
 			text = text.toUpperCase().replaceAll("[^\\d.E-]", "");
 
 			if(!text.isEmpty() && Character.isDigit(text.charAt(text.length()-1)))
 				try {
+
 					value = Math.round(Double.parseDouble(text)*factor);
 					error = false;
+
 				} catch (Exception e) {
+
+					value = this.value;
 					error = true;
 					logger.catching(e);
 				}
-			else
+			else{
+				value = this.value;
 				error = true;
+			}
 
 		}
 		return value;
@@ -192,12 +228,6 @@ public class Value extends Observable{
 
 	protected NumberFormat getInstance() {
 		return NumberFormat.getIntegerInstance();
-	}
-
-	public String toString(long value) {
-		NumberFormat numberFormat = getInstance();
-		double result = (double)value/factor;
-		return numberFormat.format(result)+prefix;
 	}
 
 	protected void setMinValue(long minValue) {
@@ -259,11 +289,11 @@ public class Value extends Observable{
 	}
 
 	public boolean hasChanged() {
-		return oldValue!=null && !oldValue.equals(value);
+		return oldValue!=null && oldValue!=value;
 	}
 
 	public String getExponentialValue() {
-		DecimalFormat df = new DecimalFormat("0.00000000000000E000");  
+		DecimalFormat df = new DecimalFormat("0.00000000000000E000");
 		return df.format((double)value/factor);
 	}
 
@@ -272,17 +302,29 @@ public class Value extends Observable{
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		return obj!=null ? obj.hashCode()==hashCode() : false;
-	}
-
-	@Override
 	public int hashCode() {
 		return new Long(value).hashCode();
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+
+		if(!(obj instanceof Value))
+			return false;
+
+		Value other = (Value)obj;
+		
+		return value!=null ? value.equals(other.value) : other.value!=null;
+	}
+
+	public String toString(long value) {
+		NumberFormat numberFormat = getInstance();
+		double result = (double)value/factor;
+		return numberFormat.format(result)+prefix;
+	}
+
+	@Override
 	public String toString() {
-		return toString(value);
+		return value!=null ? toString(value) : "";
 	}
 }

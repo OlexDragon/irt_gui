@@ -1,4 +1,3 @@
-
 package irt.gui.data.packet.observable.device_debug;
 
 import irt.gui.data.PacketIdDetails;

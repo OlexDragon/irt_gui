@@ -1,0 +1,13 @@
+.text-input:readonly{
+	-fx-control-inner-background: lightgray;
+}
+.text-field.notSaved {
+	-fx-text-box-border: red;
+}
+.text-field.focusGained, .text-field.active {
+	-fx-control-inner-background: #ffffa8;
+}
+.text-field.hasChanged {
+	-fx-text-inner-color: red;
+	-fx-control-inner-background: LightCyan;
+}

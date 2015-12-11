@@ -6,9 +6,9 @@ public class LinkHeader implements Comparable<LinkHeader>{
 
 	public static final int SIZE = 4;
 
-	private byte addr;
-	private byte control;
-	private short protocol;
+	private byte addr; 		public byte getAddr() { return addr; } 			public int getIntAddr() { return addr & 0xFF; } 		public void setAddr(byte addr) { this.addr = addr; }
+	private byte control; 	public byte getControl() { return control; } 	public int getIntControl() { return control & 0xFF; }
+	private short protocol; public short getProtocol() { return protocol; } public int getIntProtocol() { return protocol & 0xFFFF; }
 
 	public LinkHeader(byte addr, byte control, short protocol) {
 		this.addr = addr;
@@ -33,32 +33,8 @@ public class LinkHeader implements Comparable<LinkHeader>{
 		return data;
 	}
 
-	public byte getAddr() {
-		return addr;
-	}
-
-	public int getIntAddr() {
-		return addr & 0xFF;
-	}
-
-	public byte getControl() {
-		return control;
-	}
-
-	public int getIntControl() {
-		return control & 0xFF;
-	}
-
 	public static short getProtocol(byte MSB, byte LSB) {
 		return (short) ((MSB & 0xFF)<<8 + (LSB & 0xFF));
-	}
-
-	public short getProtocol() {
-		return protocol;
-	}
-
-	public int getIntProtocol() {
-		return protocol & 0xFFFF;
 	}
 
 	@Override

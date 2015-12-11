@@ -1,4 +1,3 @@
-
 package irt.gui.data.packet.observable.device_debug;
 
 import java.util.Arrays;
@@ -12,11 +11,11 @@ import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 
-public class PotentiometerPacket extends RegirterAbstractPacket {
+public class RegisterPacket extends RegirterAbstractPacket {
 
-	public static final PacketId PACKET_ID = PacketId.DEVICE_DEBAG_POTENTIOMETER;
+	public static final PacketId PACKET_ID = PacketId.DEVICE_DEBAG_REGISTER;
 
-	public PotentiometerPacket( RegisterValue registerValue) throws PacketParsingException {
+	public RegisterPacket( RegisterValue registerValue) throws PacketParsingException {
 		super(
 				new PacketHeader(
 						registerValue.getValue()==null ? PacketType.REQUEST : PacketType.COMMAND,
@@ -27,7 +26,7 @@ public class PotentiometerPacket extends RegirterAbstractPacket {
 						getBuffer(registerValue.getIndex(), registerValue.getAddr(), registerValue.getValue())));
 	}
 
-	public PotentiometerPacket(byte[] answer) throws PacketParsingException {
+	public RegisterPacket(byte[] answer) throws PacketParsingException {
 		super(PACKET_ID, answer);
 	}
 
@@ -43,5 +42,4 @@ public class PotentiometerPacket extends RegirterAbstractPacket {
 
 		return bs;
 	}
-
 }

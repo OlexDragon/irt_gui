@@ -21,9 +21,7 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 	}
 
 	public ParameterHeader(PacketId packetId, PayloadSize payloadSize) throws PacketParsingException {
-		this(
-				Optional.ofNullable(packetId).orElseThrow(()->new PacketParsingException("PacketId can not be null")).getParameterHeaderCode(),
-				payloadSize);
+		this( Optional.ofNullable(packetId).orElseThrow(()->new PacketParsingException("PacketId can not be null")).getParameterHeaderCode(), payloadSize);
 	}
 
 	public ParameterHeader(ParameterHeaderCode headerCode, PayloadSize payloadSize) throws PacketParsingException {

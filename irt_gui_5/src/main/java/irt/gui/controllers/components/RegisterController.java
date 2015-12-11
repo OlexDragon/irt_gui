@@ -6,18 +6,16 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 
-import irt.gui.IrtCuiProperties;
+import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.observable.device_debug.PotentiometerPacket;
+import irt.gui.data.packet.observable.device_debug.RegisterPacket;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -59,44 +57,40 @@ public class RegisterController extends FieldsControllerAbstract {
 		setName(Optional.of(name).get());
 
 		//setTitle
-		String titleProp = String.format(IrtCuiProperties.PANEL_PROPERTIES, getName(),"title");
-		titleLabel.setText(Optional.ofNullable(IrtCuiProperties.getProperty(titleProp)).orElse("Title"));
+		String titleProp = String.format(IrtGuiProperties.PANEL_PROPERTIES, getName(),"title");
+		titleLabel.setText(Optional.ofNullable(IrtGuiProperties.getProperty(titleProp)).orElse("Title"));
 
 		//set Register packet
-		final String indexProp 	= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "index");
-		final String addrProp 	= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "address");
-		final String valueProp 		= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "value");
+		final String indexProp 	= String.format(IrtGuiProperties.PANEL_PROPERTIES, name, "index");
+		final String addrProp 	= String.format(IrtGuiProperties.PANEL_PROPERTIES, name, "address");
+		final String valueProp 		= String.format(IrtGuiProperties.PANEL_PROPERTIES, name, "value");
 
-		final int index 	= Optional.of(IrtCuiProperties.getLong(indexProp))	.map(i->i.intValue()).get();
-		final int address 	= Optional.of(IrtCuiProperties.getLong(addrProp))	.map(a->a.intValue()).get();
+		final int index 	= Optional.of(IrtGuiProperties.getLong(indexProp))	.map(i->i.intValue()).get();
+		final int address 	= Optional.of(IrtGuiProperties.getLong(addrProp))	.map(a->a.intValue()).get();
 
-		final Optional<Long> vLong = Optional.ofNullable(IrtCuiProperties.getLong(valueProp));
+		final Optional<Long> vLong = Optional.ofNullable(IrtGuiProperties.getLong(valueProp));
 		registerValue = vLong.map(val -> new RegisterValue(index, address, val.intValue())).orElse(new RegisterValue(index, address));
 
 		//set min max values
-		final String minValueProp 		= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "value.min");
-		final String maxValueProp		= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "value.max");
+		final String minValueProp 		= String.format(IrtGuiProperties.PANEL_PROPERTIES, name, "value.min");
+		final String maxValueProp		= String.format(IrtGuiProperties.PANEL_PROPERTIES, name, "value.max");
 
-		toSetSlider.setMin(Optional.ofNullable(IrtCuiProperties.getLong(minValueProp)).orElse(0L));
-		toSetSlider.setMax(Optional.ofNullable(IrtCuiProperties.getLong(maxValueProp)).orElse(4095L));
+		toSetSlider.setMin(Optional.ofNullable(IrtGuiProperties.getLong(minValueProp)).orElse(0L));
+		toSetSlider.setMax(Optional.ofNullable(IrtGuiProperties.getLong(maxValueProp)).orElse(4095L));
 
-		toSetSlider.valueProperty().addListener(new ChangeListener<Number>() {
-
-			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+		toSetSlider.valueProperty().addListener((observable, oldValue, newValue)->{
 				Platform.runLater(()->toSetTextField.setText(Integer.toString(newValue.intValue())));
-			}
 		});
 
 		toSetTextField.textProperty().addListener(new NumericChecker());
 
-		addLinkedPacket(new PotentiometerPacket(registerValue));
+		addLinkedPacket(new RegisterPacket(registerValue));
 	
-		final String showTooltipProp 	= String.format(IrtCuiProperties.PANEL_PROPERTIES, name, "show.tooltip");
-		if(IrtCuiProperties.getBoolean(showTooltipProp)){
+		final String showTooltipProp 	= String.format(IrtGuiProperties.PANEL_PROPERTIES, name, "show.tooltip");
+		if(IrtGuiProperties.getBoolean(showTooltipProp)){
 
 			RegisterValue rv = new RegisterValue(registerValue.getIndex(), registerValue.getAddr()==0 ? 0x10+2 : 0x10+3); //0x10+2 --> RDAC:MEM2; 0x10+3 --> RDAC:MEM3
-			addLinkedPacket(new PotentiometerPacket(rv));
+			addLinkedPacket(new RegisterPacket(rv));
 		}
 	}
 
@@ -112,7 +106,7 @@ public class RegisterController extends FieldsControllerAbstract {
 		if(valueLabel.getText().equals(text))
 			logger.debug("\n\t Value did not changed:\n\t{}", text);
 		else{
-			PotentiometerPacket packet = new PotentiometerPacket(new RegisterValue(registerValue.getIndex(), registerValue.getAddr(), Integer.parseInt(text)));
+			RegisterPacket packet = new RegisterPacket(new RegisterValue(registerValue.getIndex(), registerValue.getAddr(), Integer.parseInt(text)));
 			packet.addObserver(this);
 			SerialPortController.QUEUE.add(packet);
 		}
@@ -127,7 +121,7 @@ public class RegisterController extends FieldsControllerAbstract {
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.trace("\n\tENTRY: {}", packet);
 
-		PotentiometerPacket p = new PotentiometerPacket(packet.getAnswer());
+		RegisterPacket p = new RegisterPacket(packet.getAnswer());
 		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
 
 		if(packetError==PacketErrors.NO_ERROR){
@@ -199,7 +193,7 @@ public class RegisterController extends FieldsControllerAbstract {
 
 	public void saveRegister() throws PacketParsingException {
 		if(actualValue!=savedValue){
-			PotentiometerPacket packet = new PotentiometerPacket(new RegisterValue(registerValue.getIndex(), registerValue.getAddr()+3, 0));
+			RegisterPacket packet = new RegisterPacket(new RegisterValue(registerValue.getIndex(), registerValue.getAddr()+3, 0));
 			packet.addObserver(new Observer() {
 			
 				@Override
@@ -211,7 +205,7 @@ public class RegisterController extends FieldsControllerAbstract {
 							if(observable instanceof LinkedPacket){
 								try {
 
-									PotentiometerPacket packet = new PotentiometerPacket(((LinkedPacket)observable).getAnswer());
+									RegisterPacket packet = new RegisterPacket(((LinkedPacket)observable).getAnswer());
 									logger.warn("\n\tTODO Have to add some code{}{}", observable, packet);
 
 //									Platform.runLater(new Runnable() {

@@ -22,7 +22,7 @@ import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
 import irt.gui.data.packet.observable.PacketAbstract;
-import irt.gui.data.packet.observable.device_debug.PotentiometerPacket;
+import irt.gui.data.packet.observable.device_debug.RegisterPacket;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 
@@ -35,7 +35,7 @@ public class PotentiometerPacketTest {
 		logger.entry();
 
 		RegisterValue registerValue = new RegisterValue(1, 0);
-		PotentiometerPacket packet = new PotentiometerPacket(registerValue);
+		RegisterPacket packet = new RegisterPacket(registerValue);
 		logger.trace(packet);
 
 		byte[] bytes = packet.toBytes();
@@ -49,7 +49,7 @@ public class PotentiometerPacketTest {
 
 		assertNotNull(bytes);
 
-		byte[] packetAsBytes = Packet.getPacketAsBytes(PacketType.REQUEST, PotentiometerPacket.PACKET_ID, registerValue.toBytes());
+		byte[] packetAsBytes = Packet.getPacketAsBytes(PacketType.REQUEST, RegisterPacket.PACKET_ID, registerValue.toBytes());
 		logger.trace("\n\t{}", ToHex.bytesToHex(packetAsBytes));
 
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
@@ -61,7 +61,7 @@ public class PotentiometerPacketTest {
 	public void testCommand() throws PacketParsingException {
 		logger.entry();
 		RegisterValue registerValue = new RegisterValue(1, 0, 777);
-		PotentiometerPacket packet = new PotentiometerPacket(registerValue);
+		RegisterPacket packet = new RegisterPacket(registerValue);
 		logger.trace(packet);
 		byte[] bytes = packet.toBytes();
 		logger.trace("\n\t{}", ToHex.bytesToHex(bytes));
@@ -74,7 +74,7 @@ public class PotentiometerPacketTest {
 
 		assertNotNull(bytes);
 
-		byte[] packetAsBytes = Packet.getPacketAsBytes(PacketType.COMMAND, PotentiometerPacket.PACKET_ID, registerValue.toBytes());
+		byte[] packetAsBytes = Packet.getPacketAsBytes(PacketType.COMMAND, RegisterPacket.PACKET_ID, registerValue.toBytes());
 		logger.trace("\n\t{}", ToHex.bytesToHex(packetAsBytes));
 
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
@@ -86,7 +86,7 @@ public class PotentiometerPacketTest {
 	public void testObserver() throws PacketParsingException {
 		logger.entry();
 
-		PotentiometerPacket packet = new PotentiometerPacket(new RegisterValue(1, 0));
+		RegisterPacket packet = new RegisterPacket(new RegisterValue(1, 0));
 		packet.addObserver(new Observer() {
 
 			@Override
@@ -95,7 +95,7 @@ public class PotentiometerPacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(PotentiometerPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){};
+					PacketAbstract bp = new PacketAbstract(RegisterPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){};
 					logger.debug("\n\t new PacketAbstract: {}\n", bp);
 
 				} catch (PacketParsingException e) {
@@ -124,10 +124,10 @@ public class PotentiometerPacketTest {
 
 	@Test
 	public void equalsTest() throws PacketParsingException{
-		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), is(new PotentiometerPacket(new RegisterValue(1, 5))));
+		assertThat(new RegisterPacket(new RegisterValue(1, 5)), is(new RegisterPacket(new RegisterValue(1, 5))));
 
-		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), not(new PotentiometerPacket(new RegisterValue(1, 5, 0))));
-		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), not(new PotentiometerPacket(new RegisterValue(1, 7))));
-		assertThat(new PotentiometerPacket(new RegisterValue(1, 5)), not(new PotentiometerPacket(new RegisterValue(2, 5))));
+		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(1, 5, 0))));
+		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(1, 7))));
+		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(2, 5))));
 	}
 }

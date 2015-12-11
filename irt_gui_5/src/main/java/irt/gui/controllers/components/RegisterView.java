@@ -8,7 +8,7 @@ import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.observable.device_debug.PotentiometerPacket;
+import irt.gui.data.packet.observable.device_debug.RegisterPacket;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -26,14 +26,14 @@ public class RegisterView extends FieldsControllerAbstract {
 
 	public void initialize(RegisterValue registerValue) throws PacketParsingException {
 		
-		addLinkedPacket(new PotentiometerPacket(registerValue));
+		addLinkedPacket(new RegisterPacket(registerValue));
 	}
 
 	@Override
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.trace("\n\tENTRY: {}", packet);
 
-		PotentiometerPacket p = new PotentiometerPacket(packet.getAnswer());
+		RegisterPacket p = new RegisterPacket(packet.getAnswer());
 		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
 
 		if(packetError!=PacketErrors.NO_ERROR){

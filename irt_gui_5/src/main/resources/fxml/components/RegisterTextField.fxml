@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<TextField fx:id="textField" alignment="CENTER" editable="false" onAction="#onActionTextField" onKeyPressed="#onKeyPressed" prefColumnCount="5"
+	stylesheets="@../../styles/components.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.RegisterTextField">
+	<contextMenu>
+		<ContextMenu>
+			<items>
+				<Menu fx:id="registerMenu" mnemonicParsing="false" text="Register" />
+				<SeparatorMenuItem mnemonicParsing="false" />
+				<MenuItem id="set" fx:id="setMenuItem" disable="true" mnemonicParsing="false" onAction="#onActionMenuItems" text="Set" />
+				<MenuItem id="save" fx:id="saveMenuItem" disable="true" mnemonicParsing="false" onAction="#onActionMenuItems" text="Save" />
+				<MenuItem id="reset" fx:id="resetMenuItem" disable="true" mnemonicParsing="false" onAction="#onActionMenuItems" text="Reset" />
+				<SeparatorMenuItem mnemonicParsing="false" />
+				<MenuItem id="stop" fx:id="startStopMenuItem" disable="true" mnemonicParsing="false" onAction="#onActionMenuItems" text="Stop" />
+			</items>
+		</ContextMenu>
+	</contextMenu>
+</TextField>

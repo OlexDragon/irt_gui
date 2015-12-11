@@ -13,6 +13,7 @@ import irt.gui.errors.PacketParsingException;
 public interface LinkedPacket extends Comparable<LinkedPacket>{
 
 	LinkHeader		getLinkHeader();
+	void 			setLinkHeaderAddr(byte addr);
 	PacketHeader	getPacketHeader();
 	List<Payload>	getPayloads();
 	byte[]			toBytes();
@@ -52,7 +53,7 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		//DEVICE_INFO
 		DEVICE_INFO		(	PacketGroupId.DEVICE_INFO,		ParameterHeaderCode.DI_ALL),
 		//DEVICE_DEBAG
-		DEVICE_DEBAG_POTENTIOMETER		(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_READ_WRITE			),
+		DEVICE_DEBAG_REGISTER		(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_READ_WRITE			),
 		DEVICE_DEBAG_CALIBRATION_MODE	(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_CALIBRATION_MODE	),
 		DEVICE_DEBAG_INFO				(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_INFO				),
 		DEVICE_DEBAG_DUMP				(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_DUMP				),
