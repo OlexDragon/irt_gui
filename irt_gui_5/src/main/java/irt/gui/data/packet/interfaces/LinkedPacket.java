@@ -12,6 +12,8 @@ import irt.gui.errors.PacketParsingException;
 
 public interface LinkedPacket extends Comparable<LinkedPacket>{
 
+	PacketId 		getPacketId();
+
 	LinkHeader		getLinkHeader();
 	void 			setLinkHeaderAddr(byte addr);
 	PacketHeader	getPacketHeader();
@@ -71,7 +73,9 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		//Converter
 		DEVICE_DEBAG_CONVERTER_DAC	(	PacketGroupId.DEVICE_DEBAG,		ParameterHeaderCode.DD_CONVERTER_DAC),
 		//Measurement
-		MEASUREMENT_TEMPERATURE	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_TEMPERATURE);
+		MEASUREMENT_TEMPERATURE	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_TEMPERATURE),
+		MEASUREMENT_INPUT_POWER	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_INPUT_POWER),
+		MEASUREMENT_OUTPUT_POWER(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_OUTPUT_POWER);
 
 		private PacketGroupId packetGroupId;				public PacketGroupId 		getPacketGroupId() 		{ return packetGroupId; 		}
 		private ParameterHeaderCode parameterHeaderCode;	public ParameterHeaderCode 	getParameterHeaderCode(){ return parameterHeaderCode; 	}
@@ -156,7 +160,9 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		//Converter
 		DD_CONVERTER_DAC	(Packet.PARAMETER_CONVERTER_DAC		, PacketGroupId.DEVICE_DEBAG ),
 		//Measurement
-		M_TEMPERATURE	(Packet.PARAMETER_MEASUREMENT_TEMPERATURE	, PacketGroupId.MEASUREMENT );
+		M_TEMPERATURE	(Packet.PARAMETER_MEASUREMENT_TEMPERATURE	, PacketGroupId.MEASUREMENT ),
+		M_INPUT_POWER	(Packet.PARAMETER_MEASUREMENT_INPUT_POWER	, PacketGroupId.MEASUREMENT ),
+		M_OUTPUT_POWER(Packet.PARAMETER_MEASUREMENT_OUTPUT_POWER	, PacketGroupId.MEASUREMENT );
 
 		private byte value; 			public byte 			getValue() 	{ return value; 	}
 		private PacketGroupId groupId;	public PacketGroupId 	getGroupId(){ return groupId; 	}

@@ -29,4 +29,8 @@ public class AttenuationRangePackege extends PacketAbstract implements RangePack
 		super(PACKET_ID, answer);
 	}
 
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
+	}
 }

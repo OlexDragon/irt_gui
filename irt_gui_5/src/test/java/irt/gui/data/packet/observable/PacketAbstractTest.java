@@ -1,7 +1,8 @@
 
 package irt.gui.data.packet.observable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
@@ -23,7 +24,12 @@ public class PacketAbstractTest {
 	public void testParameterNull() {
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, null){};
+			new PacketAbstract(PacketId.DEVICE_INFO, null){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 			throw new PacketParsingException(null);
 
 		} catch (PacketParsingException e) {
@@ -36,7 +42,12 @@ public class PacketAbstractTest {
 	public void testParameterIsNotCorrect() {
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{}){};
+			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{}){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 			throw new PacketParsingException(null);
 
 		} catch (PacketParsingException e) {
@@ -49,7 +60,12 @@ public class PacketAbstractTest {
 	public void testParameterIsNotCorrect2(){
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{1}){};
+			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{1}){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 			throw new PacketParsingException(null);
 
 		} catch (PacketParsingException e) {
@@ -62,7 +78,12 @@ public class PacketAbstractTest {
 	public void testParameterIsNotCorrect3() {
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{126}){};
+			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{126}){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 			throw new PacketParsingException(null);
 
 		} catch (PacketParsingException e) {
@@ -75,7 +96,12 @@ public class PacketAbstractTest {
 	public void testParameterIsNotCorrect4() {
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x03, 0x68, 0x69, 0x7E}){};
+			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x03, 0x68, 0x69, 0x7E}){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 			throw new PacketParsingException(null);
 
 		} catch (PacketParsingException e) {
@@ -88,7 +114,12 @@ public class PacketAbstractTest {
 	public void testParameterIsNotCorrect5() {
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x03, 0x68, 0x69, 0x7E, 0x7E}){};
+			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x03, 0x68, 0x69, 0x7E, 0x7E}){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 			throw new PacketParsingException(null);
 
 		} catch (PacketParsingException e) {
@@ -101,7 +132,12 @@ public class PacketAbstractTest {
 	public void testParameterIsNotCorrect6() {
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x03, 0x68, 0x69, 0x7E, 0x7E, 0x7E}){};
+			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x03, 0x68, 0x69, 0x7E, 0x7E, 0x7E}){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 			throw new PacketParsingException(null);
 
 		} catch (PacketParsingException e) {
@@ -114,7 +150,12 @@ public class PacketAbstractTest {
 	public void testChecksummIsNotCorrect() {
 		try {
 
-			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x14, 0x56, 0x0D, 0x7E, 0x7E, (byte)0xFE, 0x00, 0x00, 0x00, 0x01, 0x00, 0x14, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, 0x16, 0x7E}){};
+			new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x14, 0x56, 0x0D, 0x7E, 0x7E, (byte)0xFE, 0x00, 0x00, 0x00, 0x01, 0x00, 0x14, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, 0x16, 0x7E}){
+
+				@Override
+				public PacketId getPacketId() {
+					throw new UnsupportedOperationException("Auto-generated method stub");
+				}};
 
 			throw new IllegalStateException("This function have to throw PacketParsingException") ;
 
@@ -127,7 +168,12 @@ public class PacketAbstractTest {
 	@Test
 	public void testPacketAbstract() throws PacketParsingException {
 
-		new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x0, (byte)0xF3, 0x5B, 0x7E, 0x7E, (byte)0xFE, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, (byte)0x9A, (byte)0xAB, 0x7E}){};
+		new PacketAbstract(PacketId.DEVICE_INFO, new byte[]{0x7E, (byte)0xFE, 0x00, 0x00, 0x00, (byte)0xFF, 0x00, 0x0, (byte)0xF3, 0x5B, 0x7E, 0x7E, (byte)0xFE, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x02, (byte)0x9A, (byte)0xAB, 0x7E}){
+
+			@Override
+			public PacketId getPacketId() {
+				throw new UnsupportedOperationException("Auto-generated method stub");
+			}};
 	}
 
 	@Test

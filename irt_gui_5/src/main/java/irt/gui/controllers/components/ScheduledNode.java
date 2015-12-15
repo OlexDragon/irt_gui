@@ -13,18 +13,23 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.ScheduledServices;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.errors.PacketParsingException;
 
 public abstract class ScheduledNode implements Runnable, Observer {
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
+	public static final String NAME = "name";
+	public static final String PERIOD = "period";
+
 	protected static final 	ScheduledExecutorService SERVICES 			= ScheduledServices.services;
 	protected 				ScheduledFuture<?> 	scheduleAtFixedRate;
-	protected 				String 				name; 					public String getName() { return name; }
-	protected 				long 				period;						//time between requests
+	protected 				String 				propertyName; 			public String getPropertyName() { return propertyName; }
+	//time between requests
+	private 				long 				period = 10000;			public long getPeriod(){ return period; }	public void setPeriod(long period){ this.period = period; }	
 
 	private final			List<LinkedPacket>	packets					= new ArrayList<>();						//to get set value
 
-	public abstract void setName(String name);
+	public abstract void setKeyStartWith(String name) throws PacketParsingException, ClassNotFoundException, InstantiationException, IllegalAccessException;
 
 	public void start() {
 		if(!packets.isEmpty() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
@@ -51,6 +56,8 @@ public abstract class ScheduledNode implements Runnable, Observer {
 	}
 
 	protected void addPacket(LinkedPacket packet){
+		logger.entry(packet);
+
 		Optional.of(packet)
 		.ifPresent(p->{
 
@@ -59,12 +66,12 @@ public abstract class ScheduledNode implements Runnable, Observer {
 		});
 	}
 
-	protected void removePacket(LinkedPacket packet){
-		Optional.ofNullable(packet)
-		.ifPresent(p->{
+	protected void removeAllPackets(){
 
-			p.deleteObservers();
-			packets.remove(p);
-		});
+		packets
+		.parallelStream()
+		.forEach(p->p.deleteObservers());
+
+		packets.clear();
 	}
 }

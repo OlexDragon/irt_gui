@@ -85,7 +85,11 @@ public class ValuesController extends FieldsControllerAbstract {
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.trace("\n\t ENTRY: {}", packet);
 
-		PacketAbstract p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer()) { };
+		PacketAbstract p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer()) {
+			@Override
+			public PacketId getPacketId() {
+				return null;
+			} };
 		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
 
 		if(packetError!=PacketErrors.NO_ERROR){

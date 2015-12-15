@@ -25,4 +25,8 @@ public class RegisterIndexesPacket extends RegirterAbstractPacket {
 		super(PACKET_ID, answer);
 	}
 
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
+	}
 }

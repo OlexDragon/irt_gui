@@ -31,7 +31,11 @@ public class ValueView extends FieldsControllerAbstract {
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.trace("\n\tENTRY: {}", packet);
 
-		LinkedPacket p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer()) {};
+		LinkedPacket p = new PacketAbstract(packet.getPacketId(), packet.getAnswer()) {
+			@Override
+			public PacketId getPacketId() {
+				return null;
+			}};
 		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
 
 		if(packetError!=PacketErrors.NO_ERROR){

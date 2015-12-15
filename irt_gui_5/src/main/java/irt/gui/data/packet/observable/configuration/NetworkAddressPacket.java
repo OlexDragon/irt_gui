@@ -29,4 +29,9 @@ public class NetworkAddressPacket extends PacketAbstract{
 	public NetworkAddressPacket(byte[] answer) throws PacketParsingException {
 		super(PACKET_ID, answer);
 	}
+
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
+	}
 }

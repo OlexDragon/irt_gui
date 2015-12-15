@@ -95,7 +95,12 @@ public class PotentiometerPacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(RegisterPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){};
+					PacketAbstract bp = new PacketAbstract(RegisterPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+
+						@Override
+						public PacketId getPacketId() {
+							throw new UnsupportedOperationException("Auto-generated method stub");
+						}};
 					logger.debug("\n\t new PacketAbstract: {}\n", bp);
 
 				} catch (PacketParsingException e) {

@@ -8,7 +8,7 @@
 	<contextMenu>
 		<ContextMenu>
 			<items>
-				<Menu fx:id="registerMenu" mnemonicParsing="false" text="Register" />
+				<Menu fx:id="menuRegister" mnemonicParsing="false" text="Register" />
 				<SeparatorMenuItem mnemonicParsing="false" />
 				<MenuItem id="set" fx:id="setMenuItem" disable="true" mnemonicParsing="false" onAction="#onActionMenuItems" text="Set" />
 				<MenuItem id="save" fx:id="saveMenuItem" disable="true" mnemonicParsing="false" onAction="#onActionMenuItems" text="Save" />

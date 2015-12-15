@@ -7,9 +7,20 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
+
+import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.components.ScheduledNode;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.ToggleGroup;
 
 public class GuiUtility {
 
@@ -48,4 +59,27 @@ public class GuiUtility {
 		return null;
 	}
 
+	public static void createMamuItems(String startsWith, EventHandler<ActionEvent> action, ObservableList<MenuItem> menuItems) {
+
+		final ToggleGroup toggleGroup = new ToggleGroup();
+
+		Properties properties = IrtGuiProperties.selectFromProperties(startsWith);
+
+		List<MenuItem> menus = properties
+							.entrySet()
+							.parallelStream()
+							.filter(p->((String)p.getKey()).endsWith(ScheduledNode.NAME))
+							.map(p->{
+								final RadioMenuItem mi = new RadioMenuItem((String) p.getValue()); //This can be changed by internalization
+								final String key = (String)p.getKey();
+								mi.setId(key.substring(0, key.indexOf(ScheduledNode.NAME)));
+								Platform.runLater(()->mi.setToggleGroup(toggleGroup));
+								mi.setOnAction(action);
+								return mi;
+							})
+							.sorted((mi1, mi2)->mi1.getText().compareTo(mi2.getText()))
+							.collect(Collectors.toList());
+
+		menuItems.addAll(menus);
+	}
 }

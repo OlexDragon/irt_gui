@@ -79,4 +79,9 @@ public class TestPacket  extends Observable implements LinkedPacket {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
+
+	@Override
+	public PacketId getPacketId() {
+		return null;
+	}
 }

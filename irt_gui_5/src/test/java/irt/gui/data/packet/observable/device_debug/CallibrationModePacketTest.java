@@ -119,7 +119,12 @@ public class CallibrationModePacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(CallibrationModePacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){};
+					PacketAbstract bp = new PacketAbstract(CallibrationModePacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+
+						@Override
+						public PacketId getPacketId() {
+							throw new UnsupportedOperationException("Auto-generated method stub");
+						}};
 					logger.debug("\n\t new PacketAbstract: {}\n", bp);
 
 				} catch (PacketParsingException e) {

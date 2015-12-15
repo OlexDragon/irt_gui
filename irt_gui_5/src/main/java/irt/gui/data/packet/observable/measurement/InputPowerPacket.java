@@ -8,11 +8,11 @@ import irt.gui.data.packet.interfaces.ValuePacket;
 import irt.gui.data.packet.observable.PacketAbstract;
 import irt.gui.errors.PacketParsingException;
 
-public class TemperaturePacket extends PacketAbstract implements ValuePacket{
+public class InputPowerPacket extends PacketAbstract implements ValuePacket{
 
-	public static final PacketId PACKET_ID = PacketId.MEASUREMENT_TEMPERATURE;
+	public static final PacketId PACKET_ID = PacketId.MEASUREMENT_INPUT_POWER;
 
-	public TemperaturePacket() throws PacketParsingException {
+	public InputPowerPacket() throws PacketParsingException {
 		super(
 				new PacketHeader(
 						PacketType.REQUEST,
@@ -23,13 +23,13 @@ public class TemperaturePacket extends PacketAbstract implements ValuePacket{
 								PACKET_ID)));
 	}
 
-	public TemperaturePacket(byte[] answer) throws PacketParsingException {
+	public InputPowerPacket(byte[] answer) throws PacketParsingException {
 		super(PACKET_ID, answer);
 	}
 
 	@Override
 	public String getTitle() {
-		return "Temperature";
+		return "Input Power";
 	}
 
 	@Override
@@ -44,6 +44,6 @@ public class TemperaturePacket extends PacketAbstract implements ValuePacket{
 
 	@Override
 	public String getPrefix() {
-		return " C";
+		return " dBm";
 	}
 }

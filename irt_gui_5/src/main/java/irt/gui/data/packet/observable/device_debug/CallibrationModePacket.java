@@ -59,4 +59,9 @@ public class CallibrationModePacket extends RegirterAbstractPacket {
 
 		return value!=null ? CalibrationMode.values()[value] : null;
 	}
+
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
+	}
 }

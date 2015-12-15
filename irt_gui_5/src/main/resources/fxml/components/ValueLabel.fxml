@@ -1,21 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.effect.*?>
+<?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
-<Label fx:id="label" text="Label" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
-   <contextMenu>
-      <ContextMenu>
-         <items>
-            <Menu fx:id="menuValues" mnemonicParsing="false" text="Values">
-              <items>
-                <MenuItem mnemonicParsing="false" text="Action 1" />
-              </items>
-            </Menu>
-         </items>
-      </ContextMenu>
-   </contextMenu>
-</Label>
+<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ValueLabel">
+   <center>
+      <AnchorPane>
+         <BorderPane.margin>
+            <Insets right="3.0" />
+         </BorderPane.margin>
+         <children>
+            <Label fx:id="titleLabel" text="Title" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+         </children>
+      </AnchorPane>
+   </center>
+   <right>
+      <AnchorPane BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="valueLabel" alignment="CENTER_RIGHT" text="Value" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+               <contextMenu>
+                  <ContextMenu fx:id="contextMenu">
+                     <items>
+                        <Menu fx:id="menuValues" mnemonicParsing="false" text="Values" />
+                     </items>
+                  </ContextMenu>
+               </contextMenu>
+            </Label>
+         </children>
+      </AnchorPane>
+   </right>
+   <effect>
+      <DropShadow />
+   </effect>
+</BorderPane>

@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +49,7 @@ public class RegistersController implements Observer {
 
 	private static final String ACTIVE 		= "active";
 
-	private static final String REGISTER_PROPERTIES 		= "gui.regicter.controller.";
+	public static final String REGISTER_PROPERTIES 		= "gui.register.controller.";
 	private static final String REGISTER_PROPERTY_NAME 		= REGISTER_PROPERTIES 		+ "name.";
 	private static final String REGISTER_PROPERTY_NAME_ID 	= REGISTER_PROPERTY_NAME 	+ "%d";
 	private static final String REGISTER_ROW		 		= REGISTER_PROPERTIES 		+ "row.";
@@ -56,8 +58,6 @@ public class RegistersController implements Observer {
 	private static final String REGISTER_COLUMN_ID			= REGISTER_COLUMN	 		+ "%d";
 	private static final String REGISTER_BACKGROUND	 		= REGISTER_PROPERTIES 		+ "background.";
 	private static final String REGISTER_BACKGROUND_ID	 	= REGISTER_BACKGROUND 		+ "%d";
-	private static final String REGISTER_TEXT_FIELD_ID 		= REGISTER_PROPERTIES 		+ "textField.%d.";
-	private static final String REGISTER_TEXT_FIELD	 		= REGISTER_TEXT_FIELD_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.3.5.7)
 	private static final String REGISTER_ALIGNMENT_ID 		= REGISTER_PROPERTIES 		+ "alignment.%d.";
 	private static final String REGISTER_ALIGNMENT	 		= REGISTER_ALIGNMENT_ID 	+ "%d.%d";			//gui.regicter.controller.alignment.profikeId.column.row (ex. gui.regicter.controller.alignment.3.5.7)
 
@@ -137,16 +137,25 @@ public class RegistersController implements Observer {
 			registerValue.addObserver(valueObserver);
 		}
 	};
-	final EventHandler<ActionEvent> selectProfileMenuListener = e->{
-		RadioMenuItem rmi = (RadioMenuItem)e.getSource();
-		profileId = Integer.parseInt(((String) rmi.getUserData()));
-		setRows(profileId);
-		setColumns(profileId);
-		setTextFields(profileId);
-		saveMenu.setDisable(false);
-		registersPanelController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
-		setAlignment(profileId);
+
+	private final EventHandler<ActionEvent> onActionMenuSelectProfile = e->{
+		try{
+
+			RadioMenuItem rmi = (RadioMenuItem)e.getSource();
+			profileId = Integer.parseInt(((String) rmi.getUserData()));// get profile ID
+			setRows(profileId);
+			setColumns(profileId);
+			setFieldsOf(RegisterTextField.class, profileId);
+			setFieldsOf(ValueLabel.class, profileId);
+			setFieldsOf(RegisterLabel.class, profileId);
+			saveMenu.setDisable(false);
+			registersPanelController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
+			setAlignment(profileId);
 		//TODO menu action
+
+		}catch(Exception ex){
+			logger.catching(ex);
+		}
 	};
 
     private final ChangeListener<Boolean> stepTextFieldFocusListener = (observable, oldValue, newValue)->{
@@ -155,13 +164,15 @@ public class RegistersController implements Observer {
 			stepCheckBoxAction();
 		}
 	};
-	final ChangeListener<Number> sliderChangeListener = (observable, oldValue, newValue)->{
+
+	private final ChangeListener<Number> sliderChangeListener = (observable, oldValue, newValue)->{
 		Platform.runLater(
 				()->Optional.ofNullable(selectedTextField)
 				.ifPresent(sf->sf.setText(Integer.toString(((int)slider.getValue())))));
 	};
 
     @FXML private void initialize(){
+ 
     	((CalibrationModeButton)calibModeButton.getUserData()).addObserver(this);
 
     	stepNumericChecker = new NumericChecker(stepTextField.textProperty());
@@ -177,11 +188,19 @@ public class RegistersController implements Observer {
     }
 
 	@FXML private void resetValues(ActionEvent event) {
-    	registersPanelController.reset();
+    	try {
+			registersPanelController.reset();
+		} catch (Exception e) {
+			logger.catching(e);
+		}
     }
 
     @FXML private void saveValues(ActionEvent event) {
-    	registersPanelController.save();
+    	try {
+			registersPanelController.save();
+		} catch (Exception e) {
+			logger.catching(e);
+		}
     }
 
     @FXML private void sliderMouseReleased() {
@@ -244,7 +263,7 @@ public class RegistersController implements Observer {
 		});
 	}
 
-    private void saveNewProfile(String name) throws FileNotFoundException, IOException {
+    private void saveNewProfile(String name) throws FileNotFoundException, IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     	final Properties propertiesFromFile = getPropertiesFromFile();
 		final Properties properties = IrtGuiProperties.selectFromProperties(REGISTER_PROPERTIES);
     	int max = getNewProfileID(properties);
@@ -256,9 +275,9 @@ public class RegistersController implements Observer {
     	}
     }
 
-    private void saveProfile(String name) throws FileNotFoundException, IOException {
+    private void saveProfile(String profileName) throws FileNotFoundException, IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
     	final Properties propertiesFromFile = getPropertiesFromFile();
-    	updateProperties(propertiesFromFile, profileId, name);
+    	updateProperties(propertiesFromFile, profileId, profileName);
 
     	logger.trace(propertiesFromFile);
     	try(final FileOutputStream outputStream = new FileOutputStream(new File(IrtGuiProperties.IRT_HOME, IrtGuiProperties.getPropertiesFileName()));){
@@ -266,27 +285,23 @@ public class RegistersController implements Observer {
     	}
 	}
 
-	private void updateProperties(Properties propertiesFromFile, int profileId, String profileName) {
+	private void updateProperties(Properties propertiesFromFile, int profileId, String profileName) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		propertiesFromFile.put(String.format(REGISTER_PROPERTY_NAME_ID	, profileId), profileName);
 		propertiesFromFile.put(String.format(REGISTER_ROW_ID			, profileId), Integer.toString(registersPanelController.getRowCount()));
 		propertiesFromFile.put(String.format(REGISTER_COLUMN_ID			, profileId), Integer.toString(registersPanelController.getColumnCount()));
 
-		//remove TextFields properties
-		IrtGuiProperties
-		.selectFromProperties(propertiesFromFile, String.format(REGISTER_TEXT_FIELD_ID, profileId))
-		.entrySet()
-		.parallelStream()
-		.forEach(e->propertiesFromFile.remove(e.getKey()));
+		//TextFields properties
+		removeProperties(propertiesFromFile, String.format( RegisterTextField.FIELD_KEY_ID, profileId));
+		putProperies(propertiesFromFile, profileId, RegisterTextField.class);
 
-		//put TextFields properties
-		registersPanelController
-		.getTextFieldsProperties()
-		.parallelStream()
-		.forEach(tfp->{
-			final String format = String.format(REGISTER_TEXT_FIELD, profileId, tfp.get("column"), tfp.get("row"));
-			propertiesFromFile.put( format, tfp.get("name"));
-		});
+		//remove ValueLabel properties
+		removeProperties(propertiesFromFile, String.format( ValueLabel.FIELD_KEY_ID, profileId));
+		putProperies(propertiesFromFile, profileId, ValueLabel.class);
+
+		//remove RegisterLabel properties
+		removeProperties(propertiesFromFile, String.format( RegisterLabel.FIELD_KEY_ID, profileId));
+		putProperies(propertiesFromFile, profileId, RegisterLabel.class);
 
 		final String backgroundPath = registersPanelController.getBackgroundPath();
 		if(backgroundPath!=null)
@@ -305,6 +320,41 @@ public class RegistersController implements Observer {
 				propertiesFromFile.put( format, ((Pos)pos).name());
 		});
 		//TODO update profile
+	}
+
+	private void putProperies(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNode> nodeClass) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+		logger.entry( propertiesFromFile, profileId, nodeClass);
+
+		List<Map<String, Object>> textFieldsProperties = registersPanelController.getFieldsProperties(nodeClass);
+		logger.error("\n\t textFieldsProperties:{}", textFieldsProperties);
+		textFieldsProperties
+		.parallelStream()
+		.forEach(tfp->{
+			putProperties(propertiesFromFile, profileId, nodeClass, tfp);
+		});
+	}
+
+	private void putProperties(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNode> nodeClass, Map<String, Object> tfp) {
+		try {
+
+			Field field = nodeClass.getField("FIELD_KEY");
+			final String key = (String)field.get(null);
+			logger.error("\n\t key:{}", key);
+			final String format = String.format(key, profileId, tfp.get("column"), tfp.get("row"));
+			propertiesFromFile.put( format, tfp.get("name"));
+
+		} catch (Exception e) {
+			logger.catching(e);
+		}
+	}
+
+	private void removeProperties(Properties propertiesFromFile, String keyId) {
+		IrtGuiProperties
+		.selectFromProperties(propertiesFromFile, keyId)
+		.entrySet()
+		.parallelStream()
+		.forEach(e->propertiesFromFile.remove(e.getKey()));
 	}
 
 	private int getNewProfileID(final Properties properties) {
@@ -344,7 +394,7 @@ public class RegistersController implements Observer {
 					final RadioMenuItem radioMenuItem = new RadioMenuItem((String)p.getValue());
 					radioMenuItem.setUserData(((String)p.getKey()).replace(REGISTER_PROPERTY_NAME, ""));
 					Platform.runLater(()->{
-						radioMenuItem.setOnAction(selectProfileMenuListener);
+						radioMenuItem.setOnAction(onActionMenuSelectProfile);
 						radioMenuItem.setToggleGroup(profilesToggleGroup);
 					});
 					return radioMenuItem;
@@ -387,28 +437,32 @@ public class RegistersController implements Observer {
 		.ifPresent(rows->registersPanelController.setColumns(rows));
 	}
 
-	private void setTextFields(int profileId) {
+	private void setFieldsOf(Class<? extends ScheduledNode> fieldClass, int profileId) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-		String key = String.format(REGISTER_TEXT_FIELD_ID, profileId);
+		final Field field = fieldClass.getField("FIELD_KEY_ID");
+		String key = String.format((String)field.get(null), profileId);
+
 		Optional
 		.ofNullable(IrtGuiProperties.selectFromProperties(key))
 		.ifPresent(property->property.entrySet()
 					.parallelStream()
 					.map(e->{
 						String[] split = ((String)e.getKey()).replace(key, "").split("\\.");
+
 						Map<String, String>map = new HashMap<>();
-						map.put("name", (String) e.getValue());
+						map.put("key", (String) e.getValue());
 						map.put("column", split[0]);
 						map.put("row", split[1]);
 						return map;
 					})
-					.forEach(map->setTextField(map))
+					.forEach(map->setNode(fieldClass, map))
 				);
 	}
 
-	private void setTextField(Map<String, String> map){
+	private void setNode(Class<? extends ScheduledNode> fieldClass, Map<String, String> map){
+
 		try {
-			registersPanelController.setTextField(map.get("name"), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row")));
+			registersPanelController.setNode(fieldClass, map.get("key"), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row")));
 		} catch (Exception e) {
 			logger.catching(e);
 		}

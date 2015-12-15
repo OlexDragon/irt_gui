@@ -34,4 +34,9 @@ public class AlarmSummaryStatusPacket extends RegirterAbstractPacket{
 		MAJOR,
 		CRITICAL
 	}
+
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
+	}
 }

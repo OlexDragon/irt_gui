@@ -44,33 +44,6 @@
 										</AnchorPane>
 									</content>
 								</Tab>
-								<Tab fx:id="bias1Tab" onSelectionChanged="#selectionChanged" text="BIAS 1">
-									<content>
-										<AnchorPane>
-											<children>
-												<fx:include fx:id="bias1" source="components/Bias.fxml" />
-											</children>
-										</AnchorPane>
-									</content>
-								</Tab>
-								<Tab fx:id="bias2Tab" onSelectionChanged="#selectionChanged" text="BIAS 2">
-									<content>
-										<AnchorPane>
-											<children>
-												<fx:include fx:id="bias2" source="components/Bias.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-											</children>
-										</AnchorPane>
-									</content>
-								</Tab>
-								<Tab fx:id="converterTab" onSelectionChanged="#selectionChanged" text="Converter">
-									<content>
-										<AnchorPane>
-											<children>
-												<fx:include fx:id="converter" source="components/Converter.fxml" />
-											</children>
-										</AnchorPane>
-									</content>
-								</Tab>
 								<Tab fx:id="networkTab" onSelectionChanged="#selectionChanged" text="Network">
 									<content>
 										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
@@ -89,7 +62,7 @@
 										</AnchorPane>
 									</content>
 								</Tab>
-								<Tab text="Test Tab">
+								<Tab text="Bias">
 									<content>
 										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                  <children>

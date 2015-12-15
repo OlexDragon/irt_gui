@@ -72,7 +72,12 @@ public class AlarmSummaryStatusTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(AlarmIDsPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){};
+					PacketAbstract bp = new PacketAbstract(AlarmIDsPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+
+						@Override
+						public PacketId getPacketId() {
+							throw new UnsupportedOperationException("Auto-generated method stub");
+						}};
 					logger.debug("\n\t new PacketAbstract: {}\n", bp);
 					assertEquals(PacketErrors.NO_ERROR, bp.getPacketHeader().getPacketErrors());
 					assertEquals(1, bp.getPayloads().size());

@@ -45,4 +45,8 @@ public class ConverterDACPacket extends RegirterAbstractPacket {
 		return bs;
 	}
 
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
+	}
 }

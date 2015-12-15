@@ -51,10 +51,11 @@
 <!-- 		<logger name="irt.gui.controllers.components.BiasController" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ConverterController" level="all"/> -->
 
-		<logger name="irt.gui.controllers.components.RegisterTextField" level="debug"/>
-		<logger name="irt.gui.controllers.components.RegisterPanel" level="all"/>
-		<logger name="irt.gui.controllers.components.RegistersController" level="all"/>
+<!-- 		<logger name="irt.gui.controllers.components.RegisterTextField" level="debug"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.RegisterPanel" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.RegistersController" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.CalibrationModeButton" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.ValueLabel" level="all"/> -->
 
 		<Root level="warn">
 			<AppenderRef ref="DumpFile" />

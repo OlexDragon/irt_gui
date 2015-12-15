@@ -8,8 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.jensd.shichimifx.utils.TabPaneDetacher;
-import irt.gui.controllers.components.BiasController;
-import irt.gui.controllers.components.ConverterController;
 import irt.gui.controllers.components.DebugInfoController;
 import irt.gui.controllers.components.InfoController;
 import irt.gui.controllers.components.MeasurementController;
@@ -40,12 +38,7 @@ public class IrtGuiController{
 	@FXML private InfoController infoController;
 
 	// Right side
-	@FXML private Tab bias1Tab;
-	@FXML private BiasController bias1Controller;
-	@FXML private Tab bias2Tab;
-	@FXML private BiasController bias2Controller;
 	@FXML private Tab converterTab;
-	@FXML private ConverterController converterController;
 	@FXML private Tab networkTab;
 	@FXML private NetworkPanelController networkController;
 	@FXML private Tab debugInfoTab;
@@ -62,26 +55,6 @@ public class IrtGuiController{
 
 		measurementController.doUpdate(true);
 
-		try {
-			bias1Controller.initialize( "bias");
-			controllersMap.put(bias1Tab, bias1Controller);
-		} catch (Exception e) {
-			logger.catching(e);
-		}
-
-		try {
-			bias2Controller.initialize( "bias2");
-			controllersMap.put(bias2Tab, bias2Controller);
-		} catch (Exception e) {
-			logger.catching(e);
-		}
-
-		try {
-			converterController.initialize();
-			controllersMap.put(converterTab, converterController);
-		} catch (Exception e) {
-			logger.catching(e);
-		}
 
 		try {
 			controlController.initialize("Attenuation", new AttenuationRangePackege(), new AttenuationPacket());
@@ -100,7 +73,7 @@ public class IrtGuiController{
 
 	@FXML public void selectionChanged(Event e){
 
-		if(bias1Controller!=null && bias2Controller!=null){
+		if(controlController!=null){
 
 			Tab tab = (Tab)e.getSource();
 

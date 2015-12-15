@@ -42,4 +42,9 @@ public class RegisterPacket extends RegirterAbstractPacket {
 
 		return bs;
 	}
+
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
+	}
 }

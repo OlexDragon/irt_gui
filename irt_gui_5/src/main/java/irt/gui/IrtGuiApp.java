@@ -1,6 +1,7 @@
 package irt.gui;
 
 import java.net.URL;
+import java.util.Properties;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -37,12 +38,9 @@ public class IrtGuiApp extends Application {
 			primaryStage.setScene(scene);
 			primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/logo.gif")));
 
-        } catch (Exception e) {
-			logger.catching(e);
-		}
-
-        try{
-        	primaryStage.setTitle("IRT Gui v.5.0");
+			Properties p = new Properties();
+			p.load(getClass().getResourceAsStream("/project.properties"));
+         	primaryStage.setTitle("IRT Gui v." + p.getProperty("version"));
         	primaryStage.show();
         }catch(Exception e){
         	logger.catching(e);

@@ -10,19 +10,26 @@ import irt.gui.errors.PacketParsingException;
 
 public class DebugInfoPacket extends RegirterAbstractPacket {
 
+	private static PacketId PACKET_ID;
+
 	public DebugInfoPacket(DebugInfoCode code, int parameter) throws PacketParsingException {
 		super(
 				new PacketHeader(
 						PacketType.REQUEST,
-						new PacketIdDetails(code.getPacketID(), "; Get Debug Info"),
+						new PacketIdDetails(PACKET_ID = code.getPacketID(), "; Get Debug Info"),
 						PacketErrors.NO_ERROR),
 				new Payload(
-						new ParameterHeader(code.getPacketID()),
+						new ParameterHeader(PACKET_ID),
 						Packet.toBytes(parameter)));
 	}
 
 	public DebugInfoPacket(byte[] answer) throws PacketParsingException {
 		super(DebugInfoCode.INFO.getPacketID(), answer);
+	}
+
+	@Override
+	public PacketId getPacketId() {
+		return PACKET_ID;
 	}
 
 	public enum DebugInfoCode {

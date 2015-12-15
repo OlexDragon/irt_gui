@@ -2,9 +2,9 @@ package irt.gui.controllers.components;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Properties;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.data.GuiUtility;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextFieldFocusListener;
@@ -22,19 +22,20 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 public class RegisterTextField extends ScheduledNode {
 
-	public static final String PROPERTY_STARTS_WITH	= "gui.regicter.textField.";
-	public static final String NAME 				= "name";
+	public static final String FXML_PATH = "/fxml/components/RegisterTextField.fxml";
+
+	public static final String PROPERTY_STARTS_WITH	= "gui.register.textField.";
 	public static final String START 				= "start";
 	public static final String SET 					= "set";
 	public static final String SAVE 				= "save";
@@ -43,22 +44,20 @@ public class RegisterTextField extends ScheduledNode {
 	public static final String CLASS_NOT_SAVED 		= "notSaved";
 	public static final String CLASS_HAS_CHANGED 	= "hasChanged";
 
-	private final EventHandler<ActionEvent>	onActionMenuItemsEvent = e->{ onActionMenuItems(e); };
+	public static final String FIELD_KEY_ID 		= RegistersController.REGISTER_PROPERTIES 		+ "textField.%d.";
+	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.3.5.7)
 
-	private					Properties 		properties;					//properties for menu 'Regoster'
-	private					RegisterPacket 	savedValuePacket;				//to get saved value
 	private					RegisterValue 	setRegisterValue;			//Register's index and address
 	private	volatile		Value			value;						/*Actual value	*/							public Value getValue() { return value; }
 	private					Value			savedValue;					//Saved value in the register
 	private final 			NumericChecker 	numericChecker 	= new NumericChecker();
 
 	@FXML private TextField textField;
-	@FXML private Menu 		registerMenu;
+	@FXML private Menu 		menuRegister;
 	@FXML private MenuItem	startStopMenuItem;
 	@FXML private MenuItem	saveMenuItem;
 	@FXML private MenuItem	resetMenuItem;
 	@FXML private MenuItem	setMenuItem;
-	private RegisterPacket packet;
 
 	@FXML public void initialize(){
 
@@ -68,7 +67,7 @@ public class RegisterTextField extends ScheduledNode {
 		new TextFieldFocusListener(textField);
 		textField.setUserData(this);
 
-		setMenuItems();
+		createMenuItems();
 	}
 
 	@FXML public void onActionTextField() {
@@ -86,34 +85,27 @@ public class RegisterTextField extends ScheduledNode {
     }
 
 	@FXML private void onActionMenuItems(ActionEvent e) {
-		final MenuItem menuItem = (MenuItem)e.getSource();
+		final MenuItem menuItem = (MenuItem) e.getSource();
 		final String id = menuItem.getId();
-		switch(id){
-		case NAME:
-			setName(menuItem.getText());
-			break;
-		case START:
-			start();
-			break;
-		case STOP:
-			stop(false);
-			break;
-		case SET:
-			onActionTextField();
-			break;
-		case RESET:
-			try {
+		try {
+			switch (id) {
+			case START:
+				start();
+				break;
+			case STOP:
+				stop(false);
+				break;
+			case SET:
+				onActionTextField();
+				break;
+			case RESET:
 				reset();
-			} catch (PacketParsingException e2) {
-				logger.catching(e2);
-			}
-			break;
-		case SAVE:
-			try {
+				break;
+			case SAVE:
 				save();
-			} catch (PacketParsingException e1) {
-				logger.catching(e1);
 			}
+		} catch (Exception ex) {
+			logger.catching(ex);
 		}
 	}
 
@@ -163,27 +155,26 @@ public class RegisterTextField extends ScheduledNode {
 			SerialPortController.QUEUE.add(packet);
 	}
 
-	public void setName(String name) {
-		logger.entry(name);
+	public void setKeyStartWith(String keyStartWith){
+		logger.entry(keyStartWith);
 
 		// Stop sending packets
 		stop(false);
 
-		if(name==null || name.isEmpty())
+		if(keyStartWith==null || keyStartWith.isEmpty())
 			return;
 
-		this.name = name;
+		this.propertyName = keyStartWith;
 
-		try {
-			String[] nameKey = properties.entrySet().parallelStream().filter(p -> p.getValue().equals(name))
-					.map(p -> (String) p.getKey()).toArray(String[]::new);
-			String keyStartWith = nameKey[0].substring(0, nameKey[0].lastIndexOf(".") + 1);// +1 to return the string with dot in the end
 
-			setPacket(keyStartWith);
+			try {
+				setPacket(keyStartWith);
+			} catch (Exception e) {
+				logger.catching(e);
+			}
 			setValues(keyStartWith);
 
-			period = Long.parseLong(properties.getProperty(keyStartWith + "period"));
-			start();
+			setPeriod( Long.parseLong(IrtGuiProperties.getProperty(keyStartWith + "period")));
 
 			startStopMenuItem.setDisable(false);
 			saveMenuItem.setDisable(false);
@@ -191,58 +182,46 @@ public class RegisterTextField extends ScheduledNode {
 			setMenuItem.setDisable(false);
 
 			//Select register menu
-			final ObservableList<MenuItem> menuItems = registerMenu.getItems();
-			menuItems.parallelStream().filter(mi->mi.getText().equals(name)).forEach(mi->((RadioMenuItem)mi).setSelected(true));
+			final ObservableList<MenuItem> menuItems = menuRegister.getItems();
 
-		} catch (Exception ex) {
-			logger.catching(ex);
-		}
+			menuItems
+			.parallelStream()
+			.filter(mi->mi.getId().equals(keyStartWith))
+			.forEach(mi->Platform.runLater(()->((RadioMenuItem)mi).setSelected(true)));
+
+			start();
 	}
 
 	private void setPacket(String keyStartWith) throws PacketParsingException {
 		logger.entry(keyStartWith);
 
-		removePacket(packet);
+		removeAllPackets();
 
-		int index = Integer.parseInt(properties.getProperty(keyStartWith + "index"));
-		int address = Integer.parseInt(properties.getProperty(keyStartWith + "address"));
+		int index = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "index"));
+		int address = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "address"));
 
 		setRegisterValue = new RegisterValue(index, address);
 		addPacket(new RegisterPacket(setRegisterValue));
-
-		removePacket(savedValuePacket);
 
 		RegisterValue rv = new RegisterValue(index, address==0 ? 0x10+2 : 0x10+3); //0x10+2 --> RDAC:MEM2; 0x10+3 --> RDAC:MEM3
 		addPacket(new RegisterPacket(rv));
 	}
 
 	private void setValues(String keyStartWith) {
-		int valueMin = Integer.parseInt(properties.getProperty(keyStartWith + "value.min"));
-		int valueMax = Integer.parseInt(properties.getProperty(keyStartWith + "value.max"));
+		int valueMin = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "value.min"));
+		int valueMax = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "value.max"));
 
 		value = new Value(null, valueMin, valueMax, 0);
 		savedValue = new Value(null, valueMin, valueMax, 0);
 	}
 
-	private void setMenuItems() {
-		properties = IrtGuiProperties.selectFromProperties(PROPERTY_STARTS_WITH);
-		String[] names = properties
-							.entrySet()
-							.parallelStream()
-							.filter(p->((String)p.getKey()).contains(NAME))
-							.map(p->(String)p.getValue())
-							.sorted()
-							.toArray(String[]::new);
+	private void createMenuItems() {
 
-		ToggleGroup toggleGroup = new ToggleGroup();
-		final ObservableList<MenuItem> menuItems = registerMenu.getItems();
-		for(String n:names) {
-			final RadioMenuItem mi = new RadioMenuItem(n);
-			mi.setOnAction(onActionMenuItemsEvent);
-			mi.setId(NAME);
-			mi.setToggleGroup(toggleGroup);
-			menuItems.add(mi);
-		}
+		EventHandler<ActionEvent> onActionRegisterSelect = e->{
+			final MenuItem source = (MenuItem) e.getSource();
+			setKeyStartWith(source.getId());
+		};
+		GuiUtility.createMamuItems(PROPERTY_STARTS_WITH, onActionRegisterSelect, menuRegister.getItems());
 	}
 
 	public void start(){
@@ -324,6 +303,10 @@ public class RegisterTextField extends ScheduledNode {
 	@Override
 	public void update(Observable observable, Object object) {
 		SERVICES.execute(new Update(((LinkedPacket)observable).getAnswer()));
+	}
+
+	public static Class<? extends Node> getPootClass() {
+		return TextField.class;
 	}
 
 	//********************************************** class Update   ***************************************************
