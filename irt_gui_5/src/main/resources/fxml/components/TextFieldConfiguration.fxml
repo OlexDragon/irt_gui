@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.TextFieldConfiguration">
+   <right>
+      <TextField fx:id="textField" alignment="CENTER" editable="false" onAction="#onActionTextField" onKeyPressed="#onKeyPressed" prefColumnCount="5" stylesheets="@../../styles/components.css" BorderPane.alignment="CENTER">
+      	<contextMenu>
+      		<ContextMenu>
+      			<items>
+      				<Menu fx:id="menuConfiguration" mnemonicParsing="false" text="Configuration" />
+      				<SeparatorMenuItem mnemonicParsing="false" />
+      				<MenuItem id="set" fx:id="menuItemSet" disable="true" mnemonicParsing="false" onAction="#onActionTextField" text="Set" />
+      				<MenuItem id="save" fx:id="menuItemSave" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemSave" text="Save" />
+      				<SeparatorMenuItem mnemonicParsing="false" />
+      				<MenuItem id="stop" fx:id="menuItemStartStop" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemStartStop" text="Stop" />
+      			</items>
+      		</ContextMenu>
+      	</contextMenu>
+      </TextField>
+   </right>
+   <center>
+      <Label fx:id="label" text="Label" BorderPane.alignment="CENTER" />
+   </center>
+</BorderPane>

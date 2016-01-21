@@ -9,29 +9,25 @@
 
 <BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ValueLabel">
    <center>
-      <AnchorPane>
+      <Label fx:id="titleLabel" text="Title">
          <BorderPane.margin>
-            <Insets right="3.0" />
+            <Insets right="5.0" />
          </BorderPane.margin>
-         <children>
-            <Label fx:id="titleLabel" text="Title" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
-         </children>
-      </AnchorPane>
+      </Label>
    </center>
    <right>
-      <AnchorPane BorderPane.alignment="CENTER">
-         <children>
-            <Label fx:id="valueLabel" alignment="CENTER_RIGHT" text="Value" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-               <contextMenu>
-                  <ContextMenu fx:id="contextMenu">
-                     <items>
-                        <Menu fx:id="menuValues" mnemonicParsing="false" text="Values" />
-                     </items>
-                  </ContextMenu>
-               </contextMenu>
-            </Label>
-         </children>
-      </AnchorPane>
+      <Label fx:id="valueLabel" alignment="CENTER_RIGHT" text="Value">
+         <contextMenu>
+            <ContextMenu fx:id="contextMenu">
+               <items>
+                  <Menu fx:id="menuValues" mnemonicParsing="false" text="Values" />
+               </items>
+            </ContextMenu>
+         </contextMenu>
+         <BorderPane.margin>
+            <Insets left="5.0" />
+         </BorderPane.margin>
+      </Label>
    </right>
    <effect>
       <DropShadow />

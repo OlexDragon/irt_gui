@@ -2,7 +2,6 @@ package irt.gui.data.value;
 
 import java.text.NumberFormat;
 
-
 public class ValueDouble extends Value {
 
 	private int precision;

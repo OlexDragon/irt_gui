@@ -10,13 +10,9 @@ import org.apache.logging.log4j.Logger;
 import de.jensd.shichimifx.utils.TabPaneDetacher;
 import irt.gui.controllers.components.DebugInfoController;
 import irt.gui.controllers.components.InfoController;
-import irt.gui.controllers.components.MeasurementController;
 import irt.gui.controllers.components.NetworkPanelController;
 import irt.gui.controllers.components.SerialPortController;
-import irt.gui.controllers.components.ValuePanelController;
 import irt.gui.controllers.interfaces.FieldController;
-import irt.gui.data.packet.observable.configuration.AttenuationPacket;
-import irt.gui.data.packet.observable.configuration.AttenuationRangePackege;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -43,29 +39,14 @@ public class IrtGuiController{
 	@FXML private NetworkPanelController networkController;
 	@FXML private Tab debugInfoTab;
 	@FXML private DebugInfoController debugInfoController;
-	@FXML private Tab measurementTab;
-	@FXML private MeasurementController measurementController;
-	@FXML private Tab controlTab;
-	@FXML private ValuePanelController controlController;
 
 	@FXML private TabPane tabPane;
 
 	@FXML public void initialize() {
 		logger.entry();
 
-		measurementController.doUpdate(true);
-
-
-		try {
-			controlController.initialize("Attenuation", new AttenuationRangePackege(), new AttenuationPacket());
-			controllersMap.put( controlTab		, controlController	);
-		} catch (Exception e) {
-			logger.catching(e);
-		}
-
 		controllersMap.put( networkTab		, networkController		);
 		controllersMap.put( debugInfoTab	, debugInfoController	);
-		controllersMap.put( measurementTab	, measurementController	);
 
 		TabPaneDetacher.create().makeTabsDetachable(tabPane);
 		tabCount = tabPane.getTabs().size();
@@ -73,7 +54,7 @@ public class IrtGuiController{
 
 	@FXML public void selectionChanged(Event e){
 
-		if(controlController!=null){
+		if(!controllersMap.isEmpty()){
 
 			Tab tab = (Tab)e.getSource();
 

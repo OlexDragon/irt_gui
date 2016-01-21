@@ -9,24 +9,29 @@
 
 <BorderPane prefHeight="290.0" prefWidth="435.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.RegistersController">
    <right>
-      <HBox>
+      <AnchorPane>
          <children>
-            <Slider fx:id="slider" disable="true" onMouseReleased="#sliderMouseReleased" orientation="VERTICAL" showTickLabels="true" showTickMarks="true" />
+            <HBox layoutX="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <Slider fx:id="slider" majorTickUnit="1.0" minorTickCount="4" onMouseReleased="#sliderMouseReleased" orientation="VERTICAL" showTickLabels="true" showTickMarks="true" />
+               </children>
+            </HBox>
          </children>
-      </HBox>
+      </AnchorPane>
    </right>
    <top>
       <AnchorPane BorderPane.alignment="CENTER">
          <children>
             <HBox alignment="CENTER_RIGHT" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <fx:include fx:id="calibModeButton" source="CalibrationModeButton.fxml" />
+                  <fx:include fx:id="buttonInitialize" source="ButtonInitialize.fxml" />
+                  <fx:include fx:id="calibModeButton" source="ButtonCalibrationMode.fxml" />
                   <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveValues" text="Save">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
                   </Button>
-                  <Button fx:id="resetButton" mnemonicParsing="false" onAction="#resetValues" text="Reset">
+                  <Button fx:id="resetButton" mnemonicParsing="false" onAction="#onActionResetButton" text="Reset">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
@@ -43,8 +48,12 @@
                   </TextField>
                   <MenuButton mnemonicParsing="false">
                     <items>
-                        <Menu fx:id="profileMenu" mnemonicParsing="false" text="Profiles" />
-                      <MenuItem fx:id="saveMenu" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemsSave" text="Save" />
+                        <Menu fx:id="menuProfile" mnemonicParsing="false" text="Profiles">
+                           <items>
+                              <RadioMenuItem mnemonicParsing="false" onAction="#onActionNewProfile" text="New" />
+                           </items>
+                         </Menu>
+                      <MenuItem fx:id="menuSave" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemsSave" text="Save" />
                       <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemsSaveAs" text="Save as..." />
                     </items>
                   </MenuButton>

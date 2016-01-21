@@ -61,9 +61,14 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		DEVICE_DEBAG_DUMP				(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_DUMP				),
 		DEVICE_DEBAG_REGISTER_INDEXES	(	PacketGroupId.DEVICE_DEBAG	, ParameterHeaderCode.DD_REGISTER_INDEXES	),
 		//CONFIGURATION
-		CONFIGURATION_ATTENUATION		(	PacketGroupId.CONFIGURATION	,	ParameterHeaderCode.CONF_ATTENURATION		),
+		CONFIGURATION_ATTENUATION		(	PacketGroupId.CONFIGURATION	, ParameterHeaderCode.CONF_ATTENURATION			),
 		CONFIGURATION_ATTENUATION_RANGE	(	PacketGroupId.CONFIGURATION	, ParameterHeaderCode.CONF_ATTENURATION_RANGE	),
-		CONFIGURATION_NETWORK_ADDRESS	(	PacketGroupId.NETWORK		, ParameterHeaderCode.CONF_NETWORK_ADDRESS	),
+		CONFIGURATION_GAIN				(	PacketGroupId.CONFIGURATION	, ParameterHeaderCode.CONF_GAIN					),
+		CONFIGURATION_GAIN_RANGE		(	PacketGroupId.CONFIGURATION	, ParameterHeaderCode.CONF_GAIN_RANGE			),
+		CONFIGURATION_FREQUENCY			(	PacketGroupId.CONFIGURATION	, ParameterHeaderCode.CONF_FREQUENCY			),
+		CONFIGURATION_FREQUENCY_RANGE	(	PacketGroupId.CONFIGURATION	, ParameterHeaderCode.CONF_FREQUENCY_RANGE		),
+
+		CONFIGURATION_NETWORK_ADDRESS	(	PacketGroupId.NETWORK		, ParameterHeaderCode.CONF_NETWORK_ADDRESS		),
 		//Alarms
 		ALARMS					(	PacketGroupId.ALARM,		ParameterHeaderCode.ALARM_IDs			),
 		ALARM_SUMMARY_STATUS	(	PacketGroupId.ALARM,		ParameterHeaderCode.ALARM_SUMMARY_STATUS),
@@ -75,7 +80,9 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		//Measurement
 		MEASUREMENT_TEMPERATURE	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_TEMPERATURE),
 		MEASUREMENT_INPUT_POWER	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_INPUT_POWER),
-		MEASUREMENT_OUTPUT_POWER(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_OUTPUT_POWER);
+		MEASUREMENT_OUTPUT_POWER(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_OUTPUT_POWER),
+		//Production
+		PRODUCTION_INITIALIZE_BIASES(	PacketGroupId.PRODUCTION,		ParameterHeaderCode.PRODUCTION_INITIALIZE_BIASES);
 
 		private PacketGroupId packetGroupId;				public PacketGroupId 		getPacketGroupId() 		{ return packetGroupId; 		}
 		private ParameterHeaderCode parameterHeaderCode;	public ParameterHeaderCode 	getParameterHeaderCode(){ return parameterHeaderCode; 	}
@@ -114,7 +121,8 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		CONFIG_PROFILE	((byte) 0x09),		/* Save configuration: generic command. */
 		PROTOCOL		((byte) 0x0A),
 		NETWORK			((byte) 0x0B),
-		DEVICE_DEBAG	((byte)61);		/* 0x3D Device Debug. */
+		DEVICE_DEBAG	((byte) 0x3D), 		/* 0x3D Device Debug. */
+		PRODUCTION		((byte)	0X64);
 
 		byte value = 0; 			public byte getValue() { return value; }
 
@@ -145,8 +153,12 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		DI_UNIT_PART_NUMBER		(	Payload.DI_UNIT_PART_NUMBER			, PacketGroupId.DEVICE_INFO	),
 		DI_ALL					(	Packet.IRT_SLCP_PARAMETER_ALL		, PacketGroupId.DEVICE_INFO	),
 		//Configuration
-		CONF_ATTENURATION_RANGE	(	Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE		, PacketGroupId.CONFIGURATION ),
-		CONF_ATTENURATION		(	Packet.PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION	, PacketGroupId.CONFIGURATION ),
+		CONF_ATTENURATION		(	Packet.PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION			, PacketGroupId.CONFIGURATION ),
+		CONF_ATTENURATION_RANGE	(	Packet.PARAMETER_CONFIG_FCM_ATTENUATION_RANGE				, PacketGroupId.CONFIGURATION ),
+		CONF_GAIN				(	Packet.PARAMETER_PICOBUC_CONFIGURATION_GAIN					, PacketGroupId.CONFIGURATION ),
+		CONF_GAIN_RANGE			(	Packet.PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE			, PacketGroupId.CONFIGURATION ),
+		CONF_FREQUENCY			(	Packet.PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY		, PacketGroupId.CONFIGURATION ),
+		CONF_FREQUENCY_RANGE	(	Packet.PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY_RANGE	, PacketGroupId.CONFIGURATION ),
 		//Network
 		CONF_NETWORK_ADDRESS	(	Packet.PARAMETER_ID_NETWORK_ADDRESS		, PacketGroupId.NETWORK	),
 		SNMP_ENABLE				(	Packet.PARAMETER_ID_NETWORK_SNMP_ENABLE	, PacketGroupId.NETWORK	),
@@ -162,7 +174,9 @@ public interface LinkedPacket extends Comparable<LinkedPacket>{
 		//Measurement
 		M_TEMPERATURE	(Packet.PARAMETER_MEASUREMENT_TEMPERATURE	, PacketGroupId.MEASUREMENT ),
 		M_INPUT_POWER	(Packet.PARAMETER_MEASUREMENT_INPUT_POWER	, PacketGroupId.MEASUREMENT ),
-		M_OUTPUT_POWER(Packet.PARAMETER_MEASUREMENT_OUTPUT_POWER	, PacketGroupId.MEASUREMENT );
+		M_OUTPUT_POWER	(Packet.PARAMETER_MEASUREMENT_OUTPUT_POWER	, PacketGroupId.MEASUREMENT ),
+		//Production
+		PRODUCTION_INITIALIZE_BIASES(Packet.PACKET_ID_PRODUCTION_INITIALIZE	, PacketGroupId.PRODUCTION );
 
 		private byte value; 			public byte 			getValue() 	{ return value; 	}
 		private PacketGroupId groupId;	public PacketGroupId 	getGroupId(){ return groupId; 	}

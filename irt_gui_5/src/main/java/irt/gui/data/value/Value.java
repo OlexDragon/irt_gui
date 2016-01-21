@@ -19,6 +19,8 @@ public class Value extends Observable{
 	}
 	private int type = 0;
 
+	protected Long originalValue; 			public Long getOriginalValue() { return originalValue; }
+
 	protected Long oldValue;
 	protected Long value;
 
@@ -38,7 +40,7 @@ public class Value extends Observable{
 		setPrefix();
 	}
 
-	public Value(long value, double minValue, double maxValue, int precision){
+	public Value(Long value, double minValue, double maxValue, int precision){
 		setFactor(precision);
 		setMinMax(Math.round(minValue*factor), Math.round(maxValue*factor));
 		setValue(value);
@@ -137,6 +139,11 @@ public class Value extends Observable{
 	}
 
 	private void setValue(Long value) {
+
+		if(originalValue!=null && originalValue.equals(value))
+			return;
+
+		originalValue = value;
 
 		if(value==null)
 			return;
@@ -268,7 +275,7 @@ public class Value extends Observable{
 			value = new ValueDouble(this);
 			break;
 		case "Value":
-			value = new ValueDouble(this);
+			value = new Value(this);
 			break;
 		default:
 			value = new Value(this);
@@ -321,6 +328,12 @@ public class Value extends Observable{
 		NumberFormat numberFormat = getInstance();
 		double result = (double)value/factor;
 		return numberFormat.format(result)+prefix;
+	}
+
+	public String toStringAll() {
+		return getClass().getSimpleName() + " [type=" + type + ", originalValue=" + originalValue + ", oldValue=" + oldValue + ", value="
+				+ value + ", minValue=" + minValue + ", maxValue=" + maxValue + ", factor=" + factor + ", prefix="
+				+ prefix + ", error=" + error + "]";
 	}
 
 	@Override

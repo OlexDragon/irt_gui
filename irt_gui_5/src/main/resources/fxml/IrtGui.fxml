@@ -26,24 +26,6 @@
 					<children>
 						<TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
 							<tabs>
-								<Tab fx:id="measurementTab" onSelectionChanged="#selectionChanged" text="Measurement">
-									<content>
-										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-											<children>
-												<fx:include fx:id="measurement" source="components/Measurements.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-											</children>
-										</AnchorPane>
-									</content>
-								</Tab>
-								<Tab fx:id="controlTab" onSelectionChanged="#selectionChanged" text="Control">
-									<content>
-										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-											<children>
-												<fx:include fx:id="control" source="components/ValuePanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-											</children>
-										</AnchorPane>
-									</content>
-								</Tab>
 								<Tab fx:id="networkTab" onSelectionChanged="#selectionChanged" text="Network">
 									<content>
 										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

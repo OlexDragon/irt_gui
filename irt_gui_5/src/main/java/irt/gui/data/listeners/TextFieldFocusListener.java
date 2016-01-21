@@ -1,6 +1,8 @@
 
 package irt.gui.data.listeners;
 
+import org.apache.logging.log4j.LogManager;
+
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,7 +26,8 @@ public class TextFieldFocusListener implements ChangeListener<Boolean>{
 	@Override
 	public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		if (newValue.booleanValue()) {
-            focusGained();
+			if(textField.isEditable())
+				focusGained();
         } else {
             focusLost();
         }

@@ -46,6 +46,7 @@ irt\gui\data\PacketIdDetails.class
 irt\gui\data\packet\interfaces\LinkedPacket$PacketGroupId.class
 irt\gui\data\listeners\TextFieldFocusListener.class
 irt\gui\data\packet\interfaces\ValuePacket.class
+irt\gui\data\listeners\FractionalNumberChecker.class
 irt\gui\controllers\components\ValuesController$6.class
 irt\gui\data\value\Value$Status.class
 irt\gui\controllers\ScheduledLinkedPacketSender$1.class
@@ -80,7 +81,6 @@ irt\gui\data\packet\interfaces\LinkedPacket.class
 irt\gui\controllers\components\AlarmFieldController$1.class
 irt\gui\controllers\components\ValuesController$1$1.class
 irt\gui\controllers\components\ValueView$3.class
-irt\gui\data\packet\observable\configuration\AttenuationRangePackege.class
 irt\gui\data\packet\LinkHeader.class
 irt\gui\controllers\components\ValuesController.class
 irt\gui\data\GuiUtility.class
@@ -97,7 +97,6 @@ irt\gui\data\packet\observable\measurement\OutputPowerPacket.class
 irt\gui\data\NetworkAddress.class
 irt\gui\data\packet\PacketHeader.class
 irt\gui\controllers\components\InfoController$1.class
-irt\gui\controllers\components\MeasurementController.class
 irt\gui\controllers\components\ValuesController$5.class
 irt\gui\controllers\components\ValuesController$2.class
 irt\gui\data\ChecksumLinkedPacket.class
@@ -112,7 +111,9 @@ irt\gui\controllers\FieldsControllerAbstract.class
 irt\gui\data\packet\observable\device_debug\DebugInfoPacket$DebugInfoCode.class
 irt\gui\controllers\components\NetworkFieldController.class
 irt\gui\data\packet\interfaces\LinkedPacket$PacketErrors.class
+irt\gui\controllers\components\ConfigurationTextField.class
 irt\gui\controllers\components\ValueView.class
+irt\gui\data\packet\observable\configuration\FrequencyPacket.class
 irt\gui\controllers\components\AlarmFieldController$3.class
 irt\gui\controllers\components\AlarmsPanelController$1.class
 irt\gui\data\packet\observable\alarms\AlarmSummaryStatusPacket$AlarmSeverities.class
@@ -127,6 +128,7 @@ irt\gui\controllers\components\ValueLabel.class
 irt\gui\errors\PacketParsingException.class
 irt\gui\controllers\components\NetworkFieldController$1.class
 irt\gui\data\packet\observable\device_debug\RegisterPacket.class
+irt\gui\data\packet\observable\configuration\GainPacket.class
 irt\gui\controllers\components\AlarmFieldController$4.class
 irt\gui\data\packet\interfaces\AlarmPacket.class
 irt\gui\data\packet\observable\alarms\AlarmIDsPacket.class

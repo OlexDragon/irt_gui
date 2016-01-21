@@ -20,7 +20,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
-public class CalibrationModeButton extends Observable implements Runnable, Observer {
+public class ButtonCalibrationMode extends Observable implements Runnable, Observer {
 	private final Logger logger = LogManager.getLogger();
 
 	private static final ScheduledExecutorService SERVICES = ScheduledServices.services;
@@ -85,12 +85,15 @@ public class CalibrationModeButton extends Observable implements Runnable, Obser
 		}
 	}
 
-	private final Update update = new Update();
+	private final Updater updater = new Updater();
 	@Override
 	public void update(Observable observable, Object arg) {
 		logger.entry(observable);
-		update.setPacket(((LinkedPacket)observable).getAnswer());
-		SERVICES.execute(update);
+		updater.setPacket(((LinkedPacket)observable).getAnswer());
+		SERVICES.execute(updater);
+
+		setChanged();
+		notifyObservers(observable);
 	}
 
 	public void start(){
@@ -111,7 +114,7 @@ public class CalibrationModeButton extends Observable implements Runnable, Obser
 	}
 
 	//********************************************** class Update   *******************************************************
-	private class Update implements Runnable{
+	private class Updater implements Runnable{
 
 		private byte[] aswer;	public void setPacket(byte[] answer) { this.aswer = answer; }
 
@@ -123,9 +126,9 @@ public class CalibrationModeButton extends Observable implements Runnable, Obser
 				CallibrationModePacket p = new CallibrationModePacket(aswer);
 
 				CalibrationMode cm = p.getCallibrationMode();
-				logger.trace("{}:{}", callibrationMode, cm);
 
 				if (cm != callibrationMode) {
+				logger.trace("{}:{}", callibrationMode, cm);
 
 					callibrationMode = cm;
 					final String text = "Callibration Mode is " + cm;

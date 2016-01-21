@@ -84,14 +84,14 @@ public class LinkedPacketSender extends SerialPort {
 
 			writePacket(packet);
 			byte[] readBytes = readBytes(5);
-			packet.setAnswer(readBytes);
-			timer.stop();
 
 			//Send back acknowledgement
 			byte[] acknowledgement = packet.getAcknowledgement();
 			if(acknowledgement!=null)
 				writeBytes(acknowledgement);
 
+			packet.setAnswer(readBytes);
+			timer.stop();
 
 		} catch (Exception e) {
 			logger.catching(e);

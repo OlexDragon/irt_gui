@@ -26,7 +26,7 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
-public class ValueLabel extends ScheduledNode {
+public class ValueLabel extends ScheduledNodeAbstract {
 
 	public static final String FXML_PATH		= "/fxml/components/ValueLabel.fxml";
 
@@ -35,6 +35,7 @@ public class ValueLabel extends ScheduledNode {
 	public static final String FIELD_KEY_ID	= RegistersController.REGISTER_PROPERTIES 		+ "value.%d.";
 	public static final String FIELD_KEY 	= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.value.profikeId.column.row (ex. gui.regicter.controller.value.3.5.7)
 
+	public static final Class<? extends Node> rootClass = BorderPane.class;
 
 	@FXML private BorderPane 	borderPane;
 	@FXML private Label 		valueLabel;
@@ -72,10 +73,10 @@ public class ValueLabel extends ScheduledNode {
 		final Optional<String> className = Optional.ofNullable(IrtGuiProperties.getProperty(propertiesKeyStartWith + "class"));
 		if(className.isPresent()){
 			stop(true);
-			
+
 			removeAllPackets();
 
-			//Set PAcket
+			//Set Packet
 			createPacket(className.get());
 
 			//Select value menu
@@ -117,28 +118,30 @@ public class ValueLabel extends ScheduledNode {
 
 	@Override
 	public void update(Observable observable, Object arg) {
-		LinkedPacket packet = (LinkedPacket)observable;
-		Optional
-		.ofNullable(clazz)
-		.ifPresent(c->{
-			Optional
-			.ofNullable(createPacket(packet))
-			.ifPresent(p->{
-				Value v;
-				final short result = p.getPayloads().get(0).getShort(0);
-				if(p instanceof ValuePacket){
-					final ValuePacket valuePacket = (ValuePacket)p;
-					v = new ValueDouble(result, valuePacket.getPrecision());
-					v.setPrefix(valuePacket.getPrefix());
-				}else
-					v = new Value(result, Long.MIN_VALUE, Long.MAX_VALUE, 0);
-				
-				Platform
-				.runLater(()->{
-					valueLabel.setText(v.toString());
+		SERVICES.execute(()->{
+			LinkedPacket packet = (LinkedPacket)observable;
+			if(packet.getAnswer()!=null)
+				Optional
+				.ofNullable(clazz)
+				.ifPresent(c->{
+					Optional
+					.ofNullable(createPacket(packet))
+					.ifPresent(p->{
+						Value v;
+						final long result = p.getPayloads().get(0).getShort(0);
+						if(p instanceof ValuePacket){
+							final ValuePacket valuePacket = (ValuePacket)p;
+							v = new ValueDouble(result, valuePacket.getPrecision());
+							v.setPrefix(valuePacket.getPrefix());
+						}else
+							v = new Value(result, Long.MIN_VALUE, Long.MAX_VALUE, 0);
+
+						Platform
+						.runLater(()->{
+							valueLabel.setText(v.toString());
+						});
+					});
 				});
-			});
-			
 		});
 	}
 

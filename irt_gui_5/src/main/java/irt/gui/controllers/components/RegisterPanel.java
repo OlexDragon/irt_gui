@@ -3,8 +3,6 @@ package irt.gui.controllers.components;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
@@ -70,6 +68,7 @@ public class RegisterPanel{
 	@FXML private Menu 		menuBackground;
 	@FXML private Menu 		menuValueLabel;
 	@FXML private Menu 		menuRegisterLabel;
+	@FXML private Menu 		menuControl;
 
 	private VBox 		paneUnderMouse;
 	private ToggleGroup backgroundToggleGroup = new ToggleGroup();
@@ -79,10 +78,20 @@ public class RegisterPanel{
 
 	private final EventHandler<? super MouseEvent> mouseEvent = e->paneMouseEntered(e);
 
-	private boolean disable;
+	private boolean editable;
+
+	private final EventHandler<ActionEvent> onActionMenuItemRegister 		= e->loadNode(TextFieldRegister.class, 		((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+	private final EventHandler<ActionEvent> onActionMenuItemValueLabel 		= e->loadNode(ValueLabel.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+	private final EventHandler<ActionEvent> onActionMenuItemControl 		= e->loadNode(TextFieldConfiguration.class,	((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel 	= e->loadNode(RegisterLabel.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
 
 	@FXML private void initialize(){
-		createMenuItems();
+		createMenuItemsRegisterTextField();
+		createMenuItemsControlTextField();
+		createMenuItemsValueLabel();
+		createMenuItemsRegisterLabel();
+		createMenuItemsAlignment();
+		createMenuItemsBackground();
 	}
 
 	@FXML private void addColumnonActionMenuItems() {
@@ -142,6 +151,10 @@ public class RegisterPanel{
 			menuItemDeleteRow.setDisable(true);
 	}
 
+	@FXML private void onActionMenuItemClear(){
+		setColumnsAndRows(1, 1);
+	}
+
 	@FXML private void alignmentonActionMenuItems(ActionEvent e) {
 		MenuItem m = (MenuItem)e.getSource();
 		paneUnderMouse.setAlignment((Pos) m.getUserData());
@@ -165,24 +178,20 @@ public class RegisterPanel{
     	paneUnderMouse.getChildren().clear();
 	}
 
-	private void createMenuItems() {
-		createMenuItemsRegister();
-		createMenuItemsAlignment();
-		createBackgroundRadioMenuItems();
-		createValueLabelMenuItems();
-		createRegisterLabelMenuItems();
+	private void createMenuItemsControlTextField() {
+		GuiUtility.createMamuItems(TextFieldConfiguration.PROPERTY_STARTS_WITH, onActionMenuItemControl, menuControl.getItems());
 	}
 
-	private void createRegisterLabelMenuItems() {
+	private void createMenuItemsRegisterLabel() {
 		GuiUtility.createMamuItems(RegisterLabel.PROPERTY_STARTS_WITH, onActionMenuItemRegisterLabel, menuRegisterLabel.getItems());
 	}
 
-	private void createValueLabelMenuItems() {
+	private void createMenuItemsValueLabel() {
 		GuiUtility.createMamuItems(ValueLabel.PROPERTY_STARTS_WITH, onActionMenuItemValueLabel, menuValueLabel.getItems());
 	}
 
-	private void createMenuItemsRegister() {
-		GuiUtility.createMamuItems(RegisterTextField.PROPERTY_STARTS_WITH, registeronActionMenuItems, menuRegister.getItems());
+	private void createMenuItemsRegisterTextField() {
+		GuiUtility.createMamuItems(TextFieldRegister.PROPERTY_STARTS_WITH, onActionMenuItemRegister, menuRegister.getItems());
 	}
 
 	private void createMenuItemsAlignment() {
@@ -196,11 +205,14 @@ public class RegisterPanel{
 		menuAlignment.getItems().addAll(mis);
 	}
 
-	private void createBackgroundRadioMenuItems() {
+	private void createMenuItemsBackground() {
 		try {
 
-			createtMenuBackgroundItemsFromResource();
-			createBackgrounBackgroundFromPath();
+			createMenuBackgroundItemsFromResource();
+
+			menuBackground.getItems().add(new SeparatorMenuItem());
+
+			createMenuBackdroundItemsFromPath(IrtGuiProperties.getProperty(FILE_SYSTEM_PATH));
 			
 
 		} catch (Exception e) {
@@ -208,44 +220,25 @@ public class RegisterPanel{
 		}
 	}
 
-	private void createtMenuBackgroundItemsFromResource() throws IOException, URISyntaxException {
+	private void createMenuBackgroundItemsFromResource() throws IOException, URISyntaxException {
 
-		final String resourceFolder = IrtGuiProperties.getProperty(RESOURCE_FOLDER);
-		final List<Object> resourceFiles = GuiUtility.getResourceFiles(resourceFolder);
-		final Optional<List<Object>> optional = Optional.ofNullable(resourceFiles);
-		optional
-		.ifPresent(fs->{
-			final List<RadioMenuItem> menuItems = createBackgroundRadioMenuItems(fs);
+		final Optional<String> recourceFolderPath = Optional.ofNullable(IrtGuiProperties.getProperty(RESOURCE_FOLDER));
+		if(recourceFolderPath.isPresent()){
+			
+			Optional
+			.ofNullable(GuiUtility.getResourceFiles(recourceFolderPath.get()))
+			.ifPresent(res->{
 
-			menuBackground.getItems().addAll(menuItems);
-		});
-	}
-
-	private List<RadioMenuItem> createBackgroundRadioMenuItems(List<Object> files) {
-		return files.parallelStream().map(file -> {
-
-			RadioMenuItem rmi = new RadioMenuItem();
-			rmi.setText(file instanceof JarEntry ? ((JarEntry) file).getName() : ((File) file).getName());
-
-			Platform.runLater(()->{
-				rmi.setUserData(file);
-				rmi.setOnAction(backgrountonActionMenuItems);
-				rmi.setToggleGroup(backgroundToggleGroup);
+				final List<RadioMenuItem> menuItems = createBackgroundRadioMenuItems(res);
+				menuBackground.getItems().addAll(menuItems);				
 			});
-			return rmi;
-		})
-				.sorted((rmi1, rmi2)->rmi1.getText().compareTo(rmi2.getText()))
-				.collect(Collectors.toList());
+		}
 	}
 
-	private void createBackgrounBackgroundFromPath() {
-		final String resourceFolder = IrtGuiProperties.getProperty(FILE_SYSTEM_PATH);
+	public void createMenuBackdroundItemsFromPath(final String resourceFolder) {
 		Optional
 		.ofNullable(resourceFolder)
 		.ifPresent(path->{
-
-			final ObservableList<MenuItem> menuItems = menuBackground.getItems();
-			menuItems.add(new SeparatorMenuItem());
 
 			final List<Object> files = Arrays
 										.stream(path.split(","))
@@ -258,35 +251,40 @@ public class RegisterPanel{
 										.collect(Collectors.toList());
 
 			final List<RadioMenuItem> mi = createBackgroundRadioMenuItems(files);
-			menuItems.addAll(mi);
+			menuBackground.getItems().addAll(mi);
 
 			// C:\Users\Oleksandr\images\register\background
 			//C:\Users\Oleksandr\irt\images\register\background
 		});
 	}
 
-	private final EventHandler<ActionEvent> registeronActionMenuItems = e->{
-		Platform.runLater(()->{
+	private List<RadioMenuItem> createBackgroundRadioMenuItems(List<Object> files) {
+		return files.parallelStream().map(file -> {
 
-				try {
+			RadioMenuItem rmi = new RadioMenuItem();
+			rmi.setText(file instanceof JarEntry ? ((JarEntry) file).getName() : ((File) file).getName());
 
-					FXMLLoader loader = loadNode(RegisterTextField.class, paneUnderMouse.getChildren());
-					RegisterTextField textFieldController = loader.getController();
-					textFieldController.setKeyStartWith(((MenuItem)e.getSource()).getId());
-
-				} catch (Exception ex) {
-					logger.catching(ex);
-				}
-		});
-	};
+			Platform.runLater(()->{
+				rmi.setUserData(file);
+				rmi.setOnAction(onActionMenuItemBackgrount);
+				rmi.setToggleGroup(backgroundToggleGroup);
+			});
+			return rmi;
+		})
+				.sorted((rmi1, rmi2)->rmi1.getText().compareTo(rmi2.getText()))
+				.collect(Collectors.toList());
+	}
 
 	private void fillColumn(final int columnIndex) {
-		IntStream.range(0, gridPane.getRowConstraints().size())
+		IntStream
+		.range(0, gridPane.getRowConstraints().size())
+		.filter(rowIndex->!getVBoxAt(columnIndex, rowIndex).isPresent())
 		.forEach(rowIndex->gridPane.add(getPane(), columnIndex, rowIndex));
 	}
 
 	private void fillRow(final Integer rowIndex) {
 		IntStream.range(0, gridPane.getColumnConstraints().size())
+		.filter(columnIndex->!getVBoxAt(columnIndex, rowIndex).isPresent())
 		.forEach(columnIndex->gridPane.add(getPane(), columnIndex, rowIndex));
 	}
 
@@ -372,16 +370,16 @@ public class RegisterPanel{
 
 	private Pane getPane() {
 		final VBox pane = new VBox();
-		pane.setAlignment(Pos.CENTER);
 		pane.setFillWidth(false);
+		pane.setAlignment(Pos.CENTER);
 		pane.setOnMouseEntered(mouseEvent);
 		pane.setFocusTraversable(false);
 		pane.getStyleClass().add("mouseOver");
 		return pane;
 	}
 
-	public void setDisable(boolean disable) {
-		this.disable = disable;
+	public void setEditable(boolean editable) {
+		this.editable = editable;
 
 		gridPane
 		.getChildren()
@@ -393,33 +391,33 @@ public class RegisterPanel{
 		.flatMap(ch->ch.parallelStream())
 		.filter(ch->ch instanceof TextField)
 		.map(ch->(TextField)ch)
-		.forEach(tf->Platform.runLater(()->tf.setDisable(disable)));
+		.forEach(tf->Platform.runLater(()->tf.setEditable(editable)));
 	}
 
-	public void reset() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Stream<RegisterTextField> controllers = getAllTextFieldControllers();
+	public void reset() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException{
+		Stream<TextFieldRegister> controllers = getAllTextFieldControllers();
 		controllers.forEach(controller->reset(controller));
 	}
 
-	private void reset(RegisterTextField controller) {
+	private void reset(TextFieldRegister controller) {
 		try { controller.reset(); } catch (Exception e) { logger.catching(e); }
 	}
 
-	public void save() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Stream<RegisterTextField> controllers = getAllTextFieldControllers();
+	public void save() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		Stream<TextFieldRegister> controllers = getAllTextFieldControllers();
 		controllers.forEach(controller->save(controller));
 	}
 
-	private void save(RegisterTextField controller) {
+	private void save(TextFieldRegister controller) {
 		try { controller.save(); } catch (PacketParsingException e) { logger.catching(e); };
 	}
 
 	@SuppressWarnings("unchecked")
-	private Stream<RegisterTextField> getAllTextFieldControllers() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		return (Stream<RegisterTextField>) getAllControllersOf(RegisterTextField.class);
+	private Stream<TextFieldRegister> getAllTextFieldControllers() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		return (Stream<TextFieldRegister>) getAllControllersOf(TextFieldRegister.class);
 	}
 
-	private Stream<? extends ScheduledNode> getAllControllersOf(Class<? extends ScheduledNode> controllerClass) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private Stream<? extends ScheduledNodeAbstract> getAllControllersOf(Class<? extends ScheduledNodeAbstract> controllerClass) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException{
 		return getAllNodesOf(controllerClass).map(tf->controllerClass.cast(tf.getUserData()));
 	}
 
@@ -430,49 +428,21 @@ public class RegisterPanel{
 				.map(ch->(VBox)ch);
 	}
 
-	private Stream<? extends Node> getAllNodesOf(Class<? extends ScheduledNode> controllerClass) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		logger.entry(controllerClass);
+	private Stream<? extends Node> getAllNodesOf(Class<? extends ScheduledNodeAbstract> controllerClass) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
-		final Method method = controllerClass.getDeclaredMethod("getPootClass");
+		final Field field = controllerClass.getDeclaredField("rootClass");
 		@SuppressWarnings("unchecked")
-		final Class<? extends Node> nodeClass = (Class<? extends Node>)method.invoke(null);
+		final Class<? extends Node> rootClass = (Class<? extends Node>)field.get(null);
 
-		Stream<VBox> e = getAllVBoxex();
-		return e.map(vb->vb.getChildren())
+		return getAllVBoxex()
+				.map(vb->vb.getChildren())
 				.flatMap(ch->ch.parallelStream())
-				.filter(nodeClass::isInstance)
+				.filter(rootClass::isInstance)
 				.filter(ps->controllerClass.isInstance(ps.getUserData()))
-				.map(nodeClass::cast);
+				.map(rootClass::cast);
 	}
 
-	private final EventHandler<ActionEvent> onActionMenuItemValueLabel = e->{
-		Platform.runLater(()->{
-
-			final FXMLLoader load = loadNode(ValueLabel.class, paneUnderMouse.getChildren());
-			final ValueLabel controller = load.getController();
-			try{
-				controller.setKeyStartWith(((MenuItem) e.getSource()).getId());
-			}catch(Exception ex){
-				logger.catching(ex);
-			}
-		});
-	};
-
-	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel = e->{
-		Platform.runLater(()->{
-
-			final FXMLLoader load = loadNode(RegisterLabel.class, paneUnderMouse.getChildren());
-			final RegisterLabel controller = load.getController();
-			try{
-				controller.setKeyStartWith(((MenuItem) e.getSource()).getId());
-			}catch(Exception ex){
-				logger.catching(ex);
-			}
-		});
-		//TODO
-	};
-
-	private final EventHandler<ActionEvent> backgrountonActionMenuItems = e->{
+	private final EventHandler<ActionEvent> onActionMenuItemBackgrount = e->{
 
 		final RadioMenuItem source = (RadioMenuItem) e.getSource();
 		final Object userData = source.getUserData();
@@ -518,9 +488,8 @@ public class RegisterPanel{
 		return gridPane.getColumnConstraints().size();
 	}
 
-	public List<Map<String, Object>> getFieldsProperties(Class<? extends ScheduledNode> nodeClass) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public List<Map<String, Object>> getFieldsProperties(Class<? extends ScheduledNodeAbstract> nodeClass) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException{
 		logger.entry(nodeClass);
-
 
 		return getAllNodesOf(nodeClass)
 				.map(tf->{
@@ -546,72 +515,88 @@ public class RegisterPanel{
 				.collect(Collectors.toList());
 	}
 
-	public void setRows(int rows) {
+	private void clear() {
+		//Stop all scheduled tasks
+		getAllVBoxex()
+		.map(b->b.getChildren())
+		.flatMap(c->c.parallelStream())
+		.map(Node::getUserData)
+		.filter(Objects::nonNull)
+		.filter(ScheduledNodeAbstract.class::isInstance)
+		.map(ScheduledNodeAbstract.class::cast)
+		.forEach(sn->sn.stop(true));
+
+		gridPane.getColumnConstraints().clear();
 		gridPane.getRowConstraints().clear();
+		gridPane.getChildren().clear();
+	}
+
+	public void setColumnsAndRows(Integer columns, Integer rows) {
+		clear();
+
+		IntStream
+		.range(0, columns)
+		.forEach(count->addColumn(count));
 
 		IntStream
 		.range(0, rows)
 		.forEach(count->addRow(count));
 	}
 
-	public void setColumns(Integer rows) {
-		gridPane.getColumnConstraints().clear();
+	public Node setNode(Class<? extends ScheduledNodeAbstract> fieldClass, String name, int column, int row) throws IOException {
 
-		IntStream
-		.range(0, rows)
-		.forEach(count->addColumn(count));
+		Node node = null;
+
+		final Optional<VBox> vBoxAt = getVBoxAt(column, row);
+		if(vBoxAt.isPresent())
+			node = loadNode(fieldClass, name, vBoxAt.get().getChildren());
+
+		return node;
 	}
 
-	public void setNode(Class<? extends ScheduledNode> fieldClass, String name, int column, int row) throws IOException {
-
-		getVBoxAt(column, row)
-		.map(vBox->vBox.getChildren())
-		.forEach(child->{
-			final FXMLLoader loader = loadNode(fieldClass, child);
-			ScheduledNode controller = loader.getController();
-			try {
-				controller.setKeyStartWith(name);
-			} catch (Exception e) {
-				logger.catching(e);
-			}
-		});
-	}
-
-	public Stream<VBox> getVBoxAt(int column, int row) {
+	public Optional<VBox> getVBoxAt(int column, int row) {
 		return gridPane
 				.getChildren()
 				.parallelStream()
 				.filter(VBox.class::isInstance)
 				.filter(child->Optional.ofNullable(GridPane.getColumnIndex(child)).orElse(0)==column)
 				.filter(child->Optional.ofNullable(GridPane.getRowIndex(child)).orElse(0)==row)
-				.map(child->(VBox)child);
+				.map(child->(VBox)child)
+				.findFirst();
 	}
 
 	public void setAlignment(Pos pos, int column, int row) {
 		getVBoxAt(column, row)
-		.forEach(box->box.setAlignment(pos));
+		.ifPresent(box->box.setAlignment(pos));
 	}
 
-	private FXMLLoader loadNode(Class<? extends ScheduledNode> controllerClass, final ObservableList<Node> children){
-
-		FXMLLoader loader = null;
+	private Node loadNode(final Class<? extends ScheduledNodeAbstract> controllerClass, String name, ObservableList<Node> children) {
 		try {
+
 			final Field field = controllerClass.getField("FXML_PATH");
-			loader = new FXMLLoader( getClass().getResource((String) field.get(null)));
+			FXMLLoader loader = new FXMLLoader( getClass().getResource((String) field.get(null)));
 
-			Node root = loader.load();
+			Node node = loader.load();
 			if(focusListener!=null)
-				root.focusedProperty().addListener(focusListener);
+				addFocusListener(node);
 
-			if(controllerClass==RegisterTextField.class)
-				root.setDisable(disable);
+			Platform.runLater(()->children.add(node));
 
-			Platform.runLater(()->children.add(root));
+			final ScheduledNodeAbstract controller = loader.getController();
+			controller.setKeyStartWith(name);
+			if(controllerClass.getSuperclass().equals(TextFieldAbstract.class))
+				Platform.runLater(()->((TextFieldAbstract)controller).getTextField().setEditable(editable));
 
+			return node;
 		} catch (Exception e) {
 			logger.catching(e);
 		}
 
-		return loader;
+		return null;
+	}
+
+	private void addFocusListener(Node node) {
+		if(node.getUserData() instanceof TextFieldAbstract)
+			((TextFieldAbstract)node.getUserData()).addFocusListener(focusListener);
 	}
 }

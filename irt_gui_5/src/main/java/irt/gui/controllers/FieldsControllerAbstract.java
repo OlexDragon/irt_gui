@@ -44,7 +44,7 @@ public abstract class FieldsControllerAbstract implements Observer, FieldControl
 		if(update) {
 			if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
 				scheduleAtFixedRate = ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);
-		}else
+		}else if(scheduleAtFixedRate!=null)
 			scheduleAtFixedRate.cancel(false);
 	}
 
@@ -55,22 +55,26 @@ public abstract class FieldsControllerAbstract implements Observer, FieldControl
 
 			@Override
 			public void run() {
-				if(observable instanceof LinkedPacket) {
-					LinkedPacket p = (LinkedPacket) observable;
+				if(observable instanceof LinkedPacket) 
+					update((LinkedPacket) observable);
 
-					if( p.getAnswer()!=null)
-						try {
-							wasShown = false;
+				if(object instanceof LinkedPacket)
+					update((LinkedPacket) object);
+			}
 
-							updateFields(p);
+			public void update(LinkedPacket p) {
+				if( p.getAnswer()!=null)
+					try {
+						wasShown = false;
 
-						} catch (Exception e) {
-							logger.catching(e);
-						}
-					else if(!wasShown){
-						wasShown = true;
-						logger.warn("No Answer");
+						updateFields(p);
+
+					} catch (Exception e) {
+						logger.catching(e);
 					}
+				else if(!wasShown){
+					wasShown = true;
+					logger.warn("No Answer");
 				}
 			}
 		}));

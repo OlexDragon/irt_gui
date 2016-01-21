@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
@@ -103,7 +104,9 @@ public class DebugInfoController extends FieldsControllerAbstract {
 
 	@FXML public void hButtonVction(ActionEvent event){
 		doUpdate(false);
-		textArea.setText(commandComboBox.getTooltip().getText());
+		Optional
+		.ofNullable(commandComboBox.getTooltip())
+		.ifPresent(tt->textArea.setText(tt.getText()));
 	}
 
 	@Override

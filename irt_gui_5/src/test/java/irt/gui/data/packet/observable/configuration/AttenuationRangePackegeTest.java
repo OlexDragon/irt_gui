@@ -14,7 +14,7 @@ import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
-import irt.gui.data.packet.observable.configuration.AttenuationRangePackege;
+import irt.gui.data.packet.observable.configuration.AttenuationRangePacket;
 import irt.gui.errors.PacketParsingException;
 
 public class AttenuationRangePackegeTest {
@@ -23,7 +23,7 @@ public class AttenuationRangePackegeTest {
 
 	@Test
 	public void test() throws PacketParsingException {
-		AttenuationRangePackege packege = new AttenuationRangePackege();
+		AttenuationRangePacket packege = new AttenuationRangePacket();
 		byte[] bytes = packege.toBytes();
 		logger.trace("\n\t{}", ToHex.bytesToHex(bytes));
 

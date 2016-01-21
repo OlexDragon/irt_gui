@@ -30,7 +30,7 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
-public class RegisterLabel extends ScheduledNode {
+public class RegisterLabel extends ScheduledNodeAbstract {
 
 	public static final String FXML_PATH		= "/fxml/components/RegisterLabel.fxml";
 
@@ -44,6 +44,8 @@ public class RegisterLabel extends ScheduledNode {
 	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.3.5.7)
 
 	private	volatile		Value			value;						/*Actual value	*/							public Value getValue() { return value; }
+
+	public static final Class<? extends Node> rootClass = BorderPane.class;
 
 	@FXML private BorderPane 	borderPane;
 	@FXML private Label			registerLabel;
@@ -113,7 +115,7 @@ public class RegisterLabel extends ScheduledNode {
 							.intValue();
 
 		if(precision == 0)
-			value = new Value(0, Long.MIN_VALUE, Long.MAX_VALUE, 0);
+			value = new Value(0L, Long.MIN_VALUE, Long.MAX_VALUE, 0);
 		else
 			value = new ValueDouble(0, Long.MIN_VALUE, Long.MAX_VALUE, precision);
 

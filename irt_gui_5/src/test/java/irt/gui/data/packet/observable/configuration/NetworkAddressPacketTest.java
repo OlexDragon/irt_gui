@@ -118,12 +118,12 @@ public class NetworkAddressPacketTest {
 	@Test
 	public void equalsTest() throws PacketParsingException{
 		assertThat(new AttenuationPacket()			, is(new AttenuationPacket()));
-		assertThat(new AttenuationRangePackege()	, is(new AttenuationRangePackege()));
+		assertThat(new AttenuationRangePacket()	, is(new AttenuationRangePacket()));
 		assertThat(new NetworkAddressPacket((NetworkAddress)null)	, is(new NetworkAddressPacket((NetworkAddress)null)));
 
-		assertThat(new AttenuationPacket()			, not(new AttenuationRangePackege()));
+		assertThat(new AttenuationPacket()			, not(new AttenuationRangePacket()));
 		assertThat(new AttenuationPacket()			, not(new NetworkAddressPacket((NetworkAddress)null)));
 
-		assertThat(new AttenuationRangePackege()	, not(new NetworkAddressPacket((NetworkAddress)null)));
+		assertThat(new AttenuationRangePacket()	, not(new NetworkAddressPacket((NetworkAddress)null)));
 	}
 }

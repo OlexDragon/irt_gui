@@ -13,7 +13,7 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.components.ScheduledNode;
+import irt.gui.controllers.components.ScheduledNodeAbstract;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -31,9 +31,10 @@ public class GuiUtility {
 	 * @throws IOException
 	 * @throws URISyntaxException
 	 */
-	public static List<Object> getResourceFiles(String resourceFolder) throws IOException, URISyntaxException {
+	public static List<Object> getResourceFiles(final String resourceFolder) throws IOException, URISyntaxException {
 		
-		final File jarFile = new File(GuiUtility.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+		final String path = GuiUtility.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		final File jarFile = new File(path);
 
 		if(jarFile.isFile()) {  // Run with JAR file
 			try(final JarFile jar = new JarFile(jarFile);){
@@ -49,7 +50,9 @@ public class GuiUtility {
 						.collect(Collectors.toList());
 			}
 		} else { // Run with IDE
-		    final URL url = GuiUtility.class.getResource(resourceFolder);
+
+			final String name = resourceFolder.startsWith("\\") || resourceFolder.startsWith("/") ? resourceFolder : "/" + resourceFolder;
+			final URL url = GuiUtility.class.getResource(name);
 		    if (url != null) {
 		            return Arrays
 		            		.stream(new File(url.toURI()).listFiles())
@@ -68,11 +71,11 @@ public class GuiUtility {
 		List<MenuItem> menus = properties
 							.entrySet()
 							.parallelStream()
-							.filter(p->((String)p.getKey()).endsWith(ScheduledNode.NAME))
+							.filter(p->((String)p.getKey()).endsWith(ScheduledNodeAbstract.NAME))
 							.map(p->{
 								final RadioMenuItem mi = new RadioMenuItem((String) p.getValue()); //This can be changed by internalization
 								final String key = (String)p.getKey();
-								mi.setId(key.substring(0, key.indexOf(ScheduledNode.NAME)));
+								mi.setId(key.substring(0, key.indexOf(ScheduledNodeAbstract.NAME)));
 								Platform.runLater(()->mi.setToggleGroup(toggleGroup));
 								mi.setOnAction(action);
 								return mi;

@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +25,9 @@ import irt.gui.data.listeners.TextFieldFocusListener;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
 import irt.gui.data.value.Value;
 import irt.gui.data.value.Value.Status;
+import irt.gui.data.value.ValueDouble;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
@@ -34,6 +35,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
@@ -64,6 +66,7 @@ public class RegistersController implements Observer {
 	private final Logger logger = LogManager.getLogger();
 
 	@FXML private Slider 		slider;
+	@FXML private Button		buttonInitialize;
     @FXML private Button 		calibModeButton;
     @FXML private Button 		saveButton;
     @FXML private Button 		resetButton;
@@ -71,15 +74,16 @@ public class RegistersController implements Observer {
     @FXML private TextField 	stepTextField;
     @FXML private RegisterPanel registersPanelController;
 
-    @FXML private MenuItem 		saveMenu;
-    @FXML private Menu			profileMenu;
+    @FXML private MenuItem 		menuSave;
+    @FXML private Menu			menuProfile;
 
     private NumericChecker 		stepNumericChecker;
     private TextField 			selectedTextField;
     private TextInputDialog 	dialog = new TextInputDialog("default");
 	private ToggleGroup profilesToggleGroup = new ToggleGroup();
 
-	private int profileId;
+	private int 	profileId;
+	private Boolean editable;
 
     public RegistersController(){
     	dialog.setTitle("Save provile as...");
@@ -97,61 +101,66 @@ public class RegistersController implements Observer {
 		
 		@Override
 		public void update(Observable o, Object arg) {
+			logger.error("{} : {}", o, arg);
+
+			Value v = (Value) o;
 			if(((Status)arg)==Status.IN_RANGE){
-				Value v = (Value) o;
-				slider.setValue(v.getRelativeValue());
-			}
+				if(o instanceof ValueDouble){
+
+					double rv = (double)v.getValue()/v.getFactor();
+					if(Double.compare(slider.getValue() ,rv)!=0)
+						setSliderValue(rv);
+
+				}else{
+
+					//TODO check max double value
+					int rv = v.getValue().intValue();
+					if(Double.compare(slider.getValue(), rv)!=0)
+						setSliderValue(rv);
+
+				}
+			}else
+				logger.warn("The value {} is out of range", v.getOriginalValue());
 		}
-	};
-   private final ChangeListener<Boolean> registerPanelFocusListener = (observable, oldValue, newValue)->{
 
-	   final TextField bean = (TextField) ((ReadOnlyBooleanProperty)observable).getBean();
+		public void setSliderValue(double rv) {
+			logger.error(rv);
+			Platform.runLater(()->{
 
-	   if(newValue && selectedTextField!=bean){
-
-			Optional
-			.ofNullable(selectedTextField)
-			.ifPresent(textField->{
-				Value registerValue = ((RegisterTextField) selectedTextField.getUserData()).getValue();
-				registerValue.deleteObserver(valueObserver);
-				textField.getStyleClass().remove(ACTIVE);
+				final DoubleProperty valueProperty = slider.valueProperty();
+				valueProperty.removeListener(sliderChangeListener);
+				slider.setValue(rv);
+				valueProperty.addListener(sliderChangeListener);
 			});
-
-			selectedTextField = bean;
-			final ObservableList<String> styleClass = selectedTextField.getStyleClass();
-			if(!styleClass.contains(ACTIVE))
-				styleClass.add(ACTIVE);
-
-			Value registerValue = ((RegisterTextField) selectedTextField.getUserData()).getValue();
-
-			final long max = registerValue.getRelativeMaxValue();
-			//set limit for text field
-			stepNumericChecker.setMaximum(max);
-
-			//set slider values
-			slider.setMin(registerValue.getRelativeMinValue());
-			slider.setMax(max);
-			slider.setDisable(false);
-			slider.setValue(registerValue.getRelativeValue());
-
-			registerValue.addObserver(valueObserver);
 		}
 	};
 
+	private void removeCssClassAndDeleteObserver(String cssClass) {
+		Optional
+		.ofNullable(selectedTextField)
+		.ifPresent(textField->{
+			Platform.runLater(() -> {
+
+				TextFieldAbstract textFieldRegister = (TextFieldAbstract) selectedTextField.getUserData();
+				Value registerValue = textFieldRegister.getValue();
+				registerValue.deleteObserver(valueObserver);
+				textField.getStyleClass().remove(cssClass);
+			});
+		});
+	}
+
+	@SuppressWarnings("unchecked")
 	private final EventHandler<ActionEvent> onActionMenuSelectProfile = e->{
 		try{
 
 			RadioMenuItem rmi = (RadioMenuItem)e.getSource();
 			profileId = Integer.parseInt(((String) rmi.getUserData()));// get profile ID
-			setRows(profileId);
-			setColumns(profileId);
-			setFieldsOf(RegisterTextField.class, profileId);
-			setFieldsOf(ValueLabel.class, profileId);
-			setFieldsOf(RegisterLabel.class, profileId);
-			saveMenu.setDisable(false);
+			setRowsAndColumns(profileId);
+			setNodesOf( profileId, TextFieldRegister.class, ValueLabel.class, RegisterLabel.class);
+			menuSave.setDisable(false);
 			registersPanelController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
 			setAlignment(profileId);
-		//TODO menu action
+			slider.toFront();
 
 		}catch(Exception ex){
 			logger.catching(ex);
@@ -166,14 +175,45 @@ public class RegistersController implements Observer {
 	};
 
 	private final ChangeListener<Number> sliderChangeListener = (observable, oldValue, newValue)->{
+		logger.error(newValue);
 		Platform.runLater(
-				()->Optional.ofNullable(selectedTextField)
-				.ifPresent(sf->sf.setText(Integer.toString(((int)slider.getValue())))));
+				()->Optional
+				.ofNullable(selectedTextField)
+				.map(stf->(TextFieldAbstract)stf.getUserData())
+				.ifPresent(controller->controller.setText(slider.getValue())));
+	};
+
+	private final ChangeListener<Boolean> registerPanelFocusListener = (observable, oldValue, newValue)->{
+
+		final TextField bean = (TextField) ((ReadOnlyBooleanProperty)observable).getBean();
+		Optional
+		.ofNullable(editable)
+		.filter(e->e==true)
+		.filter(e->selectedTextField!=bean)
+		.ifPresent(e->{
+
+			removeCssClassAndDeleteObserver(ACTIVE);
+
+			selectedTextField = bean;
+
+			TextFieldAbstract textFieldcontroller = (TextFieldAbstract) selectedTextField.getUserData();
+
+			//Set slider value, max, min
+			textFieldcontroller.setSliderValue(slider, sliderChangeListener, ACTIVE, valueObserver, stepNumericChecker);
+
+			final boolean disable = selectedTextField.isDisable();
+			logger.error("*** {} ***", disable);
+			if(slider.isDisable()!=disable)
+				Platform.runLater(()->slider.setDisable(disable));
+
+		});
 	};
 
     @FXML private void initialize(){
  
-    	((CalibrationModeButton)calibModeButton.getUserData()).addObserver(this);
+    	final ButtonCalibrationMode buttonCalibrationMode = (ButtonCalibrationMode)calibModeButton.getUserData();
+		buttonCalibrationMode.addObserver(this);
+		buttonCalibrationMode.addObserver((Observer) buttonInitialize.getUserData());
 
     	stepNumericChecker = new NumericChecker(stepTextField.textProperty());
 
@@ -187,7 +227,12 @@ public class RegistersController implements Observer {
 		createProfileMenuItems();
     }
 
-	@FXML private void resetValues(ActionEvent event) {
+	@FXML private void onActionNewProfile(){
+		registersPanelController.setColumnsAndRows(1, 1);
+		menuSave.setDisable(true);
+	}
+
+	@FXML private void onActionResetButton(ActionEvent event) {
     	try {
 			registersPanelController.reset();
 		} catch (Exception e) {
@@ -208,7 +253,7 @@ public class RegistersController implements Observer {
     	.ofNullable(selectedTextField)
     	.ifPresent(s->{
     		Platform.runLater(()->{
-    			RegisterTextField controller = (RegisterTextField) s.getUserData();
+    			TextFieldAbstract controller = (TextFieldAbstract) s.getUserData();
     			controller.onActionTextField();
     		});
     	});
@@ -253,17 +298,30 @@ public class RegistersController implements Observer {
     	});
     }
 
-	@Override
-	public void update(Observable o, Object arg) {
-		Platform.runLater(()->{
-			final boolean disable = arg==CalibrationMode.OFF;
-			registersPanelController.setDisable(disable);
-			if(disable) slider.setDisable(true);
-			selectedTextField = null;
+	@Override public void update(Observable o, Object arg) {
+		Optional
+		.ofNullable(arg)
+		.filter(CalibrationMode.class::isInstance)
+		.map(a->arg==CalibrationMode.ON)
+		.filter(b->editable!=b)
+		.ifPresent(b->{
+			editable = b;
+			Platform.runLater(()->{
+
+				registersPanelController.setEditable(editable);
+
+				if(!editable)
+					slider.setDisable(true);
+
+				if(selectedTextField != null){
+					selectedTextField.getStyleClass().remove(ACTIVE);
+					selectedTextField = null;
+				}
+			});
 		});
 	}
 
-    private void saveNewProfile(String name) throws FileNotFoundException, IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void saveNewProfile(String name) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, FileNotFoundException, IOException {
     	final Properties propertiesFromFile = getPropertiesFromFile();
 		final Properties properties = IrtGuiProperties.selectFromProperties(REGISTER_PROPERTIES);
     	int max = getNewProfileID(properties);
@@ -275,7 +333,7 @@ public class RegistersController implements Observer {
     	}
     }
 
-    private void saveProfile(String profileName) throws FileNotFoundException, IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+    private void saveProfile(String profileName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, FileNotFoundException, IOException{
     	final Properties propertiesFromFile = getPropertiesFromFile();
     	updateProperties(propertiesFromFile, profileId, profileName);
 
@@ -285,15 +343,15 @@ public class RegistersController implements Observer {
     	}
 	}
 
-	private void updateProperties(Properties propertiesFromFile, int profileId, String profileName) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void updateProperties(Properties propertiesFromFile, int profileId, String profileName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
 		propertiesFromFile.put(String.format(REGISTER_PROPERTY_NAME_ID	, profileId), profileName);
 		propertiesFromFile.put(String.format(REGISTER_ROW_ID			, profileId), Integer.toString(registersPanelController.getRowCount()));
 		propertiesFromFile.put(String.format(REGISTER_COLUMN_ID			, profileId), Integer.toString(registersPanelController.getColumnCount()));
 
 		//TextFields properties
-		removeProperties(propertiesFromFile, String.format( RegisterTextField.FIELD_KEY_ID, profileId));
-		putProperies(propertiesFromFile, profileId, RegisterTextField.class);
+		removeProperties(propertiesFromFile, String.format( TextFieldRegister.FIELD_KEY_ID, profileId));
+		putProperies(propertiesFromFile, profileId, TextFieldRegister.class);
 
 		//remove ValueLabel properties
 		removeProperties(propertiesFromFile, String.format( ValueLabel.FIELD_KEY_ID, profileId));
@@ -319,15 +377,14 @@ public class RegistersController implements Observer {
 			else
 				propertiesFromFile.put( format, ((Pos)pos).name());
 		});
-		//TODO update profile
 	}
 
-	private void putProperies(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNode> nodeClass) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private void putProperies(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNodeAbstract> nodeClass) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
 		logger.entry( propertiesFromFile, profileId, nodeClass);
 
 		List<Map<String, Object>> textFieldsProperties = registersPanelController.getFieldsProperties(nodeClass);
-		logger.error("\n\t textFieldsProperties:{}", textFieldsProperties);
+
 		textFieldsProperties
 		.parallelStream()
 		.forEach(tfp->{
@@ -335,12 +392,12 @@ public class RegistersController implements Observer {
 		});
 	}
 
-	private void putProperties(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNode> nodeClass, Map<String, Object> tfp) {
+	private void putProperties(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNodeAbstract> nodeClass, Map<String, Object> tfp) {
 		try {
 
 			Field field = nodeClass.getField("FIELD_KEY");
 			final String key = (String)field.get(null);
-			logger.error("\n\t key:{}", key);
+
 			final String format = String.format(key, profileId, tfp.get("column"), tfp.get("row"));
 			propertiesFromFile.put( format, tfp.get("name"));
 
@@ -400,7 +457,9 @@ public class RegistersController implements Observer {
 					return radioMenuItem;
 				})
 				.collect(Collectors.toList());
-		profileMenu.getItems().addAll(menuItems);
+		final ObservableList<MenuItem> items = menuProfile.getItems();
+		((RadioMenuItem)items.get(0)).setToggleGroup(profilesToggleGroup);
+		items.addAll(menuItems);
 	}
 
 	private void setAlignment(int profileId) {
@@ -421,23 +480,26 @@ public class RegistersController implements Observer {
 				);
 	}
 
-	private void setRows(int profileId) {
+	private void setRowsAndColumns(int profileId) {
 		Optional
-		.ofNullable(IrtGuiProperties.getProperty(String.format(REGISTER_ROW_ID, profileId)))
+		.ofNullable(IrtGuiProperties.getProperty(String.format(REGISTER_ROW_ID, profileId)))				// Get Rows count
 		.filter(Objects::nonNull)
 		.map(Integer::parseInt)
-		.ifPresent(rows->registersPanelController.setRows(rows));
+		.ifPresent(rows->Optional
+				.ofNullable(IrtGuiProperties.getProperty(String.format(REGISTER_COLUMN_ID, profileId)))		// Get Columns count
+				.filter(Objects::nonNull)
+				.map(Integer::parseInt)
+				.ifPresent(columns->registersPanelController.setColumnsAndRows( columns, rows)));
 	}
 
-	private void setColumns(int profileId) {
-		Optional
-		.ofNullable(IrtGuiProperties.getProperty(String.format(REGISTER_COLUMN_ID, profileId)))
-		.filter(Objects::nonNull)
-		.map(Integer::parseInt)
-		.ifPresent(rows->registersPanelController.setColumns(rows));
+	@SuppressWarnings("unchecked")
+	private void setNodesOf( int profileId, Class<? extends ScheduledNodeAbstract>... fieldClass) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+
+		for(Class<? extends ScheduledNodeAbstract> c:fieldClass)
+			setNodesOf(c, profileId);
 	}
 
-	private void setFieldsOf(Class<? extends ScheduledNode> fieldClass, int profileId) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private void setNodesOf(Class<? extends ScheduledNodeAbstract> fieldClass, int profileId) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		final Field field = fieldClass.getField("FIELD_KEY_ID");
 		String key = String.format((String)field.get(null), profileId);
@@ -459,10 +521,14 @@ public class RegistersController implements Observer {
 				);
 	}
 
-	private void setNode(Class<? extends ScheduledNode> fieldClass, Map<String, String> map){
+	private void setNode(Class<? extends ScheduledNodeAbstract> fieldClass, Map<String, String> map){
 
 		try {
-			registersPanelController.setNode(fieldClass, map.get("key"), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row")));
+			final Node node = registersPanelController.setNode(fieldClass, map.get("key"), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row")));
+
+			if(editable!= null && node instanceof TextField)
+				((TextField)node).setEditable(editable);
+
 		} catch (Exception e) {
 			logger.catching(e);
 		}

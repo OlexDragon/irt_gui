@@ -14,7 +14,9 @@
 						<Menu fx:id="menuRegister" mnemonicParsing="false" text="Add Register TextField" />
                   <Menu fx:id="menuValueLabel" mnemonicParsing="false" text="Add Value Label" />
                   <Menu fx:id="menuRegisterLabel" mnemonicParsing="false" text="Add Register Label" />
+                  <Menu fx:id="menuControl" mnemonicParsing="false" text="Add Control" />
                   <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemRemove" text="Remove" />
+                  <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemClear" text="Clear" />
 						<SeparatorMenuItem mnemonicParsing="false" />
 						<MenuItem fx:id="menuItemShowGrid" mnemonicParsing="false" onAction="#showGridonActionMenuItems" text="Show Grid" />
                   <Menu fx:id="menuAlignment" mnemonicParsing="false" onAction="#alignmentonActionMenuItems" text="Alignment" />
