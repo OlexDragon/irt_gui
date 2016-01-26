@@ -25,7 +25,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 						linkHeader,
 						linkHeader==null || linkHeader.getIntAddr()==0
 												? PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE
-												: PacketImp.PARAMETER_CONFIGURATION_PICOBUC_USER_FREQUENCY_RANGE,
+												: PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY_RANGE,
 				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 
 		isConverter = linkHeader==null || linkHeader.getIntAddr()==0;
@@ -70,7 +70,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 				long maximum = r.getMaximum();
 				setStepValue(new ValueFrequency(1, 1, maximum-minimum));
 
-				startTextSliderController(FrequencyContriller.this.getName(), new ValueFrequency(0,minimum, maximum), PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY, isConverter ? PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY : PacketImp.PARAMETER_PICOBUC_CONFIGURATION_USER_FREQUENCY, style);
+				startTextSliderController(FrequencyContriller.this.getName(), new ValueFrequency(0,minimum, maximum), PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY, isConverter ? PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY : PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY, style);
 
 			}else if(source instanceof Byte)
 				txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));

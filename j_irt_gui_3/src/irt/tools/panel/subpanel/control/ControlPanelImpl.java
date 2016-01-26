@@ -76,8 +76,8 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	private IdValue selection;
 	private JComboBox<String> cbLoSelect;
 	private boolean hasFreqSet;
-	private JLabel lblMute;
-	private ImageButton btnMute;
+	private JLabel lblMute; 							protected JLabel getLblMute() { return lblMute; }
+	private ImageButton btnMute; 						protected ImageButton getBtnMute() { return btnMute; }
 	protected ImageButton btnStoreConfig;
 	private int flags;
 

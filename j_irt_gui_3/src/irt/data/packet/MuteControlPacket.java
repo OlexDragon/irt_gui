@@ -13,7 +13,7 @@ public class MuteControlPacket extends PacketAbstract {
 					: PacketImp.PACKET_TYPE_REQUEST,
 				PacketWork.PACKET_ID_CONFIGURATION_MUTE,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				PacketImp.PARAMETER_PICOBUC_CONFIGURATION_MUTE,
+				PacketImp.PARAMETER_ID_CONFIGURATION_MUTE,
 				value!=null ? PacketImp.toBytes(value) : null,
 				value!=null
 					? Priority.COMMAND

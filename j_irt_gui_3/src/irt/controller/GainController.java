@@ -20,7 +20,7 @@ public class GainController extends ValueRangeControllerAbstract {
 		super(deviceType,
 				"Gain Controller",
 				new ConfigurationSetter(linkHeader,
-						PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN_RANGE,
+						PacketImp.PARAMETER_ID_CONFIGURATION_GAIN_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE),
 				txtField,
 				slider,
@@ -62,7 +62,7 @@ public class GainController extends ValueRangeControllerAbstract {
 				Range r = (Range) source;
 				ValueDouble value = new ValueDouble(0, r.getMinimum(), r.getMaximum(), 1);
 				value.setPrefix(" dB");
-				startTextSliderController(GainController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, style);
+				startTextSliderController(GainController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, PacketImp.PARAMETER_ID_CONFIGURATION_GAIN, style);
 			}
 		}
 

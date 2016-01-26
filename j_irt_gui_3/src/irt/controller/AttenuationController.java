@@ -76,7 +76,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 
 				ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
 				value.setPrefix(prefix);
-				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION : PacketImp.PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION, style);
+				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION : PacketImp.PARAMETER_ID_CONFIGURATION_ATTENUATION, style);
 			}
 		}
 

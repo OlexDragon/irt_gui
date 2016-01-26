@@ -1,7 +1,5 @@
 package irt.tools.panel.subpanel.control;
 
-import irt.tools.CheckBox.SwitchBox;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
@@ -10,6 +8,9 @@ import java.awt.Point;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
+import irt.tools.CheckBox.SpectrumInversionSwitch;
+import irt.tools.CheckBox.SwitchBox;
 
 @SuppressWarnings("serial")
 public class ControlPanelDownConverter extends ControlPanelConverter {
@@ -32,6 +33,18 @@ public class ControlPanelDownConverter extends ControlPanelConverter {
 		switchBox.setBounds(23, 113, 27, 33);
 		add(switchBox);
 		
+		JLabel lblInversion = new JLabel("INV.");
+		lblInversion.setName("");
+		lblInversion.setHorizontalAlignment(SwingConstants.LEFT);
+		lblInversion.setForeground(Color.YELLOW);
+		lblInversion.setFont(new Font("Tahoma", Font.BOLD, 11));
+		lblInversion.setBounds(73, 100, 43, 14);
+		add(lblInversion);
+
+		SwitchBox switchInvertion = new SpectrumInversionSwitch(imageOff, imageOn);
+		switchInvertion.setBounds(70, 113, 27, 33);
+		add(switchInvertion);
+		
 		JLabel lblOff = new JLabel("OFF");
 		lblOff.setName("");
 		lblOff.setHorizontalAlignment(SwingConstants.LEFT);
@@ -39,15 +52,17 @@ public class ControlPanelDownConverter extends ControlPanelConverter {
 		lblOff.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblOff.setBounds(27, 143, 20, 14);
 		add(lblOff);
+
+		remove(getLblMute());
 	}
 
 	@Override
 	protected Point getConfigButtonPosition() {
-		return new Point(60, 111);
+		return new Point(110, 111);
 	}
 
 	@Override
 	protected Point getMuteButtonPosition() {
-		return new Point(105, 111);
+		return new Point(150, 111);
 	}
 }

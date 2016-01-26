@@ -18,7 +18,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	private final Payload payload;
 
 	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte payloadCommand, byte[] payloadData, Priority priority){
-		linkHeader = new LinkHeader(linkAddr, (byte)0, (short)0);
+		linkHeader = linkAddr>0 ? new LinkHeader(linkAddr, (byte)0, (short)0) : null;
 		header = new PacketHeader();
 		header.setType(packetType);
 		header.setGroupId(groupId);
@@ -93,7 +93,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public byte[] getData() {
-		final byte[] l = linkHeader.toBytes();
+		final byte[] l = linkHeader!=null ? linkHeader.toBytes() : new byte[0];
 		final byte[] h = header.toBytes();
 		final byte[] p = payload.toBytes();
 		return PacketThread.preparePacket(PacketImp.concatAll(l, h, p));

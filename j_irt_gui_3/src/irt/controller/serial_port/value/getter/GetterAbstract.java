@@ -170,7 +170,8 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 
 		if(packet!=null){
 			if(packet instanceof LinkedPacket){
-				byte addr = ((LinkedPacket)packet).getLinkHeader().getAddr();
+				final LinkHeader lh = ((LinkedPacket)packet).getLinkHeader();
+				byte addr = lh!=null ? lh.getAddr() : 0;
 				addrEquals = linkHeader.getAddr() == addr;
 			}else if(linkHeader==null || linkHeader.getAddr()==0)
 				addrEquals = true;

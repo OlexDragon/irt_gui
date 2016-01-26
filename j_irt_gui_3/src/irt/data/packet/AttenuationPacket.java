@@ -13,7 +13,7 @@ public class AttenuationPacket extends PacketAbstract {
 						: PacketImp.PACKET_TYPE_REQUEST,
 				PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				PacketImp.PARAMETER_PICOBUC_CONFIGURATION_ATTENUATION,
+				PacketImp.PARAMETER_ID_CONFIGURATION_ATTENUATION,
 				value!=null ? PacketImp.toBytes(value) : null,
 				value!=null
 					? Priority.COMMAND

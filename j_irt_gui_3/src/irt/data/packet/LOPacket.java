@@ -13,7 +13,7 @@ public class LOPacket extends PacketAbstract{
 				linkAddr,
 				id!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
 						PacketWork.PACKET_ID_CONFIGURATION_LO, PacketImp.GROUP_ID_CONFIGURATION,
-						PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET,
+						PacketImp.PARAMETER_ID_CONFIGURATION_LO_SET,
 						id!=null ? PacketImp.toBytes(id) : null,
 						id!=null ? Priority.COMMAND : Priority.REQUEST);
 	}

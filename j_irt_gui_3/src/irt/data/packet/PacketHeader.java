@@ -362,8 +362,8 @@ public class PacketHeader{
 		case PacketImp.PACKET_TYPE_COMMAND:
 			typeStr = "Command("+ PacketImp.PACKET_TYPE_COMMAND+")";
 			break;
-		case PacketImp.PACKET_TYPE_ACK:
-			typeStr = "Acknowledgement("+ PacketImp.PACKET_TYPE_ACK+")";
+		case PacketImp.PACKET_TYPE_ACKNOWLEDGEMENT:
+			typeStr = "Acknowledgement("+ PacketImp.PACKET_TYPE_ACKNOWLEDGEMENT+")";
 			break;
 		default:
 			typeStr = ""+(getPacketType()&0xFF);
@@ -396,11 +396,11 @@ public class PacketHeader{
 		case PacketImp.GROUP_ID_CONFIG_PROFILE:
 			typeStr = "SaveConfigProfile("+ PacketImp.GROUP_ID_CONFIG_PROFILE+")";
 			break;
-		case PacketImp.IRT_SLCP_GROUP_ID_PROTOCOL:
-			typeStr = "Protocol("+ PacketImp.IRT_SLCP_GROUP_ID_PROTOCOL+")";
+		case PacketImp.GROUP_ID_PROTOCOL:
+			typeStr = "Protocol("+ PacketImp.GROUP_ID_PROTOCOL+")";
 			break;
-		case PacketImp.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1:
-			typeStr = "DeveloperGeneric("+ PacketImp.IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1+")";
+		case PacketImp.GROUP_ID_DEVELOPER_GENERIC_SET_1:
+			typeStr = "DeveloperGeneric("+ PacketImp.GROUP_ID_DEVELOPER_GENERIC_SET_1+")";
 			break;
 		case PacketImp.GROUP_ID_DEVICE_DEBAG:
 			typeStr = "Device Debug("+ PacketImp.GROUP_ID_DEVICE_DEBAG+")";

@@ -569,8 +569,8 @@ public class BIASsPanel extends JPanel {
 							new SetterController(deviceType, "Initialize Controller",
 									new Setter(linkHeader,
 										PacketImp.PACKET_TYPE_COMMAND,
-										PacketImp.IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1,
-										PacketImp.PACKET_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
+										PacketImp.GROUP_ID_PRODUCTION_GENERIC_SET_1,
+										PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
 										PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE
 									),
 									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE

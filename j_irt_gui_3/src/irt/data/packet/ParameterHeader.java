@@ -54,8 +54,8 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 	private String getCodeStr() {
 		String codeStr = null;
 				switch(getCode()){
-				case PacketImp.IRT_SLCP_PARAMETER_ALL:
-					codeStr = "All("+PacketImp.IRT_SLCP_PARAMETER_ALL+")";
+				case PacketImp.PARAMETER_ALL:
+					codeStr = "All("+PacketImp.PARAMETER_ALL+")";
 					break;
 				default:
 					codeStr = ""+getCode();

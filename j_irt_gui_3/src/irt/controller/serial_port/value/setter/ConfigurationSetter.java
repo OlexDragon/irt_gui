@@ -40,7 +40,7 @@ public class ConfigurationSetter extends SetterAbstract {
 	 */
 	public ConfigurationSetter(LinkHeader linkHeader) {
 		this(linkHeader,
-				linkHeader!=null && linkHeader.getAddr()!=0 ? PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_FREQUENCIES :
+				linkHeader!=null && linkHeader.getAddr()!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_LO_FREQUENCIES :
 					PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES);
 	}
@@ -65,16 +65,16 @@ public class ConfigurationSetter extends SetterAbstract {
 				pt.preparePacket(PacketImp.PARAMETER_CONFIG_BUC_ENABLE, (byte) ((IdValue) value).getValue());
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_LO:
-				pt.preparePacket(PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);
+				pt.preparePacket(PacketImp.PARAMETER_ID_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR:
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE:
-				pt.preparePacket(lh != null && id!=PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR ? PacketImp.PARAMETER_PICOBUC_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
+				pt.preparePacket(lh != null && id!=PacketWork.PACKET_ID_CONFIGURATION_MUTE_OUTDOOR ? PacketImp.PARAMETER_ID_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
 						(byte) (((boolean) ((IdValue) value).getValue()) ? 1 : 0));
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN:
 				Value v = (Value) ((IdValue) value).getValue();
-				pt.preparePacket(PacketImp.IRT_SLCP_PARAMETER_PICOBUC_CONFIGURATION_GAIN, v != null ? (short) v.getValue() : null);
+				pt.preparePacket(PacketImp.PARAMETER_ID_CONFIGURATION_GAIN, v != null ? (short) v.getValue() : null);
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL:
 			case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION:

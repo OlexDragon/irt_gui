@@ -42,6 +42,7 @@
 <!--   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelHPB" level="all"/> -->
 <!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="warn"/> -->
+ 	<Logger name="irt.tools.CheckBox.SpectrumInversionSwitch" level="all"/>
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

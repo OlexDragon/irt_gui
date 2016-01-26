@@ -58,7 +58,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			}
 		});
 
-		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(alarmGetter, 1, 1, TimeUnit.MILLISECONDS);
+		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(alarmGetter, 1, 2000, TimeUnit.MILLISECONDS);
 		new AlarmIDsGetter();
 	}
 
