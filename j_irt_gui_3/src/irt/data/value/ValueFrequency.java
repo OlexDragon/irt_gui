@@ -4,7 +4,7 @@ import irt.data.DeviceInfo;
 
 import java.text.NumberFormat;
 
-public class ValueFrequency extends Value {
+public class ValueFrequency extends Value implements Comparable<ValueFrequency>{
 
 	public ValueFrequency(String value, String minValue, String maxValue) {
 		super(value, minValue, maxValue, 0);
@@ -118,4 +118,8 @@ public class ValueFrequency extends Value {
 			setMinMax(type);
 	}
 
+	@Override
+	public int compareTo(ValueFrequency o) {
+		return  Long.compare(value, o.value);
+	}
 }

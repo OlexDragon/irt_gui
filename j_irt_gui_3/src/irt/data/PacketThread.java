@@ -40,7 +40,7 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 		if (packet == null && data != null) {
 			try {
 				packet = newPacket();
-				synchronized (data) {
+				synchronized (logger) {
 					packet.set(data);
 					if (value != null) {
 						Payload pl = packet.getPayload(0);

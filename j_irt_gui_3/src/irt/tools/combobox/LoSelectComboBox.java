@@ -3,6 +3,9 @@ package irt.tools.combobox;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -31,6 +34,7 @@ import irt.data.packet.LOPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.value.ValueFrequency;
 
@@ -74,8 +78,11 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		@Override
 		public void itemStateChanged(ItemEvent itemEvent) {
 			if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-				logger.entry();
-				cptq.add(new LOPacket(linkAddr, ((IdValueFreq)model.getSelectedItem()).getId()));
+				final IdValueFreq idValueFreq = (IdValueFreq)model.getSelectedItem();
+				if(linkAddr!=0)
+					cptq.add(new LOPacket(linkAddr, idValueFreq.getId()));
+				else
+					cptq.add(new LOPacket(idValueFreq.getValueFrequency()));
 			}
 		}
 	};
@@ -115,13 +122,16 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 		@Override public void run() {
 
+			try{
 			final PacketHeader h = packet.getHeader();
 			final short pID = h.getPacketId();
 			if(!(pID==PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES || pID==PacketWork.PACKET_ID_CONFIGURATION_LO))
 				return;
 
-			if(h.getPacketType()==PacketImp.PACKET_TYPE_REQUEST)
-				logger.warn("Packet is wrong or no connection: {}", packet);
+			if(h.getPacketType()==PacketImp.PACKET_TYPE_REQUEST || h.getOption()!=0){
+				logger.error("Packet is wrong or no connection: {}", packet);
+				return;
+			}
 
 			logger.trace(packet);
 			final Payload payload = packet.getPayloads().get(0);
@@ -133,10 +143,37 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			case PacketWork.PACKET_ID_CONFIGURATION_LO:
 				update(payload);
 			}
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
 		}
 
 		private void update(Payload payload) {
 
+			if(linkAddr != 0)
+				updateBias(payload);
+			else
+				updateConverter(payload);
+		}
+
+		private void updateConverter(Payload payload) {
+			logger.entry(payload);
+
+			final long fr = payload.getLong();
+			final int itemCount = getItemCount();
+			IdValueFreq ivf = (IdValueFreq)getSelectedItem();
+
+			if(ivf.getValueFrequency().getValue()!=fr)
+				for(int i=0; i<itemCount; i++){
+					final IdValueFreq itemAt = getItemAt(i);
+					if(itemAt.getValueFrequency().getValue()==fr){
+						setSelectedItem(itemAt);
+						return;
+					}
+				}
+		}
+
+		public void updateBias(final Payload payload) {
 			final byte loID = payload.getByte();
 			final IdValueFreq anObject = new IdValueFreq(loID, null);
 			if(!anObject.equals(model.getSelectedItem())){
@@ -148,25 +185,64 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 		public void fillComboBox(Payload payload) {
 
-			final int size = payload.getParameterHeader().getSize();
+			final ParameterHeader h = payload.getParameterHeader();
+			final int size = h.getSize();
+			final LoSelectComboBox cb = LoSelectComboBox.this;
+
 			switch(size){
 			case 0:
-				final LoSelectComboBox cb = LoSelectComboBox.this;
 				cb.getParent().remove(cb);
 				break;
 			default:
-				final byte[] frs = payload.getBuffer();
-				for(int i=0; i< frs.length; i+=8){
 
-					byte id = frs[i];
-					long v = payload.getLong((byte)++i);
-					IdValueFreq ivf = new IdValueFreq(id, new ValueFrequency(v, v, v));
-					if(model.getIndexOf(ivf)<0)
-						addItem(ivf);
-				}
+				if(linkAddr != 0)
+					setBiasBoardLOs(payload);
+				else
+					if(!setConverterLOs(payload))
+						cb.getParent().remove(cb);
+
 				addItemListener(aListener);
 				packetToSend = new LOPacket(linkAddr);
 				LoSelectComboBox.this.run();
+			}
+		}
+
+		private boolean setConverterLOs(Payload payload) {
+			logger.entry(payload);
+
+			final long[] frs = payload.getArrayLong();
+			logger.trace("{}", frs);
+			Set<ValueFrequency> vf = new TreeSet<>();
+			boolean isLO = false;
+
+			for(long fr:frs)
+				if(!vf.add(new ValueFrequency(fr, fr, fr)))//if frequency start == frequency stop, so it is LO
+					isLO = true;
+
+			logger.trace("{}", vf);
+			if(isLO){
+				byte id = 0;
+				final Iterator<ValueFrequency> iterator = vf.iterator();
+				while(iterator.hasNext()){
+					IdValueFreq ivf = new IdValueFreq(++id, iterator.next());
+					if(model.getIndexOf(ivf)<0)
+						addItem(ivf);
+				}
+			}
+			return isLO;
+		}
+
+		private void setBiasBoardLOs(Payload payload) {
+			logger.entry(payload);
+
+			final byte[] frs = payload.getBuffer();
+			for(int i=0; i< frs.length; i+=8){
+
+				byte id = frs[i];
+				long v = payload.getLong((byte)++i);
+				IdValueFreq ivf = new IdValueFreq(id, new ValueFrequency(v, v, v));
+				if(model.getIndexOf(ivf)<0)
+					addItem(ivf);
 			}
 		}
 

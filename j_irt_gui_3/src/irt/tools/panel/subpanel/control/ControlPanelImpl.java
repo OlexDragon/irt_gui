@@ -412,9 +412,5 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		return controllers;
 	}
 
-	@Override
-	protected void packetRecived(List<Payload> payloads) {
-		// TODO Auto-generated method stub
-		
-	}
+	@Override protected void packetRecived(List<Payload> payloads) { }
 }

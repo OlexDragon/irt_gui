@@ -5,9 +5,8 @@ import irt.data.value.ValueFrequency;
 
 public class IdValueFreq {
 
-	private final byte id; public byte getId() { return id; }
-
-	private final ValueFrequency valueFrequency;
+	private final byte id; 							public byte 			getId() 			{ return id; }
+	private final ValueFrequency valueFrequency; 	public ValueFrequency 	getValueFrequency() { return valueFrequency; }
 
 	public IdValueFreq(byte id, ValueFrequency valueFrequency) {
 		this.id = id;
