@@ -4,10 +4,19 @@ import irt.data.PacketWork;
 
 public class LOPacket extends PacketAbstract{
 
+	/**
+	 *  request packet
+	 * @param linkAddr
+	 */
 	public LOPacket(byte linkAddr) {
 		this(linkAddr, null);
 	}
 
+	/**
+	 * command packet
+	 * @param linkAddr
+	 * @param id - select LO
+	 */
 	public LOPacket(byte linkAddr, Byte id) {
 		super(
 				linkAddr,

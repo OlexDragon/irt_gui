@@ -52,10 +52,8 @@ public class ComPortThreadQueue extends Thread {
 						if(serialPort.isOpened() && packetThread.isReadyToSend()) {
 							sent = false;
 
-							logger.trace("Data to send - {}", packetWork);
 							Packet send = serialPort.send(packetWork);
 							firePacketListener(send);
-							logger.trace("Received data - {}", send);
 
 							if(send==null || send.getHeader()==null)
 								StaticComponents.getLedRx().setLedColor(Color.WHITE);

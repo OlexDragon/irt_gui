@@ -41,12 +41,14 @@ import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
+import irt.data.IdValueFreq;
 import irt.data.Listeners;
 import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
 import irt.tools.button.ImageButton;
+import irt.tools.combobox.LoSelectComboBox;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 
@@ -74,8 +76,8 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	protected Cursor cursor;
 	protected Color color;
 	private IdValue selection;
-	private JComboBox<String> cbLoSelect;
-	private boolean hasFreqSet;
+	private JComboBox<IdValueFreq> cbLoSelect;
+//	private boolean hasFreqSet;
 	private JLabel lblMute; 							protected JLabel getLblMute() { return lblMute; }
 	private ImageButton btnMute; 						protected ImageButton getBtnMute() { return btnMute; }
 	protected ImageButton btnStoreConfig;
@@ -89,7 +91,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		Font font = Translation.getFont();
 
 		this.flags = flags;
-		hasFreqSet = (flags & (short)ActionFlags.FLAG_FREQUENCY_SET.ordinal())>0;
+//		hasFreqSet = (flags & (short)ActionFlags.FLAG_FREQUENCY_SET.ordinal())>0;
 
 		color = new Color(0x0B,0x17,0x3B);
 		cursor = new Cursor(Cursor.HAND_CURSOR);
@@ -263,19 +265,15 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 
 		font = font.deriveFont(16f);
 
-		if(hasFreqSet){
-			cbLoSelect = new JComboBox<String>();
-			cbLoSelect.setName("LO Select");
-			cbLoSelect.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0; }};}});
-			cbLoSelect.addPopupMenuListener(Listeners.popupMenuListener);
-			cbLoSelect.setForeground(Color.YELLOW);
-			cbLoSelect.setBackground(color);
-			cbLoSelect.setCursor(cursor);
-			cbLoSelect.setFont(font);
-			cbLoSelect.setBounds(10, 141, 194, 26);
-			add(cbLoSelect);
-			((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
-		}
+		cbLoSelect = new LoSelectComboBox(linkHeader!=null ? linkHeader.getAddr() : 0);
+//		cbLoSelect.setName("LO Select");
+		cbLoSelect.setForeground(Color.YELLOW);
+		cbLoSelect.setBackground(color);
+		cbLoSelect.setCursor(cursor);
+		cbLoSelect.setFont(font);
+		cbLoSelect.setBounds(10, 141, 194, 26);
+		add(cbLoSelect);
+		
 
 		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));
