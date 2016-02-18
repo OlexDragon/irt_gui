@@ -101,6 +101,8 @@ public class SpectrumInversionSwitch extends SwitchBox implements Runnable {
 			if(!(pID==PacketWork.PACKET_ID_CONFIGURATION_SPECTRUM_INVERSION || pID==PacketWork.PACKET_ID_CONFIGURATION_SET_SPECTRUM_INVERSION))
 				return;
 
+			logger.trace(packet);
+
 			final Payload pl = packet.getPayload(0);
 			if(h.getOption()!=0 || pl.getByte()==0){
 				setVisible(false);
