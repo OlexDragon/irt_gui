@@ -6,6 +6,7 @@ import java.util.prefs.Preferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.ScheduledServices;
@@ -35,7 +36,7 @@ public class SerialPortController{
 
 	public static final LinkedPacketsQueue QUEUE =  new LinkedPacketsQueue();
 
-	protected final Preferences prefs = Preferences.userRoot().node("IRT Technologies inc.");
+	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
 	private volatile static LinkedPacketSender	serialPort;					public static SerialPort 	getSerialPort() { return serialPort; 			}
 

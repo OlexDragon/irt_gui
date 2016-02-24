@@ -11,7 +11,6 @@ import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
 import irt.gui.data.packet.observable.device_debug.RegisterPacket;
 import irt.gui.data.value.Value;
 import irt.gui.data.value.ValueDouble;
@@ -30,9 +29,9 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
-public class RegisterLabel extends ScheduledNodeAbstract {
+public class LabelRegister extends ScheduledNodeAbstract {
 
-	public static final String FXML_PATH		= "/fxml/components/RegisterLabel.fxml";
+	public static final String FXML_PATH		= "/fxml/components/LabelRegister.fxml";
 
 	public static final String PROPERTY_STARTS_WITH	= "gui.register.label.";
 	public static final String PROPERTY_NAME 	= PROPERTY_STARTS_WITH + "%s.name";	//Showing name of one properties
@@ -46,6 +45,7 @@ public class RegisterLabel extends ScheduledNodeAbstract {
 	private	volatile		Value			value;						/*Actual value	*/							public Value getValue() { return value; }
 
 	public static final Class<? extends Node> rootClass = BorderPane.class;
+	private TooltipWorker tooltipWorker;
 
 	@FXML private BorderPane 	borderPane;
 	@FXML private Label			registerLabel;
@@ -57,6 +57,7 @@ public class RegisterLabel extends ScheduledNodeAbstract {
 		borderPane.setUserData(this);
 		titleLabel.setContextMenu(contextMenu);
 		createMenuItems();
+		tooltipWorker = new TooltipWorker(registerLabel);
 	}
 
 	private void createMenuItems(){
@@ -72,8 +73,7 @@ public class RegisterLabel extends ScheduledNodeAbstract {
 		GuiUtility.createMamuItems(PROPERTY_STARTS_WITH, onActionRegisterSelect, menuValues.getItems());
 	}
 
-	@Override
-	public void setKeyStartWith(String keyStartWith)  throws PacketParsingException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+	@Override public void setKeyStartWith(String keyStartWith)  throws PacketParsingException, ClassNotFoundException, InstantiationException, IllegalAccessException {
 
 		// Stop sending packets
 		stop(false);
@@ -144,17 +144,21 @@ public class RegisterLabel extends ScheduledNodeAbstract {
 		addPacket(new RegisterPacket(new RegisterValue(index, address)));
 	}
 
-	@Override
-	public void update(Observable observable, Object arg) {
+	@Override public void update(Observable observable, Object arg) {
 
-		LinkedPacket packet = (LinkedPacket)observable;
-		Optional
-		.ofNullable(packet.getAnswer())
-		.ifPresent(answer->{
-			Optional.ofNullable(createPacket(answer))
-			.ifPresent(p->{
-				final PacketHeader packetHeader = p.getPacketHeader();
-				if(packetHeader.getPacketType()==PacketType.RESPONSE && packetHeader.getPacketErrors()==PacketErrors.NO_ERROR){
+		SERVICES.execute(()->{
+			LinkedPacket packet = (LinkedPacket)observable;
+			byte[] answer = packet.getAnswer();
+			if(answer!=null){
+				Optional.ofNullable(createPacket(answer))
+				.ifPresent(p->{
+					final PacketHeader packetHeader = p.getPacketHeader();
+					final PacketErrors packetErrors = packetHeader.getPacketErrors();
+					if(packetErrors!=PacketErrors.NO_ERROR){
+						tooltipWorker.setMessage(packetErrors.toString());
+						SERVICES.execute(tooltipWorker);
+						return;
+					}
 
 					Payload payload = p.getPayloads().get(0);
 //					RegisterValue rv = new RegisterValue(payload.getInt(0), payload.getInt(1), payload.getInt(2));
@@ -162,8 +166,11 @@ public class RegisterLabel extends ScheduledNodeAbstract {
 
 					Platform
 					.runLater(()->registerLabel.setText(value.toString()));
-				}
-			});
+				});
+			}else{
+				tooltipWorker.setMessage("No answer.");
+				SERVICES.execute(tooltipWorker);
+			}
 		});
 	}
 

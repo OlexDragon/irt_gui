@@ -6,4 +6,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<Button fx:id="button" mnemonicParsing="false" onAction="#buttonAction" text="Initialize" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ButtonInitialize" />
+<Button fx:id="button" mnemonicParsing="false" onAction="#buttonAction" text="Initialize" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ButtonInitialize">
+   <tooltip>
+      <Tooltip text="Initialize" />
+   </tooltip>
+</Button>

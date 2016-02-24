@@ -141,8 +141,10 @@ public class TextFieldRegister extends TextFieldAbstract {
 		else
 			Platform.runLater(()->{
 				final ObservableList<String> styleClass = textField.getStyleClass();
-				if(!styleClass.contains(CLASS_NOT_SAVED))
-					styleClass.add(CLASS_NOT_SAVED);});
+				if(styleClass.size()>0)
+					styleClass.remove(CLASS_NOT_SAVED);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
+				styleClass.add(CLASS_NOT_SAVED);	//add to end of the list
+			});
 	}
 
 	public void reset() throws PacketParsingException {
@@ -188,8 +190,9 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 			final ObservableList<String> styleClass = textField.getStyleClass();
 
-			if(!styleClass.contains(cssClass))
-				styleClass.add(cssClass);
+			if(styleClass.size()>0)
+				styleClass.remove(cssClass);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
+			styleClass.add(cssClass);
 
 			final long max = value.getRelativeMaxValue();
 			final int v = value.getRelativeValue();
@@ -223,7 +226,11 @@ public class TextFieldRegister extends TextFieldAbstract {
 		public void run() {
 			try {
 
-				LinkedPacket packet = new RegisterPacket(this.packet.getAnswer());
+				final byte[] answer = this.packet.getAnswer();
+				if(answer==null)
+					return;
+
+				LinkedPacket packet = new RegisterPacket(answer);
 
 				final PacketHeader packetHeader = packet.getPacketHeader();
 				if(packetHeader.getPacketType()==PacketType.RESPONSE){
@@ -272,7 +279,8 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 					//remove CLASS_HAS_CHANGED css class
 					final ObservableList<String> styleClass = textField.getStyleClass();
-					styleClass.remove(CLASS_HAS_CHANGED);
+					if(styleClass.size()>0)
+						styleClass.remove(CLASS_HAS_CHANGED);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
 
 					textField.setText(text);
 				});

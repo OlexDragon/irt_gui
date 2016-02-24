@@ -11,3 +11,7 @@
 	-fx-text-inner-color: red;
 	-fx-control-inner-background: LightCyan;
 }
+.text-field.error {
+	-fx-text-inner-color: yellow;
+	-fx-control-inner-background: red;
+}

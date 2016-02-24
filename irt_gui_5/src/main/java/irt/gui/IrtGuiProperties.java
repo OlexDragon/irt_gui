@@ -17,6 +17,8 @@ import org.apache.logging.log4j.Logger;
 public class IrtGuiProperties {
 	private static final Logger logger = LogManager.getLogger();
 
+	public static final String PREFS_NAME = "IRT Technologies inc.";
+
 	public static final String 	USER_HOME 			= System.getProperty("user.home");
 	public static final File 	IRT_HOME			= new File(USER_HOME, "irt") ;
 	public static final File 	DESKTOP				= new File(USER_HOME, "Desktop") ;

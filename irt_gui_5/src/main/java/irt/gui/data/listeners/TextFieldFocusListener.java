@@ -1,8 +1,6 @@
 
 package irt.gui.data.listeners;
 
-import org.apache.logging.log4j.LogManager;
-
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -38,8 +36,9 @@ public class TextFieldFocusListener implements ChangeListener<Boolean>{
 
 			final ObservableList<String> styleClass = textField.getStyleClass();
 
-			if(!styleClass.contains(FOCUS_GAINED))
-				styleClass.add(FOCUS_GAINED);
+			if(styleClass.size()>0)
+			styleClass.remove(FOCUS_GAINED);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
+			styleClass.add(FOCUS_GAINED);
 		});
 	}
 
@@ -47,7 +46,8 @@ public class TextFieldFocusListener implements ChangeListener<Boolean>{
 		Platform.runLater(()->{
 
 			final ObservableList<String> styleClass = textField.getStyleClass();
-			styleClass.remove(FOCUS_GAINED);
+			if(styleClass.size()>0)
+				styleClass.remove(FOCUS_GAINED);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
 		});
 	}
 

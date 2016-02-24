@@ -13,7 +13,7 @@
          <children>
             <HBox layoutX="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <Slider fx:id="slider" majorTickUnit="1.0" minorTickCount="4" onMouseReleased="#sliderMouseReleased" orientation="VERTICAL" showTickLabels="true" showTickMarks="true" />
+                  <Slider fx:id="slider" majorTickUnit="1.0" minorTickCount="4" onMouseReleased="#onMouseReleasedSlider" orientation="VERTICAL" showTickLabels="true" showTickMarks="true" />
                </children>
             </HBox>
          </children>
@@ -24,17 +24,24 @@
          <children>
             <HBox alignment="CENTER_RIGHT" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
+                  <fx:include fx:id="comboBoxUnitAddress" source="ComboBoxUnitAddress.fxml" />
                   <fx:include fx:id="buttonInitialize" source="ButtonInitialize.fxml" />
-                  <fx:include fx:id="calibModeButton" source="ButtonCalibrationMode.fxml" />
-                  <Button fx:id="saveButton" mnemonicParsing="false" onAction="#saveValues" text="Save">
+                  <fx:include fx:id="buttonCalibMode" source="ButtonCalibrationMode.fxml" />
+                  <Button mnemonicParsing="false" onAction="#saveValues" text="Save">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
+                     <tooltip>
+                        <Tooltip text="Save" />
+                     </tooltip>
                   </Button>
                   <Button fx:id="resetButton" mnemonicParsing="false" onAction="#onActionResetButton" text="Reset">
                      <cursor>
                         <Cursor fx:constant="HAND" />
                      </cursor>
+                     <tooltip>
+                        <Tooltip text="Reset" />
+                     </tooltip>
                   </Button>
                   <CheckBox fx:id="stepCheckBox" mnemonicParsing="false" onAction="#stepCheckBoxAction" text="Use Step">
                      <tooltip>

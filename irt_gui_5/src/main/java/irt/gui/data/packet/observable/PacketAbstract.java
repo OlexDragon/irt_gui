@@ -173,10 +173,8 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 	public void setAnswer(byte[] answer) {
 		this.answer = answer;
 
-		if(answer!=null){
-			setChanged();
-			notifyObservers();
-		}
+		setChanged();
+		notifyObservers();
 	}
 
 	@Override

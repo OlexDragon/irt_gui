@@ -55,10 +55,11 @@
 <!-- 		<logger name="irt.gui.controllers.components.RegisterPanel" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.RegistersController" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ButtonCalibrationMode" level="all"/> -->
-<!-- 		<logger name="irt.gui.controllers.components.ValueLabel" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.LabelValue" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ScheduledNodeAbstract" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.ComboBoxUnitAddress" level="all"/> -->
 
-		<logger name="irt.gui.controllers.components.TextFieldConfiguration$Updater" level="all"/>
+<!-- 		<logger name="irt.gui.controllers.components.TextFieldConfiguration$Updater" level="all"/> -->
 
 		<Root level="warn">
 			<AppenderRef ref="DumpFile" />

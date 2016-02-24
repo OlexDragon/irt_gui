@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.interfaces.UnitAddress;
 import irt.gui.data.GuiUtility;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
@@ -57,7 +58,6 @@ public class RegisterPanel{
 	@FXML private GridPane gridPane;
 
 	@FXML private ContextMenu contextMenu;
-    @FXML private Menu 		menuRegister;
 	@FXML private MenuItem 	menuItemShowGrid;
 	@FXML private MenuItem 	menuItemAddColumn;
 	@FXML private MenuItem 	menuItemDeleteColumn;
@@ -66,6 +66,8 @@ public class RegisterPanel{
 
 	@FXML private Menu 		menuAlignment;
 	@FXML private Menu 		menuBackground;
+
+	@FXML private Menu 		menuRegister;
 	@FXML private Menu 		menuValueLabel;
 	@FXML private Menu 		menuRegisterLabel;
 	@FXML private Menu 		menuControl;
@@ -79,11 +81,12 @@ public class RegisterPanel{
 	private final EventHandler<? super MouseEvent> mouseEvent = e->paneMouseEntered(e);
 
 	private boolean editable;
+	private Byte 	unitAddress;
 
 	private final EventHandler<ActionEvent> onActionMenuItemRegister 		= e->loadNode(TextFieldRegister.class, 		((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-	private final EventHandler<ActionEvent> onActionMenuItemValueLabel 		= e->loadNode(ValueLabel.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+	private final EventHandler<ActionEvent> onActionMenuItemValueLabel 		= e->loadNode(LabelValue.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
 	private final EventHandler<ActionEvent> onActionMenuItemControl 		= e->loadNode(TextFieldConfiguration.class,	((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel 	= e->loadNode(RegisterLabel.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel 	= e->loadNode(LabelRegister.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
 
 	@FXML private void initialize(){
 		createMenuItemsRegisterTextField();
@@ -183,11 +186,11 @@ public class RegisterPanel{
 	}
 
 	private void createMenuItemsRegisterLabel() {
-		GuiUtility.createMamuItems(RegisterLabel.PROPERTY_STARTS_WITH, onActionMenuItemRegisterLabel, menuRegisterLabel.getItems());
+		GuiUtility.createMamuItems(LabelRegister.PROPERTY_STARTS_WITH, onActionMenuItemRegisterLabel, menuRegisterLabel.getItems());
 	}
 
 	private void createMenuItemsValueLabel() {
-		GuiUtility.createMamuItems(ValueLabel.PROPERTY_STARTS_WITH, onActionMenuItemValueLabel, menuValueLabel.getItems());
+		GuiUtility.createMamuItems(LabelValue.PROPERTY_STARTS_WITH, onActionMenuItemValueLabel, menuValueLabel.getItems());
 	}
 
 	private void createMenuItemsRegisterTextField() {
@@ -412,6 +415,14 @@ public class RegisterPanel{
 		try { controller.save(); } catch (PacketParsingException e) { logger.catching(e); };
 	}
 
+	private Stream<Object> getAllControllers() {
+		return getAllVBoxex()
+				.map(vb->vb.getChildren())
+				.flatMap(ch->ch.parallelStream())
+				.map(c->c.getUserData())
+				.filter(c->c!=null);
+	}
+
 	@SuppressWarnings("unchecked")
 	private Stream<TextFieldRegister> getAllTextFieldControllers() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 		return (Stream<TextFieldRegister>) getAllControllersOf(TextFieldRegister.class);
@@ -584,6 +595,10 @@ public class RegisterPanel{
 
 			final ScheduledNodeAbstract controller = loader.getController();
 			controller.setKeyStartWith(name);
+
+			if(unitAddress!=null)
+				controller.setUnitAddress(unitAddress);
+
 			if(controllerClass.getSuperclass().equals(TextFieldAbstract.class))
 				Platform.runLater(()->((TextFieldAbstract)controller).getTextField().setEditable(editable));
 
@@ -598,5 +613,13 @@ public class RegisterPanel{
 	private void addFocusListener(Node node) {
 		if(node.getUserData() instanceof TextFieldAbstract)
 			((TextFieldAbstract)node.getUserData()).addFocusListener(focusListener);
+	}
+
+	public void setUnitAddress(Byte unitAddress) {
+		this.unitAddress = unitAddress;
+
+		getAllControllers()
+		.map(UnitAddress.class::cast)
+		.forEach(ua->ua.setUnitAddress(unitAddress));
 	}
 }

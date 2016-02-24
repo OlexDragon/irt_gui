@@ -2,8 +2,8 @@ package irt.gui.controllers.components;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
@@ -40,6 +40,8 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
 public class TextFieldConfiguration extends TextFieldAbstract {
+
+	private static final int MULTIPLIER = 1000000;
 
 	private static final FractionalNumberPlusPrefixChecker FRACTIONAL_NUMBER_CHECKER = new FractionalNumberPlusPrefixChecker();
 
@@ -153,7 +155,6 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 			final long[] array = packet.getPayloads().get(0).getArrayLong();
 			value = new ValueFrequency(array[0], array[0], array[1]);
-			logger.error("\n\tRange: {}", array);
 
 		}else{
 
@@ -210,7 +211,10 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 		addCssClass(cssClass);
 
-		final int factor = value.getFactor();
+		int factor = value.getFactor();
+		if(value instanceof ValueFrequency)
+			factor = factor * MULTIPLIER;
+
 		final double max = (double)value.getMaxValue()/factor;
 		final double min = (double)value.getMinValue()/factor;
 		final double v = (double)value.getValue()/factor;
@@ -227,16 +231,26 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 	public void addCssClass(String cssClass) {
 		final ObservableList<String> styleClass = textField.getStyleClass();
-		if(!styleClass.contains(cssClass))
-			styleClass.add(cssClass);
+		if(styleClass.size()>0)
+			styleClass.remove(cssClass);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
+		styleClass.add(cssClass);
 	}
 
 	@Override protected void setPacket(String keyStartWith) throws PacketParsingException { }
 	@Override public void save() throws PacketParsingException { }
 
-	private final NumberFormat formatter = new DecimalFormat("#0.0");
 	@Override public void setText(double value) {
-		setText(formatter.format(value), FRACTIONAL_NUMBER_CHECKER);
+		Value v = this.value.getCopy();
+		if(v instanceof ValueFrequency){
+			BigDecimal bd = new BigDecimal(value);
+			BigDecimal bm = new BigDecimal(MULTIPLIER);
+			bd = bd.multiply(bm);
+			final BigInteger bi = bd.toBigInteger();
+			v.setValue(bi.longValue());
+		}else
+			v.setValue(value);
+
+		setText(v.toString(), FRACTIONAL_NUMBER_CHECKER);
 	}
 
 	@Override public void update(Observable observable, Object arg) {

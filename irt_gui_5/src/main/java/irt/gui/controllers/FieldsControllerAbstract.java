@@ -13,9 +13,10 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.interfaces.FieldController;
+import irt.gui.controllers.interfaces.UnitAddress;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 
-public abstract class FieldsControllerAbstract implements Observer, FieldController  {
+public abstract class FieldsControllerAbstract extends Observable implements Observer, FieldController, UnitAddress  {
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -44,6 +45,7 @@ public abstract class FieldsControllerAbstract implements Observer, FieldControl
 		if(update) {
 			if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
 				scheduleAtFixedRate = ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);
+
 		}else if(scheduleAtFixedRate!=null)
 			scheduleAtFixedRate.cancel(false);
 	}
@@ -74,7 +76,7 @@ public abstract class FieldsControllerAbstract implements Observer, FieldControl
 					}
 				else if(!wasShown){
 					wasShown = true;
-					logger.warn("No Answer");
+					logger.warn("No Answer: {}", p);
 				}
 			}
 		}));
@@ -88,10 +90,20 @@ public abstract class FieldsControllerAbstract implements Observer, FieldControl
 		thread.start();
 	}
 
+	@Override public void setUnitAddress(Byte address) {
+
+		packetSender
+		.getPacketsToSend()
+		.parallelStream()
+		.map(LinkedPacket::getLinkHeader)
+		.forEach(lh->lh.setAddr(address));
+	}
+
 	//*********************************************   InfoPacketSender   ****************************************************************
 	protected class PacketSender implements Runnable{
 
-		private List<LinkedPacket> 	packetsToSend = new ArrayList<>();
+		private final List<LinkedPacket> 	packetsToSend = new ArrayList<>(); private List<LinkedPacket> getPacketsToSend() { return packetsToSend; }
+
 		private boolean 			send;			public boolean isSend() { return send; }
 		public void setSend(boolean send) {
 			this.send = send;
@@ -114,8 +126,9 @@ public abstract class FieldsControllerAbstract implements Observer, FieldControl
 		public void run(){
 			logger.entry();
 
-			for(LinkedPacket packet:packetsToSend)
-					SerialPortController.QUEUE.add(packet);
+			packetsToSend
+			.parallelStream()
+			.forEach(packet->SerialPortController.QUEUE.add(packet));
 		}
 	}
 }

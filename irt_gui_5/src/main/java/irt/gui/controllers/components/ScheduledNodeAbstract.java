@@ -12,10 +12,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.ScheduledServices;
+import irt.gui.controllers.interfaces.UnitAddress;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.errors.PacketParsingException;
+import javafx.application.Platform;
+import javafx.scene.control.Control;
+import javafx.scene.control.Tooltip;
 
-public abstract class ScheduledNodeAbstract implements Runnable, Observer {
+public abstract class ScheduledNodeAbstract implements Runnable, Observer, UnitAddress{
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	public static final String NAME = "name";
@@ -31,8 +35,8 @@ public abstract class ScheduledNodeAbstract implements Runnable, Observer {
 
 	public abstract void setKeyStartWith(String name) throws PacketParsingException, ClassNotFoundException, InstantiationException, IllegalAccessException;
 
-	@Override
-	public void run() {
+	@Override public void run() {
+		logger.entry(packets);
 		try{
 
 			packets
@@ -74,5 +78,48 @@ public abstract class ScheduledNodeAbstract implements Runnable, Observer {
 		.forEach(p->p.deleteObservers());
 
 		packets.clear();
+	}
+
+	@Override public void setUnitAddress(Byte address) {
+
+		packets
+		.parallelStream()
+		.map(LinkedPacket::getLinkHeader)
+		.forEach(lh->lh.setAddr(address));
+	}
+
+	//******************************** class TooltipWorker   ********************************************
+	class TooltipWorker implements Runnable{
+
+		private Control node;
+		private String message;
+		private volatile boolean isRunning;
+
+		public TooltipWorker(Control node) {
+			super();
+			this.node = node;
+		}
+
+		public void setMessage(String message) {
+			this.message = message;
+		}
+
+		@Override
+		public void run() {
+			if(isRunning)
+				return;
+
+			isRunning = true;
+
+			final Tooltip tooltip = node.getTooltip();
+			Platform.runLater(()->node.setTooltip(new Tooltip(message)));
+
+			try { Thread.sleep(10000); } catch (Exception e) { }
+
+			Platform.runLater(()->node.setTooltip(tooltip));
+
+			isRunning = false;
+		}
+		
 	}
 }

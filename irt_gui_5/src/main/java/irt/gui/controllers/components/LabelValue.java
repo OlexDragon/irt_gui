@@ -7,7 +7,9 @@ import java.util.Optional;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.data.GuiUtility;
+import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.interfaces.ValuePacket;
 import irt.gui.data.value.Value;
 import irt.gui.data.value.ValueDouble;
@@ -26,9 +28,9 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
-public class ValueLabel extends ScheduledNodeAbstract {
+public class LabelValue extends ScheduledNodeAbstract {
 
-	public static final String FXML_PATH		= "/fxml/components/ValueLabel.fxml";
+	public static final String FXML_PATH		= "/fxml/components/LabelValue.fxml";
 
 	public static final String PROPERTY_STARTS_WITH = "gui.label.value.";		//Properties start with
 
@@ -44,11 +46,14 @@ public class ValueLabel extends ScheduledNodeAbstract {
 	@FXML private Menu 			menuValues;
 
 	private Class<?> clazz;
+	private TooltipWorker tooltipWorker;
+	private final Updater updater = new Updater();
 
 	@FXML public void initialize(){
 		borderPane.setUserData(this);
 		createMenuItems();
 		titleLabel.setContextMenu(contextMenu);
+		tooltipWorker = new TooltipWorker(valueLabel);
 	}
 
 	private void createMenuItems() {
@@ -116,40 +121,25 @@ public class ValueLabel extends ScheduledNodeAbstract {
 		return packet;
 	}
 
-	@Override
-	public void update(Observable observable, Object arg) {
-		SERVICES.execute(()->{
-			LinkedPacket packet = (LinkedPacket)observable;
-			if(packet.getAnswer()!=null)
-				Optional
-				.ofNullable(clazz)
-				.ifPresent(c->{
-					Optional
-					.ofNullable(createPacket(packet))
-					.ifPresent(p->{
-						Value v;
-						final long result = p.getPayloads().get(0).getShort(0);
-						if(p instanceof ValuePacket){
-							final ValuePacket valuePacket = (ValuePacket)p;
-							v = new ValueDouble(result, valuePacket.getPrecision());
-							v.setPrefix(valuePacket.getPrefix());
-						}else
-							v = new Value(result, Long.MIN_VALUE, Long.MAX_VALUE, 0);
+	public enum Status{
+		INDEFINED,
+		EQUALS,
+		LESS,
+		MORE
+	}
 
-						Platform
-						.runLater(()->{
-							valueLabel.setText(v.toString());
-						});
-					});
-				});
-		});
+	@Override public void update(Observable observable, Object arg) {
+		logger.entry(observable, arg);
+
+		updater.setPacket((LinkedPacket)observable);
+		SERVICES.execute(updater);
 	}
 
 	private LinkedPacket createPacket(LinkedPacket packet){
 		try {
 
 			final Constructor<?> constructor = clazz.getConstructor(byte[].class);
-			return (LinkedPacket) constructor.newInstance(packet.getAnswer());
+			return logger.exit((LinkedPacket) constructor.newInstance(packet.getAnswer()));
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -159,5 +149,100 @@ public class ValueLabel extends ScheduledNodeAbstract {
 
 	public static Class<? extends Node> getPootClass() {
 		return BorderPane.class;
+	}
+
+	private class Updater implements Runnable{
+
+		private LinkedPacket packet;
+
+		@Override
+		public void run() {
+			try{
+			if(packet.getAnswer()!=null)
+				Optional
+				.ofNullable(clazz)
+				.ifPresent(c->{
+					Optional
+					.ofNullable(createPacket(packet))
+					.ifPresent(p->{
+						Value v;
+
+						final PacketErrors packetErrors = p.getPacketHeader().getPacketErrors();
+						if(packetErrors!=PacketErrors.NO_ERROR){
+							tooltipWorker.setMessage(packetErrors.toString());
+							SERVICES.execute(tooltipWorker);
+							logger.warn("The Packet has error:{}", p);
+							return;
+						}
+
+						final Payload payload = p.getPayloads().get(0);
+
+						Status status = null;
+						long result;
+						if(payload.getParameterHeader().getPayloadSize().getSize()==2)
+							result = payload.getShort(0);
+
+						else if(payload.getParameterHeader().getPayloadSize().getSize()==3){
+							status = Status.values()[payload.getByte()&3];
+							result = payload.getShort((byte)1);
+
+						}else{
+							logger.error("Wrong packet: {}", p);
+							return;
+						}
+
+						if(p instanceof ValuePacket){
+							final ValuePacket valuePacket = (ValuePacket)p;
+							v = new ValueDouble(result, valuePacket.getPrecision());
+							v.setPrefix(valuePacket.getPrefix());
+						}else
+							v = new Value(result, Long.MIN_VALUE, Long.MAX_VALUE, 0);
+
+						String t = "";
+						if(status!=null)
+							switch(status){
+
+							case EQUALS:
+								if(v.getValue()==0x8000)
+									t = "N/A";
+								else
+									t = v.toString();
+								break;
+
+							case INDEFINED:
+								t = "N/A";
+								break;
+
+							case LESS:
+								t = "<" + v.toString();
+								break;
+
+							case MORE:
+								t = "<" + v.toString();
+								break;
+							default:
+								break;
+							}
+						else
+							t = v.toString();
+
+						logger.error(p);
+						final String text = t;
+						Platform.runLater(()->valueLabel.setText(text));
+					});
+				});
+			else{
+				tooltipWorker.setMessage("No answer.");
+				SERVICES.execute(tooltipWorker);
+			}
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
+		}
+
+		public void setPacket(LinkedPacket packet) {
+			this.packet = packet;
+		}
+		
 	}
 }

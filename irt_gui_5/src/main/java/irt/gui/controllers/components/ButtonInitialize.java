@@ -15,18 +15,18 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
-public class ButtonInitialize  extends FieldsControllerAbstract{
+public class ButtonInitialize extends FieldsControllerAbstract{
 
-	private final CallibrationModePacket getCallibrationModePacket;
+	private final CallibrationModePacket callibrationModePacket;
 	private final InitializeBiasPacket initializeBiasPacket;
 	private CalibrationMode calibrationMode;
 	
 
 	public ButtonInitialize() throws PacketParsingException{
 
-			getCallibrationModePacket = new CallibrationModePacket((CalibrationMode)null);
-			getCallibrationModePacket.addObserver(this);
-			addLinkedPacket(getCallibrationModePacket);
+			callibrationModePacket = new CallibrationModePacket((CalibrationMode)null);
+			callibrationModePacket.addObserver(this);
+			addLinkedPacket(callibrationModePacket);
 			doUpdate(true);
 
 			initializeBiasPacket = new InitializeBiasPacket();

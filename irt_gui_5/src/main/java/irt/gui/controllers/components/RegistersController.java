@@ -67,20 +67,23 @@ public class RegistersController implements Observer {
 
 	@FXML private Slider 		slider;
 	@FXML private Button		buttonInitialize;
-    @FXML private Button 		calibModeButton;
-    @FXML private Button 		saveButton;
+    @FXML private Button 		buttonCalibMode;
     @FXML private Button 		resetButton;
     @FXML private CheckBox 		stepCheckBox;
     @FXML private TextField 	stepTextField;
     @FXML private RegisterPanel registersPanelController;
 
+    @FXML private ComboBoxUnitAddress 	comboBoxUnitAddressController;
+
     @FXML private MenuItem 		menuSave;
     @FXML private Menu			menuProfile;
 
+    @FXML private ButtonCalibrationMode buttonCalibModeController;
+
     private NumericChecker 		stepNumericChecker;
     private TextField 			selectedTextField;
-    private TextInputDialog 	dialog = new TextInputDialog("default");
-	private ToggleGroup profilesToggleGroup = new ToggleGroup();
+    private TextInputDialog 	dialog 				= new TextInputDialog("default");
+	private ToggleGroup 		profilesToggleGroup = new ToggleGroup();
 
 	private int 	profileId;
 	private Boolean editable;
@@ -101,7 +104,7 @@ public class RegistersController implements Observer {
 		
 		@Override
 		public void update(Observable o, Object arg) {
-			logger.error("{} : {}", o, arg);
+			logger.entry("{} : {}", o, arg);
 
 			Value v = (Value) o;
 			if(((Status)arg)==Status.IN_RANGE){
@@ -124,13 +127,13 @@ public class RegistersController implements Observer {
 		}
 
 		public void setSliderValue(double rv) {
-			logger.error(rv);
+			logger.entry(rv);
 			Platform.runLater(()->{
 
 				final DoubleProperty valueProperty = slider.valueProperty();
-				valueProperty.removeListener(sliderChangeListener);
+				valueProperty.removeListener(sliderValueChangeListener);
 				slider.setValue(rv);
-				valueProperty.addListener(sliderChangeListener);
+				valueProperty.addListener(sliderValueChangeListener);
 			});
 		}
 	};
@@ -139,13 +142,12 @@ public class RegistersController implements Observer {
 		Optional
 		.ofNullable(selectedTextField)
 		.ifPresent(textField->{
-			Platform.runLater(() -> {
 
-				TextFieldAbstract textFieldRegister = (TextFieldAbstract) selectedTextField.getUserData();
-				Value registerValue = textFieldRegister.getValue();
-				registerValue.deleteObserver(valueObserver);
-				textField.getStyleClass().remove(cssClass);
-			});
+			TextFieldAbstract textFieldRegister = (TextFieldAbstract) selectedTextField.getUserData();
+			Value registerValue = textFieldRegister.getValue();
+			registerValue.deleteObserver(valueObserver);
+
+			Platform.runLater(()->textField.getStyleClass().remove(cssClass));
 		});
 	}
 
@@ -156,7 +158,7 @@ public class RegistersController implements Observer {
 			RadioMenuItem rmi = (RadioMenuItem)e.getSource();
 			profileId = Integer.parseInt(((String) rmi.getUserData()));// get profile ID
 			setRowsAndColumns(profileId);
-			setNodesOf( profileId, TextFieldRegister.class, ValueLabel.class, RegisterLabel.class);
+			setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class);
 			menuSave.setDisable(false);
 			registersPanelController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
 			setAlignment(profileId);
@@ -174,8 +176,7 @@ public class RegistersController implements Observer {
 		}
 	};
 
-	private final ChangeListener<Number> sliderChangeListener = (observable, oldValue, newValue)->{
-		logger.error(newValue);
+	private final ChangeListener<Number> sliderValueChangeListener = (observable, oldValue, newValue)->{
 		Platform.runLater(
 				()->Optional
 				.ofNullable(selectedTextField)
@@ -199,10 +200,9 @@ public class RegistersController implements Observer {
 			TextFieldAbstract textFieldcontroller = (TextFieldAbstract) selectedTextField.getUserData();
 
 			//Set slider value, max, min
-			textFieldcontroller.setSliderValue(slider, sliderChangeListener, ACTIVE, valueObserver, stepNumericChecker);
+			textFieldcontroller.setSliderValue(slider, sliderValueChangeListener, ACTIVE, valueObserver, stepNumericChecker);
 
 			final boolean disable = selectedTextField.isDisable();
-			logger.error("*** {} ***", disable);
 			if(slider.isDisable()!=disable)
 				Platform.runLater(()->slider.setDisable(disable));
 
@@ -211,9 +211,8 @@ public class RegistersController implements Observer {
 
     @FXML private void initialize(){
  
-    	final ButtonCalibrationMode buttonCalibrationMode = (ButtonCalibrationMode)calibModeButton.getUserData();
-		buttonCalibrationMode.addObserver(this);
-		buttonCalibrationMode.addObserver((Observer) buttonInitialize.getUserData());
+    	buttonCalibModeController.addObserver(this);
+    	buttonCalibModeController.addObserver((Observer) buttonInitialize.getUserData());
 
     	stepNumericChecker = new NumericChecker(stepTextField.textProperty());
 
@@ -222,9 +221,11 @@ public class RegistersController implements Observer {
 
 		registersPanelController.setFocusListener(registerPanelFocusListener);
 
-		slider.valueProperty().addListener(sliderChangeListener);
+		slider.valueProperty().addListener(sliderValueChangeListener);
 
 		createProfileMenuItems();
+
+		comboBoxUnitAddressController.addObserver(new AddressUpdater());
     }
 
 	@FXML private void onActionNewProfile(){
@@ -248,7 +249,7 @@ public class RegistersController implements Observer {
 		}
     }
 
-    @FXML private void sliderMouseReleased() {
+    @FXML private void onMouseReleasedSlider() {
     	Optional
     	.ofNullable(selectedTextField)
     	.ifPresent(s->{
@@ -353,13 +354,13 @@ public class RegistersController implements Observer {
 		removeProperties(propertiesFromFile, String.format( TextFieldRegister.FIELD_KEY_ID, profileId));
 		putProperies(propertiesFromFile, profileId, TextFieldRegister.class);
 
-		//remove ValueLabel properties
-		removeProperties(propertiesFromFile, String.format( ValueLabel.FIELD_KEY_ID, profileId));
-		putProperies(propertiesFromFile, profileId, ValueLabel.class);
+		//remove LabelValue properties
+		removeProperties(propertiesFromFile, String.format( LabelValue.FIELD_KEY_ID, profileId));
+		putProperies(propertiesFromFile, profileId, LabelValue.class);
 
-		//remove RegisterLabel properties
-		removeProperties(propertiesFromFile, String.format( RegisterLabel.FIELD_KEY_ID, profileId));
-		putProperies(propertiesFromFile, profileId, RegisterLabel.class);
+		//remove LabelRegister properties
+		removeProperties(propertiesFromFile, String.format( LabelRegister.FIELD_KEY_ID, profileId));
+		putProperies(propertiesFromFile, profileId, LabelRegister.class);
 
 		final String backgroundPath = registersPanelController.getBackgroundPath();
 		if(backgroundPath!=null)
@@ -532,5 +533,18 @@ public class RegistersController implements Observer {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+	}
+
+	public class AddressUpdater implements Observer {
+
+		@Override
+		public void update(Observable o, Object unitAddress) {
+			
+			final byte byteValue = ((Integer)unitAddress).byteValue();
+
+			registersPanelController.setUnitAddress(byteValue);
+			buttonCalibModeController.setUnitAddress(byteValue);
+		}
+
 	}
 }

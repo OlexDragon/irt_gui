@@ -7,16 +7,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ValueLabel">
+<BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.LabelRegister">
    <center>
-      <Label fx:id="titleLabel" text="Title">
+      <AnchorPane>
          <BorderPane.margin>
-            <Insets right="5.0" />
+            <Insets right="3.0" />
          </BorderPane.margin>
-      </Label>
+         <children>
+            <Label fx:id="titleLabel" text="Title" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+         </children>
+      </AnchorPane>
    </center>
    <right>
-      <Label fx:id="valueLabel" alignment="CENTER_RIGHT" text="Value">
+      <Label fx:id="registerLabel" alignment="CENTER_RIGHT" minWidth="40.0" text="Value" BorderPane.alignment="CENTER">
          <contextMenu>
             <ContextMenu fx:id="contextMenu">
                <items>
@@ -24,12 +27,9 @@
                </items>
             </ContextMenu>
          </contextMenu>
-         <BorderPane.margin>
-            <Insets left="5.0" />
-         </BorderPane.margin>
       </Label>
    </right>
    <effect>
-      <DropShadow />
+      <DropShadow color="#f85757" />
    </effect>
 </BorderPane>

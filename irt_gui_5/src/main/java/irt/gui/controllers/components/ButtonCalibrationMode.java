@@ -1,16 +1,13 @@
 
 package irt.gui.controllers.components;
 
-import java.util.Observable;
+import java.time.Duration;
 import java.util.Observer;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.gui.controllers.ScheduledServices;
+import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
@@ -20,17 +17,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 
-public class ButtonCalibrationMode extends Observable implements Runnable, Observer {
+public class ButtonCalibrationMode extends FieldsControllerAbstract {
 	private final Logger logger = LogManager.getLogger();
 
-	private static final ScheduledExecutorService SERVICES = ScheduledServices.services;
-	private ScheduledFuture<?> scheduleAtFixedRate;
-
-	private CallibrationModePacket packetGet;
 	private CallibrationModePacket packetSetOn;
 	private CallibrationModePacket packetSetOff;
-
-	private long period = 5000; //time between requests
 
 	private CalibrationMode callibrationMode;
 
@@ -40,8 +31,9 @@ public class ButtonCalibrationMode extends Observable implements Runnable, Obser
 		try {
 			button.setUserData(this);
 
-			packetGet = new CallibrationModePacket((CalibrationMode)null);
+			CallibrationModePacket packetGet = new CallibrationModePacket((CalibrationMode)null);
 			packetGet.addObserver(this);
+			addLinkedPacket(packetGet);
 
 			packetSetOn = new CallibrationModePacket(CalibrationMode.ON);
 			packetSetOn.addObserver(this);
@@ -49,7 +41,7 @@ public class ButtonCalibrationMode extends Observable implements Runnable, Obser
 			packetSetOff = new CallibrationModePacket(CalibrationMode.OFF);
 			packetSetOff.addObserver(this);
 
-			start();
+			doUpdate(true);
 
 		} catch (PacketParsingException e) {
 			logger.catching(e);
@@ -72,76 +64,37 @@ public class ButtonCalibrationMode extends Observable implements Runnable, Obser
 		}
 	}
 
-	@Override
-	public void run() {
-		try{
-			logger.entry(packetGet);
-
-			packetGet.setAnswer(null);
-			SerialPortController.QUEUE.add(packetGet);
-
-		}catch(Exception ex){
-			logger.catching(ex);
-		}
-	}
-
-	private final Updater updater = new Updater();
-	@Override
-	public void update(Observable observable, Object arg) {
-		logger.entry(observable);
-		updater.setPacket(((LinkedPacket)observable).getAnswer());
-		SERVICES.execute(updater);
-
-		setChanged();
-		notifyObservers(observable);
-	}
-
-	public void start(){
-		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate = SERVICES.scheduleAtFixedRate(this, 1, period, TimeUnit.MILLISECONDS);
-	}
-
-	public void stop(){
-		if(scheduleAtFixedRate==null)
-			scheduleAtFixedRate.cancel(true);
-	}
-
-	@Override
-	public synchronized void addObserver(Observer o) {
+	@Override public synchronized void addObserver(Observer o) {
 		super.addObserver(o);
 
 		callibrationMode = null;// When callibrationMode==null Observers will by notified
 	}
 
-	//********************************************** class Update   *******************************************************
-	private class Updater implements Runnable{
+	@Override protected void updateFields(LinkedPacket packet) throws Exception {
+		logger.entry(packet);
 
-		private byte[] aswer;	public void setPacket(byte[] answer) { this.aswer = answer; }
+		final byte[] answer = packet.getAnswer();
+		if(answer==null)
+			return;
 
-		@Override
-		public void run() {
-			
-			try {
+		CallibrationModePacket p = new CallibrationModePacket(answer);
 
-				CallibrationModePacket p = new CallibrationModePacket(aswer);
+		CalibrationMode cm = p.getCallibrationMode();
 
-				CalibrationMode cm = p.getCallibrationMode();
+		if (cm != callibrationMode) {
+		logger.trace("{}:{}", callibrationMode, cm);
 
-				if (cm != callibrationMode) {
-				logger.trace("{}:{}", callibrationMode, cm);
+			callibrationMode = cm;
+			final String text = cm + " : Callibration Mode";
 
-					callibrationMode = cm;
-					final String text = "Callibration Mode is " + cm;
+			Platform.runLater(() -> button.setText(text));
 
-					Platform.runLater(() -> button.setText(text));
-
-					setChanged();
-					notifyObservers(cm);
-				}
-
-			} catch (Exception e) {
-				logger.catching(e);
-			}
+			setChanged();
+			notifyObservers(cm);
 		}
+	}
+
+	@Override protected Duration getPeriod() {
+		return Duration.ofSeconds(5);
 	}
 }

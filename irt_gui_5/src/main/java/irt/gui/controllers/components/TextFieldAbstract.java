@@ -1,11 +1,13 @@
 
 package irt.gui.controllers.components;
 
+import java.util.Observable;
 import java.util.Observer;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextFieldFocusListener;
+import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.value.Value;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
@@ -174,7 +176,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	}
 
 	@Override public void start(){
-		logger.error("Start");
+//		logger.error("Start");
 
 		Platform.runLater(()->{
 
@@ -216,7 +218,10 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 
 			//If Integer or double not end by '.' and new value equals set value
 			if((value.getClass()==Value.class || newValue.charAt(newValue.length()-1)!='.') && value.equals(copy)){
-				styleClass.remove(CLASS_HAS_CHANGED);
+
+				
+				if(styleClass.size()>0)
+					styleClass.remove(CLASS_HAS_CHANGED);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
 
 				if(scheduleAtFixedRate.isCancelled())
 					start();
@@ -225,7 +230,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 			}else if(!styleClass.contains(CLASS_HAS_CHANGED)){
 				styleClass.add(CLASS_HAS_CHANGED);
 				stop(true);
-				logger.error("Stop");
+//				logger.error("Stop");
 			}
 		});
 	}
@@ -270,5 +275,30 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	public void setSliderMin(Slider slider, double min) {
 		if(Double.compare(slider.getMin(), min)!=0)
 			slider.setMin(min);
+	}
+
+	@Override protected void addPacket(LinkedPacket packet) {
+		super.addPacket(packet);
+		packet.addObserver(new Observer() {
+			
+			@Override
+			public void update(Observable o, Object arg) {
+				SERVICES.execute(new Runnable() {
+					
+					private static final String ERROR = "error";
+
+					@Override
+					public void run() {
+						final ObservableList<String> styleClass = textField.getStyleClass();
+
+						if(styleClass.size()>0)
+							styleClass.remove(ERROR);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
+
+						if(packet.getAnswer()==null)
+							styleClass.add(ERROR);
+					}
+				});
+			}
+		});
 	}
 }
