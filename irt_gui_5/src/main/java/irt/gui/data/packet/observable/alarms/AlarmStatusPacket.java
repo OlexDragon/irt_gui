@@ -37,12 +37,18 @@ public class AlarmStatusPacket extends RegirterAbstractPacket{
 	}
 
 	public enum AlarmSeverities{
-		NO_ALARM,
-		INFO,
-		WARNING,
-		MINOR,
-		MAJOR,
-		CRITICAL
+		NO_ALARM	( "no_alarm"	),
+		INFO		( "no_alarm"	),
+		WARNING		( "warning"	),
+		MINOR		( "warning"	),
+		MAJOR		( "alarm"),
+		CRITICAL	( "alarm");
+
+		private String styleClass; 		public String getStyleClass() { return styleClass; }
+
+		private AlarmSeverities(String className){
+			this.styleClass = className;
+		}
 	}
 
 	@Override

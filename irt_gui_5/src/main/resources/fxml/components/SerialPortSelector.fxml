@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
@@ -9,8 +10,14 @@
    <children>
       <HBox>
          <children>
-            <ComboBox fx:id="serialPortComboBox" onAction="#selectSerialPort" promptText="Select The Serial Port" />
-            <Button fx:id="openClosePortButton" mnemonicParsing="false" onAction="#onOpenClosePortButtonClicked" text="Button" />
+            <ComboBox fx:id="serialPortComboBox" onAction="#selectSerialPort" promptText="Select The Serial Port">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor></ComboBox>
+            <Button fx:id="openClosePortButton" mnemonicParsing="false" onAction="#onOpenClosePortButtonClicked" text="Button">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor></Button>
          </children>
       </HBox>
    </children>

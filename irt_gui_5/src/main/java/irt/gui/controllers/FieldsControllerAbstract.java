@@ -127,7 +127,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 			logger.entry();
 
 			packetsToSend
-			.parallelStream()
+			.stream()
 			.forEach(packet->SerialPortController.QUEUE.add(packet));
 		}
 	}

@@ -2,6 +2,7 @@ package irt.gui;
 
 import java.net.URL;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -25,6 +26,7 @@ import jssc.SerialPort;
 @SuppressWarnings("restriction")
 public class IrtGuiApp extends Application {
 
+	public static final String BUNDLE = "bundles/bundle";
 	private final Logger logger = LogManager.getLogger();
 
 	@Override
@@ -33,7 +35,9 @@ public class IrtGuiApp extends Application {
 
  //       	logger.trace(System.getProperty("sun.boot.class.path"));
         	URL resource = getClass().getResource("/fxml/IrtGui.fxml");
-			Parent parent = FXMLLoader.load(resource);
+
+			final ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
+			Parent parent = FXMLLoader.load(resource, bundle);
 			Scene scene = new Scene(parent);
 			primaryStage.setScene(scene);
 			primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/logo.gif")));

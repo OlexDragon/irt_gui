@@ -1,7 +1,9 @@
 package irt.gui.controllers.components;
 
+import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.data.StringData;
@@ -15,30 +17,51 @@ import irt.gui.data.packet.observable.alarms.AlarmStatusPacket;
 import irt.gui.data.packet.observable.alarms.AlarmStatusPacket.AlarmSeverities;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 
-public class AlarmFieldController extends FieldsControllerAbstract {
+public class AlarmFieldController extends FieldsControllerAbstract implements Initializable{
 
 	@FXML private Label titleLabel;
 	@FXML private Label valueLabel;
 
+	private AlarmStatusPacket alarmStatus;
+	private AlarmDescriptionPacket alarmDescription;
+	private AlarmNamePacket alarmName;
+
+	private String name;
+	private ResourceBundle bundle;
+//	private URL location;
+	private AlarmSeverities alarmSeverities;
+
+
+	@Override
+	public void initialize(URL location, ResourceBundle resources) {
+		bundle = resources;
+//		this.location = location;
+	}
 
 	@Override
 	protected Duration getPeriod() {
 		return Duration.ofSeconds(3);
 	}
 
-	public void initialize(short alarmId) throws PacketParsingException{
+	public void build(short alarmId) throws PacketParsingException{
 
-		addLinkedPacket(new AlarmStatusPacket(alarmId));
-		addLinkedPacket(new AlarmDescriptionPacket(alarmId));
-		addLinkedPacket(new AlarmNamePacket(alarmId));
+		alarmStatus = new AlarmStatusPacket(alarmId);
+		alarmDescription = new AlarmDescriptionPacket(alarmId);
+		alarmName = new AlarmNamePacket(alarmId);
+
+		addLinkedPacket(alarmStatus);
+		addLinkedPacket(alarmDescription);
+		addLinkedPacket(alarmName);
 	}
 
 	@Override
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
-		logger.trace("\n\tENTRY: {}", packet);
+		logger.entry( packet);
 
 		LinkedPacket p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer()) {
 			@Override
@@ -46,7 +69,6 @@ public class AlarmFieldController extends FieldsControllerAbstract {
 				throw new UnsupportedOperationException("Auto-generated method stub");
 			}};
 		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
-		logger.trace("\n\t Received packet:{}", p);
 
 		if(packetError!=PacketErrors.NO_ERROR){
 			final String error = packetError.toString();
@@ -83,44 +105,73 @@ public class AlarmFieldController extends FieldsControllerAbstract {
 				case ALARM_SUMMARY_STATUS:
 				default:
 				}
-
-			
-			
-	
 		}
 	}
 
 	private void setDescription(Payload pl) {
-		final StringData stringData = pl.getStringData();
-		logger.debug("\n\t Result: {}", stringData);
+		logger.entry(pl);
 
-		Platform.runLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				titleLabel.setText(stringData.toString());
-			}
-		});
+		removeLinkedPacket(alarmDescription);
+
+		if(name==null){
+			final StringData stringData = pl.getStringData();
+			final String string = stringData.toString();
+
+			Platform.runLater(()->{
+				if(!string.equals(titleLabel.getText()))
+					titleLabel.setText(string);
+			});
+		}
 	}
 
 	private void setName(Payload pl) {
-		final StringData stringData = pl.getStringData();
-		logger.debug("\n\t Result: {}", stringData);
+		removeLinkedPacket(alarmName);
+
+		if(name==null){
+			final StringData stringData = pl.getStringData();
+			name = stringData.toString();
+			final String string = bundle.getString("alarms.name." + name);
+
+			Platform.runLater(()->{
+				if(!string.equals(titleLabel.getText()))
+					titleLabel.setText(string);
+			});
+		}
 	}
 
 	private void setStatus(Payload pl) {
 
 		byte[] value = pl.getBuffer();
 		int v = value[5] & 7;
-		String valueStr = AlarmSeverities.values()[v].toString();
+		final AlarmSeverities as = AlarmSeverities.values()[v];
+		if(as!=alarmSeverities){
+			removeStyleClass();
+			alarmSeverities = as;
+			final String al = alarmSeverities.toString();
+			final String string = bundle.getString("alarms." + al);
 
-		if(!valueLabel.getText().equals(valueStr))
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					valueLabel.setText(valueStr);
+			Platform.runLater(()->{
+				if(!string.equals(valueLabel.getText())){
+
+					valueLabel.setText(string);
+
+					final ObservableList<String> styleClass = valueLabel.getStyleClass();
+					final String sc = alarmSeverities.getStyleClass();
+
+					if(!styleClass.contains(sc))
+						styleClass.add(sc);
 				}
 			});
+		}
+	}
+
+	private void removeStyleClass() {
+		if(alarmSeverities!=null){
+			Platform.runLater(()->{
+				final ObservableList<String> styleClass = valueLabel.getStyleClass();
+				styleClass.remove(alarmSeverities.getStyleClass());
+			});
+		}
 	}
 
 	public void setTitle(String title){

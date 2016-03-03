@@ -283,7 +283,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 			
 			@Override
 			public void update(Observable o, Object arg) {
-				SERVICES.execute(new Runnable() {
+				Platform.runLater(new Runnable() {
 					
 					private static final String ERROR = "error";
 
@@ -291,11 +291,13 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 					public void run() {
 						final ObservableList<String> styleClass = textField.getStyleClass();
 
-						if(styleClass.size()>0)
-							styleClass.remove(ERROR);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
+						if(packet.getAnswer()==null){
+							if(!styleClass.contains(ERROR))
+								styleClass.add(ERROR);
 
-						if(packet.getAnswer()==null)
-							styleClass.add(ERROR);
+						}else if(styleClass.size()>0)	// if size == 0 throw  java.lang.ArrayIndexOutOfBoundsException
+							styleClass.remove(ERROR);
+
 					}
 				});
 			}

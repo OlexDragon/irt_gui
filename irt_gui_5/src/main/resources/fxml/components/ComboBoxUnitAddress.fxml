@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<ComboBox fx:id="addressComboBox" editable="true" onAction="#onActionAddressComboBox" prefWidth="80.0" promptText="Address" visibleRowCount="3" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ComboBoxUnitAddress" />
+<ComboBox fx:id="addressComboBox" editable="true" onAction="#onActionAddressComboBox" prefWidth="80.0" promptText="Address" visibleRowCount="3" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ComboBoxUnitAddress">
+   <cursor>
+      <Cursor fx:constant="HAND" />
+   </cursor>
+</ComboBox>

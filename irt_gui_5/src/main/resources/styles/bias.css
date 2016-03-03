@@ -7,7 +7,7 @@
 .mouseOver:hover{
 	-fx-background-color: rgba(0, 255, 255, .05) ;
 }
-.label:hover{
+.label:hover, .text-field:hover{
 	-fx-scale-x :2;
 	-fx-scale-y :2;
 }

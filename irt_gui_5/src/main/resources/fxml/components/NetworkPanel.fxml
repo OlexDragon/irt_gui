@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
@@ -14,7 +15,10 @@
                <children>
                   <AnchorPane>
                      <children>
-                        <ComboBox fx:id="addressType" onAction="#typeChangeAction" prefWidth="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <ComboBox fx:id="addressType" onAction="#typeChangeAction" prefWidth="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor></ComboBox>
                      </children>
                   </AnchorPane>
                   <Pane prefWidth="200.0">
@@ -50,9 +54,18 @@
          <bottom>
             <ButtonBar BorderPane.alignment="CENTER">
               <buttons>
-                <Button fx:id="saveButton" defaultButton="true" disable="true" mnemonicParsing="false" onAction="#saveAction" text="Save" />
-                  <Button fx:id="canselButton" cancelButton="true" disable="true" mnemonicParsing="false" onAction="#canselAction" text="Cansel" />
-                  <Button fx:id="resetButton" mnemonicParsing="false" text="Reset" />
+                <Button fx:id="saveButton" defaultButton="true" disable="true" mnemonicParsing="false" onAction="#saveAction" text="Save">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button fx:id="canselButton" cancelButton="true" disable="true" mnemonicParsing="false" onAction="#canselAction" text="Cansel">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
+                  <Button fx:id="resetButton" mnemonicParsing="false" text="Reset">
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor></Button>
               </buttons>
             </ButtonBar>
          </bottom>

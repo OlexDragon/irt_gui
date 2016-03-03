@@ -1,0 +1,12 @@
+.alarm{
+	-fx-background-color :red;
+	-fx-text-fill :yellow;
+}
+.no_alarm{
+	-fx-background-color :green;
+	-fx-text-fill :yellow;
+}
+.warning{
+	-fx-background-color :#FFCC66;
+	-fx-text-fill :black;
+}

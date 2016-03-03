@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-
 <Button fx:id="button" mnemonicParsing="false" onAction="#buttonAction" text="Calibration Mode" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ButtonCalibrationMode">
    <tooltip>
       <Tooltip text="Calibration Mode" />
    </tooltip>
+   <cursor>
+      <Cursor fx:constant="HAND" />
+   </cursor>
 </Button>

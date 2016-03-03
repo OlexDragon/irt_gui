@@ -218,15 +218,15 @@ public class LabelValue extends ScheduledNodeAbstract {
 								break;
 
 							case MORE:
-								t = "<" + v.toString();
+								t = ">" + v.toString();
 								break;
+
 							default:
 								break;
 							}
 						else
 							t = v.toString();
 
-						logger.error(p);
 						final String text = t;
 						Platform.runLater(()->valueLabel.setText(text));
 					});
