@@ -1,6 +1,10 @@
 package irt.gui.data.packet.observable.device_debug;
 
 import java.util.Arrays;
+import java.util.Observer;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.RegisterValue;
@@ -12,6 +16,16 @@ import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 
 public class RegisterPacket extends RegirterAbstractPacket {
+
+	@Override
+	public synchronized void deleteObserver(Observer o) {
+		super.deleteObserver(o);
+	}
+
+	@Override
+	public synchronized void deleteObservers() {
+		super.deleteObservers();
+	}
 
 	public static final PacketId PACKET_ID = PacketId.DEVICE_DEBAG_REGISTER;
 
@@ -26,8 +40,8 @@ public class RegisterPacket extends RegirterAbstractPacket {
 						getBuffer(registerValue.getIndex(), registerValue.getAddr(), registerValue.getValue())));
 	}
 
-	public RegisterPacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public RegisterPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
 	public static byte[] getBuffer(int index, int addr, Integer value) {
@@ -43,7 +57,7 @@ public class RegisterPacket extends RegirterAbstractPacket {
 		return bs;
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return PACKET_ID;
 	}

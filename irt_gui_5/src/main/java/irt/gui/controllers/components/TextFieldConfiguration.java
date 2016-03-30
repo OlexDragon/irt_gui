@@ -187,7 +187,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 				final LinkedPacket packet = createNewPacket(value.getValue());
 				packet.addObserver(this);
-				SerialPortController.QUEUE.add(packet);
+				SerialPortController.QUEUE.add(packet, true);
 
 			} catch (Exception e) {
 				logger.catching(e);
@@ -279,11 +279,11 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 					return;
 
 				packetClass = packet.getClass();
-				final Constructor<? extends LinkedPacket> constructor = packetClass.getConstructor(byte[].class);
-				LinkedPacket p = constructor.newInstance(this.packet.getAnswer());
+				final Constructor<? extends LinkedPacket> constructor = packetClass.getConstructor(byte[].class, boolean.class);
+				LinkedPacket p = constructor.newInstance(this.packet.getAnswer(), true);
 				final PacketHeader header = p.getPacketHeader();
 
-				if(header.getPacketType()==PacketType.RESPONSE && header.getPacketErrors()==PacketErrors.NO_ERROR){
+				if(header.getPacketType()==PacketType.RESPONSE && header.getPacketError()==PacketErrors.NO_ERROR){
 					if(p instanceof RangePacket)
 						setRange(p);
 

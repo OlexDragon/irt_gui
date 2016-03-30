@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import de.jensd.shichimifx.utils.TabPaneDetacher;
 import irt.gui.controllers.components.DebugInfoController;
 import irt.gui.controllers.components.InfoController;
-import irt.gui.controllers.components.NetworkPanelController;
+import irt.gui.controllers.components.PanelNetworkController;
 import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.interfaces.FieldController;
 import javafx.collections.ObservableList;
@@ -36,7 +36,7 @@ public class IrtGuiController{
 	// Right side
 	@FXML private Tab converterTab;
 	@FXML private Tab networkTab;
-	@FXML private NetworkPanelController networkController;
+	@FXML private PanelNetworkController networkController;
 	@FXML private Tab debugInfoTab;
 	@FXML private DebugInfoController debugInfoController;
 

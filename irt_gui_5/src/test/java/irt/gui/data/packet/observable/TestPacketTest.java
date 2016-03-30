@@ -77,7 +77,7 @@ public class TestPacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(AlarmIDsPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+					PacketAbstract bp = new PacketAbstract(AlarmIDsPacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
 
 						@Override
 						public PacketId getPacketId() {
@@ -85,7 +85,7 @@ public class TestPacketTest {
 						}};
 					logger.debug("\n\t new PacketAbstract: {}\n", bp);
 
-					assertEquals(PacketErrors.NO_ERROR, bp.getPacketHeader().getPacketErrors());
+					assertEquals(PacketErrors.NO_ERROR, bp.getPacketHeader().getPacketError());
 					assertTrue(bp.getPayloads().size()>0);
 
 					Payload payload = bp.getPayloads().get(0);

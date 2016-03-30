@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import irt.gui.data.PacketIdDetails;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.PacketHeader;
@@ -16,9 +19,25 @@ public class TestPacket  extends Observable implements LinkedPacket {
 
 	private byte[] packetWithoutChecksum;
 	private byte[] answer;
+	private final LinkHeader linkHeader;
+
+	public TestPacket(byte address) {
+		linkHeader = new LinkHeader(address, (byte)0, (short) 0);
+		final PacketIdDetails packetIdDetails = new PacketIdDetails(PacketId.ALARMS, "Scan addresses");
+		PacketHeader packetHeader = new PacketHeader(PacketType.REQUEST,  packetIdDetails, PacketErrors.NO_ERROR);
+
+		packetWithoutChecksum = linkHeader.toBytes();
+		byte[] phb = packetHeader.getPacketIdDetails().toBytes();
+
+		packetWithoutChecksum = Arrays.copyOf(packetWithoutChecksum, 7);
+		packetWithoutChecksum[4] = PacketType.ACKNOWLEGEMENT.getValue();
+		packetWithoutChecksum[5] = phb[0];
+		packetWithoutChecksum[6] = phb[1];
+	}
 
 	public TestPacket(byte[] packetWithoutChecksum) {
 		this.packetWithoutChecksum = packetWithoutChecksum;
+		 linkHeader = new LinkHeader((byte)0, (byte)0, (byte)0);
 	}
 
 	@Override
@@ -28,7 +47,7 @@ public class TestPacket  extends Observable implements LinkedPacket {
 
 	@Override
 	public LinkHeader getLinkHeader() {
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		return linkHeader;
 	}
 
 	@Override
@@ -76,12 +95,15 @@ public class TestPacket  extends Observable implements LinkedPacket {
 
 	@Override
 	public void setLinkHeaderAddr(byte addr) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return null;
+	}
+
+	@Override
+	public void clearAnswer() {
 	}
 }

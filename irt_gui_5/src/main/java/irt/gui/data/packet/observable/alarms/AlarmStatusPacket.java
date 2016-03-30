@@ -1,5 +1,8 @@
 package irt.gui.data.packet.observable.alarms;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
@@ -28,21 +31,21 @@ public class AlarmStatusPacket extends RegirterAbstractPacket{
 						Packet.shortToBytes(alarmId)));
 	}
 
-	public AlarmStatusPacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public AlarmStatusPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
-	protected AlarmStatusPacket(PacketId packetId, byte[] answer) throws PacketParsingException {
-		super(packetId, answer);
+	protected AlarmStatusPacket(PacketId packetId, byte[] answer, boolean hasAcknowledgment) throws PacketParsingException {
+		super(packetId, answer, hasAcknowledgment);
 	}
 
 	public enum AlarmSeverities{
-		NO_ALARM	( "no_alarm"	),
-		INFO		( "no_alarm"	),
+		NO_ALARM	( "no_alarm"),
+		INFO		( "info"),
 		WARNING		( "warning"	),
 		MINOR		( "warning"	),
-		MAJOR		( "alarm"),
-		CRITICAL	( "alarm");
+		MAJOR		( "alarm"	),
+		CRITICAL	( "alarm"	);
 
 		private String styleClass; 		public String getStyleClass() { return styleClass; }
 
@@ -51,7 +54,7 @@ public class AlarmStatusPacket extends RegirterAbstractPacket{
 		}
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return PACKET_ID;
 	}

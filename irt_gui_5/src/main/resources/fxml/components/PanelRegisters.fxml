@@ -5,7 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<GridPane id="bias" fx:id="gridPane" onContextMenuRequested="#gridPanContextMenuRequest" stylesheets="@../../styles/bias.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.RegisterPanel">
+<GridPane id="bias" fx:id="gridPane" onContextMenuRequested="#gridPanContextMenuRequest" stylesheets="@../../styles/bias.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.PanelRegisters">
 	<children>
 		<Label cacheShape="false" centerShape="false" focusTraversable="false" scaleShape="false" visible="false">
 			<contextMenu>

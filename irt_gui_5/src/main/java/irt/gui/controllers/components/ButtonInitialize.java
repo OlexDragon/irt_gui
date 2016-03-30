@@ -42,8 +42,7 @@ public class ButtonInitialize extends FieldsControllerAbstract{
 
 	@FXML void buttonAction(ActionEvent event) {
 
-		initializeBiasPacket.setAnswer(null);
-		SerialPortController.QUEUE.add(initializeBiasPacket);
+		SerialPortController.QUEUE.add(initializeBiasPacket, true);
 	}
 
 	@Override
@@ -55,8 +54,8 @@ public class ButtonInitialize extends FieldsControllerAbstract{
 	protected void updateFields(LinkedPacket packet) throws Exception {
 		logger.entry(packet);
 		if(packet instanceof CallibrationModePacket){
-			CallibrationModePacket p  = new CallibrationModePacket(packet.getAnswer());
-			if(p.getPacketHeader().getPacketErrors()==PacketErrors.NO_ERROR){
+			CallibrationModePacket p  = new CallibrationModePacket(packet.getAnswer(), true);
+			if(p.getPacketHeader().getPacketError()==PacketErrors.NO_ERROR){
 				final CalibrationMode cm = p.getCallibrationMode();
 				if(cm != calibrationMode){
 					calibrationMode = cm;

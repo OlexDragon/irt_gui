@@ -2,6 +2,8 @@ package irt.gui.data.packet;
 
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket.ParameterHeaderCode;
 import irt.gui.errors.PacketParsingException;
@@ -12,7 +14,9 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 
 	public static final int SIZE = 3;
 
+	@JsonProperty("phc")
 	private ParameterHeaderCode parameterHeaderCode;
+	@JsonProperty("pls")
 	private PayloadSize payloadSize;
 
 

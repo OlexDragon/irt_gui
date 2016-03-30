@@ -13,10 +13,9 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.interfaces.FieldController;
-import irt.gui.controllers.interfaces.UnitAddress;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 
-public abstract class FieldsControllerAbstract extends Observable implements Observer, FieldController, UnitAddress  {
+public abstract class FieldsControllerAbstract extends Observable implements Observer, FieldController  {
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -44,7 +43,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 		logger.entry(update);
 		if(update) {
 			if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-				scheduleAtFixedRate = ScheduledServices.services.scheduleAtFixedRate(packetSender, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);
+				scheduleAtFixedRate = LinkedPacketsQueue.SERVICES.scheduleAtFixedRate(packetSender, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);
 
 		}else if(scheduleAtFixedRate!=null)
 			scheduleAtFixedRate.cancel(false);
@@ -90,19 +89,10 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 		thread.start();
 	}
 
-	@Override public void setUnitAddress(Byte address) {
-
-		packetSender
-		.getPacketsToSend()
-		.parallelStream()
-		.map(LinkedPacket::getLinkHeader)
-		.forEach(lh->lh.setAddr(address));
-	}
-
 	//*********************************************   InfoPacketSender   ****************************************************************
 	protected class PacketSender implements Runnable{
 
-		private final List<LinkedPacket> 	packetsToSend = new ArrayList<>(); private List<LinkedPacket> getPacketsToSend() { return packetsToSend; }
+		private final List<LinkedPacket> 	packetsToSend = new ArrayList<>(); 
 
 		private boolean 			send;			public boolean isSend() { return send; }
 		public void setSend(boolean send) {
@@ -128,7 +118,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 			packetsToSend
 			.stream()
-			.forEach(packet->SerialPortController.QUEUE.add(packet));
+			.forEach(packet->SerialPortController.QUEUE.add(packet, true));
 		}
 	}
 }

@@ -1,11 +1,15 @@
 package irt.gui.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
 
 public class PacketIdDetails {
 
+	@JsonIgnore
 	private PacketId packetId;		public PacketId	getPacketId()		{ return packetId;		}
+	@JsonIgnore
 	private String packetDetails;	public String	getPacketDetails()	{ return packetDetails; }
 
 	public PacketIdDetails(PacketId packetId, String packetDetails) {
@@ -24,7 +28,8 @@ public class PacketIdDetails {
 	public int hashCode() {
 		final int prime = 31;
 		int result = prime + ((packetId == null) ? 0 : packetId.hashCode());
-		return prime * result + ((packetDetails == null) ? 0 : packetDetails.hashCode());
+		return result;
+//		return prime * result + ((packetDetails == null) ? 0 : packetDetails.hashCode());
 	}
 
 	@Override
@@ -38,11 +43,11 @@ public class PacketIdDetails {
 		PacketIdDetails other = (PacketIdDetails) obj;
 		if (packetId != other.packetId)
 			return false;
-		if (packetDetails == null) {
-			if (other.packetDetails != null)
-				return false;
-		} else if (!packetDetails.equals(other.packetDetails))
-			return false;
+//		if (packetDetails == null) {
+//			if (other.packetDetails != null)
+//				return false;
+//		} else if (!packetDetails.equals(other.packetDetails))
+//			return false;
 		return true;
 	}
 

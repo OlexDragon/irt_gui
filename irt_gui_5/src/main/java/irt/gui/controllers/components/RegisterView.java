@@ -33,8 +33,8 @@ public class RegisterView extends FieldsControllerAbstract {
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.trace("\n\tENTRY: {}", packet);
 
-		RegisterPacket p = new RegisterPacket(packet.getAnswer());
-		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
+		RegisterPacket p = new RegisterPacket(packet.getAnswer(), true);
+		PacketErrors packetError = p.getPacketHeader().getPacketError();
 
 		if(packetError!=PacketErrors.NO_ERROR){
 			final String error = packetError.toString();

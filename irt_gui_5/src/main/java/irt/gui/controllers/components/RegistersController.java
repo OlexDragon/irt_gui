@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -71,9 +74,7 @@ public class RegistersController implements Observer {
     @FXML private Button 		resetButton;
     @FXML private CheckBox 		stepCheckBox;
     @FXML private TextField 	stepTextField;
-    @FXML private RegisterPanel registersPanelController;
-
-    @FXML private ComboBoxUnitAddress 	comboBoxUnitAddressController;
+    @FXML private PanelRegisters PanelRegistersController;
 
     @FXML private MenuItem 		menuSave;
     @FXML private Menu			menuProfile;
@@ -160,7 +161,7 @@ public class RegistersController implements Observer {
 			setRowsAndColumns(profileId);
 			setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class);
 			menuSave.setDisable(false);
-			registersPanelController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
+			PanelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
 			setAlignment(profileId);
 			slider.toFront();
 
@@ -184,29 +185,32 @@ public class RegistersController implements Observer {
 				.ifPresent(controller->controller.setText(slider.getValue())));
 	};
 
-	private final ChangeListener<Boolean> registerPanelFocusListener = (observable, oldValue, newValue)->{
+	private final ChangeListener<Boolean> focusListenerRegisterPanel = (observable, oldValue, newValue)->{
 
 		final TextField bean = (TextField) ((ReadOnlyBooleanProperty)observable).getBean();
-		Optional
-		.ofNullable(editable)
-		.filter(e->e==true)
-		.filter(e->selectedTextField!=bean)
-		.ifPresent(e->{
+		if(selectedTextField!=bean){
 
 			removeCssClassAndDeleteObserver(ACTIVE);
 
-			selectedTextField = bean;
+			if(bean.isDisable() || !bean.isEditable()){
 
-			TextFieldAbstract textFieldcontroller = (TextFieldAbstract) selectedTextField.getUserData();
+				selectedTextField = null;
+				if(!slider.isDisable())
+					Platform.runLater(()->slider.setDisable(!editable));
 
-			//Set slider value, max, min
-			textFieldcontroller.setSliderValue(slider, sliderValueChangeListener, ACTIVE, valueObserver, stepNumericChecker);
+			}else{
 
-			final boolean disable = selectedTextField.isDisable();
-			if(slider.isDisable()!=disable)
-				Platform.runLater(()->slider.setDisable(disable));
+				selectedTextField = bean;
 
-		});
+				TextFieldAbstract textFieldcontroller = (TextFieldAbstract) selectedTextField.getUserData();
+
+				//Set slider value, max, min
+				textFieldcontroller.setSliderValue(slider, sliderValueChangeListener, ACTIVE, valueObserver, stepNumericChecker);
+
+				if(slider.isDisable())
+					Platform.runLater(()->slider.setDisable(false));
+			}
+		}
 	};
 
     @FXML private void initialize(){
@@ -219,23 +223,21 @@ public class RegistersController implements Observer {
     	new TextFieldFocusListener(stepTextField);
     	stepTextField.focusedProperty().addListener(stepTextFieldFocusListener);
 
-		registersPanelController.setFocusListener(registerPanelFocusListener);
+		PanelRegistersController.setFocusListener(focusListenerRegisterPanel);
 
 		slider.valueProperty().addListener(sliderValueChangeListener);
 
 		createProfileMenuItems();
-
-		comboBoxUnitAddressController.addObserver(new AddressUpdater());
     }
 
 	@FXML private void onActionNewProfile(){
-		registersPanelController.setColumnsAndRows(1, 1);
+		PanelRegistersController.setColumnsAndRows(1, 1);
 		menuSave.setDisable(true);
 	}
 
 	@FXML private void onActionResetButton(ActionEvent event) {
     	try {
-			registersPanelController.reset();
+			PanelRegistersController.reset();
 		} catch (Exception e) {
 			logger.catching(e);
 		}
@@ -243,7 +245,7 @@ public class RegistersController implements Observer {
 
     @FXML private void saveValues(ActionEvent event) {
     	try {
-			registersPanelController.save();
+			PanelRegistersController.save();
 		} catch (Exception e) {
 			logger.catching(e);
 		}
@@ -309,7 +311,7 @@ public class RegistersController implements Observer {
 			editable = b;
 			Platform.runLater(()->{
 
-				registersPanelController.setEditable(editable);
+				PanelRegistersController.setEditable(editable);
 
 				if(!editable)
 					slider.setDisable(true);
@@ -347,8 +349,8 @@ public class RegistersController implements Observer {
 	private void updateProperties(Properties propertiesFromFile, int profileId, String profileName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
 		propertiesFromFile.put(String.format(REGISTER_PROPERTY_NAME_ID	, profileId), profileName);
-		propertiesFromFile.put(String.format(REGISTER_ROW_ID			, profileId), Integer.toString(registersPanelController.getRowCount()));
-		propertiesFromFile.put(String.format(REGISTER_COLUMN_ID			, profileId), Integer.toString(registersPanelController.getColumnCount()));
+		propertiesFromFile.put(String.format(REGISTER_ROW_ID			, profileId), Integer.toString(PanelRegistersController.getRowCount()));
+		propertiesFromFile.put(String.format(REGISTER_COLUMN_ID			, profileId), Integer.toString(PanelRegistersController.getColumnCount()));
 
 		//TextFields properties
 		removeProperties(propertiesFromFile, String.format( TextFieldRegister.FIELD_KEY_ID, profileId));
@@ -362,12 +364,12 @@ public class RegistersController implements Observer {
 		removeProperties(propertiesFromFile, String.format( LabelRegister.FIELD_KEY_ID, profileId));
 		putProperies(propertiesFromFile, profileId, LabelRegister.class);
 
-		final String backgroundPath = registersPanelController.getBackgroundPath();
+		final String backgroundPath = PanelRegistersController.getBackgroundPath();
 		if(backgroundPath!=null)
 			propertiesFromFile.put(String.format(REGISTER_BACKGROUND_ID, profileId), backgroundPath);
 
 		//put TextFields alignment properties
-		registersPanelController
+		PanelRegistersController
 		.getVBoxesAlignmentProperties()
 		.parallelStream()
 		.forEach(align->{
@@ -384,7 +386,7 @@ public class RegistersController implements Observer {
 
 		logger.entry( propertiesFromFile, profileId, nodeClass);
 
-		List<Map<String, Object>> textFieldsProperties = registersPanelController.getFieldsProperties(nodeClass);
+		List<Map<String, Object>> textFieldsProperties = PanelRegistersController.getFieldsProperties(nodeClass);
 
 		textFieldsProperties
 		.parallelStream()
@@ -432,7 +434,14 @@ public class RegistersController implements Observer {
 	private Properties getPropertiesFromFile() throws IOException, FileNotFoundException {
 
 		final File file = new File(IrtGuiProperties.IRT_HOME, IrtGuiProperties.getPropertiesFileName());
- 		Properties properties = new Properties();
+ 		Properties properties = new Properties(){
+			private static final long serialVersionUID = -3674674113970367029L;
+
+			@Override
+ 		    public synchronized Enumeration<Object> keys() {
+ 		        return Collections.enumeration(new TreeSet<Object>(super.keySet()));// alphabetical key order
+ 		    }
+ 		};
 
  		if(file.exists()) {
 			try(final FileInputStream inputStream = new FileInputStream(file);){
@@ -477,7 +486,7 @@ public class RegistersController implements Observer {
 						map.put("row", split[1]);
 						return map;
 					})
-					.forEach(map->registersPanelController.setAlignment(Pos.valueOf(map.get("pos")), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row"))))
+					.forEach(map->PanelRegistersController.setAlignment(Pos.valueOf(map.get("pos")), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row"))))
 				);
 	}
 
@@ -490,7 +499,7 @@ public class RegistersController implements Observer {
 				.ofNullable(IrtGuiProperties.getProperty(String.format(REGISTER_COLUMN_ID, profileId)))		// Get Columns count
 				.filter(Objects::nonNull)
 				.map(Integer::parseInt)
-				.ifPresent(columns->registersPanelController.setColumnsAndRows( columns, rows)));
+				.ifPresent(columns->PanelRegistersController.setColumnsAndRows( columns, rows)));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -525,7 +534,7 @@ public class RegistersController implements Observer {
 	private void setNode(Class<? extends ScheduledNodeAbstract> fieldClass, Map<String, String> map){
 
 		try {
-			final Node node = registersPanelController.setNode(fieldClass, map.get("key"), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row")));
+			final Node node = PanelRegistersController.setNode(fieldClass, map.get("key"), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row")));
 
 			if(editable!= null && node instanceof TextField)
 				((TextField)node).setEditable(editable);
@@ -533,18 +542,5 @@ public class RegistersController implements Observer {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
-	}
-
-	public class AddressUpdater implements Observer {
-
-		@Override
-		public void update(Observable o, Object unitAddress) {
-			
-			final byte byteValue = ((Integer)unitAddress).byteValue();
-
-			registersPanelController.setUnitAddress(byteValue);
-			buttonCalibModeController.setUnitAddress(byteValue);
-		}
-
 	}
 }

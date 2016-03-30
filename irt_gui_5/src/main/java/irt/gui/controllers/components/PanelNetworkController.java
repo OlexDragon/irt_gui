@@ -22,7 +22,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.SingleSelectionModel;
 
-public class NetworkPanelController extends FieldsControllerAbstract {
+public class PanelNetworkController extends FieldsControllerAbstract {
 
 	private final Logger logger = LogManager.getLogger();
 	
@@ -76,7 +76,7 @@ public class NetworkPanelController extends FieldsControllerAbstract {
 
 			final NetworkAddressPacket packet = new NetworkAddressPacket(networkAddress);
 			packet.addObserver(this);
-			SerialPortController.QUEUE.add(packet);
+			SerialPortController.QUEUE.add(packet, true);
 
 			setValueChanged(false);
 
@@ -97,9 +97,9 @@ public class NetworkPanelController extends FieldsControllerAbstract {
 	@Override
 	protected void updateFields(LinkedPacket packet) throws Exception {
 
-		LinkedPacket p = new NetworkAddressPacket(packet.getAnswer());
+		LinkedPacket p = new NetworkAddressPacket(packet.getAnswer(), true);
 
-		if(p.getPacketHeader().getPacketErrors()!=PacketErrors.NO_ERROR){
+		if(p.getPacketHeader().getPacketError()!=PacketErrors.NO_ERROR){
 			logger.warn("\n\tPacket has Error:\n\t sent packet{}\n\n\t received packet{}", packet, p);
 			return;
 		}
@@ -142,7 +142,6 @@ public class NetworkPanelController extends FieldsControllerAbstract {
 		@Override
 		public void changed(ObservableValue<? extends byte[]> observable, byte[] oldValue, byte[] newValue) {
 			setValueChanged(!Arrays.equals(oldValue, newValue));
-			logger.error("\n\toldValue: {}\n\tnewValue: {}\n\t valueChanged: {}", oldValue, newValue, valueChanged);
 		}
 	};
 

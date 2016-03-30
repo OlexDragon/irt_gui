@@ -15,8 +15,8 @@ public abstract class RegirterAbstractPacket extends PacketAbstract implements A
 		super(packetHeader, payload);
 	}
 
-	protected RegirterAbstractPacket(PacketId packetId, byte[] answer) throws PacketParsingException {
-		super(packetId, answer);
+	protected RegirterAbstractPacket(PacketId packetId, byte[] answer, boolean hasAcknowledgment) throws PacketParsingException {
+		super(packetId, answer, hasAcknowledgment);
 	}
 
 	@Override
@@ -27,8 +27,10 @@ public abstract class RegirterAbstractPacket extends PacketAbstract implements A
 
 		if(payloads!=null && payloads.size()>0){
 			final Payload payload = payloads.get(0);
-			final byte[] buffer = payload.getBuffer();
-			hash = Arrays.hashCode(buffer);
+			if(payload.getParameterHeader().getPayloadSize().getSize()!=0){
+				final byte[] buffer = payload.getBuffer();
+				hash = Arrays.hashCode(buffer.length>8 ? Arrays.copyOf(buffer, 8) : buffer);
+			}
 		}
 
 		return 31 * super.hashCode() + hash;

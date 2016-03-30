@@ -2,13 +2,19 @@ package irt.gui.data.packet;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class LinkHeader implements Comparable<LinkHeader>{
 
 	public static final int SIZE = 4;
 
-	private byte addr; 		public byte getAddr() { return addr; } 			public int getIntAddr() { return addr & 0xFF; } 		public void setAddr(byte addr) { this.addr = addr; }
-	private byte control; 	public byte getControl() { return control; } 	public int getIntControl() { return control & 0xFF; }
-	private short protocol; public short getProtocol() { return protocol; } public int getIntProtocol() { return protocol & 0xFFFF; }
+	@JsonProperty
+	private byte addr; 		public byte getAddr() { return addr; } 			@JsonIgnore public int getIntAddr() { return addr & 0xFF; } 		public void setAddr(byte addr) { this.addr = addr; }
+	@JsonIgnore
+	private byte control; 	public byte getControl() { return control; } 	@JsonIgnore public int getIntControl() { return control & 0xFF; }
+	@JsonIgnore
+	private short protocol; public short getProtocol() { return protocol; } @JsonIgnore public int getIntProtocol() { return protocol & 0xFFFF; }
 
 	public LinkHeader(byte addr, byte control, short protocol) {
 		this.addr = addr;

@@ -13,6 +13,12 @@ import java.util.Vector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import irt.gui.data.ChecksumLinkedPacket;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
@@ -22,12 +28,17 @@ import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.errors.PacketParsingException;
 
+@JsonTypeInfo(include=As.WRAPPER_OBJECT, use=Id.CLASS)
 public abstract class PacketAbstract extends Observable implements LinkedPacket {
 
+	@JsonIgnore
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
+	@JsonIgnore
 	protected LinkHeader linkHeader = new LinkHeader((byte)254, (byte)0, (short)0);
+	@JsonIgnore
 	protected PacketHeader packetHeader;
+	@JsonIgnore
 	protected List<Payload> payloads = new ArrayList<>();
 	protected byte[] answer;
 
@@ -37,7 +48,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		payloads.add(payload);
 	}
 
-	public PacketAbstract(PacketId packetId, byte[] answer) throws PacketParsingException {
+	public PacketAbstract(PacketId packetId, byte[] answer, boolean hasAcknowledgment) throws PacketParsingException {
 		logger.trace("\n\t ENTRY ({})", answer);
 
 		answer = Optional
@@ -45,14 +56,14 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 				.filter(a->a.length>0)
 				.orElseThrow(()->new PacketParsingException("\n\t Constructor parameter can not be null or empty."));
 
-		byte[] bs  = removeAcknowledgmentAndChecksum(answer);
+		byte[] bs  = removeAcknowledgmentAndChecksum(answer, hasAcknowledgment);
 
 		linkHeader = new LinkHeader(bs);
 		packetHeader = new PacketHeader(bs);
 		payloads.addAll(Payload.parsePayloads(packetId, bs));
 	}
 
-	private byte[] removeAcknowledgmentAndChecksum(byte[] answer) throws PacketParsingException {
+	private byte[] removeAcknowledgmentAndChecksum(byte[] answer, boolean hasAcknowledgment) throws PacketParsingException {
 
 		//Acknowledgement
 		int beginning = indexOf(answer, Packet.FLAG_SEQUENCE);
@@ -62,6 +73,9 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		int end = indexOf(answer, ++beginning, Packet.FLAG_SEQUENCE);
 		if(end<0)
 			throw new PacketParsingException("\n\t The Packet structure is not correct:\n\t Das not has second Packet.FLAG_SEQUENCE : 126(0x7E)\n\t" + ToHex.bytesToHex(answer));
+
+		if(!hasAcknowledgment)
+			return getPacket(answer, 0);
 
 		byte[] acknowledgement = byteStuffing(Arrays.copyOfRange(answer, beginning, end));
 		if(acknowledgement.length!=9)
@@ -105,7 +119,6 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 
 			byte[] checksum = Arrays.copyOfRange(packet, packet.length-2, packet.length);
 
-			logger.trace("\n\t answer:{}\n\t checksum:{}",ch, checksum);
 			if(Arrays.equals(checksum, ch.toBytes()))
 				return ch.getChecksumOf();
 
@@ -150,7 +163,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		return payloads;
 	}
 
-	@Override
+	@Override @JsonProperty(value="asBytes")
 	public byte[] toBytes() {
 
 		byte[] b = null;
@@ -169,20 +182,23 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		return preparePacket(b);
 	}
 
-	@Override
-	public void setAnswer(byte[] answer) {
+	/** set answer and notify observers */
+	@Override public void setAnswer(byte[] answer) {
 		this.answer = answer;
 
 		setChanged();
 		notifyObservers();
 	}
 
-	@Override
-	public byte[] getAnswer() {
+	@Override public void clearAnswer() {
+		answer = null;
+	}
+
+	@Override public byte[] getAnswer() {
 		return answer;
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public byte[] getAcknowledgement() {
 		
 		byte[] b = null;
@@ -207,6 +223,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 
 	private static final Logger l = LogManager.getLogger();
 	public static byte[] preparePacket(byte[] data) {
+
 		if(data!=null){
 			byte[] p = new byte[data.length*2];
 			int index = 0;
@@ -262,7 +279,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		return result;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("unchecked") @JsonIgnore
 	public Observer[] getObservers() throws Exception{
 
 		final Field obs = Observable.class.getDeclaredField("obs");
@@ -295,6 +312,13 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 				return false;
 		} else if (!packetHeader.equals(other.packetHeader))
 			return false;
+		
+		if (linkHeader == null) {
+			if (other.linkHeader != null)
+				return false;
+		} else if (linkHeader.getAddr()!=other.linkHeader.getAddr())
+			return false;
+		
 		return this==obj || (obj instanceof PacketAbstract ? hashCode()==obj.hashCode() : false);
 	}
 

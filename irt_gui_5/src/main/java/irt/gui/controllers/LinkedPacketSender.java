@@ -29,6 +29,7 @@ public class LinkedPacketSender extends SerialPort {
 		BAUDRATE_115200	(SerialPort.BAUDRATE_115200);
 
 		private int baudrate;
+		private static Baudrate defaultBaudrate = BAUDRATE_115200;
 
 		private Baudrate(int baudrate){
 			this.baudrate = baudrate;
@@ -44,7 +45,7 @@ public class LinkedPacketSender extends SerialPort {
 		}
 
 		public static Baudrate valueOf(int baudrate) {
-			Baudrate result = null;
+			Baudrate result = defaultBaudrate;
 
 			for(Baudrate b:values())
 				if(b.getBaudrate()==baudrate){
@@ -56,10 +57,10 @@ public class LinkedPacketSender extends SerialPort {
 		}
 	}
 
-	private static int baudrate = BAUDRATE_115200;
+	private static Baudrate baudrate = Baudrate.BAUDRATE_115200;
 
 	volatile private boolean run = true;
-	private int timeout = 3000;
+	private int timeout = 1000;
 	private SerialPortEvent serialPortEvent = new SerialPortEvent();
 
 	public LinkedPacketSender(String portName) {
@@ -75,27 +76,36 @@ public class LinkedPacketSender extends SerialPort {
 
 		if(!run) return;
 
+		Timer timer = setTimer();
+
 		try {
 
 			if(!isOpened())
 				openPort();
 
-			Timer timer = setTimer();
 
-			writePacket(packet);
-			byte[] readBytes = readBytes(5);
+			packet.clearAnswer();
+			if(writePacket(packet)){
+				byte[] readBytes = readBytes(5);
 
-			//Send back acknowledgement
-			byte[] acknowledgement = packet.getAcknowledgement();
-			if(acknowledgement!=null)
-				writeBytes(acknowledgement);
+				//Send back acknowledgement
+				byte[] acknowledgement = packet.getAcknowledgement();
+				if(acknowledgement!=null)
+					writeBytes(acknowledgement);
 
-			packet.setAnswer(readBytes);
-			timer.stop();
+				packet.setAnswer(readBytes);
+			}else
+				logger.warn("packet.toBytes() return null. {}", packet);
+
+
+//			if(packet.getAnswer()==null)
+//				logger.error(packet.getObservers().length);
 
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+
+		timer.stop();
 	}
 
 	private Timer setTimer() {
@@ -115,11 +125,15 @@ public class LinkedPacketSender extends SerialPort {
 		return timer;
 	}
 
-	private void writePacket(LinkedPacket packet) throws SerialPortException {
+	private boolean writePacket(LinkedPacket packet) throws SerialPortException {
 
 		clear();
 		byte[] buffer = packet.toBytes();
-		writeBytes(buffer);
+		if(buffer!=null)
+			writeBytes(buffer);
+		else
+			return false;
+		return true;
 	}
 
 	public int getTimeout() {
@@ -283,11 +297,11 @@ public class LinkedPacketSender extends SerialPort {
 		
 	}
 
-	public static int getBaudrate() {
+	public static Baudrate getBaudrate() {
 		return baudrate;
 	}
 
-	public void setBaudrate(int baudrate){
+	public void setBaudrate(Baudrate baudrate){
 		LinkedPacketSender.baudrate = baudrate;
 		try {
 			setBaudrate();
@@ -297,6 +311,6 @@ public class LinkedPacketSender extends SerialPort {
 	}
 
 	public void setBaudrate() throws SerialPortException {
-		setParams(baudrate, DATABITS_8, STOPBITS_1, PARITY_NONE);
+		setParams(baudrate.getBaudrate(), DATABITS_8, STOPBITS_1, PARITY_NONE);
 	}
 }

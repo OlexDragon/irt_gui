@@ -25,6 +25,7 @@ import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket.ParameterHeaderCode;
 import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.alarms.AlarmStatusPacket.AlarmSeverities;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 
@@ -73,14 +74,14 @@ public class AlarmStatusTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(AlarmIDsPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+					PacketAbstract bp = new PacketAbstract(AlarmIDsPacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
 
 						@Override
 						public PacketId getPacketId() {
 							throw new UnsupportedOperationException("Auto-generated method stub");
 						}};
 					logger.debug("\n\t new PacketAbstract: {}\n", bp);
-					assertEquals(PacketErrors.NO_ERROR, bp.getPacketHeader().getPacketErrors());
+					assertEquals(PacketErrors.NO_ERROR, bp.getPacketHeader().getPacketError());
 					assertEquals(1, bp.getPayloads().size());
 
 					Payload payload = bp.getPayloads().get(0);
@@ -89,7 +90,7 @@ public class AlarmStatusTest {
 					final int status = payload.getInt(0) & 0x07;
 
 					logger.trace("\n\tStatus: {}", status);
-					logger.trace("\n\t{}", AlarmSummaryStatusPacket.AlarmSeverities.values()[status]);
+					logger.trace("\n\t{}", AlarmSeverities.values()[status]);
 
 				} catch (PacketParsingException e) {
 					logger.catching(e);

@@ -16,8 +16,14 @@
 						<VBox prefHeight="782.0" prefWidth="962.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<children>
 								<fx:include fx:id="serialPort" source="components/SerialPortSelector.fxml" />
+                        <HBox>
+                           <children>
+                              <fx:include source="components/ButtonMute.fxml" />
+                              <fx:include source="components/LabelStatus.fxml" />
+                           </children>
+                        </HBox>
 								<fx:include source="components/Info.fxml" />
-								<fx:include source="components/AlarmsPanel.fxml" />
+								<fx:include source="components/PanelAlarms.fxml" />
 							</children>
 						</VBox>
 					</children>
@@ -30,7 +36,7 @@
 									<content>
 										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
 											<children>
-												<fx:include fx:id="network" source="components/NetworkPanel.fxml" />
+												<fx:include fx:id="network" source="components/PanelNetwork.fxml" />
 											</children>
 										</AnchorPane>
 									</content>

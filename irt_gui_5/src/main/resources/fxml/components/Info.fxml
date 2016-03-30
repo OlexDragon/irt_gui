@@ -15,6 +15,7 @@
 					<rowConstraints>
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
 						<RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -31,42 +32,42 @@
 								<Insets right="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label text="Count:" GridPane.rowIndex="2">
+						<Label text="Count:" GridPane.rowIndex="3">
 							<GridPane.margin>
 								<Insets right="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label text="Built Date:" GridPane.rowIndex="3">
+						<Label text="Built Date:" GridPane.rowIndex="4">
 							<GridPane.margin>
 								<Insets right="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label text="Version:" GridPane.rowIndex="4">
+						<Label text="Version:" GridPane.rowIndex="5">
 							<GridPane.margin>
 								<Insets right="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label text="Type" GridPane.rowIndex="5">
+						<Label text="Type" GridPane.rowIndex="6">
 							<GridPane.margin>
 								<Insets right="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label fx:id="typeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Type" GridPane.columnIndex="1" GridPane.rowIndex="5">
+						<Label fx:id="typeLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Type" GridPane.columnIndex="1" GridPane.rowIndex="6">
 							<GridPane.margin>
 								<Insets left="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label fx:id="versionLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="version" GridPane.columnIndex="1" GridPane.rowIndex="4">
+						<Label fx:id="versionLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="version" GridPane.columnIndex="1" GridPane.rowIndex="5">
 							<GridPane.margin>
 								<Insets left="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label fx:id="builtDateLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="builtDate" GridPane.columnIndex="1" GridPane.rowIndex="3">
+						<Label fx:id="builtDateLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="builtDate" GridPane.columnIndex="1" GridPane.rowIndex="4">
 							<GridPane.margin>
 								<Insets left="5.0" />
 							</GridPane.margin>
 						</Label>
-						<Label fx:id="countLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="count" GridPane.columnIndex="1" GridPane.rowIndex="2">
+						<Label fx:id="countLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="count" GridPane.columnIndex="1" GridPane.rowIndex="3">
 							<GridPane.margin>
 								<Insets left="5.0" />
 							</GridPane.margin>
@@ -81,6 +82,16 @@
 								<Insets left="5.0" />
 							</GridPane.margin>
 						</Label>
+            <Label text="Address" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets right="5.0" />
+               </GridPane.margin>
+            </Label>
+            <Label fx:id="addressLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="addr" GridPane.columnIndex="1" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets left="5.0" />
+               </GridPane.margin>
+            </Label>
 					</children>
 				</GridPane>
 	</content>

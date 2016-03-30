@@ -6,7 +6,7 @@
 
 <BorderPane fx:id="borderPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.TextFieldConfiguration">
    <right>
-      <TextField fx:id="textField" alignment="CENTER" editable="false" onAction="#onActionTextField" onKeyPressed="#onKeyPressed" prefColumnCount="5" stylesheets="@../../styles/components.css" BorderPane.alignment="CENTER">
+      <TextField fx:id="textField" alignment="CENTER" onAction="#onActionTextField" onKeyPressed="#onKeyPressed" prefColumnCount="5" stylesheets="@../../styles/components.css" BorderPane.alignment="CENTER">
       	<contextMenu>
       		<ContextMenu>
       			<items>

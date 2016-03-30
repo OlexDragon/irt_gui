@@ -63,12 +63,12 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.entry( packet);
 
-		LinkedPacket p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer()) {
+		LinkedPacket p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer(), true) {
 			@Override
 			public PacketId getPacketId() {
 				throw new UnsupportedOperationException("Auto-generated method stub");
 			}};
-		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
+		PacketErrors packetError = p.getPacketHeader().getPacketError();
 
 		if(packetError!=PacketErrors.NO_ERROR){
 			final String error = packetError.toString();
@@ -167,9 +167,10 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 
 	private void removeStyleClass() {
 		if(alarmSeverities!=null){
+			final String sc = alarmSeverities.getStyleClass();
 			Platform.runLater(()->{
 				final ObservableList<String> styleClass = valueLabel.getStyleClass();
-				styleClass.remove(alarmSeverities.getStyleClass());
+				styleClass.remove(sc);
 			});
 		}
 	}

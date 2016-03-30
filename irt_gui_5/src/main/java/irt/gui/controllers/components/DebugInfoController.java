@@ -116,10 +116,10 @@ public class DebugInfoController extends FieldsControllerAbstract {
 
 	@Override
 	protected void updateFields(LinkedPacket packet) throws Exception {
-		LinkedPacket p = new DebugInfoPacket(packet.getAnswer());
+		LinkedPacket p = new DebugInfoPacket(packet.getAnswer(), true);
 
-		if(p.getPacketHeader().getPacketErrors()!=PacketErrors.NO_ERROR){
-			textArea.setText(p.getPacketHeader().getPacketErrors().toString());
+		if(p.getPacketHeader().getPacketError()!=PacketErrors.NO_ERROR){
+			textArea.setText(p.getPacketHeader().getPacketError().toString());
 			return;
 		}
 

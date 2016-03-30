@@ -1,6 +1,8 @@
 
 package irt.gui.data.packet.observable.alarms;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.errors.PacketParsingException;
 
 public class AlarmDescriptionPacket extends AlarmStatusPacket {
@@ -11,8 +13,8 @@ public class AlarmDescriptionPacket extends AlarmStatusPacket {
 		super(PACKET_ID, "Get Alarm Description", alarmId);
 	}
 
-	public AlarmDescriptionPacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public AlarmDescriptionPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
 }

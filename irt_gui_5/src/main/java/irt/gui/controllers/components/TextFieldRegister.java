@@ -23,35 +23,51 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Labeled;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.Region;
 
 public class TextFieldRegister extends TextFieldAbstract {
 
 	private static final NumericChecker NUMERIC_CHECKER = new NumericChecker();
 
 	public static final String FXML_PATH = "/fxml/components/TextFieldRegister.fxml";
-
-	public static final String PROPERTY_STARTS_WITH	= "gui.register.textField.";
+	public static final String PROPERTY_STARTS_WITH	= "gui.textField.register.";
 
 	public static final String FIELD_KEY_ID 		= RegistersController.REGISTER_PROPERTIES 		+ "textField.%d.";
 	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.3.5.7)
+
+	private static Alert alert = new Alert(AlertType.INFORMATION);
+	static{
+		alert.setTitle("Save");
+		alert.setResizable(true);
+		alert.setHeight(500);
+		alert.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setWrapText(true));
+	}
+	private static StringBuilder alertBuilder = new StringBuilder();
 
 	public static final Class<? extends Node> rootClass = TextField.class;
 
 	public final Updater updater = new Updater();
 
-	private	RegisterValue 	setRegisterValue;			//Register's index and address
+	private	RegisterValue 	registerValueToSet;			//Register's index and address
 	private	Value			savedValue;					// Saved value in the register
 	private RegisterPacket 	valuePacket;
 	private RegisterPacket 	isSetValuePacket;
 
 	@FXML private Menu 		menuRegister;
 
-	protected void setup(){ }
+	private String name;
+
+	@Override
+	protected void setup(){	}
 
 	@FXML private void onActionMenuItemReset() {
 				try {
@@ -63,7 +79,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 	public void save() throws PacketParsingException {
 
-		final RegisterValue registerValue = new RegisterValue(setRegisterValue.getIndex(), setRegisterValue.getAddr()+3, 0);
+		final RegisterValue registerValue = new RegisterValue(registerValueToSet.getIndex(), registerValueToSet.getAddr()+3, 0);
 		RegisterPacket packet = new RegisterPacket(registerValue);
 		packet.addObserver(new Observer() {
 
@@ -77,17 +93,46 @@ public class TextFieldRegister extends TextFieldAbstract {
 						public void run() {
 							if(observable instanceof LinkedPacket){
 								try {
+									alertBuilder.setLength(0);
 
-									RegisterPacket p = new RegisterPacket(((LinkedPacket)observable).getAnswer());
+									if(alert == null || !alert.isShowing())
+										Platform.runLater(()->{
 
-									if((p.getPacketHeader().getPacketType()!=PacketType.RESPONSE || p.getPacketHeader().getPacketErrors()!=PacketErrors.NO_ERROR) && --times>=0){
+											alert.setContentText("");
+											alert.show();
+										});
+
+									RegisterPacket p = new RegisterPacket(((LinkedPacket)observable).getAnswer(), true);
+
+									if((p.getPacketHeader().getPacketType()!=PacketType.RESPONSE || p.getPacketHeader().getPacketError()!=PacketErrors.NO_ERROR) && --times>=0){
 
 										logger.warn("Not posible to save register " + registerValue);
 										Thread.sleep(20);
-										SerialPortController.QUEUE.add(packet);
-
-									}else
+										SerialPortController.QUEUE.add(packet, true);
 										packet.deleteObservers();
+
+										Platform.runLater(()->{
+											alertBuilder.append(alert.getContentText());
+											alertBuilder.append(String.format("\nImpossible to save register %s", name));
+											alert.setContentText(alertBuilder.toString());
+//											alert.setContentText("I have a great message for you!");
+
+										});
+
+									}else{
+
+										Platform.runLater(()->{
+											alertBuilder.append(alert.getContentText());
+											alertBuilder.append(String.format("\nRegister %s has been saved", name));
+											alert.setContentText(alertBuilder.toString());
+//											alert.setContentText("I have a great message for you!");
+										});
+									}
+									 
+//									alert.getDialogPane().setMinHeight(200);
+									Platform.runLater(()->{
+										alert.getDialogPane().getChildren().stream().filter(node -> node instanceof Labeled).forEach(node -> ((Labeled)node).setMinHeight(Region.USE_PREF_SIZE));
+									});
 
 								} catch (Exception e) {
 									logger.catching(e);
@@ -98,7 +143,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 					});
 					}
 			});
-			SerialPortController.QUEUE.add(packet);
+			SerialPortController.QUEUE.add(packet, true);
 	}
 
 	@Override protected void setPacket(String propertiesKeyStartWith) throws PacketParsingException {
@@ -106,11 +151,12 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 		removeAllPackets();
 
+		name = IrtGuiProperties.getProperty(propertiesKeyStartWith + "name");
 		int index = Integer.parseInt(IrtGuiProperties.getProperty(propertiesKeyStartWith + INDEX));
 		int address = Integer.parseInt(IrtGuiProperties.getProperty(propertiesKeyStartWith + ADDRESS));
 
-		setRegisterValue = new RegisterValue(index, address);
-		valuePacket = new RegisterPacket(setRegisterValue);
+		registerValueToSet = new RegisterValue(index, address);
+		valuePacket = new RegisterPacket(registerValueToSet);
 		addPacket(valuePacket);
 
 		RegisterValue rv = new RegisterValue(index, address==0 ? 0x10+2 : 0x10+3); //0x10+2 --> RDAC:MEM2; 0x10+3 --> RDAC:MEM3
@@ -158,8 +204,8 @@ public class TextFieldRegister extends TextFieldAbstract {
 				.filter(v->!v.isError());
 
 		if (val.isPresent()) {
-			int i = setRegisterValue.getIndex();
-			int a = setRegisterValue.getAddr();
+			int i = registerValueToSet.getIndex();
+			int a = registerValueToSet.getAddr();
 			int v = Optional
 					.ofNullable(value.getValue())
 					.map(l->l.intValue())
@@ -168,7 +214,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 				RegisterValue rValue = new RegisterValue(i, a, v);
 				RegisterPacket packet  = new RegisterPacket(rValue);
 				packet.addObserver(this);
-				SerialPortController.QUEUE.add(packet);
+				SerialPortController.QUEUE.add(packet, true);
 			}
 		}
 	}
@@ -209,33 +255,51 @@ public class TextFieldRegister extends TextFieldAbstract {
 	}
 
 	@Override public void update(Observable observable, Object object) {
-		updater.setPacket(((LinkedPacket)observable));
-		SERVICES.execute(updater);
+		if(!packets.contains(observable))
+			try {
+				logger.error("{}:{}:{} {} {}", this, ((LinkedPacket)observable).getObservers(), valuePacket.getObservers(), observable, valuePacket);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new UnsupportedOperationException("Auto-generated method stub", e);
+			}
+
+		if(packets.contains(observable))
+			SERVICES.execute(updater.setPacket(((LinkedPacket)observable)));
+
+		else
+			((LinkedPacket)observable).deleteObserver(this);
 	}
 
 	//********************************************** class Updater   ***************************************************
 	private class Updater implements Runnable{
 
 		private LinkedPacket packet;
+		private boolean writeLogger;
+		private byte[] answer;
 
-		void setPacket(LinkedPacket packet){
+		Updater setPacket(LinkedPacket packet){
+			answer = packet.getAnswer();
+			writeLogger = answer==null && (this.packet==null || this.packet.getAnswer()!=null);
 			this.packet = packet;
+			return this;
 		}
 
 		@Override
 		public void run() {
 			try {
 
-				final byte[] answer = this.packet.getAnswer();
-				if(answer==null)
+				if(answer==null){
+					if(writeLogger)
+						logger.warn("Package does not contain the answer. {}", packet);
 					return;
+				}
 
-				LinkedPacket packet = new RegisterPacket(answer);
+				LinkedPacket packet = new RegisterPacket(answer, true);
 
 				final PacketHeader packetHeader = packet.getPacketHeader();
 				if(packetHeader.getPacketType()==PacketType.RESPONSE){
 
-					final PacketErrors packetErrors = packetHeader.getPacketErrors();
+					final PacketErrors packetErrors = packetHeader.getPacketError();
 					if(packetErrors!=PacketErrors.NO_ERROR){
 						showError(packetErrors);
 						return;
@@ -245,7 +309,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 					RegisterValue rv = new RegisterValue(payload.getInt(0), payload.getInt(1), payload.getInt(2));
 
 					//if it is set value
-					if(setRegisterValue.equals(rv))
+					if(registerValueToSet.equals(rv))
 
 						setText(rv);
 
@@ -293,7 +357,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 		/**
 		 * If value changed set textField text
-		 * @param setRegisterValue	- sent value
+		 * @param registerValueToSet	- sent value
 		 */
 		private void setText(RegisterValue setRegisterValue) {
 

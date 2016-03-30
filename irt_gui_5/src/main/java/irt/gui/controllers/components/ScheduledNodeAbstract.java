@@ -1,6 +1,7 @@
 package irt.gui.controllers.components;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.Set;
@@ -11,27 +12,26 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.gui.controllers.ScheduledServices;
-import irt.gui.controllers.interfaces.UnitAddress;
+import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
 import javafx.scene.control.Control;
 import javafx.scene.control.Tooltip;
 
-public abstract class ScheduledNodeAbstract implements Runnable, Observer, UnitAddress{
+public abstract class ScheduledNodeAbstract implements Runnable, Observer{
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	public static final String NAME = "name";
 	public static final String PERIOD = "period";
 
-	protected static final 	ScheduledExecutorService SERVICES 			= ScheduledServices.services;
+	protected static final 	ScheduledExecutorService SERVICES 			= LinkedPacketsQueue.SERVICES;
 	protected 				ScheduledFuture<?> 	scheduleAtFixedRate;
 	protected 				String 				propertyName; 			public String getPropertyName() { return propertyName; }
 	//time between requests
 	private 				long 				period = 10000;			public long getPeriod(){ return period; }	public void setPeriod(long period){ this.period = period; }	
 
-	private final			Set<LinkedPacket>	packets					= new HashSet<>();						//to get set value
+	protected final			Set<LinkedPacket>	packets					= new HashSet<>();						//to get set value 
 
 	public abstract void setKeyStartWith(String name) throws PacketParsingException, ClassNotFoundException, InstantiationException, IllegalAccessException;
 
@@ -41,7 +41,7 @@ public abstract class ScheduledNodeAbstract implements Runnable, Observer, UnitA
 
 			packets
 			.stream()
-			.forEach(packet->SerialPortController.QUEUE.add(packet));
+			.forEach(packet->SerialPortController.QUEUE.add(packet, true));
 
 		}catch(Exception ex){
 			logger.catching(ex);
@@ -60,14 +60,9 @@ public abstract class ScheduledNodeAbstract implements Runnable, Observer, UnitA
 	}
 
 	protected void addPacket(LinkedPacket packet){
-		logger.entry(packet);
 
-		Optional.of(packet)
-		.ifPresent(p->{
-
-			p.addObserver(this);
-			packets.add(p);
-		});
+		packets.add(Objects.requireNonNull(packet));
+		packet.addObserver(this);
 	}
 
 	protected void removeAllPackets(){
@@ -78,14 +73,6 @@ public abstract class ScheduledNodeAbstract implements Runnable, Observer, UnitA
 		.forEach(p->p.deleteObservers());
 
 		packets.clear();
-	}
-
-	@Override public void setUnitAddress(Byte address) {
-
-		packets
-		.parallelStream()
-		.map(LinkedPacket::getLinkHeader)
-		.forEach(lh->lh.setAddr(address));
 	}
 
 	//******************************** class TooltipWorker   ********************************************

@@ -13,7 +13,6 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import com.sun.javafx.application.LauncherImpl;
 
-import irt.gui.controllers.ScheduledServices;
 import irt.gui.controllers.components.SerialPortController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -55,7 +54,7 @@ public class IrtGuiApp extends Application {
 	@Override
 	public void stop() throws Exception {
 		stopLoggers();
-		ScheduledServices.services.shutdownNow();
+//		ScheduledServices.services.shutdownNow();
 
 		SerialPort serialPort = SerialPortController.getSerialPort();
 		if(serialPort!=null && serialPort.isOpened())

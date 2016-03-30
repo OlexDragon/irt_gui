@@ -1,5 +1,8 @@
 package irt.gui.data.packet.observable.alarms;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
@@ -22,20 +25,11 @@ public class AlarmSummaryStatusPacket extends RegirterAbstractPacket{
 								PACKET_ID)));
 	}
 
-	public AlarmSummaryStatusPacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public AlarmSummaryStatusPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
-	public enum AlarmSeverities{
-		NO_ALARM,
-		INFO,
-		WARNING,
-		MINOR,
-		MAJOR,
-		CRITICAL
-	}
-
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return PACKET_ID;
 	}

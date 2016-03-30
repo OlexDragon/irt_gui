@@ -24,7 +24,6 @@
          <children>
             <HBox alignment="CENTER_RIGHT" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <fx:include fx:id="comboBoxUnitAddress" source="ComboBoxUnitAddress.fxml" />
                   <fx:include fx:id="buttonInitialize" source="ButtonInitialize.fxml" />
                   <fx:include fx:id="buttonCalibMode" source="ButtonCalibrationMode.fxml" />
                   <Button mnemonicParsing="false" onAction="#saveValues" text="Save">
@@ -73,6 +72,6 @@
       </AnchorPane>
    </top>
    <center>
-      <fx:include fx:id="registersPanel" source="RegistersPanel.fxml" />
+      <fx:include fx:id="PanelRegisters" source="PanelRegisters.fxml" />
    </center>
 </BorderPane>

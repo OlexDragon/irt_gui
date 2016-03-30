@@ -7,6 +7,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.DacValue;
 import irt.gui.data.DeviceId;
 import irt.gui.data.StringData;
@@ -42,7 +45,9 @@ public class Payload {
 							DEVICE_MESUREMENT_MONITOR__CURRENT	= 9,
 							DEVICE_MESUREMENT_SPU_TEMPERATURE	= 10;
 
+	@JsonProperty("ph")
 	private ParameterHeader parameterHeader;
+	@JsonProperty("b")
 	private byte[] buffer;
 
 	public Payload(ParameterHeader parameterHeader, byte... buffer) {
@@ -63,7 +68,7 @@ public class Payload {
 
 			int size = ParameterHeader.SIZE + parameterHeader.getPayloadSize().getSize();
 
-			if(size>ParameterHeader.SIZE && size<=data.length)
+			if(size>=ParameterHeader.SIZE && size<=data.length)
 				buffer = Arrays.copyOfRange(data, ParameterHeader.SIZE, size);
 
 			else
@@ -77,20 +82,23 @@ public class Payload {
 		return next!=0 && next<data.length ? Arrays.copyOfRange(data, next, data.length) : null;
 	}
 
+	@JsonIgnore
 	public StringData 		getStringData()		{ return new StringData(buffer);}
 	public ParameterHeader	getParameterHeader(){ return parameterHeader;		}
 	public byte[]			getBuffer()			{ return buffer;				}
 	public byte[] 			toBytes()			{ return Packet.concat(parameterHeader.toBytes(), buffer);}
 
+	@JsonIgnore
 	public byte	getByte() { return getByte(0);	}
 	public byte getByte(int b) { return buffer!=null && buffer.length>b ? buffer[b] : 0;}
+	@JsonIgnore
 	public long	getLong() { return Packet.shiftAndAdd(buffer);	}
+	@JsonIgnore
 	public DeviceId getDeviceId() { return buffer!=null  ? new DeviceId(buffer) : null;	}
 
 	public void setParameterHeader	(ParameterHeader parameterHeader)	{ this.parameterHeader= parameterHeader;			}
 
 	public void setBuffer(byte[] buffer	){
-		logger.trace("buffer={}", buffer);
 		this.buffer = buffer;
 		parameterHeader.setSize((short)(buffer!=null ?  buffer.length : 0));
 	}
@@ -207,12 +215,13 @@ public class Payload {
 		long result = 0;
 		int end = startFrom+length;
 
-		if(end<=buffer.length)
+		if(buffer!=null && end<=buffer.length)
 			result = Packet.shiftAndAdd(Arrays.copyOfRange(buffer, startFrom, end));
 
 		return result;
 	}
 
+	@JsonIgnore
 	public DacValue getDacValue() {
 		DacValue dacValue = null;
 
@@ -224,6 +233,8 @@ public class Payload {
 //		return new RegisterValue( getInt(0), getInt(1), new Value(value, 0 , Long.MAX_VALUE, 0));
 //	}
 //
+
+	@JsonIgnore
 	public long[] getArrayLong() {
 		long[] longs = null;
 
@@ -236,6 +247,7 @@ public class Payload {
 		return longs;
 	}
 
+	@JsonIgnore
 	public short[] getArrayOfShort() {
 		short[] shorts = null;
 

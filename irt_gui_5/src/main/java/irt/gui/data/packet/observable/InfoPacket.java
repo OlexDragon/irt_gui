@@ -1,5 +1,8 @@
 package irt.gui.data.packet.observable;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
@@ -24,11 +27,11 @@ public class InfoPacket extends PacketAbstract{
 								PACKET_ID)));
 	}
 
-	public InfoPacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public InfoPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return PACKET_ID;
 	}

@@ -8,6 +8,9 @@ import java.util.Arrays;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketGroupId;
@@ -17,6 +20,7 @@ import irt.gui.errors.PacketParsingException;;
 
 public class PacketHeader{
 
+	@JsonIgnore
 	private final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final int SIZE = 7;
@@ -28,11 +32,15 @@ public class PacketHeader{
 		private short 	reserved;	4,5
 		private byte 	code; 		6
 	 */
+	@JsonProperty("type")
 	private PacketType		packetType;						public PacketType 		getPacketType() 	{ return packetType; 		}
+	@JsonIgnore
 	private PacketIdDetails packetIdDetails; 				public PacketIdDetails 	getPacketIdDetails(){ return packetIdDetails; 	}
-	/*private PacketGroupId 	packetGroupId;*/			public PacketGroupId 	getPacketGroupId() 	{ return packetIdDetails.getPacketId().getPacketGroupId(); 	}
+	/*private PacketGroupId 	packetGroupId;*/			@JsonIgnore public PacketGroupId 	getPacketGroupId() 	{ return packetIdDetails.getPacketId().getPacketGroupId(); 	}
+	@JsonIgnore
 	private byte[]			reserved = new byte[]{0, 0}; 	public short			getReserved()		{ return (short) Packet.shiftAndAdd(reserved);	}
-	private PacketErrors 	packetError;					public PacketErrors		getPacketErrors() 	{ return packetError;		}
+	@JsonProperty("error")
+	private PacketErrors 	packetError;					public PacketErrors		getPacketError() 	{ return packetError;		}
 
 	public PacketHeader(PacketType packetType, PacketIdDetails packetIdDetails, PacketErrors packetError) {
 		this.packetType = packetType;
@@ -105,7 +113,7 @@ public class PacketHeader{
 	public int hashCode() {
 		final int prime = 31;
 		int result = prime  + ((packetIdDetails == null) ? 0 : packetIdDetails.hashCode());
-		result = prime * result + ((packetType == null) ? 0 : packetType.hashCode());
+//		result = prime * result + ((packetType == null) ? 0 : packetType.hashCode());
 		return result;
 	}
 	@Override
@@ -122,8 +130,8 @@ public class PacketHeader{
 				return false;
 		} else if (!packetIdDetails.equals(other.packetIdDetails))
 			return false;
-		if (packetType != other.packetType)
-			return false;
+//		if (packetType != other.packetType)
+//			return false;
 		return true;
 	}
 

@@ -38,7 +38,7 @@ public class ComPortThreadQueueTest {
 				}
 			});
 
-			queue.add(packet);
+			queue.add(packet, true);
 			Thread.sleep(100);
 
 			serialPort.closePort();

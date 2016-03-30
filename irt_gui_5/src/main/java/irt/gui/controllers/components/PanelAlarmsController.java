@@ -17,15 +17,15 @@ import javafx.scene.Parent;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.VBox;
 
-public class AlarmsPanelController extends FieldsControllerAbstract {
+public class PanelAlarmsController extends FieldsControllerAbstract {
 
-	@FXML private 	TitledPane 	alarmsPanel;
+	@FXML private 	TitledPane 	PanelAlarms;
 	@FXML private 	VBox 		vBox;
 
 	private short[] alarms;
 	private final LinkedPacket packet;
 
-	public AlarmsPanelController() throws PacketParsingException {
+	public PanelAlarmsController() throws PacketParsingException {
 		packet = new AlarmIDsPacket();
 	}
 
@@ -43,9 +43,9 @@ public class AlarmsPanelController extends FieldsControllerAbstract {
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.entry(packet);
 
-		LinkedPacket p = new AlarmIDsPacket(packet.getAnswer());
+		LinkedPacket p = new AlarmIDsPacket(packet.getAnswer(), true);
 
-		if (p.getPacketHeader().getPacketErrors() == PacketErrors.NO_ERROR) {
+		if (p.getPacketHeader().getPacketError() == PacketErrors.NO_ERROR) {
 
 			final Payload pl = p.getPayloads().get(0);
 
@@ -71,7 +71,7 @@ public class AlarmsPanelController extends FieldsControllerAbstract {
 	}
 
 	public void setTitle(String title) {
-		alarmsPanel.setText(title);
+		PanelAlarms.setText(title);
 	}
 
 	private synchronized boolean setAlarmIDs(Payload pl) {
@@ -79,9 +79,9 @@ public class AlarmsPanelController extends FieldsControllerAbstract {
 		if(alarms!=null) //return if already set
 			return false;
 
-		alarms = pl.getArrayOfShort();
-		packet.deleteObserver(observer);
 		doUpdate(false);
+		packet.deleteObservers();
+		alarms = pl.getArrayOfShort();
 
 		return true;
 	}

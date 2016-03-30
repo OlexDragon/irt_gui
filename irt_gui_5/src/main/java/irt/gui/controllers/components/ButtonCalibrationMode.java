@@ -55,8 +55,7 @@ public class ButtonCalibrationMode extends FieldsControllerAbstract {
 
 				CallibrationModePacket packet = callibrationMode==CalibrationMode.ON ? packetSetOff : packetSetOn;
 				logger.trace(packet);
-				packet.setAnswer(null);
-				SerialPortController.QUEUE.add(packet);
+				SerialPortController.QUEUE.add(packet, true);
 
 			} catch (Exception e) {
 				logger.catching(e);
@@ -77,7 +76,7 @@ public class ButtonCalibrationMode extends FieldsControllerAbstract {
 		if(answer==null)
 			return;
 
-		CallibrationModePacket p = new CallibrationModePacket(answer);
+		CallibrationModePacket p = new CallibrationModePacket(answer, true);
 
 		CalibrationMode cm = p.getCallibrationMode();
 

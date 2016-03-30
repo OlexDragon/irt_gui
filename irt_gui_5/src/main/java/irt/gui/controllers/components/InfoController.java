@@ -24,6 +24,7 @@ public class InfoController extends FieldsControllerAbstract {
 	@FXML private Label builtDateLabel;
 	@FXML private Label versionLabel;
 	@FXML private Label typeLabel;
+	@FXML private Label addressLabel;
 
 	@FXML public void initialize() {
 		try {
@@ -43,10 +44,10 @@ public class InfoController extends FieldsControllerAbstract {
 	@Override
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 
-		InfoPacket p = new InfoPacket(packet.getAnswer());
+		InfoPacket p = new InfoPacket(packet.getAnswer(), true);
 		logger.trace(p);
 
-		if (p.getPacketHeader().getPacketErrors() == PacketErrors.NO_ERROR) {
+		if (p.getPacketHeader().getPacketError() == PacketErrors.NO_ERROR) {
 
 			DeviceInfo deviceInfo = new DeviceInfo(p);
 			logger.trace(deviceInfo);
@@ -55,6 +56,7 @@ public class InfoController extends FieldsControllerAbstract {
 				
 				@Override
 				public void run() {
+					try{
 					infoPanel		.setText(deviceInfo.getSerialNumber() + " : " + deviceInfo.getUnitName());
 
 					snLabel			.setText( deviceInfo.getSerialNumber()		.toString());
@@ -65,6 +67,10 @@ public class InfoController extends FieldsControllerAbstract {
 					DEVICE_TYPE = deviceInfo.getType();
 					typeLabel		.setText(DEVICE_TYPE+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype());
 					countLabel		.setText( Integer.toString(deviceInfo.getUptimeCounter()));
+					addressLabel	.setText((packet.getLinkHeader().getAddr() & 0xFF) + "");
+					}catch(Exception ex){
+						logger.catching(ex);
+					}
 				}
 			});
 

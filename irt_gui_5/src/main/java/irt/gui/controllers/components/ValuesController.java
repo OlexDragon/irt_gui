@@ -41,7 +41,7 @@ public class ValuesController extends FieldsControllerAbstract {
 			else{
 				AttenuationPacket packet = new AttenuationPacket(Short.parseShort(text));
 				packet.addObserver(this);
-				SerialPortController.QUEUE.add(packet);
+				SerialPortController.QUEUE.add(packet, true);
 			}
 
 		} catch (Exception e) {
@@ -85,12 +85,12 @@ public class ValuesController extends FieldsControllerAbstract {
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.trace("\n\t ENTRY: {}", packet);
 
-		PacketAbstract p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer()) {
+		PacketAbstract p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer(), true) {
 			@Override
 			public PacketId getPacketId() {
 				return null;
 			} };
-		PacketErrors packetError = p.getPacketHeader().getPacketErrors();
+		PacketErrors packetError = p.getPacketHeader().getPacketError();
 
 		if(packetError!=PacketErrors.NO_ERROR){
 			final String error = packetError.toString();
@@ -102,8 +102,6 @@ public class ValuesController extends FieldsControllerAbstract {
 							valueLabel.setText(error);
 						}
 					});
-
-			logger.error("\n\tPacket has Error:\n\t sent packet{}\n\n\t received packet{}", packet, p);
 
 		}else{
 

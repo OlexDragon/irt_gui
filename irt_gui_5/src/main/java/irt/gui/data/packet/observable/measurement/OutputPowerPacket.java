@@ -1,5 +1,8 @@
 package irt.gui.data.packet.observable.measurement;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
@@ -23,26 +26,26 @@ public class OutputPowerPacket extends PacketAbstract implements ValuePacket{
 								PACKET_ID)));
 	}
 
-	public OutputPowerPacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public OutputPowerPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public String getTitle() {
 		return "Output Power";
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return PACKET_ID;
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public int getPrecision() {
 		return 1;
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public String getPrefix() {
 		return " dBm";
 	}

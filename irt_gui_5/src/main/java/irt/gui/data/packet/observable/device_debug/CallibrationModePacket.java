@@ -3,6 +3,9 @@ package irt.gui.data.packet.observable.device_debug;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
@@ -39,10 +42,11 @@ public class CallibrationModePacket extends RegirterAbstractPacket {
 
 	}
 
-	public CallibrationModePacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public CallibrationModePacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
+	@JsonIgnore
 	public CalibrationMode getCallibrationMode() {
 
 		Integer value = null;
@@ -60,7 +64,7 @@ public class CallibrationModePacket extends RegirterAbstractPacket {
 		return value!=null ? CalibrationMode.values()[value] : null;
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return PACKET_ID;
 	}

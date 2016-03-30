@@ -33,7 +33,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 
 	public static final String FXML_PATH		= "/fxml/components/LabelRegister.fxml";
 
-	public static final String PROPERTY_STARTS_WITH	= "gui.register.label.";
+	public static final String PROPERTY_STARTS_WITH	= "gui.label.register.";
 	public static final String PROPERTY_NAME 	= PROPERTY_STARTS_WITH + "%s.name";	//Showing name of one properties
 	public static final String PROPERTY_PERIOD 	= PROPERTY_STARTS_WITH + "%s.period";
 
@@ -153,7 +153,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 				Optional.ofNullable(createPacket(answer))
 				.ifPresent(p->{
 					final PacketHeader packetHeader = p.getPacketHeader();
-					final PacketErrors packetErrors = packetHeader.getPacketErrors();
+					final PacketErrors packetErrors = packetHeader.getPacketError();
 					if(packetErrors!=PacketErrors.NO_ERROR){
 						tooltipWorker.setMessage(packetErrors.toString());
 						SERVICES.execute(tooltipWorker);
@@ -176,7 +176,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 
 	private RegisterPacket createPacket(byte[] answer) {
 		try {
-			return new RegisterPacket(answer);
+			return new RegisterPacket(answer, true);
 		} catch (PacketParsingException e) {
 			logger.catching(e);
 		}

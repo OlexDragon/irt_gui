@@ -83,14 +83,14 @@ public class NetworkAddressPacketTest {
 
 				try {
 
-					PacketAbstract packet = new PacketAbstract(NetworkAddressPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+					PacketAbstract packet = new PacketAbstract(NetworkAddressPacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
 
 						@Override
 						public PacketId getPacketId() {
 							throw new UnsupportedOperationException("Auto-generated method stub");
 						}};
 					logger.debug("\n\t new PacketAbstract: {}\n", packet);
-					assertEquals(packet.getPacketHeader().getPacketErrors(), PacketErrors.NO_ERROR);
+					assertEquals(packet.getPacketHeader().getPacketError(), PacketErrors.NO_ERROR);
 
 				} catch (PacketParsingException e) {
 					logger.catching(e);

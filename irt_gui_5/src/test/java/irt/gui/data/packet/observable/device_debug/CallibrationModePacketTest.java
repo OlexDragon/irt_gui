@@ -119,7 +119,7 @@ public class CallibrationModePacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(CallibrationModePacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+					PacketAbstract bp = new PacketAbstract(CallibrationModePacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
 
 						@Override
 						public PacketId getPacketId() {
@@ -159,7 +159,7 @@ public class CallibrationModePacketTest {
 
 			try {
 
-				CallibrationModePacket bp = new CallibrationModePacket(((LinkedPacket)o).getAnswer());
+				CallibrationModePacket bp = new CallibrationModePacket(((LinkedPacket)o).getAnswer(), true);
 				logger.debug("\n\t new PacketAbstract: {}\n", bp);
 
 				final CalibrationMode cm = bp.getCallibrationMode();

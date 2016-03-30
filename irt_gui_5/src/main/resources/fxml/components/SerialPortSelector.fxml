@@ -7,18 +7,31 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.SerialPortController">
-   <children>
-      <HBox>
-         <children>
-            <ComboBox fx:id="serialPortComboBox" onAction="#selectSerialPort" promptText="Select The Serial Port">
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor></ComboBox>
-            <Button fx:id="openClosePortButton" mnemonicParsing="false" onAction="#onOpenClosePortButtonClicked" text="Button">
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor></Button>
-         </children>
-      </HBox>
-   </children>
+	<children>
+		<HBox>
+			<children>
+				<ComboBox fx:id="serialPortComboBox" onAction="#onActionSelectSerialPort" promptText="Select The Serial Port">
+					<cursor>
+						<Cursor fx:constant="HAND" />
+					</cursor>
+				</ComboBox>
+				<Button fx:id="openClosePortButton" mnemonicParsing="false" onAction="#onOpenClosePortButtonClicked" text="Button">
+					<cursor>
+						<Cursor fx:constant="HAND" />
+					</cursor>
+				</Button>
+				<fx:include fx:id="comboBoxUnitAddress" source="ComboBoxUnitAddress.fxml" />
+				<MenuButton mnemonicParsing="false">
+					<items>
+						<Menu fx:id="menuBaudrate" mnemonicParsing="false" text="%baudrate">
+							<items>
+							</items>
+						</Menu>
+						<MenuItem mnemonicParsing="false" onAction="#onActionScanUnitAddres" text="%address.scan" />
+                  <MenuItem mnemonicParsing="false" onAction="#onActionNetworkInfo" text="%network.info" />
+					</items>
+				</MenuButton>
+			</children>
+		</HBox>
+	</children>
 </AnchorPane>

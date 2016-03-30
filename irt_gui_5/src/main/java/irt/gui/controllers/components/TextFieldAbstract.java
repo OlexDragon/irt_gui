@@ -1,10 +1,10 @@
 
 package irt.gui.controllers.components;
 
-import java.util.Observable;
 import java.util.Observer;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.observer.TextFieldErrorController;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextFieldFocusListener;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -45,6 +45,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	protected volatile Value	value;		/* Actual value	*/							public 			Value 					getValue() 			{ return value; }
 	private final ChangeListener<String> 	numericChecker 	= getNumericChecker();		public abstract ChangeListener<String> 	getNumericChecker();
 	private Menu menu;
+	private TextFieldErrorController errorController;
 
 	protected abstract void setup();
 	protected abstract Menu getMenu();
@@ -66,6 +67,8 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	@FXML public void initialize(){
 
 		menu = getMenu();
+
+		errorController = new TextFieldErrorController(textField);
 
 		final StringProperty textProperty = textField.textProperty();
 		textProperty.addListener(numericChecker);
@@ -279,28 +282,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 
 	@Override protected void addPacket(LinkedPacket packet) {
 		super.addPacket(packet);
-		packet.addObserver(new Observer() {
-			
-			@Override
-			public void update(Observable o, Object arg) {
-				Platform.runLater(new Runnable() {
-					
-					private static final String ERROR = "error";
-
-					@Override
-					public void run() {
-						final ObservableList<String> styleClass = textField.getStyleClass();
-
-						if(packet.getAnswer()==null){
-							if(!styleClass.contains(ERROR))
-								styleClass.add(ERROR);
-
-						}else if(styleClass.size()>0)	// if size == 0 throw  java.lang.ArrayIndexOutOfBoundsException
-							styleClass.remove(ERROR);
-
-					}
-				});
-			}
-		});
+		// if no answer add 'error' ( css class )
+		packet.addObserver(errorController);
 	}
 }

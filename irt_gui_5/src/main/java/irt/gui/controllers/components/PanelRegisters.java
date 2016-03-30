@@ -20,8 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.interfaces.UnitAddress;
 import irt.gui.data.GuiUtility;
+import irt.gui.data.packet.interfaces.ConfigurationGroup;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -48,7 +48,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 
-public class RegisterPanel{
+public class PanelRegisters{
 	private final Logger logger = LogManager.getLogger();
 
 	public static final File 	IRT_HOME			= new File(System.getProperty("user.home"), "irt") ;
@@ -81,7 +81,6 @@ public class RegisterPanel{
 	private final EventHandler<? super MouseEvent> mouseEvent = e->paneMouseEntered(e);
 
 	private boolean editable;
-	private Byte 	unitAddress;
 
 	private final EventHandler<ActionEvent> onActionMenuItemRegister 		= e->loadNode(TextFieldRegister.class, 		((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
 	private final EventHandler<ActionEvent> onActionMenuItemValueLabel 		= e->loadNode(LabelValue.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
@@ -393,6 +392,7 @@ public class RegisterPanel{
 		.map(VBox::getChildren)
 		.flatMap(ch->ch.parallelStream())
 		.filter(ch->ch instanceof TextField)
+		.filter(ch->!(ch instanceof ConfigurationGroup))
 		.map(ch->(TextField)ch)
 		.forEach(tf->Platform.runLater(()->tf.setEditable(editable)));
 	}
@@ -413,14 +413,6 @@ public class RegisterPanel{
 
 	private void save(TextFieldRegister controller) {
 		try { controller.save(); } catch (PacketParsingException e) { logger.catching(e); };
-	}
-
-	private Stream<Object> getAllControllers() {
-		return getAllVBoxex()
-				.map(vb->vb.getChildren())
-				.flatMap(ch->ch.parallelStream())
-				.map(c->c.getUserData())
-				.filter(c->c!=null);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -596,9 +588,6 @@ public class RegisterPanel{
 			final ScheduledNodeAbstract controller = loader.getController();
 			controller.setKeyStartWith(name);
 
-			if(unitAddress!=null)
-				controller.setUnitAddress(unitAddress);
-
 			if(controllerClass.getSuperclass().equals(TextFieldAbstract.class))
 				Platform.runLater(()->((TextFieldAbstract)controller).getTextField().setEditable(editable));
 
@@ -613,13 +602,5 @@ public class RegisterPanel{
 	private void addFocusListener(Node node) {
 		if(node.getUserData() instanceof TextFieldAbstract)
 			((TextFieldAbstract)node.getUserData()).addFocusListener(focusListener);
-	}
-
-	public void setUnitAddress(Byte unitAddress) {
-		this.unitAddress = unitAddress;
-
-		getAllControllers()
-		.map(UnitAddress.class::cast)
-		.forEach(ua->ua.setUnitAddress(unitAddress));
 	}
 }

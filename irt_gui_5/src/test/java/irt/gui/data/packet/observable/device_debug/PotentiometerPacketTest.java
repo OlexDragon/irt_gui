@@ -95,7 +95,7 @@ public class PotentiometerPacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(RegisterPacket.PACKET_ID, ((LinkedPacket)o).getAnswer()){
+					PacketAbstract bp = new PacketAbstract(RegisterPacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
 
 						@Override
 						public PacketId getPacketId() {
@@ -131,7 +131,7 @@ public class PotentiometerPacketTest {
 	public void equalsTest() throws PacketParsingException{
 		assertThat(new RegisterPacket(new RegisterValue(1, 5)), is(new RegisterPacket(new RegisterValue(1, 5))));
 
-		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(1, 5, 0))));
+		assertThat(new RegisterPacket(new RegisterValue(1, 5)), is(new RegisterPacket(new RegisterValue(1, 5, 0))));
 		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(1, 7))));
 		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(2, 5))));
 	}

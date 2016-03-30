@@ -12,6 +12,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.components.ScheduledNodeAbstract;
 import javafx.application.Platform;
@@ -76,8 +78,10 @@ public class GuiUtility {
 								final RadioMenuItem mi = new RadioMenuItem((String) p.getValue()); //This can be changed by internalization
 								final String key = (String)p.getKey();
 								mi.setId(key.substring(0, key.indexOf(ScheduledNodeAbstract.NAME)));
-								Platform.runLater(()->mi.setToggleGroup(toggleGroup));
-								mi.setOnAction(action);
+								Platform.runLater(()->{
+									mi.setToggleGroup(toggleGroup);
+									mi.setOnAction(action);
+								});
 								return mi;
 							})
 							.sorted((mi1, mi2)->mi1.getText().compareTo(mi2.getText()))

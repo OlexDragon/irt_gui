@@ -138,8 +138,8 @@ public class LabelValue extends ScheduledNodeAbstract {
 	private LinkedPacket createPacket(LinkedPacket packet){
 		try {
 
-			final Constructor<?> constructor = clazz.getConstructor(byte[].class);
-			return logger.exit((LinkedPacket) constructor.newInstance(packet.getAnswer()));
+			final Constructor<?> constructor = clazz.getConstructor(byte[].class, boolean.class);
+			return logger.exit((LinkedPacket) constructor.newInstance(packet.getAnswer(), true));
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -167,7 +167,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 					.ifPresent(p->{
 						Value v;
 
-						final PacketErrors packetErrors = p.getPacketHeader().getPacketErrors();
+						final PacketErrors packetErrors = p.getPacketHeader().getPacketError();
 						if(packetErrors!=PacketErrors.NO_ERROR){
 							tooltipWorker.setMessage(packetErrors.toString());
 							SERVICES.execute(tooltipWorker);

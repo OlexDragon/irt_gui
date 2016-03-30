@@ -3,6 +3,9 @@ package irt.gui.data.packet.observable.device_debug;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.Packet;
@@ -28,8 +31,8 @@ public class ConverterDACPacket extends RegirterAbstractPacket {
 
 	}
 
-	public ConverterDACPacket(byte[] answer) throws PacketParsingException {
-		super(PACKET_ID, answer);
+	public ConverterDACPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, hasAcknowledgment);
 	}
 
 	public static byte[] getBuffer(int index, int addr, Integer value) {
@@ -45,7 +48,7 @@ public class ConverterDACPacket extends RegirterAbstractPacket {
 		return bs;
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public PacketId getPacketId() {
 		return PACKET_ID;
 	}
