@@ -166,13 +166,13 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1:
 				packetIdStr = "DAC 1("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2:
+			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2:
 				packetIdStr = "DAC 2("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3:
+			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3:
 				packetIdStr = "DAC 3("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4:
+			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4:
 				packetIdStr = "DAC 4("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_13V2:

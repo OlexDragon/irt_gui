@@ -329,7 +329,9 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 				// Set BUC Name
 				final RedundancyName redundancyName = RedundancyName.values()[b];
+				cmbBxName.removeItemListener(nameListener);
 				cmbBxName.setSelectedItem(redundancyName);
+				cmbBxName.addItemListener(nameListener);
 			
 			}else if(packet.equals(redundancyStatusPacket)){
 			

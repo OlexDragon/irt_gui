@@ -411,8 +411,8 @@ public class BIASsPanel extends JPanel {
 		add(switch_2);
 
 		slider = new JSlider();
-		slider.setMinimum(RegisterTextField.MIN);
-		slider.setMaximum(RegisterTextField.MAX);
+		slider.setMinimum(0);
+		slider.setMaximum(896);
 		slider.setOpaque(false);
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setBounds(249, 0, 22, 260);
@@ -470,35 +470,35 @@ public class BIASsPanel extends JPanel {
 		add(txtStep);
 		txtStep.setFont(font);
 
-		txtPotentiometer1 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(1, 0, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1);
+		txtPotentiometer1 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(1, 0, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N1, 0, 896);
 		txtPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer1.setBounds(184, P1, 55, 20);
 		txtPotentiometer1.setFont(font);
 		txtPotentiometer1.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer1);
 
-		txtPotentiometer2 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(1, 8, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N2);
+		txtPotentiometer2 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(1, 8, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N2, 0, 896);
 		txtPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer2.setFont(font);
 		txtPotentiometer2.setBounds(184, P2, 55, 20);
 		txtPotentiometer2.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer2);
 
-		txtPotentiometer3 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(2, 0, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N3);
+		txtPotentiometer3 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(2, 0, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N3, 0, 896);
 		txtPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer3.setFont(font);
 		txtPotentiometer3.setBounds(184, P3, 55, 20);
 		txtPotentiometer3.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer3);
 
-		txtPotentiometer4 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(2, 8, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N4);
+		txtPotentiometer4 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(2, 8, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N4, 0, 896);
 		txtPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer4.setFont(font);
 		txtPotentiometer4.setBounds(184, P4, 55, 20);
 		txtPotentiometer4.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer4);
 
-		txtPotentiometer5 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(7, 0, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N5);
+		txtPotentiometer5 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(7, 0, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N5, 0, 896);
 		txtPotentiometer5.setText("0");
 		txtPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -507,7 +507,7 @@ public class BIASsPanel extends JPanel {
 		txtPotentiometer5.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer5);
 		
-		txtPotentiometer6 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(7, 8, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N6);
+		txtPotentiometer6 = new RegisterTextField(linkHeader.getAddr(), new RegisterValue(7, 8, null), PacketWork.PACKET_ID_DEVICE_DEBAG_POTENTIOMETER_N6, 0, 896);
 		txtPotentiometer6.setText("0");
 		txtPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 14));

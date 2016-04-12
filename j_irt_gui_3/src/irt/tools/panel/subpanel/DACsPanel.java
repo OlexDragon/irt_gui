@@ -9,8 +9,11 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,41 +29,41 @@ import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import irt.controller.AdcController;
-import irt.controller.DeviceDebugController;
 import irt.controller.SwitchController;
 import irt.controller.TextSliderController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.DeviceDebagGetter;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.data.PacketWork;
+import irt.data.RegisterValue;
 import irt.data.RundomNumber;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ControllerFocusListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
+import irt.tools.RegisterTextField;
 import irt.tools.CheckBox.SwitchBox;
 
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel {
 
-	private JTextField txtDAC1;
-	private JTextField txtDAC2;
-	private JTextField txtDAC3;
-	private JTextField txtDAC4;
+	private RegisterTextField txtDAC1;
+	private RegisterTextField txtDAC2;
+	private RegisterTextField txtDAC3;
+	private RegisterTextField txtDAC4;
 	private JSlider slider;
 	private JLabel lblDAC1;
 	private JLabel lblDAC2;
 	private JLabel lblDAC3;
 	private JLabel lblDAC4;
 
-	private JTextField activeTextField;
+	private RegisterTextField activeTextField;
 	private SwitchBox switchBoxCalibrationModeswitchBox;
 	private JTextField txtStep;
 	private JCheckBox chckbxStep;
@@ -83,46 +86,78 @@ public class DACsPanel extends JPanel {
 	private JTextField txtGainOffset;
 	private JSlider sliderGainOffset;
 
+	private final FocusListener dacfocusListener = new FocusListener() {
+		@Override public void focusGained(FocusEvent e) {
+			final RegisterTextField source = (RegisterTextField) e.getSource();
+			setColors(source);
+			setSliderValue(source);
+		}
+		private void setSliderValue(RegisterTextField registerTextField) {
+			final String text = registerTextField.getText();
+			if(text.isEmpty())
+				return;
+
+			slider.setValue(Integer.parseInt(text.replaceAll("\\D", "")));
+		}
+		private void setColors(RegisterTextField registerTextField) {
+			if(activeTextField!=null){
+				activeTextField.setBackground(Color.WHITE);
+				activeTextField.start();
+			}
+
+			activeTextField = registerTextField;
+			activeTextField.stop();
+
+			activeTextField.setBackground(Color.YELLOW);
+		}
+		@Override public void focusLost(FocusEvent e) {}
+	};
+
 	public DACsPanel(final int deviceType, final LinkHeader linkHeader) {
 
 		setLayout(null);
+		final byte unitAddr = linkHeader==null ? 0 :  linkHeader.getAddr();
 		addAncestorListener(new AncestorListener() {
 			private List<ControllerAbstract> threadList = new ArrayList<>();
 
-			private ControllerFocusListener controllerFocusListener = new ControllerFocusListener() {
-
-				@Override
-				public void focusGained(ValueChangeEvent valueChangeEvent) {
-					if(activeTextField!=null)
-						activeTextField.setBackground(Color.WHITE);
-
-					activeTextField = (JTextField) valueChangeEvent.getSource();
-					activeTextField.setBackground(Color.YELLOW);
-				}
-			};
+//			private ControllerFocusListener controllerFocusListener = new ControllerFocusListener() {
+//
+//				@Override
+//				public void focusGained(ValueChangeEvent valueChangeEvent) {
+//					if(activeTextField!=null)
+//						activeTextField.setBackground(Color.WHITE);
+//
+//					activeTextField = (JTextField) valueChangeEvent.getSource();
+//					activeTextField.setBackground(Color.YELLOW);
+//				}
+//			};
 
 			public void ancestorAdded(AncestorEvent arg0) {
+				txtDAC1.start();
+				txtDAC2.start();
+				txtDAC3.start();
+				txtDAC4.start();
 
-				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
-
-				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC2, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
-
-				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC3, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
-
-				startController(linkHeader==null || linkHeader.getAddr()==0 ?
-						new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
-							new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_ID_DEVICE_DEBAG_CONVERTER_DAC4, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+//				startController(unitAddr==0 ?
+//						new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 1, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+//							new DeviceDebugController(deviceType, "DAC 1 Controller", txtDAC1, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 1, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+//
+//				startController(unitAddr==0 ?
+//						new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 2, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+//							new DeviceDebugController(deviceType, "DAC 2 Controller", txtDAC2, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 2, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+//
+//				startController(unitAddr==0 ?
+//						new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 3, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+//							new DeviceDebugController(deviceType, "DAC 3 Controller", txtDAC3, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 3, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
+//
+//				startController(unitAddr==0 ?
+//						new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(null, 4, 0, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS) :
+//							new DeviceDebugController(deviceType, "DAC 4 Controller", txtDAC4, slider, new Value(0, 0, 4095, 0), new DeviceDebagSetter(linkHeader, 100, 4, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), -1, Style.CHECK_ALWAYS));
 
 				//Calibration mode
 				startController(new SwitchController(deviceType, "Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, PacketImp.GROUP_ID_DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_ID_DEVICE_DEBAG_CALIBRATION_MODE)));
 
-				if(linkHeader==null || linkHeader.getAddr()==0){
+				if(unitAddr==0){
 					Value value = new Value(0, 0, 4095, 0);
 					startController(new AdcController(deviceType, "Input Power Controller", lblInputPower, new DeviceDebagGetter(null,  10, 0, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
 
@@ -152,8 +187,8 @@ public class DACsPanel extends JPanel {
 
 			public void startController(ControllerAbstract abstractController) {
 				threadList.add(abstractController);
-				if(abstractController instanceof DeviceDebugController)
-					((DeviceDebugController)abstractController).addFocusListener(controllerFocusListener);
+//				if(abstractController instanceof DeviceDebugController)
+//					((DeviceDebugController)abstractController).addFocusListener(controllerFocusListener);
 
 				Thread t = new Thread(abstractController, "DACsPanel."+abstractController.getName()+"-"+new RundomNumber());
 				int priority = t.getPriority();
@@ -165,10 +200,16 @@ public class DACsPanel extends JPanel {
 			public void ancestorMoved(AncestorEvent arg0) {
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
+
+				txtDAC1.stop();
+				txtDAC2.stop();
+				txtDAC3.stop();
+				txtDAC4.stop();
+
 				for(ControllerAbstract t:threadList){
 					t.stop();
-					if(t instanceof DeviceDebugController)
-						((DeviceDebugController)t).removeFocusListener(controllerFocusListener);
+//					if(t instanceof DeviceDebugController)
+//						((DeviceDebugController)t).removeFocusListener(controllerFocusListener);
 				}
 				threadList.clear();
 			}
@@ -193,41 +234,100 @@ public class DACsPanel extends JPanel {
 		Font font = new Font("Tahoma", Font.PLAIN, 14);
 
 		slider = new JSlider();
+		slider.setMinimum(0);
+		slider.setMaximum(4095);
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setOpaque(false);
 		slider.setBounds(251, 8, 22, 260);
 		add(slider);
+		slider.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if(activeTextField!=null)
+					activeTextField.setText(Integer.toString(slider.getValue()));
+			}
+		});
+		slider.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if(activeTextField!=null)
+					activeTextField.send();
+			}
+		});
+		slider.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				if(activeTextField!=null)
+					activeTextField.stop();
+			}
+			@Override
+			public void focusLost(FocusEvent e) {
+				if(activeTextField!=null)
+					activeTextField.start();
+			}
+		});
 
-		txtDAC1 = new JTextField();
-		txtDAC1.setText("0");
+		int index;
+		int rAddr;
+		if(unitAddr==0){
+			index = 1;
+			rAddr = 0;
+		}else{
+			index = 100;
+			rAddr = 1;
+		}
+		RegisterValue registerValue = new RegisterValue(index, rAddr, null);
+		txtDAC1 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, 0, 4095);
+		txtDAC1.start();
 		txtDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC1.setColumns(10);
 		txtDAC1.setBounds(186, 16, 55, 20);
+		txtDAC1.addFocusListener(dacfocusListener);
 		add(txtDAC1);
 		txtDAC1.setFont(font);
 
-		txtDAC2 = new JTextField();
+		if(unitAddr==0)
+			index++;
+		else
+			rAddr++;
+
+		registerValue = new RegisterValue(index, rAddr, null);
+		txtDAC2 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2, 0, 4095);
+		txtDAC2.start();
 		txtDAC2.setEnabled(false);
-		txtDAC2.setText("0");
 		txtDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC2.setColumns(10);
 		txtDAC2.setBounds(186, 44, 55, 20);
+		txtDAC2.addFocusListener(dacfocusListener);
 		add(txtDAC2);
 		txtDAC2.setFont(font);
 
-		txtDAC3 = new JTextField();
-		txtDAC3.setText("0");
+		if(unitAddr==0)
+			index++;
+		else
+			rAddr++;
+
+		registerValue = new RegisterValue(index, rAddr, null);
+		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3, 0, 4095);
+		txtDAC3.start();
 		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC3.setColumns(10);
 		txtDAC3.setBounds(186, 72, 55, 20);
+		txtDAC3.addFocusListener(dacfocusListener);
 		add(txtDAC3);
 		txtDAC3.setFont(font);
 
-		txtDAC4 = new JTextField();
-		txtDAC4.setText("0");
+		if(unitAddr==0)
+			index++;
+		else
+			rAddr++;
+
+		registerValue = new RegisterValue(index, rAddr, null);
+		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4, 0, 4095);
+		txtDAC4.start();
 		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC4.setColumns(10);
 		txtDAC4.setBounds(187, 100, 55, 20);
+		txtDAC4.addFocusListener(dacfocusListener);
 		add(txtDAC4);
 		txtDAC4.setFont(font);
 

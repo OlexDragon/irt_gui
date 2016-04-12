@@ -31,8 +31,8 @@ public class RegisterTextField extends JTextField implements PacketListener {
 	private static final long serialVersionUID = 517630309792962880L;
 	private final Logger logger = LogManager.getLogger();
 
-	public static final int MIN = 0;
-	public static final int MAX = 896;
+	public final int MIN;
+	public final int MAX;
 
 	private PacketWork getPacket;
 	private PacketWork setPacket;
@@ -45,12 +45,16 @@ public class RegisterTextField extends JTextField implements PacketListener {
 
 	private final TextFieldUpdater updater 		= new TextFieldUpdater();
 
-	public RegisterTextField(Byte linkAddr, RegisterValue value, short packetId) {
+	public RegisterTextField(Byte linkAddr, RegisterValue value, short packetId, int min, int max) {
 
+		MIN = min;
+		MAX = max;
+
+		value.setValue(null); // if value is null packet type is REQIEST
 		getPacket = new RegisterPacket(linkAddr, value, packetId);
 
 		valueToSend = new RegisterValue(value);
-		valueToSend.setValue( new Value(896, MIN, MAX, 0));
+		valueToSend.setValue( new Value(896, MIN, MAX, 0)); // if value not null packet type is COMMAND
 		setPacket = new RegisterPacket(linkAddr, valueToSend, packetId);
 
 		valueSaveRegister = new RegisterValue(value.getIndex(), value.getAddr()+3, new Value(0, 0, 0, 0));
@@ -146,6 +150,7 @@ public class RegisterTextField extends JTextField implements PacketListener {
 				try{
 
 					if(packet.equals(getPacket)){
+
 						final RegisterValue registerValue = packet.getPayload(0).getRegisterValue();
 						if(registerValue.equals(valueSaveRegister))
 							showSaved();

@@ -117,6 +117,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		}
 	}
 
+	//****************************** class Updater **************************************
 	public class Updater implements Runnable {
 
 		private Packet packet;

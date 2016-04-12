@@ -38,16 +38,26 @@ public class ComPortThreadQueue extends Thread {
 	public void run() {
 
 		boolean sent = false;
+		PacketWork packetWork = null;
 		while(true){
 			try {
 
-				PacketWork packetWork = comPortQueue.take();
+				packetWork = comPortQueue.take();
 
 				if(serialPort!=null){
 					PacketThreadWorker packetThread = packetWork.getPacketThread();
 
 					if(packetThread!=null){
 						packetThread.join();
+
+						Packet packet = packetThread.getPacket();
+						if(packet==null){
+							logger.warn(packetWork);
+							continue;
+						}
+
+//						if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND)
+//							logger.error(packetThread);
 
 						if(serialPort.isOpened() && packetThread.isReadyToSend()) {
 							sent = false;
