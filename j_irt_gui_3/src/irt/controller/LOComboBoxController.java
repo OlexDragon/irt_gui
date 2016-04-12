@@ -24,6 +24,7 @@ import irt.controller.interfaces.IrtController;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.IdValue;
 import irt.data.LOIdValue;
+import irt.data.MyThreadFactory;
 import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LOFrequenciesPacket;
@@ -40,7 +41,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 
 	private final 	PacketListener 			pl 		= this;
 	private final 	ComPortThreadQueue 		cptq 	= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
+	private final 	ScheduledExecutorService scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private final 	ScheduledFuture<?> 		scheduleAtFixedRate;
 	private final 	LOPacket 				loPacket;
 

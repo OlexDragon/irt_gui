@@ -40,6 +40,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.network.NetworkAddress;
 import irt.data.network.NetworkAddress.AddressType;
@@ -56,7 +57,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	private final Logger logger = LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	public  final 	ScheduledExecutorService 	services = Executors.newScheduledThreadPool(1);
+	public  final 	ScheduledExecutorService 	services = Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	NetworkAddressPacket 		packet;
 	private final 	NetworkAddress				networkAddress = new NetworkAddress();

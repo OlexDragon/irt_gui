@@ -1,5 +1,8 @@
 package irt.data;
 
+import java.util.Arrays;
+
+import irt.data.packet.PacketImp;
 import irt.data.value.Value;
 
 public class RegisterValue {
@@ -47,8 +50,7 @@ public class RegisterValue {
 
 	@Override
 	public String toString() {
-		return "RegisterValue [index=" + index + ", addr=" + addr + ", value="
-				+ value + "]";
+		return "RegisterValue [index=" + index + ", addr=" + addr + ", value=" + value + "]";
 	}
 
 	public void setValue(Value value) {
@@ -61,5 +63,22 @@ public class RegisterValue {
 
 	public void setIndex(int index) {
 		this.index = index;
+	}
+
+	public byte[] toBytes() {
+
+		final byte[] i = PacketImp.toBytes(index);
+		final byte[] a = PacketImp.toBytes(addr);
+		final boolean valueIsNotNull = value != null;
+
+		final byte[] result = Arrays.copyOf(i, valueIsNotNull ? 12 : 8);
+
+		System.arraycopy(a, 0, result, 4, a.length);
+
+		if(valueIsNotNull){
+			 final byte[] v =value.toBytes();
+			 System.arraycopy(v, 4, result, 8, 4);
+		}
+		return result;
 	}
 }

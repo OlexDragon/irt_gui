@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
@@ -61,7 +62,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	private static final ImageIcon ICON_BUC_A = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg"));
 
 	private final 	ComPortThreadQueue 			cptq 		= GuiControllerAbstract.getComPortThreadQueue();
-	public  final 	ScheduledExecutorService 	services 	= Executors.newScheduledThreadPool(1);
+	public  final 	ScheduledExecutorService 	services 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 
 	private final	RedundancyEnablePacket		redundancyEnablePacket;

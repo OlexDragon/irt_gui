@@ -10,13 +10,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.serial_port.ComPortThreadQueue;
+import irt.data.MyThreadFactory;
 import irt.data.packet.AlarmStatusPacket;
 
 public class AlarmPacketSender{
 
 	private final Logger logger = LogManager.getLogger();
 
-	private final ScheduledExecutorService scheduler =  Executors.newScheduledThreadPool(1);
+	private final ScheduledExecutorService scheduler =  Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private final ScheduledFuture<?> processHandle;
 
 	private final AlarmStatusPacket packet; 			public AlarmStatusPacket getPacket() { return packet; }

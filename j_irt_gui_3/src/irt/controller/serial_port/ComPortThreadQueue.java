@@ -49,6 +49,8 @@ public class ComPortThreadQueue extends Thread {
 					if(packetThread!=null){
 						packetThread.join();
 
+						logger.error(packetThread.getPacket().getHeader().getTypeStr());
+
 						if(serialPort.isOpened() && packetThread.isReadyToSend()) {
 							sent = false;
 

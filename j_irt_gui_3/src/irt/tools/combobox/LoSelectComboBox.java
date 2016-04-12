@@ -27,6 +27,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.IdValueFreq;
 import irt.data.Listeners;
+import irt.data.MyThreadFactory;
 import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LOFrequenciesPacket;
@@ -45,7 +46,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 	private final 	DefaultComboBoxModel<IdValueFreq> model = new DefaultComboBoxModel<>();
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService	scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
+	private final 	ScheduledExecutorService	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		PacketWork 					packetToSend;
 	private final 	ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	Updater			 			updater = new Updater();

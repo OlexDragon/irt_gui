@@ -18,6 +18,7 @@ import org.apache.logging.log4j.core.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.ComPortThreadQueue;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.AlarmsIDsPacket;
 import irt.data.packet.LinkHeader;
@@ -31,7 +32,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	protected final Logger logger = (Logger) LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 		cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
+	private final 	ScheduledExecutorService scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private final 	ScheduledFuture<?> 		scheduleAtFixedRate;
 	private final 	PacketSender 			alarmGetter 			= new PacketSender();
 

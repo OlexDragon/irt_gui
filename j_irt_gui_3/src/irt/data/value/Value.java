@@ -7,6 +7,8 @@ import java.util.Observable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.packet.PacketImp;
+
 public class Value extends Observable{
 
 	protected final Logger logger = LogManager.getLogger();
@@ -318,5 +320,9 @@ public class Value extends Observable{
 	@Override
 	public String toString() {
 		return toString(value);
+	}
+
+	public byte[] toBytes() {
+		return PacketImp.toBytes(value);
 	}
 }

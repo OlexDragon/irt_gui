@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
+import irt.data.MyThreadFactory;
 import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.ALCEnablePacket;
@@ -29,7 +30,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	protected final Logger logger = LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
+	private	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 
 	private final ALCEnablePacket packet;

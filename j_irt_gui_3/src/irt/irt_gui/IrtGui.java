@@ -75,7 +75,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.098";
+	public static final String VERTION = "- 3.099";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -453,8 +453,7 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected Font doInBackground() throws Exception {
 				try {
-					return new Font(IrtPanel.PROPERTIES.getProperty("font_name"), IrtPanel.parseFontStyle(IrtPanel.PROPERTIES
-							.getProperty("font_style")), 12);
+					return new Font(IrtPanel.PROPERTIES.getProperty("font_name"), IrtPanel.parseFontStyle(IrtPanel.PROPERTIES.getProperty("font_style")), 12);
 				} catch (Exception e) {
 					logger.catching(e);
 					return null;

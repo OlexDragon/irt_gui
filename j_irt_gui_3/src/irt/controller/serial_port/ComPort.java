@@ -257,11 +257,10 @@ do{
 
 		timer.stop();
 
-		logger.trace(marker, "<< Get: {}", packet);
 		Console.appendLn(packet, "Get");
 		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 
-		return logger.exit(packet);
+		return packet;
 	}
 
 	private byte[] getAcknowledge() {

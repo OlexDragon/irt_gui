@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.FireValue;
+import irt.data.MyThreadFactory;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 
@@ -18,7 +19,7 @@ public class ValueChangeListenerClass {
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	protected 	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1);
+	protected 	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 	final 	EventListenerList 			valueChangeListeners 	= new EventListenerList();
 
 	public void addVlueChangeListener(ValueChangeListener valueChangeListener) {

@@ -208,7 +208,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		JPanel contentPane = (JPanel) gui.getContentPane();
 		Component[] components = contentPane.getComponents();
-		for(Component c:components)
+		for(Component c:components){
 			switch(c.getClass().getSimpleName()){
 			case "UnitsContainer":
 				unitsPanel = (UnitsContainer) c;
@@ -227,7 +227,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						break;
 					}
 				}
-			case "IrtControllPanel":
+			case "IrtPanel":
 				c.addMouseListener(new MouseListener() {
 
 					@Override
@@ -242,6 +242,7 @@ public abstract class GuiControllerAbstract extends Thread {
 					@Override public void mouseClicked(MouseEvent e) {}
 				});
 			}
+		}
 		comPortThreadQueue.addPacketListener(packetListener);
 	}
 

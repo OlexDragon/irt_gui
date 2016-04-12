@@ -43,7 +43,6 @@ public class SwitchController extends ControllerAbstract {
 			}
 
 			private void doSwitch(SetterAbstract as, Object value) {
-				logger.error(logger.getName());
 
 				if(value!=null){
 					if(value instanceof Integer)
