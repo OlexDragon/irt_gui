@@ -90,7 +90,6 @@ public class ClientSocket implements Runnable{
 					}
 				}
 			}
-			logger.error("************************************************************************");
 
 		}catch(Exception ex){
 			logger.catching(ex);
@@ -98,8 +97,9 @@ public class ClientSocket implements Runnable{
 	}
 
 	public void send(LinkedPacket packet) throws JsonProcessingException {
-		if(!packets.add(packet))
-			logger.error("***");
+
+		packets.add(packet);
+
 		if(out!=null)
 			out.send(packet);
 	}

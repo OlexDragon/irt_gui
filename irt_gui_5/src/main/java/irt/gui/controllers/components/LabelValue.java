@@ -6,6 +6,7 @@ import java.util.Observable;
 import java.util.Optional;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -132,7 +133,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 		logger.entry(observable, arg);
 
 		updater.setPacket((LinkedPacket)observable);
-		SERVICES.execute(updater);
+		LinkedPacketsQueue.SERVICES.execute(updater);
 	}
 
 	private LinkedPacket createPacket(LinkedPacket packet){
@@ -170,7 +171,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 						final PacketErrors packetErrors = p.getPacketHeader().getPacketError();
 						if(packetErrors!=PacketErrors.NO_ERROR){
 							tooltipWorker.setMessage(packetErrors.toString());
-							SERVICES.execute(tooltipWorker);
+							LinkedPacketsQueue.SERVICES.execute(tooltipWorker);
 							logger.warn("The Packet has error:{}", p);
 							return;
 						}
@@ -233,7 +234,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 				});
 			else{
 				tooltipWorker.setMessage("No answer.");
-				SERVICES.execute(tooltipWorker);
+				LinkedPacketsQueue.SERVICES.execute(tooltipWorker);
 			}
 			}catch(Exception ex){
 				logger.catching(ex);

@@ -11,28 +11,36 @@
 			<contextMenu>
 				<ContextMenu fx:id="contextMenu">
 					<items>
-						<Menu fx:id="menuRegister" mnemonicParsing="false" text="Add Register TextField" />
-                  <Menu fx:id="menuValueLabel" mnemonicParsing="false" text="Add Value Label" />
-                  <Menu fx:id="menuRegisterLabel" mnemonicParsing="false" text="Add Register Label" />
-                  <Menu fx:id="menuControl" mnemonicParsing="false" text="Add Control" />
-                  <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemRemove" text="Remove" />
-                  <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemClear" text="Clear" />
-						<SeparatorMenuItem mnemonicParsing="false" />
-						<MenuItem fx:id="menuItemShowGrid" mnemonicParsing="false" onAction="#showGridonActionMenuItems" text="Show Grid" />
-                  <Menu fx:id="menuAlignment" mnemonicParsing="false" onAction="#alignmentonActionMenuItems" text="Alignment" />
-						<SeparatorMenuItem mnemonicParsing="false" />
-						<MenuItem fx:id="menuItemAddColumn" mnemonicParsing="false" onAction="#addColumnonActionMenuItems" text="Add Column" />
-						<MenuItem fx:id="menuItemDeleteColumn" disable="true" mnemonicParsing="false" onAction="#deleteColumnonActionMenuItems" text="Delete Column" />
-						<SeparatorMenuItem mnemonicParsing="false" />
-						<MenuItem fx:id="menuItemAddRow" mnemonicParsing="false" onAction="#addRowonActionMenuItems" text="Add Row" />
-						<MenuItem fx:id="menuItemDeleteRow" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemsDeleteRow" text="Delete Row" />
-                  <SeparatorMenuItem mnemonicParsing="false" />
-                  <Menu fx:id="menuBackground" mnemonicParsing="false" text="Background Image" />
+                  <Menu mnemonicParsing="false" text="Add">
+                     <items>
+      					<Menu fx:id="menuRegister" mnemonicParsing="false" text="Register TextField" />
+                        <Menu fx:id="menuValueLabel" mnemonicParsing="false" text="Value Label" />
+                        <Menu fx:id="menuRegisterLabel" mnemonicParsing="false" text="Register Label" />
+                        <Menu fx:id="menuControl" mnemonicParsing="false" text="Control" />
+                        <Menu fx:id="menuOther" mnemonicParsing="false" text="Other" />
+                     </items></Menu>
+                  <Menu mnemonicParsing="false" text="Set">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemRemove" text="Clear Field" />
+                        <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemClear" text="Clear Panel" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem fx:id="menuItemShowGrid" mnemonicParsing="false" onAction="#onActionMenuItemShowGridon" text="Show Grid" />
+                        <Menu fx:id="menuAlignment" mnemonicParsing="false" onAction="#alignmentonActionMenuItems" text="Alignment" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem mnemonicParsing="false" onAction="#onActionMenuItemAddColumn" text="Add Column" />
+      						<MenuItem fx:id="menuItemDeleteColumn" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemDeleteColumn" text="Delete Column" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem mnemonicParsing="false" onAction="#onActionMenuItemAddRow" text="Add Row" />
+      						<MenuItem fx:id="menuItemDeleteRow" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemDeleteRow" text="Delete Row" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <Menu fx:id="menuBackground" mnemonicParsing="false" text="Background Image" />
+                    </items>
+                  </Menu>
 					</items>
 				</ContextMenu>
 			</contextMenu>
 		</Label>
-		<VBox alignment="CENTER" fillWidth="false" onMouseEntered="#paneMouseEntered" styleClass="mouseOver" />
+		<VBox alignment="CENTER" fillWidth="false" onMouseEntered="#onMouseEntered" styleClass="mouseOver" />
 	</children>
 	<columnConstraints>
 		<ColumnConstraints hgrow="ALWAYS" />

@@ -22,7 +22,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 
-public class AlarmFieldController extends FieldsControllerAbstract implements Initializable{
+public class AlarmFieldController extends FieldsControllerAbstract implements Initializable {
 
 	@FXML private Label titleLabel;
 	@FXML private Label valueLabel;
@@ -36,15 +36,12 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 //	private URL location;
 	private AlarmSeverities alarmSeverities;
 
-
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
+	@Override public void initialize(URL location, ResourceBundle resources) {
 		bundle = resources;
 //		this.location = location;
 	}
 
-	@Override
-	protected Duration getPeriod() {
+	@Override protected Duration getPeriod() {
 		return Duration.ofSeconds(3);
 	}
 
@@ -59,8 +56,7 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 		addLinkedPacket(alarmName);
 	}
 
-	@Override
-	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
+	@Override protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.entry( packet);
 
 		LinkedPacket p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer(), true) {

@@ -18,8 +18,9 @@ public class MutePacket extends PacketAbstract implements ConfigurationGroup{
 	public static final PacketId PACKET_ID = PacketId.CONFIGURATION_MUT;
 
 	public enum MuteStatus{
-		MUTED,
-		UNMUTED
+		UNMUTED,
+		MUTED
+		
 	}
 
 	public MutePacket() throws PacketParsingException {

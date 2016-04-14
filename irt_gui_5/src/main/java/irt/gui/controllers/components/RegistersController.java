@@ -23,6 +23,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.interfaces.OtherFields;
+import irt.gui.controllers.interfaces.ScheduledNode;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextFieldFocusListener;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
@@ -74,7 +76,7 @@ public class RegistersController implements Observer {
     @FXML private Button 		resetButton;
     @FXML private CheckBox 		stepCheckBox;
     @FXML private TextField 	stepTextField;
-    @FXML private PanelRegisters PanelRegistersController;
+    @FXML private PanelRegisters panelRegistersController;
 
     @FXML private MenuItem 		menuSave;
     @FXML private Menu			menuProfile;
@@ -159,11 +161,11 @@ public class RegistersController implements Observer {
 			RadioMenuItem rmi = (RadioMenuItem)e.getSource();
 			profileId = Integer.parseInt(((String) rmi.getUserData()));// get profile ID
 			setRowsAndColumns(profileId);
-			setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class);
+			setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class, OtherFields.class);
 			menuSave.setDisable(false);
-			PanelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
+			panelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
 			setAlignment(profileId);
-			slider.toFront();
+//			slider.toFront();
 
 		}catch(Exception ex){
 			logger.catching(ex);
@@ -223,7 +225,7 @@ public class RegistersController implements Observer {
     	new TextFieldFocusListener(stepTextField);
     	stepTextField.focusedProperty().addListener(stepTextFieldFocusListener);
 
-		PanelRegistersController.setFocusListener(focusListenerRegisterPanel);
+		panelRegistersController.setFocusListener(focusListenerRegisterPanel);
 
 		slider.valueProperty().addListener(sliderValueChangeListener);
 
@@ -231,13 +233,13 @@ public class RegistersController implements Observer {
     }
 
 	@FXML private void onActionNewProfile(){
-		PanelRegistersController.setColumnsAndRows(1, 1);
+		panelRegistersController.setColumnsAndRows(1, 1);
 		menuSave.setDisable(true);
 	}
 
 	@FXML private void onActionResetButton(ActionEvent event) {
     	try {
-			PanelRegistersController.reset();
+			panelRegistersController.reset();
 		} catch (Exception e) {
 			logger.catching(e);
 		}
@@ -245,7 +247,7 @@ public class RegistersController implements Observer {
 
     @FXML private void saveValues(ActionEvent event) {
     	try {
-			PanelRegistersController.save();
+			panelRegistersController.save();
 		} catch (Exception e) {
 			logger.catching(e);
 		}
@@ -290,14 +292,15 @@ public class RegistersController implements Observer {
     }
 
 	@FXML private void onActionMenuItemsSave(){
-		dialog.getEditor().setText(IrtGuiProperties.getProperty(String.format(REGISTER_PROPERTY_NAME_ID, profileId)));
-    	Optional<String> result = dialog.showAndWait();
-    	result.ifPresent(name->{
-    		try {
-				saveProfile(name);
-			} catch (Exception e) {
-				logger.catching(e);
-			}
+
+		dialog.
+		getEditor()
+		.setText(IrtGuiProperties.getProperty(String.format(REGISTER_PROPERTY_NAME_ID, profileId)));
+
+		dialog
+		.showAndWait()
+    	.ifPresent(name->{
+    		try { saveProfile(name); } catch (Exception e) { logger.catching(e); }
     	});
     }
 
@@ -311,7 +314,7 @@ public class RegistersController implements Observer {
 			editable = b;
 			Platform.runLater(()->{
 
-				PanelRegistersController.setEditable(editable);
+				panelRegistersController.setEditable(editable);
 
 				if(!editable)
 					slider.setDisable(true);
@@ -337,39 +340,50 @@ public class RegistersController implements Observer {
     }
 
     private void saveProfile(String profileName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException, FileNotFoundException, IOException{
+ 
     	final Properties propertiesFromFile = getPropertiesFromFile();
     	updateProperties(propertiesFromFile, profileId, profileName);
 
-    	logger.trace(propertiesFromFile);
-    	try(final FileOutputStream outputStream = new FileOutputStream(new File(IrtGuiProperties.IRT_HOME, IrtGuiProperties.getPropertiesFileName()));){
+    	final String fileName 	= IrtGuiProperties.getPropertiesFileName();
+		final File file 		= new File(IrtGuiProperties.IRT_HOME, fileName);
+		try(final FileOutputStream outputStream = new FileOutputStream(file);){
     		propertiesFromFile.store(outputStream, "Gui5 Properties");
     	}
+
+		//Reload Properties and Profile Menu
+		IrtGuiProperties.reload();
+		menuProfile.getItems().clear();
+		createProfileMenuItems();
 	}
 
 	private void updateProperties(Properties propertiesFromFile, int profileId, String profileName) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 
 		propertiesFromFile.put(String.format(REGISTER_PROPERTY_NAME_ID	, profileId), profileName);
-		propertiesFromFile.put(String.format(REGISTER_ROW_ID			, profileId), Integer.toString(PanelRegistersController.getRowCount()));
-		propertiesFromFile.put(String.format(REGISTER_COLUMN_ID			, profileId), Integer.toString(PanelRegistersController.getColumnCount()));
+		propertiesFromFile.put(String.format(REGISTER_ROW_ID			, profileId), Integer.toString(panelRegistersController.getRowCount()));
+		propertiesFromFile.put(String.format(REGISTER_COLUMN_ID			, profileId), Integer.toString(panelRegistersController.getColumnCount()));
 
 		//TextFields properties
 		removeProperties(propertiesFromFile, String.format( TextFieldRegister.FIELD_KEY_ID, profileId));
 		putProperies(propertiesFromFile, profileId, TextFieldRegister.class);
 
-		//remove LabelValue properties
+		//LabelValue properties
 		removeProperties(propertiesFromFile, String.format( LabelValue.FIELD_KEY_ID, profileId));
 		putProperies(propertiesFromFile, profileId, LabelValue.class);
 
-		//remove LabelRegister properties
+		//LabelRegister properties
 		removeProperties(propertiesFromFile, String.format( LabelRegister.FIELD_KEY_ID, profileId));
 		putProperies(propertiesFromFile, profileId, LabelRegister.class);
 
-		final String backgroundPath = PanelRegistersController.getBackgroundPath();
+		//Other properties
+		removeProperties(propertiesFromFile, String.format( OtherFields.FIELD_KEY_ID, profileId));
+		putOtherFieldsProperies(propertiesFromFile, profileId);
+
+		final String backgroundPath = panelRegistersController.getBackgroundPath();
 		if(backgroundPath!=null)
 			propertiesFromFile.put(String.format(REGISTER_BACKGROUND_ID, profileId), backgroundPath);
 
 		//put TextFields alignment properties
-		PanelRegistersController
+		panelRegistersController
 		.getVBoxesAlignmentProperties()
 		.parallelStream()
 		.forEach(align->{
@@ -382,11 +396,20 @@ public class RegistersController implements Observer {
 		});
 	}
 
-	private void putProperies(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNodeAbstract> nodeClass) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+	private void putOtherFieldsProperies(Properties propertiesFromFile, int profileId) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		List<Map<String, Object>> otherFieldsProperties = panelRegistersController.getOtherFieldsProperties();
 
-		logger.entry( propertiesFromFile, profileId, nodeClass);
+		otherFieldsProperties
+		.parallelStream()
+		.forEach(tfp->{
+			String key = String.format(OtherFields.FIELD_KEY, profileId, tfp.get("column"), tfp.get("row"));
+			propertiesFromFile.put(key, tfp.get("name"));
+		});
+	}
 
-		List<Map<String, Object>> textFieldsProperties = PanelRegistersController.getFieldsProperties(nodeClass);
+	private void putProperies(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNode> nodeClass) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+
+		List<Map<String, Object>> textFieldsProperties = panelRegistersController.getFieldsProperties(nodeClass);
 
 		textFieldsProperties
 		.parallelStream()
@@ -395,7 +418,7 @@ public class RegistersController implements Observer {
 		});
 	}
 
-	private void putProperties(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNodeAbstract> nodeClass, Map<String, Object> tfp) {
+	private void putProperties(Properties propertiesFromFile, int profileId, Class<? extends ScheduledNode> nodeClass, Map<String, Object> tfp) {
 		try {
 
 			Field field = nodeClass.getField("FIELD_KEY");
@@ -457,6 +480,7 @@ public class RegistersController implements Observer {
 		final List<RadioMenuItem> menuItems = selectFromProperties
 				.entrySet()
 				.parallelStream()
+				.sorted((a, b)->((String)a.getValue()).compareTo((String) b.getValue()))
 				.map(p->{
 					final RadioMenuItem radioMenuItem = new RadioMenuItem((String)p.getValue());
 					radioMenuItem.setUserData(((String)p.getKey()).replace(REGISTER_PROPERTY_NAME, ""));
@@ -468,7 +492,7 @@ public class RegistersController implements Observer {
 				})
 				.collect(Collectors.toList());
 		final ObservableList<MenuItem> items = menuProfile.getItems();
-		((RadioMenuItem)items.get(0)).setToggleGroup(profilesToggleGroup);
+//		((RadioMenuItem)items.get(0)).setToggleGroup(profilesToggleGroup);
 		items.addAll(menuItems);
 	}
 
@@ -486,7 +510,7 @@ public class RegistersController implements Observer {
 						map.put("row", split[1]);
 						return map;
 					})
-					.forEach(map->PanelRegistersController.setAlignment(Pos.valueOf(map.get("pos")), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row"))))
+					.forEach(map->panelRegistersController.setAlignment(Pos.valueOf(map.get("pos")), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row"))))
 				);
 	}
 
@@ -499,45 +523,62 @@ public class RegistersController implements Observer {
 				.ofNullable(IrtGuiProperties.getProperty(String.format(REGISTER_COLUMN_ID, profileId)))		// Get Columns count
 				.filter(Objects::nonNull)
 				.map(Integer::parseInt)
-				.ifPresent(columns->PanelRegistersController.setColumnsAndRows( columns, rows)));
+				.ifPresent(columns->panelRegistersController.setColumnsAndRows( columns, rows)));
 	}
 
 	@SuppressWarnings("unchecked")
-	private void setNodesOf( int profileId, Class<? extends ScheduledNodeAbstract>... fieldClass) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private void setNodesOf( int profileId, Class<? extends ScheduledNode>... fieldClass) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
-		for(Class<? extends ScheduledNodeAbstract> c:fieldClass)
+		for(Class<? extends ScheduledNode> c:fieldClass)
 			setNodesOf(c, profileId);
 	}
 
-	private void setNodesOf(Class<? extends ScheduledNodeAbstract> fieldClass, int profileId) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+	private void setNodesOf(Class<? extends ScheduledNode> fieldClass, int profileId) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		final Field field = fieldClass.getField("FIELD_KEY_ID");
 		String key = String.format((String)field.get(null), profileId);
 
 		Optional
 		.ofNullable(IrtGuiProperties.selectFromProperties(key))
-		.ifPresent(property->property.entrySet()
-					.parallelStream()
-					.map(e->{
-						String[] split = ((String)e.getKey()).replace(key, "").split("\\.");
+		.ifPresent(property->
+							property.entrySet()
+							.parallelStream()
+							.map(e->{
+										String[] split = ((String)e.getKey()).replace(key, "").split("\\.");
 
-						Map<String, String>map = new HashMap<>();
-						map.put("key", (String) e.getValue());
-						map.put("column", split[0]);
-						map.put("row", split[1]);
-						return map;
-					})
-					.forEach(map->setNode(fieldClass, map))
+										Map<String, String>map = new HashMap<>();
+										map.put("key", (String) e.getValue());
+										map.put("column", split[0]);
+										map.put("row", split[1]);
+										return map;
+							})
+							.forEach(map->setNode(fieldClass, map))
 				);
 	}
 
-	private void setNode(Class<? extends ScheduledNodeAbstract> fieldClass, Map<String, String> map){
+	@SuppressWarnings("unchecked")
+	private void setNode(Class<? extends ScheduledNode> fieldClass, Map<String, String> map){
 
 		try {
-			final Node node = PanelRegistersController.setNode(fieldClass, map.get("key"), Integer.parseInt(map.get("column")), Integer.parseInt(map.get("row")));
+			final String key = map.get("key");
+			final int column = Integer.parseInt(map.get("column"));
+			final int row = Integer.parseInt(map.get("row"));
+			final Class<? extends ScheduledNode> fc = fieldClass.equals(OtherFields.class) ?  (Class<? extends ScheduledNode>) Class.forName(key) : fieldClass;
 
-			if(editable!= null && node instanceof TextField)
-				((TextField)node).setEditable(editable);
+			Platform.runLater(()->{
+				Node node;
+				try {
+
+
+					node = panelRegistersController.setNode(fc, key, column, row);
+					if(editable!= null && node instanceof TextField)
+						((TextField)node).setEditable(editable);
+
+				} catch (Exception e) {
+					logger.catching(e);
+				}
+
+			});
 
 		} catch (Exception e) {
 			logger.catching(e);

@@ -49,7 +49,6 @@ public class LinkedPacketsQueue implements Runnable {
 				SOCKET.startServer(comPort.getPortName());
 
 				comPort.send(packet);
-				logger.trace("\n\tResived data - {}", packet);
 				warnReported = false;
 
 			} else{

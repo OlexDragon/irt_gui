@@ -30,6 +30,9 @@
 						<MenuItem mnemonicParsing="false" onAction="#onActionScanUnitAddres" text="%address.scan" />
                   <MenuItem mnemonicParsing="false" onAction="#onActionNetworkInfo" text="%network.info" />
 					</items>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
 				</MenuButton>
 			</children>
 		</HBox>

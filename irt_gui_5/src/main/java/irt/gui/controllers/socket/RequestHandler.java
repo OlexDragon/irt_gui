@@ -34,7 +34,6 @@ public class RequestHandler implements Runnable {
 
 			String input;
 			while((input = in.readLine()) != null){
-				logger.error("in :{}", input);
 				final JsonNode readTree = mapper.readTree(input);
 				final Iterator<String> iterator = readTree.fieldNames();
 				if(iterator.hasNext()){

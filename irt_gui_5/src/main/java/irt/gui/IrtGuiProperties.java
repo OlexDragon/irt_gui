@@ -29,16 +29,9 @@ public class IrtGuiProperties {
 	private static final Set<String> defaultPaths = new LinkedHashSet<>(Arrays.asList("", IRT_HOME.getAbsolutePath(), DESKTOP.getAbsolutePath()));
 
 	static{
-		final InputStream resource = IrtGuiProperties.class.getResourceAsStream("/gui5.properties");
 		try {
 
-			properties.load(resource);
-
-			Optional
-			.ofNullable(properties.getProperty("gui.properties.file.path"))
-			.ifPresent((p)->defaultPaths.addAll(Arrays.asList(p.split(","))));
-
-			getPropertiesFromFiles();
+			reload();
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -103,5 +96,16 @@ public class IrtGuiProperties {
 		.entrySet()
 		.stream()
 		.forEach(e->properties.setProperty((String)e.getKey(), (String)e.getValue()));
+	}
+
+	public static void reload() throws IOException {
+		final InputStream resource = IrtGuiProperties.class.getResourceAsStream("/gui5.properties");
+		properties.load(resource);
+
+		Optional
+		.ofNullable(properties.getProperty("gui.properties.file.path"))
+		.ifPresent((p)->defaultPaths.addAll(Arrays.asList(p.split(","))));
+
+		getPropertiesFromFiles();
 	}
 }

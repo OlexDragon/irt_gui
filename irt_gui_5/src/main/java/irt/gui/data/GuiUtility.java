@@ -12,8 +12,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.components.ScheduledNodeAbstract;
 import javafx.application.Platform;

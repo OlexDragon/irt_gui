@@ -5,6 +5,7 @@ import java.util.Observer;
 import java.util.Optional;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.listeners.NumericChecker;
@@ -87,7 +88,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 			@Override
 			public void update(Observable observable, Object object) {
-				SERVICES.execute(new Runnable() {
+				LinkedPacketsQueue.SERVICES.execute(new Runnable() {
 
 						@Override
 						public void run() {
@@ -255,16 +256,16 @@ public class TextFieldRegister extends TextFieldAbstract {
 	}
 
 	@Override public void update(Observable observable, Object object) {
-		if(!packets.contains(observable))
-			try {
-				logger.error("{}:{}:{} {} {}", this, ((LinkedPacket)observable).getObservers(), valuePacket.getObservers(), observable, valuePacket);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				throw new UnsupportedOperationException("Auto-generated method stub", e);
-			}
+//		if(!packets.contains(observable))
+//			try {
+//				logger.error("{}:{}:{} {} {}", this, ((LinkedPacket)observable).getObservers(), valuePacket.getObservers(), observable, valuePacket);
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				throw new UnsupportedOperationException("Auto-generated method stub", e);
+//			}
 
 		if(packets.contains(observable))
-			SERVICES.execute(updater.setPacket(((LinkedPacket)observable)));
+			LinkedPacketsQueue.SERVICES.execute(updater.setPacket(((LinkedPacket)observable)));
 
 		else
 			((LinkedPacket)observable).deleteObserver(this);

@@ -11,6 +11,7 @@ import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.observable.alarms.AlarmStatusPacket.AlarmSeverities;
 import irt.gui.data.packet.observable.measurement.StatusPacket;
 import irt.gui.errors.PacketParsingException;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -76,13 +77,17 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 		final String unmuted = AlarmSeverities.NO_ALARM.getStyleClass();
 
 		if((status & StatusByte.MUTE.ordinal()) != 0){
-			String value = bundle.getString("mute.muted");
-			muteLabel.setText(value);
+			Platform.runLater(()->{
+				final String value = bundle.getString("mute.muted");
+				muteLabel.setText(value);
+			});
 			setStyleClass(muteLabel, muted, unmuted);
 
 		}else{
-			String value = bundle.getString("mute.unmuted");
-			muteLabel.setText(value);
+			Platform.runLater(()->{
+				final String value = bundle.getString("mute.unmuted");
+				muteLabel.setText(value);
+			});
 			setStyleClass(muteLabel, unmuted, muted);
 		}
 	}
@@ -94,12 +99,12 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 
 		if((status & StatusByte.LOCK.ordinal()) != 0){
 			String value = bundle.getString("lock.locked");
-			lockLabel.setText(value);
+			Platform.runLater(()->lockLabel.setText(value));
 			setStyleClass(lockLabel, locked, notLocked);
 
 		}else{
 			String value = bundle.getString("lock.unlocked");
-			lockLabel.setText(value);
+			Platform.runLater(()->lockLabel.setText(value));
 			setStyleClass(lockLabel, notLocked, locked);
 		}
 	}

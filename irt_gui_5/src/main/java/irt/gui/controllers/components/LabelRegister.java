@@ -5,6 +5,7 @@ import java.util.Observable;
 import java.util.Optional;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.PacketHeader;
@@ -40,7 +41,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 	public static final String PROPERTY_NAMEs 	= "gui.value.label.register.names";		//All property names
 
 	public static final String FIELD_KEY_ID 		= RegistersController.REGISTER_PROPERTIES 		+ "registerLabel.%d.";
-	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.3.5.7)
+	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profileId.column.row (ex. gui.regicter.controller.textField.3.5.7)
 
 	private	volatile		Value			value;						/*Actual value	*/							public Value getValue() { return value; }
 
@@ -138,15 +139,16 @@ public class LabelRegister extends ScheduledNodeAbstract {
 
 		removeAllPackets();
 
-		int index = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "index"));
-		int address = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "addr"));
+		final String addr = IrtGuiProperties.getProperty(keyStartWith + "addr");
+		int index = Integer.parseInt(addr);	//TODO  Have to check why addr<->index
+		int address = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "index"));//TODO
 
 		addPacket(new RegisterPacket(new RegisterValue(index, address)));
 	}
 
 	@Override public void update(Observable observable, Object arg) {
 
-		SERVICES.execute(()->{
+		LinkedPacketsQueue.SERVICES.execute(()->{
 			LinkedPacket packet = (LinkedPacket)observable;
 			byte[] answer = packet.getAnswer();
 			if(answer!=null){
@@ -156,7 +158,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 					final PacketErrors packetErrors = packetHeader.getPacketError();
 					if(packetErrors!=PacketErrors.NO_ERROR){
 						tooltipWorker.setMessage(packetErrors.toString());
-						SERVICES.execute(tooltipWorker);
+						LinkedPacketsQueue.SERVICES.execute(tooltipWorker);
 						return;
 					}
 
@@ -169,7 +171,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 				});
 			}else{
 				tooltipWorker.setMessage("No answer.");
-				SERVICES.execute(tooltipWorker);
+				LinkedPacketsQueue.SERVICES.execute(tooltipWorker);
 			}
 		});
 	}

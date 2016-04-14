@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.listeners.FractionalNumberPlusPrefixChecker;
 import irt.gui.data.listeners.NumericChecker;
@@ -256,7 +257,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	@Override public void update(Observable observable, Object arg) {
 		logger.trace("{} : {}", observable, arg);
 		updater.setPacket(((LinkedPacket)observable));
-		SERVICES.execute(updater);
+		LinkedPacketsQueue.SERVICES.execute(updater);
 	}
 
 	//********************************************** class Updater   ***************************************************

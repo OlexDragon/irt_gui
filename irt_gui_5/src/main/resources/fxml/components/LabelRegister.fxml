@@ -19,7 +19,7 @@
       </AnchorPane>
    </center>
    <right>
-      <Label fx:id="registerLabel" alignment="CENTER_RIGHT" minWidth="40.0" text="Value" BorderPane.alignment="CENTER">
+      <Label fx:id="registerLabel" alignment="CENTER_RIGHT" minWidth="40.0" styleClass="value" text="Value" BorderPane.alignment="CENTER">
          <contextMenu>
             <ContextMenu fx:id="contextMenu">
                <items>

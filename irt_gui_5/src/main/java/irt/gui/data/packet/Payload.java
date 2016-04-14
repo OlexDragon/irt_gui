@@ -98,11 +98,11 @@ public class Payload {
 
 	public void setParameterHeader	(ParameterHeader parameterHeader)	{ this.parameterHeader= parameterHeader;			}
 
-	public void setBuffer(byte[] buffer	){
+	public void setBuffer(byte... buffer	){
 		this.buffer = buffer;
 		parameterHeader.setSize((short)(buffer!=null ?  buffer.length : 0));
 	}
-	public void setBuffer(byte value	)					{ setBuffer(new byte[]{value});			}
+	public void setBuffer(byte value	)					{ setBuffer(new byte[]{value});		}
 	public void setBuffer(short value	)					{ setBuffer(new byte[]{(byte) (value>>8),	(byte) value});		}
 	public void setBuffer(int value		)					{ setBuffer(Packet.toBytes(value));		}
 	public void setBuffer(long value	)					{ setBuffer(Packet.toBytes(value));		}

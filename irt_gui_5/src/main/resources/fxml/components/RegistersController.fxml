@@ -62,6 +62,9 @@
                       <MenuItem fx:id="menuSave" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemsSave" text="Save" />
                       <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemsSaveAs" text="Save as..." />
                     </items>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
                   </MenuButton>
                </children>
                <padding>
@@ -72,6 +75,6 @@
       </AnchorPane>
    </top>
    <center>
-      <fx:include fx:id="PanelRegisters" source="PanelRegisters.fxml" />
+      <fx:include fx:id="panelRegisters" source="PanelRegisters.fxml" />
    </center>
 </BorderPane>

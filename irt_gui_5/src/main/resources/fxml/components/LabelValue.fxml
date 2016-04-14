@@ -16,7 +16,7 @@
       </Label>
    </center>
    <right>
-      <Label fx:id="valueLabel" alignment="CENTER_RIGHT" text="Value">
+      <Label fx:id="valueLabel" alignment="CENTER_RIGHT" styleClass="value" text="Value">
          <contextMenu>
             <ContextMenu fx:id="contextMenu">
                <items>
