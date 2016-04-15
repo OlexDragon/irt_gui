@@ -42,8 +42,7 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 			doUpdate(true);
 	}
 
-	@Override
-	public void initialize(URL location, ResourceBundle resources) {
+	@Override public void initialize(URL location, ResourceBundle resources) {
 		bundle = resources;
 //		this.location = location;
 	}

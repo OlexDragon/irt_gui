@@ -11,6 +11,6 @@
       <Cursor fx:constant="HAND" />
    </cursor>
    <tooltip>
-      <Tooltip text="LO Select" />
+      <Tooltip text="%lo.select" />
    </tooltip>
 </ComboBox>

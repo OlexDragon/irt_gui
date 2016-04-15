@@ -12,9 +12,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.LinkedPacketsQueue;
+import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 
-public abstract class StartStopAbstract implements Runnable, Observer{
+public abstract class StartStopAbstract implements Runnable, Observer, FieldController{
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 	protected final			Set<LinkedPacket>	packets					= new HashSet<>();						//to get set value 
@@ -60,5 +61,13 @@ public abstract class StartStopAbstract implements Runnable, Observer{
 		.forEach(p->p.deleteObservers());
 
 		packets.clear();
+	}
+
+	@Override
+	public void doUpdate(boolean doUpdate) {
+		if(doUpdate)
+			start();
+		else
+			stop(true);
 	}
 }

@@ -1,75 +1,57 @@
 
 package irt.gui.controllers;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.prefs.Preferences;
 
 import de.jensd.shichimifx.utils.TabPaneDetacher;
-import irt.gui.controllers.components.DebugInfoController;
-import irt.gui.controllers.components.InfoController;
-import irt.gui.controllers.components.PanelNetworkController;
-import irt.gui.controllers.components.SerialPortController;
+import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.interfaces.FieldController;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 
 public class IrtGuiController{
 
-	private final Logger logger = LogManager.getLogger();
+	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
-	private Map<Tab, FieldController> controllersMap = new HashMap<>();
 	private int tabCount;
-
-	@FXML private AnchorPane serialPort;
-	@FXML private SerialPortController serialPortController;
-
-//	@FXML private TitledPane info;
-	@FXML private InfoController infoController;
-
-	// Right side
-	@FXML private Tab converterTab;
-	@FXML private Tab networkTab;
-	@FXML private PanelNetworkController networkController;
-	@FXML private Tab debugInfoTab;
-	@FXML private DebugInfoController debugInfoController;
 
 	@FXML private TabPane tabPane;
 
 	@FXML public void initialize() {
-		logger.entry();
-
-		controllersMap.put( networkTab		, networkController		);
-		controllersMap.put( debugInfoTab	, debugInfoController	);
 
 		TabPaneDetacher.create().makeTabsDetachable(tabPane);
-		tabCount = tabPane.getTabs().size();
+		ObservableList<Tab> tabs = tabPane.getTabs();
+		tabCount = tabs.size();
+
+		String selectedTabId = prefs.get("selected_tab_id", "biasTab");
+
+		tabs
+		.parallelStream()
+		.filter(t->t.getId().equals(selectedTabId))
+		.findAny()
+		.filter(t->!t.isSelected())
+		.ifPresent(t->tabPane.getSelectionModel().select(t));
 	}
 
-	@FXML public void selectionChanged(Event e){
+	@FXML public void onSelectionChanged(Event e){
 
-		if(!controllersMap.isEmpty()){
+		Tab tab = (Tab)e.getSource();
 
-			Tab tab = (Tab)e.getSource();
+		if(tab!=null){
+			final ObservableList<Tab> tabs = tabPane.getTabs();
+			final int size = tabs.size();
+			final boolean selected = tab.isSelected();
 
-			if(tab!=null){
-				final ObservableList<Tab> tabs = tabPane.getTabs();
-				final int size = tabs.size();
-				final boolean selected = tab.isSelected();
+			if(size>=tabCount || ( selected && size<=tabCount))
+				((FieldController)tab.getContent().getUserData()).doUpdate(selected);
 
-				if(size>=tabCount || ( selected && size<=tabCount)) {
-					final FieldController fieldController = controllersMap.get(tab);
-					fieldController.doUpdate(selected);
-				}
-				
-				tabCount = size;
-			}
+			tabCount = size;
+			if(selected && size>1)
+				prefs.put("selected_tab_id", tab.getId());
+
 		}
 	}
 }

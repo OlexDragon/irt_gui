@@ -40,7 +40,6 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 	/** update = true - start sending the packages to the device, false - stop*/
 	public void doUpdate(boolean update) {
-		logger.entry(update);
 		if(update) {
 			if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
 				scheduleAtFixedRate = LinkedPacketsQueue.SERVICES.scheduleAtFixedRate(packetSender, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);

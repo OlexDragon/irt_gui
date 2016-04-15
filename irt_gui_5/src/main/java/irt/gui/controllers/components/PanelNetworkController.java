@@ -21,6 +21,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.layout.AnchorPane;
 
 public class PanelNetworkController extends FieldsControllerAbstract {
 
@@ -34,11 +35,13 @@ public class PanelNetworkController extends FieldsControllerAbstract {
 	@FXML private NetworkFieldController maskController;
 	@FXML private NetworkFieldController gatewayController;
 
+	@FXML private AnchorPane networkPane;
 	@FXML private Button saveButton;
 	@FXML private Button canselButton;
 	@FXML private Button resetButton;
 
 	@FXML public void initialize(){
+		networkPane.setUserData(this);
 		try {
 
 			addLinkedPacket(new NetworkAddressPacket((NetworkAddress)null));

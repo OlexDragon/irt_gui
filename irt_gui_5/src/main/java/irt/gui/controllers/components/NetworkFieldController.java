@@ -59,21 +59,11 @@ public class NetworkFieldController{
 	@FXML private TextField textField4;
 
 	@FXML public void initialize(){
-		addTextFieldsChangeListener();
-	}
 
-	private void addTextFieldsChangeListener() {
 		textField1.textProperty().addListener(changeListener);
 		textField2.textProperty().addListener(changeListener);
 		textField3.textProperty().addListener(changeListener);
 		textField4.textProperty().addListener(changeListener);
-	}
-
-	private void removeTextFieldsChangeListener() {
-		textField1.textProperty().removeListener(changeListener);
-		textField2.textProperty().removeListener(changeListener);
-		textField3.textProperty().removeListener(changeListener);
-		textField4.textProperty().removeListener(changeListener);
 	}
 	
 	protected void setFields(byte[] ipAddress) {
@@ -81,21 +71,25 @@ public class NetworkFieldController{
 		objectProperty.set(ipAddress);
 
 		final String v1 = Integer.toString(ipAddress[0]&0xff);
-		final String v2 = Integer.toString(ipAddress[1]&0xff);
-		final String v3 = Integer.toString(ipAddress[2]&0xff);
-		final String v4 = Integer.toString(ipAddress[3]&0xff);
+		setFiel(textField1, v1);
 
-		Platform.runLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				removeTextFieldsChangeListener();
-				textField1.setText(v1);
-				textField2.setText(v2);
-				textField3.setText(v3);
-				textField4.setText(v4);
-				addTextFieldsChangeListener();
-			}
+		final String v2 = Integer.toString(ipAddress[1]&0xff);
+		setFiel(textField2, v2);
+
+		final String v3 = Integer.toString(ipAddress[2]&0xff);
+		setFiel(textField3, v3);
+
+		final String v4 = Integer.toString(ipAddress[3]&0xff);
+		setFiel(textField4, v4);
+
+	}
+
+	private void setFiel(TextField textField, String text){
+		if(!textField1.getText().equals(text))
+			Platform.runLater(()-> {
+				textField.textProperty().removeListener(changeListener);
+				textField.setText(text);
+				textField.textProperty().addListener(changeListener);
 		});
 	}
 

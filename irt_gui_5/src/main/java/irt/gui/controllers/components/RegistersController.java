@@ -17,12 +17,14 @@ import java.util.Observer;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.controllers.interfaces.OtherFields;
 import irt.gui.controllers.interfaces.ScheduledNode;
 import irt.gui.data.listeners.NumericChecker;
@@ -51,8 +53,14 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 
-public class RegistersController implements Observer {
+public class RegistersController implements Observer, FieldController {
+
+	public static final String KEY_PROFILE_ID = "profile_id";
+
+	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
 	private static final String ACTIVE 		= "active";
 
@@ -69,6 +77,9 @@ public class RegistersController implements Observer {
 	private static final String REGISTER_ALIGNMENT	 		= REGISTER_ALIGNMENT_ID 	+ "%d.%d";			//gui.regicter.controller.alignment.profikeId.column.row (ex. gui.regicter.controller.alignment.3.5.7)
 
 	private final Logger logger = LogManager.getLogger();
+
+	@FXML private BorderPane registersPane;
+	@FXML private GridPane panelRegisters;
 
 	@FXML private Slider 		slider;
 	@FXML private Button		buttonInitialize;
@@ -154,23 +165,29 @@ public class RegistersController implements Observer {
 		});
 	}
 
-	@SuppressWarnings("unchecked")
 	private final EventHandler<ActionEvent> onActionMenuSelectProfile = e->{
 		try{
 
 			RadioMenuItem rmi = (RadioMenuItem)e.getSource();
 			profileId = Integer.parseInt(((String) rmi.getUserData()));// get profile ID
-			setRowsAndColumns(profileId);
-			setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class, OtherFields.class);
-			menuSave.setDisable(false);
-			panelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
-			setAlignment(profileId);
+			showProfile(profileId);
 //			slider.toFront();
+
+			prefs.putInt(KEY_PROFILE_ID, profileId);
 
 		}catch(Exception ex){
 			logger.catching(ex);
 		}
 	};
+
+	@SuppressWarnings("unchecked")
+	private void showProfile(int profileId) throws NoSuchFieldException, IllegalAccessException {
+		setRowsAndColumns(profileId);
+		setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class, OtherFields.class);
+		menuSave.setDisable(false);
+		panelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
+		setAlignment(profileId);
+	}
 
     private final ChangeListener<Boolean> stepTextFieldFocusListener = (observable, oldValue, newValue)->{
 		if(newValue){
@@ -216,6 +233,8 @@ public class RegistersController implements Observer {
 	};
 
     @FXML private void initialize(){
+
+    	registersPane.setUserData(this);
  
     	buttonCalibModeController.addObserver(this);
     	buttonCalibModeController.addObserver((Observer) buttonInitialize.getUserData());
@@ -230,6 +249,22 @@ public class RegistersController implements Observer {
 		slider.valueProperty().addListener(sliderValueChangeListener);
 
 		createProfileMenuItems();
+
+		int pID = prefs.getInt(KEY_PROFILE_ID, 0);
+		menuProfile
+		.getItems()
+		.parallelStream()
+		.filter(m->m.getUserData()!=null)
+		.filter(mp->Integer.parseInt((String) mp.getUserData())==pID)
+		.findAny()
+		.ifPresent(mp->{
+			try {
+				((RadioMenuItem)mp).setSelected(true);
+				showProfile(pID);
+			} catch (Exception e) {
+				logger.catching(e);
+			}
+		});
     }
 
 	@FXML private void onActionNewProfile(){
@@ -583,5 +618,12 @@ public class RegistersController implements Observer {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+	}
+
+	@Override
+	public void doUpdate(boolean doUpdate) {
+		((FieldController)buttonInitialize.getUserData()).doUpdate(doUpdate);
+		((FieldController)buttonCalibMode.getUserData()).doUpdate(doUpdate);
+		((FieldController)panelRegisters.getUserData()).doUpdate(doUpdate);
 	}
 }

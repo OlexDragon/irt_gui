@@ -4,7 +4,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.DebugInfoController">
+<BorderPane fx:id="debugInfoPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.DebugInfoController">
    <top>
       <ToolBar focusTraversable="false" maxHeight="40.0" minHeight="40.0" prefHeight="40.0">
         <items>

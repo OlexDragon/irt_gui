@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.jar.JarEntry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.controllers.interfaces.OtherFields;
 import irt.gui.controllers.interfaces.ScheduledNode;
 import irt.gui.data.GuiUtility;
@@ -32,6 +34,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -50,12 +53,13 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 
-public class PanelRegisters{
+public class PanelRegisters implements Initializable, FieldController {
 	private final Logger logger = LogManager.getLogger();
 
 	public static final File 	IRT_HOME			= new File(System.getProperty("user.home"), "irt") ;
 	public static final String 	RESOURCE_FOLDER 	= "gui.register.gridPane.background.resource";
 	public static final String 	FILE_SYSTEM_PATH 	= "gui.register.gridPane.background.path";
+	private ResourceBundle bundle;	
 
 	@FXML private GridPane gridPane;
 
@@ -91,7 +95,11 @@ public class PanelRegisters{
 	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel 	= e->loadNode(LabelRegister.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
 	private final EventHandler<ActionEvent> onActionMenuItemOther			= e->loadNode(((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());//TODO
 
-	@FXML private void initialize(){
+	@Override public void initialize(URL location, ResourceBundle resources){
+		gridPane.setUserData(this);
+		bundle = resources;
+//		this.location = location;
+
 		createMenuItemsRegisterTextField();
 		createMenuItemsControlTextField();
 		createMenuItemsValueLabel();
@@ -620,7 +628,7 @@ public class PanelRegisters{
 			final String fxml = (String) field.get(null);
 
 			final URL resource = getClass().getResource(fxml);
-			FXMLLoader loader = new FXMLLoader( resource);
+			FXMLLoader loader = new FXMLLoader( resource, bundle);
 			Node node = loader.load();
 			Platform.runLater(()->children.add(node));
 
@@ -663,5 +671,21 @@ public class PanelRegisters{
 	private void addFocusListener(Node node) {
 		if(node.getUserData() instanceof TextFieldAbstract)
 			((TextFieldAbstract)node.getUserData()).addFocusListener(focusListener);
+	}
+
+	@Override
+	public void doUpdate(boolean doUpdate) {
+
+			getAllFieldControllers()
+			.forEach(fc->fc.doUpdate(doUpdate));
+	}
+
+	private Stream<FieldController> getAllFieldControllers() {
+		return getAllVBoxex()
+				.map(vb->vb.getChildren())
+				.flatMap(ch->ch.parallelStream())
+				.map(ps->ps.getUserData())
+				.filter(ps->FieldController.class.isInstance(ps))
+				.map(FieldController.class::cast);
 	}
 }

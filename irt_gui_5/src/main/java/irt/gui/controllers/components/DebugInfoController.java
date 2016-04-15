@@ -37,6 +37,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -45,6 +46,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 	private DebugInfoPacket 		infoPacket;
 	private RegisterIndexesPacket 	indexesPacket;
 
+	@FXML private BorderPane debugInfoPane;
 	@FXML private ComboBox<DebugInfoCode> commandComboBox;
 	@FXML private ComboBox<Integer> parameterComboBox;
 	@FXML private Button plussButton;
@@ -53,6 +55,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 	@FXML private ScrollPane scrollPane;
 
 	@FXML public void initialize(){
+		debugInfoPane.setUserData(this);
 
 		commandComboBox.getItems().add(DebugInfoCode.INFO);
 		commandComboBox.getItems().add(DebugInfoCode.DUMP);

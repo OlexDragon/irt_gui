@@ -32,32 +32,20 @@
 					<children>
 						<TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
 							<tabs>
-								<Tab fx:id="networkTab" onSelectionChanged="#selectionChanged" text="Network">
+								<Tab fx:id="networkTab" onSelectionChanged="#onSelectionChanged" text="Network">
 									<content>
-										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-											<children>
-												<fx:include fx:id="network" source="components/PanelNetwork.fxml" />
-											</children>
-										</AnchorPane>
+										<fx:include fx:id="network" source="components/PanelNetwork.fxml" />
 									</content>
 								</Tab>
-								<Tab fx:id="debugInfoTab" onSelectionChanged="#selectionChanged" text="Info">
+								<Tab fx:id="debugInfoTab" onSelectionChanged="#onSelectionChanged" text="Info">
 									<content>
-										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="0.0" prefWidth="200.0">
-											<children>
-												<fx:include fx:id="debugInfo" source="components/DebugInfoPanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-											</children>
-										</AnchorPane>
+										<fx:include fx:id="debugInfo" source="components/DebugInfoPanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 									</content>
 								</Tab>
-								<Tab text="Bias">
+								<Tab fx:id="biasTab" onSelectionChanged="#onSelectionChanged" text="Bias">
 									<content>
-										<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                 <children>
-                                    <fx:include source="components/RegistersController.fxml" />
-                                 </children>
-										</AnchorPane>
-									</content>
+										<fx:include source="components/RegistersController.fxml" />
+ 									</content>
 								</Tab>
 							</tabs>
 						</TabPane>
