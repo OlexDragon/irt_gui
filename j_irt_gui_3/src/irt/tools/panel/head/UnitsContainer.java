@@ -89,7 +89,7 @@ public class UnitsContainer extends JPanel{
 		panel.addComponentListener(componentListener);
 	}
 
-	private void setLocations() {
+	private synchronized void setLocations() {
 		int x = 0,  height = 0;
 		Dimension containerPreferredSize = getPreferredSize();
 
@@ -97,7 +97,7 @@ public class UnitsContainer extends JPanel{
 		Arrays.sort(components);
 
 		for(Component c:components){
-			Dimension preferredSize = c.getPreferredSize();
+			Dimension preferredSize = c.getPreferredSize(); //TODO stack trace
 			c.setLocation(x, 0);
 			x += SPACE + preferredSize.width;
 			if(height<preferredSize.height)
@@ -155,7 +155,7 @@ public class UnitsContainer extends JPanel{
 
 	public synchronized void remove(String className) {
 		Component[] cs = getComponents();
-		for(Component c:cs){
+		for(Component c:cs){ //TODO stack trace
 			if(c.getClass().getSimpleName().equals(className)){
 				super.remove(c);
 				break;
