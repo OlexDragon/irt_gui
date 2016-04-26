@@ -3,6 +3,7 @@ package irt.gui.controllers;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import javax.swing.Timer;
@@ -13,11 +14,15 @@ import org.apache.logging.log4j.Logger;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.observable.flash.FlashPacket;
 import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
 public class LinkedPacketSender extends SerialPort {
+
+	private static final int STANDARD_WAIT_TIME = 5;
+	private static final int FLASH_MEMORY_WAIT_TIME = 1;
 
 	private final Logger logger = LogManager.getLogger();
 
@@ -62,17 +67,15 @@ public class LinkedPacketSender extends SerialPort {
 	volatile private boolean run = true;
 	private int timeout = 1000;
 	private SerialPortEvent serialPortEvent = new SerialPortEvent();
+	private int parity = PARITY_NONE;  		public int getParity() { return parity; }  public void setParity(int parity) { this.parity = parity; }
+
 
 	public LinkedPacketSender(String portName) {
 		super(portName);
 	}
 
 	public void send(LinkedPacket packet){
-		logger.entry(packet);
-
-//	for Debugging		
-//		if(packet.getPacketHeader().getPacketIdDetails().getPacketId()==PacketId.ALARMS)
-//			logger.error(packet);
+//		logger.error(packet);
 
 		if(!run) return;
 
@@ -86,7 +89,7 @@ public class LinkedPacketSender extends SerialPort {
 
 			packet.clearAnswer();
 			if(writePacket(packet)){
-				byte[] readBytes = readBytes(5);
+				byte[] readBytes = readBytes(packet instanceof FlashPacket ? FLASH_MEMORY_WAIT_TIME : STANDARD_WAIT_TIME);
 
 				//Send back acknowledgement
 				byte[] acknowledgement = packet.getAcknowledgement();
@@ -127,12 +130,17 @@ public class LinkedPacketSender extends SerialPort {
 
 	private boolean writePacket(LinkedPacket packet) throws SerialPortException {
 
-		clear();
 		byte[] buffer = packet.toBytes();
-		if(buffer!=null)
-			writeBytes(buffer);
-		else
-			return false;
+
+		final Optional<byte[]> d = Optional
+		.ofNullable(buffer)
+		.filter(b->b.length>0);
+
+		if(d.isPresent()){
+			clear();
+			return writeBytes(buffer);
+		}
+
 		return true;
 	}
 
@@ -144,8 +152,7 @@ public class LinkedPacketSender extends SerialPort {
 		this.timeout = timeout;
 	}
 
-	@Override
-	protected void finalize(){
+	@Override protected void finalize(){
 			try {
 				closePort();
 			} catch (Exception e) {
@@ -236,50 +243,60 @@ public class LinkedPacketSender extends SerialPort {
 		return logger.exit(isReady);
 	}
 
-	@Override
-	public boolean openPort() throws SerialPortException {
-		
+	@Override public synchronized boolean openPort() throws SerialPortException {
+
 		boolean isOpened;
 
-		synchronized (logger) {
-			isOpened = isOpened();
+		isOpened = isOpened();
 
-			if(!isOpened)
-				if (run) {
-					logger.debug("openPort() Port Name={}", this);
-					isOpened = super.openPort();
-					if (isOpened){
-						addEventListener(serialPortEvent);
-						setBaudrate();
-					}
-				}else
-					throw new SerialPortException(getPortName(), "openPort()", "Property LinkedPacketSender.run set to " + run);
-		}
+		if (!isOpened)
+			if (run) {
+				logger.debug("openPort() Port Name={}", this);
+				isOpened = super.openPort();
+				if (isOpened) {
+					setParams();
+					addEventListener(serialPortEvent);
+				}
+			} else
+				throw new SerialPortException(getPortName(), "openPort()",
+						"Property LinkedPacketSender.run set to " + run);
 		return isOpened;
 	}
 
-	@Override
-	public boolean closePort() throws SerialPortException{
+	@Override public synchronized boolean closePort() throws SerialPortException{
 
 		boolean isClosed = !isOpened();
-		logger.debug("1) Port Name={} closePort()is Closed={}", this, isClosed);
 
-		synchronized (logger) {
-			if (!isClosed) {
+		if (!isClosed) {
 
-					removeEventListener();
-					boolean isPurged = purgePort(PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
-					isClosed = super.closePort();
-					logger.debug("2) closePort()is Closed={}, is purged={}",isClosed, isPurged);
+			removeEventListener();
+			boolean isPurged = purgePort(PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
+			isClosed = super.closePort();
+			logger.debug("closePort()is Closed={}, is purged={}", isClosed, isPurged);
 
-			}
 		}
 
 		return isClosed;
 	}
 
-	@Override
-	public String toString() {
+	public static Baudrate getBaudrate() {
+		return baudrate;
+	}
+
+	public void setBaudrate(Baudrate baudrate){
+		LinkedPacketSender.baudrate = baudrate;
+		try {
+			setParams();
+		} catch (Exception e) {
+			logger.catching(e);
+		}
+	}
+
+	public void setParams() throws SerialPortException {
+		setParams(baudrate.getBaudrate(), DATABITS_8, STOPBITS_1, parity);
+	}
+
+	@Override public String toString() {
 		return getPortName();
 	}
 
@@ -291,26 +308,7 @@ public class LinkedPacketSender extends SerialPort {
 
 			synchronized (LinkedPacketSender.this) {
 				LinkedPacketSender.this.notify();
-//				Console.appendLn("", "notify");
 			}
 		}
-		
-	}
-
-	public static Baudrate getBaudrate() {
-		return baudrate;
-	}
-
-	public void setBaudrate(Baudrate baudrate){
-		LinkedPacketSender.baudrate = baudrate;
-		try {
-			setBaudrate();
-		} catch (Exception e) {
-			logger.catching(e);
-		}
-	}
-
-	public void setBaudrate() throws SerialPortException {
-		setParams(baudrate.getBaudrate(), DATABITS_8, STOPBITS_1, PARITY_NONE);
 	}
 }

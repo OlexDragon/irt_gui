@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.ResourceBundle;
 
 import irt.gui.controllers.FieldsControllerAbstract;
+import irt.gui.controllers.UpdateController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.observable.alarms.AlarmStatusPacket.AlarmSeverities;
@@ -24,28 +25,18 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 
 	private ResourceBundle 		bundle;
 
-	private final StatusPacket statusPacket;
+	private StatusPacket statusPacket;
 	private Integer status;
 
 	public LabelStatus() {
 
-		StatusPacket p;
-
 		try {
-			p =  new StatusPacket();
+
+			statusPacket = new StatusPacket();
 
 		} catch (PacketParsingException e) {
-			p = null;
 			logger.catching(e);
 		}
-
-		statusPacket = p;
-
-		if(p==null)
-			return;
-
-		addLinkedPacket(statusPacket);
-		doUpdate(true);
 	}
 
 	@Override
@@ -54,6 +45,9 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 //		this.location = location;
 
 		addLinkedPacket(statusPacket);
+		doUpdate(true);
+
+		UpdateController.addController(this);
 	}
 
 	@Override
@@ -119,6 +113,12 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 	@Override
 	protected Duration getPeriod() {
 		return Duration.ofSeconds(3);
+	}
+
+	@Override
+	public void doUpdate(boolean update) {
+		super.doUpdate(update);
+		muteLabel.getParent().setDisable(!update);
 	}
 
 	public enum StatusByte{

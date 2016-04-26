@@ -19,7 +19,7 @@ public class OutputPowerPacket extends PacketAbstract implements ValuePacket{
 		super(
 				new PacketHeader(
 						PacketType.REQUEST,
-						new PacketIdDetails(PACKET_ID, "Get Temperature"),
+						new PacketIdDetails(PACKET_ID, "Get Output Power"),
 						PacketErrors.NO_ERROR),
 				new Payload(
 						new ParameterHeader(

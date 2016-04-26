@@ -84,9 +84,6 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		 .ofNullable(IrtGuiProperties.getProperty(propertiesKeyStartWith + CLASS))
 		 .ifPresent(classNamw->{
 
-			 // Stop sending packets
-			 stop(true);
-
 			 value = null;
 			 removeAllPackets();
 
@@ -94,7 +91,6 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 			 .ofNullable(createNewPacket(classNamw))
 			 .ifPresent(p->{
 				 addPacket(p);
-				 start();
 			 });
 
 		 });

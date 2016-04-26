@@ -33,7 +33,7 @@ public class RegisterPacket extends RegirterAbstractPacket {
 		super(
 				new PacketHeader(
 						registerValue.getValue()==null ? PacketType.REQUEST : PacketType.COMMAND,
-						new PacketIdDetails(PACKET_ID, "; value:" +  registerValue),
+						new PacketIdDetails(PACKET_ID, "; register:" +  registerValue),
 						PacketErrors.NO_ERROR),
 				new Payload(
 						new ParameterHeader(PACKET_ID),

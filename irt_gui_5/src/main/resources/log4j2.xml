@@ -67,6 +67,8 @@
 <!-- 		<logger name="irt.gui.controllers.socket.RequestHandler" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.socket.ClientSocket" level="all"/> -->
 
+<!-- 		<logger name="irt.gui.flash.ButtonErase" level="all"/> -->
+
 		<Root level="warn">
 			<AppenderRef ref="DumpFile" />
 			<AppenderRef ref="STDOUT" />

@@ -20,7 +20,7 @@ public class StatusPacket extends PacketAbstract{
 		super(
 				new PacketHeader(
 						PacketType.REQUEST,
-						new PacketIdDetails(PACKET_ID, "Get status"),
+						new PacketIdDetails(PACKET_ID, "Get status byte"),
 						PacketErrors.NO_ERROR),
 				new Payload(
 						new ParameterHeader(

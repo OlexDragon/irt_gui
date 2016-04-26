@@ -37,6 +37,8 @@ public class LinkedPacketsQueue implements Runnable {
 	private String host;
 	private int port;
 
+	private boolean error;
+
 	@Override
 	public void run() {
 		logger.entry();
@@ -44,6 +46,8 @@ public class LinkedPacketsQueue implements Runnable {
 		try {
 
 			LinkedPacket packet = blockingQueue.take();
+
+//			logger.error(packet);
 
 			if (comPort != null && comPort.isOpened()) {
 				SOCKET.startServer(comPort.getPortName());
@@ -61,8 +65,13 @@ public class LinkedPacketsQueue implements Runnable {
 				final ClientSocket clientSocket = SOCKET.getClientSocket(host, port);
 				clientSocket.send(packet);
 			}
+
+			error = false;
 		} catch (Exception e) {
-			logger.catching(e);
+			if(!error){	// not to repeat the same error message
+				error = true;
+				logger.catching(e);
+			}
 		}
 
 		logger.exit();

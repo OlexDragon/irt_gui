@@ -3,22 +3,33 @@ package irt.gui.controllers;
 
 import java.util.prefs.Preferences;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.jensd.shichimifx.utils.TabPaneDetacher;
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.components.RegistersController;
+import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.interfaces.FieldController;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import jssc.SerialPort;
+import jssc.SerialPortException;
 
 public class IrtGuiController{
+	private final Logger logger = LogManager.getLogger();
 
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
 	private int tabCount;
 
 	@FXML private TabPane tabPane;
+	@FXML private Tab biasTab;
+
+	private int parity;
 
 	@FXML public void initialize() {
 
@@ -26,14 +37,19 @@ public class IrtGuiController{
 		ObservableList<Tab> tabs = tabPane.getTabs();
 		tabCount = tabs.size();
 
-		String selectedTabId = prefs.get("selected_tab_id", "biasTab");
-
+		//Get save selected tab
+		String selectedTabId = prefs.get("selected_tab_id", null);
+		//Select saved tab
 		tabs
 		.parallelStream()
+		.filter(t->t.getId()!=null)
 		.filter(t->t.getId().equals(selectedTabId))
 		.findAny()
 		.filter(t->!t.isSelected())
 		.ifPresent(t->tabPane.getSelectionModel().select(t));
+
+		RegistersController rc = (RegistersController) biasTab.getContent().getUserData();
+		rc.setTab(biasTab);
 	}
 
 	@FXML public void onSelectionChanged(Event e){
@@ -46,12 +62,45 @@ public class IrtGuiController{
 			final boolean selected = tab.isSelected();
 
 			if(size>=tabCount || ( selected && size<=tabCount))
-				((FieldController)tab.getContent().getUserData()).doUpdate(selected);
+
+				((FieldController)tab
+						.getContent()
+						.getUserData())
+				.doUpdate(selected);
 
 			tabCount = size;
 			if(selected && size>1)
 				prefs.put("selected_tab_id", tab.getId());
 
+		}
+	}
+
+	@FXML public void onSelectionChangeFlash(Event e){
+
+		Tab tab = (Tab)e.getSource();
+
+		if(tab.isSelected()){
+			UpdateController.stop();
+			SerialPortController.QUEUE.clear();
+			prefs.put("selected_tab_id", tab.getId());
+
+			final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
+			parity = serialPort.getParity();
+			serialPort.setParity(SerialPort.PARITY_EVEN);
+			try {
+				serialPort.setParams();
+			} catch (SerialPortException e1) {
+				logger.catching(e1);
+			}
+		}else{
+			final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
+			serialPort.setParity(parity);
+			try {
+				serialPort.setParams();
+			} catch (SerialPortException e1) {
+				logger.catching(e1);
+			}
+			UpdateController.start();
 		}
 	}
 }

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.collections.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.flash.PanelFlash">
+   <children>
+      <BorderPane stylesheets="@../../styles/flash.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <HBox BorderPane.alignment="CENTER">
+               <children>
+                  <fx:include fx:id="connectButton" source="ButtonConnect.fxml" />
+                  <ChoiceBox fx:id="choiceBox" />
+                  <fx:include fx:id="readButton" source="ButtonRead.fxml" />
+                  <fx:include fx:id="writeButton" source="ButtonWrite.fxml" />
+                  <fx:include fx:id="eraseButton" source="ButtonErase.fxml" />
+               </children>
+            </HBox>
+         </top>
+         <center>
+            <ScrollPane BorderPane.alignment="CENTER" fitToHeight="true" fitToWidth="true" >
+              <content>
+                <AnchorPane>
+                     <children>
+                        <TextArea fx:id="textArea" editable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+              </content>
+            </ScrollPane>
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>

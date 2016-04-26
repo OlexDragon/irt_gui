@@ -5,6 +5,7 @@ import java.util.ResourceBundle;
 
 import irt.gui.IrtGuiApp;
 import irt.gui.controllers.FieldsControllerAbstract;
+import irt.gui.controllers.UpdateController;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
@@ -32,6 +33,7 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 	@FXML public void initialize() {
 		addLinkedPacket(packet);
 		doUpdate(true);
+		UpdateController.addController(this);
 	}
 
 	@Override
@@ -42,6 +44,9 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 	@Override
 	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 		logger.entry(packet);
+
+		if(scheduleAtFixedRate!=null && scheduleAtFixedRate.isCancelled())
+			return;
 
 		LinkedPacket p = new AlarmIDsPacket(packet.getAnswer(), true);
 
@@ -100,6 +105,8 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 					alarmFieldController.build(alarmId);
 					alarmFieldController.doUpdate(true);
 					vBox.getChildren().add(root);
+
+					UpdateController.addController(alarmFieldController);
 
 				} catch (Exception e) {
 					logger.catching(e);

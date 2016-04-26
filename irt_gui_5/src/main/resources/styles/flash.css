@@ -1,0 +1,12 @@
+.error{
+	-fx-border-color : red;
+	-fx-text-fill : red;
+}
+.connected{
+	-fx-border-color : green;
+	-fx-text-fill : green;
+}
+.warning{
+	-fx-border-color : blue;
+	-fx-text-fill : blue;
+}

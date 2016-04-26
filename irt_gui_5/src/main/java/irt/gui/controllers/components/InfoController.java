@@ -3,6 +3,7 @@ package irt.gui.controllers.components;
 import java.time.Duration;
 
 import irt.gui.controllers.FieldsControllerAbstract;
+import irt.gui.controllers.UpdateController;
 import irt.gui.data.DeviceInfo;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
@@ -31,6 +32,7 @@ public class InfoController extends FieldsControllerAbstract {
 			addLinkedPacket(new InfoPacket());
 			doUpdate(true);
 
+			UpdateController.addController(this);
 		} catch (Exception e) {
 			logger.catching(e);
 		}
@@ -81,5 +83,11 @@ public class InfoController extends FieldsControllerAbstract {
 
 	public static Integer getDeviceType() {
 		return DEVICE_TYPE;
+	}
+
+	@Override
+	public void doUpdate(boolean update) {
+		super.doUpdate(update);
+		snLabel.getParent().setDisable(!update);
 	}
 }

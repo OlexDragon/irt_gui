@@ -131,10 +131,6 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
     }
 
 	public void setKeyStartWith(String propertiesKeyStartWith){
-		logger.entry(propertiesKeyStartWith);
-
-		// Stop sending packets
-		stop(false);
 
 		if(propertiesKeyStartWith==null || propertiesKeyStartWith.isEmpty())
 			return;
@@ -162,8 +158,6 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 			.parallelStream()
 			.filter(mi->mi.getId().equals(propertiesKeyStartWith))
 			.forEach(mi->Platform.runLater(()->((RadioMenuItem)mi).setSelected(true)));
-
-			start();
 
 		} catch (Exception e) {
 			logger.catching(e);

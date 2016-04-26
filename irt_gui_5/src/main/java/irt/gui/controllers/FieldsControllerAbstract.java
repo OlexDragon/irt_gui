@@ -19,7 +19,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
-	private static boolean wasShown;
+	private static boolean error;
 
 	protected abstract void 	updateFields(LinkedPacket packet) throws Exception;
 	protected abstract Duration getPeriod();
@@ -28,7 +28,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 	protected 		Observer 		observer 		= this;
 	private final 	PacketSender 	packetSender 	= new PacketSender();
-	private ScheduledFuture<?> 		scheduleAtFixedRate;
+	protected ScheduledFuture<?> 		scheduleAtFixedRate;
 
 	public void addLinkedPacket(LinkedPacket linkedPacket){
 		packetSender.addPacketToSend(linkedPacket);
@@ -65,15 +65,19 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 			public void update(LinkedPacket p) {
 				if( p.getAnswer()!=null)
 					try {
-						wasShown = false;
 
 						updateFields(p);
 
+						error = false;
+
 					} catch (Exception e) {
-						logger.catching(e);
+						if(!error){	//not to repeat the same error message
+							error = true;
+							logger.catching(e);
+						}
 					}
-				else if(!wasShown){
-					wasShown = true;
+				else if(!error){	//not to repeat the same error message
+					error = true;
 					logger.warn("No Answer: {}", p);
 				}
 			}

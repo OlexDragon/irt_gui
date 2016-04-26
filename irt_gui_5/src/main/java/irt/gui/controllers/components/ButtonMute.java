@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.ResourceBundle;
 
 import irt.gui.controllers.FieldsControllerAbstract;
+import irt.gui.controllers.UpdateController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.observable.configuration.MutePacket;
@@ -38,31 +39,33 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 			muteCommandPacket = new MutePacket(MuteStatus.MUTED);
 			muteCommandPacket.addObserver(this);
 
-			addLinkedPacket(mutePacket);
-			doUpdate(true);
 	}
 
 	@Override public void initialize(URL location, ResourceBundle resources) {
 		bundle = resources;
 //		this.location = location;
+
+		addLinkedPacket(mutePacket);
+
+		UpdateController.addController(this);
+
 	}
 
 //	@FXML void initialize() {
 //		button.setUserData(this);
 //	}
 //
+
 	@FXML void buttonAction(ActionEvent event) {
 		muteCommandPacket.setCommand(muteStatus==MuteStatus.MUTED ? MuteStatus.UNMUTED : MuteStatus.MUTED);
 		SerialPortController.QUEUE.add(muteCommandPacket, true);
 	}
 
-	@Override
-	protected Duration getPeriod() {
+	@Override protected Duration getPeriod() {
 		return Duration.ofSeconds(10);
 	}
 
-	@Override
-	protected void updateFields(LinkedPacket packet) throws Exception {
+	@Override protected void updateFields(LinkedPacket packet) throws Exception {
 
 		if(packet instanceof MutePacket){
 			if(packet.getPacketHeader().getPacketError()==PacketErrors.NO_ERROR){
@@ -99,5 +102,10 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 		styleClass.remove(toRemove);
 		if(!styleClass.contains(toAdd))
 			styleClass.add(toAdd);
+	}
+
+	@Override public void doUpdate(boolean update) {
+		super.doUpdate(update);
+		button.setDisable(!update);
 	}
 }

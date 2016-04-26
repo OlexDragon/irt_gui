@@ -50,6 +50,8 @@ public class LabelValue extends ScheduledNodeAbstract {
 	private TooltipWorker tooltipWorker;
 	private final Updater updater = new Updater();
 
+	private boolean error;
+
 	@FXML public void initialize(){
 		borderPane.setUserData(this);
 		createMenuItems();
@@ -78,7 +80,6 @@ public class LabelValue extends ScheduledNodeAbstract {
 
 		final Optional<String> className = Optional.ofNullable(IrtGuiProperties.getProperty(propertiesKeyStartWith + "class"));
 		if(className.isPresent()){
-			stop(true);
 
 			removeAllPackets();
 
@@ -92,8 +93,6 @@ public class LabelValue extends ScheduledNodeAbstract {
 			.forEach(mi->Platform.runLater(()->((RadioMenuItem)mi).setSelected(true)));
 
 			this.propertyName = propertiesKeyStartWith;
-
-			start();
 		}
 	}
 
@@ -140,10 +139,15 @@ public class LabelValue extends ScheduledNodeAbstract {
 		try {
 
 			final Constructor<?> constructor = clazz.getConstructor(byte[].class, boolean.class);
-			return logger.exit((LinkedPacket) constructor.newInstance(packet.getAnswer(), true));
+			final LinkedPacket newPacket = (LinkedPacket) constructor.newInstance(packet.getAnswer(), true);
+			error = false;
+			return newPacket;
 
 		} catch (Exception e) {
-			logger.catching(e);
+			if(!error){	//not to repeat the same error message
+				error = true;
+				logger.catching(e);
+			}
 		}
 		return null;
 	}

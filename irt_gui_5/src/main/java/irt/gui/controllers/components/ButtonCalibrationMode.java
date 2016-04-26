@@ -41,8 +41,6 @@ public class ButtonCalibrationMode extends FieldsControllerAbstract {
 			packetSetOff = new CallibrationModePacket(CalibrationMode.OFF);
 			packetSetOff.addObserver(this);
 
-			doUpdate(true);
-
 		} catch (PacketParsingException e) {
 			logger.catching(e);
 		}

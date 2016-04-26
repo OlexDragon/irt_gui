@@ -34,6 +34,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 	private  LoPacket 		setPacket;
 
 	private final Map<String, Byte> values = new HashMap<>();
+	private boolean error;
 	
 
 	public ComboBoxLoSelect() {
@@ -52,7 +53,6 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 	@FXML public void initialize() {
 		addPacket(packet);
 		loSelectComboBox.setUserData(this);
-		start();
 	}
 
 	@FXML private void onActionLoSelectComboBox() {
@@ -67,6 +67,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 			if(o instanceof LoFrequenciesPacket){
 
 				LoFrequenciesPacket p = new LoFrequenciesPacket(((LinkedPacket)o).getAnswer(), true);
+				error = false;
 				final PacketHeader ph = p.getPacketHeader();
 
 				if(ph.getPacketType()==PacketType.RESPONSE && ph.getPacketError()==PacketErrors.NO_ERROR){
@@ -90,7 +91,10 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 			}
 
 		} catch (Exception e) {
-			logger.catching(e);
+			if(!error){
+				error = true;
+				logger.catching(e);
+			}
 		}
 	}
 

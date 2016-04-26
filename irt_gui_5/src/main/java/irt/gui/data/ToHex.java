@@ -3,7 +3,7 @@ package irt.gui.data;
 public class ToHex {
 	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 
-	public static String bytesToHex(byte[] bytes) {
+	public static String bytesToHex(byte... bytes) {
 		String string = null;
 
 		if (bytes != null) {

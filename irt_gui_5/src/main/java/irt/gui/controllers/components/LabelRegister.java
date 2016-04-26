@@ -54,6 +54,8 @@ public class LabelRegister extends ScheduledNodeAbstract {
 	@FXML private ContextMenu 	contextMenu;
 	@FXML private Menu 			menuValues;
 
+	private boolean error;
+
 	@FXML public void initialize(){
 		borderPane.setUserData(this);
 		titleLabel.setContextMenu(contextMenu);
@@ -75,9 +77,6 @@ public class LabelRegister extends ScheduledNodeAbstract {
 	}
 
 	@Override public void setKeyStartWith(String keyStartWith)  throws PacketParsingException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-
-		// Stop sending packets
-		stop(false);
 
 		if(keyStartWith==null || keyStartWith.isEmpty())
 			return;
@@ -105,8 +104,6 @@ public class LabelRegister extends ScheduledNodeAbstract {
 		.parallelStream()
 		.filter(mi->mi.getId().equals(keyStartWith))
 		.forEach(mi->Platform.runLater(()->((RadioMenuItem)mi).setSelected(true)));
-
-		start();
 	}
 
 	private void setValue(String keyStartWith) {
@@ -178,9 +175,16 @@ public class LabelRegister extends ScheduledNodeAbstract {
 
 	private RegisterPacket createPacket(byte[] answer) {
 		try {
-			return new RegisterPacket(answer, true);
+
+			final RegisterPacket registerPacket = new RegisterPacket(answer, true);
+			error = false;
+			return registerPacket;
+
 		} catch (PacketParsingException e) {
-			logger.catching(e);
+			if(!error){	//not to repeat the same error message
+				error = true;
+				logger.catching(e);
+			}
 		}
 		return null;
 	}

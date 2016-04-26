@@ -7,21 +7,24 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane id="AnchorPane" prefHeight="530.0" prefWidth="838.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.IrtGuiController">
+<AnchorPane id="AnchorPane" prefHeight="530.0" prefWidth="838.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="irt.gui.controllers.IrtGuiController">
 	<children>
-		<SplitPane dividerPositions="0.3885416666666667" layoutX="213.0" layoutY="103.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+		<SplitPane dividerPositions="0.3885416666666667" layoutX="213.0" layoutY="103.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+			AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<items>
 				<AnchorPane>
 					<children>
-						<VBox prefHeight="782.0" prefWidth="962.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+						<VBox prefHeight="782.0" prefWidth="962.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+							AnchorPane.topAnchor="0.0">
 							<children>
 								<fx:include fx:id="serialPort" source="components/SerialPortSelector.fxml" />
-                        <HBox>
-                           <children>
-                              <fx:include source="components/ButtonMute.fxml" />
-                              <fx:include source="components/LabelStatus.fxml" />
-                           </children>
-                        </HBox>
+								<HBox>
+									<children>
+										<fx:include source="components/ButtonMute.fxml" />
+										<fx:include source="components/LabelStatus.fxml" />
+									</children>
+								</HBox>
 								<fx:include source="components/Info.fxml" />
 								<fx:include source="components/PanelAlarms.fxml" />
 							</children>
@@ -30,7 +33,7 @@
 				</AnchorPane>
 				<AnchorPane>
 					<children>
-						<TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="1.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="1.0" AnchorPane.topAnchor="1.0">
+						<TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<tabs>
 								<Tab fx:id="networkTab" onSelectionChanged="#onSelectionChanged" text="Network">
 									<content>
@@ -39,13 +42,18 @@
 								</Tab>
 								<Tab fx:id="debugInfoTab" onSelectionChanged="#onSelectionChanged" text="Info">
 									<content>
-										<fx:include fx:id="debugInfo" source="components/DebugInfoPanel.fxml" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+										<fx:include fx:id="debugInfo" source="components/DebugInfoPanel.fxml" />
 									</content>
 								</Tab>
 								<Tab fx:id="biasTab" onSelectionChanged="#onSelectionChanged" text="Bias">
 									<content>
 										<fx:include source="components/RegistersController.fxml" />
- 									</content>
+									</content>
+								</Tab>
+								<Tab fx:id="flashTab" onSelectionChanged="#onSelectionChangeFlash" text="Flash">
+									<content>
+										<fx:include source="flash/PanelFlash.fxml" />
+									</content>
 								</Tab>
 							</tabs>
 						</TabPane>

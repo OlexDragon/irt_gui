@@ -67,8 +67,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 	private String name;
 
-	@Override
-	protected void setup(){	}
+	@Override protected void setup(){	}
 
 	@FXML private void onActionMenuItemReset() {
 				try {
@@ -277,6 +276,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 		private LinkedPacket packet;
 		private boolean writeLogger;
 		private byte[] answer;
+		private boolean error;
 
 		Updater setPacket(LinkedPacket packet){
 			answer = packet.getAnswer();
@@ -296,6 +296,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 				}
 
 				LinkedPacket packet = new RegisterPacket(answer, true);
+				error = false;
 
 				final PacketHeader packetHeader = packet.getPacketHeader();
 				if(packetHeader.getPacketType()==PacketType.RESPONSE){
@@ -322,7 +323,10 @@ public class TextFieldRegister extends TextFieldAbstract {
 					logger.warn("\n\t This Packet has error: {}", packet);
 
 			} catch (Exception e) {
-				logger.catching(e);
+				if(!error){	//not to repeat the same error message
+					error = true;
+					logger.catching(e);
+				}
 			}
 		}
 

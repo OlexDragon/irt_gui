@@ -174,4 +174,10 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 	public void setTitle(String title){
 		titleLabel.setText(title);
 	}
+
+	@Override
+	public void doUpdate(boolean update) {
+		super.doUpdate(update);
+		titleLabel.getParent().setDisable(!update);
+	}
 }

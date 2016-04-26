@@ -89,11 +89,23 @@ public class PanelRegisters implements Initializable, FieldController {
 
 	private boolean editable;
 
-	private final EventHandler<ActionEvent> onActionMenuItemRegister 		= e->loadNode(TextFieldRegister.class, 		((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-	private final EventHandler<ActionEvent> onActionMenuItemValueLabel 		= e->loadNode(LabelValue.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-	private final EventHandler<ActionEvent> onActionMenuItemControl 		= e->loadNode(TextFieldConfiguration.class,	((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel 	= e->loadNode(LabelRegister.class, 			((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-	private final EventHandler<ActionEvent> onActionMenuItemOther			= e->loadNode(((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());//TODO
+	private final EventHandler<ActionEvent> onActionMenuItemRegister 		= e->{
+																					Node node = loadNode(TextFieldRegister.class, ((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+																					((FieldController)node.getUserData()).doUpdate(true);
+	};
+	private final EventHandler<ActionEvent> onActionMenuItemValueLabel 		= e->{
+																					Node node = loadNode(LabelValue.class, 	((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+																					((FieldController)node.getUserData()).doUpdate(true);
+	};
+	private final EventHandler<ActionEvent> onActionMenuItemControl 		= e->{
+																					Node node = loadNode(TextFieldConfiguration.class, ((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+																					((FieldController)node.getUserData()).doUpdate(true);
+	};
+	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel 	= e->{
+																					Node node = loadNode(LabelRegister.class, ((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+																					((FieldController)node.getUserData()).doUpdate(true);
+	};
+	private final EventHandler<ActionEvent> onActionMenuItemOther			= e->loadNode(((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
 
 	@Override public void initialize(URL location, ResourceBundle resources){
 		gridPane.setUserData(this);
@@ -643,6 +655,7 @@ public class PanelRegisters implements Initializable, FieldController {
 				Platform.runLater(()->((TextFieldAbstract)controller).getTextField().setEditable(editable));
 
 			return node;
+
 		} catch (Exception e) {
 			logger.catching(e);
 			return null;
@@ -656,9 +669,10 @@ public class PanelRegisters implements Initializable, FieldController {
 		try {
 
 			final URL resource = getClass().getResource(fxml);
-			FXMLLoader loader = new FXMLLoader( resource);
+			FXMLLoader loader = new FXMLLoader( resource, bundle);
 			Node node = loader.load();
 			Platform.runLater(()->children.add(node));
+			((FieldController)node.getUserData()).doUpdate(true);
 
 			return node;
 

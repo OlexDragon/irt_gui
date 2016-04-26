@@ -19,8 +19,8 @@ import org.apache.logging.log4j.Logger;
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.LinkedPacketSender.Baudrate;
-import irt.gui.controllers.socket.SocketWorker;
 import irt.gui.controllers.LinkedPacketsQueue;
+import irt.gui.controllers.socket.SocketWorker;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.configuration.AttenuationPacket;
 import javafx.application.Platform;
@@ -46,7 +46,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
-import jssc.SerialPort;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
 
@@ -70,7 +69,7 @@ public class SerialPortController implements Initializable{
 
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
-	private volatile static LinkedPacketSender	serialPort;					public static SerialPort 	getSerialPort() { return serialPort; 			}
+	private static LinkedPacketSender	serialPort;				public static LinkedPacketSender 	getSerialPort() { return serialPort; }
 
 	private static final ScheduledExecutorService SERVICES = LinkedPacketsQueue.SERVICES;
 
@@ -91,7 +90,7 @@ public class SerialPortController implements Initializable{
         selectSerialPort();
 		fillMenuBaudrate();
 
-		SERVICES.scheduleAtFixedRate(new SerialPortAnalyzer(), 1, 1, TimeUnit.SECONDS);
+		SERVICES.scheduleAtFixedRate(new SerialPortAnalyzer(), 1, 3, TimeUnit.SECONDS);
 
         comboBoxUnitAddressController.addObserver((o, address)->{
         	QUEUE.setUnitAddress(((Integer)address).byteValue());
@@ -343,12 +342,17 @@ public class SerialPortController implements Initializable{
 
 			if(serialPort==null){
 				portStatus = SerialPortStatus.NOT_SELECTED;
+				addStyleClass("warning", "error", "connected");
 
-			}else if(serialPort.isOpened())
+			}else if(serialPort.isOpened()){
 				portStatus = SerialPortStatus.OPEND;
+				addStyleClass("connected", "error", "warning");
 
-			else if(SerialPortController.this.portStatus!=SerialPortStatus.BUSY && SerialPortController.this.portStatus!=SerialPortStatus.ERROR)
+			}else if(SerialPortController.this.portStatus!=SerialPortStatus.BUSY && SerialPortController.this.portStatus!=SerialPortStatus.ERROR){
 				portStatus = SerialPortStatus.CLOSED;
+				addStyleClass("warning", "connected", "error");
+			}else
+				addStyleClass("error", "connected", "warning");
 
 			if(portStatus!=SerialPortController.this.portStatus){
 				if(portStatus!=null)
@@ -356,14 +360,18 @@ public class SerialPortController implements Initializable{
 
 				final String text = "Serial port is " + SerialPortController.this.portStatus;
 				if(!openClosePortButton.getText().equals(text))
-					Platform.runLater(new Runnable() {
-					
-						@Override
-						public void run() {
-							openClosePortButton.setText(text);
-						}
-					});
+					Platform.runLater(()->openClosePortButton.setText(text));
 			}
+		}
+
+		private void addStyleClass(String toAdd, String... toRemove) {
+			Platform.runLater(()->{
+				final ObservableList<String> styleClass = openClosePortButton.getStyleClass();
+				if(!styleClass.contains(toAdd)){
+					styleClass.removeAll(toRemove);
+					styleClass.add(toAdd);
+				}
+			});
 		}
 	}
 

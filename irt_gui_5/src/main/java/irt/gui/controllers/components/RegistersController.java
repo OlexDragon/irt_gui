@@ -50,6 +50,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
+import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
@@ -169,9 +170,8 @@ public class RegistersController implements Observer, FieldController {
 		try{
 
 			RadioMenuItem rmi = (RadioMenuItem)e.getSource();
-			profileId = Integer.parseInt(((String) rmi.getUserData()));// get profile ID
+			profileId = Integer.parseInt((String) rmi.getUserData());// get profile ID
 			showProfile(profileId);
-//			slider.toFront();
 
 			prefs.putInt(KEY_PROFILE_ID, profileId);
 
@@ -187,6 +187,19 @@ public class RegistersController implements Observer, FieldController {
 		menuSave.setDisable(false);
 		panelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
 		setAlignment(profileId);
+
+		setTabText();
+	}
+
+	private void setTabText() {
+		if(tab!=null)
+			menuProfile
+			.getItems()
+			.parallelStream()
+			.map(RadioMenuItem.class::cast)
+			.filter(rm->rm.isSelected())
+			.findAny()
+			.ifPresent(rm->tab.setText(rm.getText()));
 	}
 
     private final ChangeListener<Boolean> stepTextFieldFocusListener = (observable, oldValue, newValue)->{
@@ -231,6 +244,8 @@ public class RegistersController implements Observer, FieldController {
 			}
 		}
 	};
+
+	private Tab tab;
 
     @FXML private void initialize(){
 
@@ -601,13 +616,18 @@ public class RegistersController implements Observer, FieldController {
 			final Class<? extends ScheduledNode> fc = fieldClass.equals(OtherFields.class) ?  (Class<? extends ScheduledNode>) Class.forName(key) : fieldClass;
 
 			Platform.runLater(()->{
-				Node node;
 				try {
 
+					Node node = panelRegistersController.setNode(fc, key, column, row);
 
-					node = panelRegistersController.setNode(fc, key, column, row);
-					if(editable!= null && node instanceof TextField)
-						((TextField)node).setEditable(editable);
+					Optional
+					.ofNullable(tab)
+					.filter(t->t.isSelected())
+					.ifPresent(t->((FieldController)node.getUserData()).doUpdate(true));
+
+					Optional
+					.ofNullable(editable)
+					.filter(TextField.class::isInstance);
 
 				} catch (Exception e) {
 					logger.catching(e);
@@ -625,5 +645,10 @@ public class RegistersController implements Observer, FieldController {
 		((FieldController)buttonInitialize.getUserData()).doUpdate(doUpdate);
 		((FieldController)buttonCalibMode.getUserData()).doUpdate(doUpdate);
 		((FieldController)panelRegisters.getUserData()).doUpdate(doUpdate);
+	}
+
+	public void setTab(Tab biasTab) {
+		tab = biasTab;
+		setTabText();
 	}
 }

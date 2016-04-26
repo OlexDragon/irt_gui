@@ -81,9 +81,9 @@ public class DebugInfoController extends FieldsControllerAbstract {
 
 	@FXML public void plussButtonAction(ActionEvent event){
 
-		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/DebugInfoPanel.fxml"));  
 		try {
 
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/DebugInfoPanel.fxml"));  
 			Parent root = (Parent) loader.load();
 			DebugInfoController dic = (DebugInfoController) loader.getController();
 			dic.doUpdate(true);
