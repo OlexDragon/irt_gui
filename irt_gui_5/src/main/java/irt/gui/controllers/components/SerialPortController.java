@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
@@ -21,6 +23,7 @@ import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.LinkedPacketSender.Baudrate;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.socket.SocketWorker;
+import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.configuration.AttenuationPacket;
 import javafx.application.Platform;
@@ -62,6 +65,8 @@ public class SerialPortController implements Initializable{
 		ERROR
 	}
 	
+	private final ExecutorService executor = Executors.newFixedThreadPool(5, new MyThreadFactory());
+
 	public static final String SERIAL_PORT_PREF = "serialPort";
 	public static final String ADDRESSES 		= "unit_addresses";
 
@@ -406,30 +411,32 @@ public class SerialPortController implements Initializable{
 					final AttenuationPacket packet = new AttenuationPacket();
 					packet.getLinkHeader().setAddr(addr.byteValue());
 					packet.addObserver((o, arg)->{
+						executor.execute(()->{
 
-						final LinkedPacket lp = (LinkedPacket)o;
-						final int indexOf = bytes.indexOf(lp.getLinkHeader().getAddr()&0xFF);
-						results[indexOf] = lp.getAnswer()!=null;
-						if(!Arrays.asList(results).contains(null)){
+							final LinkedPacket lp = (LinkedPacket)o;
+							final int indexOf = bytes.indexOf(lp.getLinkHeader().getAddr()&0xFF);
+							results[indexOf] = lp.getAnswer()!=null;
+							if(!Arrays.asList(results).contains(null)){
 
-							Platform.runLater(()->{
-								
-								final List<ButtonType> buttons = createButtons(bytes, results);
+								Platform.runLater(()->{
+									
+									final List<ButtonType> buttons = createButtons(bytes, results);
 
-								Alert alert = new Alert(AlertType.CONFIRMATION);
-								alert.initOwner(openClosePortButton.getScene().getWindow());
-								alert.setTitle(bundle.getString("choice"));
-								alert.setHeaderText(bundle.getString("address.choose"));
-//								alert.setContentText("Choose your option.");
-								alert.getButtonTypes().setAll(buttons);
-								Optional<ButtonType> result = alert.showAndWait();
-								final ButtonType buttonType = result.get();
-								if(buttonType.getButtonData()==ButtonData.OK_DONE){
-									QUEUE.setUnitAddress((byte) Integer.parseInt(buttonType.getText()));
-								}
-							});
+									Alert alert = new Alert(AlertType.CONFIRMATION);
+									alert.initOwner(openClosePortButton.getScene().getWindow());
+									alert.setTitle(bundle.getString("choice"));
+									alert.setHeaderText(bundle.getString("address.choose"));
+//									alert.setContentText("Choose your option.");
+									alert.getButtonTypes().setAll(buttons);
+									Optional<ButtonType> result = alert.showAndWait();
+									final ButtonType buttonType = result.get();
+									if(buttonType.getButtonData()==ButtonData.OK_DONE){
+										QUEUE.setUnitAddress((byte) Integer.parseInt(buttonType.getText()));
+									}
+								});
 
-						}
+							}
+						});
 					});
 
 					QUEUE.add(packet, false);

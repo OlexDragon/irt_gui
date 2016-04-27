@@ -6,11 +6,14 @@ import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.EmptyPacket;
@@ -40,40 +43,45 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 	private int readFromAddress;
 	private byte[] dataToSend;
 
+	private final ExecutorService executor = Executors.newSingleThreadExecutor(new MyThreadFactory());
+
 	private final Observer sendAddressObsorver = (o, arg)->{
+		executor.execute(()->{
+			
+			if(PanelFlash.checkAswer("Send Address: ", (LinkedPacket)o, button)){
 
-		if(PanelFlash.checkAswer("Send Address: ", (LinkedPacket)o, button)){
+				dataToSend = PanelFlash.LENGTH;
+				dataPacket.deleteObservers();
 
-			dataToSend = PanelFlash.LENGTH;
-			dataPacket.deleteObservers();
+				final Observer reset = sendLengthObsorver.reset();
+				dataPacket.addObserver(reset);
 
-			final Observer reset = sendLengthObsorver.reset();
-			dataPacket.addObserver(reset);
+				SerialPortController.QUEUE.add(dataPacket, false);
 
-			SerialPortController.QUEUE.add(dataPacket, false);
-
-		}else
-			Platform.runLater(()->{
-				button.setText(bundle.getString("read"));
-				button.getStyleClass().remove(ButtonRead.WARNING);
-			});
-
+			}else
+				Platform.runLater(()->{
+					button.setText(bundle.getString("read"));
+					button.getStyleClass().remove(ButtonRead.WARNING);
+				});
+		});
 	};
 
 	private final Observer readCommandObserver = (o, arg)->{
+		executor.execute(()->{
+			
+			if(PanelFlash.checkAswer("Read Command: ", (LinkedPacket)o, button)){
 
-		if(PanelFlash.checkAswer("Read Command: ", (LinkedPacket)o, button)){
-
-			byte[] address = Packet.toBytes(readFromAddress);
-			dataToSend = PanelFlash.addCheckSum(address);
-			dataPacket.deleteObservers();
-			dataPacket.addObserver(sendAddressObsorver);
-			SerialPortController.QUEUE.add(dataPacket, false);
-		}else
-			Platform.runLater(()->{
-				button.setText(bundle.getString("read"));
-				button.getStyleClass().remove(ButtonRead.WARNING);
-			});
+				byte[] address = Packet.toBytes(readFromAddress);
+				dataToSend = PanelFlash.addCheckSum(address);
+				dataPacket.deleteObservers();
+				dataPacket.addObserver(sendAddressObsorver);
+				SerialPortController.QUEUE.add(dataPacket, false);
+			}else
+				Platform.runLater(()->{
+					button.setText(bundle.getString("read"));
+					button.getStyleClass().remove(ButtonRead.WARNING);
+				});
+		});
 	};
 
 	@Override public void initialize(URL location, ResourceBundle resources) {

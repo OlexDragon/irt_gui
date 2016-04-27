@@ -4,15 +4,23 @@ import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.EmptyPacket;
 import irt.gui.data.packet.observable.flash.ErasePacket;
 import irt.gui.flash.PanelFlash.UnitAddress;
+import irt.gui.flash.service.EraseObject;
+import irt.gui.flash.service.PagesCount;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -23,7 +31,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tooltip;
 
-public class ButtonErase extends Observable implements Observer, Initializable {
+public class ButtonErase extends Observable implements Observer, Initializable, EraseObject {
 	private Logger logger = LogManager.getLogger();
 
 	@FXML private Button button;
@@ -36,8 +44,27 @@ public class ButtonErase extends Observable implements Observer, Initializable {
 	private UnitAddress unitAddress;
 	private byte[] pagesToErase;
 	private int count;
+	private long fileSize;
+	private boolean error;
+
+	private final ExecutorService executor = Executors.newFixedThreadPool(5, new MyThreadFactory());
+	private Future<Boolean> submit;
+	private Callable<Boolean> sleep = ()->{
+
+		try{
+
+			TimeUnit.SECONDS.sleep(10);
+
+		}catch(Exception ex){
+			return error;
+		}
+
+		return true;//error
+	};
+
 
 	private ResourceBundle bundle;
+
 
 	@Override public void initialize(URL location, ResourceBundle resources) {
 		bundle = resources;
@@ -45,27 +72,48 @@ public class ButtonErase extends Observable implements Observer, Initializable {
 
 		alert.setTitle("Erase Flash");
 		erasePacket.addObserver((o, arg)->{
-			if(PanelFlash.checkAswer("Erase " + unitAddress, (LinkedPacket)o, button))
-				SerialPortController.QUEUE.add(dataPacket, false);
+			executor.execute(()->{
 
+				if(PanelFlash.checkAswer("Erase " + unitAddress + ": ", (LinkedPacket)o, button))
+					SerialPortController.QUEUE.add(dataPacket, false);
+				else{
+					if(submit!=null)
+						submit.cancel(true);
+
+					Platform.runLater(()->{
+						button.setText(bundle.getString("erase"));
+						button.getStyleClass().remove(ButtonRead.WARNING);
+					});
+				}
+			});
 		});
 
 		final Observer dataObserver = (o, arg)->{
-			logger.trace(o);
-			LinkedPacket p = (LinkedPacket) o;
-			if(p.getAnswer()==null && count<1000){
-				count++;
-				try {
-					Thread.sleep(10);
-				} catch (Exception e) {
-					logger.catching(e);
+			executor.execute(()->{
+
+				logger.trace(o);
+				LinkedPacket p = (LinkedPacket) o;
+				if(p.getAnswer()==null && count<1000){
+					count++;
+					try {
+						Thread.sleep(10);
+					} catch (Exception e) {
+						logger.catching(e);
+					}
+					SerialPortController.QUEUE.add(emptyPacket, false);
+
+				}else{
+					error = !PanelFlash.checkAswer("Erase " + unitAddress + ": ", (LinkedPacket)o, button);
+
+					 if(submit!=null)
+						 submit.cancel(true);
+
+					Platform.runLater(()->{
+						button.setText(bundle.getString("erase"));
+						button.getStyleClass().remove(ButtonRead.WARNING);
+					});
 				}
-				SerialPortController.QUEUE.add(emptyPacket, false);
-			}else
-				Platform.runLater(()->{
-					button.setText(bundle.getString("erase"));
-					button.getStyleClass().remove(ButtonRead.WARNING);
-				});
+			});
 		};
 		emptyPacket.addObserver(dataObserver);
 		dataPacket.addObserver(dataObserver);
@@ -79,13 +127,32 @@ public class ButtonErase extends Observable implements Observer, Initializable {
 		.showAndWait()
 		.ifPresent((b)->{
 			if(b == ButtonType.OK){
-				count = 0;
-				button.setText(bundle.getString("erase.erasing"));
-				addWarningClass();
-				SerialPortController.QUEUE.add(erasePacket, false);
+				fileSize = 0;
+				erase();
 			}
 		});
-		
+	}
+
+	public boolean erase(long fileSize) {
+		this.fileSize = fileSize;
+		update(null, unitAddress);
+		erase();
+
+		submit = executor.submit(sleep);
+
+		try {
+			error = submit.get();
+		} catch (Exception e) {}
+
+		return !error;
+	}
+
+	private void erase() {
+		error = false;
+		count = 0;
+		Platform.runLater(()->button.setText(bundle.getString("erase.erasing")));
+		addWarningClass();
+		SerialPortController.QUEUE.add(erasePacket, false);
 	}
 
 	@Override public void update(Observable o, Object arg) {
@@ -103,11 +170,14 @@ public class ButtonErase extends Observable implements Observer, Initializable {
 											0, 11 };
 				break;
 			case HP_BIAS:
-				pagesToErase = new byte[] { 0,
+				pagesToErase = new byte[] { 0, 0,
 											0, 23 };
 				break;
 			case PROGRAM:
-				pagesToErase = new byte[] { 0, 9,	// N + 1 pages are erased
+				pagesToErase =
+						fileSize>0
+							? new PagesCount(fileSize).getPages()
+							: new byte[] { 0, 9,	// N + 1 pages are erased
 											0, 0,	// pages are erased
 											0, 1,
 											0, 2,
@@ -117,16 +187,16 @@ public class ButtonErase extends Observable implements Observer, Initializable {
 											0, 6,
 											0, 7,
 											0, 8,
-											0, 9 };	
+											0, 9 };
 				break;
 			default:
 				pagesToErase = new byte[] { 0, 0,
 											0, 11 };
 				break;
 			}
+			pagesToErase = PanelFlash.addCheckSum(pagesToErase);
 		}
 
-		pagesToErase = PanelFlash.addCheckSum(pagesToErase);
 	}
 
 	private void addWarningClass() {

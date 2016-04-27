@@ -41,6 +41,7 @@ public class PanelFlash extends Observable{
 
 	@FXML void initialize() {
 
+		writeButtonController.setEraseObject(eraseButtonController);
 		unitTypeChangeNotifier.addObserver(readButtonController);
 		unitTypeChangeNotifier.addObserver(writeButtonController);
 		unitTypeChangeNotifier.addObserver(eraseButtonController);

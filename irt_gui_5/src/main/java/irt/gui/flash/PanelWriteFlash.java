@@ -8,11 +8,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.EmptyPacket;
@@ -23,10 +23,10 @@ import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;
 
 public class PanelWriteFlash extends Observable{
-	private final Logger logger = LogManager.getLogger();
 
 	private final WritePacket writePacket = new WritePacket();
 	private final LinkedPacket dataPacket = new EmptyPacket(){ @Override public byte[] toBytes() { return dataToSend; }};
+	private final ExecutorService executor = Executors.newSingleThreadExecutor(new MyThreadFactory());
 
 	private int writeToAddress;
 	private byte[] dataToSend;
@@ -37,48 +37,54 @@ public class PanelWriteFlash extends Observable{
 	@FXML private ProgressIndicator 		progressIndicator;
 
 	private final Observer sendDataObsorver = (o, arg)->{
+		executor.execute(()->{
 
-		if (PanelFlash.checkAswer("Send data: ", (LinkedPacket) o, progressIndicator)) {
+			if (PanelFlash.checkAswer("Send data: ", (LinkedPacket) o, progressIndicator)) {
 
-			filePosition += PanelFlash.MAX_VAR_RAM_SIZE;
-			writeToAddress += PanelFlash.MAX_VAR_RAM_SIZE;
+				filePosition += PanelFlash.MAX_VAR_RAM_SIZE;
+				writeToAddress += PanelFlash.MAX_VAR_RAM_SIZE;
 
-			float value = (float)filePosition / fileAsBytes.length;
-			Platform.runLater(()->progressIndicator.setProgress(value));
+				float value = (float)filePosition / fileAsBytes.length;
+				Platform.runLater(()->progressIndicator.setProgress(value));
 
-			if (filePosition < fileAsBytes.length) {
-				// Send command 'WRITE TO MEMORY'
-				SerialPortController.QUEUE.add(writePacket, false);
+				if (filePosition < fileAsBytes.length) {
+					// Send command 'WRITE TO MEMORY'
+					SerialPortController.QUEUE.add(writePacket, false);
+				}
 			}
-		}
+		});
 	};
 
 	private final Observer sendAddressObsorver = (o, arg)->{
+		executor.execute(()->{
+			
+			if(PanelFlash.checkAswer("Send Address: ", (LinkedPacket)o, progressIndicator)){
 
-		if(PanelFlash.checkAswer("Send Address: ", (LinkedPacket)o, progressIndicator)){
+				dataToSend = PanelFlash.LENGTH;
+				dataPacket.deleteObservers();
+				dataPacket.addObserver(sendDataObsorver);
+				dataToSend = prepareDataToSend();
 
-			dataToSend = PanelFlash.LENGTH;
-			dataPacket.deleteObservers();
-			dataPacket.addObserver(sendDataObsorver);
-			dataToSend = prepareDataToSend();
-
-			if(dataToSend!=null)
-				SerialPortController.QUEUE.add(dataPacket, false);
-		}
+				if(dataToSend!=null)
+					SerialPortController.QUEUE.add(dataPacket, false);
+			}
+		});
 	};
 
 	private final Observer writePacketObserver = (o, arg)->{
+		executor.execute(()->{
 
-		if(PanelFlash.checkAswer("Write command", (LinkedPacket)o, progressIndicator)){
+			if(PanelFlash.checkAswer("Write command", (LinkedPacket)o, progressIndicator)){
 
-			byte[] address = Packet.toBytes(writeToAddress);
-			dataToSend = PanelFlash.addCheckSum(address);
-			dataPacket.deleteObservers();
-			dataPacket.addObserver(sendAddressObsorver);
+				byte[] address = Packet.toBytes(writeToAddress);
+				dataToSend = PanelFlash.addCheckSum(address);
+				dataPacket.deleteObservers();
+				dataPacket.addObserver(sendAddressObsorver);
 
-			//Send ADDRESS
-			SerialPortController.QUEUE.add(dataPacket, false);
-		}
+				//Send ADDRESS
+				SerialPortController.QUEUE.add(dataPacket, false);
+			}
+		});
 	};
 
 	@FXML void initialize() {

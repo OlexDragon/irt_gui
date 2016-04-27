@@ -28,12 +28,10 @@ public class IrtGuiApp extends Application {
 	public static final String BUNDLE = "bundles/bundle";
 	private final Logger logger = LogManager.getLogger();
 
-	@Override
-	public void start(Stage primaryStage) {
+	@Override public void start(Stage primaryStage) {
         try {
 
- //       	logger.trace(System.getProperty("sun.boot.class.path"));
-        	URL resource = getClass().getResource("/fxml/IrtGui.fxml");
+         	URL resource = getClass().getResource("/fxml/IrtGui.fxml");
 
 			final ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
 			Parent parent = FXMLLoader.load(resource, bundle);
@@ -51,10 +49,8 @@ public class IrtGuiApp extends Application {
 	}
 
 
-	@Override
-	public void stop() throws Exception {
+	@Override public void stop() throws Exception {
 		stopLoggers();
-//		ScheduledServices.services.shutdownNow();
 
 		SerialPort serialPort = SerialPortController.getSerialPort();
 		if(serialPort!=null && serialPort.isOpened())
