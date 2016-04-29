@@ -8,6 +8,9 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.ConfigurationGroup;
 import irt.gui.data.packet.observable.PacketAbstract;
 import irt.gui.errors.PacketParsingException;
@@ -17,10 +20,10 @@ public class FrequencyPacket extends PacketAbstract implements ConfigurationGrou
 	public static final PacketId PACKET_ID = PacketId.CONFIGURATION_FREQUENCY;
 
 	public FrequencyPacket() throws PacketParsingException {
-		this((Short)null);
+		this((Long)null);
 	}
 
-	public FrequencyPacket(Short value) throws PacketParsingException {
+	public FrequencyPacket(Long value) throws PacketParsingException {
 		super(
 				new PacketHeader(
 						value==null ? PacketType.REQUEST : PacketType.COMMAND,

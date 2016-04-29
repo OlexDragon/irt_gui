@@ -20,8 +20,9 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.LinkedPacketSender;
-import irt.gui.controllers.LinkedPacketSender.Baudrate;
 import irt.gui.controllers.LinkedPacketsQueue;
+import irt.gui.controllers.enums.Baudrate;
+import irt.gui.controllers.enums.SerialPortStatus;
 import irt.gui.controllers.socket.SocketWorker;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -56,14 +57,6 @@ public class SerialPortController implements Initializable{
 
 	private static final String NETWORK_SELECTION = "Network";
 	private final Logger logger = LogManager.getLogger();
-
-	public enum SerialPortStatus{
-		NOT_SELECTED,
-		CLOSED,
-		OPEND,
-		BUSY,
-		ERROR
-	}
 	
 	private final ExecutorService executor = Executors.newFixedThreadPool(5, new MyThreadFactory());
 

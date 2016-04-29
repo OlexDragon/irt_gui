@@ -4,11 +4,11 @@ package irt.gui.controllers.components;
 import java.time.Duration;
 
 import irt.gui.controllers.FieldsControllerAbstract;
+import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
-import irt.gui.data.packet.observable.device_debug.InitializeBiasPacket;
+import irt.gui.data.packet.observable.production.InitializeBiasPacket;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;

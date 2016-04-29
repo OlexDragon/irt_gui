@@ -8,10 +8,14 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
+import irt.gui.data.packet.interfaces.AlarmPacket;
 import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 
-public class AlarmStatusPacket extends RegirterAbstractPacket{
+public class AlarmStatusPacket extends RegirterAbstractPacket implements AlarmPacket{
 
 	public static final PacketId PACKET_ID = PacketId.ALARM_STATUS;
 

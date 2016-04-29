@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNotEquals;
 
 import org.junit.Test;
 
+import irt.gui.controllers.flash.ButtonRead;
+
 public class ButtonReadTest {
 
 	@Test

@@ -1,4 +1,4 @@
-package irt.gui.flash;
+package irt.gui.controllers.flash;
 
 import java.net.URL;
 import java.util.Observable;
@@ -6,9 +6,9 @@ import java.util.Observer;
 import java.util.ResourceBundle;
 
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.controllers.flash.PanelFlash.Answer;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.ConnectPacket;
-import irt.gui.flash.PanelFlash.Answer;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

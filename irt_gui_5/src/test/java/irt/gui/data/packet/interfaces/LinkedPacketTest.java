@@ -1,12 +1,12 @@
 
 package irt.gui.data.packet.interfaces;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket.ParameterHeaderCode;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.ParameterHeaderCode;
 import irt.gui.errors.PacketParsingException;
 
 public class LinkedPacketTest {

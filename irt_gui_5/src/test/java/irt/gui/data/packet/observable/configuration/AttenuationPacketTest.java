@@ -1,7 +1,8 @@
 
 package irt.gui.data.packet.observable.configuration;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -15,8 +16,8 @@ import org.junit.Test;
 import irt.gui.data.NetworkAddress;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.errors.PacketParsingException;
 
 public class AttenuationPacketTest {

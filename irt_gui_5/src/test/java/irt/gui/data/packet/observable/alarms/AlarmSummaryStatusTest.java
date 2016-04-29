@@ -1,8 +1,12 @@
 
 package irt.gui.data.packet.observable.alarms;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Observable;
@@ -17,12 +21,12 @@ import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketGroupId;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
+import irt.gui.data.packet.enums.ParameterHeaderCode;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketGroupId;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
-import irt.gui.data.packet.interfaces.LinkedPacket.ParameterHeaderCode;
 import irt.gui.data.packet.observable.PacketAbstract;
 import irt.gui.data.packet.observable.alarms.AlarmStatusPacket.AlarmSeverities;
 import irt.gui.errors.PacketParsingException;

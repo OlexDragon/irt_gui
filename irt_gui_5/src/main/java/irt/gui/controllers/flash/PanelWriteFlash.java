@@ -1,5 +1,5 @@
 
-package irt.gui.flash;
+package irt.gui.controllers.flash;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,12 +12,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.controllers.flash.PanelFlash.UnitAddress;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.EmptyPacket;
 import irt.gui.data.packet.observable.flash.WritePacket;
-import irt.gui.flash.PanelFlash.UnitAddress;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.ProgressIndicator;

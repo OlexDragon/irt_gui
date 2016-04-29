@@ -27,19 +27,16 @@ import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.controllers.interfaces.OtherFields;
 import irt.gui.controllers.interfaces.ScheduledNode;
+import irt.gui.controllers.observers.TextFieldValueChangeObserver;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextFieldFocusListener;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
 import irt.gui.data.value.Value;
-import irt.gui.data.value.Value.Status;
-import irt.gui.data.value.ValueDouble;
 import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -103,6 +100,8 @@ public class RegistersController implements Observer, FieldController {
 	private int 	profileId;
 	private Boolean editable;
 
+	private TextFieldValueChangeObserver textFieldValueChangeObserver;
+
     public RegistersController(){
     	dialog.setTitle("Save provile as...");
     	dialog.setContentText("Type the profile name");
@@ -115,44 +114,6 @@ public class RegistersController implements Observer, FieldController {
 
     }
 
-	private final Observer valueObserver = new Observer() {
-		
-		@Override
-		public void update(Observable o, Object arg) {
-			logger.entry("{} : {}", o, arg);
-
-			Value v = (Value) o;
-			if(((Status)arg)==Status.IN_RANGE){
-				if(o instanceof ValueDouble){
-
-					double rv = (double)v.getValue()/v.getFactor();
-					if(Double.compare(slider.getValue() ,rv)!=0)
-						setSliderValue(rv);
-
-				}else{
-
-					//TODO check max double value
-					int rv = v.getValue().intValue();
-					if(Double.compare(slider.getValue(), rv)!=0)
-						setSliderValue(rv);
-
-				}
-			}else
-				logger.warn("The value {} is out of range", v.getOriginalValue());
-		}
-
-		public void setSliderValue(double rv) {
-			logger.entry(rv);
-			Platform.runLater(()->{
-
-				final DoubleProperty valueProperty = slider.valueProperty();
-				valueProperty.removeListener(sliderValueChangeListener);
-				slider.setValue(rv);
-				valueProperty.addListener(sliderValueChangeListener);
-			});
-		}
-	};
-
 	private void removeCssClassAndDeleteObserver(String cssClass) {
 		Optional
 		.ofNullable(selectedTextField)
@@ -160,38 +121,24 @@ public class RegistersController implements Observer, FieldController {
 
 			TextFieldAbstract textFieldRegister = (TextFieldAbstract) selectedTextField.getUserData();
 			Value registerValue = textFieldRegister.getValue();
-			registerValue.deleteObserver(valueObserver);
+			registerValue.deleteObserver(textFieldValueChangeObserver);
 
 			Platform.runLater(()->textField.getStyleClass().remove(cssClass));
 		});
 	}
 
-	private final EventHandler<ActionEvent> onActionMenuSelectProfile = e->{
-		try{
-
-			RadioMenuItem rmi = (RadioMenuItem)e.getSource();
-			profileId = Integer.parseInt((String) rmi.getUserData());// get profile ID
-			showProfile(profileId);
-
-			prefs.putInt(KEY_PROFILE_ID, profileId);
-
-		}catch(Exception ex){
-			logger.catching(ex);
-		}
-	};
-
 	@SuppressWarnings("unchecked")
 	private void showProfile(int profileId) throws NoSuchFieldException, IllegalAccessException {
 		setRowsAndColumns(profileId);
-		setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class, OtherFields.class);
+		setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class, OtherFields.class, TextFieldConfiguration.class);
 		menuSave.setDisable(false);
 		panelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
 		setAlignment(profileId);
 
-		setTabText();
+		setTabName();
 	}
 
-	private void setTabText() {
+	private void setTabName() {
 		if(tab!=null)
 			menuProfile
 			.getItems()
@@ -217,14 +164,14 @@ public class RegistersController implements Observer, FieldController {
 				.ifPresent(controller->controller.setText(slider.getValue())));
 	};
 
-	private final ChangeListener<Boolean> focusListenerRegisterPanel = (observable, oldValue, newValue)->{
+	private final ChangeListener<Boolean> textFieldFocusListenerRegisterPanel = (observable, oldValue, newValue)->{
 
-		final TextField bean = (TextField) ((ReadOnlyBooleanProperty)observable).getBean();
-		if(selectedTextField!=bean){
+		final TextField textField = (TextField) ((ReadOnlyBooleanProperty)observable).getBean();
+		if(selectedTextField!=textField){
 
 			removeCssClassAndDeleteObserver(ACTIVE);
 
-			if(bean.isDisable() || !bean.isEditable()){
+			if(textField.isDisable() || !textField.isEditable()){
 
 				selectedTextField = null;
 				if(!slider.isDisable())
@@ -232,12 +179,13 @@ public class RegistersController implements Observer, FieldController {
 
 			}else{
 
-				selectedTextField = bean;
+				selectedTextField = textField;
 
 				TextFieldAbstract textFieldcontroller = (TextFieldAbstract) selectedTextField.getUserData();
 
 				//Set slider value, max, min
-				textFieldcontroller.setSliderValue(slider, sliderValueChangeListener, ACTIVE, valueObserver, stepNumericChecker);
+				textFieldcontroller.setSliderValue(slider, sliderValueChangeListener, ACTIVE, textFieldValueChangeObserver, stepNumericChecker);
+				textFieldValueChangeObserver.setMultiplier(textFieldcontroller.getMultiplier());
 
 				if(slider.isDisable())
 					Platform.runLater(()->slider.setDisable(false));
@@ -249,6 +197,8 @@ public class RegistersController implements Observer, FieldController {
 
     @FXML private void initialize(){
 
+    	textFieldValueChangeObserver = new TextFieldValueChangeObserver(slider, sliderValueChangeListener);
+
     	registersPane.setUserData(this);
  
     	buttonCalibModeController.addObserver(this);
@@ -259,41 +209,68 @@ public class RegistersController implements Observer, FieldController {
     	new TextFieldFocusListener(stepTextField);
     	stepTextField.focusedProperty().addListener(stepTextFieldFocusListener);
 
-		panelRegistersController.setFocusListener(focusListenerRegisterPanel);
+		panelRegistersController.setFocusListener(textFieldFocusListenerRegisterPanel);
 
 		slider.valueProperty().addListener(sliderValueChangeListener);
 
 		createProfileMenuItems();
 
-		int pID = prefs.getInt(KEY_PROFILE_ID, 0);
+		profileId = prefs.getInt(KEY_PROFILE_ID, 0);
 		menuProfile
 		.getItems()
 		.parallelStream()
 		.filter(m->m.getUserData()!=null)
-		.filter(mp->Integer.parseInt((String) mp.getUserData())==pID)
+		.filter(mp->Integer.parseInt((String) mp.getUserData())==profileId)
 		.findAny()
 		.ifPresent(mp->{
 			try {
 				((RadioMenuItem)mp).setSelected(true);
-				showProfile(pID);
+				showProfile(profileId);
 			} catch (Exception e) {
 				logger.catching(e);
 			}
 		});
     }
 
-	@FXML private void onActionNewProfile(){
+	@FXML private void onActionMenuNewProfile(){
+
 		panelRegistersController.setColumnsAndRows(1, 1);
 		menuSave.setDisable(true);
 	}
 
 	@FXML private void onActionResetButton(ActionEvent event) {
     	try {
-			panelRegistersController.reset();
-		} catch (Exception e) {
+
+    		panelRegistersController.reset();
+
+    	} catch (Exception e) {
 			logger.catching(e);
 		}
     }
+
+	@FXML public void onActionMenuProfile(ActionEvent event){
+
+		final Menu source = (Menu) event.getSource();
+		final Optional<RadioMenuItem> ormi = source
+												.getItems()
+												.parallelStream()
+												.filter(m->m.getId()==null || !m.getId().equals("menuNewProfile"))
+												.map(m->(RadioMenuItem)m)
+												.filter(rm->rm.isSelected())
+												.findAny();
+		ormi.ifPresent(rmi->{
+			try{
+
+				profileId = Integer.parseInt((String) rmi.getUserData());// get profile ID
+				showProfile(profileId);
+
+				prefs.putInt(KEY_PROFILE_ID, profileId);
+
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
+		});
+	}
 
     @FXML private void saveValues(ActionEvent event) {
     	try {
@@ -424,6 +401,10 @@ public class RegistersController implements Observer, FieldController {
 		removeProperties(propertiesFromFile, String.format( LabelRegister.FIELD_KEY_ID, profileId));
 		putProperies(propertiesFromFile, profileId, LabelRegister.class);
 
+		//TextFieldConfiguration properties ( Control )
+		removeProperties(propertiesFromFile, String.format( TextFieldConfiguration.FIELD_KEY_ID, profileId));
+		putProperies(propertiesFromFile, profileId, TextFieldConfiguration.class);
+
 		//Other properties
 		removeProperties(propertiesFromFile, String.format( OtherFields.FIELD_KEY_ID, profileId));
 		putOtherFieldsProperies(propertiesFromFile, profileId);
@@ -534,16 +515,16 @@ public class RegistersController implements Observer, FieldController {
 				.map(p->{
 					final RadioMenuItem radioMenuItem = new RadioMenuItem((String)p.getValue());
 					radioMenuItem.setUserData(((String)p.getKey()).replace(REGISTER_PROPERTY_NAME, ""));
-					Platform.runLater(()->{
-						radioMenuItem.setOnAction(onActionMenuSelectProfile);
-						radioMenuItem.setToggleGroup(profilesToggleGroup);
-					});
 					return radioMenuItem;
 				})
 				.collect(Collectors.toList());
+
 		final ObservableList<MenuItem> items = menuProfile.getItems();
-//		((RadioMenuItem)items.get(0)).setToggleGroup(profilesToggleGroup);
 		items.addAll(menuItems);
+
+		items
+		.parallelStream()
+		.forEach(rm->Platform.runLater(()->((RadioMenuItem)rm).setToggleGroup(profilesToggleGroup)));
 	}
 
 	private void setAlignment(int profileId) {
@@ -649,6 +630,6 @@ public class RegistersController implements Observer, FieldController {
 
 	public void setTab(Tab biasTab) {
 		tab = biasTab;
-		setTabText();
+		setTabName();
 	}
 }

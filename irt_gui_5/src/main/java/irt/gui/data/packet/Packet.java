@@ -9,9 +9,9 @@ package irt.gui.data.packet;
 
 import java.util.Arrays;
 
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.observable.PacketAbstract;
 
 public class Packet {
@@ -95,7 +95,7 @@ public class Packet {
 
 	/* backwards compatibility - to be deleted */
 		IRT_SLCP_PACKET_ID_PRODUCTION_GENERIC_SET_1 = 100,
-		IRT_SLCP_GROUP_ID_DEVELOPER_GENERIC_SET_1 = 120;
+		PACKET_ID_DEVELOPER_GENERIC_SET_1 = 120;
 	/* Parameter general types definition. */
 	public static final byte
 		IRT_SLCP_PARAMETER_NONE		= 0,
@@ -213,7 +213,7 @@ public class Packet {
 
 	/* PicoBUC production procedures */
 
-	public static final byte PACKET_ID_PRODUCTION_INITIALIZE = 1; /* Re-init default values of RDAC */
+	public static final byte PARAMETER_PRODUCTION_INITIALIZE = 1; /* Re-init default values of RDAC */
 
 	public static final byte IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS	= 3;
 
@@ -227,6 +227,8 @@ public class Packet {
 							ALARM_NAME				= 7;
 
 	public static final byte PARAMETER_CONVERTER_DAC = 3;
+
+	public static final byte PARAMETER_DEVELOPER_CONNECT_FCM = 2;
 
 	//************************************************************************************************************
 	/**

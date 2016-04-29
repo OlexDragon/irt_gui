@@ -54,9 +54,9 @@
                   </TextField>
                   <MenuButton mnemonicParsing="false">
                     <items>
-                        <Menu fx:id="menuProfile" mnemonicParsing="false" text="Profiles">
+                        <Menu fx:id="menuProfile" mnemonicParsing="false" onAction="#onActionMenuProfile" text="Profiles">
                            <items>
-                              <RadioMenuItem mnemonicParsing="false" onAction="#onActionNewProfile" text="New" />
+                              <RadioMenuItem fx:id="menuNewProfile" mnemonicParsing="false" onAction="#onActionMenuNewProfile" text="New" />
                            </items>
                          </Menu>
                       <MenuItem fx:id="menuSave" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemsSave" text="Save" />

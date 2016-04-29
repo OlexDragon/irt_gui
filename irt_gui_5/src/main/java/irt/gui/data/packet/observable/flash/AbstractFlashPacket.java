@@ -1,16 +1,19 @@
 package irt.gui.data.packet.observable.flash;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Vector;
 
+import irt.gui.controllers.flash.PanelFlash.Command;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.flash.PanelFlash.Command;
 
 public class AbstractFlashPacket extends Observable implements LinkedPacket, FlashPacket{
 
@@ -80,7 +83,12 @@ public class AbstractFlashPacket extends Observable implements LinkedPacket, Fla
 
 	@Override
 	public Observer[] getObservers() throws Exception {
-		throw new UnsupportedOperationException("This function should not be used");
+
+		final Field obs = Observable.class.getDeclaredField("obs");
+		obs.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		final Vector<Observer> vector = (Vector<Observer>) obs.get(this);
+		return vector.toArray(new Observer[vector.size()]);
 	}
 
 	@Override

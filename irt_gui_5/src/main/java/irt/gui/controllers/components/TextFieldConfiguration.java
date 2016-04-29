@@ -8,18 +8,15 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.listeners.FractionalNumberPlusPrefixChecker;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.packet.PacketHeader;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
 import irt.gui.data.packet.interfaces.RangePacket;
 import irt.gui.data.packet.observable.configuration.FrequencyPacket;
 import irt.gui.data.value.Value;
@@ -48,6 +45,9 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 	public static final String FXML_PATH = "/fxml/components/TextFieldConfiguration.fxml";
 	public static final String PROPERTY_STARTS_WITH = "gui.control.";
+
+	public static final String FIELD_KEY_ID 		= RegistersController.REGISTER_PROPERTIES 		+ "textField.control.%d.";
+	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.control.3.5.7)
 
 	public static final Class<? extends Node> rootClass = BorderPane.class;
 
@@ -102,9 +102,10 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		Constructor<? extends LinkedPacket> constructor;
 
 		LinkedPacket newInstance;
-		if(packetClass.isInstance(ValueFrequency.class)){
-			constructor = packetClass.getConstructor(Integer.class);
-			newInstance = constructor.newInstance(value.intValue());
+		if(packetClass == FrequencyPacket.class){
+			constructor = packetClass.getConstructor(Long.class);
+			newInstance = constructor.newInstance(value.longValue());
+			
 		}else{
 			constructor = packetClass.getConstructor(Short.class);
 			newInstance = constructor.newInstance(value.shortValue());
@@ -215,7 +216,8 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		final double max = (double)value.getMaxValue()/factor;
 		final double min = (double)value.getMinValue()/factor;
 		final double v = (double)value.getValue()/factor;
-		logger.trace("{} : {} : {} : {}", v, min, max, factor);
+
+//		logger.error("{} : {} : {} : {}", v, min, max, factor);
 
 			//set limit for text field
 //			stepNumericChecker.setMaximum(max);
@@ -244,6 +246,8 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 			bd = bd.multiply(bm);
 			final BigInteger bi = bd.toBigInteger();
 			v.setValue(bi.longValue());
+
+//			logger.error("value={}, bm={}, bd={}, bi={}, bi.long={}, v={}, v.isError()={}", value, bm, bd, bi, bi.longValue(), v, v.isError());
 		}else
 			v.setValue(value);
 
@@ -251,29 +255,34 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	}
 
 	@Override public void update(Observable observable, Object arg) {
-		logger.trace("{} : {}", observable, arg);
-		updater.setPacket(((LinkedPacket)observable));
-		LinkedPacketsQueue.SERVICES.execute(updater);
+		LinkedPacketsQueue.SERVICES.execute(updater.setPacket(((LinkedPacket)observable)));
+	}
+
+	@Override public int getMultiplier() {
+		return MULTIPLIER;
 	}
 
 	//********************************************** class Updater   ***************************************************
 	private class Updater implements Runnable{
 
-		final Logger logger = LogManager.getLogger();
-
 		private LinkedPacket packet;
 
-		void setPacket(LinkedPacket packet){
+		Updater setPacket(LinkedPacket packet){
 			this.packet = packet;
+			return this;
 		}
 
 		@Override
 		public void run() {
-			
-			try {
 
-				if(packet.getAnswer()==null)
-					return;
+			if(packet.getPacketHeader().getPacketType()==PacketType.COMMAND)
+				packet.deleteObservers();
+
+
+			if(packet.getAnswer()==null)
+				return;
+
+			try {
 
 				packetClass = packet.getClass();
 				final Constructor<? extends LinkedPacket> constructor = packetClass.getConstructor(byte[].class, boolean.class);
@@ -288,7 +297,6 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 						setTextFieldValue(p);
 					}
 				}
-
 			} catch (Exception e) {
 				logger.catching(e);
 			}

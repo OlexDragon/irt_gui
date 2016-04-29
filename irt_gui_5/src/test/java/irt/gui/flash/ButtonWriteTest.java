@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import irt.gui.controllers.flash.PanelFlash;
 import irt.gui.data.ToHex;
 
 public class ButtonWriteTest {

@@ -12,10 +12,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import irt.gui.data.PacketIdDetails;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketGroupId;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketGroupId;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.errors.PacketParsingException;;
 
 public class PacketHeader{

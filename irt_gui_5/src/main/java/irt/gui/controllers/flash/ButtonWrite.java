@@ -1,4 +1,4 @@
-package irt.gui.flash;
+package irt.gui.controllers.flash;
 
 import java.io.File;
 import java.net.URL;
@@ -14,9 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.flash.PanelFlash.UnitAddress;
+import irt.gui.controllers.flash.service.EraseObject;
 import irt.gui.data.MyThreadFactory;
-import irt.gui.flash.PanelFlash.UnitAddress;
-import irt.gui.flash.service.EraseObject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

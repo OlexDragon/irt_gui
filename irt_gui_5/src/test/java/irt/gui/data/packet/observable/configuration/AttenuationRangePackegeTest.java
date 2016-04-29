@@ -12,9 +12,8 @@ import org.junit.Test;
 
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
-import irt.gui.data.packet.observable.configuration.AttenuationRangePacket;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.errors.PacketParsingException;
 
 public class AttenuationRangePackegeTest {

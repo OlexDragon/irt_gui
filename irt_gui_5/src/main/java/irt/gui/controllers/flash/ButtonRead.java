@@ -1,4 +1,4 @@
-package irt.gui.flash;
+package irt.gui.controllers.flash;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -13,12 +13,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.controllers.flash.PanelFlash.UnitAddress;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.EmptyPacket;
 import irt.gui.data.packet.observable.flash.ReadPacket;
-import irt.gui.flash.PanelFlash.UnitAddress;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -161,6 +161,10 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 			if(answer == null || (l = answer.length)==0){
 				PanelFlash.showAlert(AlertType.ERROR, "It is impossible to read the data", button);
 				dataPacket.deleteObservers();
+				Platform.runLater(()->{
+					button.setText(bundle.getString("read"));
+					button.getStyleClass().remove(ButtonRead.WARNING);
+				});
 				return;
 			}
 

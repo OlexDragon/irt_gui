@@ -16,8 +16,9 @@ import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 
@@ -29,6 +30,7 @@ public class InfoPacketTest {
 	public void testToBytes() throws PacketParsingException {
 
 		LinkedPacket packet = new InfoPacket();
+		logger.trace("packet.toBytes()={} {}", ToHex.bytesToHex(packet.toBytes()), packet);
 		byte[] bytes = packet.toBytes();
 		logger.trace("\n\t{}", bytes);
 

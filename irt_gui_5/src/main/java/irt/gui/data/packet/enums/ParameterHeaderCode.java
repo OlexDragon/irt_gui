@@ -1,0 +1,67 @@
+package irt.gui.data.packet.enums;
+
+import irt.gui.data.packet.Packet;
+import irt.gui.data.packet.Payload;
+
+public enum ParameterHeaderCode {
+
+	//Device debug
+	DD_READ_WRITE			(	Packet.PARAMETER_DEVICE_DEBAG_READ_WRITE		, PacketGroupId.DEVICE_DEBAG ),
+	DD_CALIBRATION_MODE		(	Packet.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE	, PacketGroupId.DEVICE_DEBAG ),
+	DD_INFO					(	Packet.PARAMETER_DEVICE_DEBAG_INFO				, PacketGroupId.DEVICE_DEBAG ),
+	DD_DUMP					(	Packet.PARAMETER_DEVICE_DEBAG_DUMP				, PacketGroupId.DEVICE_DEBAG ),
+	DD_REGISTER_INDEXES		(	Packet.PARAMETER_DEVICE_DEBAG_INDEX				, PacketGroupId.DEVICE_DEBAG ),
+	//device info
+	DI_DEVICE_TYPE			(	Payload.DI_DEVICE_TYPE				, PacketGroupId.DEVICE_INFO	),
+	DI_DEVICE_SN			(	Payload.DI_DEVICE_SN				, PacketGroupId.DEVICE_INFO	),
+	DI_FIRMWARE_VERSION		(	Payload.DI_FIRMWARE_VERSION			, PacketGroupId.DEVICE_INFO	),
+	DI_FIRMWARE_BUILD_DATE	(	Payload.DI_FIRMWARE_BUILD_DATE		, PacketGroupId.DEVICE_INFO	),
+	DI_UNIT_UPTIME_COUNTER	(	Payload.DI_UNIT_UPTIME_COUNTER		, PacketGroupId.DEVICE_INFO	),
+	DI_UNIT_NAME			(	Payload.DI_UNIT_NAME				, PacketGroupId.DEVICE_INFO	),
+	DI_UNIT_PART_NUMBER		(	Payload.DI_UNIT_PART_NUMBER			, PacketGroupId.DEVICE_INFO	),
+	DI_ALL					(	Packet.IRT_SLCP_PARAMETER_ALL		, PacketGroupId.DEVICE_INFO	),
+	//Configuration
+	CONF_ATTENURATION		(	Packet.PARAMETER_CONFIG_ATTENUATION			, PacketGroupId.CONFIGURATION ),
+	CONF_ATTENURATION_RANGE	(	Packet.PARAMETER_CONFIG_ATTENUATION_RANGE	, PacketGroupId.CONFIGURATION ),
+	CONF_GAIN				(	Packet.PARAMETER_CONFIG_GAIN				, PacketGroupId.CONFIGURATION ),
+	CONF_GAIN_RANGE			(	Packet.PARAMETER_CONFIG_GAIN_RANGE			, PacketGroupId.CONFIGURATION ),
+	CONF_FREQUENCY			(	Packet.PARAMETER_CONFIG_USER_FREQUENCY		, PacketGroupId.CONFIGURATION ),
+	CONF_FREQUENCY_RANGE	(	Packet.PARAMETER_CONFIG_USER_FREQUENCY_RANGE, PacketGroupId.CONFIGURATION ),
+	CONF_MUTE				(	Packet.PARAMETER_CONFIG_MUTE				, PacketGroupId.CONFIGURATION ),
+	CONF_LO_FREQUENCIES		(	Packet.PARAMETER_CONFIG_LO_FREQUENCIES		, PacketGroupId.CONFIGURATION ),
+	CONF_LO					(	Packet.PARAMETER_CONFIG_LO_SET				, PacketGroupId.CONFIGURATION ),
+	//Network
+	NETWORK_ADDRESS		(	Packet.PARAMETER_ID_NETWORK_ADDRESS		, PacketGroupId.NETWORK	),
+	NETWORK_SNMP_ENABLE	(	Packet.PARAMETER_ID_NETWORK_SNMP_ENABLE	, PacketGroupId.NETWORK	),
+	//Alarms
+	ALARM_IDs				(	Packet.ALARMS_IDs				, PacketGroupId.ALARM ),
+	ALARM_SUMMARY_STATUS	(	Packet.ALARM_SUMMARY_STATUS		, PacketGroupId.ALARM ),
+	ALARM_CONFIG			(	Packet.ALARM_CONFIG				, PacketGroupId.ALARM ),
+	ALARM_STATUS			(	Packet.ALARM_STATUS				, PacketGroupId.ALARM ),
+	ALARM_NAME				(	Packet.ALARM_NAME				, PacketGroupId.ALARM ),
+	ALARM_DESCRIPTION		(	Packet.ALARM_DESCRIPTION		, PacketGroupId.ALARM ),
+	//Converter
+	DD_CONVERTER_DAC	(Packet.PARAMETER_CONVERTER_DAC		, PacketGroupId.DEVICE_DEBAG ),
+	//Measurement
+	M_TEMPERATURE	(Packet.PARAMETER_MEASUREMENT_TEMPERATURE	, PacketGroupId.MEASUREMENT ),
+	M_INPUT_POWER	(Packet.PARAMETER_MEASUREMENT_INPUT_POWER	, PacketGroupId.MEASUREMENT ),
+	M_OUTPUT_POWER	(Packet.PARAMETER_MEASUREMENT_OUTPUT_POWER	, PacketGroupId.MEASUREMENT ),
+	M_STATUS	(Packet.PARAMETER_MEASUREMENT_STATUS	, PacketGroupId.MEASUREMENT ),
+	//Production
+	PRODUCTION_INITIALIZE_BIASES(Packet.PARAMETER_PRODUCTION_INITIALIZE	, PacketGroupId.PRODUCTION ),
+
+	PRODUCTION_CONNECT_FCM	(Packet.PARAMETER_DEVELOPER_CONNECT_FCM	, PacketGroupId.PRODUCTION );
+
+	private byte value; 			public byte 			getValue() 	{ return value; 	}
+	private PacketGroupId groupId;	public PacketGroupId 	getGroupId(){ return groupId; 	}
+
+	private ParameterHeaderCode(byte value, PacketGroupId groupId){
+		this.value = value;
+		this.groupId = groupId;
+	}
+
+	@Override
+	public String toString(){
+		return name() + ":" + value;
+	}
+}

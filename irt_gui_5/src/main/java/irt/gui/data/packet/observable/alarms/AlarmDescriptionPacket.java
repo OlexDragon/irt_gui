@@ -3,6 +3,7 @@ package irt.gui.data.packet.observable.alarms;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import irt.gui.data.packet.enums.PacketId;
 import irt.gui.errors.PacketParsingException;
 
 public class AlarmDescriptionPacket extends AlarmStatusPacket {

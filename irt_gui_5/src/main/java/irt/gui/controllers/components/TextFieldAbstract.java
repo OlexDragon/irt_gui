@@ -4,7 +4,6 @@ package irt.gui.controllers.components;
 import java.util.Observer;
 
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.observer.TextFieldErrorController;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextFieldFocusListener;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -23,6 +22,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -50,6 +50,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	protected abstract void setup();
 	protected abstract Menu getMenu();
 	protected abstract Node getRootNode();
+	public 	  abstract int  getMultiplier();
 	protected abstract void createMenuItems();
 	protected abstract void sendValue(Value value) 																	throws PacketParsingException;
 	protected abstract void setPacket(String keyStartWith) 															throws PacketParsingException ;
@@ -216,7 +217,6 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 			//If Integer or double not end by '.' and new value equals set value
 			if((value.getClass()==Value.class || newValue.charAt(newValue.length()-1)!='.') && value.equals(copy)){
 
-				
 				if(styleClass.size()>0)
 					styleClass.remove(CLASS_HAS_CHANGED);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
 
@@ -237,6 +237,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	}
 
 	protected void setText(String text, ChangeListener<String> fractionalNumberChecker){
+//		logger.error(text);
 
 		if(text.equals(textField.getText()))
 			return;
@@ -246,6 +247,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 			final StringProperty textProperty = textField.textProperty();
 			textProperty.removeListener(fractionalNumberChecker);
 			textField.setText(text);
+			textField.setTooltip(new Tooltip(text));
 			textProperty.addListener(fractionalNumberChecker);
 		});
 	}

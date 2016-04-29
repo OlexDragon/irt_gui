@@ -9,6 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import irt.gui.controllers.flash.service.PagesCount;
+
 public class PagesCountTest {
 	private final Logger logger = LogManager.getLogger();
 

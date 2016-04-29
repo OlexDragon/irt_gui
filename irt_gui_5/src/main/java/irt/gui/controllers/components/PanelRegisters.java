@@ -89,23 +89,16 @@ public class PanelRegisters implements Initializable, FieldController {
 
 	private boolean editable;
 
-	private final EventHandler<ActionEvent> onActionMenuItemRegister 		= e->{
-																					Node node = loadNode(TextFieldRegister.class, ((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-																					((FieldController)node.getUserData()).doUpdate(true);
-	};
-	private final EventHandler<ActionEvent> onActionMenuItemValueLabel 		= e->{
-																					Node node = loadNode(LabelValue.class, 	((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-																					((FieldController)node.getUserData()).doUpdate(true);
-	};
-	private final EventHandler<ActionEvent> onActionMenuItemControl 		= e->{
-																					Node node = loadNode(TextFieldConfiguration.class, ((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-																					((FieldController)node.getUserData()).doUpdate(true);
-	};
-	private final EventHandler<ActionEvent> onActionMenuItemRegisterLabel 	= e->{
-																					Node node = loadNode(LabelRegister.class, ((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
-																					((FieldController)node.getUserData()).doUpdate(true);
-	};
-	private final EventHandler<ActionEvent> onActionMenuItemOther			= e->loadNode(((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+	private final EventHandler<ActionEvent> onActionMenuItemAddRegister 		= e->onActionMenuItemAdd(e, TextFieldRegister.class);
+	private final EventHandler<ActionEvent> onActionMenuItemAddValueLabel 		= e->onActionMenuItemAdd(e, LabelValue.class);
+	private final EventHandler<ActionEvent> onActionMenuItemAddControl 			= e->onActionMenuItemAdd(e, TextFieldConfiguration.class);
+	private final EventHandler<ActionEvent> onActionMenuItemAddRegisterLabel 	= e->onActionMenuItemAdd(e, LabelRegister.class);
+	private final EventHandler<ActionEvent> onActionMenuItemAddOther			= e->loadNode(((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+
+	private void onActionMenuItemAdd(ActionEvent actionEvent, Class<? extends ScheduledNode> clazz){
+		Node node = loadNode(clazz, ((MenuItem) actionEvent.getSource()).getId(), paneUnderMouse.getChildren());
+		((FieldController)node.getUserData()).doUpdate(true);
+	}
 
 	@Override public void initialize(URL location, ResourceBundle resources){
 		gridPane.setUserData(this);
@@ -203,23 +196,23 @@ public class PanelRegisters implements Initializable, FieldController {
 	}
 
 	private void createMenuItemsControlTextField() {
-		GuiUtility.createMamuItems(TextFieldConfiguration.PROPERTY_STARTS_WITH, onActionMenuItemControl, menuControl.getItems());
+		GuiUtility.createMamuItems(TextFieldConfiguration.PROPERTY_STARTS_WITH, onActionMenuItemAddControl, menuControl.getItems());
 	}
 
 	private void createMenuItemsRegisterLabel() {
-		GuiUtility.createMamuItems(LabelRegister.PROPERTY_STARTS_WITH, onActionMenuItemRegisterLabel, menuRegisterLabel.getItems());
+		GuiUtility.createMamuItems(LabelRegister.PROPERTY_STARTS_WITH, onActionMenuItemAddRegisterLabel, menuRegisterLabel.getItems());
 	}
 
 	private void createMenuItemsValueLabel() {
-		GuiUtility.createMamuItems(LabelValue.PROPERTY_STARTS_WITH, onActionMenuItemValueLabel, menuValueLabel.getItems());
+		GuiUtility.createMamuItems(LabelValue.PROPERTY_STARTS_WITH, onActionMenuItemAddValueLabel, menuValueLabel.getItems());
 	}
 
 	private void createMenuItemsRegisterTextField() {
-		GuiUtility.createMamuItems(TextFieldRegister.PROPERTY_STARTS_WITH, onActionMenuItemRegister, menuRegister.getItems());
+		GuiUtility.createMamuItems(TextFieldRegister.PROPERTY_STARTS_WITH, onActionMenuItemAddRegister, menuRegister.getItems());
 	}
 
 	private void createMenuItemsOther() {
-		GuiUtility.createMamuItems(OtherFields.PROPERTY_STARTS_WITH, onActionMenuItemOther, menuOther.getItems());
+		GuiUtility.createMamuItems(OtherFields.PROPERTY_STARTS_WITH, onActionMenuItemAddOther, menuOther.getItems());
 	}
 
 	private void createMenuItemsAlignment() {
@@ -435,8 +428,8 @@ public class PanelRegisters implements Initializable, FieldController {
 		.filter(v->v.getChildren()!=null)
 		.map(VBox::getChildren)
 		.flatMap(ch->ch.parallelStream())
-		.filter(ch->ch instanceof TextField)
-		.filter(ch->!(ch instanceof ConfigurationGroup))
+		.filter(TextField.class::isInstance)
+		.filter(ConfigurationGroup.class::isInstance)
 		.map(ch->(TextField)ch)
 		.forEach(tf->Platform.runLater(()->tf.setEditable(editable)));
 	}
@@ -592,6 +585,9 @@ public class PanelRegisters implements Initializable, FieldController {
 		gridPane.getColumnConstraints().clear();
 		gridPane.getRowConstraints().clear();
 		gridPane.getChildren().clear();
+
+		gridPane.setStyle("-fx-background-image: null;");
+		backgroundPath = null;
 	}
 
 	public void setColumnsAndRows(Integer columns, Integer rows) {

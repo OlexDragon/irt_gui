@@ -11,56 +11,22 @@ import javax.swing.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.gui.controllers.enums.Baudrate;
+import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.observable.flash.FlashPacket;
 import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
 public class LinkedPacketSender extends SerialPort {
 
-	private static final int STANDARD_WAIT_TIME = 5;
-	private static final int FLASH_MEMORY_WAIT_TIME = 1;
+	public static final int STANDARD_WAIT_TIME 		= 5;
+	public static final int FLASH_MEMORY_WAIT_TIME 	= 1;
+	public static final int FCM_BY_BAIS_WAIT_TIME 	= 1;
 
 	private final Logger logger = LogManager.getLogger();
-
-	public enum Baudrate{
-		BAUDRATE_9600	(SerialPort.BAUDRATE_9600),
-		BAUDRATE_19200	(SerialPort.BAUDRATE_19200),
-		BAUDRATE_38400	(SerialPort.BAUDRATE_38400),
-		BAUDRATE_57600	(SerialPort.BAUDRATE_57600),
-		BAUDRATE_115200	(SerialPort.BAUDRATE_115200);
-
-		private int baudrate;
-		private static Baudrate defaultBaudrate = BAUDRATE_115200;
-
-		private Baudrate(int baudrate){
-			this.baudrate = baudrate;
-		}
-
-		public int getBaudrate() {
-			return baudrate;
-		}
-
-		@Override
-		public String toString(){
-			return ""+baudrate;
-		}
-
-		public static Baudrate valueOf(int baudrate) {
-			Baudrate result = defaultBaudrate;
-
-			for(Baudrate b:values())
-				if(b.getBaudrate()==baudrate){
-					result = b;
-					break;
-				}
-
-			return result;
-		}
-	}
 
 	private static Baudrate baudrate = Baudrate.BAUDRATE_115200;
 
@@ -68,6 +34,7 @@ public class LinkedPacketSender extends SerialPort {
 	private int timeout = 1000;
 	private SerialPortEvent serialPortEvent = new SerialPortEvent();
 	private int parity = PARITY_NONE;  		public int getParity() { return parity; }  public void setParity(int parity) { this.parity = parity; }
+	private int waitTime = STANDARD_WAIT_TIME;
 
 
 	public LinkedPacketSender(String portName) {
@@ -86,23 +53,25 @@ public class LinkedPacketSender extends SerialPort {
 			if(!isOpened())
 				openPort();
 
-
 			packet.clearAnswer();
 			if(writePacket(packet)){
-				byte[] readBytes = readBytes(packet instanceof FlashPacket ? FLASH_MEMORY_WAIT_TIME : STANDARD_WAIT_TIME);
 
-				//Send back acknowledgement
-				byte[] acknowledgement = packet.getAcknowledgement();
-				if(acknowledgement!=null)
-					writeBytes(acknowledgement);
+				if(packet.getObservers().length>0){
 
-				packet.setAnswer(readBytes);
+					if(packet instanceof WaitTime)
+						waitTime = ((WaitTime)packet).getWaitTime();
+
+					byte[] readBytes = readBytes(waitTime);
+
+					//Send back acknowledgement
+					byte[] acknowledgement = packet.getAcknowledgement();
+					if(acknowledgement!=null)
+						writeBytes(acknowledgement);
+
+					packet.setAnswer(readBytes);
+				}
 			}else
 				logger.warn("packet.toBytes() return null. {}", packet);
-
-
-//			if(packet.getAnswer()==null)
-//				logger.error(packet.getObservers().length);
 
 		} catch (Exception e) {
 			logger.catching(e);

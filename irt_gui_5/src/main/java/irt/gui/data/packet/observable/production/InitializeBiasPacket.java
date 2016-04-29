@@ -1,5 +1,5 @@
 
-package irt.gui.data.packet.observable.device_debug;
+package irt.gui.data.packet.observable.production;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,6 +8,9 @@ import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.observable.RegirterAbstractPacket;
 import irt.gui.errors.PacketParsingException;
 

@@ -1,6 +1,6 @@
 package irt.gui.data.packet.observable.flash;
 
-import irt.gui.flash.PanelFlash.Command;
+import irt.gui.controllers.flash.PanelFlash.Command;
 
 public class ErasePacket extends AbstractFlashPacket{
 

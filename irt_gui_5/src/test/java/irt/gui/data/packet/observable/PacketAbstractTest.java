@@ -13,7 +13,7 @@ import org.junit.Test;
 import irt.gui.data.ChecksumLinkedPacket;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
+import irt.gui.data.packet.enums.PacketId;
 import irt.gui.errors.PacketParsingException;
 
 public class PacketAbstractTest {

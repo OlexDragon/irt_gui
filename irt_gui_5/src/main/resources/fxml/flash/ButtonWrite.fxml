@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<Button fx:id="button" mnemonicParsing="false" onAction="#onAction" text="%write" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.flash.ButtonWrite">
+<Button fx:id="button" mnemonicParsing="false" onAction="#onAction" text="%write" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.flash.ButtonWrite">
    <tooltip>
       <Tooltip text="%write" />
    </tooltip>

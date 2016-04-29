@@ -3,7 +3,7 @@ package irt.gui.data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import irt.gui.data.packet.Packet;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
+import irt.gui.data.packet.enums.PacketId;
 
 public class PacketIdDetails {
 

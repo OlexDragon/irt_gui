@@ -1,14 +1,16 @@
 package irt.gui.controllers.components;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import irt.gui.IrtGuiApp;
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.UpdateController;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.observable.alarms.AlarmIDsPacket;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
@@ -60,7 +62,6 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 				if(setAlarmIDs(pl))
 					for (short alarmId : alarms)
 						addAlarmView(alarmId);
-
 				break;
 
 			case ALARM_CONFIG:
@@ -81,21 +82,22 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 
 	private synchronized boolean setAlarmIDs(Payload pl) {
 
-		if(alarms!=null) //return if already set
-			return false;
-
 		doUpdate(false);
 		packet.deleteObservers();
-		alarms = pl.getArrayOfShort();
+		final short[] arrayOfShort = pl.getArrayOfShort();
+
+		if(alarms!=null && Arrays.equals(alarms, arrayOfShort)) //return if already set
+			return false;
+
+			alarms = arrayOfShort;
+
+			vBox.getChildren().clear();
 
 		return true;
 	}
 
 	private void addAlarmView(short alarmId) {
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
+		Platform.runLater(()->{
 				try {
 
 					FXMLLoader loader = new FXMLLoader( getClass().getResource("/fxml/components/AlarmView.fxml"));
@@ -103,15 +105,19 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 					Parent root = (Parent) loader.load();
 					AlarmFieldController alarmFieldController = loader.getController();
 					alarmFieldController.build(alarmId);
-					alarmFieldController.doUpdate(true);
 					vBox.getChildren().add(root);
+
+					final Optional<String> senderId = Optional
+														.ofNullable(UpdateController.getSenderId())
+														.filter(id->id.equals("flashTab"));
+
+					alarmFieldController.doUpdate(!senderId.isPresent());
 
 					UpdateController.addController(alarmFieldController);
 
 				} catch (Exception e) {
 					logger.catching(e);
 				}
-			}
 		});
 	}
 }

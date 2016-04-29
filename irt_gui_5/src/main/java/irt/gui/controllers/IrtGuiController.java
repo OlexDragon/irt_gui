@@ -80,7 +80,7 @@ public class IrtGuiController{
 		Tab tab = (Tab)e.getSource();
 
 		if(tab.isSelected()){
-			UpdateController.stop();
+			UpdateController.stop(tab.getId());
 			SerialPortController.QUEUE.clear();
 			prefs.put("selected_tab_id", tab.getId());
 
@@ -100,7 +100,7 @@ public class IrtGuiController{
 			} catch (SerialPortException e1) {
 				logger.catching(e1);
 			}
-			UpdateController.start();
+			UpdateController.start(tab.getId());
 		}
 	}
 }

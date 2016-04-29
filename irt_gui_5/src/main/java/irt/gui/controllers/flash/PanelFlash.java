@@ -1,5 +1,5 @@
 
-package irt.gui.flash;
+package irt.gui.controllers.flash;
 
 import java.util.Arrays;
 import java.util.Observable;

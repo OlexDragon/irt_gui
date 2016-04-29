@@ -7,16 +7,12 @@ import java.util.Observable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.gui.data.value.enums.ValueStatus;
+
 public class Value extends Observable{
 
 	protected final Logger logger = LogManager.getLogger();
 
-	public enum Status{
-				IN_RANGE,
-				UNDER_RANGE,
-				MORE_THEN_RANGE,
-				RANGE_SET
-	}
 	private int type = 0;
 
 	protected Long originalValue; 			public Long getOriginalValue() { return originalValue; }
@@ -74,7 +70,7 @@ public class Value extends Observable{
 			this.minValue = maxValue;
 			this.maxValue = minValue;
 		}
-		notifyObservers(Status.RANGE_SET);
+		notifyObservers(ValueStatus.RANGE_SET);
 
 		setValue(value);
 	}
@@ -155,15 +151,15 @@ public class Value extends Observable{
 			if (value > maxValue) {
 				this.value = maxValue;
 				error = true;
-				notifyObservers(Status.MORE_THEN_RANGE);
+				notifyObservers(ValueStatus.MORE_THEN_RANGE);
 			} else if (value < minValue) {
 				error = true;
 				this.value = minValue;
-				notifyObservers(Status.UNDER_RANGE);
+				notifyObservers(ValueStatus.UNDER_RANGE);
 			} else {
 				error = false;
 				this.value = value;
-				notifyObservers(Status.IN_RANGE);
+				notifyObservers(ValueStatus.IN_RANGE);
 			}
 		}else
 			error = false;

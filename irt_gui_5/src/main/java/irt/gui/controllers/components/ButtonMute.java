@@ -7,8 +7,8 @@ import java.util.ResourceBundle;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.UpdateController;
+import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
 import irt.gui.data.packet.observable.configuration.MutePacket;
 import irt.gui.data.packet.observable.configuration.MutePacket.MuteStatus;
 import irt.gui.errors.PacketParsingException;

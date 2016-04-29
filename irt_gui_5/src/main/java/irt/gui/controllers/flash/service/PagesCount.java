@@ -1,4 +1,4 @@
-package irt.gui.flash.service;
+package irt.gui.controllers.flash.service;
 
 import java.util.Arrays;
 import java.util.Optional;

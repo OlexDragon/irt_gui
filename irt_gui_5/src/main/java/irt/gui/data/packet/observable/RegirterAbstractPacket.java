@@ -6,10 +6,10 @@ import java.util.List;
 
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.interfaces.AlarmPacket;
+import irt.gui.data.packet.enums.PacketId;
 import irt.gui.errors.PacketParsingException;
 
-public abstract class RegirterAbstractPacket extends PacketAbstract implements AlarmPacket{
+public abstract class RegirterAbstractPacket extends PacketAbstract{
 
 	protected RegirterAbstractPacket(PacketHeader packetHeader, Payload payload) {
 		super(packetHeader, payload);

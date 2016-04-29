@@ -11,9 +11,9 @@ import irt.gui.data.RegisterValue;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
 import irt.gui.data.packet.observable.device_debug.RegisterPacket;
 import irt.gui.data.value.Value;
 import irt.gui.errors.PacketParsingException;
@@ -37,6 +37,7 @@ import javafx.scene.layout.Region;
 
 public class TextFieldRegister extends TextFieldAbstract {
 
+	private static final int MULTIPLIER = 1;
 	private static final NumericChecker NUMERIC_CHECKER = new NumericChecker();
 
 	public static final String FXML_PATH = "/fxml/components/TextFieldRegister.fxml";
@@ -268,6 +269,10 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 		else
 			((LinkedPacket)observable).deleteObserver(this);
+	}
+
+	@Override public int getMultiplier() {
+		return MULTIPLIER;
 	}
 
 	//********************************************** class Updater   ***************************************************

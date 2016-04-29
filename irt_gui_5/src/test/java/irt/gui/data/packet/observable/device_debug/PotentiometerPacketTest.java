@@ -1,8 +1,11 @@
 
 package irt.gui.data.packet.observable.device_debug;
 
-import static org.junit.Assert.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,10 +22,10 @@ import irt.gui.data.RegisterValue;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketType;
 import irt.gui.data.packet.observable.PacketAbstract;
-import irt.gui.data.packet.observable.device_debug.RegisterPacket;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 

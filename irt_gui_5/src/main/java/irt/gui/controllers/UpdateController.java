@@ -1,26 +1,33 @@
 
 package irt.gui.controllers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import irt.gui.controllers.interfaces.FieldController;
 
 public class UpdateController {
 
-	private final static List<FieldController> controllers = new ArrayList<>();
+	private final static Set<FieldController> controllers = new HashSet<>();
+	private static String senderId;		public static String getSenderId() { return senderId; }
 
-	public static void addController(FieldController infoController) {
-		controllers.add(infoController);
+	public static void addController(FieldController controller) {
+		controllers.add(controller);
 	}
 
-	public static void start(){
+	public static void start(String senderId){
+
+		UpdateController.senderId = senderId;
+
 		controllers
 		.parallelStream()
 		.forEach(c->c.doUpdate(true));
 	}
 
-	public static void stop(){
+	public static void stop(String senderId){
+
+		UpdateController.senderId = senderId;
+
 		controllers
 		.parallelStream()
 		.forEach(c->c.doUpdate(false));

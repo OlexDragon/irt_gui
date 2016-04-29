@@ -25,6 +25,9 @@ import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.PacketType;
+import irt.gui.data.packet.interfaces.AlarmPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.errors.PacketParsingException;
 
@@ -78,7 +81,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 			return getPacket(answer, 0);
 
 		byte[] acknowledgement = byteStuffing(Arrays.copyOfRange(answer, beginning, end));
-		if(acknowledgement.length!=9)
+		if(checkAcknowledgement(acknowledgement))
 			throw new PacketParsingException("\n\t The Acknowledgement length is not correct\n\t" + ToHex.bytesToHex(acknowledgement) + "\n\tanswer: " + ToHex.bytesToHex(answer));
 
 		//acknowledgement checksum
@@ -98,6 +101,10 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 												+ "checksum: " + ToHex.bytesToHex(checksum) +
 												ch
 					);
+	}
+
+	protected boolean checkAcknowledgement(byte[] acknowledgement) {
+		return acknowledgement.length!=9;
 	}
 
 	private byte[] getPacket(byte[] answer, int beginning) throws PacketParsingException {
@@ -325,14 +332,22 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 	@Override
 	public int compareTo(LinkedPacket packet) {
 
-		byte v1 = packetHeader.getPacketType().getValue();
-		byte v2 = packet.getPacketHeader().getPacketType().getValue();
+		PacketType packetType = packetHeader.getPacketType();
+		byte v1 = packetType.getValue();
+		if(packetType!=PacketType.COMMAND && !(this instanceof AlarmPacket))
+			v1--;
+
+		packetType = packet.getPacketHeader().getPacketType();
+		byte v2 = packetType.getValue();
+		if(packetType!=PacketType.COMMAND && !(packet instanceof AlarmPacket))
+			v2--;
 
 		return Byte.compare(v2, v1);
 	}
 
 	@Override
 	public String toString() {
-		return "\n\t" + getClass().getSimpleName()+ " [linkHeader=" + linkHeader + ", packetHeader=" + packetHeader + ", payloads=" + payloads + ", \n\t answer=" + ToHex.bytesToHex(answer) + "]";
+		return "\n\t" + getClass().getSimpleName()+ " [linkHeader=" + linkHeader + ", packetHeader=" + packetHeader + ", payloads=" + payloads + ", \n\t answer=" + ToHex.bytesToHex(answer) +
+				"\n\t toBytes()=" + ToHex.bytesToHex(toBytes()) + "]";
 	}
 }

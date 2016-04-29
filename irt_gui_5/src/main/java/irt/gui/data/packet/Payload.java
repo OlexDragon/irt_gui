@@ -14,7 +14,7 @@ import irt.gui.data.DacValue;
 import irt.gui.data.DeviceId;
 import irt.gui.data.StringData;
 import irt.gui.data.ToHex;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
+import irt.gui.data.packet.enums.PacketId;
 import irt.gui.errors.PacketParsingException;
 
 

@@ -1,4 +1,4 @@
-package irt.gui.controllers.observer;
+package irt.gui.controllers.components;
 
 import java.util.Observable;
 import java.util.Observer;

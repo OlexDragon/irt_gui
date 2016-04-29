@@ -1,7 +1,9 @@
 
 package irt.gui.data.packet.observable;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -15,9 +17,9 @@ import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketErrors;
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
 import irt.gui.data.packet.observable.alarms.AlarmIDsPacket;
 import irt.gui.data.packet.observable.alarms.AlarmNamePacket;
 import irt.gui.errors.PacketParsingException;

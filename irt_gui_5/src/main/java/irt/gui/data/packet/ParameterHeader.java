@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import irt.gui.data.packet.interfaces.LinkedPacket.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket.ParameterHeaderCode;
+import irt.gui.data.packet.enums.PacketId;
+import irt.gui.data.packet.enums.ParameterHeaderCode;
 import irt.gui.errors.PacketParsingException;
 
 public class ParameterHeader {	//irtalcp_parameter_header_t
