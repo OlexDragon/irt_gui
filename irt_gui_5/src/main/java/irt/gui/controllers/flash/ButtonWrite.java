@@ -27,8 +27,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -75,8 +78,10 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 			toWrite = fileChooser.showOpenDialog(button.getScene().getWindow());
 
 		} else{
-			saveToFile();
-			toWrite = file;
+			if(saveToFile())
+				toWrite = file;	// if selected ButtonType.OK or ButtonType.NO
+			else
+				toWrite = null;	// if selected ButtonType.CANSEL
 		}
 
 		Optional
@@ -113,22 +118,34 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 		});
 	}
 
-	private void saveToFile() {
-		Optional
-		.ofNullable(text)
-		.ifPresent(t->{
+	private boolean saveToFile() {
+		ButtonType buttonType = ButtonType.YES;
+		final Optional<String> ofNullable = Optional
+				.ofNullable(text);
+		if(ofNullable.isPresent()){
+			buttonType = showAlert();
+			if(buttonType==ButtonType.YES){
+				saveLocalCopy();
+				moveOriginal();
 
-			saveLocalCopy();
-			moveOriginal();
+				try(PrintWriter out = new PrintWriter(file)){
 
-			try(PrintWriter out = new PrintWriter(file)){
+					out.println( text );
 
-				out.println( t );
-
-			}catch(Exception ex){
-				logger.catching(ex);
+				}catch(Exception ex){
+					logger.catching(ex);
+				}
 			}
-		});
+		}
+		return buttonType != ButtonType.CANCEL;
+	}
+
+	private ButtonType showAlert() {
+		Alert alert = new Alert(AlertType.CONFIRMATION, "Do you want to save changes?", ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+		alert.setTitle("The profile has been modified");
+		return alert
+				.showAndWait()
+				.get();
 	}
 
 	private void saveLocalCopy() {

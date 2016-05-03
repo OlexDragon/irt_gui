@@ -14,11 +14,18 @@ import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.flash.enums.UnitAddress;
 import irt.gui.controllers.flash.service.FindTheFile;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -72,8 +79,37 @@ public class ButtonLinkToFile implements Initializable, Observer {
 			final File f = foundFiles.get(0).toFile();
 			set(unitAddress.name() + "_file", f);
 			break;
-		default://TODO More then 1 file
-			
+		default:// More then 1 file
+			Platform.runLater(()->{
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setTitle("Found more than one file");
+				alert.setHeaderText("Choose one of them");
+
+				final DialogPane dialogPane = alert.getDialogPane();
+				final ObservableList<ButtonType> buttonTypes = dialogPane.getButtonTypes();
+				buttonTypes.clear();	//Remove 'OK' button
+				buttonTypes.add(ButtonType.CANCEL);
+				VBox vb = new VBox();
+				dialogPane.setContent(vb);
+				foundFiles
+				.stream()
+				.forEach(path->{
+					Button b = new Button();
+					final String text = path.toString();
+					b.setText(text);
+					b.setTooltip(new Tooltip(text));
+					b.setUserData(path);
+					vb.getChildren().add(b);
+					b.setOnAction(e->{
+						final Node source = (Node)e.getSource();
+						Path p = (Path)source.getUserData();
+						set(unitAddress.name() + "_file", p.toFile());
+						alert.close();
+					});
+				});
+
+				alert.show();
+			});
 		}
 	}
 
