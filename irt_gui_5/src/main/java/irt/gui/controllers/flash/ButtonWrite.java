@@ -1,7 +1,11 @@
 package irt.gui.controllers.flash;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
@@ -14,7 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.flash.PanelFlash.UnitAddress;
+import irt.gui.controllers.flash.enums.UnitAddress;
 import irt.gui.controllers.flash.service.EraseObject;
 import irt.gui.data.MyThreadFactory;
 import javafx.application.Platform;
@@ -39,10 +43,13 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 	private ResourceBundle bundle;
 	private UnitAddress unitAddress;
-	private File file;
+	private File file; 			File getFile() { return file; } 			void setFile(File file) { this.file = file;	button.setTooltip(new Tooltip(file.getName())); }
+
 	private EraseObject setEraseObject;
 
 	private final ExecutorService executor = Executors.newSingleThreadExecutor(new MyThreadFactory());
+
+	private String text;
 
 	@Override public void initialize(URL location, ResourceBundle resources) {
 		bundle = resources;
@@ -50,25 +57,36 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 	}
 
 	@FXML private void onAction() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(new ExtensionFilter("IRT Technologies BIN file", "*.bin"));
+
 		final String key = unitAddress.name() + "_file";
 		final String path = prefs.get(key, null);
-		if(path!=null){
-			File p = new File(path);
-			fileChooser.setInitialDirectory(p.getParentFile());
-			fileChooser.setInitialFileName(p.getName());
+		File toWrite;
+
+		if (file == null) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.getExtensionFilters().add(new ExtensionFilter("IRT Technologies BIN file", "*.bin"));
+			if (path != null) {
+				File p = new File(path);
+				fileChooser.setInitialDirectory(p.getParentFile());
+				fileChooser.setInitialFileName(p.getName());
+			}
+			fileChooser.setTitle(bundle.getString("write.to_flash"));
+
+			toWrite = fileChooser.showOpenDialog(button.getScene().getWindow());
+
+		} else{
+			saveToFile();
+			toWrite = file;
 		}
-		fileChooser.setTitle(bundle.getString("write.to_flash"));
+
 		Optional
-		.ofNullable(fileChooser.showOpenDialog(button.getScene().getWindow()))
+		.ofNullable(toWrite)
 		.ifPresent(f->{
-			file = f;
 			prefs.put(key, f.getAbsolutePath());
 			button.setTooltip(new Tooltip(f.getName()));
 
 			executor.execute(()->{
-				if(setEraseObject.erase(file.length()))
+				if(setEraseObject.erase(f.length()))
 					Platform.runLater(() -> {
 								try {
 									FXMLLoader loader = new FXMLLoader(
@@ -78,7 +96,7 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 									PanelWriteFlash writeFlash = (PanelWriteFlash) loader.getController();
 
 									Stage stage = new Stage();
-									writeFlash.write(unitAddress, file);
+									writeFlash.write(unitAddress, f);
 
 									stage.setScene(new Scene(root));
 									stage.setTitle("Data input");
@@ -95,6 +113,80 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 		});
 	}
 
+	private void saveToFile() {
+		Optional
+		.ofNullable(text)
+		.ifPresent(t->{
+
+			saveLocalCopy();
+			moveOriginal();
+
+			try(PrintWriter out = new PrintWriter(file)){
+
+				out.println( t );
+
+			}catch(Exception ex){
+				logger.catching(ex);
+			}
+		});
+	}
+
+	private void saveLocalCopy() {
+
+		if(file.exists()){
+			try{
+				String absolutePath = file.getAbsolutePath();
+				final String str = "profile";
+				final int indexOf = absolutePath.indexOf(str);
+
+				if (indexOf > 0)
+					absolutePath = Paths.get(System.getProperty("user.home"), "irt", "profile_backup", absolutePath.substring(indexOf + str.length())).toString();
+				else
+					absolutePath = Paths.get(System.getProperty("user.home"), "irt", "profile_backup", absolutePath.replace(file.toPath().getRoot().toString(), "")).toString();
+
+
+				final File dest = new File(absolutePath + "." + System.currentTimeMillis());
+
+				File folder = dest.getParentFile();
+				if (!folder.exists())
+					folder.mkdirs();
+
+				Files.copy(file.toPath(), dest.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+
+			} catch (Exception ex) {
+				logger.catching(ex);
+			}
+		}
+	}
+
+	private void moveOriginal() {
+
+		if(file.exists()){
+			try {
+				// copy existing file
+				String absolutePath = file.getAbsolutePath();
+				final String str = "profile";
+				final int indexOf = absolutePath.indexOf(str);
+
+				if (indexOf > 0)
+					absolutePath = Paths.get(file.toPath().getRoot().toString(), "profile_backup", absolutePath.substring(indexOf + str.length())).toString();
+
+
+				final File dest = new File(absolutePath + "." + System.currentTimeMillis());
+
+				File folder = dest.getParentFile();
+				if (!folder.exists())
+					folder.mkdirs();
+
+				Files.copy(file.toPath(), dest.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+				file.delete();
+
+			} catch (Exception ex) {
+				logger.catching(ex);
+			}
+		}
+	}
+
 	@Override public void update(Observable o, Object arg) {
 		if(arg instanceof UnitAddress){
 			unitAddress = (UnitAddress)arg;
@@ -104,5 +196,9 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 
 	public void setEraseObject(EraseObject eraseObject) {
 		this.setEraseObject = eraseObject;
+	}
+
+	public void setText(String text) {
+		this.text = text;
 	}
 }

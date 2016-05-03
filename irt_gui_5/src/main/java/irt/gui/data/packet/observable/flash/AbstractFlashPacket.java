@@ -7,7 +7,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-import irt.gui.controllers.flash.PanelFlash.Command;
+import irt.gui.controllers.flash.enums.Command;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.PacketHeader;

@@ -1,15 +1,24 @@
 
 package irt.gui.controllers.flash;
 
+import static irt.gui.controllers.flash.ButtonLinkToFile.findTheFile;
+
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.prefs.Preferences;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.flash.enums.Answer;
+import irt.gui.controllers.flash.enums.UnitAddress;
+import irt.gui.data.MyThreadFactory;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import javafx.application.Platform;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,6 +28,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 
 public class PanelFlash extends Observable{
@@ -30,27 +40,72 @@ public class PanelFlash extends Observable{
 
 	private static Alert alert;
 
+	private final  OnActionChoiceBox unitTypeChangeNotifier = new OnActionChoiceBox();
+	private final ExecutorService executor = Executors.newSingleThreadExecutor(new MyThreadFactory());
+
 	@FXML private ButtonConnect 		connectButtonController;
-	@FXML private ChoiceBox<UnitAddress> choiceBox;
+	@FXML private ButtonFCM 			fcmButtonController;
 	@FXML private ButtonRead 			readButtonController;
 	@FXML private ButtonWrite 			writeButtonController;
+	@FXML private ButtonLinkToFile 		linkToFileButtonController;
 	@FXML private ButtonErase 			eraseButtonController;
 	@FXML private TextArea 				textArea;
+	@FXML private ChoiceBox<UnitAddress> choiceBox;
+	@FXML private MenuItem				menuItemEdit;
 
-	private final  OnActionChoiceBox unitTypeChangeNotifier = new OnActionChoiceBox();
+	private volatile String text;
+
 
 	@FXML void initialize() {
+
+		fcmButtonController.setConnectButton(connectButtonController);
 
 		writeButtonController.setEraseObject(eraseButtonController);
 		unitTypeChangeNotifier.addObserver(readButtonController);
 		unitTypeChangeNotifier.addObserver(writeButtonController);
 		unitTypeChangeNotifier.addObserver(eraseButtonController);
+		unitTypeChangeNotifier.addObserver(linkToFileButtonController);
+
+		linkToFileButtonController.setWriteButton(writeButtonController);
+		linkToFileButtonController.setMenuItemEdit(menuItemEdit);
+
+		
+		final ChangeListener<? super String> listener = (observable, oldValue, newValue)->{
+
+			if(newValue.equals(text))
+				writeButtonController.setText(null);
+			else
+				writeButtonController.setText(textArea.getText());
+		};
+		textArea.textProperty().addListener(listener);
+
 		readButtonController.addObserver((o, arg)->{
 			Platform.runLater(()->{
-				if(arg instanceof String)
+
+				final StringProperty textProperty = textArea.textProperty();
+				textProperty.removeListener(listener);
+
+				if(arg instanceof String) {
+
 					textArea.setText(textArea.getText() + arg);
-				else
+					text = textArea.getText();
+
+					if(choiceBox.getSelectionModel().getSelectedItem()!=UnitAddress.PROGRAM)
+						if(!findTheFile.isFiles()){
+							findTheFile.setText(text);
+							executor.execute(findTheFile);
+						}
+				} else{
+					//reset
+					menuItemEdit.setDisable(true);
+					textArea.setEditable(false);
 					textArea.setText("");
+					textArea.getStyleClass().remove("editable");
+					findTheFile.reset();
+					writeButtonController.setText(null);
+				}
+
+				textProperty.addListener(listener);
 			});
 		});
 
@@ -67,86 +122,13 @@ public class PanelFlash extends Observable{
 		choiceBox.getSelectionModel().select(valueOf);
 	}
 
-	//------------------------- enums -----------------------------------
-	public enum Answer {
-		UNKNOWN	((byte) -1),
-		NULL	((byte) 0),
-		ACK		((byte) 0x79),
-		NACK	((byte) 0x1F);
-
-		private final byte answer;
-
-		private Answer(byte answer) {
-			this.answer = answer;
-		}
-
-		public byte getAnswer() {
-			return answer;
-		}
-
-		public static Optional<Answer> valueOf(byte key){
-			return Arrays
-					.stream(values())
-					.filter(a->a.answer==key)
-					.findAny();
-		}
-
-		@Override
-		public String toString() {
-			return name()+" (0x"+ToHex.bytesToHex(answer)+ ")";
-		}
+	@FXML public void onActionMemuItermEdit(){
+		textArea.setEditable(true);
+		final ObservableList<String> styleClass = textArea.getStyleClass();
+		if(!styleClass.contains("editable"))
+			styleClass.add("editable");
+		menuItemEdit.setDisable(true);
 	}
-
-	public enum UnitAddress {
-		PROGRAM("PROGRAM", 0x08000000),
-		CONVERTER("CONVERTER", 0x080C0000),
-		BIAS("BIAS BOARD", 0x080E0000),
-		HP_BIAS("HP BIAS", 0x081E0000);
-
-		private String text;
-		private int addr;
-
-		private UnitAddress(String name, int addr) {
-			this.text = name;
-			this.addr = addr;
-		}
-
-		public int getAddr() {
-			return addr;
-		}
-
-		@Override
-		public String toString() {
-			return text;
-		}
-	}
-
-	public enum Command {
-		EMPTY			(new byte[] { }),
-		/** 0x7F */
-		CONNECT			(new byte[] { 0x7F }),
-		/** byte[] { 0x00, 0xFF} */
-		GET				(new byte[] { 0x00, (byte) 0xFF }),
-		/** byte[] { 0x11, 0xEE} */
-		READ_MEMORY		(new byte[] { 0x11, (byte) 0xEE }),
-		/** byte[] { 0x31, 0xCE} */
-		WRITE_MEMORY	(new byte[] { 0x31, (byte) 0xCE }),
-		/** byte[] { 0x43, 0xBC} */
-		ERASE			(new byte[] { 0x43, (byte) 0xBC }),
-		/** byte[] { 0x44, 0xBB} */
-		EXTENDED_ERASE	(new byte[] { 0x44, (byte) 0xBB });
-
-		private byte[] command;
-
-		private Command(byte[] command) {
-			this.command = command;
-		}
-
-		public byte[] toBytes() {
-			return command;
-		}
-	}
-
 	//****************************   class OnActionChoiceBox   ******************************
 	private class OnActionChoiceBox extends Observable implements EventHandler<ActionEvent>{
 		

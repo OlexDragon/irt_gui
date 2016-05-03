@@ -6,7 +6,7 @@ import java.util.Observer;
 import java.util.ResourceBundle;
 
 import irt.gui.controllers.components.SerialPortController;
-import irt.gui.controllers.flash.PanelFlash.Answer;
+import irt.gui.controllers.flash.enums.Answer;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.ConnectPacket;
 import javafx.application.Platform;
@@ -31,7 +31,7 @@ public class ButtonConnect implements Observer, Initializable {
 		packet.addObserver(this);
 	}
 
-	@FXML private void onAction() {
+	@FXML public void onAction() {
 		button.setText(bundle.getString("connect.connecting"));
 		SerialPortController.QUEUE.add(packet, false);
 	}

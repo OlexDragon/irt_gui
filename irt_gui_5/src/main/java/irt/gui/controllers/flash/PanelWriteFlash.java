@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import irt.gui.controllers.components.SerialPortController;
-import irt.gui.controllers.flash.PanelFlash.UnitAddress;
+import irt.gui.controllers.flash.enums.UnitAddress;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;

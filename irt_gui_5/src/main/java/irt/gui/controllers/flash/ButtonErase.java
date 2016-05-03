@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
-import irt.gui.controllers.flash.PanelFlash.UnitAddress;
+import irt.gui.controllers.flash.enums.UnitAddress;
 import irt.gui.controllers.flash.service.EraseObject;
 import irt.gui.controllers.flash.service.PagesCount;
 import irt.gui.data.MyThreadFactory;

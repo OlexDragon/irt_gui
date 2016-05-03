@@ -16,17 +16,25 @@
                   <fx:include fx:id="fcmButton" source="ButtonFCM.fxml" />
                   <ChoiceBox fx:id="choiceBox" />
                   <fx:include fx:id="readButton" source="ButtonRead.fxml" />
+                  <fx:include fx:id="linkToFileButton" source="ButtonLinkToFile.fxml" />
                   <fx:include fx:id="writeButton" source="ButtonWrite.fxml" />
                   <fx:include fx:id="eraseButton" source="ButtonErase.fxml" />
                </children>
             </HBox>
          </top>
          <center>
-            <ScrollPane BorderPane.alignment="CENTER" fitToHeight="true" fitToWidth="true" >
+            <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
               <content>
                 <AnchorPane>
                      <children>
-                        <TextArea fx:id="textArea" editable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <TextArea fx:id="textArea" editable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <contextMenu>
+                              <ContextMenu>
+                                <items>
+                                  <MenuItem fx:id="menuItemEdit" disable="true" mnemonicParsing="false" onAction="#onActionMemuItermEdit" text="%edit" />
+                                </items>
+                              </ContextMenu>
+                           </contextMenu></TextArea>
                      </children>
                   </AnchorPane>
               </content>

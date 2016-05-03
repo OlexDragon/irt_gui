@@ -13,7 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
-import irt.gui.controllers.flash.PanelFlash.UnitAddress;
+import irt.gui.controllers.flash.enums.UnitAddress;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -53,8 +53,8 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 				dataToSend = PanelFlash.LENGTH;
 				dataPacket.deleteObservers();
 
-				final Observer reset = sendLengthObsorver.reset();
-				dataPacket.addObserver(reset);
+				sendLengthObsorver.reset();
+				dataPacket.addObserver(sendLengthObsorver);
 
 				SerialPortController.QUEUE.add(dataPacket, false);
 
@@ -158,6 +158,7 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 			byte[] answer = packet.getAnswer();
 			int l;
 
+			//return if it is impossible to read the data
 			if(answer == null || (l = answer.length)==0){
 				PanelFlash.showAlert(AlertType.ERROR, "It is impossible to read the data", button);
 				dataPacket.deleteObservers();
@@ -202,9 +203,8 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 				});
 		}
 
-		public Observer reset(){
+		public void reset(){
 			totalLength = 0;
-			return this;
 		}
 	}
 }

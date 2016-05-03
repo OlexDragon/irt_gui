@@ -13,6 +13,7 @@ import irt.gui.controllers.components.SerialPortController;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.observable.production.ConnectFCMPacket;
 import irt.gui.errors.PacketParsingException;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -20,7 +21,6 @@ import jssc.SerialPort;
 import jssc.SerialPortException;
 
 public class ButtonFCM implements Observer, Initializable {
-
 	private final Logger logger = LogManager.getLogger();
 
 	private ConnectFCMPacket packet;
@@ -28,8 +28,8 @@ public class ButtonFCM implements Observer, Initializable {
 	@FXML private Button button;
 
 	private ResourceBundle bundle;
-
 	private int parity;
+	private ButtonConnect connectButton;
 
 	public ButtonFCM() {
 		try {
@@ -67,22 +67,21 @@ public class ButtonFCM implements Observer, Initializable {
 		final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
 		serialPort.setParity(parity);
 		try {
+
 			serialPort.setParams();
-		} catch (SerialPortException e1) {
+			Thread.sleep(2000);
+
+		} catch (Exception e1) {
 			logger.catching(e1);
 		}
 
-		//		try {
+		Platform.runLater(()->{
+			button.setText(bundle.getString("connect.connected"));
+			connectButton.onAction();
+		});
+	}
 
-		//					7E FE 00 00 00 03 00 1B 64 00 00 00 02 00 00 8B 08 7E
-		//					7E FE 00 00 00 03 00 78 64 00 00 00 02 00 00 5A 51 7E
-		//					0x7E, (byte) 0xFE, 0x00, 0x00, 0x00, 0x03, 0x00, 0x78, 0x64, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x5A, 0x51, 0x7E
-
-		//			ConnectFCMPacket p = new ConnectFCMPacket(((ConnectFCMPacket)o).getAnswer(), true);
-//			logger.trace(p);
-//
-//		} catch (PacketParsingException e) {
-//			logger.catching(e);
-//		}
+	public void setConnectButton(ButtonConnect connectButton) {
+		this.connectButton = connectButton;
 	}
 }

@@ -10,3 +10,9 @@
 	-fx-border-color : blue;
 	-fx-text-fill : blue;
 }
+.text-area .content{
+	-fx-background-color: LightCyan ;
+}
+.text-area.editable .content{
+	-fx-background-color: white;
+}

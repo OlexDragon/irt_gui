@@ -1,6 +1,6 @@
 package irt.gui.data.packet.observable.flash;
 
-import irt.gui.controllers.flash.PanelFlash.Command;
+import irt.gui.controllers.flash.enums.Command;
 
 public class ReadPacket extends AbstractFlashPacket{
 
