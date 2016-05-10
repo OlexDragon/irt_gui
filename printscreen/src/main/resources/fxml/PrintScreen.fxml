@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.printscreen.PrintScreenController">
+   <children>
+      <BorderPane fx:id="borderPane" style="-fx-background-color: white;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <center>
+            <VBox style="-fx-background-color: transparent;" BorderPane.alignment="CENTER">
+               <children>
+                  <CheckBox fx:id="checkBoxCtrl" mnemonicParsing="false" selected="true" text="Ctrl">
+                     <VBox.margin>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </VBox.margin></CheckBox>
+                  <CheckBox fx:id="checkBoxShift" mnemonicParsing="false" selected="true" text="Shift">
+                     <VBox.margin>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </VBox.margin></CheckBox>
+                  <CheckBox fx:id="checkBoxAlt" mnemonicParsing="false" text="Alt">
+                     <VBox.margin>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </VBox.margin></CheckBox>
+                  <Button mnemonicParsing="false" onAction="#onActionFullScreen" text="FullScreen" />
+               </children>
+            </VBox>
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>
