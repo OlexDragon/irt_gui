@@ -2,7 +2,12 @@ package irt.printscreen;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.jnativehook.GlobalScreen;
 
 import javafx.application.Application;
@@ -13,6 +18,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class PrintScreeanApp extends Application {
+	private static final Preferences prefs = Preferences.userRoot().node(PrintScreenController.class.getSimpleName());
 
 
     public static void main(String[] args) throws Exception {
@@ -20,6 +26,7 @@ public class PrintScreeanApp extends Application {
     }
 
 	public void start(Stage stage) throws Exception {
+		LogManager.getLogger().info("PrintScreen Start");
 
 		// Get the logger for "org.jnativehook" and set the level to warning.
 		Logger logger = Logger.getLogger(GlobalScreen.class.getPackage().getName());
@@ -35,6 +42,12 @@ public class PrintScreeanApp extends Application {
 //        rootNode.setPickOnBounds(true);
 
         Scene scene = new Scene(rootNode,100,100);
+        final double x = prefs.getDouble("psx", -1);
+        if(x>=0)
+        	stage.setX(x);
+        final double y = prefs.getDouble("psy", -1);
+        if(y>=0)
+        	stage.setY(y);
         scene.setFill(null);
 
         stage.setTitle("Print Screen");
@@ -47,6 +60,26 @@ public class PrintScreeanApp extends Application {
 
     @Override
 	public void stop() throws Exception {
+    	LogManager.getLogger().info("PrintScreen Stop");
     	GlobalScreen.unregisterNativeHook();
+		stopLoggers();
+	}
+
+	private void stopLoggers() {
+
+		//Flush and stop 'DumpFile' appender
+		((org.apache.logging.log4j.core.Logger)LogManager.getRootLogger())
+		.getAppenders()
+		.entrySet()
+		.stream()
+		.forEach(a->{
+			a.getValue().stop();
+		});
+
+		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+		Configuration config = ctx.getConfiguration();
+		LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME); 
+		loggerConfig.setLevel(org.apache.logging.log4j.Level.OFF);
+		ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
 	}
 }
