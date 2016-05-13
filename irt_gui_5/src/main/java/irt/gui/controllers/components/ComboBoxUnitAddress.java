@@ -9,11 +9,11 @@ import java.util.prefs.Preferences;
 import java.util.stream.IntStream;
 
 import irt.gui.IrtGuiProperties;
-import irt.gui.data.listeners.NumericChecker;
+import irt.gui.data.converters.AddressIntegerStringConverter;
+import irt.gui.data.listeners.AddressListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.util.converter.IntegerStringConverter;
 
 public class ComboBoxUnitAddress extends Observable {
 
@@ -63,8 +63,8 @@ public class ComboBoxUnitAddress extends Observable {
 
 	private void setupComboBox() {
 		addressComboBox.setUserData(this);
-		addressComboBox.setConverter(new IntegerStringConverter());
-		new NumericChecker(addressComboBox.getEditor().textProperty());
+		addressComboBox.setConverter(new AddressIntegerStringConverter());
+		new AddressListener(addressComboBox.getEditor().textProperty());
 	}
 
 	private void fillComboBox() {

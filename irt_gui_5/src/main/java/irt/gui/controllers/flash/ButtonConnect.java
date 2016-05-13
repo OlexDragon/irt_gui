@@ -33,7 +33,7 @@ public class ButtonConnect implements Observer, Initializable {
 
 	@FXML public void onAction() {
 		button.setText(bundle.getString("connect.connecting"));
-		SerialPortController.QUEUE.add(packet, false);
+		SerialPortController.getQueue().add(packet, false);
 	}
 
 	@Override public void update(Observable o, Object arg) {

@@ -21,6 +21,7 @@
             <ContextMenu fx:id="contextMenu">
                <items>
                   <Menu fx:id="menuValues" mnemonicParsing="false" text="Values" />
+                  <MenuItem mnemonicParsing="false" onAction="#onActionRemove" text="Remove" />
                </items>
             </ContextMenu>
          </contextMenu>

@@ -33,7 +33,7 @@ public class SocketWorkerTest {
 		socketWorker = new SocketWorker();
 		socketWorker.startServer(COM_PORT);
 		serialPort = new LinkedPacketSender(COM_PORT);
-		queue = SerialPortController.QUEUE;
+		queue = SerialPortController.getQueue();
 		queue.setComPort(serialPort);
 		try {
 			serialPort.openPort();

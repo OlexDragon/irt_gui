@@ -36,6 +36,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 
 public class TextFieldConfiguration extends TextFieldAbstract {
 
@@ -58,6 +59,11 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	@FXML private BorderPane 	borderPane;
     @FXML private Label label;
     @FXML private Menu menuConfiguration;
+
+	@FXML private void onActionRemove(){
+		final ObservableList<Node> nodes = ((Pane)borderPane.getParent()).getChildren();
+		nodes.remove(borderPane);
+	}
 
 	protected void setup() {
 	}
@@ -185,7 +191,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 				final LinkedPacket packet = createNewPacket(value.getValue());
 				packet.addObserver(this);
-				SerialPortController.QUEUE.add(packet, true);
+				SerialPortController.getQueue().add(packet, true);
 
 			} catch (Exception e) {
 				logger.catching(e);

@@ -1,0 +1,39 @@
+package irt.gui.controllers.calibration;
+
+import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.LinkedPacketsQueue;
+import irt.gui.controllers.components.ButtonOpenSerialPort;
+import irt.gui.controllers.components.ComboBoxSerialPort;
+import javafx.fxml.FXML;
+
+public class PanelTools {
+
+	private static final String SERIAL_PORT_PREF = "tools_serialPort";
+
+	private static LinkedPacketsQueue queue; public static LinkedPacketsQueue getQueue() { return queue; }
+	private static LinkedPacketSender serialPort; public static LinkedPacketSender getSerialPort() { return serialPort; }
+
+	@FXML private ComboBoxSerialPort	toolsSerialPortComboBoxController;
+	@FXML private ButtonOpenSerialPort  toolsOpenClosePortButtonController;
+
+	@FXML private PanelPrologix			prologixController;
+	@FXML private PanelPowerMeter		powerMeterController;
+	@FXML private PanelSignalGenerator	signalGeneratorController;
+
+	@FXML public void initialize() {
+
+		toolsSerialPortComboBoxController.initialize(SERIAL_PORT_PREF);
+		queue = toolsSerialPortComboBoxController.getQueue();
+		queue.setRunServer(false);
+
+		toolsOpenClosePortButtonController.setComboBoxSerialPort(toolsSerialPortComboBoxController);
+
+		serialPort = toolsSerialPortComboBoxController.getSerialPort();
+		toolsSerialPortComboBoxController.addObserver((o, arg)->{
+			serialPort = toolsSerialPortComboBoxController.getSerialPort();
+		});
+
+		powerMeterController.setPrologix(prologixController);
+		signalGeneratorController.setPrologix(prologixController);
+	}
+}

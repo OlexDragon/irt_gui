@@ -29,6 +29,10 @@ public class LinkHeader implements Comparable<LinkHeader>{
 	}
 
 	public byte[] toBytes(){
+
+		if(addr<0)
+			return new byte[0];
+
 		byte[] data = new byte[4];
 
 		data[0] = addr;

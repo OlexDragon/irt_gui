@@ -58,7 +58,7 @@ public class ButtonFCM implements Observer, Initializable {
 		}
 
 		button.setText(bundle.getString("connect.connecting"));
-		SerialPortController.QUEUE.add(packet, true);
+		SerialPortController.getQueue().add(packet, true);
 	}
 
 	@Override public void update(Observable o, Object arg) {

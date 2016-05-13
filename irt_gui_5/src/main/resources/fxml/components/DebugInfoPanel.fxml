@@ -10,7 +10,7 @@
         <items>
             <ComboBox fx:id="commandComboBox" onAction="#onAction" />
             <ComboBox fx:id="parameterComboBox" editable="true" minWidth="60.0" onAction="#onAction" prefWidth="60.0" />
-            <Button mnemonicParsing="false" onAction="#hButtonVction" text="H" />
+            <Button fx:id="buttonHelp" mnemonicParsing="false" onAction="#onActionButtonHelp" text="H" />
             <Pane HBox.hgrow="ALWAYS" />
      	    <Button fx:id="plussButton" mnemonicParsing="false" onAction="#plussButtonAction" text="+" />
         </items>

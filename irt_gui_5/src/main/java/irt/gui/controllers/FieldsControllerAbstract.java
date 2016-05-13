@@ -28,7 +28,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 	protected 		Observer 		observer 		= this;
 	private final 	PacketSender 	packetSender 	= new PacketSender();
-	protected ScheduledFuture<?> 		scheduleAtFixedRate;
+	protected ScheduledFuture<?> 	scheduleAtFixedRate;
 
 	public void addLinkedPacket(LinkedPacket linkedPacket){
 		packetSender.addPacketToSend(linkedPacket);
@@ -121,7 +121,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 			packetsToSend
 			.stream()
-			.forEach(packet->SerialPortController.QUEUE.add(packet, true));
+			.forEach(packet->SerialPortController.getQueue().add(packet, true));
 		}
 	}
 }

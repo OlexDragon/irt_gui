@@ -41,7 +41,7 @@ public class ButtonInitialize extends FieldsControllerAbstract{
 
 	@FXML void buttonAction(ActionEvent event) {
 
-		SerialPortController.QUEUE.add(initializeBiasPacket, true);
+		SerialPortController.getQueue().add(initializeBiasPacket, true);
 	}
 
 	@Override

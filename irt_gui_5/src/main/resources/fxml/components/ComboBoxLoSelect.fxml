@@ -13,4 +13,11 @@
    <tooltip>
       <Tooltip text="%lo.select" />
    </tooltip>
+   <contextMenu>
+      <ContextMenu>
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#onActionRemove" text="Remove" />
+        </items>
+      </ContextMenu>
+   </contextMenu>
 </ComboBox>

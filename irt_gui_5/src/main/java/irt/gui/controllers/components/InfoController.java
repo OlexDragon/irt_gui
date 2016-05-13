@@ -1,6 +1,22 @@
 package irt.gui.controllers.components;
 
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.AbstractManager;
+import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
+import org.apache.logging.log4j.core.appender.rolling.RollingFileManager;
+import org.apache.logging.log4j.core.appender.rolling.RollingRandomAccessFileManager;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.UpdateController;
@@ -26,6 +42,8 @@ public class InfoController extends FieldsControllerAbstract {
 	@FXML private Label versionLabel;
 	@FXML private Label typeLabel;
 	@FXML private Label addressLabel;
+
+	private RollingRandomAccessFileManager rollingRandomAccessFileManager;
 
 	@FXML public void initialize() {
 		try {
@@ -54,14 +72,16 @@ public class InfoController extends FieldsControllerAbstract {
 			DeviceInfo deviceInfo = new DeviceInfo(p);
 			logger.trace(deviceInfo);
 
-			Platform.runLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					try{
-					infoPanel		.setText(deviceInfo.getSerialNumber() + " : " + deviceInfo.getUnitName());
+			Platform.runLater(()->{
+				try{
+					final String sn = deviceInfo.getSerialNumber().toString();
 
-					snLabel			.setText( deviceInfo.getSerialNumber()		.toString());
+					if(!sn.equals(snLabel.getText()))
+						changeAppenderSettings(sn);
+
+					snLabel.setText(sn);
+
+					infoPanel		.setText(deviceInfo.getSerialNumber() + " : " + deviceInfo.getUnitName());
 					pnLabel			.setText( deviceInfo.getUnitPartNumber()	.toString());
 					builtDateLabel	.setText( deviceInfo.getFirmwareBuildDate()	.toString());
 					versionLabel	.setText( deviceInfo.getFirmwareVersion()	.toString());
@@ -70,9 +90,8 @@ public class InfoController extends FieldsControllerAbstract {
 					typeLabel		.setText(DEVICE_TYPE+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype());
 					countLabel		.setText( Integer.toString(deviceInfo.getUptimeCounter()));
 					addressLabel	.setText((packet.getLinkHeader().getAddr() & 0xFF) + "");
-					}catch(Exception ex){
-						logger.catching(ex);
-					}
+				}catch(Exception ex){
+					logger.catching(ex);
 				}
 			});
 
@@ -80,6 +99,53 @@ public class InfoController extends FieldsControllerAbstract {
 			logger.warn("\n\tInfoPacket has ERROR:{}", p);
 
 	}
+
+	private void changeAppenderSettings(String serialNumber) {
+		try{
+
+			final Path fileName = Paths.get(System.getProperty("user.home"), "irt", serialNumber, serialNumber + ".log");
+			final Path filePattern = Paths.get(System.getProperty("user.home"), "irt", serialNumber, serialNumber + "-%d{MM-dd-yyyy}-%i.log.gz");
+
+		
+			final Logger dumper = (Logger) LogManager.getLogger("dumper");
+			final Map<String, Appender> appenders = dumper.getAppenders();
+			final RollingRandomAccessFileAppender appender = (RollingRandomAccessFileAppender) appenders.get("DumpFile");
+
+			final RollingFileManager manager = appender.getManager();
+
+			if(rollingRandomAccessFileManager==null){
+				rollingRandomAccessFileManager = AbstractManager.getManager(manager.getFileName(), null, null);
+			}
+
+
+			final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+			final Configuration config = ctx.getConfiguration();
+			Layout<?> layout = PatternLayout.createLayout("%n%-5p %d%n %M (%F:%L)%n%m%n", null, config, null, Charset.forName("UTF-8"), true, false, null, null);
+
+			final RollingRandomAccessFileAppender newAppender = RollingRandomAccessFileAppender
+																		.createAppender(fileName.toString(),
+																				filePattern.toString(),
+																				"true",
+																				appender.getName(),
+																				"false",
+																				Integer.toString(manager.getBufferSize()),
+																				rollingRandomAccessFileManager.getTriggeringPolicy(),
+																				rollingRandomAccessFileManager.getRolloverStrategy(),
+																				layout,
+																				appender.getFilter(),
+																				null,
+																				"false",
+																				null,
+																				config);
+			appender.stop();
+			dumper.removeAppender(appender);
+			dumper.addAppender(newAppender);
+			newAppender.start();
+
+		}catch(Exception ex){
+			logger.catching(ex);
+		}
+ 	}
 
 	public static Integer getDeviceType() {
 		return DEVICE_TYPE;

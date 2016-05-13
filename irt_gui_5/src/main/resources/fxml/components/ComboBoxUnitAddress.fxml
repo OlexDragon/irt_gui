@@ -2,6 +2,7 @@
 
 <?import javafx.scene.*?>
 <?import java.lang.*?>
+<?import javafx.collections.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -11,4 +12,9 @@
    <cursor>
       <Cursor fx:constant="HAND" />
    </cursor>
+   <items>
+   	<FXCollections fx:factory="observableArrayList">
+   		<Integer fx:value="-1" />
+   	</FXCollections>
+   </items>
 </ComboBox>

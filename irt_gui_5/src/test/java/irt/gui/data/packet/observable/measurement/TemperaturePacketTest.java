@@ -17,6 +17,7 @@ import irt.gui.controllers.ComPortTest;
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketGroupId;
@@ -72,7 +73,7 @@ public class TemperaturePacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(AlarmIDsPacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
+					PacketAbstract bp = new PacketAbstract(new PacketProperties(AlarmIDsPacket.PACKET_ID).setHasAcknowledgment(true), ((LinkedPacket)o).getAnswer()){
 
 						@Override
 						public PacketId getPacketId() {

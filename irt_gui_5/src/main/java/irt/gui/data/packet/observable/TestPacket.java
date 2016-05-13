@@ -17,6 +17,7 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
 
 public class TestPacket  extends Observable implements LinkedPacket {
 
@@ -44,7 +45,7 @@ public class TestPacket  extends Observable implements LinkedPacket {
 	}
 
 	@Override
-	public int compareTo(LinkedPacket o) {
+	public int compareTo(PacketToSend o) {
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 

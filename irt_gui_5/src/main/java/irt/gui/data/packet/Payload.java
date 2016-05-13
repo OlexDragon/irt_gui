@@ -260,10 +260,10 @@ public class Payload {
 		return shorts;
 	}
 
-	public static List<Payload> parsePayloads(PacketId packetId, byte[] packetInBytes) throws PacketParsingException {
+	public static List<Payload> parsePayloads(PacketProperties packetProperties, byte[] packetInBytes) throws PacketParsingException {
 
 		List<Payload> pls = new ArrayList<>();
-		int headersSize = LinkHeader.SIZE+PacketHeader.SIZE;
+		int headersSize = packetProperties.gerHeadersSize();
 		if(packetInBytes!=null && packetInBytes.length>headersSize){
 
 			packetInBytes = Arrays.copyOfRange(packetInBytes, headersSize, packetInBytes.length);
@@ -271,7 +271,7 @@ public class Payload {
 
 			while(packetInBytes!=null){
 				p = new Payload();
-				packetInBytes = p.setPayload(packetId, packetInBytes);
+				packetInBytes = p.setPayload(packetProperties.getPacketId(), packetInBytes);
 
 				if(p.isSet())
 					pls.add(p);

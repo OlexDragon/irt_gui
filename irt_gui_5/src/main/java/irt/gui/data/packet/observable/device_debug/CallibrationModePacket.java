@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
@@ -46,7 +47,7 @@ public class CallibrationModePacket extends RegirterAbstractPacket {
 	}
 
 	public CallibrationModePacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(PACKET_ID, answer, hasAcknowledgment);
+		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(hasAcknowledgment), answer);
 	}
 
 	@JsonIgnore

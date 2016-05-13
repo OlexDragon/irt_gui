@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
@@ -22,7 +23,7 @@ public class InputPowerPacket extends PacketAbstract implements ValuePacket{
 		super(
 				new PacketHeader(
 						PacketType.REQUEST,
-						new PacketIdDetails(PACKET_ID, "Get Input Power"),
+						new PacketIdDetails(PACKET_ID, "Get Input ToolsPower"),
 						PacketErrors.NO_ERROR),
 				new Payload(
 						new ParameterHeader(
@@ -30,12 +31,12 @@ public class InputPowerPacket extends PacketAbstract implements ValuePacket{
 	}
 
 	public InputPowerPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(PACKET_ID, answer, hasAcknowledgment);
+		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(hasAcknowledgment), answer);
 	}
 
 	@Override @JsonIgnore
 	public String getTitle() {
-		return "Input Power";
+		return "Input ToolsPower";
 	}
 
 	@Override @JsonIgnore

@@ -15,6 +15,7 @@ import irt.gui.controllers.ComPortTest;
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
@@ -56,7 +57,7 @@ public class InfoPacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(InfoPacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
+					PacketAbstract bp = new PacketAbstract(new PacketProperties(InfoPacket.PACKET_ID).setHasAcknowledgment(true), ((LinkedPacket)o).getAnswer()){
 
 						@Override
 						public PacketId getPacketId() {

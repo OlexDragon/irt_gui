@@ -75,7 +75,7 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 			executor.execute(()->{
 
 				if(PanelFlash.checkAswer("Erase " + unitAddress + ": ", (LinkedPacket)o, button))
-					SerialPortController.QUEUE.add(dataPacket, false);
+					SerialPortController.getQueue().add(dataPacket, false);
 				else{
 					if(submit!=null)
 						submit.cancel(true);
@@ -100,7 +100,7 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 					} catch (Exception e) {
 						logger.catching(e);
 					}
-					SerialPortController.QUEUE.add(emptyPacket, false);
+					SerialPortController.getQueue().add(emptyPacket, false);
 
 				}else{
 					error = !PanelFlash.checkAswer("Erase " + unitAddress + ": ", (LinkedPacket)o, button);
@@ -152,7 +152,7 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 		count = 0;
 		Platform.runLater(()->button.setText(bundle.getString("erase.erasing")));
 		addWarningClass();
-		SerialPortController.QUEUE.add(erasePacket, false);
+		SerialPortController.getQueue().add(erasePacket, false);
 	}
 
 	@Override public void update(Observable o, Object arg) {

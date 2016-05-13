@@ -28,6 +28,7 @@ public class IrtGuiController{
 
 	@FXML private TabPane tabPane;
 	@FXML private Tab biasTab;
+	@FXML private Tab calibrationTab;
 
 	private int parity;
 
@@ -63,10 +64,11 @@ public class IrtGuiController{
 
 			if(size>=tabCount || ( selected && size<=tabCount))
 
-				((FieldController)tab
-						.getContent()
-						.getUserData())
-				.doUpdate(selected);
+				if(tab!=calibrationTab)
+					((FieldController)tab
+							.getContent()
+							.getUserData())
+					.doUpdate(selected);
 
 			tabCount = size;
 			if(selected && size>1)
@@ -81,7 +83,7 @@ public class IrtGuiController{
 
 		if(tab.isSelected()){
 			UpdateController.stop(tab.getId());
-			SerialPortController.QUEUE.clear();
+			SerialPortController.getQueue().clear();
 			prefs.put("selected_tab_id", tab.getId());
 
 			final LinkedPacketSender serialPort = SerialPortController.getSerialPort();

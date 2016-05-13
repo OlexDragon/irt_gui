@@ -208,6 +208,8 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 		if(arg instanceof UnitAddress){
 			unitAddress = (UnitAddress)arg;
 			button.setTooltip(new Tooltip(unitAddress.toString()));
+			text = null;
+			file = null;
 		}
 	}
 

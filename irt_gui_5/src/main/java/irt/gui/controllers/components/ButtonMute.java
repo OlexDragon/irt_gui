@@ -58,7 +58,7 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 
 	@FXML void buttonAction(ActionEvent event) {
 		muteCommandPacket.setCommand(muteStatus==MuteStatus.MUTED ? MuteStatus.UNMUTED : MuteStatus.MUTED);
-		SerialPortController.QUEUE.add(muteCommandPacket, true);
+		SerialPortController.getQueue().add(muteCommandPacket, true);
 	}
 
 	@Override protected Duration getPeriod() {

@@ -22,6 +22,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.SingleSelectionModel;
+import javafx.scene.layout.Pane;
 
 public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 
@@ -59,7 +60,12 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 		final String key = loSelectComboBox.getSelectionModel().getSelectedItem();
 		final byte value = values.get(key);
 		setPacket.setValue(value);
-		SerialPortController.QUEUE.add(setPacket, true);
+		SerialPortController.getQueue().add(setPacket, true);
+	}
+
+	@FXML private void onActionRemove(){
+		final ObservableList<Node> nodes = ((Pane)loSelectComboBox.getParent()).getChildren();
+		nodes.remove(loSelectComboBox);
 	}
 
 	@Override public void update(Observable o, Object arg) {

@@ -2,17 +2,31 @@
 <Configuration>
 
 	<Appenders>
-		<RollingFile name="DumpFile" fileName="${sys:user.home}/irt/irtGui.5.0.log" filePattern="%d{yyyy-MM-dd}-%i.log.gz" bufferedIO="false">
+
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %d [%t] %C{2} %M (%F:%L) - %m%xEx%n" />
+		</Console>
+
+		<RollingRandomAccessFile name="LogFile"
+								 fileName="${sys:user.home}/irt/irtGui.5.0.log"
+								 filePattern="${sys:user.home}/irt/irtGui.5.0-%d{yyyy-MM-dd}-%i.log.gz">
 			<PatternLayout pattern="%n%-5p %d%n %M (%F:%L)%n%m%n" />
 			<Policies>
 				<SizeBasedTriggeringPolicy size="20 MB" />
 			</Policies>
 			<DefaultRolloverStrategy max="10" />
-		</RollingFile>
+		</RollingRandomAccessFile>
 
-		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="%-5p %d [%t] %C{2} %M (%F:%L) - %m%xEx%n" />
-		</Console>
+<!-- Dumper -->
+		<RollingRandomAccessFile name="DumpFile"
+								 fileName="${sys:user.home}/irt/UnknownSerialNumber/UnknownSerialNumber.log"
+								 filePattern="${sys:user.home}/irt/UnknownSerialNumber/UnknownSerialNumber-%d{MM-dd-yyyy}-%i.log.gz">
+			<PatternLayout pattern="%n%-5p %d%n %M (%F:%L)%n%m%n" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingRandomAccessFile>
 	</Appenders>
 
 	<Loggers>
@@ -69,11 +83,17 @@
 
 <!-- 		<logger name="irt.gui.controllers.flash.ButtonFCM" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.flash.service.FileFinder" level="all"/> -->
+		<logger name="irt.gui.controllers.calibration.PanelPrologix" level="all"/>
+		<logger name="irt.gui.controllers.calibration.PanelSignalGenerator" level="all"/>
 
 		<Root level="warn">
-			<AppenderRef ref="DumpFile" />
+			<AppenderRef ref="LogFile" />
 			<AppenderRef ref="STDOUT" />
 		</Root>
+
+    	<Logger name="dumper" level="INFO">
+      		<AppenderRef ref="DumpFile" />
+    	</Logger>
 	</Loggers>
 
 </Configuration>

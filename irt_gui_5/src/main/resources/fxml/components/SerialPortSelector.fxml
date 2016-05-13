@@ -6,20 +6,12 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane stylesheets="@../../styles/flash.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.SerialPortController">
+<AnchorPane fx:id="anchorPane" stylesheets="@../../styles/flash.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.SerialPortController">
 	<children>
 		<HBox>
 			<children>
-				<ComboBox fx:id="serialPortComboBox" onAction="#onActionSelectSerialPort" promptText="Select The Serial Port">
-					<cursor>
-						<Cursor fx:constant="HAND" />
-					</cursor>
-				</ComboBox>
-				<Button fx:id="openClosePortButton" mnemonicParsing="false" onAction="#onOpenClosePortButtonClicked" text="Button">
-					<cursor>
-						<Cursor fx:constant="HAND" />
-					</cursor>
-				</Button>
+            <fx:include fx:id="serialPortComboBox" source="ComboBoxSerialPort.fxml" />
+            <fx:include fx:id="openClosePortButton" source="ButtonOpenSerialPort.fxml" />
 				<fx:include fx:id="comboBoxUnitAddress" source="ComboBoxUnitAddress.fxml" />
 				<MenuButton mnemonicParsing="false">
 					<items>

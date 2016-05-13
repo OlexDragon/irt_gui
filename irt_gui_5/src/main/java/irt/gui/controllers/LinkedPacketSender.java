@@ -15,7 +15,8 @@ import irt.gui.controllers.enums.Baudrate;
 import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
-import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
+import irt.gui.data.packet.observable.calibration.ToolsPacket;
 import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
@@ -25,6 +26,7 @@ public class LinkedPacketSender extends SerialPort {
 	public static final int STANDARD_WAIT_TIME 		= 5;
 	public static final int FLASH_MEMORY_WAIT_TIME 	= 1;
 	public static final int FCM_BY_BAIS_WAIT_TIME 	= 1;
+	public static final int TOOLS_WAIT_TIME = 1000;
 
 	private final Logger logger = LogManager.getLogger();
 
@@ -41,8 +43,9 @@ public class LinkedPacketSender extends SerialPort {
 		super(portName);
 	}
 
-	public void send(LinkedPacket packet){
-//		logger.error(packet);
+	public void send(PacketToSend packet){
+		if(packet instanceof ToolsPacket)
+			logger.error(packet);
 
 		if(!run) return;
 
@@ -70,8 +73,10 @@ public class LinkedPacketSender extends SerialPort {
 
 					packet.setAnswer(readBytes);
 				}
-			}else
+			}else{
+				packet.setAnswer(null);
 				logger.warn("packet.toBytes() return null. {}", packet);
+			}
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -97,7 +102,7 @@ public class LinkedPacketSender extends SerialPort {
 		return timer;
 	}
 
-	private boolean writePacket(LinkedPacket packet) throws SerialPortException {
+	private boolean writePacket(PacketToSend packet) throws SerialPortException {
 
 		byte[] buffer = packet.toBytes();
 

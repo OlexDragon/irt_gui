@@ -50,6 +50,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 	@FXML private ComboBox<DebugInfoCode> commandComboBox;
 	@FXML private ComboBox<Integer> parameterComboBox;
 	@FXML private Button plussButton;
+	@FXML private Button buttonHelp;
 
 	@FXML private TextArea textArea;
 	@FXML private ScrollPane scrollPane;
@@ -88,10 +89,10 @@ public class DebugInfoController extends FieldsControllerAbstract {
 			DebugInfoController dic = (DebugInfoController) loader.getController();
 			dic.doUpdate(true);
 
-			Scene scene = new Scene(root);  
-			Stage stage = new Stage();  
-			stage.setScene(scene);  
-			stage.setTitle("My Window");  
+			Scene scene = new Scene(root);
+			Stage stage = new Stage();
+			stage.setScene(scene);
+			stage.setTitle("Debug Window");
 			stage.show();
 			stage.addEventHandler( WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>() {
 
@@ -105,10 +106,10 @@ public class DebugInfoController extends FieldsControllerAbstract {
 		}  
 	}
 
-	@FXML public void hButtonVction(ActionEvent event){
+	@FXML public void onActionButtonHelp(ActionEvent event){
 		doUpdate(false);
 		Optional
-		.ofNullable(commandComboBox.getTooltip())
+		.ofNullable(buttonHelp.getTooltip())
 		.ifPresent(tt->textArea.setText(tt.getText()));
 	}
 
@@ -132,7 +133,10 @@ public class DebugInfoController extends FieldsControllerAbstract {
 
 		if(p.getPacketHeader().getPacketIdDetails().getPacketId()==RegisterIndexesPacket.PACKET_ID){
 
-			Platform.runLater(()->commandComboBox.setTooltip(new Tooltip(stringData.toString())));
+			Platform.runLater(()->{
+				final Tooltip toolTip = new Tooltip(stringData.toString());
+				buttonHelp.setTooltip(toolTip);
+			});
 			setParameters(stringData);
 
 		}else{

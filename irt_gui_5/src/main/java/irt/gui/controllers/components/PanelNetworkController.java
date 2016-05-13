@@ -79,7 +79,7 @@ public class PanelNetworkController extends FieldsControllerAbstract {
 
 			final NetworkAddressPacket packet = new NetworkAddressPacket(networkAddress);
 			packet.addObserver(this);
-			SerialPortController.QUEUE.add(packet, true);
+			SerialPortController.getQueue().add(packet, true);
 
 			setValueChanged(false);
 

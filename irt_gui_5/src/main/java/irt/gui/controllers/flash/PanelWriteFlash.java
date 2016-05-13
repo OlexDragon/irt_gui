@@ -20,7 +20,11 @@ import irt.gui.data.packet.observable.flash.EmptyPacket;
 import irt.gui.data.packet.observable.flash.WritePacket;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ProgressIndicator;
+import javafx.stage.Window;
 
 public class PanelWriteFlash extends Observable{
 
@@ -33,6 +37,7 @@ public class PanelWriteFlash extends Observable{
 
 	private int filePosition;
 	private byte[] fileAsBytes;
+	private boolean run;
 
 	@FXML private ProgressIndicator 		progressIndicator;
 
@@ -47,9 +52,9 @@ public class PanelWriteFlash extends Observable{
 				float value = (float)filePosition / fileAsBytes.length;
 				Platform.runLater(()->progressIndicator.setProgress(value));
 
-				if (filePosition < fileAsBytes.length) {
+				if ((filePosition < fileAsBytes.length) && run) {
 					// Send command 'WRITE TO MEMORY'
-					SerialPortController.QUEUE.add(writePacket, false);
+					SerialPortController.getQueue().add(writePacket, false);
 				}
 			}
 		});
@@ -66,7 +71,7 @@ public class PanelWriteFlash extends Observable{
 				dataToSend = prepareDataToSend();
 
 				if(dataToSend!=null)
-					SerialPortController.QUEUE.add(dataPacket, false);
+					SerialPortController.getQueue().add(dataPacket, false);
 			}
 		});
 	};
@@ -82,14 +87,32 @@ public class PanelWriteFlash extends Observable{
 				dataPacket.addObserver(sendAddressObsorver);
 
 				//Send ADDRESS
-				SerialPortController.QUEUE.add(dataPacket, false);
+				SerialPortController.getQueue().add(dataPacket, false);
 			}
 		});
 	};
 
 	@FXML void initialize() {
 		writePacket.addObserver(writePacketObserver);
-		
+		run = true;
+	}
+
+	@FXML private void onMouseClicked(){
+		boolean close = true;
+		if(Double.compare(progressIndicator.getProgress(), 1)<0){
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.setTitle("The process is not finished yet. ");
+			alert.setContentText("Do you want to interrupt him?");
+			close = alert
+						.showAndWait()
+						.filter(b->b==ButtonType.OK)
+						.isPresent();
+		}
+		if(close){
+			final Window window = progressIndicator.getScene().getWindow();
+			window.hide();
+			run = false;
+		}
 	}
 
 	private byte[] prepareDataToSend() {
@@ -128,7 +151,7 @@ public class PanelWriteFlash extends Observable{
 		filePosition = 0;
 
 		//Send command 'WRITE TO MEMORY'
-		SerialPortController.QUEUE.add(writePacket, false);
+		SerialPortController.getQueue().add(writePacket, false);
 	}
 
 	private byte[] fileToBytes(File file) throws FileNotFoundException, IOException {

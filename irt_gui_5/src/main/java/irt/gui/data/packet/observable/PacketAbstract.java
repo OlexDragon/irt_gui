@@ -1,14 +1,10 @@
 
 package irt.gui.data.packet.observable;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Optional;
-import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,19 +16,21 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 import irt.gui.data.ChecksumLinkedPacket;
+import irt.gui.data.MyObservable;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.AlarmPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
 import irt.gui.errors.PacketParsingException;
 
 @JsonTypeInfo(include=As.WRAPPER_OBJECT, use=Id.CLASS)
-public abstract class PacketAbstract extends Observable implements LinkedPacket {
+public abstract class PacketAbstract extends MyObservable implements LinkedPacket {
 
 	@JsonIgnore
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
@@ -51,22 +49,21 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		payloads.add(payload);
 	}
 
-	public PacketAbstract(PacketId packetId, byte[] answer, boolean hasAcknowledgment) throws PacketParsingException {
-		logger.trace("\n\t ENTRY ({})", answer);
+	public PacketAbstract(PacketProperties packetProperties, byte[] answer) throws PacketParsingException {
 
 		answer = Optional
 				.ofNullable(answer)
 				.filter(a->a.length>0)
 				.orElseThrow(()->new PacketParsingException("\n\t Constructor parameter can not be null or empty."));
 
-		byte[] bs  = removeAcknowledgmentAndChecksum(answer, hasAcknowledgment);
+		byte[] bs  = removeAcknowledgmentAndChecksum(answer, packetProperties);
 
-		linkHeader = new LinkHeader(bs);
-		packetHeader = new PacketHeader(bs);
-		payloads.addAll(Payload.parsePayloads(packetId, bs));
+		linkHeader = packetProperties.isConverter() ? new LinkHeader((byte)-1, (byte)0, (byte)0) : new LinkHeader(bs);
+		packetHeader = new PacketHeader(bs, packetProperties);
+		payloads.addAll(Payload.parsePayloads(packetProperties, bs));
 	}
 
-	private byte[] removeAcknowledgmentAndChecksum(byte[] answer, boolean hasAcknowledgment) throws PacketParsingException {
+	private byte[] removeAcknowledgmentAndChecksum(byte[] answer, PacketProperties packetProperties) throws PacketParsingException {
 
 		//Acknowledgement
 		int beginning = indexOf(answer, Packet.FLAG_SEQUENCE);
@@ -77,11 +74,11 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		if(end<0)
 			throw new PacketParsingException("\n\t The Packet structure is not correct:\n\t Das not has second Packet.FLAG_SEQUENCE : 126(0x7E)\n\t" + ToHex.bytesToHex(answer));
 
-		if(!hasAcknowledgment)
-			return getPacket(answer, 0);
+		if(!packetProperties.hasAcknowledgment())
+			return getPacketAsArray(answer, 0, packetProperties);
 
 		byte[] acknowledgement = byteStuffing(Arrays.copyOfRange(answer, beginning, end));
-		if(checkAcknowledgement(acknowledgement))
+		if(!checkAcknowledgement(acknowledgement, packetProperties))
 			throw new PacketParsingException("\n\t The Acknowledgement length is not correct\n\t" + ToHex.bytesToHex(acknowledgement) + "\n\tanswer: " + ToHex.bytesToHex(answer));
 
 		//acknowledgement checksum
@@ -93,7 +90,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		final byte[] checksumToBytes = ch.toBytes();
 		logger.trace("\n\t answer:{}\n\t checksum1:{}\n\t checksum2:{}",ch, checksumToBytes, checksum);
 		if(Arrays.equals(checksum, checksumToBytes))
-			return getPacket(answer, ++end);
+			return getPacketAsArray(answer, ++end, packetProperties);
 
 		else
 			throw new PacketParsingException("\n\t Acknowledgement checksum is not correct:\n\t" + ToHex.bytesToHex(answer) + "\n\t"
@@ -103,11 +100,14 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 					);
 	}
 
-	protected boolean checkAcknowledgement(byte[] acknowledgement) {
-		return acknowledgement.length!=9;
+	protected boolean checkAcknowledgement(byte[] acknowledgement, PacketProperties packetProperties) {
+		final int length = acknowledgement.length;
+		final boolean isConverter = length==5;
+		packetProperties.setConverter(isConverter);
+		return length==9 || isConverter;// 9 LinkedPacket; 5 - Converter
 	}
 
-	private byte[] getPacket(byte[] answer, int beginning) throws PacketParsingException {
+	private byte[] getPacketAsArray(byte[] answer, int beginning, PacketProperties packetProperties) throws PacketParsingException {
 		//Packet
 		beginning = indexOf(answer, beginning, Packet.FLAG_SEQUENCE);
 		if(beginning<0)
@@ -118,7 +118,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 			throw new PacketParsingException("\n\t The Packet structure is not correct:\n\t NO second Packet.FLAG_SEQUENCE : 126(0x7E)\n\t" + ToHex.bytesToHex(answer));
 
 		//remove garbage
-		if((end-beginning)>LinkHeader.SIZE+PacketHeader.SIZE){
+		if((end-beginning) > packetProperties.gerHeadersSize()){
 
 			byte[] packet = byteStuffing( Arrays.copyOfRange(answer, beginning, end));
 
@@ -216,13 +216,17 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 
 				byte[] phb = packetHeader.getPacketIdDetails().toBytes();
 
-				b = Arrays.copyOf(b, 7);
-				b[4] = PacketType.ACKNOWLEGEMENT.getValue();
-				b[5] = phb[0];
-				b[6] = phb[1];
+				if(b.length==0)
+					b = new byte[3];
+				else
+					b = Arrays.copyOf(b, 7);
 
-			}else
-				b = null;
+				int length = b.length;
+				b[length-3] = PacketType.ACKNOWLEGEMENT.getValue();
+				b[length-2] = phb[0];
+				b[length-1] = phb[1];
+
+			}
 		}
 
 		return preparePacket(b);
@@ -232,7 +236,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 	public static byte[] preparePacket(byte[] data) {
 
 		if(data!=null){
-			byte[] p = new byte[data.length*2];
+			byte[] p = new byte[(int) (data.length*2.4)];
 			int index = 0;
 			p[index++] = Packet.FLAG_SEQUENCE;
 			for(int i=0; i< data.length; i++, index ++){
@@ -247,8 +251,7 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 
 			p[index++] = Packet.FLAG_SEQUENCE;
 
-			data = Arrays.copyOf(p, index);//new byte[index];
-//			System.arraycopy(p, 0, data, 0, index);
+			data = Arrays.copyOf(p, index);
 		}
 		return data;
 	}
@@ -286,15 +289,6 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 		return result;
 	}
 
-	@SuppressWarnings("unchecked") @JsonIgnore
-	public Observer[] getObservers() throws Exception{
-
-		final Field obs = Observable.class.getDeclaredField("obs");
-		obs.setAccessible(true);
-		final Vector<Observer> vector = (Vector<Observer>) obs.get(this);
-		return vector.toArray(new Observer[vector.size()]);
-	}
-
 	@Override
 	public void setLinkHeaderAddr(byte addr) {
 		getLinkHeader().setAddr(addr);
@@ -330,14 +324,14 @@ public abstract class PacketAbstract extends Observable implements LinkedPacket 
 	}
 
 	@Override
-	public int compareTo(LinkedPacket packet) {
-
+	public int compareTo(PacketToSend packet) {
+		
 		PacketType packetType = packetHeader.getPacketType();
 		byte v1 = packetType.getValue();
 		if(packetType!=PacketType.COMMAND && !(this instanceof AlarmPacket))
 			v1--;
-
-		packetType = packet.getPacketHeader().getPacketType();
+		
+		packetType = ((LinkedPacket)packet).getPacketHeader().getPacketType();
 		byte v2 = packetType.getValue();
 		if(packetType!=PacketType.COMMAND && !(packet instanceof AlarmPacket))
 			v2--;

@@ -33,7 +33,8 @@
 				</AnchorPane>
 				<AnchorPane>
 					<children>
-						<TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+						<TabPane fx:id="tabPane" layoutX="8.0" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+							AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<tabs>
 								<Tab fx:id="networkTab" onSelectionChanged="#onSelectionChanged" text="Network">
 									<content>
@@ -53,6 +54,11 @@
 								<Tab fx:id="flashTab" onSelectionChanged="#onSelectionChangeFlash" text="Flash">
 									<content>
 										<fx:include source="flash/PanelFlash.fxml" />
+									</content>
+								</Tab>
+								<Tab fx:id="calibrationTab" onSelectionChanged="#onSelectionChanged" text="Calibration">
+									<content>
+										<fx:include source="calibration/PanelCalibration.fxml" />
 									</content>
 								</Tab>
 							</tabs>

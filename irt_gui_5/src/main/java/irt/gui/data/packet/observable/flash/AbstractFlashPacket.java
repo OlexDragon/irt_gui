@@ -14,6 +14,7 @@ import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
 
 public class AbstractFlashPacket extends Observable implements LinkedPacket, FlashPacket{
 
@@ -25,7 +26,7 @@ public class AbstractFlashPacket extends Observable implements LinkedPacket, Fla
 	}
 
 	@Override
-	public int compareTo(LinkedPacket o) {
+	public int compareTo(PacketToSend o) {
 		return 1;
 	}
 

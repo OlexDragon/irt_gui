@@ -38,14 +38,11 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 		UpdateController.addController(this);
 	}
 
-	@Override
-	protected Duration getPeriod() {
+	@Override protected Duration getPeriod() {
 		return Duration.ofSeconds(1);
 	}
 
-	@Override
-	protected void updateFields(LinkedPacket packet) throws PacketParsingException {
-		logger.entry(packet);
+	@Override protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 
 		if(scheduleAtFixedRate!=null && scheduleAtFixedRate.isCancelled())
 			return;
@@ -76,6 +73,16 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 			logger.warn("\n\t This Packet has error: {}", p);
 	}
 
+	@Override public void doUpdate(boolean update) {
+
+		if(update)
+			packet.addObserver(this);
+		else
+			packet.deleteObservers();
+
+		super.doUpdate(update);
+	}
+
 	public void setTitle(String title) {
 		PanelAlarms.setText(title);
 	}
@@ -83,15 +90,14 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 	private synchronized boolean setAlarmIDs(Payload pl) {
 
 		doUpdate(false);
-		packet.deleteObservers();
 		final short[] arrayOfShort = pl.getArrayOfShort();
 
-		if(alarms!=null && Arrays.equals(alarms, arrayOfShort)) //return if already set
+		if(alarms!=null && (Arrays.equals(alarms, arrayOfShort) || alarms.length != vBox.getChildren().size())) //return if already set
 			return false;
 
 			alarms = arrayOfShort;
 
-			vBox.getChildren().clear();
+			Platform.runLater(()->vBox.getChildren().clear());
 
 		return true;
 	}

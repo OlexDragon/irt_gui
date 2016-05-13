@@ -56,7 +56,7 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 				sendLengthObsorver.reset();
 				dataPacket.addObserver(sendLengthObsorver);
 
-				SerialPortController.QUEUE.add(dataPacket, false);
+				SerialPortController.getQueue().add(dataPacket, false);
 
 			}else
 				Platform.runLater(()->{
@@ -75,7 +75,7 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 				dataToSend = PanelFlash.addCheckSum(address);
 				dataPacket.deleteObservers();
 				dataPacket.addObserver(sendAddressObsorver);
-				SerialPortController.QUEUE.add(dataPacket, false);
+				SerialPortController.getQueue().add(dataPacket, false);
 			}else
 				Platform.runLater(()->{
 					button.setText(bundle.getString("read"));
@@ -96,7 +96,7 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 		readFromAddress = unitAddress.getAddr();
 		button.setText(bundle.getString("read.reading"));
 		addWarningClass();
-		SerialPortController.QUEUE.add(readPacket, false);
+		SerialPortController.getQueue().add(readPacket, false);
 		notifyObservers();
 	}
 
@@ -191,10 +191,10 @@ public class ButtonRead extends Observable implements Observer, Initializable {
 
 			if(hasMore)
 				if(totalLength<257){
-					SerialPortController.QUEUE.add(emptyPacket, false);
+					SerialPortController.getQueue().add(emptyPacket, false);
 				}else{
 					readFromAddress += PanelFlash.MAX_VAR_RAM_SIZE;
-					SerialPortController.QUEUE.add(readPacket, false);
+					SerialPortController.getQueue().add(readPacket, false);
 				}
 			else
 				Platform.runLater(()->{

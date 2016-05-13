@@ -6,18 +6,18 @@ import java.util.function.Predicate;
 
 import org.apache.logging.log4j.LogManager;
 
-import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
 
-public class LinkedPacketFilter implements Predicate<LinkedPacket> {
+public class PacketFilter implements Predicate<PacketToSend> {
 
-	private LinkedPacket linkedPacket;
+	private PacketToSend linkedPacket;
 
-	public void setLincedPacket(LinkedPacket packet) {
+	public void setLincedPacket(PacketToSend packet) {
 		this.linkedPacket = packet;
 	}
 
 	@Override
-	public boolean test(LinkedPacket packet) {
+	public boolean test(PacketToSend packet) {
 
 		try {
 			if (linkedPacket.equals(packet)) {

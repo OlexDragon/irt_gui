@@ -13,6 +13,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import com.sun.javafx.application.LauncherImpl;
 
+import irt.gui.controllers.calibration.PanelTools;
 import irt.gui.controllers.components.SerialPortController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -43,6 +44,7 @@ public class IrtGuiApp extends Application {
 			p.load(getClass().getResourceAsStream("/project.properties"));
          	primaryStage.setTitle("IRT Gui v." + p.getProperty("version"));
         	primaryStage.show();
+
         }catch(Exception e){
         	logger.catching(e);
         }
@@ -52,12 +54,35 @@ public class IrtGuiApp extends Application {
 	@Override public void stop() throws Exception {
 		stopLoggers();
 
+		//BUC 
 		SerialPort serialPort = SerialPortController.getSerialPort();
-		if(serialPort!=null && serialPort.isOpened())
-				serialPort.closePort();
+		if(serialPort!=null)
+			synchronized (serialPort) {
+				if(serialPort.isOpened())
+					serialPort.closePort();
+			}
+
+		//Calibration tool
+		serialPort = PanelTools.getSerialPort();
+		if(serialPort!=null)
+			synchronized (serialPort) {
+				if(serialPort.isOpened())
+					serialPort.closePort();
+			}
 	}
 
 	private void stopLoggers() {
+
+		//Flush and stop 'DumpFile' appender
+		((org.apache.logging.log4j.core.Logger)LogManager
+		.getLogger("dumper"))
+		.getAppenders()
+		.entrySet()
+		.stream()
+		.forEach(a->{
+			a.getValue().stop();
+		});
+
 		LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
 		Configuration config = ctx.getConfiguration();
 		LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME); 

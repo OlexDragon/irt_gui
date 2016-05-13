@@ -48,19 +48,19 @@ public class PacketHeader{
 		this.packetError = packetError;
 	}
 
-	public PacketHeader(byte[] packetInBytes) throws PacketParsingException {
+	public PacketHeader(byte[] packetInBytes, PacketProperties packetProperties) throws PacketParsingException {
 
-		if(packetInBytes==null || packetInBytes.length<11)
+		if(packetInBytes==null || packetInBytes.length<packetProperties.getMinLength())
 			throw new PacketParsingException(packetInBytes==null ? "\n\tThe Constructor Parameter can not be null." : "\n\tThe Constructor Parameter length is " + packetInBytes.length + ". It can not be less than 11");
 
-		setPacketType	(packetInBytes[4]);
+		setPacketType	(packetInBytes[packetProperties.getPacketTypeIndex()]);
 
-		byte[] copyOfRange = Arrays.copyOfRange(packetInBytes, 5, 7);
+		final int packetIdIndex = packetProperties.getPacketIdIndex();
+		byte[] copyOfRange = Arrays.copyOfRange(packetInBytes, packetIdIndex, packetIdIndex + 2);
 		short shiftAndAdd = (short)Packet.shiftAndAdd(copyOfRange);
-		logger.trace("\n\t{}\n\t{}", copyOfRange, shiftAndAdd);
 
 		setPacketIdDetails(shiftAndAdd);
-		setPacketAlarms(packetInBytes[10]);
+		setPacketAlarms(packetInBytes[packetProperties.getPacketAlarmsIndex()]);
 	}
 
 	private void setPacketAlarms(byte errorAsByte) {

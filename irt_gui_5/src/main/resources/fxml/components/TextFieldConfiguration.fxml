@@ -16,6 +16,7 @@
       				<MenuItem id="save" fx:id="menuItemSave" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemSave" text="Save" />
       				<SeparatorMenuItem mnemonicParsing="false" />
       				<MenuItem id="stop" fx:id="menuItemStartStop" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemStartStop" text="Stop" />
+                  <MenuItem mnemonicParsing="false" onAction="#onActionRemove" text="Remove" />
       			</items>
       		</ContextMenu>
       	</contextMenu>

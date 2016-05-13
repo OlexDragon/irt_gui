@@ -33,6 +33,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
 public class TextFieldRegister extends TextFieldAbstract {
@@ -64,6 +65,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 	private RegisterPacket 	valuePacket;
 	private RegisterPacket 	isSetValuePacket;
 
+	@FXML private TextField textField;
 	@FXML private Menu 		menuRegister;
 
 	private String name;
@@ -76,6 +78,11 @@ public class TextFieldRegister extends TextFieldAbstract {
 				} catch (PacketParsingException e) {
 					logger.catching(e);
 				}
+	}
+
+	@FXML private void onActionRemove(){
+		final ObservableList<Node> nodes = ((Pane)textField.getParent()).getChildren();
+		nodes.remove(textField);
 	}
 
 	public void save() throws PacketParsingException {
@@ -109,7 +116,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 										logger.warn("Not posible to save register " + registerValue);
 										Thread.sleep(20);
-										SerialPortController.QUEUE.add(packet, true);
+										SerialPortController.getQueue().add(packet, true);
 										packet.deleteObservers();
 
 										Platform.runLater(()->{
@@ -144,7 +151,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 					});
 					}
 			});
-			SerialPortController.QUEUE.add(packet, true);
+			SerialPortController.getQueue().add(packet, true);
 	}
 
 	@Override protected void setPacket(String propertiesKeyStartWith) throws PacketParsingException {
@@ -215,7 +222,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 				RegisterValue rValue = new RegisterValue(i, a, v);
 				RegisterPacket packet  = new RegisterPacket(rValue);
 				packet.addObserver(this);
-				SerialPortController.QUEUE.add(packet, true);
+				SerialPortController.getQueue().add(packet, true);
 			}
 		}
 	}

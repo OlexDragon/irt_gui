@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import irt.gui.data.packet.PacketHeader;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.enums.PacketId;
 import irt.gui.errors.PacketParsingException;
 
 public abstract class RegirterAbstractPacket extends PacketAbstract{
@@ -15,8 +15,8 @@ public abstract class RegirterAbstractPacket extends PacketAbstract{
 		super(packetHeader, payload);
 	}
 
-	protected RegirterAbstractPacket(PacketId packetId, byte[] answer, boolean hasAcknowledgment) throws PacketParsingException {
-		super(packetId, answer, hasAcknowledgment);
+	protected RegirterAbstractPacket(PacketProperties packetProperties, byte[] answer) throws PacketParsingException {
+		super(packetProperties, answer);
 	}
 
 	@Override

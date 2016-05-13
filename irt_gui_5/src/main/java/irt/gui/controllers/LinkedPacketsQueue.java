@@ -12,7 +12,7 @@ import irt.gui.controllers.socket.SocketWorker;
 import irt.gui.data.LinkedPacketPriorityBlockingQueue;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.LinkHeader;
-import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
 import javafx.util.Pair;
 
 public class LinkedPacketsQueue implements Runnable {
@@ -27,6 +27,7 @@ public class LinkedPacketsQueue implements Runnable {
 	private volatile LinkedPacketSender comPort;
 
 	private byte unitAddress = (byte) 254;
+	private boolean runServer = true; public boolean isRunServer() { return runServer; } public void setRunServer(boolean runServer) { this.runServer = runServer; }
 
 	public LinkedPacketsQueue(){
 		SERVICES.scheduleAtFixedRate(this, 1, 20, TimeUnit.MILLISECONDS);
@@ -45,12 +46,13 @@ public class LinkedPacketsQueue implements Runnable {
 
 		try {
 
-			LinkedPacket packet = blockingQueue.take();
+			PacketToSend packet = blockingQueue.take();
 
 //			logger.error(packet);
 
 			if (comPort != null && comPort.isOpened()) {
-				SOCKET.startServer(comPort.getPortName());
+				if(runServer)
+					SOCKET.startServer(comPort.getPortName());
 
 				comPort.send(packet);
 				warnReported = false;
@@ -77,7 +79,7 @@ public class LinkedPacketsQueue implements Runnable {
 		logger.exit();
 	}
 
-	public synchronized void add(LinkedPacket packet, boolean checkUnitAddress){
+	public synchronized void add(PacketToSend packet, boolean checkUnitAddress){
 		logger.entry(packet);
 
 		if(packet!=null){
@@ -100,6 +102,7 @@ public class LinkedPacketsQueue implements Runnable {
 	}
 
 	public void setComPort(LinkedPacketSender serialPort) {
+
 		this.comPort = serialPort;
 		host = null;
 
@@ -116,7 +119,7 @@ public class LinkedPacketsQueue implements Runnable {
 		unitAddress = address;
 	}
 
-	private void checkUnitAddress(LinkedPacket packet) {
+	private void checkUnitAddress(PacketToSend packet) {
 		final LinkHeader linkHeader = packet.getLinkHeader();
 		final byte addr = linkHeader.getAddr();
 		if(addr!=unitAddress)

@@ -21,6 +21,7 @@ import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.data.NetworkAddress;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
@@ -83,7 +84,7 @@ public class NetworkAddressPacketTest {
 
 				try {
 
-					PacketAbstract packet = new PacketAbstract(NetworkAddressPacket.PACKET_ID, ((LinkedPacket)o).getAnswer(), true){
+					PacketAbstract packet = new PacketAbstract(new PacketProperties(NetworkAddressPacket.PACKET_ID).setHasAcknowledgment(true), ((LinkedPacket)o).getAnswer()){
 
 						@Override
 						public PacketId getPacketId() {

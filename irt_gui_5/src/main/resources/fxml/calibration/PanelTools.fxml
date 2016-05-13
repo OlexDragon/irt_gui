@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.calibration.PanelTools">
+	<children>
+		<TitledPane text="Tools" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<content>
+				<VBox>
+					<children>
+						<HBox stylesheets="@../../styles/flash.css">
+							<children>
+								<fx:include fx:id="toolsSerialPortComboBox" source="../components/ComboBoxSerialPort.fxml" />
+								<fx:include fx:id="toolsOpenClosePortButton" source="../components/ButtonOpenSerialPort.fxml" />
+							</children>
+						</HBox>
+						<fx:include fx:id="powerMeter" source="PanelPowerMeret.fxml" />
+						<fx:include fx:id="signalGenerator" source="PanelSignalGenerator.fxml" />
+						<fx:include fx:id="prologix" source="PanelPrologix.fxml" />
+					</children>
+				</VBox>
+			</content>
+		</TitledPane>
+	</children>
+</AnchorPane>

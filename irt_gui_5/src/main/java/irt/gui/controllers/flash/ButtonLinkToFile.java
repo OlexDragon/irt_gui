@@ -146,6 +146,7 @@ public class ButtonLinkToFile implements Initializable, Observer {
 	public void update(Observable o, Object arg) {
 		if(arg instanceof UnitAddress){
 			unitAddress = (UnitAddress)arg;
+			button.setText(bundle.getString("link.to.file"));
 		}
 	}
 

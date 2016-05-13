@@ -29,7 +29,7 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 
 			packets
 			.stream()
-			.forEach(packet->SerialPortController.QUEUE.add(packet, true));
+			.forEach(packet->SerialPortController.getQueue().add(packet, true));
 
 		}catch(Exception ex){
 			logger.catching(ex);

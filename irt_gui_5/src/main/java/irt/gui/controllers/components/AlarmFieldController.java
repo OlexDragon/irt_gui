@@ -5,8 +5,14 @@ import java.time.Duration;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.core.Logger;
+
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.data.StringData;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
@@ -24,6 +30,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 
 public class AlarmFieldController extends FieldsControllerAbstract implements Initializable {
+	public final Logger dumper = (Logger) LogManager.getLogger("dumper");
+	public final Marker marker = MarkerManager.getMarker("FileWork");
 
 	@FXML private Label titleLabel;
 	@FXML private Label valueLabel;
@@ -58,9 +66,8 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 	}
 
 	@Override protected void updateFields(LinkedPacket packet) throws PacketParsingException {
-		logger.entry( packet);
 
-		LinkedPacket p = new PacketAbstract(packet.getPacketHeader().getPacketIdDetails().getPacketId(), packet.getAnswer(), true) {
+		LinkedPacket p = new PacketAbstract(new PacketProperties(packet.getPacketHeader().getPacketIdDetails().getPacketId()).setHasAcknowledgment(true), packet.getAnswer()) {
 			@Override
 			public PacketId getPacketId() {
 				throw new UnsupportedOperationException("Auto-generated method stub");
@@ -115,8 +122,11 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 			final String string = stringData.toString();
 
 			Platform.runLater(()->{
-				if(!string.equals(titleLabel.getText()))
+				if(!string.equals(titleLabel.getText())){
 					titleLabel.setText(string);
+					if(name!=null && alarmSeverities!=null)
+						dumper.info(marker, toString());
+				}
 			});
 		}
 	}
@@ -127,11 +137,15 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 		if(name==null){
 			final StringData stringData = pl.getStringData();
 			name = stringData.toString();
+
 			final String string = bundle.getString("alarms.name." + name);
 
 			Platform.runLater(()->{
-				if(!string.equals(titleLabel.getText()))
+				if(!string.equals(titleLabel.getText())){
 					titleLabel.setText(string);
+					if(name!=null && alarmSeverities!=null)
+						dumper.info(marker, toString());
+				}
 			});
 		}
 	}
@@ -155,8 +169,11 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 					final ObservableList<String> styleClass = valueLabel.getStyleClass();
 					final String sc = alarmSeverities.getStyleClass();
 
-					if(!styleClass.contains(sc))
+					if(!styleClass.contains(sc)){
 						styleClass.add(sc);
+						if(name!=null && alarmSeverities!=null)
+							dumper.info(marker, toString());
+					}
 				}
 			});
 		}
@@ -180,5 +197,10 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 	public void doUpdate(boolean update) {
 		super.doUpdate(update);
 		titleLabel.getParent().setDisable(!update);
+	}
+
+	@Override
+	public String toString() {
+		return name + " : " + alarmSeverities;
 	}
 }

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
@@ -30,7 +31,7 @@ public class DebugInfoPacket extends RegirterAbstractPacket {
 	}
 
 	public DebugInfoPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(DebugInfoCode.INFO.getPacketID(), answer, hasAcknowledgment);
+		super(new PacketProperties(DebugInfoCode.INFO.getPacketID()).setHasAcknowledgment(hasAcknowledgment), answer);
 	}
 
 	@Override @JsonIgnore

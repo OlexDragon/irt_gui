@@ -52,7 +52,7 @@ public class RequestHandler implements Runnable {
 							logger.catching(e);
 						}
 					});
-					SerialPortController.QUEUE.add(packet, false);
+					SerialPortController.getQueue().add(packet, false);
 				}
 			}
 		} catch (Exception e) {

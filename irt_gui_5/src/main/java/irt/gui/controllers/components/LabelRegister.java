@@ -29,6 +29,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 
 public class LabelRegister extends ScheduledNodeAbstract {
 
@@ -61,6 +62,11 @@ public class LabelRegister extends ScheduledNodeAbstract {
 		titleLabel.setContextMenu(contextMenu);
 		createMenuItems();
 		tooltipWorker = new TooltipWorker(registerLabel);
+	}
+
+	@FXML private void onActionRemove(){
+		final ObservableList<Node> nodes = ((Pane)borderPane.getParent()).getChildren();
+		nodes.remove(borderPane);
 	}
 
 	private void createMenuItems(){

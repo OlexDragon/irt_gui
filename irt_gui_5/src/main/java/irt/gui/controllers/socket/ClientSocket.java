@@ -18,9 +18,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import irt.gui.data.LinkedPacketFilter;
 import irt.gui.data.MyThreadFactory;
+import irt.gui.data.PacketFilter;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
 
 public class ClientSocket implements Runnable{
 
@@ -30,12 +31,12 @@ public class ClientSocket implements Runnable{
 
 	private final ObjectMapper mapper = new ObjectMapper();
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor(new MyThreadFactory()); 		public ExecutorService getExecutorService() { return executorService; }
-	private final Set<LinkedPacket> packets = new HashSet<LinkedPacket>(){
+	private final Set<PacketToSend> packets = new HashSet<PacketToSend>(){
 		private static final long serialVersionUID = 310921430550025085L;
-		private final LinkedPacketFilter filter = new LinkedPacketFilter();
+		private final PacketFilter filter = new PacketFilter();
 
 		@Override
-		public synchronized boolean add(LinkedPacket linkedPacket) {
+		public synchronized boolean add(PacketToSend linkedPacket) {
 
 			filter.setLincedPacket(linkedPacket);
 			if (removeIf(filter))
@@ -63,6 +64,7 @@ public class ClientSocket implements Runnable{
 	@Override
 	public void run() {
 
+		if(port>0)
 		try(	Socket socket = new Socket(host, port);
 				PrintWriter printWriter = new PrintWriter(socket.getOutputStream(), true);
 				BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream())); ){
@@ -96,7 +98,7 @@ public class ClientSocket implements Runnable{
 		}
 	}
 
-	public void send(LinkedPacket packet) throws JsonProcessingException {
+	public void send(PacketToSend packet) throws JsonProcessingException {
 
 		packets.add(packet);
 
@@ -112,7 +114,7 @@ public class ClientSocket implements Runnable{
 			this.printWriter = printWriter;
 		}
 
-		public void send(LinkedPacket packet) throws JsonProcessingException {
+		public void send(PacketToSend packet) throws JsonProcessingException {
 			packet.clearAnswer();
 			final String packetAsString = mapper.writeValueAsString(packet);
 			printWriter.println(packetAsString);

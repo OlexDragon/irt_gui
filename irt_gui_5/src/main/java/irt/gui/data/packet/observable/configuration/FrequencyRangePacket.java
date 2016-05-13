@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
+import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.ParameterHeader;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
@@ -24,7 +25,7 @@ public class FrequencyRangePacket extends PacketAbstract implements RangePacket{
 				new PacketHeader(
 						PacketType.REQUEST,
 						new PacketIdDetails(
-								PACKET_ID, "Get Frequency range"),
+								PACKET_ID, "Get ToolsFrequency range"),
 						PacketErrors.NO_ERROR),
 				new Payload(
 						new ParameterHeader(PACKET_ID),
@@ -32,7 +33,7 @@ public class FrequencyRangePacket extends PacketAbstract implements RangePacket{
 	}
 
 	public FrequencyRangePacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(PACKET_ID, answer, hasAcknowledgment);
+		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(hasAcknowledgment), answer);
 	}
 
 	@Override @JsonIgnore

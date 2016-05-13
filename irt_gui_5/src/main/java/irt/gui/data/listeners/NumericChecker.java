@@ -6,14 +6,14 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public final class NumericChecker implements ChangeListener<String> {
+public class NumericChecker implements ChangeListener<String> {
 
 	private long maximum = Long.MAX_VALUE; public long getMaximum() { return maximum; } public void setMaximum(long maximum) { this.maximum = maximum; }
 
 	public NumericChecker(){}
 
-	public NumericChecker(StringProperty stringProperty){
-		stringProperty.addListener(this);
+	public NumericChecker(StringProperty textProperty){
+		textProperty.addListener(this);
 	}
 
 	@Override
