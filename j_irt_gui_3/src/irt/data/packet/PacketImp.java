@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import irt.data.ToHex;
+
 public class PacketImp implements Packet{
 
 	public static final int NO_ERROR = 0;
@@ -542,6 +544,6 @@ public class PacketImp implements Packet{
 
 	@Override
 	public String toString() {
-		return "Packet=[\n\t"+header + ",\n\t" + payloads+"]";
+		return "Packet=[\n\t"+header + ",\n\t" + payloads+"] toBytes()=" + ToHex.bytesToHex(toBytes());
 	}
 }

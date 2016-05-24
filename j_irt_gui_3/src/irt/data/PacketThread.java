@@ -123,12 +123,6 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 			super.start();
 	}
 
-	@Override
-	public String toString() {
-		return "PacketThread [data=" + ToHex.bytesToHex(data) + ", packet="
-				+ packet + "]";
-	}
-
 
 	public void preparePacket() {
 		data = preparePacket(packet);
@@ -216,5 +210,10 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 
 	public void setData(byte[] data) {
 		this.data = data;
+	}
+
+	@Override
+	public String toString() {
+		return "PacketThread [data=" + ToHex.bytesToHex(data) + ", packet=" + packet + "]";
 	}
 }

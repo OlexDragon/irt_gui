@@ -136,11 +136,6 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		return packetId;
 	}
 
-	@Override
-	public String toString() {
-		return "AbstractGetter [packetThread=" + packetThread + "]"+super.toString();
-	}
-
 	public void setPacketId(short packetId) {
 		this.packetId = packetId;
 		packetThread.getPacket().getHeader().setPacketId(packetId);
@@ -181,5 +176,10 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 			addrEquals = false;
 
 		return addrEquals;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [packetThread=" + packetThread + "]";
 	}
 }

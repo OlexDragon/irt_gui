@@ -413,6 +413,17 @@ public class DumpControllers{
 					waitTime,
 					"DUMP_REGISTER_220");
 		}
+
+		addDumpController(
+				newGetter(
+						linkHeader,
+						PacketImp.GROUP_ID_DEVICE_DEBAG,
+						PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
+						PacketWork.PACKET_ID_DUMP_POWER,
+						24,
+						Priority.ALARM),
+				waitTime,
+				"DUMP_POWER");
 	}
 
 	private Getter newGetter(LinkHeader linkHeader, byte irtSlcpPacketId, byte irtSlcpParameter, short packetId, int value, final Priority priority) {
