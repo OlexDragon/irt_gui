@@ -11,7 +11,7 @@
 			<contextMenu>
 				<ContextMenu fx:id="contextMenu">
 					<items>
-                  <Menu mnemonicParsing="false" text="Add">
+                  <Menu fx:id="menuAdd" mnemonicParsing="false" text="Add">
                      <items>
       					<Menu fx:id="menuRegister" mnemonicParsing="false" text="Register TextField" />
                         <Menu fx:id="menuValueLabel" mnemonicParsing="false" text="Value Label" />

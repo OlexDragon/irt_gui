@@ -3,10 +3,12 @@ package irt.gui.controllers.components;
 
 import java.net.URL;
 import java.time.Duration;
+import java.util.Observer;
 import java.util.ResourceBundle;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.UpdateController;
+import irt.gui.controllers.calibration.tools.Tool.Commands;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.configuration.MutePacket;
@@ -46,6 +48,7 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 //		this.location = location;
 
 		addLinkedPacket(mutePacket);
+		doUpdate(true);
 
 		UpdateController.addController(this);
 
@@ -71,7 +74,8 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 			if(packet.getPacketHeader().getPacketError()==PacketErrors.NO_ERROR){
 
 				MutePacket p = new MutePacket(packet.getAnswer(), true);
-				MuteStatus ms = MutePacket.MuteStatus.values()[p.getPayloads().get(0).getByte()];
+				final byte index = p.getPayloads().get(0).getByte();
+				MuteStatus ms = MutePacket.MuteStatus.values()[index];
 				if(muteStatus!=ms){
 					muteStatus = ms;
 					final boolean muted = muteStatus==MuteStatus.MUTED;
@@ -107,5 +111,19 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 	@Override public void doUpdate(boolean update) {
 		super.doUpdate(update);
 		button.setDisable(!update);
+	}
+
+	public void get(Observer observer) {
+		mutePacket.addObserver(observer);
+		SerialPortController.getQueue().add(mutePacket, true);
+	}
+
+	public void set(Commands command, MuteStatus valueToSend, Observer observer) {
+
+		if(observer!=null)
+			muteCommandPacket.addObserver(observer);
+			
+		muteCommandPacket.setCommand(valueToSend);
+		SerialPortController.getQueue().add(muteCommandPacket, true);
 	}
 }

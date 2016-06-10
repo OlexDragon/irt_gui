@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import irt.gui.data.DacValue;
 import irt.gui.data.DeviceId;
+import irt.gui.data.RegisterValue;
 import irt.gui.data.StringData;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.enums.PacketId;
@@ -96,7 +97,10 @@ public class Payload {
 	@JsonIgnore
 	public DeviceId getDeviceId() { return buffer!=null  ? new DeviceId(buffer) : null;	}
 
-	public void setParameterHeader	(ParameterHeader parameterHeader)	{ this.parameterHeader= parameterHeader;			}
+	public void setParameterHeader	(ParameterHeader parameterHeader)	{
+		this.parameterHeader= parameterHeader;
+		parameterHeader.setSize((short) (buffer==null ? 0 : buffer.length));
+	}
 
 	public void setBuffer(byte... buffer	){
 		this.buffer = buffer;
@@ -313,5 +317,9 @@ public class Payload {
 	@Override
 	public String toString() {
 		return "\n\tPayload [" + parameterHeader + ", buffer=" + ToHex.bytesToHex(buffer) + "]";
+	}
+
+	public RegisterValue getRegisterValue() {
+		return buffer.length==12 ? new RegisterValue(getInt(0), getInt(1), getInt(2)) : new RegisterValue(getInt(0), getInt(1));
 	}
 }

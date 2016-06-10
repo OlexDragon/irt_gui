@@ -14,6 +14,7 @@ import irt.gui.controllers.interfaces.FieldController;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import jssc.SerialPort;
@@ -62,13 +63,12 @@ public class IrtGuiController{
 			final int size = tabs.size();
 			final boolean selected = tab.isSelected();
 
-			if(size>=tabCount || ( selected && size<=tabCount))
-
-				if(tab!=calibrationTab)
-					((FieldController)tab
-							.getContent()
-							.getUserData())
-					.doUpdate(selected);
+			if(size>=tabCount || ( selected && size<=tabCount)) {
+				final Node content = tab .getContent();
+				final FieldController userData = (FieldController)content .getUserData();
+//				logger.error("{}: {}", tab.getText(), userData);
+				userData .doUpdate(selected);
+			}
 
 			tabCount = size;
 			if(selected && size>1)

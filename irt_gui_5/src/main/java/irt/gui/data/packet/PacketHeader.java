@@ -21,7 +21,7 @@ import irt.gui.errors.PacketParsingException;;
 public class PacketHeader{
 
 	@JsonIgnore
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private final Logger logger = LogManager.getLogger();
 
 	public static final int SIZE = 7;
 

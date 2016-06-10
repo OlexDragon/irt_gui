@@ -30,7 +30,7 @@ public class LinkHeader implements Comparable<LinkHeader>{
 
 	public byte[] toBytes(){
 
-		if(addr<0)
+		if(addr==-1)
 			return new byte[0];
 
 		byte[] data = new byte[4];
@@ -65,5 +65,9 @@ public class LinkHeader implements Comparable<LinkHeader>{
 	@Override
 	public int compareTo(LinkHeader linkHeader) {
 		return linkHeader!=null ? addr-linkHeader.getAddr() :-1;
+	}
+
+	public LinkHeader immutable() {
+		return new LinkHeaderImmutable(addr, control, protocol);
 	}
 }

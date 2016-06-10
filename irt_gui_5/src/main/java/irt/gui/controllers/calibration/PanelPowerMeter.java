@@ -12,10 +12,11 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.calibration.tools.Prologix;
+import irt.gui.controllers.calibration.tools.Tool;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.packet.interfaces.PacketToSend;
-import irt.gui.data.packet.observable.calibration.GetPacket;
+import irt.gui.data.packet.observable.calibration.GetPowerMeterPacket;
 import irt.gui.data.packet.observable.calibration.IdPacket;
 import irt.gui.data.packet.observable.calibration.ToolsPacket;
 import javafx.application.Platform;
@@ -23,11 +24,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
-public class PanelPowerMeter extends Observable{
+public class PanelPowerMeter extends Observable implements Tool{
+
 	private final Logger logger = LogManager.getLogger();
 
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
-	private final ExecutorService executor = Executors.newSingleThreadExecutor(new MyThreadFactory());
+	private final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(new MyThreadFactory());
 
 	@FXML private TextField textFieldAddress;
 	@FXML private Label labelInfo;
@@ -36,7 +38,11 @@ public class PanelPowerMeter extends Observable{
 	private Prologix prologix;
 
 	private final ToolsPacket idPacket = new IdPacket();
-	private final ToolsPacket getPacket = new GetPacket();
+	private final ToolsPacket getPacket = new GetPowerMeterPacket();
+
+	public PanelPowerMeter() {
+		idPacket.addObserver(observerGetInfo);
+	}
 
 	@FXML public void initialize() {
 		new NumericChecker(textFieldAddress.textProperty());
@@ -52,15 +58,21 @@ public class PanelPowerMeter extends Observable{
 
 		@Override
 		public void update(Observable o, Object arg) {
-			logger.error(o);
+
 			final PacketToSend tp = (PacketToSend) o;
 			tp.deleteObserver(observerGetValue);
 
-			executor.execute(() -> {
+			EXECUTOR.execute(() -> {
+				try{
 				final Double value = Optional
 										.ofNullable(tp.getAnswer())
 										.map(String::new)
-										.map(Double::new)
+										.map(String::trim)
+										.map(s->s.split("\n"))
+										.filter(split->split.length!=0)
+										.map(split->split[split.length-1])
+										.filter(s->!s.isEmpty())
+										.map(Double::parseDouble)
 										.orElse(null);
 
 				notifyObservers(value);
@@ -71,6 +83,9 @@ public class PanelPowerMeter extends Observable{
 										.orElse("No Answer");
 
 				Platform.runLater(() -> labelValue.setText(text));
+				}catch(Exception e){
+					logger.catching(e);
+				}
 			});
 		}
 	};
@@ -80,9 +95,8 @@ public class PanelPowerMeter extends Observable{
 		@Override
 		public void update(Observable o, Object arg) {
 			final PacketToSend tp = (PacketToSend) o;
-			tp.deleteObserver(observerGetInfo);
 
-			executor.execute(()->{
+			EXECUTOR.execute(()->{
 				final String text = Optional
 										.ofNullable(tp.getAnswer())
 										.map(String::new)
@@ -93,14 +107,47 @@ public class PanelPowerMeter extends Observable{
 		}
 	};
 	@FXML private void onActionGetInfo(){
-		prologix.send(textFieldAddress.getText(), idPacket, observerGetInfo);
+		prologix.send(textFieldAddress.getText(), idPacket);
 	}
 
 	@FXML public void onActionGetValue(){
-		prologix.send(textFieldAddress.getText(), getPacket, observerGetValue);
+		
+		getPacket.addObserver(observerGetValue);
+		prologix.send(textFieldAddress.getText(), getPacket);
 	}
 
 	public void setPrologix(Prologix prologix) {
 		this.prologix = prologix;
+	}
+
+	private void sendCommand(final ToolsPacket packet, Observer... observers) {
+		Optional
+		.ofNullable(observers)
+		.ifPresent(os->{
+			for(Observer o:os)
+				if(o!=null)
+					packet.addObserver(o);
+		});
+		final String addr = textFieldAddress.getText();
+		prologix.send(addr, packet);
+	}
+
+	@Override
+	public void get(Commands command, Observer observer) {
+
+		switch(command){
+		case GET:
+		case POWER:
+			sendCommand(getPacket, observer, observerGetValue);
+			break;
+
+		default:
+		}
+	}
+
+	@Override
+	public void set(Commands command, Object valueToSend, Observer observer) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 }

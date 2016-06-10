@@ -13,6 +13,7 @@ import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.listeners.FractionalNumberPlusPrefixChecker;
 import irt.gui.data.listeners.NumericChecker;
+import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketType;
@@ -58,7 +59,14 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 	@FXML private BorderPane 	borderPane;
     @FXML private Label label;
-    @FXML private Menu menuConfiguration;
+ 
+    @Override public void run() {
+		// TODO Remove this function( Used for debug)
+		super.run();
+//		logger.error(packets);
+	}
+
+	@FXML private Menu menuConfiguration;
 
 	@FXML private void onActionRemove(){
 		final ObservableList<Node> nodes = ((Pane)borderPane.getParent()).getChildren();
@@ -94,7 +102,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 			 removeAllPackets();
 
 			 Optional
-			 .ofNullable(createNewPacket(classNamw))
+			 .ofNullable(Packet.createNewPacketBy(classNamw))
 			 .ifPresent(p->{
 				 addPacket(p);
 			 });
@@ -106,6 +114,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	private LinkedPacket createNewPacket(Number value) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
 		Constructor<? extends LinkedPacket> constructor;
+//		logger.error(packetClass);
 
 		LinkedPacket newInstance;
 		if(packetClass == FrequencyPacket.class){
@@ -120,25 +129,6 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		return newInstance;
 	}
 
-	private LinkedPacket createNewPacket(String className) {
-		logger.entry(className);
-
-		LinkedPacket packet = null;
-		try {
-
-			@SuppressWarnings("unchecked")
-			Class<? extends LinkedPacket> clazz = (Class<? extends LinkedPacket>) Class.forName(className);
-			packet = (LinkedPacket) clazz.newInstance();
-
-		} catch (Exception e) {
-			logger.catching(e);
-		}
-
-
-
-		return packet;
-	}
-
 	@Override protected void createMenuItems() {
 
 		EventHandler<ActionEvent> onActionRegisterSelect = e->{
@@ -148,38 +138,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		GuiUtility.createMamuItems(PROPERTY_STARTS_WITH, onActionRegisterSelect, menuConfiguration.getItems());
 	}
 
-	private void setValue(LinkedPacket packet) {
-
-		int precision = Optional
-				.ofNullable(IrtGuiProperties.getLong(propertyName + PRECISION))
-				.orElse(0l)
-				.intValue();
-
-		if(precision==0){
-
-			final long[] array = packet.getPayloads().get(0).getArrayLong();
-			value = new ValueFrequency(array[0], array[0], array[1]);
-
-		}else{
-
-			final short[] array = packet.getPayloads().get(0).getArrayOfShort();
-			value = new ValueDouble(array[0], array[0], array[1], precision);
-		}
-
-		 //Prefix
-		 Optional
-		 .ofNullable(IrtGuiProperties.getProperty(propertyName + PREFIX))
-		 .ifPresent(p->value.setPrefix(p));
-
-		logger.debug("\n\t"
-					+ "value: {}\n\t"
-					+ "precision: {}", value, precision);
-
-		FRACTIONAL_NUMBER_CHECKER.setMaximum((double)value.getMaxValue()/value.getFactor());
-	}
-
 	@Override protected void sendValue(Value value) throws PacketParsingException {
-		logger.trace(value);
 
 		final Optional<Value> val = Optional
 				.ofNullable(value)
@@ -278,8 +237,9 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 			return this;
 		}
 
-		@Override
-		public void run() {
+		@Override public void run() {
+//			if(packet instanceof FrequencyPacket)
+//				logger.error(packet);
 
 			if(packet.getPacketHeader().getPacketType()==PacketType.COMMAND)
 				packet.deleteObservers();
@@ -290,10 +250,11 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 			try {
 
-				packetClass = packet.getClass();
-				final Constructor<? extends LinkedPacket> constructor = packetClass.getConstructor(byte[].class, boolean.class);
-				LinkedPacket p = constructor.newInstance(this.packet.getAnswer(), true);
+				LinkedPacket p = (LinkedPacket) Packet.createNewPacket(packet.getClass(), packet.getAnswer(), true);
 				final PacketHeader header = p.getPacketHeader();
+//
+//				if(packet.getPacketHeader().getPacketType()==PacketType.COMMAND)
+//					logger.error(p);
 
 				if(header.getPacketType()==PacketType.RESPONSE && header.getPacketError()==PacketErrors.NO_ERROR){
 					if(p instanceof RangePacket)
@@ -317,14 +278,45 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 				//add value packet
 				Optional
-				 .ofNullable(createNewPacket(packet.getClass().getName().replace("Range", "")))
+				 .ofNullable(Packet.createNewPacketBy(packet.getClass().getName().replace("Range", "")))
 				 .ifPresent(p->{
 					 addPacket(p);
 					 packetClass = p.getClass();
-					 start();
-				});
 
+					 if(!scheduleAtFixedRate.isCancelled())
+						 start();
+				});
 			}
+		}
+
+		private void setValue(LinkedPacket packet) {
+
+			int precision = Optional
+					.ofNullable(IrtGuiProperties.getLong(propertyName + PRECISION))
+					.orElse(0l)
+					.intValue();
+
+			if(precision==0){
+
+				final long[] array = packet.getPayloads().get(0).getArrayLong();
+				value = new ValueFrequency(array[0], array[0], array[1]);
+
+			}else{
+
+				final short[] array = packet.getPayloads().get(0).getArrayOfShort();
+				value = new ValueDouble(array[0], array[0], array[1], precision);
+			}
+
+			 //Prefix
+			 Optional
+			 .ofNullable(IrtGuiProperties.getProperty(propertyName + PREFIX))
+			 .ifPresent(p->value.setPrefix(p));
+
+			logger.debug("\n\t"
+						+ "value: {}\n\t"
+						+ "precision: {}", value, precision);
+
+			FRACTIONAL_NUMBER_CHECKER.setMaximum((double)value.getMaxValue()/value.getFactor());
 		}
 
 		private void setTextFieldValue(LinkedPacket packet) {

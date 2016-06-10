@@ -1,0 +1,8 @@
+.border{
+	-fx-border-color : black;
+}
+
+.head{
+		-fx-font-weight: bold;
+		-fx-text-fill : blue;
+}

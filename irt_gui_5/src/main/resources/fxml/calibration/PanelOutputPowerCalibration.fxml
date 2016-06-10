@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane stylesheets="@../../styles/default.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.calibration.PanelOutputPowerCalibration">
+   <children>
+      <SplitPane dividerPositions="0.5" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+          <AnchorPane>
+               <children>
+                  <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <center>
+                        <ScrollPane fitToHeight="true" fitToWidth="true">
+                          <content>
+                              <TextArea fx:id="textAria" />
+                          </content>
+                        </ScrollPane>
+                     </center>
+                     <top>
+                        <HBox BorderPane.alignment="CENTER">
+                           <children>
+                              <TextField fx:id="textFieldVariableName" onAction="#onSetVariableName">
+                                 <contextMenu>
+                                    <ContextMenu>
+                                      <items>
+                                        <MenuItem mnemonicParsing="false" onAction="#onMenuDefaultVariable" text="Default" />
+                                      </items>
+                                    </ContextMenu>
+                                 </contextMenu>
+                              </TextField>
+                              <Label fx:id="receivedValueLabel" text="Received value" />
+                              <TextField fx:id="textFieldAccuracy" onAction="#onSetPrecision" onKeyPressed="#onKeyPressedAccuracy" onKeyReleased="#onKeyReleasedAccuracy" prefColumnCount="4">
+                                 <tooltip>
+                                    <Tooltip text="Accuracy in degrees.(max 5.0)" />
+                                 </tooltip>
+                              </TextField>
+                           </children>
+                        </HBox>
+                     </top>
+                  </BorderPane>
+               </children>
+            </AnchorPane>
+          <AnchorPane>
+               <children>
+                  <LineChart fx:id="lineChart" stylesheets="@../../styles/chart.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <xAxis>
+                      <NumberAxis side="LEFT" fx:id="xAxis" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis fx:id="yAxis" side="BOTTOM" />
+                    </yAxis>
+                  </LineChart>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</AnchorPane>

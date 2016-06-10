@@ -37,8 +37,8 @@ public class LoPacket extends PacketAbstract{
 						Optional.ofNullable(value).map(b->new byte[]{b}).orElse(null)));
 	}
 
-	public LoPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(hasAcknowledgment), answer);
+	public LoPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") Boolean hasAcknowledgment) throws PacketParsingException {
+		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
 	}
 
 	@Override @JsonIgnore

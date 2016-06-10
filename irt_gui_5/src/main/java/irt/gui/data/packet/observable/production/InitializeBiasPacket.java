@@ -1,6 +1,8 @@
 
 package irt.gui.data.packet.observable.production;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -36,8 +38,8 @@ public class InitializeBiasPacket extends RegirterAbstractPacket {
 						null));
 	}
 
-	public InitializeBiasPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(hasAcknowledgment), answer);
+	public InitializeBiasPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") Boolean hasAcknowledgment) throws PacketParsingException {
+		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
 	}
 
 	@Override @JsonIgnore

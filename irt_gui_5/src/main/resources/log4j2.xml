@@ -83,8 +83,12 @@
 
 <!-- 		<logger name="irt.gui.controllers.flash.ButtonFCM" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.flash.service.FileFinder" level="all"/> -->
-		<logger name="irt.gui.controllers.calibration.PanelPrologix" level="all"/>
-		<logger name="irt.gui.controllers.calibration.PanelSignalGenerator" level="all"/>
+<!-- 		<logger name="irt.gui.controllers.calibration.PanelPrologix" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.calibration.PanelSignalGenerator" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.calibration.PanelTasks" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.calibration.process.SequentialProcess" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.calibration.process.CalibrationMap" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.calibration.process.AverageDouble" level="all"/> -->
 
 		<Root level="warn">
 			<AppenderRef ref="LogFile" />

@@ -58,14 +58,15 @@ public enum HP437B_Commands implements ToolCommands{
 		return (command + Eos.LF).getBytes();
 	}
 
-	@Override
-	public String toString() {
+	@Override public String toString() {
 		return name() + "('" + command + "')";
 	}
 
-	@Override
-	public void setValue(Object value) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
+	@Override public void setValue(Object value) {
+		throw new UnsupportedOperationException("This function should not be used");
+	}
+
+	@Override public Object getValue() {
+		return null;
 	}
 }

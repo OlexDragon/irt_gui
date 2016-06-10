@@ -1,10 +1,8 @@
 
 package irt.gui.controllers.components;
 
-import java.util.Observer;
-
 import irt.gui.IrtGuiProperties;
-import irt.gui.data.listeners.NumericChecker;
+import irt.gui.controllers.interfaces.SliderListener;
 import irt.gui.data.listeners.TextFieldFocusListener;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.value.Value;
@@ -26,7 +24,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
+public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements SliderListener {
 
 	public static final String START 				= "start";
 	public static final String STOP 				= "stop";
@@ -42,7 +40,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	public static final String CLASS_NOT_SAVED 		= "notSaved";
 	public static final String CLASS_HAS_CHANGED 	= "hasChanged";
 
-	protected volatile Value	value;		/* Actual value	*/							public 			Value 					getValue() 			{ return value; }
+	protected volatile Value	value;		/* Actual value	*/							public Value getValue() { return value; }
 	private final ChangeListener<String> 	numericChecker 	= getNumericChecker();		public abstract ChangeListener<String> 	getNumericChecker();
 	private Menu menu;
 	private TextFieldErrorController errorController;
@@ -50,13 +48,10 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	protected abstract void setup();
 	protected abstract Menu getMenu();
 	protected abstract Node getRootNode();
-	public 	  abstract int  getMultiplier();
 	protected abstract void createMenuItems();
 	protected abstract void sendValue(Value value) 																	throws PacketParsingException;
 	protected abstract void setPacket(String keyStartWith) 															throws PacketParsingException ;
 	public 	  abstract void save() 																					throws PacketParsingException;
-	public 	  abstract void setSliderValue(Slider slider, ChangeListener<Number> sliderChangeListener, String cssClass, Observer valueObserver, NumericChecker stepNumericChecker);
-	public 	  abstract void setText(double value);
 
 	@FXML protected TextField textField; 		public TextField getTextField() { return textField; }
 
@@ -65,7 +60,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	@FXML protected MenuItem	menuItemReset;
 	@FXML protected MenuItem	menuItemSet;
 
-	@FXML public void initialize(){
+	@FXML protected void initialize(){
 
 		menu = getMenu();
 
@@ -82,8 +77,9 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 		setup();
 	}
 
-	@FXML protected void onActionTextField() {
+	@FXML public void onActionTextField() {
 
+		if(value!=null)
 		try {
 
 			final Value v = value.getCopy();
@@ -173,8 +169,8 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 		return value;
 	}
 
-	@Override public void start(){
-//		logger.error("Start");
+	@Override public boolean start(){
+//		logger.error(this.getClass().getSimpleName());
 
 		Platform.runLater(()->{
 
@@ -191,11 +187,11 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 			}
 		});
 
-		super.start();
+		return super.start();
 	}
 
 	public void stop(boolean leaveEditable){
-		logger.entry(leaveEditable);
+//		logger.error("{} : {}", this.getClass().getSimpleName(), leaveEditable);
 
 		super.stop(leaveEditable);
 
@@ -207,6 +203,8 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract {
 	}
 
 	private void checkForValueChange(String newValue) {
+		if(value==null)
+			return;
 
 		final Value copy = value.getCopy().setValue(newValue);
 

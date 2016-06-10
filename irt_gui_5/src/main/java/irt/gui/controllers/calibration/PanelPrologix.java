@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -122,7 +121,11 @@ public class PanelPrologix implements Prologix {
 	}
 
 	@FXML private void onActionGet() {
-    	send(packetMode);
+		//Do not remember the configuration
+		packetSaveCfg.getCommand().setValue(false);
+	   	send(packetSaveCfg);
+
+	   	send(packetMode);
     	send(packetAddr);
     	send(packetEoi);
     	send(packetReadAfterWrite);
@@ -142,12 +145,11 @@ public class PanelPrologix implements Prologix {
 	   	listen();
 	}
 
-	private void send(PrologixPacket toolsPacket) {
+	private synchronized void send(PrologixPacket toolsPacket) {
 		PanelTools.getQueue().add(toolsPacket, false);
 	}
 
-	@Override public void send(String addr, PacketToSend packet, Observer observer) {
-		logger.entry(addr, packet, observer);
+	@Override synchronized public void send(String addr, PacketToSend packet) {
 
 		List<PacketToSend> ps = new ArrayList<>();
 
@@ -159,21 +161,28 @@ public class PanelPrologix implements Prologix {
 
 		ps.add(packet);
 
-		if(observer!=null)
-			ps.add(packetRead);
+		try {
+			final ToolsComandsPacket p = new ToolsComandsPacket(ps);
+
+			Optional
+			.of(packet.getObservers())
+			.filter(os->os.length>0)
+			.ifPresent(os->{
+				ps.add(packetRead);
+				p.addObserver((o, arg)->packet.setAnswer(((PacketToSend)o).getAnswer()));
+			});
 
 
-		final ToolsComandsPacket p = new ToolsComandsPacket(ps.toArray(new PacketToSend[ps.size()]));
-		logger.debug(new String(p.toBytes()));
-
-		if(observer!=null)
-			p.addObserver(observer);
-
-		PanelTools.getQueue().add(p, false);
+			if(addr.equals("19"))
+				logger.error("{} : {}", addr, packet);
+			PanelTools.getQueue().add(p, false);
+		} catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	@Override public void listen() {
 		packetReadAfterWrite.getCommand().setValue(false);
-		PanelTools.getQueue().add(packetReadAfterWrite, false);
+		send(packetReadAfterWrite);
 	}
 }

@@ -21,8 +21,7 @@ public class TextFieldFocusListener implements ChangeListener<Boolean>{
 		textField.focusedProperty().addListener(this);
 	}
 
-	@Override
-	public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+	@Override public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
 		if (newValue.booleanValue()) {
 			if(textField.isEditable())
 				focusGained();

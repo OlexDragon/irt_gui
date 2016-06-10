@@ -7,14 +7,22 @@
  */
 package irt.gui.data.packet;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
+import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.PacketToSend;
 import irt.gui.data.packet.observable.PacketAbstract;
 
 public class Packet {
+	private static final Logger logger = LogManager.getLogger();
 
 	public static final int NO_ERROR = 0;
 
@@ -103,9 +111,9 @@ public class Packet {
 
 	/* Measurement codes. */
 	public static final byte
-			PARAMETER_MEASUREMENT_INPUT_POWER	= 1,
+			PARAMETER_MEASUREMENT_INPUT_POWER_BUC	= 1,
 			PARAMETER_MEASUREMENT_OUTPUT_POWER	= 2,
-			PARAMETER_MEASUREMENT_STATUS		= 4,
+			PARAMETER_MEASUREMENT_STATUS_BUC		= 4,
 			PARAMETER_MEASUREMENT_WGS_POSITION	= 4,
 			PARAMETER_MEASUREMENT_LNB1_STATUS	= 5,
 			PARAMETER_MEASUREMENT_LNB2_STATUS	= 6,
@@ -114,9 +122,9 @@ public class Packet {
 	public static final byte
 		PARAMETER_MEASUREMENT_FCM_NONE = IRT_SLCP_PARAMETER_NONE,
 		PARAMETER_MEASUREMENT_FCM_SUMMARY_ALARM		= 1,	//Flags
-		PARAMETER_MEASUREMENT_FCM_STATUS			= 2,
+		PARAMETER_MEASUREMENT_STATUS_FCM			= 2,
 		PARAMETER_MEASUREMENT_TEMPERATURE			= 3,
-		PARAMETER_MEASUREMENT_FCM_INPUT_POWER		= 4,
+		PARAMETER_MEASUREMENT_INPUT_POWER_FCM		= 4,
 		PARAMETER_MEASUREMENT_FCM_OUTPUT_POWER		= 5,
 		PARAMETER_MEASUREMENT_FCM_MON_5V5			= 6,
 		PARAMETER_MEASUREMENT_FCM_MON_13V2_POS		= 7,
@@ -142,8 +150,8 @@ public class Packet {
 		PARAMETER_CONFIG_FCM_FREQUENCY				= 3,
 		PARAMETER_CONFIG_FCM_FREQUENCY_RANGE		= 4,
 		PARAMETER_CONFIG_FCM_GAIN_RANGE				= 5,
-		PARAMETER_CONFIG_ATTENUATION_RANGE		= 6,
-		PARAMETER_CONFIG_FCM_MUTE_CONTROL			= 7,
+		PARAMETER_CONFIG_ATTENUATION_RANGE			= 6,
+		PARAMETER_CONFIG_FCM_MUTE					= 7,
 		PARAMETER_CONFIG_BUC_ENABLE					= 8,
 		PARAMETER_CONFIG_FCM_FLAGS 					= 9,
 		PARAMETER_CONFIG_FCM_GAIN_OFFSET			= 10,
@@ -197,14 +205,14 @@ public class Packet {
 	//PicoBUC Bias board
 	public static final byte IRT_SLCP_PARAMETER_PICOBUC_LO_SELECT = 1;
 
-	public static final byte PARAMETER_CONFIG_LO_SET 				= 1,
-							PARAMETER_CONFIG_MUTE 					= 2,
-							PARAMETER_CONFIG_GAIN 					= 3,
-							PARAMETER_CONFIG_ATTENUATION 			= 4,
-							PARAMETER_CONFIG_GAIN_RANGE 				= 5,
-							PARAMETER_CONFIG_LO_FREQUENCIES			= 7,
-							PARAMETER_CONFIG_USER_FREQUENCY 			= 8,
-							PARAMETER_CONFIG_USER_FREQUENCY_RANGE 	= 9,
+	public static final byte PARAMETER_CONFIG_LO_SET 								= 1,
+							PARAMETER_CONFIG_MUTE 									= 2,
+							PARAMETER_CONFIG_GAIN 									= 3,
+							PARAMETER_CONFIG_ATTENUATION 							= 4,
+							PARAMETER_CONFIG_GAIN_RANGE 							= 5,
+							PARAMETER_CONFIG_LO_FREQUENCIES							= 7,
+							PARAMETER_CONFIG_USER_FREQUENCY 						= 8,
+							PARAMETER_CONFIG_USER_FREQUENCY_RANGE 					= 9,
 							PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_ENABLE		= 10,
 							PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_MODE			= 11,
 							PARAMETER_PICOBUC_CONFIGURATION_REDUNDANCY_NAME			= 12,
@@ -365,5 +373,44 @@ public class Packet {
 		bs = concat(bs, data);
 		bs = PacketAbstract.preparePacket(bs);
 		return bs;
+	}
+
+	public static LinkedPacket createNewPacketBy(String className) {
+
+		LinkedPacket packet = null;
+		try {
+
+			@SuppressWarnings("unchecked")
+			Class<? extends LinkedPacket> clazz = (Class<? extends LinkedPacket>) Class.forName(className);
+			packet = (LinkedPacket) clazz.newInstance();
+
+		} catch (Exception e) {
+			logger.catching(e);
+		}
+
+
+
+		return packet;
+	}
+
+	public static PacketToSend createNewPacket(Class<? extends PacketToSend> clazz, Object... parameters ) {
+
+		PacketToSend packet = null;
+		try {
+
+			final Class<?>[] parameterTypes =
+					parameters != null 
+						? (Class<?>[])Arrays.stream(parameters).map(o->o.getClass()).collect(Collectors.toList()).toArray(new Class<?>[parameters.length]) 
+								: null;
+			Constructor<? extends PacketToSend> constructor = clazz.getConstructor( parameterTypes);
+			packet = constructor.newInstance(parameters);
+
+		} catch (Exception e) {
+			logger.catching(e);
+		}
+
+
+
+		return packet;
 	}
 }

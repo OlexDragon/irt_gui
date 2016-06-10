@@ -1,0 +1,20 @@
+/* Chart */
+.chart-series-line{    
+    -fx-stroke-width: 1px;
+    -fx-effect: null;
+}
+.chart-line-symbol{
+	-fx-background-insets: 0, 1;
+}
+.chart-plot-background {
+    -fx-background-color: #f2f7ff;
+}
+.default-color1.chart-series-line {
+	-fx-stroke: green;
+}
+.default-color1.chart-line-symbol{
+	-fx-background-color: green, white;
+}
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
+    -fx-stroke: #3278fa;
+}

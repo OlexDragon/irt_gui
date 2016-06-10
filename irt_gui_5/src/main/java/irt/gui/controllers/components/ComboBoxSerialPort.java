@@ -113,7 +113,7 @@ public class ComboBoxSerialPort extends Observable {
 		}
 	}
 
-	synchronized public void closePort(){
+	public void closePort(){
 
 		if(serialPort!=null && serialPort.isOpened()){
 
@@ -124,11 +124,11 @@ public class ComboBoxSerialPort extends Observable {
 				else
 					logger.error("It is not posible to close {} port", serialPort);
 
-				notifyObservers();
-
 			} catch (SerialPortException e) {
 				catchError(e);
 			}
+
+			notifyObservers();
 		}
 	}
 

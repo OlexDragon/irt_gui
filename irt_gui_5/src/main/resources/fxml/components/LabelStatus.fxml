@@ -8,19 +8,90 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<BorderPane stylesheets="@../../styles/alarms.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.LabelStatus">
-   <center>
+<HBox alignment="CENTER_LEFT" stylesheets="@../../styles/alarms.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.LabelStatus">
+   <children>
+      <Label fx:id="inputOwerdriveLabel" styleClass="alarm" text="Input Owerdrive">
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding>
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
+      </Label>
       <Label fx:id="muteLabel" alignment="CENTER" contentDisplay="CENTER" text="%mute">
          <padding>
             <Insets left="3.0" right="3.0" />
          </padding>
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
+         <contextMenu>
+            <ContextMenu>
+              <items>
+                <MenuItem mnemonicParsing="false" onAction="#onCopyStatisBytes" text="Copy status bytes" />
+              </items>
+            </ContextMenu>
+         </contextMenu>
       </Label>
-   </center>
-   <right>
-      <Label fx:id="lockLabel" alignment="CENTER" contentDisplay="CENTER" text="%lock" BorderPane.alignment="CENTER">
+      <Label fx:id="lockLabel" alignment="CENTER" contentDisplay="CENTER" text="%lock">
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding>
+         <tooltip>
+            <Tooltip text="Lock" />
+         </tooltip>
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
+      </Label>
+      <Label fx:id="pll1Label" alignment="CENTER" contentDisplay="CENTER" styleClass="no_alarm" text="PLL 1">
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding>
+         <tooltip>
+            <Tooltip text="PLL1" />
+         </tooltip>
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
+      </Label>
+      <Label fx:id="pll2Label" alignment="CENTER" contentDisplay="CENTER" styleClass="no_alarm" text="PLL 2">
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding>
+         <tooltip>
+            <Tooltip text="PLL2" />
+         </tooltip>
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
+      </Label>
+      <Label fx:id="pll3Label" alignment="CENTER" contentDisplay="CENTER" styleClass="no_alarm" text="PLL 3">
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding>
+         <tooltip>
+            <Tooltip text="PLL3" />
+         </tooltip>
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
+      </Label>
+      <Label fx:id="aopcLabel" text="AOPC">
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
          <padding>
             <Insets left="3.0" right="3.0" />
          </padding>
       </Label>
-   </right>
-</BorderPane>
+      <Label fx:id="lnbPowerLabel" text="LNB Power">
+         <HBox.margin>
+            <Insets left="1.0" right="1.0" />
+         </HBox.margin>
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding>
+      </Label>
+   </children>
+</HBox>

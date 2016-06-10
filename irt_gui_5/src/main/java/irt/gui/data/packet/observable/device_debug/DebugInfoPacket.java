@@ -1,5 +1,7 @@
 package irt.gui.data.packet.observable.device_debug;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,8 +32,8 @@ public class DebugInfoPacket extends RegirterAbstractPacket {
 						Packet.toBytes(parameter)));
 	}
 
-	public DebugInfoPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(new PacketProperties(DebugInfoCode.INFO.getPacketID()).setHasAcknowledgment(hasAcknowledgment), answer);
+	public DebugInfoPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") Boolean hasAcknowledgment) throws PacketParsingException {
+		super(new PacketProperties(DebugInfoCode.INFO.getPacketID()).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
 	}
 
 	@Override @JsonIgnore

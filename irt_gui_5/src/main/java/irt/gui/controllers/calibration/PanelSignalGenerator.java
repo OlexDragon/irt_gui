@@ -1,5 +1,6 @@
 package irt.gui.controllers.calibration;
 
+import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
+import irt.gui.controllers.calibration.tools.Tool;
 import irt.gui.controllers.calibration.tools.data.ToolsFrequency;
 import irt.gui.controllers.calibration.tools.data.ToolsPower;
 import irt.gui.controllers.calibration.tools.enums.FrequencyUnits;
@@ -31,7 +33,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
-public class PanelSignalGenerator {
+public class PanelSignalGenerator implements Tool{
 	private static final String NO_ANSWER = "No Answer";
 
 	private final Logger logger = LogManager.getLogger();
@@ -52,6 +54,10 @@ public class PanelSignalGenerator {
 	private final ToolsPacket pwPacket = new ToolsPowerPacket();
 	private final ToolsPacket outPacket = new ToolsOutputPacket();
 
+	public PanelSignalGenerator() {
+		idPacket.addObserver(observerGetInfo);
+	}
+
 	private Observer observerGetInfo = new Observer() {
 		
 		@Override
@@ -59,12 +65,12 @@ public class PanelSignalGenerator {
 			logger.entry(o);
 
 			final PacketToSend tp = (PacketToSend) o;
-			tp.deleteObserver(observerGetInfo);
 
 			executor.execute(()->{
 				final String text = Optional
 										.ofNullable(tp.getAnswer())
 										.map(String::new)
+										.map(String::trim)
 										.orElse(NO_ANSWER);
 
 				Platform.runLater(()->labelId.setText(text));
@@ -82,11 +88,8 @@ public class PanelSignalGenerator {
 			tp.deleteObserver(observerFrequency);
 
 			executor.execute(()->{
-				final Double d = Optional
-										.ofNullable(tp.getAnswer())
-										.map(String::new)
-										.map(Double::parseDouble)
-										.orElse(null);
+				final byte[] answer = tp.getAnswer();
+				final Double d = getDouble(answer).orElse(null);
 
 				final String text = Optional
 										.ofNullable(d)
@@ -108,11 +111,8 @@ public class PanelSignalGenerator {
 			tp.deleteObserver(observerPower);
 
 			executor.execute(()->{
-				final Double d = Optional
-										.ofNullable(tp.getAnswer())
-										.map(String::new)
-										.map(Double::parseDouble)
-										.orElse(null);
+				final byte[] answer = tp.getAnswer();
+				final Double d = getDouble(answer).orElse(null);
 
 				final String text = Optional
 										.ofNullable(d)
@@ -129,9 +129,9 @@ public class PanelSignalGenerator {
 		@Override
 		public void update(Observable o, Object arg) {
 			logger.entry(o);
+			o.deleteObserver(observerOutput);
 
 			final PacketToSend tp = (PacketToSend) o;
-			tp.deleteObserver(observerOutput);
 
 			executor.execute(()->{
 				final ToolsState ts = Optional
@@ -159,7 +159,7 @@ public class PanelSignalGenerator {
 	@FXML private void onActionSignalGeneratorGet(ActionEvent event) {
 		try {
 
-			prologix.send(textFieldAddress.getText(), idPacket, observerGetInfo);
+			prologix.send(textFieldAddress.getText(), idPacket);
 			Thread.sleep(1000);
 
 			onActionGetFrequency();
@@ -177,46 +177,147 @@ public class PanelSignalGenerator {
 		final String text = textFieldFrequency.getText();
 		if(text.matches(".*\\d+.*")){
 			frPacket.getCommand().setValue(new ToolsFrequency(text));
-			prologix.send(textFieldAddress.getText(), frPacket, null);
-		}else
-			prologix.send(textFieldAddress.getText(), frPacket, observerFrequency);
+			prologix.send(textFieldAddress.getText(), frPacket);
+		}else{
+			frPacket.addObserver(observerFrequency);
+			prologix.send(textFieldAddress.getText(), frPacket);
+		}
 	}
 
 	@FXML private void onActionGetFrequency() {
-		prologix.send(textFieldAddress.getText(), frPacket, observerFrequency);
+		frPacket.addObserver(observerFrequency);
+		prologix.send(textFieldAddress.getText(), frPacket);
 	}
 
 	@FXML private void onActionSetPower() {
-		logger.entry();
 
-		final String text = textFieldPower.getText();
-		if(text.matches(".*\\d+.*")){
-			pwPacket.getCommand().setValue(new ToolsPower(text));
-			prologix.send(textFieldAddress.getText(), pwPacket, null);
-		}else
-			prologix.send(textFieldAddress.getText(), pwPacket, observerPower);
+		final String power = textFieldPower.getText();
+		final String addr = textFieldAddress.getText();
+
+
+		if(power.matches(".*\\d+.*")){//if has value
+			pwPacket.getCommand().setValue(new ToolsPower(power));
+			pwPacket.deleteObservers();
+			logger.error(power);
+			prologix.send(addr, pwPacket);
+
+		}else{
+			pwPacket.addObserver(observerPower);
+			prologix.send(addr, pwPacket);
+		}
 	}
 
 	@FXML private void onActionGetPower() {
-		prologix.send(textFieldAddress.getText(), pwPacket, observerPower);
+		pwPacket.addObserver(observerPower);
+		prologix.send(textFieldAddress.getText(), pwPacket);
 	}
 
 	@FXML private void onActionSetRF() {
 		logger.entry();
 
-		if(comboBoxOutput.getSelectionModel().getSelectedItem()==null)
-				prologix.send(textFieldAddress.getText(), outPacket, observerOutput);
-		else{
+		if(comboBoxOutput.getSelectionModel().getSelectedItem()==null){
+			outPacket.addObserver(observerOutput);
+			prologix.send(textFieldAddress.getText(), outPacket);
+		}else{
 			outPacket.getCommand().setValue(comboBoxOutput.getSelectionModel().getSelectedItem());
-			prologix.send(textFieldAddress.getText(), outPacket, null);
+			prologix.send(textFieldAddress.getText(), outPacket);
 		}
 	}
 
 	@FXML private void onActionGetRF() {
-		prologix.send(textFieldAddress.getText(), outPacket, observerOutput);
+		outPacket.addObserver(observerOutput);
+		prologix.send(textFieldAddress.getText(), outPacket);
 	}
 
 	public void setPrologix(PanelPrologix prologix) {
 		this.prologix = prologix; 
+	}
+
+	private void sendCommand(final ToolsPacket packet, Observer... observers) {
+		logger.entry(packet, observers);
+		Optional
+		.ofNullable(observers)
+		.ifPresent(os->{
+			for(Observer o:os)
+				if(o!=null)
+					packet.addObserver(o);
+		});
+		final String addr = textFieldAddress.getText();
+		prologix.send(addr, packet);
+	}
+
+	@Override public void get(Commands command, Observer observer) {
+
+		switch(command){
+		case GET:
+		case OUTPUT:
+			sendCommand(outPacket, observer, observerOutput);
+			break;
+
+		case POWER:
+			sendCommand(pwPacket, observer, observerPower);
+			break;
+
+		case FREQUENCY:
+			sendCommand(frPacket, observer, observerFrequency);
+			break;
+
+		default:
+		}
+	}
+
+	@Override public void set(Commands command, Object valueToSend, Observer observer) {
+		logger.entry(command, valueToSend, observer);
+
+		ToolsPacket packet;
+		switch(command){
+
+		case GET:
+		case OUTPUT:
+			outPacket.getCommand().setValue(valueToSend);
+			packet = outPacket;
+			break;
+
+		case POWER:
+
+			String value;
+			if(valueToSend instanceof Double)
+				value = PowerUnits.DBM.valueOf((double) valueToSend);
+			else
+				value = valueToSend.toString();
+
+			Platform.runLater(()->{
+				textFieldPower.setText(value);
+				onActionSetPower();
+			});
+			return;
+
+		case FREQUENCY:
+			packet = frPacket;
+			break;
+
+		default:
+			logger.debug("unused command - {}", command);
+			return;
+		}
+
+		if(observer==null)
+			sendCommand(packet, (Observer[])null);
+		else
+			sendCommand(packet, observer, observerOutput);
+	}
+
+	public static Optional<Double> getDouble(final byte[] answer) {
+		return Optional
+				.ofNullable(answer)
+				.map(String::new)
+				.map(s->s.split("\n"))
+				.map(split->Arrays
+						.stream(split)
+						.filter(s->Character.isDigit(s.charAt(s.length()-1)))
+						.reduce((a, b) -> b)	//find last value
+						.orElse(null))
+				.filter(s->!s.isEmpty())
+				.map(Double::parseDouble);
 	}
 }

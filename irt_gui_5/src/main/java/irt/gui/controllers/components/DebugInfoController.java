@@ -2,6 +2,7 @@
 package irt.gui.controllers.components;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,8 +84,10 @@ public class DebugInfoController extends FieldsControllerAbstract {
 	@FXML public void plussButtonAction(ActionEvent event){
 
 		try {
+			final String title = "Debug Window";
+			final URL resource = getClass().getResource("/fxml/components/DebugInfoPanel.fxml");
 
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/components/DebugInfoPanel.fxml"));  
+			FXMLLoader loader = new FXMLLoader(resource);  
 			Parent root = (Parent) loader.load();
 			DebugInfoController dic = (DebugInfoController) loader.getController();
 			dic.doUpdate(true);
@@ -92,7 +95,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 			Scene scene = new Scene(root);
 			Stage stage = new Stage();
 			stage.setScene(scene);
-			stage.setTitle("Debug Window");
+			stage.setTitle(title);
 			stage.show();
 			stage.addEventHandler( WindowEvent.WINDOW_CLOSE_REQUEST, new EventHandler<WindowEvent>() {
 

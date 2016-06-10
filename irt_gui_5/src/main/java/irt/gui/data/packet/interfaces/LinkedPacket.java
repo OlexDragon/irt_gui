@@ -11,7 +11,6 @@ public interface LinkedPacket extends PacketToSend{
 
 	PacketId 		getPacketId();
 
-	void 			setLinkHeaderAddr(byte addr);
 	PacketHeader	getPacketHeader();
 	List<Payload>	getPayloads();
 

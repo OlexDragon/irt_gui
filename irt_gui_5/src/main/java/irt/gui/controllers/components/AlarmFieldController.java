@@ -124,8 +124,7 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 			Platform.runLater(()->{
 				if(!string.equals(titleLabel.getText())){
 					titleLabel.setText(string);
-					if(name!=null && alarmSeverities!=null)
-						dumper.info(marker, toString());
+					toLog();
 				}
 			});
 		}
@@ -143,8 +142,7 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 			Platform.runLater(()->{
 				if(!string.equals(titleLabel.getText())){
 					titleLabel.setText(string);
-					if(name!=null && alarmSeverities!=null)
-						dumper.info(marker, toString());
+					toLog();
 				}
 			});
 		}
@@ -171,12 +169,30 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 
 					if(!styleClass.contains(sc)){
 						styleClass.add(sc);
-						if(name!=null && alarmSeverities!=null)
-							dumper.info(marker, toString());
+						toLog();
 					}
 				}
 			});
 		}
+	}
+
+	private void toLog() {
+		if(name!=null && alarmSeverities!=null)
+			switch(alarmSeverities){
+			case CRITICAL:
+				dumper.fatal(marker, toString());
+				break;
+			case MAJOR:
+				dumper.error(marker, toString());
+				break;
+			case INFO:
+			case NO_ALARM:
+				dumper.info(marker, toString());
+				break;
+			case MINOR:
+			case WARNING:
+				dumper.warn(marker, toString());
+			}
 	}
 
 	private void removeStyleClass() {

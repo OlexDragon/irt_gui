@@ -3,4 +3,5 @@ public interface ToolCommands {
 
 	byte[] getCommand();
 	void setValue(Object value);
+	Object getValue();
 }

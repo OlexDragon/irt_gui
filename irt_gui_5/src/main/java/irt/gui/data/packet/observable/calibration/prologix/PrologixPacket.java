@@ -7,6 +7,7 @@ import java.util.Observer;
 
 import irt.gui.controllers.calibration.tools.prologix.enums.PrologixCommands;
 import irt.gui.data.MyObservable;
+import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.interfaces.PacketToSend;
 
@@ -68,7 +69,12 @@ public class PrologixPacket extends MyObservable implements PacketToSend {
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
+	@Override
+	public void setLinkHeaderAddr(byte addr) {
+		throw new UnsupportedOperationException("Auto-generated method stub");
+	}
+
 	@Override public String toString() {
-		return getClass().getSimpleName() + " [command=" + command + ", answer=" + Arrays.toString(answer) + "]";
+		return getClass().getSimpleName() + " [" + command + ", answer=" + ToHex.bytesToHex(answer) + "]";
 	}
 }

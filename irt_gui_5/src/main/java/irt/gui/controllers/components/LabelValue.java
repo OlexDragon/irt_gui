@@ -1,13 +1,13 @@
 
 package irt.gui.controllers.components;
 
-import java.lang.reflect.Constructor;
 import java.util.Observable;
 import java.util.Optional;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
+import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -50,8 +50,6 @@ public class LabelValue extends ScheduledNodeAbstract {
 	private Class<?> clazz;
 	private TooltipWorker tooltipWorker;
 	private final Updater updater = new Updater();
-
-	private boolean error;
 
 	@FXML public void initialize(){
 		borderPane.setUserData(this);
@@ -141,23 +139,6 @@ public class LabelValue extends ScheduledNodeAbstract {
 		LinkedPacketsQueue.SERVICES.execute(updater);
 	}
 
-	private LinkedPacket createPacket(LinkedPacket packet){
-		try {
-
-			final Constructor<?> constructor = clazz.getConstructor(byte[].class, boolean.class);
-			final LinkedPacket newPacket = (LinkedPacket) constructor.newInstance(packet.getAnswer(), true);
-			error = false;
-			return newPacket;
-
-		} catch (Exception e) {
-			if(!error){	//not to repeat the same error message
-				error = true;
-				logger.catching(e);
-			}
-		}
-		return null;
-	}
-
 	public static Class<? extends Node> getPootClass() {
 		return BorderPane.class;
 	}
@@ -174,7 +155,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 				.ofNullable(clazz)
 				.ifPresent(c->{
 					Optional
-					.ofNullable(createPacket(packet))
+					.ofNullable((LinkedPacket)Packet.createNewPacket(packet.getClass(), packet.getAnswer(), true))
 					.ifPresent(p->{
 						Value v;
 
@@ -190,13 +171,16 @@ public class LabelValue extends ScheduledNodeAbstract {
 
 						Status status = null;
 						long result;
-						if(payload.getParameterHeader().getPayloadSize().getSize()==2)
+						final short size = payload.getParameterHeader().getPayloadSize().getSize();
+						if(size==2)
 							result = payload.getShort(0);
 
-						else if(payload.getParameterHeader().getPayloadSize().getSize()==3){
+						else if(size==3){
 							status = Status.values()[payload.getByte()&3];
 							result = payload.getShort((byte)1);
 
+						}else if(size==4){
+							result = payload.getInt(0);
 						}else{
 							logger.error("Wrong packet: {}", p);
 							return;

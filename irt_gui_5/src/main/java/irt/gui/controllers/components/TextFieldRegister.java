@@ -10,10 +10,10 @@ import irt.gui.data.GuiUtility;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.packet.PacketHeader;
-import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import irt.gui.data.packet.interfaces.Register;
 import irt.gui.data.packet.observable.device_debug.RegisterPacket;
 import irt.gui.data.value.Value;
 import irt.gui.errors.PacketParsingException;
@@ -36,7 +36,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 
-public class TextFieldRegister extends TextFieldAbstract {
+public class TextFieldRegister extends TextFieldAbstract implements Register{
 
 	private static final int MULTIPLIER = 1;
 	private static final NumericChecker NUMERIC_CHECKER = new NumericChecker();
@@ -244,6 +244,11 @@ public class TextFieldRegister extends TextFieldAbstract {
 
 			final ObservableList<String> styleClass = textField.getStyleClass();
 
+			Platform.runLater(()->{
+				slider.setMinorTickCount(1);
+				slider.setMajorTickUnit(10);
+			});
+
 			if(styleClass.size()>0)
 				styleClass.remove(cssClass);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
 			styleClass.add(cssClass);
@@ -319,8 +324,7 @@ public class TextFieldRegister extends TextFieldAbstract {
 						return;
 					}
 
-					Payload payload = packet.getPayloads().get(0);
-					RegisterValue rv = new RegisterValue(payload.getInt(0), payload.getInt(1), payload.getInt(2));
+					RegisterValue rv = packet.getPayloads().get(0).getRegisterValue();
 
 					//if it is set value
 					if(registerValueToSet.equals(rv))

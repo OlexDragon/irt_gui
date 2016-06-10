@@ -22,10 +22,13 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.interfaces.FieldController;
+import irt.gui.controllers.interfaces.FxmlNode;
 import irt.gui.controllers.interfaces.OtherFields;
 import irt.gui.controllers.interfaces.ScheduledNode;
+import irt.gui.controllers.interfaces.SliderListener;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.packet.interfaces.ConfigurationGroup;
+import irt.gui.data.packet.interfaces.Register;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -70,6 +73,7 @@ public class PanelRegisters implements Initializable, FieldController {
 //	@FXML private MenuItem 	menuItemAddRow;
 	@FXML private MenuItem 	menuItemDeleteRow;
 
+	@FXML private Menu 		menuAdd;
 	@FXML private Menu 		menuAlignment;
 	@FXML private Menu 		menuBackground;
 
@@ -93,7 +97,8 @@ public class PanelRegisters implements Initializable, FieldController {
 	private final EventHandler<ActionEvent> onActionMenuItemAddValueLabel 		= e->onActionMenuItemAdd(e, LabelValue.class);
 	private final EventHandler<ActionEvent> onActionMenuItemAddControl 			= e->onActionMenuItemAdd(e, TextFieldConfiguration.class);
 	private final EventHandler<ActionEvent> onActionMenuItemAddRegisterLabel 	= e->onActionMenuItemAdd(e, LabelRegister.class);
-	private final EventHandler<ActionEvent> onActionMenuItemAddOther			= e->loadNode(((MenuItem) e.getSource()).getId(), paneUnderMouse.getChildren());
+	private final EventHandler<ActionEvent> onActionMenuItemAddOther			= e->loadOtherNode(((MenuItem) e.getSource()).getId());
+	private final EventHandler<ActionEvent> onActionMenuItemAddFxml				= e->loadNode((String) ((MenuItem) e.getSource()).getUserData());
 
 	private void onActionMenuItemAdd(ActionEvent actionEvent, Class<? extends ScheduledNode> clazz){
 		Node node = loadNode(clazz, ((MenuItem) actionEvent.getSource()).getId(), paneUnderMouse.getChildren());
@@ -112,6 +117,7 @@ public class PanelRegisters implements Initializable, FieldController {
 		createMenuItemsOther();
 		createMenuItemsAlignment();
 		createMenuItemsBackground();
+		createMenuItems();	
 	}
 
 	@FXML private void onActionMenuItemAddColumn() {
@@ -213,6 +219,11 @@ public class PanelRegisters implements Initializable, FieldController {
 
 	private void createMenuItemsOther() {
 		GuiUtility.createMamuItems(OtherFields.PROPERTY_STARTS_WITH, onActionMenuItemAddOther, menuOther.getItems());
+	}
+
+	private void createMenuItems() {
+		List<Menu> menus = GuiUtility.createMamu("gui.menu", onActionMenuItemAddFxml);
+		menuAdd.getItems().addAll(menus);
 	}
 
 	private void createMenuItemsAlignment() {
@@ -429,7 +440,7 @@ public class PanelRegisters implements Initializable, FieldController {
 		.map(VBox::getChildren)
 		.flatMap(ch->ch.parallelStream())
 		.filter(TextField.class::isInstance)
-		.filter(ConfigurationGroup.class::isInstance)
+		.filter(tf->tf.getUserData() instanceof Register)
 		.map(ch->(TextField)ch)
 		.forEach(tf->Platform.runLater(()->tf.setEditable(editable)));
 	}
@@ -558,6 +569,23 @@ public class PanelRegisters implements Initializable, FieldController {
 				.collect(Collectors.toList());
 	}
 
+	public List<Map<String, Object>> getFxmlNodesProperties() {
+
+		return getAllVBoxex()
+				.map(vb->vb.getChildren())
+				.flatMap(ch->ch.parallelStream())
+				.filter(c->c.getUserData() instanceof FxmlNode)
+				.map(c->{
+					Map<String, Object> map = new HashMap<>();
+					final FxmlNode fxmlNode = (FxmlNode)c.getUserData();
+					map.put("fxml", GuiUtility.getResourcePath(fxmlNode.getLocation()));
+					map.put("row", Optional.ofNullable(GridPane.getRowIndex(c.getParent())).orElse(0));
+					map.put("column", Optional.ofNullable(GridPane.getColumnIndex(c.getParent())).orElse(0));
+					return map;
+				})
+				.collect(Collectors.toList());
+	}
+
 	public List<Map<String, Object>> getVBoxesAlignmentProperties() {
 		return getAllVBoxex()
 				.map(box->{
@@ -658,29 +686,48 @@ public class PanelRegisters implements Initializable, FieldController {
 		}
 	}
 
-	private Node loadNode(String keyStartWith, ObservableList<Node> children) {
-
+	private Node loadOtherNode(String keyStartWith) {
 		final String fxml = IrtGuiProperties.getProperty(keyStartWith + "fxml");
+		return loadNode(fxml);
+	}
 
+	private Node loadNode(String fxmlPath) {
 		try {
-
-			final URL resource = getClass().getResource(fxml);
-			FXMLLoader loader = new FXMLLoader( resource, bundle);
-			Node node = loader.load();
-			Platform.runLater(()->children.add(node));
-			((FieldController)node.getUserData()).doUpdate(true);
-
-			return node;
-
+			return loadNode(fxmlPath, paneUnderMouse.getChildren());
 		} catch (Exception e) {
 			logger.catching(e);
 			return null;
 		}
 	}
 
+	private Node loadNode(String fxmlPath, final ObservableList<Node> children) throws IOException {
+		final URL resource = getClass().getResource(fxmlPath);
+		FXMLLoader loader = new FXMLLoader( resource, bundle);
+		Node node = loader.load();
+		Platform.runLater(()->children.add(node));
+		((FieldController)node.getUserData()).doUpdate(true);
+
+		addFocusListener(node);
+
+		return node;
+	}
+
+	public Node loadNode(String fxmlPath, int column, int row) throws IOException {
+
+		final Optional<VBox> vBoxAt = getVBoxAt(column, row);
+
+		if(vBoxAt.isPresent()){
+			final VBox vBox = vBoxAt.get();
+			ObservableList<Node> children = vBox.getChildren();
+			return loadNode(fxmlPath, children);
+		}
+		return null;
+	}
+
 	private void addFocusListener(Node node) {
-		if(node.getUserData() instanceof TextFieldAbstract)
-			((TextFieldAbstract)node.getUserData()).addFocusListener(focusListener);
+		final Object userData = node.getUserData();
+		if(userData instanceof SliderListener)
+			((SliderListener)userData).addFocusListener(focusListener);
 	}
 
 	@Override

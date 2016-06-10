@@ -1,5 +1,7 @@
 package irt.gui.data.packet.observable.alarms;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -30,8 +32,8 @@ public class AlarmSummaryStatusPacket extends RegirterAbstractPacket implements 
 								PACKET_ID)));
 	}
 
-	public AlarmSummaryStatusPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(hasAcknowledgment), answer);
+	public AlarmSummaryStatusPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") Boolean hasAcknowledgment) throws PacketParsingException {
+		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
 	}
 
 	@Override @JsonIgnore

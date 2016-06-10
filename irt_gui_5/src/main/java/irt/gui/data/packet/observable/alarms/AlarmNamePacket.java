@@ -1,6 +1,8 @@
 
 package irt.gui.data.packet.observable.alarms;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import irt.gui.data.packet.enums.PacketId;
@@ -15,8 +17,8 @@ public class AlarmNamePacket extends AlarmStatusPacket implements AlarmPacket {
 		super(PACKET_ID, "Get Alarm Name", alarmId);
 	}
 
-	public AlarmNamePacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") boolean hasAcknowledgment) throws PacketParsingException {
-		super(PACKET_ID, answer, hasAcknowledgment);
+	public AlarmNamePacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") Boolean hasAcknowledgment) throws PacketParsingException {
+		super(PACKET_ID, answer, Optional.ofNullable(hasAcknowledgment).orElse(false));
 	}
 
 }

@@ -31,7 +31,6 @@ public class TextFieldValueChangeObserver implements Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		logger.error("{} : {}", o, arg);
 
 		Value v = (Value) o;
 		if(arg==ValueStatus.IN_RANGE){

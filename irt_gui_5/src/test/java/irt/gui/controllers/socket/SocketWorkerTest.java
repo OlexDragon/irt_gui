@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,13 +15,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.LinkedPacketsQueue;
-import irt.gui.controllers.components.SerialPortController;
 import irt.gui.data.packet.observable.InfoPacket;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 
 public class SocketWorkerTest {
-	private static final String COM_PORT = "COM2";
+	private static final String COM_PORT = "COM13";
 
 	private final Logger logger = LogManager.getLogger();
 	private SocketWorker socketWorker;
@@ -33,7 +33,7 @@ public class SocketWorkerTest {
 		socketWorker = new SocketWorker();
 		socketWorker.startServer(COM_PORT);
 		serialPort = new LinkedPacketSender(COM_PORT);
-		queue = SerialPortController.getQueue();
+		queue = new LinkedPacketsQueue();
 		queue.setComPort(serialPort);
 		try {
 			serialPort.openPort();
@@ -64,5 +64,10 @@ public class SocketWorkerTest {
 		assertEquals(expected, socketWorker.getLocalPort());
 
 		clientSocket.getExecutorService().awaitTermination(1, TimeUnit.SECONDS);
+	}
+
+	@After
+	public void end() throws SerialPortException{
+		serialPort.closePort();
 	}
 }

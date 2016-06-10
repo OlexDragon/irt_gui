@@ -17,8 +17,9 @@ public class PanelTools {
 	@FXML private ButtonOpenSerialPort  toolsOpenClosePortButtonController;
 
 	@FXML private PanelPrologix			prologixController;
-	@FXML private PanelPowerMeter		powerMeterController;
-	@FXML private PanelSignalGenerator	signalGeneratorController;
+	@FXML private PanelPowerMeter		powerMeterController; 		public PanelPowerMeter getPowerMeter() { return powerMeterController; }
+	@FXML private PanelSignalGenerator	signalGeneratorController;	public PanelSignalGenerator getSignalGenerator() { return signalGeneratorController; }
+	@FXML private PanelBUC				bucController; 				public PanelBUC getBuc() { return bucController; }
 
 	@FXML public void initialize() {
 
@@ -35,5 +36,9 @@ public class PanelTools {
 
 		powerMeterController.setPrologix(prologixController);
 		signalGeneratorController.setPrologix(prologixController);
+	}
+
+	public void doUpdate(boolean doUpdate) {
+		bucController.doUpdate(doUpdate);
 	}
 }

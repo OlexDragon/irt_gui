@@ -21,19 +21,18 @@ public enum SCPICommands implements ToolCommands{
 		this.clazz = clazz;
 	}
 
-	public Object getValue() {
+	@Override public Object getValue() {
 		return value;
 	}
 
-	public void setValue(Object value) {
+	@Override public void setValue(Object value) {
 		this.value = Optional
 						.of(value)
 						.filter(v->v.getClass()==clazz)
 						.get();
 	}
 
-	@Override
-	public byte[] getCommand() {
+	@Override public byte[] getCommand() {
 		final StringBuilder sb = new StringBuilder(command);
 
 		if(value==null)

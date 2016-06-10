@@ -25,8 +25,10 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.interfaces.FieldController;
+import irt.gui.controllers.interfaces.FxmlNode;
 import irt.gui.controllers.interfaces.OtherFields;
 import irt.gui.controllers.interfaces.ScheduledNode;
+import irt.gui.controllers.interfaces.SliderListener;
 import irt.gui.controllers.observers.TextFieldValueChangeObserver;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextFieldFocusListener;
@@ -119,7 +121,7 @@ public class RegistersController implements Observer, FieldController {
 		.ofNullable(selectedTextField)
 		.ifPresent(textField->{
 
-			TextFieldAbstract textFieldRegister = (TextFieldAbstract) selectedTextField.getUserData();
+			SliderListener textFieldRegister = (SliderListener) selectedTextField.getUserData();
 			Value registerValue = textFieldRegister.getValue();
 			registerValue.deleteObserver(textFieldValueChangeObserver);
 
@@ -131,6 +133,7 @@ public class RegistersController implements Observer, FieldController {
 	private void showProfile(int profileId) throws NoSuchFieldException, IllegalAccessException {
 		setRowsAndColumns(profileId);
 		setNodesOf( profileId, TextFieldRegister.class, LabelValue.class, LabelRegister.class, OtherFields.class, TextFieldConfiguration.class);
+		setFxmlNodes(profileId);
 		menuSave.setDisable(false);
 		panelRegistersController.setBackground(IrtGuiProperties.getProperty(String.format(REGISTER_BACKGROUND_ID, profileId)));
 		setAlignment(profileId);
@@ -160,7 +163,7 @@ public class RegistersController implements Observer, FieldController {
 		Platform.runLater(
 				()->Optional
 				.ofNullable(selectedTextField)
-				.map(stf->(TextFieldAbstract)stf.getUserData())
+				.map(stf->(SliderListener)stf.getUserData())
 				.ifPresent(controller->controller.setText(slider.getValue())));
 	};
 
@@ -181,7 +184,7 @@ public class RegistersController implements Observer, FieldController {
 
 				selectedTextField = textField;
 
-				TextFieldAbstract textFieldcontroller = (TextFieldAbstract) selectedTextField.getUserData();
+				SliderListener textFieldcontroller = (SliderListener) selectedTextField.getUserData();
 
 				//Set slider value, max, min
 				textFieldcontroller.setSliderValue(slider, sliderValueChangeListener, ACTIVE, textFieldValueChangeObserver, stepNumericChecker);
@@ -250,15 +253,14 @@ public class RegistersController implements Observer, FieldController {
 
 	@FXML public void onActionMenuProfile(ActionEvent event){
 
-		final Menu source = (Menu) event.getSource();
-		final Optional<RadioMenuItem> ormi = source
-												.getItems()
-												.parallelStream()
-												.filter(m->m.getId()==null || !m.getId().equals("menuNewProfile"))
-												.map(m->(RadioMenuItem)m)
-												.filter(rm->rm.isSelected())
-												.findAny();
-		ormi.ifPresent(rmi->{
+		((Menu) event.getSource())
+		.getItems()
+		.parallelStream()
+		.filter(m->m.getId()==null || !m.getId().equals("menuNewProfile"))
+		.map(m->(RadioMenuItem)m)
+		.filter(rm->rm.isSelected())
+		.findAny()
+		.ifPresent(rmi->{
 			try{
 
 				profileId = Integer.parseInt((String) rmi.getUserData());// get profile ID
@@ -285,7 +287,7 @@ public class RegistersController implements Observer, FieldController {
     	.ofNullable(selectedTextField)
     	.ifPresent(s->{
     		Platform.runLater(()->{
-    			TextFieldAbstract controller = (TextFieldAbstract) s.getUserData();
+    			SliderListener controller = (SliderListener) s.getUserData();
     			controller.onActionTextField();
     		});
     	});
@@ -409,6 +411,10 @@ public class RegistersController implements Observer, FieldController {
 		removeProperties(propertiesFromFile, String.format( OtherFields.FIELD_KEY_ID, profileId));
 		putOtherFieldsProperies(propertiesFromFile, profileId);
 
+		//FxmlNode properties
+		removeProperties(propertiesFromFile, String.format( FxmlNode.FIELD_KEY_ID, profileId));
+		putFxmlNodesProperies(propertiesFromFile, profileId);
+
 		final String backgroundPath = panelRegistersController.getBackgroundPath();
 		if(backgroundPath!=null)
 			propertiesFromFile.put(String.format(REGISTER_BACKGROUND_ID, profileId), backgroundPath);
@@ -435,6 +441,17 @@ public class RegistersController implements Observer, FieldController {
 		.forEach(tfp->{
 			String key = String.format(OtherFields.FIELD_KEY, profileId, tfp.get("column"), tfp.get("row"));
 			propertiesFromFile.put(key, tfp.get("name"));
+		});
+	}
+
+	private void putFxmlNodesProperies(Properties propertiesFromFile, int profileId2) {
+		List<Map<String, Object>> otherFieldsProperties = panelRegistersController.getFxmlNodesProperties();
+
+		otherFieldsProperties
+		.parallelStream()
+		.forEach(tfp->{
+			String key = String.format(FxmlNode.FIELD_KEY, profileId, tfp.get("column"), tfp.get("row"));
+			propertiesFromFile.put(key, tfp.get("fxml"));
 		});
 	}
 
@@ -585,6 +602,60 @@ public class RegistersController implements Observer, FieldController {
 							})
 							.forEach(map->setNode(fieldClass, map))
 				);
+	}
+
+	private void setFxmlNodes(int profileId2) {
+		String key = String.format(FxmlNode.FIELD_KEY_ID, profileId);
+
+		Optional
+		.ofNullable(IrtGuiProperties.selectFromProperties(key))
+		.ifPresent(property->
+							property
+							.entrySet()
+							.parallelStream()
+							.map(e->{
+										String[] split = ((String)e.getKey()).replace(key, "").split("\\.");
+
+										Map<String, String>map = new HashMap<>();
+										map.put("fxml", (String) e.getValue());
+										map.put("column", split[0]);
+										map.put("row", split[1]);
+										return map;
+							})
+							.forEach(map->setFxmlNode(map))
+				);
+	}
+
+	private void setFxmlNode(Map<String, String> map) {
+
+		try {
+			final String fxml = map.get("fxml");
+			final int column = Integer.parseInt(map.get("column"));
+			final int row = Integer.parseInt(map.get("row"));
+
+			Platform.runLater(()->{
+				try {
+
+					Node node = panelRegistersController.loadNode(fxml, column, row);
+
+					Optional
+					.ofNullable(tab)
+					.filter(t->t.isSelected())
+					.ifPresent(t->((FieldController)node.getUserData()).doUpdate(true));
+
+//					Optional
+//					.ofNullable(editable)
+//					.filter(TextField.class::isInstance);
+
+				} catch (Exception e) {
+					logger.catching(e);
+				}
+
+			});
+
+		} catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

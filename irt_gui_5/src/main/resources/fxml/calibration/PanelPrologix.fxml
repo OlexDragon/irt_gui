@@ -5,41 +5,49 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.calibration.PanelPrologix">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" styleClass="border" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.calibration.PanelPrologix">
    <children>
-      <GridPane alignment="CENTER_RIGHT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <columnConstraints>
-          <ColumnConstraints hgrow="ALWAYS" />
-            <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" />
-          <ColumnConstraints hgrow="ALWAYS" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints vgrow="ALWAYS" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
-          <RowConstraints vgrow="ALWAYS" />
-            <RowConstraints vgrow="ALWAYS" />
-        </rowConstraints>
+      <VBox layoutX="3.0" layoutY="3.0" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Button mnemonicParsing="false" onAction="#onActionGet" text="Get">
-               <GridPane.margin>
-                  <Insets left="3.0" right="3.0" />
-               </GridPane.margin>
-            </Button>
-            <Label fx:id="labelOperatingMode" text="Label" GridPane.columnIndex="2" />
-            <Label text="Operation Mode:" textAlignment="RIGHT" GridPane.columnIndex="1" />
-            <Label text="Addr:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="labelAddr" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Label text="Save Config:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label fx:id="labelSaveCfg" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <Label text="Read After Write:" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label fx:id="labelReadAfterWrite" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-            <Label text="EOI" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Label fx:id="labelEoi" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-            <Button mnemonicParsing="false" onAction="#onActionPreset" text="Preset" GridPane.rowIndex="1" />
+            <Label styleClass="head" text="Prologix" />
+            <GridPane alignment="CENTER_RIGHT" hgap="3.0" vgap="3.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="ALWAYS" />
+                  <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" />
+                <ColumnConstraints hgrow="ALWAYS" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints vgrow="ALWAYS" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                <RowConstraints vgrow="ALWAYS" />
+                  <RowConstraints vgrow="ALWAYS" />
+              </rowConstraints>
+               <children>
+                  <Button mnemonicParsing="false" onAction="#onActionGet" text="Get">
+                     <GridPane.margin>
+                        <Insets left="3.0" right="3.0" />
+                     </GridPane.margin>
+                  </Button>
+                  <Label fx:id="labelOperatingMode" text="Label" GridPane.columnIndex="2" />
+                  <Label text="Operation Mode:" textAlignment="RIGHT" GridPane.columnIndex="1" />
+                  <Label text="Addr:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <Label fx:id="labelAddr" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <Label text="Save Config:" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <Label fx:id="labelSaveCfg" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                  <Label text="Read After Write:" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Label fx:id="labelReadAfterWrite" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <Label text="EOI" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                  <Label fx:id="labelEoi" text="Label" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                  <Button mnemonicParsing="false" onAction="#onActionPreset" text="Preset" GridPane.rowIndex="1" />
+               </children>
+            </GridPane>
          </children>
-      </GridPane>
+         <padding>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+         </padding>
+      </VBox>
    </children>
 </AnchorPane>

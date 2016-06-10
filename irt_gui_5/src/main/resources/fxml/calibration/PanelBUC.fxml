@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane styleClass="border" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.calibration.PanelBUC">
+	<children>
+		<VBox spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<children>
+            <HBox>
+               <children>
+                  <Label styleClass="head" text="BUC" />
+                  <fx:include fx:id="mute" source="../components/ButtonMute.fxml" />
+               </children>
+            </HBox>
+				<GridPane alignment="TOP_CENTER" hgap="3.0" vgap="3.0">
+					<columnConstraints>
+						<ColumnConstraints hgrow="SOMETIMES" />
+						<ColumnConstraints hgrow="SOMETIMES" />
+						<ColumnConstraints hgrow="SOMETIMES" />
+					</columnConstraints>
+					<rowConstraints>
+						<RowConstraints vgrow="SOMETIMES" />
+						<RowConstraints vgrow="SOMETIMES" />
+						<RowConstraints vgrow="SOMETIMES" />
+						<RowConstraints vgrow="SOMETIMES" />
+					</rowConstraints>
+					<children>
+						<fx:include fx:id="attenuation" source="../components/TextFieldAttenuation.fxml" />
+						<Label text="DAC #1:" textAlignment="RIGHT" GridPane.columnIndex="1" />
+						<fx:include fx:id="dac1" source="../components/TextFieldDAC1.fxml" GridPane.columnIndex="2" />
+
+						<fx:include fx:id="frequency" source="../components/TextFieldFrequency.fxml" GridPane.rowIndex="1" />
+						<Label text="DAC #2:" textAlignment="RIGHT" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+						<fx:include fx:id="dac2" source="../components/TextFieldDAC2.fxml" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+
+						<Label text="Input Power:" GridPane.rowIndex="2" />
+						<fx:include fx:id="inputPowerDetector" source="../components/LabelRegisterInputPowerDetector.fxml" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+						<fx:include fx:id="inputPower" source="../components/LabelMeasurementInputPower.fxml" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+
+						<Label text="Output Power:" GridPane.rowIndex="3" />
+						<fx:include fx:id="outputPowerDetector" source="../components/LabelRegisterOutputPowerDetector.fxml" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+						<fx:include fx:id="outputPower" source="../components/LabelMeasurementOutputPower.fxml" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+					</children>
+				</GridPane>
+			</children>
+         <padding>
+            <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+         </padding>
+		</VBox>
+	</children>
+</AnchorPane>

@@ -16,7 +16,6 @@ import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.interfaces.PacketToSend;
-import irt.gui.data.packet.observable.calibration.ToolsPacket;
 import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
@@ -44,8 +43,8 @@ public class LinkedPacketSender extends SerialPort {
 	}
 
 	public void send(PacketToSend packet){
-		if(packet instanceof ToolsPacket)
-			logger.error(packet);
+//		if(packet instanceof ToolsPacket)
+//			logger.error(packet);
 
 		if(!run) return;
 
@@ -237,17 +236,12 @@ public class LinkedPacketSender extends SerialPort {
 		return isOpened;
 	}
 
-	@Override public synchronized boolean closePort() throws SerialPortException{
+	@Override public boolean closePort() throws SerialPortException{
 
-		boolean isClosed = !isOpened();
+		boolean isClosed = true;
 
-		if (!isClosed) {
-
-			removeEventListener();
-			boolean isPurged = purgePort(PURGE_RXCLEAR | PURGE_TXCLEAR | PURGE_RXABORT | PURGE_TXABORT);
+		if (isOpened()) {
 			isClosed = super.closePort();
-			logger.debug("closePort()is Closed={}, is purged={}", isClosed, isPurged);
-
 		}
 
 		return isClosed;

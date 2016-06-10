@@ -82,14 +82,17 @@ public class LinkedPacketsQueue implements Runnable {
 	public synchronized void add(PacketToSend packet, boolean checkUnitAddress){
 		logger.entry(packet);
 
-		if(packet!=null){
-			if(checkUnitAddress)
-				checkUnitAddress(packet);
-			blockingQueue.add(packet);
-//			logger.error("{}:{}", unitAddress, packet);
-
-		}else
+		if(packet==null){
 			logger.warn("packetWork!=null");
+			return;
+		}
+
+		if(checkUnitAddress)
+			checkUnitAddress(packet);
+
+		blockingQueue.add(packet);
+
+		//		logger.error("{}:{}", unitAddress, packet);
 //		logger.error(blockingQueue.size());
 	}
 
@@ -123,7 +126,7 @@ public class LinkedPacketsQueue implements Runnable {
 		final LinkHeader linkHeader = packet.getLinkHeader();
 		final byte addr = linkHeader.getAddr();
 		if(addr!=unitAddress)
-			linkHeader.setAddr(unitAddress);
+			packet.setLinkHeaderAddr(unitAddress);
 	}
 
 	public void setNetwork(Pair<String, String> hostPortPair) {

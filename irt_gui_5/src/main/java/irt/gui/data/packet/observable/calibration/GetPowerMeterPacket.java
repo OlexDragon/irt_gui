@@ -3,9 +3,9 @@ package irt.gui.data.packet.observable.calibration;
 
 import irt.gui.controllers.calibration.tools.enums.HP437B_Commands;
 
-public class GetPacket extends ToolsPacket {
+public class GetPowerMeterPacket extends ToolsPacket {
 
-	public GetPacket() {
+	public GetPowerMeterPacket() {
 		super(HP437B_Commands.TRIGGER_IMMEDIATE);
 	}
 }

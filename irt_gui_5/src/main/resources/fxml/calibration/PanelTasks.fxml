@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.calibration.PanelTasks">
+	<children>
+		<TitledPane text="Tasks" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<content>
+            <VBox>
+               <children>
+                  <HBox fx:id="hBox">
+                     <children>
+                        <Label text="Step(dB)" />
+                        <TextField fx:id="textFieldStepDB" prefColumnCount="3" />
+                        <Label text="Max steps" />
+                        <TextField fx:id="textFieldMaxSteps" prefColumnCount="3" />
+                        <CheckBox fx:id="cbInput" mnemonicParsing="false" onAction="#onCheckBoxAction" text="Input Power" />
+                        <CheckBox fx:id="cbOutput" mnemonicParsing="false" onAction="#onCheckBoxAction" text="Output Power" />
+                        <CheckBox fx:id="cbGain" mnemonicParsing="false" onAction="#onCheckBoxAction" text="Gain" />
+                        <Button mnemonicParsing="false" onAction="#onButtonStart" text="Start" />
+                     </children>
+                  </HBox>
+                  <Label fx:id="labelResponses" text="Label">
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#onMenuClear" text="Clear" />
+                              <MenuItem mnemonicParsing="false" onAction="#onMenuCopy" text="Copy" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu></Label>
+               </children>
+            </VBox>
+			</content>
+		</TitledPane>
+	</children>
+</AnchorPane>

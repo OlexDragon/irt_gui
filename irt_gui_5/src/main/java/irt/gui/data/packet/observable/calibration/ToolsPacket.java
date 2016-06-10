@@ -1,26 +1,21 @@
 package irt.gui.data.packet.observable.calibration;
 
 import java.util.Arrays;
-import java.util.List;
 
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.calibration.tools.enums.ToolCommands;
 import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.MyObservable;
 import irt.gui.data.packet.LinkHeader;
-import irt.gui.data.packet.PacketHeader;
-import irt.gui.data.packet.Payload;
-import irt.gui.data.packet.enums.PacketId;
-import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.PacketToSend;
 
-public class ToolsPacket extends MyObservable implements LinkedPacket, WaitTime {
+public class ToolsPacket extends MyObservable implements PacketToSend, WaitTime {
 
 	private ToolCommands command; 	public ToolCommands getCommand() { return command; }
 
 	private byte[] answer;
 
-	public ToolsPacket(ToolCommands command) {
+	protected ToolsPacket(ToolCommands command) {
 		this.command = command;
 	}
 
@@ -30,32 +25,12 @@ public class ToolsPacket extends MyObservable implements LinkedPacket, WaitTime 
 	}
 
 	@Override
-	public PacketId getPacketId() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
-	}
-
-	@Override
 	public LinkHeader getLinkHeader() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void setLinkHeaderAddr(byte addr) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
-	}
-
-	@Override
-	public PacketHeader getPacketHeader() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
-	}
-
-	@Override
-	public List<Payload> getPayloads() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -87,12 +62,22 @@ public class ToolsPacket extends MyObservable implements LinkedPacket, WaitTime 
 	}
 
 	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " [command=" + command + ", answer=" + Arrays.toString(answer) + "]";
+	public int getWaitTime() {
+		return LinkedPacketSender.TOOLS_WAIT_TIME;
 	}
 
 	@Override
-	public int getWaitTime() {
-		return LinkedPacketSender.TOOLS_WAIT_TIME;
+	public int hashCode() {
+		return command.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof ToolsPacket ? command.equals(((ToolsPacket)obj).command) : false;
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [command=" + command + "(" + command.getValue() + "), answer=" + Arrays.toString(answer) + "]";
 	}
 }

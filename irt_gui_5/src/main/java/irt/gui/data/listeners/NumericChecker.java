@@ -21,8 +21,9 @@ public class NumericChecker implements ChangeListener<String> {
 
 		Optional
 		.ofNullable(newValue)
+		.map(mv->mv.replaceAll(",", ""))
 		// If is not digit or value bigger then max, leave the old value
-		.filter(nv->!nv.matches("\\d++") || Integer.parseInt(newValue)>maximum)
+		.filter(nv->!nv.matches("\\d++") || Integer.parseInt(nv)>maximum)
 		.ifPresent(nv->{
 			
 			final StringProperty stringProperty = (StringProperty)observable;

@@ -6,12 +6,12 @@ import javafx.beans.value.ObservableValue;
 
 public final class FractionalNumberPlusPrefixChecker implements ChangeListener<String> {
 
-	final String Digits = "(\\p{Digit}+)";
-	final String HexDigits = "(\\p{XDigit}+)";
+	private static final String Digits = "(\\p{Digit}+)";
+	private static final String HexDigits = "(\\p{XDigit}+)";
 	// an exponent is 'e' or 'E' followed by an optionally
 	// signed decimal integer.
-	final String Exp = "[eE][+-]?" + Digits;
-	final String fpRegex = ("[\\x00-\\x20]*" + // Optional leading "whitespace"
+	private static final String Exp = "[eE][+-]?" + Digits;
+	final static String fpRegex = ("[\\x00-\\x20]*" + // Optional leading "whitespace"
 			"[+-]?(" + // Optional sign character
 			"NaN|" + // "NaN" string
 			"Infinity|" + // "Infinity" string
@@ -40,9 +40,7 @@ public final class FractionalNumberPlusPrefixChecker implements ChangeListener<S
 	// 0[xX] HexDigits_opt . HexDigits BinaryExponent FloatTypeSuffix_opt
 			"(0[xX]" + HexDigits + "?(\\.)" + HexDigits + ")" +
 
-	")[pP][+-]?" + Digits + "))" + "[fFdD]?))" + "[\\x00-\\x20]*");// Optional
-																	// trailing
-																	// "whitespace"
+	")[pP][+-]?" + Digits + "))" + "[fFdD]?))" + "[\\x00-\\x20]*");// Optional trailing "whitespace"
 
 	private double maximum = Double.MAX_VALUE; 		public double getMaximum() { return maximum; } 		public void setMaximum(double maximum) { this.maximum = maximum; }
 

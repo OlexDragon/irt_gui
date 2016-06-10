@@ -155,23 +155,24 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 		return logger.exit(index);
 	}
 
-	@Override
-	public LinkHeader getLinkHeader() {
-		return linkHeader;
+	@Override public LinkHeader getLinkHeader() {
+		return linkHeader.immutable();
 	}
 
-	@Override
-	public PacketHeader getPacketHeader() {
+	protected synchronized void setPacketHeader(PacketHeader packetHeader) {
+		 this.packetHeader = packetHeader;
+	}
+
+	@Override public PacketHeader getPacketHeader() {
 		return packetHeader;
 	}
 
-	@Override
-	public List<Payload> getPayloads() {
+	@Override public List<Payload> getPayloads() {
 		return payloads;
 	}
 
 	@Override @JsonProperty(value="asBytes")
-	public byte[] toBytes() {
+	public synchronized byte[] toBytes() {
 
 		byte[] b = null;
 		if(linkHeader!=null){
@@ -289,18 +290,15 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 		return result;
 	}
 
-	@Override
-	public void setLinkHeaderAddr(byte addr) {
-		getLinkHeader().setAddr(addr);
+	@Override public synchronized void setLinkHeaderAddr(byte addr) {
+		linkHeader.setAddr(addr);
 	}
 
-	@Override
-	public int hashCode() {
+	@Override public int hashCode() {
 		return 31 + ((packetHeader == null) ? 0 : packetHeader.hashCode());
 	}
 
-	@Override
-	public boolean equals(Object obj) {
+	@Override public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -323,8 +321,7 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 		return this==obj || (obj instanceof PacketAbstract ? hashCode()==obj.hashCode() : false);
 	}
 
-	@Override
-	public int compareTo(PacketToSend packet) {
+	@Override public int compareTo(PacketToSend packet) {
 		
 		PacketType packetType = packetHeader.getPacketType();
 		byte v1 = packetType.getValue();

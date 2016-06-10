@@ -57,18 +57,12 @@ public class IrtGuiApp extends Application {
 		//BUC 
 		SerialPort serialPort = SerialPortController.getSerialPort();
 		if(serialPort!=null)
-			synchronized (serialPort) {
-				if(serialPort.isOpened())
-					serialPort.closePort();
-			}
+			serialPort.closePort();
 
 		//Calibration tool
 		serialPort = PanelTools.getSerialPort();
 		if(serialPort!=null)
-			synchronized (serialPort) {
-				if(serialPort.isOpened())
-					serialPort.closePort();
-			}
+			serialPort.closePort();
 	}
 
 	private void stopLoggers() {
