@@ -141,6 +141,17 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	// ******************************* constructor NetworkPanel   ***************************************************
 	public NetworkPanel(final int deviceType, final LinkHeader linkHeader) {
 
+		if(linkHeader==null){
+			packet = null;
+			lblSubnetMask = null;
+			lblIpAddress = null;
+			lblDefaultMask = null;
+			lblAddressType = null;
+			btnOk = null;
+			btnCansel = null;
+			return;
+		}
+
 		packet = new NetworkAddressPacket(linkHeader.getAddr(), null);
 
 		addAncestorListener(new AncestorListener() {
