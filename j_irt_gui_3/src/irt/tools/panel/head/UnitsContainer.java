@@ -82,7 +82,7 @@ public class UnitsContainer extends JPanel{
 		return unitPanel;
 	}
 
-	private void add(Panel panel) {
+	private synchronized void add(Panel panel) {
 
 		super.add(panel);
 		setLocations();

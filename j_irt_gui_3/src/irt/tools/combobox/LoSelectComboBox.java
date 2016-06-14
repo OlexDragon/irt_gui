@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -165,7 +166,8 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			final int itemCount = getItemCount();
 			IdValueFreq ivf = (IdValueFreq)getSelectedItem();
 
-			if(ivf.getValueFrequency().getValue()!=fr)
+			final ValueFrequency valueFrequency = ivf.getValueFrequency();
+			if(valueFrequency.getValue()!=fr)
 				for(int i=0; i<itemCount; i++){
 					final IdValueFreq itemAt = getItemAt(i);
 					if(itemAt.getValueFrequency().getValue()==fr){
@@ -200,8 +202,16 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 				if(linkAddr != 0)
 					setBiasBoardLOs(payload);
 				else
-					if(!setConverterLOs(payload))
-						cb.getParent().remove(cb);
+					if(!setConverterLOs(payload)){
+						new SwingWorker<Void, Void>(){
+
+							@Override
+							protected Void doInBackground() throws Exception {
+								cb.getParent().remove(cb);
+								return null;
+							}
+						}.execute();
+					}
 
 				addItemListener(aListener);
 				packetToSend = new LOPacket(linkAddr);
