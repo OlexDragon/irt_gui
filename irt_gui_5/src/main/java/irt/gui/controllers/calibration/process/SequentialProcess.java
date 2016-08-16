@@ -15,7 +15,6 @@ import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.gui.controllers.calibration.PanelSignalGenerator;
 import irt.gui.controllers.calibration.enums.Calibration;
 import irt.gui.controllers.calibration.tools.Tool;
 import irt.gui.controllers.calibration.tools.Tool.Commands;
@@ -25,7 +24,6 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.PacketToSend;
-import irt.gui.data.packet.observable.calibration.ToolsPacket;
 import irt.gui.data.packet.observable.configuration.MutePacket;
 import irt.gui.data.packet.observable.configuration.MutePacket.MuteStatus;
 import javafx.application.Platform;
@@ -127,7 +125,7 @@ public class SequentialProcess extends Observable implements Runnable {
 				return;
 
 			synchronized (this) { try {wait(100);} catch (Exception e) {} }
-			signalGenerator.set(Commands.POWER, valueToSend.doubleValue(), null);
+			signalGenerator.set(Commands.POWER, valueToSend.doubleValue());
 
 			synchronized (this) { try { wait(100); } catch (Exception e1) { logger.catching(e1); } }
 
@@ -243,22 +241,22 @@ public class SequentialProcess extends Observable implements Runnable {
 
 	public void setSignalGenerator(Tool signalGenerator) {
 		this.signalGenerator = signalGenerator;
-		EXECUTOR.execute(()->{
-			try{
+		try{
 
-				synchronized (this) { wait(10); }
-				signalGenerator.get(Commands.POWER, sgInputPowerObserver);
+			Future<Double> future = signalGenerator.get(Commands.POWER);
+			sgPower = future.get();
 
-				synchronized (this) { wait(100); }
-				signalGenerator.get(Commands.FREQUENCY, sgFrequensyObserver);
+			future = signalGenerator.get(Commands.FREQUENCY);
+			sgFrequency = future.get();
 
-				synchronized (this) { wait(100); }
-				signalGenerator.get(Commands.OUTPUT, sgOutputObserver);
+			final Future<ToolsState> toolsStateFuture = signalGenerator.get(Commands.OUTPUT);
+			sgOutputState = toolsStateFuture.get();
 
-			}catch(Exception e){
-				 logger.catching(e);
-			}
-		});
+			logger.error("sgPower={}; sgFrequency={}; sgOutputState={}", sgPower, sgFrequency, sgOutputState);
+
+		}catch(Exception e){
+			logger.catching(e);
+		}
 
 		synchronized (thisObject) { notified = true; thisObject.notifyAll(); }
 	}
@@ -276,42 +274,6 @@ public class SequentialProcess extends Observable implements Runnable {
 		buc.get(Commands.OUTPUT, bucMuteObserver);			//Mute
 		synchronized (thisObject) { notified = true; thisObject.notifyAll(); }
 	}
-
-	private final Observer sgInputPowerObserver = new Observer() {
-
-		@Override
-		public void update(Observable o, Object arg) {
-			logger.entry(o);
-			o.deleteObserver(sgInputPowerObserver);
-
-			final byte[] answer = ((ToolsPacket)o).getAnswer();
-			if(answer!=null){
-				PanelSignalGenerator
-				.getDouble(answer)
-				.ifPresent(p->sgPower = p);
-			}else
-				showAlert("It is impossible to obtain the power from the Signal Generator");
-
-			synchronized (thisObject) { notified = true; thisObject.notifyAll(); }
-		}
-	};
-	private final Observer sgFrequensyObserver = new Observer() {
-
-		@Override
-		public void update(Observable o, Object arg) {
-			o.deleteObserver(sgFrequensyObserver);
-
-			final byte[] answer = ((ToolsPacket)o).getAnswer();
-			if(answer!=null){
-				PanelSignalGenerator
-				.getDouble(answer)
-				.ifPresent(p->sgFrequency = p);
-			}else
-				showAlert("It is impossible to obtain the frequency from the Signal Generator");
-
-			synchronized (thisObject) { notified = true; thisObject.notifyAll(); }
-		}
-	};
 	private final Observer bucInputDetectorObserver = new Observer() {
 
 		@Override
@@ -350,25 +312,6 @@ public class SequentialProcess extends Observable implements Runnable {
 
 			synchronized (thisObject) { notified = true; thisObject.notifyAll(); }
 		}
-	};
-	private final Observer sgOutputObserver= new Observer() {
-
-		@Override
-		public void update(Observable o, Object arg) {
-			o.deleteObserver(sgOutputObserver);
-
-			final PacketToSend tp = (PacketToSend) o;
-
-			sgOutputState = Optional
-					.ofNullable(tp.getAnswer())
-					.map(ToolsState::valueOf)
-					.orElseGet(()->{
-						showAlert("It is impossible to obtain the output state from the Signal Generator");
-						return null;
-					});
-
-			synchronized (thisObject) { notified = true; thisObject.notifyAll(); }
-		}	
 	};
 	private final Observer powerMeterObserver = new Observer() {
 		

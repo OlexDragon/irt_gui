@@ -20,7 +20,7 @@ import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 
 public class SocketWorkerTest {
-	private static final String COM_PORT = "COM13";
+	public static final String COM_PORT = "COM13";
 
 	private final Logger logger = LogManager.getLogger();
 	private SocketWorker socketWorker;

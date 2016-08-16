@@ -4,8 +4,10 @@ import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.LogManager;
@@ -34,12 +36,13 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 
 public class PanelSignalGenerator implements Tool{
+
 	private static final String NO_ANSWER = "No Answer";
 
 	private final Logger logger = LogManager.getLogger();
 
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
-	private final ExecutorService executor = Executors.newFixedThreadPool(5, new MyThreadFactory());
+	private final ExecutorService EXECUTOR = Executors.newFixedThreadPool(5, new MyThreadFactory());
 
 	@FXML private Label labelId;
 	@FXML private TextField textFieldAddress;
@@ -66,7 +69,7 @@ public class PanelSignalGenerator implements Tool{
 
 			final PacketToSend tp = (PacketToSend) o;
 
-			executor.execute(()->{
+			EXECUTOR.execute(()->{
 				final String text = Optional
 										.ofNullable(tp.getAnswer())
 										.map(String::new)
@@ -87,7 +90,7 @@ public class PanelSignalGenerator implements Tool{
 			final PacketToSend tp = (PacketToSend) o;
 			tp.deleteObserver(observerFrequency);
 
-			executor.execute(()->{
+			EXECUTOR.execute(()->{
 				final byte[] answer = tp.getAnswer();
 				final Double d = getDouble(answer).orElse(null);
 
@@ -110,7 +113,7 @@ public class PanelSignalGenerator implements Tool{
 			final PacketToSend tp = (PacketToSend) o;
 			tp.deleteObserver(observerPower);
 
-			executor.execute(()->{
+			EXECUTOR.execute(()->{
 				final byte[] answer = tp.getAnswer();
 				final Double d = getDouble(answer).orElse(null);
 
@@ -133,7 +136,7 @@ public class PanelSignalGenerator implements Tool{
 
 			final PacketToSend tp = (PacketToSend) o;
 
-			executor.execute(()->{
+			EXECUTOR.execute(()->{
 				final ToolsState ts = Optional
 										.ofNullable(tp.getAnswer())
 										.map(ToolsState::valueOf)
@@ -177,6 +180,7 @@ public class PanelSignalGenerator implements Tool{
 		final String text = textFieldFrequency.getText();
 		if(text.matches(".*\\d+.*")){
 			frPacket.getCommand().setValue(new ToolsFrequency(text));
+			frPacket.deleteObservers();
 			prologix.send(textFieldAddress.getText(), frPacket);
 		}else{
 			frPacket.addObserver(observerFrequency);
@@ -198,7 +202,6 @@ public class PanelSignalGenerator implements Tool{
 		if(power.matches(".*\\d+.*")){//if has value
 			pwPacket.getCommand().setValue(new ToolsPower(power));
 			pwPacket.deleteObservers();
-			logger.error(power);
 			prologix.send(addr, pwPacket);
 
 		}else{
@@ -217,6 +220,7 @@ public class PanelSignalGenerator implements Tool{
 
 		if(comboBoxOutput.getSelectionModel().getSelectedItem()==null){
 			outPacket.addObserver(observerOutput);
+			outPacket.deleteObservers();
 			prologix.send(textFieldAddress.getText(), outPacket);
 		}else{
 			outPacket.getCommand().setValue(comboBoxOutput.getSelectionModel().getSelectedItem());
@@ -247,6 +251,7 @@ public class PanelSignalGenerator implements Tool{
 	}
 
 	@Override public void get(Commands command, Observer observer) {
+		synchronized (this) {try { wait(200); } catch (InterruptedException e) { }}
 
 		switch(command){
 		case GET:
@@ -264,6 +269,16 @@ public class PanelSignalGenerator implements Tool{
 
 		default:
 		}
+	}
+
+	@Override public <T> Future<T> get(Commands command) {
+
+		Task<T> task = new Task<>();
+		final Future<T> future = EXECUTOR.submit(task);
+
+		get(command, task.getObserver(command));
+
+		return future;
 	}
 
 	@Override public void set(Commands command, Object valueToSend, Observer observer) {
@@ -319,5 +334,70 @@ public class PanelSignalGenerator implements Tool{
 						.orElse(null))
 				.filter(s->!s.isEmpty())
 				.map(Double::parseDouble);
+	}
+
+	@Override public void set(Commands command, Object valueToSend) {
+		set(command, valueToSend, null);
+	}
+
+	//****************************   class Task   *********************************************
+	private class Task<T> implements Callable<T> {
+
+		private Object thisObject = this;
+		private T value;
+
+		@Override
+		public T call() throws Exception {
+			synchronized (this) {wait(1000);}
+			return value;
+		}
+
+		public Observer getObserver(Commands command){
+			Observer observer;
+			switch(command){
+			case POWER:
+			case FREQUENCY:
+				observer = getDoubleObserver();
+				break;
+			case OUTPUT:
+				observer = getToolsStateObserver();
+				break;
+			default:
+				return null;
+			}
+			return observer;
+		}
+
+		@SuppressWarnings("unchecked")
+		private Observer getToolsStateObserver() {
+			return (o, arg)->{
+
+				final PacketToSend tp = (PacketToSend) o;
+
+				value = (T) Optional
+						.ofNullable(tp.getAnswer())
+						.map(ToolsState::valueOf)
+						.orElse(null);
+
+				synchronized (thisObject) { thisObject.notifyAll();}
+			};
+		}
+
+		@SuppressWarnings("unchecked")
+		private Observer getDoubleObserver() {
+			final Observer observer = new Observer() {
+				
+				@Override public void update(Observable o, Object arg) {
+					o.deleteObserver(this);
+					final PacketToSend tp = (PacketToSend) o;
+					final byte[] answer = tp.getAnswer();
+
+					value = (T) getDouble(answer).orElse(null);
+
+					synchronized (thisObject) { thisObject.notifyAll();}
+				}
+			};
+			return observer;
+		}
 	}
 }

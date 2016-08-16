@@ -151,7 +151,6 @@ public class PanelTasks {
         final ClipboardContent content = new ClipboardContent();
         final Tooltip tooltip = labelResponses.getTooltip();
 		content.putString(tooltip!=null ? tooltip.getText() : labelResponses.getText());
-//        content.putHtml("<b>Some</b> text");
         clipboard.setContent(content);
     }
 

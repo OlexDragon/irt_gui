@@ -21,6 +21,7 @@ public class CalibrationMap extends TreeMap<Number, Number> {
 			final Number lastKey = lastEntry.getKey();
 
 			int compareTo = new BigDecimal(lastKey.toString()).compareTo(new BigDecimal(key.toString()));
+			logger.error("{}!!{}={}; size={}", lastKey, key, compareTo, size());
 			if(compareTo>=0)
 				if(size()>beginning)
 					throw new UnsupportedOperationException("The key can not be less than or equal to the existing");
