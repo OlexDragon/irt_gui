@@ -60,6 +60,18 @@ public class AverageDoubleTest {
 				getPacket.addObserver(observer);
 				send("13", getPacket);
 			}
+
+			@Override
+			public <T> Future<T> get(Commands command) {
+				// TODO Auto-generated method stub
+				throw new UnsupportedOperationException("Auto-generated method stub");
+			}
+
+			@Override
+			public void set(Commands command, Object valueToSend) {
+				// TODO Auto-generated method stub
+				throw new UnsupportedOperationException("Auto-generated method stub");
+			}
 		};
 
 		try {
@@ -69,8 +81,6 @@ public class AverageDoubleTest {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
-
-		logger.trace("Result = {}", future.get());
 	}
 
 

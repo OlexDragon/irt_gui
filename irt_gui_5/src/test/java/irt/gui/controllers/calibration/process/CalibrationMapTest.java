@@ -38,6 +38,11 @@ public class CalibrationMapTest {
 	public void test2() {
 		CalibrationMap map = new CalibrationMap();
 		map.put(1, 11);
+		map.put(2, 22);
+		map.put(3, 23);
+		map.put(4, 24);
+		map.put(5, 52);
+		map.put(6, 53);
 		map.put(0, 22);
 	}
 
@@ -103,6 +108,6 @@ public class CalibrationMapTest {
 		map.put(40, 1062);
 
 		map = map.getWith(.5);
-		assertEquals(7, map.size());
+		assertEquals(10, map.size());
 	}
 }

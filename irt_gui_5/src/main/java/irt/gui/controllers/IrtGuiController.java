@@ -87,6 +87,9 @@ public class IrtGuiController{
 			prefs.put("selected_tab_id", tab.getId());
 
 			final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
+			if(serialPort==null)
+				return;
+
 			parity = serialPort.getParity();
 			serialPort.setParity(SerialPort.PARITY_EVEN);
 			try {

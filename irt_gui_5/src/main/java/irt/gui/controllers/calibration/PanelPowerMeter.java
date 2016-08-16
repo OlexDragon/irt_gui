@@ -5,6 +5,7 @@ import java.util.Observer;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.LogManager;
@@ -132,8 +133,7 @@ public class PanelPowerMeter extends Observable implements Tool{
 		prologix.send(addr, packet);
 	}
 
-	@Override
-	public void get(Commands command, Observer observer) {
+	@Override public void get(Commands command, Observer observer) {
 
 		switch(command){
 		case GET:
@@ -145,9 +145,17 @@ public class PanelPowerMeter extends Observable implements Tool{
 		}
 	}
 
-	@Override
-	public void set(Commands command, Object valueToSend, Observer observer) {
+	@Override public void set(Commands command, Object valueToSend, Observer observer) {
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
+	}
+
+	@Override public <T> Future<T> get(Commands command) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Auto-generated method stub");
+	}
+
+	@Override public void set(Commands command, Object valueToSend) {
+		set(command, valueToSend, null);
 	}
 }

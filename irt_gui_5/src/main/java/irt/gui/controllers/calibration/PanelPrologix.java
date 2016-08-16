@@ -173,8 +173,6 @@ public class PanelPrologix implements Prologix {
 			});
 
 
-			if(addr.equals("19"))
-				logger.error("{} : {}", addr, packet);
 			PanelTools.getQueue().add(p, false);
 		} catch (Exception e) {
 			logger.catching(e);
