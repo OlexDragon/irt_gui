@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.controllers.RegistersController">
+   <children>
+      <BorderPane fx:id="registersPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <right>
+            <AnchorPane>
+               <children>
+                  <HBox layoutX="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <Slider fx:id="slider" majorTickUnit="1.0" minorTickCount="4" onMouseReleased="#onMouseReleasedSlider" orientation="VERTICAL" showTickLabels="true" showTickMarks="true" />
+                     </children>
+                  </HBox>
+               </children>
+            </AnchorPane>
+         </right>
+         <top>
+            <AnchorPane BorderPane.alignment="CENTER">
+               <children>
+                  <HBox alignment="CENTER_RIGHT" spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <fx:include fx:id="buttonCalibMode" source="ButtonCalibrationMode.fxml" />
+                        <Button fx:id="btnSave" mnemonicParsing="false" onAction="#onActionSave" text="Save">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                           <tooltip>
+                              <Tooltip text="Save" />
+                           </tooltip>
+                        </Button>
+                        <Button fx:id="btnReset" mnemonicParsing="false" onAction="#onActionResetButton" text="Reset">
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                           <tooltip>
+                              <Tooltip text="Reset" />
+                           </tooltip>
+                        </Button>
+                        <MenuButton mnemonicParsing="false">
+                          <items>
+                              <Menu fx:id="menuProfile" mnemonicParsing="false" onAction="#onActionMenuProfile" text="Profiles">
+                                 <items>
+                                    <RadioMenuItem fx:id="menuNewProfile" mnemonicParsing="false" onAction="#onActionMenuNewProfile" text="New" />
+                                 </items>
+                               </Menu>
+                            <MenuItem fx:id="menuSave" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemsSave" text="Save" />
+                            <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemsSaveAs" text="Save as..." />
+                          </items>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </MenuButton>
+                     </children>
+                     <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                     </padding>
+                  </HBox>
+               </children>
+            </AnchorPane>
+         </top>
+         <center>
+            <fx:include fx:id="panelRegisters" source="PanelRegisters.fxml" />
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>

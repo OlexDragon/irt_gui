@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+
+	<Appenders>
+
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%-5p %d [%t] %C{2} %M (%F:%L) - %m%xEx%n" />
+		</Console>
+
+		<RollingRandomAccessFile name="LogFile"
+								 fileName="${sys:user.home}/irt/linearizer.log"
+								 filePattern="${sys:user.home}/irt/linearizer-%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout pattern="%n%-5p %d%n %M (%F:%L)%n%m%n" />
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10" />
+		</RollingRandomAccessFile>
+	</Appenders>
+
+	<Loggers>
+
+<!-- 		<logger name="irt.controllers.ButtonCalibrationMode"  -->
+<!-- 				level="all" /> -->
+
+<!-- 		<logger name="irt.controllers.TextFieldRegister"  -->
+<!-- 				level="all" /> -->
+
+		<Root level="warn">
+			<AppenderRef ref="LogFile" />
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+
+</Configuration>

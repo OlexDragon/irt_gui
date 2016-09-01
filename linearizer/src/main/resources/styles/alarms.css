@@ -1,0 +1,19 @@
+.label.info, .label.alarm, .label.no_alarm, .label.warning{
+	-fx-font-weight: bold;
+}
+.alarm{
+	-fx-background-color : red;
+	-fx-text-fill : yellow;
+}
+.no_alarm{
+	-fx-background-color : green;
+	-fx-text-fill : yellow;
+}
+.warning{
+	-fx-background-color : #FFCC66;
+	-fx-text-fill : black;
+}
+.info{
+	-fx-background-color : yellow;
+	-fx-text-fill : black;
+}

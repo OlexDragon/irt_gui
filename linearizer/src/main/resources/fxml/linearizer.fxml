@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.*?>
+<?import java.lang.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import layouttests.migfxml.sample1.*?>
+
+<AnchorPane styleClass="main-panel" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <top>
+            <fx:include source="components/serial_port/SerialPortSelector.fxml" />
+         </top>
+         <center>
+            <fx:include source="components/RegistersController.fxml" />
+         </center>
+      </BorderPane>
+   </children>
+</AnchorPane>
