@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<GridPane id="bias" fx:id="gridPane" onContextMenuRequested="#gridPanContextMenuRequest" stylesheets="@../../styles/bias.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.controllers.PanelRegisters">
+	<children>
+		<Label cacheShape="false" centerShape="false" focusTraversable="false" scaleShape="false" visible="false">
+			<contextMenu>
+				<ContextMenu fx:id="contextMenu">
+					<items>
+                  <Menu fx:id="menuAdd" mnemonicParsing="false" text="Add">
+                     <items>
+      					<Menu fx:id="menuRegister" mnemonicParsing="false" text="Register" />
+                     </items></Menu>
+                  <Menu mnemonicParsing="false" text="Set">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemRemove" text="Clear Field" />
+                        <MenuItem mnemonicParsing="false" onAction="#onActionMenuItemClear" text="Clear Panel" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem fx:id="menuItemShowGrid" mnemonicParsing="false" onAction="#onActionMenuItemShowGridon" text="Show Grid" />
+                        <Menu fx:id="menuAlignment" mnemonicParsing="false" onAction="#alignmentonActionMenuItems" text="Alignment" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem mnemonicParsing="false" onAction="#onActionMenuItemAddColumn" text="Add Column" />
+      						<MenuItem fx:id="menuItemDeleteColumn" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemDeleteColumn" text="Delete Column" />
+      						<SeparatorMenuItem mnemonicParsing="false" />
+      						<MenuItem mnemonicParsing="false" onAction="#onActionMenuItemAddRow" text="Add Row" />
+      						<MenuItem fx:id="menuItemDeleteRow" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemDeleteRow" text="Delete Row" />
+                        <SeparatorMenuItem mnemonicParsing="false" />
+                        <Menu fx:id="menuBackground" mnemonicParsing="false" text="Background Image" />
+                    </items>
+                  </Menu>
+					</items>
+				</ContextMenu>
+			</contextMenu>
+		</Label>
+		<VBox alignment="CENTER" fillWidth="false" onMouseEntered="#onMouseEntered" styleClass="mouseOver" />
+	</children>
+	<columnConstraints>
+		<ColumnConstraints hgrow="ALWAYS" />
+	</columnConstraints>
+	<rowConstraints>
+		<RowConstraints vgrow="ALWAYS" />
+	</rowConstraints>
+</GridPane>

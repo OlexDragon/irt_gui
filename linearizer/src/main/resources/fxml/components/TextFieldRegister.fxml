@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+
+<TextField fx:id="textField" 
+			alignment="CENTER" 
+			editable="false" 
+			onAction="#onActionTextField" 
+			onKeyPressed="#onKeyPressed" 
+			prefColumnCount="5" 
+			stylesheets="@../../styles/components.css" 
+			xmlns="http://javafx.com/javafx/8.0.40" 
+			xmlns:fx="http://javafx.com/fxml/1" 
+			fx:controller="irt.controllers.TextFieldRegister">
+	<contextMenu>
+		<ContextMenu>
+			<items>
+				<Menu fx:id="menuRegister" mnemonicParsing="false" text="Register" />
+				<SeparatorMenuItem mnemonicParsing="false" />
+				<MenuItem id="set" fx:id="menuItemSet" disable="true" mnemonicParsing="false" onAction="#onActionTextField" text="Set" />
+				<MenuItem id="save" fx:id="menuItemSave" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemSave" text="Save" />
+				<MenuItem id="reset" fx:id="menuItemReset" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemReset" text="Reset" />
+				<SeparatorMenuItem mnemonicParsing="false" />
+				<MenuItem id="stop" fx:id="menuItemStartStop" disable="true" mnemonicParsing="false" onAction="#onActionMenuItemStartStop" text="Stop" />
+            <MenuItem mnemonicParsing="false" onAction="#onActionRemove" text="Remove" />
+			</items>
+		</ContextMenu>
+	</contextMenu>
+</TextField>
