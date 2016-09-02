@@ -37,16 +37,17 @@
 
 
 .main-panel {
-    -fx-background-image: url("../images/background-patterns.jpg");
+	-fx-background-color: #39455f
+/*    -fx-background-image: url("../images/background-patterns.jpg"); */
 }
 
 .slider .axis {
 	-fx-tick-label-fill: yellow;
     -fx-stroke: white;
 }
-.slider .thumb {
-	-fx-background-color:  linear-gradient(#ffff00, #BBBB00);
-}
+/*.slider .thumb {
+	-fx-background-color:  linear-gradient(#081738, #081738);
+} */
 .slider{
 	-fx-skin: "com.sun.javafx.scene.control.skin.SliderSkin";
 }
