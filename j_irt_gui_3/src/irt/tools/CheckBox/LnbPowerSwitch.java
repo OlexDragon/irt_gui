@@ -28,7 +28,8 @@ public class LnbPowerSwitch extends SwitchBoxImpl {
 
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
-		if(!(pID==PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER || pID==PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER))
+
+		if(pID!=PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER)
 			return;
 
 		logger.debug(packet);
