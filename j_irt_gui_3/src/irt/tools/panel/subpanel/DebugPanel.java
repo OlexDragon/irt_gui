@@ -124,12 +124,10 @@ public class DebugPanel extends JPanel{
 					destinationFile.deleteOnExit();
 
 					if (sourceFile.exists() && sourceFile.isFile()) {
-						try (FileChannel source = new FileInputStream(sourceFile).getChannel()) {
-							try(FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);){
-								try (FileChannel destination = fileOutputStream.getChannel()) {
+						try (FileChannel source = new FileInputStream(sourceFile).getChannel();
+							FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
+							FileChannel destination = fileOutputStream.getChannel()) {
 									destination.transferFrom(source, 0, source.size());
-								}
-							}
 						}
 					}
 

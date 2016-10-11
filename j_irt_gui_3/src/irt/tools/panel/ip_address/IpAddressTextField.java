@@ -9,6 +9,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,8 +41,9 @@ public class IpAddressTextField extends GridbagPanel {
 
 	private static Font font;
 	static{
-		try {
-			font = Font.createFont(Font.TRUETYPE_FONT, IrtGui.class.getResource("fonts/TAHOMA.TTF").openStream());
+		try( InputStream openStream = IrtGui.class.getResource("fonts/TAHOMA.TTF").openStream();) {
+			
+			font = Font.createFont(Font.TRUETYPE_FONT, openStream);
 			font = font.deriveFont(Font.PLAIN, 12f);
 		} catch (Exception e) {
 			logger.catching(e);
