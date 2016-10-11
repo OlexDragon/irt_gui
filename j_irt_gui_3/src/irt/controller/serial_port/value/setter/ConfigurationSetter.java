@@ -59,10 +59,10 @@ public class ConfigurationSetter extends SetterAbstract {
 			LinkHeader lh = pt.getLinkHeader();
 
 			switch (id) {
-			case PacketWork.PACKET_ID_CONFIGURATION_LNB:
-			case PacketImp.PARAMETER_CONFIG_BUC_ENABLE:
+			case PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER:
+			case PacketImp.PARAMETER_CONFIG_LNB_POWER:
 				logger.trace(pt.getClass().getSimpleName());
-				pt.preparePacket(PacketImp.PARAMETER_CONFIG_BUC_ENABLE, (byte) ((IdValue) value).getValue());
+				pt.preparePacket(PacketImp.PARAMETER_CONFIG_LNB_POWER, (byte) ((IdValue) value).getValue());
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_LO:
 				pt.preparePacket(PacketImp.PARAMETER_ID_CONFIGURATION_LO_SET, value != null ? (Byte) ((IdValue) value).getValue() : null);

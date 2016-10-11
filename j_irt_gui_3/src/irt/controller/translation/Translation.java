@@ -8,6 +8,7 @@ import irt.tools.panel.head.IrtPanel;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -143,8 +144,10 @@ public class Translation {
 			if (fontURL != null && (font = getSystemFont(fontURL, fontStyle, (int) fontSize)) == null) {
 				LOGGER.warn("The Operating System does not have {} font.", fontURL);
 				URL resource = IrtGui.class.getResource(fontURL);
-				font = Font.createFont(Font.TRUETYPE_FONT, resource.openStream());
-				font = font.deriveFont(fontStyle).deriveFont(fontSize);
+				try (InputStream openStream = resource.openStream();) {
+					font = Font.createFont(Font.TRUETYPE_FONT, openStream);
+					font = font.deriveFont(fontStyle).deriveFont(fontSize);
+				}
 			}
 		} catch (Exception e) {
 			LOGGER.catching(e);
@@ -204,8 +207,9 @@ public class Translation {
 		LOGGER.entry();
 		if(translationProperties==null){
 			translationProperties = new Properties();
-			try {
-				translationProperties.load(Translation.class.getResourceAsStream("translation.properties"));
+			try(InputStream resourceAsStream = Translation.class.getResourceAsStream("translation.properties");) {
+				
+				translationProperties.load(resourceAsStream);
 			} catch (Exception e) {
 				LOGGER.catching(e);
 			}

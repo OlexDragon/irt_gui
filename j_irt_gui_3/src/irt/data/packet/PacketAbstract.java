@@ -39,7 +39,6 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override	// function of java.lang.Thread
 	public void setPriority(int priority) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -50,31 +49,26 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public void addVlueChangeListener(ValueChangeListener valueChangeListener) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void removeVlueChangeListener(ValueChangeListener valuechangelistener) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void clear() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void removeVlueChangeListeners() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public boolean isAddressEquals(Packet packet) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -110,7 +104,6 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public Object getValue() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -121,37 +114,31 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public void setData(byte[] d) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void preparePacket() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void preparePacket(byte packetParameterHeaderCode, Object value) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void setDataPacketTypeCommand() {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void setValue(Object source) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void preparePacket(byte value) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -162,13 +149,11 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public void setHeader(PacketHeader packetHeader) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public void setPayloads(List<Payload> payloadsList) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -187,7 +172,6 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public boolean set(Packet packet) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -198,13 +182,11 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public void set(byte[] data) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
 	@Override
 	public Payload getPayload(byte parameterId) {
-		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
@@ -247,8 +229,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public String toString() {
-		return "\n\t" + getClass().getSimpleName()
-				+ " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payload=" + payload + "]";
+		return "\n\t" + getClass().getSimpleName() + " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payload=" + payload + "]";
 	}
 
 	public enum Priority {

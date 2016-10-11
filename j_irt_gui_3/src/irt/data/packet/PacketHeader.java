@@ -208,7 +208,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET:
 				packetIdStr = "Gain Offset("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_CONFIGURATION_LNB:
+			case PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER:
 				packetIdStr = "LNB On/Off("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_STORE_CONFIG:

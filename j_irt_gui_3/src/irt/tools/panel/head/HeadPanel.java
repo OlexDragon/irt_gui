@@ -3,6 +3,7 @@ package irt.tools.panel.head;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.io.InputStream;
 import java.util.Properties;
 
 import javax.swing.JFrame;
@@ -62,8 +63,9 @@ public class HeadPanel extends MainPanel {
 		if(properties==null){
 
 			properties = new Properties();
-			try {
-				properties.load(HeadPanel.class.getResourceAsStream("HeadPanel.properties"));
+			try(InputStream resourceAsStream = HeadPanel.class.getResourceAsStream("HeadPanel.properties");) {
+				 
+				properties.load(resourceAsStream);
 			} catch (Exception e) {
 				logger.catching(e);
 			}

@@ -22,6 +22,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Set;
 import java.util.TreeSet;
@@ -75,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.103";
+	public static final String VERTION = "- 3.104";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -594,9 +595,11 @@ public class IrtGui extends IrtMainFrame {
 					Font f = Translation.getSystemFont(fontURL, Font.BOLD, (int) fontSize);
 					if (f == null) {
 						URL resource = getClass().getResource(fontURL);// Chinese
-						if (resource != null)
-							f = Font.createFont(Font.TRUETYPE_FONT, resource.openStream()).deriveFont(fontSize).deriveFont(Font.BOLD);
-						else
+						if (resource != null) {
+							try( InputStream openStream = resource.openStream();){
+								f = Font.createFont(Font.TRUETYPE_FONT, openStream).deriveFont(fontSize).deriveFont(Font.BOLD);
+							}
+						} else
 							logger.warn("Can not get the resouce font 'MINGLIU.TTF'");
 					}
 					return f;

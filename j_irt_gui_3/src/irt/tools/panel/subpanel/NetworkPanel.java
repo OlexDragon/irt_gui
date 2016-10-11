@@ -407,7 +407,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 		comboBoxAddressType.setFont(font);
 		comboBoxAddressType.setModel(getComboboxModel());
-		logger.debug("comboBoxAddressType.getSelectedItem()={}", comboBoxAddressType.getSelectedItem());
+//		logger.debug("comboBoxAddressType.getSelectedItem()={}", comboBoxAddressType.getSelectedItem());
 	}
 
 	@Override

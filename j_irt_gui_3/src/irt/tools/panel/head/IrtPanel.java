@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,14 +51,17 @@ public class IrtPanel extends MainPanel {
 	public static Properties PROPERTIES;
 
 	static{
-		try {
+		try(InputStream resourceAsStream = IrtGui.class.getResourceAsStream("irt.properties");) {
 			PROPERTIES = new Properties();
-			PROPERTIES.load(IrtGui.class.getResourceAsStream("irt.properties"));
+
+			PROPERTIES.load(resourceAsStream);
 
 			File f = new File(System.getProperty("user.dir")+File.separator+"gui.properties");
 			if(f.exists() && !f.isDirectory()){
-				PROPERTIES.load(new FileInputStream(f));
-				PROPERTIES.put("lastModified", ""+f.lastModified());
+				try (FileInputStream inStream = new FileInputStream(f);) {
+					PROPERTIES.load(inStream);
+					PROPERTIES.put("lastModified", "" + f.lastModified());
+				}
 			}
 
 			String logoPath = PROPERTIES.getProperty("company_logo");

@@ -1,4 +1,3 @@
-
 package irt.tools.combobox;
 
 import java.awt.event.ItemEvent;
@@ -166,14 +165,15 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			final int itemCount = getItemCount();
 			IdValueFreq ivf = (IdValueFreq)getSelectedItem();
 
+			if(ivf==null)
+				return;
+
 			final ValueFrequency valueFrequency = ivf.getValueFrequency();
 			if(valueFrequency.getValue()!=fr)
 				for(int i=0; i<itemCount; i++){
 					final IdValueFreq itemAt = getItemAt(i);
-					if(itemAt.getValueFrequency().getValue()==fr){
+					if(itemAt.getValueFrequency().getValue()==fr)
 						setSelectedItem(itemAt);
-						return;
-					}
 				}
 		}
 

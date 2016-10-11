@@ -9,9 +9,9 @@ import irt.data.packet.Payload;
 public class NetworkAddress {
 
 	public enum AddressType{
-		UNKNOWN("Unkmown"),
+		UNKNOWN("Unknown"),
 		STATIC("Static"),
-		DYNAMIC("Dinamic");
+		DYNAMIC("Dynamic");
 
 		private String description; 	public String getDescription() { return description; } public void setDescription(String description) { this.description = description; }
 
