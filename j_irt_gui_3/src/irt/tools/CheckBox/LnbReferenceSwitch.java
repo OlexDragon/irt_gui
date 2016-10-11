@@ -3,7 +3,6 @@ package irt.tools.CheckBox;
 import java.awt.Image;
 
 import irt.data.PacketWork;
-import irt.data.packet.LnbPowerPacket;
 import irt.data.packet.LnbReferencePacket;
 import irt.data.packet.LnbReferencePacket.ReferenceStatus;
 import irt.data.packet.Packet;
@@ -14,7 +13,7 @@ public class LnbReferenceSwitch extends SwitchBoxImpl {
 	private static final long serialVersionUID = 312509249334409413L;
 
 	public LnbReferenceSwitch(Image offImage, Image onImage) {
-		super(offImage, onImage, new LnbPowerPacket());
+		super(offImage, onImage, new LnbReferencePacket());
 	}
 
 	@Override
@@ -28,7 +27,7 @@ public class LnbReferenceSwitch extends SwitchBoxImpl {
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
 
-		if(!(pID==PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_REFERENCE || pID==PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_REFERENCE))
+		if(pID!=PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_REFERENCE)
 			return;
 
 		logger.debug(packet);
