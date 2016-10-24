@@ -11,8 +11,8 @@ public class LnbPowerPacket  extends PacketAbstract{
 	public enum PowerStatus{
 		UNDEFINED0,
 		UNDEFINED1,
-		OFF,
-		ON
+		ON,
+		OFF
 	}
 
 	public LnbPowerPacket() {
