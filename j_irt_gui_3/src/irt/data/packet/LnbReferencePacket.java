@@ -10,8 +10,8 @@ public class LnbReferencePacket  extends PacketAbstract{
 
 	public enum ReferenceStatus{
 		UNDEFINED,
-		OFF,
-		ON
+		ON,
+		OFF
 	}
 
 	public LnbReferencePacket() {

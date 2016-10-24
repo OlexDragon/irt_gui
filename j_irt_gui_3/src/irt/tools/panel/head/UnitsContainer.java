@@ -38,22 +38,24 @@ public class UnitsContainer extends JPanel{
 		};
 	}
 
-	public synchronized boolean contains(LinkHeader linkHeader){
+	public boolean contains(LinkHeader linkHeader){
 		logger.entry(linkHeader);
 
 		boolean result = false;
 
-		for (Component c : getComponents()) {
-			if (c instanceof DevicePanel) {
-				LinkHeader lh = ((DevicePanel) c).getLinkHeader();
-				if (linkHeader == null) {
-					if (lh == null) {
+		synchronized (UnitsContainer.class) {
+			for (Component c : getComponents()) {
+				if (c instanceof DevicePanel) {
+					LinkHeader lh = ((DevicePanel) c).getLinkHeader();
+					if (linkHeader == null) {
+						if (lh == null) {
+							result = true;
+							break;
+						}
+					} else if (linkHeader.equals(lh)) {
 						result = true;
 						break;
 					}
-				} else if (linkHeader.equals(lh)) {
-					result = true;
-					break;
 				}
 			}
 		}
@@ -65,49 +67,56 @@ public class UnitsContainer extends JPanel{
 	}
 
 	@Override
-	public synchronized Component add(Component unitPanel) {
+	public Component add(Component unitPanel) {
 
-		if(contains(unitPanel)){
-			DevicePanel dp = (DevicePanel)getComponent(unitPanel.getClass());
-			if(dp!=null)
-				if(dp.getVarticalLabel().getText().equals(((DevicePanel)unitPanel).getVarticalLabel().getText()))
-					unitPanel = dp;
-				else{
-					remove(unitPanel);
+		synchronized (UnitsContainer.class) {
+			if(contains(unitPanel)){
+				DevicePanel dp = (DevicePanel)getComponent(unitPanel.getClass());
+				if(dp!=null)
+					if(dp.getVarticalLabel().getText().equals(((DevicePanel)unitPanel).getVarticalLabel().getText()))
+						unitPanel = dp;
+					else{
+						remove(unitPanel);
+						add((Panel)unitPanel);
+					}
+			}else if(unitPanel instanceof Panel)
 					add((Panel)unitPanel);
-				}
-		}else if(unitPanel instanceof Panel)
-				add((Panel)unitPanel);
+		}
 
 		return unitPanel;
 	}
 
-	private synchronized void add(Panel panel) {
+	private void add(Panel panel) {
 
-		super.add(panel);
-		setLocations();
-		panel.addComponentListener(componentListener);
+		synchronized (UnitsContainer.class) {
+			super.add(panel);
+			setLocations();
+			panel.addComponentListener(componentListener);
+		}
 	}
 
-	private synchronized void setLocations() {
-		int x = 0,  height = 0;
-		Dimension containerPreferredSize = getPreferredSize();
+	private void setLocations() {
 
-		Component[] components = getComponents();
-		Arrays.sort(components);
+		synchronized (UnitsContainer.class) {
+			int x = 0,  height = 0;
+			Dimension containerPreferredSize = getPreferredSize();
 
-		for(Component c:components){
-			Dimension preferredSize = c.getPreferredSize(); //TODO stack trace
-			c.setLocation(x, 0);
-			x += SPACE + preferredSize.width;
-			if(height<preferredSize.height)
-				height = preferredSize.height;
+			Component[] components = getComponents();
+			Arrays.sort(components);
+
+			for(Component c:components){
+				Dimension preferredSize = c.getPreferredSize(); //TODO stack trace
+				c.setLocation(x, 0);
+				x += SPACE + preferredSize.width;
+				if(height<preferredSize.height)
+					height = preferredSize.height;
+			}
+
+				containerPreferredSize.height = height;
+				containerPreferredSize.width = x;
+				setPreferredSize(containerPreferredSize);
+				setSize(containerPreferredSize);
 		}
-
-			containerPreferredSize.height = height;
-			containerPreferredSize.width = x;
-			setPreferredSize(containerPreferredSize);
-			setSize(containerPreferredSize);
 	}
 
 	public <T> Component getComponent(Class<T> instance) {
@@ -125,20 +134,23 @@ public class UnitsContainer extends JPanel{
 		return component;
 	}
 
-	public synchronized boolean remove(LinkHeader linkHeader) {
+	public boolean remove(LinkHeader linkHeader) {
 		logger.entry(linkHeader);
 
 		boolean removed = false;
-		Component[] components = getComponents();
 
-		if(components!=null)
-			for(Component c:components){
-				if(isDevicePanel(linkHeader, c)){
-					super.remove(c);
-					removed = true;
-					break;
+		synchronized (UnitsContainer.class) {
+			Component[] components = getComponents();
+
+			if(components!=null)
+				for(Component c:components){
+					if(isDevicePanel(linkHeader, c)){
+						super.remove(c);
+						removed = true;
+						break;
+					}
 				}
-			}
+		}
 
 		return logger.exit(removed);
 	}
@@ -153,12 +165,14 @@ public class UnitsContainer extends JPanel{
 		}
 	}
 
-	public synchronized void remove(String className) {
-		Component[] cs = getComponents();
-		for(Component c:cs){ //TODO stack trace
-			if(c.getClass().getSimpleName().equals(className)){
-				super.remove(c);
-				break;
+	public void remove(String className) {
+		synchronized (UnitsContainer.class) {
+			Component[] cs = getComponents();
+			for(Component c:cs){ //TODO stack trace
+				if(c.getClass().getSimpleName().equals(className)){
+					super.remove(c);
+					break;
+				}
 			}
 		}
 	}

@@ -38,6 +38,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.value.ValueFrequency;
+import irt.tools.panel.head.UnitsContainer;
 
 public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable{
 	private static final long serialVersionUID = -419940816764892955L;
@@ -207,7 +208,9 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 							@Override
 							protected Void doInBackground() throws Exception {
-								cb.getParent().remove(cb);
+								synchronized (UnitsContainer.class) {
+									cb.getParent().remove(cb);									
+								}
 								return null;
 							}
 						}.execute();
