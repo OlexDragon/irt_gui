@@ -467,6 +467,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	public static Set<Byte> getAddresses(Byte addtess) {
+
 		String addressesStr = prefs.get(AddressWizard.REDUNDANCY_ADDRESSES, null);
 		Set<Byte> addresses = new HashSet<>();
 		if(addtess!=null)

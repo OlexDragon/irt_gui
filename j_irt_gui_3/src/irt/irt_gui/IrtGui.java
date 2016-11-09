@@ -76,7 +76,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.104";
+	public static final String VERTION = "- 3.105";
 	private static final Preferences prefs = GuiController.getPrefs();
 	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
 	private int address;
@@ -165,9 +165,14 @@ public class IrtGui extends IrtMainFrame {
 		setAddressHistory(prefs.get("address_history", null));
 
 		address = prefs.getInt("address", DEFAULT_ADDRESS);
+		logger.debug("Address fom System Pref: {}", address);
+
 		Set<Byte> addresses = GuiControllerAbstract.getAddresses(null);
-		if(!addresses.contains(addresses)){
+		logger.debug("Set<Byte> addresses = {}", addresses);
+
+		if(!addresses.contains(address)){
 			address = addresses.iterator().next()&0xFF;
+			logger.trace("save 'address': {}", address);
 			prefs.putInt("address", address);
 		}
 		txtAddress = new JTextField();
@@ -234,7 +239,12 @@ public class IrtGui extends IrtMainFrame {
 				try {
 					txtAddress.setText("" + DEFAULT_ADDRESS);
 					prefs.remove("address_history");
+					prefs.remove(AddressWizard.REDUNDANCY_ADDRESSES);
+
+					logger.trace("save 'address': {}", DEFAULT_ADDRESS);
 					prefs.putInt("address", DEFAULT_ADDRESS);
+					address = DEFAULT_ADDRESS;
+
 				} catch (Exception ex) {
 					logger.catching(ex);
 				}
@@ -290,6 +300,7 @@ public class IrtGui extends IrtMainFrame {
 									logger.trace(packetWork);
 									guiController.setAddress(na);
 									GuiController.getComPortThreadQueue().add(packetWork);
+									logger.trace("save 'address': {}", address);
 									prefs.putInt("address", address);
 								} else
 									txtAddress.setText("" + address);
@@ -329,6 +340,7 @@ public class IrtGui extends IrtMainFrame {
 										txtAddress.setToolTipText(addressHistory.toString());
 									}
 
+									logger.trace("save 'address': {}", address);
 									prefs.putInt("address", address);
 									txtAddress.setText("" + address);
 									guiController.setAddress((byte) address);
@@ -433,10 +445,14 @@ public class IrtGui extends IrtMainFrame {
 	}
 
 	private void setAddressHistory(String historyStr) {
+		logger.entry(historyStr);
+
 		if(historyStr!=null){
 			for(String s:historyStr.split(","))
 				try{
-					addressHistory.add(Integer.parseInt(s.replaceAll("\\D", "")));
+					final String replaceAll = s.replaceAll("\\D", "");
+					if(!replaceAll.isEmpty())
+						addressHistory.add(Integer.parseInt(replaceAll));
 				}catch(Exception e){
 					logger.catching(e);
 				}
