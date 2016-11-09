@@ -20,6 +20,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
@@ -90,6 +91,18 @@ public class ComboBoxSerialPort extends Observable {
 			catchError(ex);
 		}
 	}
+
+    @FXML void onActionMenuRefresg() {
+
+    	final SingleSelectionModel<String> selectionModel = serialPortComboBox.getSelectionModel();
+		final String selectedItem = selectionModel.getSelectedItem();
+
+    	ObservableList<String> items = serialPortComboBox.getItems();
+		items.clear();
+		items.addAll(SerialPortList.getPortNames());
+
+		selectionModel.select(selectedItem);
+    }
 
 	synchronized public void openPort(){
 		logger.entry();

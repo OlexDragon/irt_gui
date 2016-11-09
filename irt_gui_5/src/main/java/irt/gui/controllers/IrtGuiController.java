@@ -39,9 +39,9 @@ public class IrtGuiController{
 		ObservableList<Tab> tabs = tabPane.getTabs();
 		tabCount = tabs.size();
 
-		//Get save selected tab
+		//Get selected tab
 		String selectedTabId = prefs.get("selected_tab_id", null);
-		//Select saved tab
+		//Select tab
 		tabs
 		.parallelStream()
 		.filter(t->t.getId()!=null)
@@ -64,7 +64,7 @@ public class IrtGuiController{
 			final boolean selected = tab.isSelected();
 
 			if(size>=tabCount || ( selected && size<=tabCount)) {
-				final Node content = tab .getContent();
+				final Node content = tab.getContent();
 				final FieldController userData = (FieldController)content .getUserData();
 //				logger.error("{}: {}", tab.getText(), userData);
 				userData .doUpdate(selected);
