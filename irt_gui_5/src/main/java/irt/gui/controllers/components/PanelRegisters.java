@@ -27,7 +27,6 @@ import irt.gui.controllers.interfaces.OtherFields;
 import irt.gui.controllers.interfaces.ScheduledNode;
 import irt.gui.controllers.interfaces.SliderListener;
 import irt.gui.data.GuiUtility;
-import irt.gui.data.packet.interfaces.ConfigurationGroup;
 import irt.gui.data.packet.interfaces.Register;
 import irt.gui.errors.PacketParsingException;
 import javafx.application.Platform;

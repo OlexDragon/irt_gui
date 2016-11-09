@@ -6,4 +6,12 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<ComboBox fx:id="serialPortComboBox" onAction="#onActionSelectSerialPort" promptText="Select The Serial Port" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ComboBoxSerialPort" />
+<ComboBox fx:id="serialPortComboBox" onAction="#onActionSelectSerialPort" promptText="Select The Serial Port" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ComboBoxSerialPort">
+   <contextMenu>
+      <ContextMenu>
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#onActionMenuRefresg" text="Refresh" />
+        </items>
+      </ContextMenu>
+   </contextMenu>
+</ComboBox>
