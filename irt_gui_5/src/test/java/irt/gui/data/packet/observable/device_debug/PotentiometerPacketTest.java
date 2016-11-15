@@ -36,7 +36,7 @@ public class PotentiometerPacketTest {
 
 	@Test
 	public void testRequest() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		RegisterValue registerValue = new RegisterValue(1, 0);
 		RegisterPacket packet = new RegisterPacket(registerValue);
@@ -58,12 +58,12 @@ public class PotentiometerPacketTest {
 
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	@Test
 	public void testCommand() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 		RegisterValue registerValue = new RegisterValue(1, 0, 777);
 		RegisterPacket packet = new RegisterPacket(registerValue);
 		logger.trace(packet);
@@ -83,12 +83,12 @@ public class PotentiometerPacketTest {
 
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	@Test
 	public void testObserver() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		RegisterPacket packet = new RegisterPacket(new RegisterValue(1, 0));
 		packet.addObserver(new Observer() {
@@ -128,7 +128,7 @@ public class PotentiometerPacketTest {
 			logger.catching(e);
 		}
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	@Test

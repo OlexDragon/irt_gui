@@ -1,7 +1,6 @@
 
 package irt.gui.data.packet.observable.calibration.prologix;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Observer;
 

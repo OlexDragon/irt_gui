@@ -62,7 +62,7 @@ public class TemperaturePacketTest {
 
 	@Test
 	public void testObserver() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		TemperaturePacket packet = new TemperaturePacket();
 		packet.addObserver(new Observer() {
@@ -110,6 +110,6 @@ public class TemperaturePacketTest {
 			logger.catching(e);
 		}
 
-		logger.exit();
+		logger.traceExit();
 	}
 }

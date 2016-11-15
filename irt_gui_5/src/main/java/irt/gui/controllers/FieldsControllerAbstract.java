@@ -117,7 +117,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 		@Override
 		public void run(){
-			logger.entry();
+			logger.traceEntry();
 
 			packetsToSend
 			.stream()

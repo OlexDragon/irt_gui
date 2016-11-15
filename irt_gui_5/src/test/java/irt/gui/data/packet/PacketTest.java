@@ -17,7 +17,7 @@ public class PacketTest {
 
 	@Test
 	public void createNewPacketTest1() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		AttenuationPacket expecteds = new AttenuationPacket();
 		LinkedPacket actuals = (LinkedPacket) Packet.createNewPacket(AttenuationPacket.class, (Object[])null);
@@ -28,7 +28,7 @@ public class PacketTest {
 
 	@Test
 	public void createNewPacketTest2() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		FrequencyPacket expecteds = new FrequencyPacket();
 		LinkedPacket actuals = (LinkedPacket) Packet.createNewPacket(FrequencyPacket.class, (Object[])null);
@@ -39,7 +39,7 @@ public class PacketTest {
 
 	@Test
 	public void createNewPacketTest3() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		FrequencyPacket expecteds = new FrequencyPacket(2000000000L);
 		LinkedPacket actuals = (LinkedPacket) Packet.createNewPacket(FrequencyPacket.class, 2000000000L);
@@ -50,7 +50,7 @@ public class PacketTest {
 
 	@Test
 	public void createNewPacketTest4() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		final byte[] answer = new byte[]{(byte)0x7E, (byte)0xFE, 0x00, 0x00, 0x00, 0x03, 0x00, 0x0B, 0x02, 0x00, 0x00, 0x00, 0x08, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x77, 0x35, (byte)0x94, 0x00, 0x17, 0x5A, (byte)0x7E};
 		FrequencyPacket expecteds = new FrequencyPacket(answer, false);
@@ -62,7 +62,7 @@ public class PacketTest {
 
 	@Test
 	public void createNewPacketTest5() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		final byte[] answer = new byte[]{(byte)0x7E, (byte)0xFE, 0x00, 0x00, 0x00, 0x03, 0x00, 0x0B, 0x02, 0x00, 0x00, 0x00, 0x08, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x77, 0x35, (byte)0x94, 0x00, 0x17, 0x5A, (byte)0x7E};
 		FrequencyPacket expecteds = new FrequencyPacket(answer, false);

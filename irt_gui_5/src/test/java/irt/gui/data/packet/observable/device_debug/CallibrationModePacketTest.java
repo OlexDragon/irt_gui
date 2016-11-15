@@ -33,7 +33,7 @@ public class CallibrationModePacketTest {
 
 	@Test
 	public void testRequest() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		CallibrationModePacket packet = new CallibrationModePacket((CalibrationMode)null);
 		logger.trace(packet);
@@ -53,13 +53,13 @@ public class CallibrationModePacketTest {
 
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
 
-		logger.exit();
+		logger.traceExit();
 	
 	}
 
 	@Test
 	public void testCommandCallibrationModeOn() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		CalibrationMode mode = CalibrationMode.ON;
 		CallibrationModePacket packet = new CallibrationModePacket(mode);
@@ -80,12 +80,12 @@ public class CallibrationModePacketTest {
 
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	@Test
 	public void testCommandCallibrationModeOff() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		CalibrationMode mode = CalibrationMode.OFF;
 		CallibrationModePacket packet = new CallibrationModePacket(mode);
@@ -106,12 +106,12 @@ public class CallibrationModePacketTest {
 
 		assertTrue(Arrays.equals(packetAsBytes, bytes));
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	@Test
 	public void testObserver() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		CallibrationModePacket packet = new CallibrationModePacket((CalibrationMode)null);
 		packet.addObserver(new Observer() {
@@ -150,7 +150,7 @@ public class CallibrationModePacketTest {
 			logger.catching(e);
 		}
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	CalibrationMode calibrationMode = CalibrationMode.ON;
@@ -179,7 +179,7 @@ public class CallibrationModePacketTest {
 	};
 	@Test
 	public void testObserverSetOnOff() throws PacketParsingException, InterruptedException {
-		logger.entry();
+		logger.traceEntry();
 
 		LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
 
@@ -204,6 +204,6 @@ public class CallibrationModePacketTest {
 			logger.catching(e);
 		}
 
-		logger.exit();
+		logger.traceExit();
 	}
 }

@@ -60,7 +60,7 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 	}
 
 	protected void removeAllPackets(){
-		logger.entry();
+		logger.traceEntry();
 
 		packets
 		.parallelStream()

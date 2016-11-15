@@ -105,7 +105,7 @@ public class ComboBoxSerialPort extends Observable {
     }
 
 	synchronized public void openPort(){
-		logger.entry();
+		logger.traceEntry();
 
 		
 		if(serialPort!=null && !serialPort.isOpened()){

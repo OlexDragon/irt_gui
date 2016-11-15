@@ -29,7 +29,7 @@ public class SocketWorkerTest {
 
 	@Before
 	public void setup(){
-		logger.entry();
+		logger.traceEntry();
 		socketWorker = new SocketWorker();
 		socketWorker.startServer(COM_PORT);
 		serialPort = new LinkedPacketSender(COM_PORT);
@@ -44,7 +44,7 @@ public class SocketWorkerTest {
 
 	@Test
 	public void testPort() {
-		logger.entry();
+		logger.traceEntry();
 		final Integer expected = getSocketPort();
 		assertEquals(expected, socketWorker.getLocalPort());
 	}
@@ -56,7 +56,7 @@ public class SocketWorkerTest {
 
 	@Test
 	public void testCommunication() throws PacketParsingException, InterruptedException, JsonProcessingException {
-		logger.entry();
+		logger.traceEntry();
 		final ClientSocket clientSocket = socketWorker.getClientSocket(null, getSocketPort());
 		clientSocket.send(new InfoPacket());
 

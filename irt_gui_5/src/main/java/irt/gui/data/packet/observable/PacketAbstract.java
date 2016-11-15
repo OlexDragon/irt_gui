@@ -152,7 +152,7 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 				break;
 			}
 
-		return logger.exit(index);
+		return logger.traceExit(index);
 	}
 
 	@Override public LinkHeader getLinkHeader() {
