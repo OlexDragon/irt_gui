@@ -36,13 +36,13 @@ public class AverageDoubleTest {
 	private final PrologixPacket packetRead = new PReadPacket();
 	private final LinkedPacketsQueue queue = new LinkedPacketsQueue();
 	private final LinkedPacketSender serialPort = new LinkedPacketSender("COM7");
-	private final Observer observer = (o,arg)->{
-												ToolsPacket tp = (ToolsPacket)o;
-												String answer = new String(tp.getAnswer());
-												double d = Double.parseDouble(answer);
-												logger.trace(d);
-	};
-	private Future<Double> future;
+//	private final Observer observer = (o,arg)->{
+//												ToolsPacket tp = (ToolsPacket)o;
+//												String answer = new String(tp.getAnswer());
+//												double d = Double.parseDouble(answer);
+//												logger.trace(d);
+//	};
+//	private Future<Double> future;
 
 	public AverageDoubleTest() {
 		queue.setComPort(serialPort);
@@ -76,7 +76,8 @@ public class AverageDoubleTest {
 
 		try {
 			serialPort.openPort();
-			future = EXECUTOR.submit(new AverageDouble(tools, Commands.GET));
+//			future =
+					EXECUTOR.submit(new AverageDouble(tools, Commands.GET));
 
 		} catch (Exception e) {
 			logger.catching(e);

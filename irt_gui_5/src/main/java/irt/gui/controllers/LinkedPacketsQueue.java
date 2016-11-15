@@ -42,7 +42,7 @@ public class LinkedPacketsQueue implements Runnable {
 
 	@Override
 	public void run() {
-		logger.entry();
+		logger.traceEntry();
 
 		try {
 
@@ -76,7 +76,7 @@ public class LinkedPacketsQueue implements Runnable {
 			}
 		}
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	public synchronized void add(PacketToSend packet, boolean checkUnitAddress){

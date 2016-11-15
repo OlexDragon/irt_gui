@@ -216,7 +216,7 @@ public class PanelSignalGenerator implements Tool{
 	}
 
 	@FXML private void onActionSetRF() {
-		logger.entry();
+		logger.traceEntry();
 
 		if(comboBoxOutput.getSelectionModel().getSelectedItem()==null){
 			outPacket.addObserver(observerOutput);

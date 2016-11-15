@@ -213,7 +213,7 @@ public class LinkedPacketSender extends SerialPort {
 				}
 		};
 
-		return logger.exit(isReady);
+		return logger.traceExit(isReady);
 	}
 
 	@Override public synchronized boolean openPort() throws SerialPortException {

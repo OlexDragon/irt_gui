@@ -61,7 +61,7 @@ public class AlarmIDsPacketTest {
 
 	@Test
 	public void testObserver() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		AlarmIDsPacket packet = new AlarmIDsPacket();
 		packet.addObserver(new Observer() {
@@ -107,6 +107,6 @@ public class AlarmIDsPacketTest {
 			logger.catching(e);
 		}
 
-		logger.exit();
+		logger.traceExit();
 	}
 }

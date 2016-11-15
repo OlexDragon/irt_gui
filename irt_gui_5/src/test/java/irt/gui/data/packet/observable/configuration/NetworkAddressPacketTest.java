@@ -73,7 +73,7 @@ public class NetworkAddressPacketTest {
 
 	@Test
 	public void testObserver() throws PacketParsingException {
-		logger.entry();
+		logger.traceEntry();
 
 		NetworkAddressPacket packet = new NetworkAddressPacket((NetworkAddress)null);
 		packet.addObserver(new Observer() {
@@ -114,7 +114,7 @@ public class NetworkAddressPacketTest {
 			logger.catching(e);
 		}
 
-		logger.exit();
+		logger.traceExit();
 	}
 	@Test
 	public void equalsTest() throws PacketParsingException{
