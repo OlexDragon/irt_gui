@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="anchorPane" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.serial.port.controllers.SerialPortSelector">
+	<children>
+		<HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<children>
+            <fx:include fx:id="comboBoxSerialPort" source="ComboBoxSerialPort.fxml" />
+            <fx:include fx:id="openClosePortButton" source="ButtonOpenSerialPort.fxml" />
+				<fx:include fx:id="comboBoxUnitAddress" source="ComboBoxUnitAddress.fxml" />
+				<MenuButton mnemonicParsing="false">
+					<items>
+						<Menu fx:id="menuBaudrate" mnemonicParsing="false" text="%baudrate">
+							<items>
+							</items>
+						</Menu>
+						<MenuItem mnemonicParsing="false" onAction="#onActionScanUnitAddres" text="%address.scan" />
+                  <MenuItem mnemonicParsing="false" onAction="#onActionNetworkInfo" text="%network.info" />
+					</items>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+				</MenuButton>
+			</children>
+		</HBox>
+	</children>
+</AnchorPane>
