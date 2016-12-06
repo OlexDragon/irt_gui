@@ -1,0 +1,9 @@
+
+package irt.packet.interfaces;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public interface WaitTime {
+	@JsonIgnore
+	int getWaitTime();
+}
