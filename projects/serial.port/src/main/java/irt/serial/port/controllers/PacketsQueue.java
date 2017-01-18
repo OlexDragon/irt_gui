@@ -56,8 +56,9 @@ public class PacketsQueue implements Runnable {
 					if(runServer)
 						SOCKET.startServer(comPort.getPortName());
 
-					comPort.send(packet);
 					warnReported = false;
+					comPort.send(packet);
+
 				} else
 					stopServer("serialPort is closed");
 			} else{
@@ -79,6 +80,8 @@ public class PacketsQueue implements Runnable {
 	}
 
 	private void stopServer(String message) throws IOException {
+		logger.entry(message);
+
 		if(!warnReported){
 			logger.warn(message);
 			warnReported = true;

@@ -1,4 +1,4 @@
-package irt.fx.control.prologix.enums;
+package irt.data.prologix;
 public enum PrologixDeviceType {
 
 	DEVICE,

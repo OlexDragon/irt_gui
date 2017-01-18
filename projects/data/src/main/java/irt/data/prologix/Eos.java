@@ -1,4 +1,4 @@
-package irt.fx.control.prologix.enums;
+package irt.data.prologix;
 
 /** GPIB termination characters */
 public enum Eos{
@@ -16,5 +16,13 @@ public enum Eos{
 	@Override
 	public String toString() {
 		return eos;
+	}
+
+	public byte[] toBytes() {
+
+		if(this == NONE)
+			return null;
+
+		return eos.getBytes();
 	}
 }

@@ -7,6 +7,10 @@ import java.util.InputMismatchException;
 
 import org.junit.Test;
 
+import irt.data.prologix.Eos;
+import irt.data.prologix.PrologixCommands;
+import irt.data.prologix.PrologixDeviceType;
+
 public class PrologixCommandsTest {
 
 	@Test(expected=InputMismatchException.class)

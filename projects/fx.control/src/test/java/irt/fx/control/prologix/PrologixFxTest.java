@@ -14,26 +14,30 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 import org.testfx.framework.junit.ApplicationTest;
 
-import irt.fx.control.prologix.enums.PrologixCommands;
-import irt.fx.control.prologix.packets.PrologixAddrPacket;
-import irt.fx.control.prologix.packets.PrologixPacket;
-import irt.fx.control.prologix.packets.PrologixSaveCfgPacket;
+import irt.data.IrtGuiProperties;
+import irt.data.prologix.PrologixCommands;
+import irt.packet.prologix.PrologixAddrPacket;
+import irt.packet.prologix.PrologixPacket;
+import irt.packet.prologix.PrologixSaveCfgPacket;
+import irt.serial.port.enums.SerialPortStatus;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 public class PrologixFxTest extends ApplicationTest {
 	private final Logger logger = LogManager.getLogger();
+	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
 	private PrologixFx testNode;
 
@@ -43,9 +47,8 @@ public class PrologixFxTest extends ApplicationTest {
 	public void start(Stage stage) throws Exception {
 		logger.debug("****************************** Start Test ***************************************");
 
-		
 		testNode = new PrologixFx();
- 
+
 		Scene scene = new Scene(testNode);
 		stage.setScene(scene);
 		stage.show();
@@ -63,22 +66,30 @@ public class PrologixFxTest extends ApplicationTest {
 
 		assertTrue(button.isPresent());
 
-		final GridPane grid = (GridPane) lookup("#gridPane").query();
+		final AnchorPane anchorPane = (AnchorPane) lookup("#anchorPane").query();
 
-		assertFalse(grid.isVisible());
+		assertTrue(anchorPane.getChildren().isEmpty());
 
 		final Button b = button.get();
 
 		clickOn(b);
 
 		verifyThat(b, hasText("-"));
-		assertTrue(grid.isVisible());
+		assertFalse(anchorPane.getChildren().isEmpty());
 	}
 
 	@Test
 	public void labelsTest() throws InterruptedException, ExecutionException, TimeoutException {
 		logger.traceEntry();
 		setupTask.get(5, TimeUnit.SECONDS);
+
+		//add greadPane if not added
+		final AnchorPane anchorPane = (AnchorPane) lookup("#anchorPane").query();
+		if(anchorPane.getChildren().isEmpty()){
+			final Optional<Button> button = lookup(".button").queryAll().parallelStream().filter(hasText("+")::matches).map(Button.class::cast).findAny();
+			final Button b = button.get();
+			clickOn(b);
+		}
 
 		final Label lblAddr = lookup("#labelAddr").query();
 		final Label labelEoi = lookup("#labelEoi").query();
@@ -101,9 +112,11 @@ public class PrologixFxTest extends ApplicationTest {
 		assertEquals("Label", lblMode.getText());
 		FutureTask<Void> lblModeTask = addTextChangeListener(lblMode);
 
-		testNode.onActionGet();
+		testNode.onGet();
 
-		labelTest(lblAddr, "18", lblAddrTask);
+		final String addr = prefs.get("sgAddr", "18");
+
+		labelTest(lblAddr, addr, lblAddrTask);
 		labelTest(labelEoi, "true", labelEoiTask);
 		labelTest(labelReadAfterWrite, "false", labelReadAfterWriteTask);
 		labelTest(lblMode, "CONTROLLER", lblModeTask);
@@ -137,12 +150,16 @@ public class PrologixFxTest extends ApplicationTest {
 	public void sendCommandTest() throws InterruptedException, ExecutionException, TimeoutException{
 		logger.traceEntry();
 		setupTask.get(5, TimeUnit.SECONDS);
-
 		PrologixPacket packet = new PrologixSaveCfgPacket();
 		FutureTask<Void> task = new FutureTask<>(()->null);
 		packet.addObserver((o,arg)->new Thread(task ).start());
 		final PrologixCommands command = packet.getCommand();
 
+
+		if(testNode.getSerialPortStatus()!=SerialPortStatus.OPEND){
+			logger.error("Serial port is not open");
+			return;
+		}
 		//wait for initialization
 		while(command.getValue()!=null){
 			logger.trace(packet);

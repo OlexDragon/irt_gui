@@ -1,11 +1,12 @@
 
-package irt.fx.control.prologix.packets;
+package irt.packet.prologix;
 
 import java.util.Objects;
 import java.util.Observer;
 import java.util.Optional;
 
-import irt.fx.control.prologix.enums.PrologixCommands;
+import irt.data.prologix.Eos;
+import irt.data.prologix.PrologixCommands;
 import irt.packet.LinkHeader;
 import irt.packet.interfaces.PacketToSend;
 import irt.packet.interfaces.WaitTime;
@@ -105,10 +106,6 @@ public class PrologixPacket extends MyObservable implements PacketToSend, WaitTi
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 
-	@Override public String toString() {
-		return getClass().getSimpleName() + " [" + command + ", answer=" + ToHex.bytesToHex(answer) + "]";
-	}
-
 	@Override
 	public int getWaitTime() {
 		return command.getValue()==null && command.getOldValue()==null ? PROLOGIX_WAIT_TIME : 1;
@@ -116,6 +113,10 @@ public class PrologixPacket extends MyObservable implements PacketToSend, WaitTi
 
 	@Override
 	public byte[] getEndSequence() {
-		return "\r\n".getBytes();
+		return Eos.CR_LF.toBytes();
+	}
+
+	@Override public String toString() {
+		return getClass().getSimpleName() + " [" + command + ", answer=" + ToHex.bytesToHex(answer) + "]";
 	}
 }

@@ -2,7 +2,7 @@
 package irt.serial.port.listener;
 
 import irt.services.AddressIntegerStringConverter;
-import irt.services.NumericChecker;
+import irt.services.listeners.NumericChecker;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 
