@@ -1,5 +1,7 @@
 
-package irt.fx.control.prologix.enums;
+package irt.data.prologix;
+
+import org.apache.logging.log4j.LogManager;
 
 import irt.service.ObjectToEos;
 import irt.service.ObjectToNoValue;
@@ -62,6 +64,7 @@ public enum PrologixCommands{
 	}
 
 	public byte[] getCommand(){
+		LogManager.getLogger().error("{}: byte[] getCommand()", name());
 
 		final String str = command + castValue.toPrologixCode();
 		oldValue = castValue.setValue(null);
@@ -75,6 +78,6 @@ public enum PrologixCommands{
 
 	@Override
 	public String toString() {
-		return "command="+command + "; value=" + castValue.getValue() + "; oldValue=" + oldValue;
+		return "command="+ command + "; value=" + castValue.getValue() + "; oldValue=" + oldValue;
 	}
 }

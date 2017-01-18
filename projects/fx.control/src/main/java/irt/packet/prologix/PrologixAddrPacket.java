@@ -1,6 +1,6 @@
-package irt.fx.control.prologix.packets;
+package irt.packet.prologix;
 
-import irt.fx.control.prologix.enums.PrologixCommands;
+import irt.data.prologix.PrologixCommands;
 
 /**<b>8.1. addr</b>
 <p>The addr command is used to configure, or query the GPIB address. Meaning of the GPIB address depends on the operating mode of the controller. In CONTROLLER mode, it refers to the GPIB address of the instrument being controlled. In DEVICE mode, it is the address of the GPIB peripheral that Prologix GPIB-USB controller is emulating.</p>

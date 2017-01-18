@@ -1,33 +1,39 @@
 package irt.fx.control.prologix;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.fx.control.prologix.enums.PrologixDeviceType;
+import irt.data.prologix.PrologixDeviceType;
 import irt.fx.control.prologix.interfaces.Prologix;
-import irt.fx.control.prologix.packets.PrologixAddrPacket;
-import irt.fx.control.prologix.packets.PrologixEoiPacket;
-import irt.fx.control.prologix.packets.PrologixModePacket;
-import irt.fx.control.prologix.packets.PrologixPacket;
-import irt.fx.control.prologix.packets.PrologixReadAfterWritePacket;
-import irt.fx.control.prologix.packets.PrologixReadPacket;
-import irt.fx.control.prologix.packets.PrologixSaveCfgPacket;
 import irt.fx.control.serial.port.SerialPortFX;
+import irt.packet.ToolsComandsPacket;
 import irt.packet.interfaces.PacketToSend;
+import irt.packet.prologix.PrologixAddrPacket;
+import irt.packet.prologix.PrologixEoiPacket;
+import irt.packet.prologix.PrologixModePacket;
+import irt.packet.prologix.PrologixPacket;
+import irt.packet.prologix.PrologixReadAfterWritePacket;
+import irt.packet.prologix.PrologixReadPacket;
+import irt.packet.prologix.PrologixSaveCfgPacket;
 import irt.serial.port.enums.SerialPortStatus;
 import irt.services.MyThreadFactory;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
@@ -59,6 +65,7 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 	private final PrologixPacket packetEoi = new PrologixEoiPacket();
 	private final PrologixPacket packetRead = new PrologixReadPacket();
 
+	@FXML private AnchorPane anchorPane;
 	@FXML  private GridPane gridPane;
 
     @FXML private SerialPortFX serialPortFx;
@@ -75,7 +82,8 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 			final String text = Optional
 					.ofNullable(((PrologixPacket) o).getAnswer())
 					.map(PrologixDeviceType::valueOf)
-					.map(Objects::toString).orElse("No Answer");
+					.map(Objects::toString)
+					.orElse("No Answer");
 
 			Platform.runLater(() -> {
 				setText(labelOperatingMode, text);
@@ -119,10 +127,14 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 		o.deleteObservers();
 	};
 
+	private List<Consumer<Boolean>> statusChangeActions = new ArrayList<>();
+	private SerialPortStatus serialPortStatus = SerialPortStatus.NOT_SELECTED;		public SerialPortStatus getSerialPortStatus() { return serialPortStatus; }
+
 	@FXML public void initialize() {
 
 		serialPortFx.addObserver(this);
 		serialPortFx.initialize(PrologixFx.class.getSimpleName());
+		anchorPane.getChildren().remove(gridPane);
 //
 //		packetRead.addObserver((o,arg)->{
 //			LogManager.getLogger().error(o);
@@ -146,7 +158,7 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 									.orElse("No Answer");
 	}
 
-	@FXML public void onActionGet() {
+	@FXML public void onGet() {
 		logger.traceEntry();
 
 		packetMode.addObserver(oMode);
@@ -161,7 +173,7 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
     	send(packetSaveCfg);
     }
 
-	@FXML public void onActionPreset() {
+	@FXML public void onPreset() {
 		logger.traceEntry();
 
 		//Do not remember the configuration
@@ -176,49 +188,57 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 	}
 
     @FXML
-    void onActionShowGrid(ActionEvent e) {
+    void onShowGrid(ActionEvent e) {
 
-    	final boolean setVisible = !gridPane.isVisible();
-		gridPane.setVisible(setVisible);
+    	final ObservableList<Node> children = anchorPane.getChildren();
+		if(children.contains(gridPane)){
 
-		((Button)e.getSource()).setText(setVisible ? "-" : "+");
+			children.remove(gridPane);
+    		((Button)e.getSource()).setText("+");
+
+		}else{
+
+			children.add(gridPane);
+			((Button)e.getSource()).setText("-");
+		}
     }
 
-	public void send(PrologixPacket prologixPacket) {
+	public void send(PacketToSend prologixPacket) {
 		logger.entry(prologixPacket);
 
 		serialPortFx.queue.add(prologixPacket, false);
 	}
 
-	@Override synchronized public void send(String addr, PacketToSend packet) {
+	@Override public void send(String addr, PacketToSend packet) {
+		logger.entry(addr, packet);
 
-//		List<PacketToSend> ps = new ArrayList<>();
-//
-//		if(!addr.equals(labelAddr.getText())){
-//			Platform.runLater(()->labelAddr.setText(addr));
-//			packetAddr.getCommand().setValue(addr);
-//			ps.add(packetAddr);
-//		}
-//
-//		ps.add(packet);
-//
-//		try {
-//			final ToolsComandsPacket p = new ToolsComandsPacket(ps);
-//
-//			Optional
-//			.of(packet.getObservers())
-//			.filter(os->os.length>0)
-//			.ifPresent(os->{
-//				ps.add(packetRead);
-//				p.addObserver((o, arg)->packet.setAnswer(((PacketToSend)o).getAnswer()));
-//			});
-//
-//
-//			send(p);
-//
-//		} catch (Exception e) {
-//			logger.catching(e);
-//		}
+		List<PacketToSend> ps = new ArrayList<>();
+
+		// If necessary, set the address
+		if(!addr.equals(labelAddr.getText())){
+			Platform.runLater(()->labelAddr.setText(addr));
+			packetAddr.getCommand().setValue(addr);
+			ps.add(packetAddr);
+		}
+
+		ps.add(packet);
+
+		try {
+			final ToolsComandsPacket p = new ToolsComandsPacket(ps);
+
+			Optional
+			.of(packet.getObservers())
+			.filter(os->os.length>0)
+			.ifPresent(os->{
+				ps.add(packetRead);
+				p.addObserver((o, arg)->packet.setAnswer(((PacketToSend)o).getAnswer()));
+			});
+
+			send(p);
+
+		} catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	@Override public void setPrologixToListen() {
@@ -232,13 +252,25 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 		Optional
 		.ofNullable(arg)
 		.filter(SerialPortStatus.class::isInstance)
-		.filter(SerialPortStatus.OPEND::equals)
-		.ifPresent(s->{
-			onActionPreset();
+		.map(sps->(SerialPortStatus) sps)
+		.ifPresent(sps->{
+
+			serialPortStatus = sps;
+
+			boolean opend = sps == SerialPortStatus.OPEND;
+
+			if(opend)
+				onPreset();
+
+			statusChangeActions.parallelStream().forEach(a->a.accept(!opend));
 		});
 	}
 
 	public void claseSerialPort() {
 		serialPortFx.closePort();
+	}
+
+	public void addStatusChangeAction(Consumer<Boolean> consumer) {
+		statusChangeActions.add(consumer);
 	}
 }

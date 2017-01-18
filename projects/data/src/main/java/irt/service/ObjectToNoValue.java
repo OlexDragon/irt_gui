@@ -1,15 +1,17 @@
-
 package irt.service;
 
 import java.util.InputMismatchException;
 
-import irt.fx.control.prologix.enums.Eos;
 import irt.services.ObjectToAbstract;
 
-public class ObjectToNoValue extends ObjectToAbstract<Eos> {
+public class ObjectToNoValue extends ObjectToAbstract<Void> {
 
 	@Override
-	public Eos setValue(Object value) {
+	public Void setValue(Object value) {
+
+		if(value==null)
+			return null;
+
 		throw new InputMismatchException("This object do not accepts eny values.");
 	}
 

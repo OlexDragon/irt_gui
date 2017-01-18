@@ -200,13 +200,15 @@ public class PacketSender extends SerialPort {
 			int from = 0;
 			int to = readBytes.length - endBytes.length + 1;
 
-			return IntStream
+			return logger.traceExit(
+
+					IntStream
 					.range( from, to)
 					.map(i -> to - i + from - 1)
 					.mapToObj(i->Arrays.copyOfRange(readBytes, i, i+endBytes.length))
 					.filter(bs->Arrays.equals(bs, endBytes))
 					.findAny()
-					.isPresent();
+					.isPresent());
 		}
 	}
 

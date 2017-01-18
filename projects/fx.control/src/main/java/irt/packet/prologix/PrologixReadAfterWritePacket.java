@@ -1,7 +1,7 @@
 
-package irt.fx.control.prologix.packets;
+package irt.packet.prologix;
 
-import irt.fx.control.prologix.enums.PrologixCommands;
+import irt.data.prologix.PrologixCommands;
 
 /**
  * <b>8.2. auto</b>
