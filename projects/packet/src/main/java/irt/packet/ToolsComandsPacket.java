@@ -83,7 +83,7 @@ public class ToolsComandsPacket extends MyObservable implements PacketToSend, Wa
 
 	@Override
 	public int getWaitTime() {
-		return 10;
+		return packets.size() * 5;
 	}
 
 	@Override
