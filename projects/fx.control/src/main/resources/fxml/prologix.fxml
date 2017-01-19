@@ -14,7 +14,7 @@
                <children>
                   <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <center>
-                        <HBox spacing="5">
+                        <HBox fx:id="hBox" spacing="5">
                            <children>
                               <Label styleClass="head" text="Prologix" />
                               <Button mnemonicParsing="false" onAction="#onGet" text="Get" />

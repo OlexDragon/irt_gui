@@ -38,6 +38,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 
 public class PrologixFx extends AnchorPane implements Prologix, Observer {
 
@@ -66,7 +67,8 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 	private final PrologixPacket packetRead = new PrologixReadPacket();
 
 	@FXML private AnchorPane anchorPane;
-	@FXML  private GridPane gridPane;
+	@FXML private GridPane gridPane;
+	@FXML private HBox hBox;
 
     @FXML private SerialPortFX serialPortFx;
     @FXML private Label statusLabel;
@@ -135,10 +137,13 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 		serialPortFx.addObserver(this);
 		serialPortFx.initialize(PrologixFx.class.getSimpleName());
 		anchorPane.getChildren().remove(gridPane);
-//
-//		packetRead.addObserver((o,arg)->{
-//			LogManager.getLogger().error(o);
-//		});
+
+		disableButtons(serialPortFx.getSerialPortStatus()!=SerialPortStatus.OPEND);
+		statusChangeActions.add(comPrtNotOpend->disableButtons(comPrtNotOpend));
+	}
+
+	private void disableButtons(Boolean comPrtNotOpend) {
+		hBox.getChildren().parallelStream().filter(Button.class::isInstance).map(Button.class::cast).forEach(b->b.setDisable(comPrtNotOpend));
 	}
 
 	private void setText(Label label, final String text) {
@@ -216,7 +221,7 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 
 		// If necessary, set the address
 		if(!addr.equals(labelAddr.getText())){
-			Platform.runLater(()->labelAddr.setText(addr));
+			labelAddr.setText(addr);
 			packetAddr.getCommand().setValue(addr);
 			ps.add(packetAddr);
 		}
