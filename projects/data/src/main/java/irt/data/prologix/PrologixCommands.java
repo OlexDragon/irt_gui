@@ -1,8 +1,6 @@
 
 package irt.data.prologix;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.service.ObjectToEos;
 import irt.service.ObjectToNoValue;
 import irt.service.ObjectToPrologixDeviceType;
@@ -64,7 +62,6 @@ public enum PrologixCommands{
 	}
 
 	public byte[] getCommand(){
-		LogManager.getLogger().error("{}: byte[] getCommand()", name());
 
 		final String str = command + castValue.toPrologixCode();
 		oldValue = castValue.setValue(null);

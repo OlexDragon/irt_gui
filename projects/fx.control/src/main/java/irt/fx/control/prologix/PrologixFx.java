@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import irt.data.prologix.PrologixDeviceType;
 import irt.fx.control.prologix.interfaces.Prologix;
 import irt.fx.control.serial.port.SerialPortFX;
-import irt.packet.ToolsComandsPacket;
+import irt.packet.ToolsCommandsPacket;
 import irt.packet.interfaces.PacketToSend;
 import irt.packet.prologix.PrologixAddrPacket;
 import irt.packet.prologix.PrologixEoiPacket;
@@ -229,7 +229,7 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 		ps.add(packet);
 
 		try {
-			final ToolsComandsPacket p = new ToolsComandsPacket(ps);
+			final ToolsCommandsPacket p = new ToolsCommandsPacket(ps);
 
 			Optional
 			.of(packet.getObservers())

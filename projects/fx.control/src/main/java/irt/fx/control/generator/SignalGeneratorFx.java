@@ -15,6 +15,7 @@ import irt.data.IrtGuiProperties;
 import irt.data.tools.ToolsFrequency;
 import irt.data.tools.enums.FrequencyUnits;
 import irt.data.tools.enums.PowerUnits;
+import irt.data.tools.enums.SignalGenerators;
 import irt.data.tools.enums.ToolsPower;
 import irt.data.tools.enums.ToolsState;
 import irt.fx.control.prologix.PrologixFx;
@@ -33,23 +34,29 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 
 public class SignalGeneratorFx extends AnchorPane{
 
+	private static final String GENERATOR = "generator";
+
+	public static final String SG_ADDR = "sgAddr";
+
 	private Logger logger = LogManager.getLogger();
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
     @FXML private GridPane gridPane;
     @FXML private TextField textFieldAddress;
+    @FXML private ChoiceBox<SignalGenerators> choiceBoxModelSelect;
     @FXML private Label labelId;
     @FXML private TextField textFieldFrequency;
     @FXML private TextField textFieldPower;
-    @FXML private ComboBox<ToolsState> comboBoxOutput;
+    @FXML private ChoiceBox<ToolsState> choiceBoxOutput;
 
     private PrologixFx prologix;
 	private final ToolsPacket idPacket	= new ToolsIdPacket();
@@ -80,16 +87,30 @@ public class SignalGeneratorFx extends AnchorPane{
 
     @FXML private void initialize() {
 		new NumericChecker(textFieldAddress.textProperty());
-		final String addr = prefs.get("sgAddr", "19");
+		final String addr = prefs.get(SG_ADDR, "19");
 		textFieldAddress.setText(addr);
 		textFieldAddress.focusedProperty().addListener((observable, oldValue, newValue)->{
 			if(!newValue)
-				prefs.put("powerMeterAddr", textFieldAddress.getText());
+				prefs.put(SG_ADDR, textFieldAddress.getText());
 		});
 
-		comboBoxOutput.getItems().addAll(ToolsState.values());
-		onAction = comboBoxOutput.getOnAction();
-	}
+		choiceBoxOutput.getItems().addAll(ToolsState.values());
+		onAction = choiceBoxOutput.getOnAction();
+
+		choiceBoxModelSelect.getItems().addAll(SignalGenerators.values());
+		int index = prefs.getInt(GENERATOR, 0);
+		choiceBoxModelSelect.getSelectionModel().select(index);
+    }
+
+    @FXML void onSelectTool() {
+			SingleSelectionModel<SignalGenerators> selectionModel = choiceBoxModelSelect.getSelectionModel();
+			SignalGenerators selectedItem = selectionModel.getSelectedItem();
+			idPacket.updateCommand(selectedItem);
+			frPacket.updateCommand(selectedItem);
+			pwPacket.updateCommand(selectedItem);
+			outPacket.updateCommand(selectedItem);
+			prefs.putInt(GENERATOR, selectionModel.getSelectedIndex());
+    }
 
     @FXML void onGetAll() {
 		prologix.send(textFieldAddress.getText(), idPacket);
@@ -109,6 +130,10 @@ public class SignalGeneratorFx extends AnchorPane{
 		}));
 		prologix.send(textFieldAddress.getText(), frPacket);
 	}
+
+    @FXML void onRememberAddr() {
+    	prefs.put(SG_ADDR, textFieldAddress.getText());
+    }
 
 	private void setText(TextField textField, byte[] answer, Supplier<String> supplier) {
 
@@ -171,24 +196,24 @@ public class SignalGeneratorFx extends AnchorPane{
     @FXML void onGetRF() {
 		outPacket.addObserver((o,arg)->{
 
-			final ObservableList<String> styleClass = comboBoxOutput.getStyleClass();
+			final ObservableList<String> styleClass = choiceBoxOutput.getStyleClass();
 			outPacket.deleteObservers();
 			final byte[] answer = ((PacketToSend)o).getAnswer();
 
 			Platform.runLater(()->{
-				comboBoxOutput.setOnAction(null);
+				choiceBoxOutput.setOnAction(null);
 
 				if(answer!=null){
 					final ToolsState valueOf = ToolsState.valueOf(answer);
-					comboBoxOutput.getSelectionModel().select(valueOf);
+					choiceBoxOutput.getSelectionModel().select(valueOf);
 					styleClass.remove("error");
 
 				}else if(!styleClass.contains("error")){
-					comboBoxOutput.getSelectionModel().select(-1);
+					choiceBoxOutput.getSelectionModel().select(-1);
 					styleClass.add("error");
 				}
 
-				comboBoxOutput.setOnAction(onAction);
+				choiceBoxOutput.setOnAction(onAction);
 			});
 		});
 		prologix.send(textFieldAddress.getText(), outPacket);
@@ -197,7 +222,7 @@ public class SignalGeneratorFx extends AnchorPane{
     @FXML void onSetRF(){
 		logger.traceEntry();
 
-    	final int selectedIndex = comboBoxOutput.getSelectionModel().getSelectedIndex();
+    	final int selectedIndex = choiceBoxOutput.getSelectionModel().getSelectedIndex();
 
     	if(selectedIndex<0){
     		onGetRF();
@@ -205,7 +230,7 @@ public class SignalGeneratorFx extends AnchorPane{
     	}
 
     	try {
-			outPacket.getCommand().setValue(comboBoxOutput.getSelectionModel().getSelectedItem());
+			outPacket.getCommand().setValue(choiceBoxOutput.getSelectionModel().getSelectedItem());
 			prologix.send(textFieldAddress.getText(), outPacket);
 		} catch (UnsupportedDataTypeException e) {
 			logger.catching(e);

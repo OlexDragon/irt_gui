@@ -1,16 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
 
-<fx:root styleClass="border" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root styleClass="border" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <VBox spacing="3.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Label styleClass="head" text="Signal Generator" />
+            <BorderPane>
+               <left>
+                  <Label styleClass="head" text="Signal Generator" BorderPane.alignment="CENTER" />
+               </left>
+               <right>
+                  <ChoiceBox fx:id="choiceBoxModelSelect" onAction="#onSelectTool" BorderPane.alignment="CENTER" />
+               </right>
+            </BorderPane>
             <GridPane fx:id="gridPane" hgap="3.0" vgap="3.0">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" />
@@ -27,7 +42,7 @@
                <children>
                   <HBox fx:id="hbox">
                      <children>
-                        <TextField fx:id="textFieldAddress" maxWidth="-Infinity" prefWidth="50.0">
+                        <TextField fx:id="textFieldAddress" maxWidth="-Infinity" onAction="#onRememberAddr" prefWidth="50.0">
                            <tooltip>
                               <Tooltip text="Signal Generator Address" />
                            </tooltip>
@@ -53,7 +68,7 @@
                         <Tooltip text="Get Output" />
                      </tooltip>
                   </Button>
-                  <ComboBox fx:id="comboBoxOutput" onAction="#onSetRF" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                  <ChoiceBox fx:id="choiceBoxOutput" onAction="#onSetRF" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                   <Label text="Frequency" GridPane.rowIndex="1" />
                   <Label text="Power" GridPane.rowIndex="2" />
                   <Label text="Output" GridPane.rowIndex="3" />
