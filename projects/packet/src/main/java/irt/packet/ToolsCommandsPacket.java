@@ -12,12 +12,12 @@ import irt.services.ToHex;
 /**
  * 
  */
-public class ToolsComandsPacket extends MyObservable implements PacketToSend, WaitTime{
+public class ToolsCommandsPacket extends MyObservable implements PacketToSend, WaitTime{
 
 	private byte[] answer;
 	private List<PacketToSend> packets;
 
-	public ToolsComandsPacket(List<PacketToSend> packets) {
+	public ToolsCommandsPacket(List<PacketToSend> packets) {
 		this.packets = packets;
 	}
 
@@ -83,12 +83,12 @@ public class ToolsComandsPacket extends MyObservable implements PacketToSend, Wa
 
 	@Override
 	public int getWaitTime() {
-		return packets.size() * 5;
+		return packets.size() * 15;
 	}
 
 	@Override
 	public String toString() {
 		String commands = packets.stream().map(p->p.toString()).collect (Collectors.joining ("; "));
-		return "ToolsComandsPacket [commands=" + commands + ", answer=" + ToHex.bytesToHex(answer) + "]";
+		return "ToolsCommandsPacket [commands=" + commands + ", answer=" + ToHex.bytesToHex(answer) + "]";
 	}
 }

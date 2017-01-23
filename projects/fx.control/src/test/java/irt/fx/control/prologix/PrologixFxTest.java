@@ -23,6 +23,7 @@ import org.testfx.framework.junit.ApplicationTest;
 
 import irt.data.IrtGuiProperties;
 import irt.data.prologix.PrologixCommands;
+import irt.fx.control.generator.SignalGeneratorFx;
 import irt.packet.prologix.PrologixAddrPacket;
 import irt.packet.prologix.PrologixPacket;
 import irt.packet.prologix.PrologixSaveCfgPacket;
@@ -114,7 +115,7 @@ public class PrologixFxTest extends ApplicationTest {
 
 		testNode.onGet();
 
-		final String addr = prefs.get("sgAddr", "18");
+		final String addr = prefs.get(SignalGeneratorFx.SG_ADDR, "19");
 
 		labelTest(lblAddr, addr, lblAddrTask);
 		labelTest(labelEoi, "true", labelEoiTask);

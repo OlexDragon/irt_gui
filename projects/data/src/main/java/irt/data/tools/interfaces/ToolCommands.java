@@ -7,4 +7,5 @@ public interface ToolCommands {
 	byte[] getCommand();
 	void setValue(Object value) throws UnsupportedDataTypeException;
 	Object getValue();
+	String name();
 }

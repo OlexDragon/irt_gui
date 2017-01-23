@@ -1,21 +1,29 @@
 package irt.packet;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Objects;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import irt.data.prologix.Eos;
+import irt.data.tools.enums.SignalGenerators;
 import irt.data.tools.interfaces.ToolCommands;
 import irt.packet.interfaces.PacketToSend;
 import irt.packet.interfaces.WaitTime;
 import irt.services.MyObservable;
 
 public class ToolsPacket extends MyObservable implements PacketToSend, WaitTime {
+	private final Logger logger = LogManager.getLogger();
 
-	private static final int TOOLS_WAIT_TIME = 10;
+	private static final int TOOLS_WAIT_TIME = 5;
 	private ToolCommands command; 	public ToolCommands getCommand() { return command; }
 
 	private byte[] answer;
 
 	protected ToolsPacket(ToolCommands command) {
+		Objects.requireNonNull(command);
 		this.command = command;
 	}
 
@@ -84,5 +92,12 @@ public class ToolsPacket extends MyObservable implements PacketToSend, WaitTime 
 	@Override
 	public String toString() {
 		return getClass().getSimpleName() + " [command=" + command + "), answer=" + Arrays.toString(answer) + "]";
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void updateCommand(SignalGenerators signalGenerators){
+
+		Class<? extends ToolCommands> c = signalGenerators.commandEnumClass;
+		command = (ToolCommands) Enum.valueOf((Class<? extends Enum>) c, command.name());
 	}
 }

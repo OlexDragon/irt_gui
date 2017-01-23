@@ -4,23 +4,34 @@ import java.util.Optional;
 
 import javax.activation.UnsupportedDataTypeException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.data.prologix.Eos;
 import irt.data.tools.ToolsFrequency;
 import irt.data.tools.interfaces.ToolCommands;
 
-public enum SCPICommands implements ToolCommands{
+/**
+ * @category Hewlett Packard 83640N
+ * @since 10MHz-40MHz
+ * @category 8363B series swept signal generator
+ */
+public enum Commands83640B implements ToolCommands{
 
 	/** Identification */
 	ID		(	"*IDN"		, null),
 	OUTPUT	(	"OUTP:STAT"	, ToolsState		.class),
-	POWER	(	"POW:AMPL"	, ToolsPower		.class),
+	POWER	(	"POW:LEV"	, ToolsPower		.class),
 	FREQUENCY(	"FREQ:CW"	, ToolsFrequency	.class);
+	//IP- instrument preset; ST - sweep time; AT - attenuation
+
+	private Logger logger = LogManager.getLogger();
 
 	private String command;
 	private Class<?> clazz;
 	private Object value;
 
-	private SCPICommands(String command, Class<?> clazz){
+	private Commands83640B(String command, Class<?> clazz){
 		this.command = command;
 		this.clazz = clazz;
 	}
@@ -47,6 +58,8 @@ public enum SCPICommands implements ToolCommands{
 		}
 
 		value = null;
+
+		logger.trace("{}", sb);
 
 		sb.append(Eos.LF);
 
