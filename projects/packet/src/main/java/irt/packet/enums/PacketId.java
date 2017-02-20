@@ -1,6 +1,8 @@
 
 package irt.packet.enums;
 
+import java.util.Arrays;
+
 import irt.packet.PacketParsingException;
 
 public enum PacketId {
@@ -38,12 +40,14 @@ public enum PacketId {
 	//Converter
 	DEVICE_DEBAG_CONVERTER_DAC	(	PacketGroupId.DEVICE_DEBAG,		ParameterHeaderCode.DD_CONVERTER_DAC),
 	//Measurement
-	MEASUREMENT_TEMPERATURE		(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_TEMPERATURE),
+	MEASUREMENT_TEMPERATURE		(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_TEMPERATURE_UNIT),
 	MEASUREMENT_INPUT_POWER		(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_INPUT_POWER_BUC),
 	MEASUREMENT_INPUT_POWER_FCM	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_INPUT_POWER_FCM),
-	MEASUREMENT_OUTPUT_POWER	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_OUTPUT_POWER),
+	MEASUREMENT_OUTPUT_POWER	(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_OUTPUT_POWER_BUC),
 	MEASUREMENT_STATUS_BUC		(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_STATUS_BUC),
 	MEASUREMENT_STATUS_FCM		(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_STATUS_FCM),
+	MEASUREMENT_ALL_FCM			(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_MEASUREMENT_ALL_FCM),
+	MEASUREMENT_ALL_BUC			(	PacketGroupId.MEASUREMENT,		ParameterHeaderCode.M_MEASUREMENT_ALL_BUC),
 	//Production
 	PRODUCTION_INITIALIZE_BIASES(	PacketGroupId.PRODUCTION,		ParameterHeaderCode.PRODUCTION_INITIALIZE_BIASES),
 	PRODUCTION_UPDATE_FCM		(	PacketGroupId.PRODUCTION,		ParameterHeaderCode.PRODUCTION_CONNECT_FCM);
@@ -56,12 +60,21 @@ public enum PacketId {
 		this.parameterHeaderCode = parameterHeaderCode;
 	}
 
-	public ParameterHeaderCode valueOf(byte code) throws PacketParsingException {
-		for(ParameterHeaderCode phc:ParameterHeaderCode.values())
-			if(phc.getGroupId()==packetGroupId && phc.getValue()==code)
-				return phc;
+	public ParameterHeaderCode valueOf(final byte code){
 
-		throw new PacketParsingException("\n\tThe code(" + code + ") for packetGroupId(" + packetGroupId + ") do not exists");
+		return Arrays
+				.stream(ParameterHeaderCode.values())
+				.parallel()
+				.filter(phc->phc.getGroupId()==packetGroupId)
+				.filter(phc->phc.getValue()==code)
+				.findAny()
+				.orElseThrow(()->new PacketParsingException("\n\tThe code(" + code + ") for packetGroupId(" + packetGroupId + ") do not exists"));
+//
+//		for(ParameterHeaderCode phc:ParameterHeaderCode.values())
+//			if(phc.getGroupId()==packetGroupId && phc.getValue()==code)
+//				return phc;
+//
+//		throw new PacketParsingException("\n\tThe code(" + code + ") for packetGroupId(" + packetGroupId + ") do not exists");
 	}
 
 	@Override

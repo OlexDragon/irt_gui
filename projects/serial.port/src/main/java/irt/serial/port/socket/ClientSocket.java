@@ -72,6 +72,8 @@ public class ClientSocket implements Runnable{
 	}
 
 	public ClientSocket(String host, int port) {
+		logger.entry(host, port);
+
 		this.host = Optional.ofNullable(host).orElse(LOCALHOST);
 		this.port = port;
 		executorService.execute(this);
@@ -131,9 +133,10 @@ public class ClientSocket implements Runnable{
 		}
 
 		public void send(PacketToSend packet) throws JsonProcessingException {
-			packet.clearAnswer();
+			packet.clear();
 			final String packetAsString = mapper.writeValueAsString(packet);
 			printWriter.println(packetAsString);
+			logger.trace("Sent: {}", packetAsString);
 		}
 		
 	}

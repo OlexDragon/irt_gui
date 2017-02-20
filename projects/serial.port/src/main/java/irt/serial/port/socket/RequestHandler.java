@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import irt.packet.interfaces.LinkedPacket;
-import irt.serial.port.controllers.SerialPortSelector;
+import irt.services.GlobalPacketsQueues;
 
 public class RequestHandler implements Runnable {
 	Logger logger = LogManager.getLogger();
@@ -22,8 +22,11 @@ public class RequestHandler implements Runnable {
 
 	private Socket socket;
 
-	public RequestHandler(Socket socket) {
+	private String prefsName;
+
+	public RequestHandler(String prefsName, Socket socket) {
 		this.socket = socket;
+		this.prefsName = prefsName;
 	}
 
 	@Override
@@ -52,7 +55,7 @@ public class RequestHandler implements Runnable {
 							logger.catching(e);
 						}
 					});
-					SerialPortSelector.getQueue().add(packet, false);
+					GlobalPacketsQueues.get(prefsName).add(packet, false);
 				}
 			}
 		} catch (Exception e) {

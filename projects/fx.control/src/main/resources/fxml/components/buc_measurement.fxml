@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import irt.fx.control.buc.ButtonMuteFx?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<fx:root text="%monitor" type="TitledPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+	<content>
+		<GridPane hgap="3.0" vgap="3.0">
+			<children>
+
+				<ButtonMuteFx fx:id="buttonMute" />
+				<Label fx:id="lblMute" text="Mute Status" GridPane.columnIndex="6" />
+
+				<Label text="%power.input" GridPane.rowIndex="1" />
+				<Label fx:id="lblInputPower" text="input power" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+
+				<Label text="%power.output" GridPane.rowIndex="2" />
+				<Label fx:id="lblOutputPower" text="output power" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+
+				<Label text="%temperature.unit" GridPane.rowIndex="3" />
+				<Label fx:id="lblTmperatureUnit" text="unit temperature" GridPane.columnIndex="6" GridPane.rowIndex="3" />
+
+				<Label text="%temperature.cpu" GridPane.rowIndex="4" />
+				<Label fx:id="lblTemperatureCpu" text="temperature.cpu" GridPane.columnIndex="6" GridPane.rowIndex="4" />
+
+				<Label text="5.5V" GridPane.rowIndex="5" />
+				<Label fx:id="lbl5_5V" text="lbl5.5V" GridPane.columnIndex="6" GridPane.rowIndex="5" />
+
+				<Label text="13.2V" GridPane.rowIndex="6" />
+				<Label fx:id="lbl13_2V" text="lbl13.2V" GridPane.columnIndex="6" GridPane.rowIndex="6" />
+
+				<Label text="-13.2V" GridPane.rowIndex="7" />
+				<Label fx:id="lblNeg13_2V" text="lbl-13.2V" GridPane.columnIndex="6" GridPane.rowIndex="7" />
+
+				<Label text="%current.lnb" GridPane.rowIndex="8" />
+				<Label fx:id="lblLnbCurrent" text="current" GridPane.columnIndex="6" GridPane.rowIndex="8" />
+
+				<Label text="%status" GridPane.rowIndex="9" />
+				<Label fx:id="lblStatus" text="status" GridPane.columnIndex="6" GridPane.rowIndex="9">
+               <tooltip>
+                  <Tooltip fx:id="ttStatus" text="Empty Tooltip" />
+               </tooltip></Label>
+
+				<Label text="%attenuation" GridPane.rowIndex="10" />
+				<Label fx:id="lblAttenuation" text="attenuation" GridPane.columnIndex="6" GridPane.rowIndex="10" />
+
+				<Label text="%reference.source" GridPane.rowIndex="11" />
+				<Label fx:id="lblReferenceSource" text="reference source" GridPane.columnIndex="6" GridPane.rowIndex="11" />
+
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+				<Label text=":" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+			</children>
+			<columnConstraints>
+				<ColumnConstraints halignment="RIGHT" />
+				<ColumnConstraints />
+				<ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+            <ColumnConstraints />
+			</columnConstraints>
+			<rowConstraints>
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+				<RowConstraints />
+			</rowConstraints>
+		</GridPane>
+	</content>
+</fx:root>

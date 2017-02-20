@@ -1,6 +1,7 @@
 
 package irt.packet.observable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
+import irt.data.value.PacketDoubleValue;
 import irt.packet.LinkHeader;
 import irt.packet.Packet;
 import irt.packet.PacketHeader;
@@ -210,7 +212,7 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 		notifyObservers();
 	}
 
-	@Override public void clearAnswer() {
+	@Override public void clear() {
 		answer = null;
 	}
 
@@ -352,5 +354,18 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 	public String toString() {
 		return "\n\t" + getClass().getSimpleName()+ " [linkHeader=" + linkHeader + ", packetHeader=" + packetHeader + ", payloads=" + payloads + ", \n\t answer=" + ToHex.bytesToHex(answer) +
 				"\n\t toBytes()=" + ToHex.bytesToHex(toBytes()) + "]";
+	}
+
+	public PacketAbstract getAnswerPacket() throws InstantiationException, IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException, InvocationTargetException {
+		return getClass().getConstructor(byte[].class, Boolean.class).newInstance(getAnswer(), true);
+	}
+
+	public Optional<? extends Object> getPacketValue() {
+		return Optional
+				.of(payloads)
+				.filter(pls->!pls.isEmpty())
+				.map(pls->pls.get(0))
+				.map(pl->pl.getBuffer())
+				.map(b->new PacketDoubleValue(b, 10));
 	}
 }

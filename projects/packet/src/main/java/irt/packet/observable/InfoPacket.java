@@ -12,6 +12,7 @@ import irt.packet.PacketParsingException;
 import irt.packet.PacketProperties;
 import irt.packet.ParameterHeader;
 import irt.packet.Payload;
+import irt.packet.data.DeviceInfo;
 import irt.packet.enums.PacketErrors;
 import irt.packet.enums.PacketId;
 import irt.packet.enums.PacketType;
@@ -47,5 +48,13 @@ public class InfoPacket extends PacketAbstract implements WaitTime{
 	@Override
 	public int getWaitTime() {
 		return Packet.STANDARD_WAIT_TIME;
+	}
+
+	@Override
+	public Optional<? extends Object> getPacketValue() {
+		return Optional
+				.of(payloads)
+				.filter(pls->!pls.isEmpty())
+				.map(b->new DeviceInfo(InfoPacket.this));
 	}
 }

@@ -26,7 +26,8 @@ public class MutePacket extends PacketAbstract implements ConfigurationGroup{
 
 	public enum MuteStatus{
 		UNMUTED,
-		MUTED
+		MUTED,
+		UNKNOWN
 		
 	}
 

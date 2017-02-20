@@ -9,7 +9,7 @@ public class Commands83640BTest {
 	@Test
 	public void test() {
 		byte[] command = Commands83640B.FREQUENCY.getCommand();
-		assertEquals("FREQ:CW 950MHz\n", new String(command));
+		assertEquals("FREQ:CW?\n", new String(command));
 	}
 
 }

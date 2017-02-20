@@ -63,6 +63,7 @@ public class SignalGeneratorFx extends AnchorPane{
 	private final ToolsPacket frPacket	= new ToolsFrequencyPacket();
 	private final ToolsPacket pwPacket	= new ToolsPowerPacket();
 	private final ToolsPacket outPacket	= new ToolsOutputPacket();
+
 	private EventHandler<ActionEvent> onAction;
 
 	public SignalGeneratorFx() {
@@ -102,24 +103,27 @@ public class SignalGeneratorFx extends AnchorPane{
 		choiceBoxModelSelect.getSelectionModel().select(index);
     }
 
-    @FXML void onSelectTool() {
-			SingleSelectionModel<SignalGenerators> selectionModel = choiceBoxModelSelect.getSelectionModel();
-			SignalGenerators selectedItem = selectionModel.getSelectedItem();
-			idPacket.updateCommand(selectedItem);
-			frPacket.updateCommand(selectedItem);
-			pwPacket.updateCommand(selectedItem);
-			outPacket.updateCommand(selectedItem);
-			prefs.putInt(GENERATOR, selectionModel.getSelectedIndex());
+    @FXML private void onSelectTool() {
+
+    	SingleSelectionModel<SignalGenerators> selectionModel = choiceBoxModelSelect.getSelectionModel();
+    	SignalGenerators selectedItem = selectionModel.getSelectedItem();
+
+    	idPacket.updateCommand(selectedItem);
+    	frPacket.updateCommand(selectedItem);
+    	pwPacket.updateCommand(selectedItem);
+    	outPacket.updateCommand(selectedItem);
+
+    	prefs.putInt(GENERATOR, selectionModel.getSelectedIndex());
     }
 
-    @FXML void onGetAll() {
+    @FXML private void onGetAll() {
 		prologix.send(textFieldAddress.getText(), idPacket);
 		onGetFrequency();
 		onGetPower();
 		onGetRF();
     }
 
-	@FXML void onGetFrequency() {
+	@FXML private void onGetFrequency() {
 		logger.traceEntry();
 		frPacket.addObserver((o,arg)->Platform.runLater(()->{
 
@@ -131,7 +135,7 @@ public class SignalGeneratorFx extends AnchorPane{
 		prologix.send(textFieldAddress.getText(), frPacket);
 	}
 
-    @FXML void onRememberAddr() {
+    @FXML private void onRememberAddr() {
     	prefs.put(SG_ADDR, textFieldAddress.getText());
     }
 
@@ -148,7 +152,7 @@ public class SignalGeneratorFx extends AnchorPane{
 				styleClass.add("error");
 	}
 
-    @FXML void onSetFrequency() {
+    @FXML private void onSetFrequency() {
     	final String text = textFieldFrequency.getText();
 
     	if(text.isEmpty() || !text.matches(".*\\d+.*")){
@@ -165,7 +169,7 @@ public class SignalGeneratorFx extends AnchorPane{
 		prologix.send(textFieldAddress.getText(), frPacket);
     }
 
-    @FXML void onGetPower() {
+    @FXML private void onGetPower() {
 		pwPacket.addObserver((o,arg)->{
 
 			pwPacket.deleteObservers();
@@ -176,7 +180,7 @@ public class SignalGeneratorFx extends AnchorPane{
 		prologix.send(textFieldAddress.getText(), pwPacket);
     }
 
-    @FXML void onSetPower() {
+    @FXML private void onSetPower() {
     	final String text = textFieldPower.getText();
 
     	if(text.isEmpty() || !text.matches(".*\\d+.*")){
@@ -193,7 +197,7 @@ public class SignalGeneratorFx extends AnchorPane{
 		prologix.send(textFieldAddress.getText(), pwPacket);
     }
 
-    @FXML void onGetRF() {
+    @FXML private void onGetRF() {
 		outPacket.addObserver((o,arg)->{
 
 			final ObservableList<String> styleClass = choiceBoxOutput.getStyleClass();
@@ -219,7 +223,7 @@ public class SignalGeneratorFx extends AnchorPane{
 		prologix.send(textFieldAddress.getText(), outPacket);
     }
 
-    @FXML void onSetRF(){
+    @FXML private void onSetRF(){
 		logger.traceEntry();
 
     	final int selectedIndex = choiceBoxOutput.getSelectionModel().getSelectedIndex();
@@ -240,12 +244,12 @@ public class SignalGeneratorFx extends AnchorPane{
     public void setPrologix(PrologixFx prologix){
     	this.prologix = prologix;
 
-    	final Consumer<Boolean> consumer = comPrtNotOpend-> gridPane.getChildren().parallelStream().filter(Button.class::isInstance).map(Button.class::cast).forEach(b->b.setDisable(comPrtNotOpend));
+    	final Consumer<SerialPortStatus> consumer = comPrtNotOpend-> gridPane.getChildren().parallelStream().filter(Button.class::isInstance).map(Button.class::cast).forEach(b->b.setDisable(comPrtNotOpend!=SerialPortStatus.OPEND));
 
     	//Status change action
-    	prologix.addStatusChangeAction(consumer);
+    	prologix.addSerialPortStatusChangeAction(consumer);
 
     	//set current status
-    	consumer.accept(prologix.getSerialPortStatus() != SerialPortStatus.OPEND);
+    	consumer.accept(prologix.getSerialPortStatus());
     }
 }

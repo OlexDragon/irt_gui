@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import java.lang.*?>
-<?import javafx.scene.layout.*?>
+<?import irt.serial.port.fx.ButtonOpenSerialPortFX?>
+<?import irt.serial.port.fx.ComboBoxSerialPortFx?>
+<?import irt.serial.port.fx.ComboBoxUnitAddressFx?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 
-<AnchorPane fx:id="anchorPane" stylesheets="@../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.serial.port.controllers.SerialPortSelector">
+<fx:root stylesheets="@../styles/Styles.css" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
 	<children>
 		<HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<children>
-            <fx:include fx:id="comboBoxSerialPort" source="ComboBoxSerialPort.fxml" />
-            <fx:include fx:id="openClosePortButton" source="ButtonOpenSerialPort.fxml" />
-				<fx:include fx:id="comboBoxUnitAddress" source="ComboBoxUnitAddress.fxml" />
+            <ComboBoxSerialPortFx fx:id="comboBoxSerialPort" />
+            <ButtonOpenSerialPortFX fx:id="openClosePortButton" />
+				<ComboBoxUnitAddressFx fx:id="comboBoxUnitAddress" />
 				<MenuButton mnemonicParsing="false">
 					<items>
 						<Menu fx:id="menuBaudrate" mnemonicParsing="false" text="%baudrate">
@@ -28,4 +33,4 @@
 			</children>
 		</HBox>
 	</children>
-</AnchorPane>
+</fx:root>

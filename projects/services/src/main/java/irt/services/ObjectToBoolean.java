@@ -2,6 +2,7 @@
 package irt.services;
 
 import java.util.InputMismatchException;
+import java.util.Optional;
 
 public class ObjectToBoolean extends ObjectToAbstract<Boolean> {
 
@@ -46,6 +47,16 @@ public class ObjectToBoolean extends ObjectToAbstract<Boolean> {
 
 		final Boolean v = getValue();
 		return v==null ? "" : (" " + (v ? '1' : '0'));
+	}
+
+	@Override
+	public Boolean getValue(byte... bs) {
+		return Optional
+				.ofNullable(bs)
+				.map(String::new)
+				.map(String::trim)
+				.map(s->s.equals("1"))
+				.orElse(null);
 	}
 
 }

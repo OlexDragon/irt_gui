@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,6 +19,8 @@ public class IrtGuiProperties {
 	private static final Logger logger = LogManager.getLogger();
 
 	public static final String PREFS_NAME = "IRT Technologies inc.";
+
+	public static final ResourceBundle BUNDLE = ResourceBundle.getBundle("bundles/bundle");
 
 	public static final String 	USER_HOME 			= System.getProperty("user.home");
 	public static final File 	IRT_HOME			= new File(USER_HOME, "irt") ;
@@ -99,7 +102,7 @@ public class IrtGuiProperties {
 	}
 
 	public static void reload() throws IOException {
-		final InputStream resource = IrtGuiProperties.class.getResourceAsStream("/gui5.properties");
+		final InputStream resource = IrtGuiProperties.class.getResourceAsStream("/gui.properties");
 		properties.load(resource);
 
 		Optional

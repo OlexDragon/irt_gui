@@ -60,7 +60,7 @@ public class ToolsPacket extends MyObservable implements PacketToSend, WaitTime 
 	}
 
 	@Override
-	public void clearAnswer() {
+	public void clear() {
 		answer = null;
 	}
 

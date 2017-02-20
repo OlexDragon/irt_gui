@@ -46,7 +46,7 @@ public class ToolsCommandsPacket extends MyObservable implements PacketToSend, W
 	}
 
 	@Override
-	public void clearAnswer() {
+	public void clear() {
 		answer = null;
 	}
 

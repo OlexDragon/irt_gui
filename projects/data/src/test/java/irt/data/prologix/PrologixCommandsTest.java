@@ -9,30 +9,47 @@ public class PrologixCommandsTest {
 
 	@Test public void addrTest() {
 
-		assertNull(PrologixCommands.ADDR.getValue());
-		assertNull(PrologixCommands.ADDR.getOldValue());
+		final PrologixCommands addr = PrologixCommands.ADDR;
 
-		PrologixCommands.ADDR.setValue("19");
-		String string = PrologixCommands.ADDR.toString();
+		assertNull(addr.getValue());
+		assertNull(addr.getOldValue());
+
+		addr.setValue("19");
+		String string = addr.toString();
 
 		assertEquals("command=++addr; value=19; oldValue=null", string);
-		assertEquals(19, PrologixCommands.ADDR.getValue());
-		assertNull(PrologixCommands.ADDR.getOldValue());
+		assertEquals(19, addr.getValue());
+		assertNull(addr.getOldValue());
 
-		PrologixCommands.ADDR.setValue("17");
-		string = PrologixCommands.ADDR.toString();
+		addr.setValue("17");
+		string = addr.toString();
 
 		assertEquals("command=++addr; value=17; oldValue=null", string);
-		assertEquals(17, PrologixCommands.ADDR.getValue());
-		assertNull(PrologixCommands.ADDR.getOldValue());
+		assertEquals(17, addr.getValue());
+		assertNull(addr.getOldValue());
 
-		final byte[] command = PrologixCommands.ADDR.getCommand();
-		string = PrologixCommands.ADDR.toString();
+		final byte[] command = addr.getCommand();
+		string = addr.toString();
 
 		assertEquals("++addr 17\n", new String(command));
 		assertEquals("command=++addr; value=null; oldValue=17", string);
-		assertNull(PrologixCommands.ADDR.getValue());
-		assertEquals(17, PrologixCommands.ADDR.getOldValue());
+		assertNull(addr.getValue());
+		assertEquals(17, addr.getOldValue());
 	}
 
+	@Test public void savecfgTest() {
+
+		final PrologixCommands savecfg = PrologixCommands.SAVECFG;
+
+		assertNull(savecfg.getValue());
+		assertNull(savecfg.getOldValue());
+
+		savecfg.setValue(null);
+		assertNull(savecfg.getValue());
+		assertNull(savecfg.getOldValue());
+
+		savecfg.getCommand();
+		assertNull(savecfg.getValue());
+		assertNull(savecfg.getOldValue());
+	}
 }

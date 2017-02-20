@@ -43,7 +43,7 @@ public class PacketSender extends SerialPort {
 	}
 
 	public void send(PacketToSend packet){
-		logger.entry(packet);
+		logger.traceEntry(()->packet.toString());
 
 		if(!run) return;
 
@@ -54,13 +54,15 @@ public class PacketSender extends SerialPort {
 			if(!isOpened())
 				openPort();
 
-			packet.clearAnswer();
+			packet.clear();
 			if(writePacket(packet)){
 
 				if(packet.getObservers().length>0){
 
 					if(packet instanceof WaitTime)
 						waitTime = ((WaitTime)packet).getWaitTime();
+
+					logger.trace("waitTime = {}", waitTime);
 
 					byte[] readBytes = readBytes(waitTime, packet.getEndSequence());
 
@@ -73,7 +75,7 @@ public class PacketSender extends SerialPort {
 				}
 			}else{
 				packet.setAnswer(null);
-				logger.warn("packet.toBytes() return null. {}", packet);
+				logger.warn("packet.toBytes() return null. {}", ()->packet.toString());
 			}
 
 		} catch (Exception e) {
@@ -103,7 +105,6 @@ public class PacketSender extends SerialPort {
 	private boolean writePacket(PacketToSend packet) throws SerialPortException {
 
 		byte[] buffer = packet.toBytes();
-		logger.trace("{}", ()->ToHex.bytesToHex(buffer));
 
 		final Optional<byte[]> d = Optional
 		.ofNullable(buffer)
@@ -111,6 +112,7 @@ public class PacketSender extends SerialPort {
 
 		if(d.isPresent()){
 			clear();
+			logger.trace("{}", ()->ToHex.bytesToHex(buffer));
 			return writeBytes(buffer);
 		}
 
@@ -134,6 +136,8 @@ public class PacketSender extends SerialPort {
 	}
 
 	public byte[] clear() throws SerialPortException {
+		logger.traceEntry();
+
 		byte[] readBytes = null;
 		if (wait(1, 20)){
 			do {
@@ -260,15 +264,9 @@ public class PacketSender extends SerialPort {
 		return isOpened;
 	}
 
-	@Override public boolean closePort() throws SerialPortException{
+	@Override public synchronized boolean closePort() throws SerialPortException{
 
-		boolean isClosed = true;
-
-		if (isOpened()) {
-			isClosed = super.closePort();
-		}
-
-		return isClosed;
+		return isOpened() ? super.closePort() : true;
 	}
 
 	public static Baudrate getBaudrate() {
