@@ -2,18 +2,17 @@ package irt.fx.control.prologix;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.prologix.PrologixCommands;
 import irt.data.prologix.PrologixDeviceType;
 import irt.fx.control.prologix.interfaces.Prologix;
 import irt.fx.control.serial.port.SerialPortFX;
@@ -26,8 +25,11 @@ import irt.packet.prologix.PrologixPacket;
 import irt.packet.prologix.PrologixReadAfterWritePacket;
 import irt.packet.prologix.PrologixReadPacket;
 import irt.packet.prologix.PrologixSaveCfgPacket;
+import irt.serial.port.controllers.PacketsQueue;
 import irt.serial.port.enums.SerialPortStatus;
-import irt.services.MyThreadFactory;
+import irt.serial.port.fx.ComboBoxSerialPortFx;
+import irt.services.GlobalPacketsQueues;
+import irt.services.listeners.NumericChecker;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -35,14 +37,25 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.util.StringConverter;
 
+/**
+ * public class PrologixFx extends AnchorPane implements Prologix, Observer {}
+ */
 public class PrologixFx extends AnchorPane implements Prologix, Observer {
 
+	private final Logger logger = LogManager.getLogger();
+
+	public static final String KEY = PrologixFx.class.getSimpleName();
+
 	public PrologixFx() {
+		logger.traceEntry();
 
     	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/prologix.fxml"));
         fxmlLoader.setRoot(this);
@@ -53,18 +66,17 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
+		logger.traceExit();
 	}
 
-	private final Logger logger = LogManager.getLogger();
+//	private final ExecutorService executor = Executors.newSingleThreadExecutor(new MyThreadFactory());
 
-	private final ExecutorService executor = Executors.newSingleThreadExecutor(new MyThreadFactory());
-
-	private final PrologixPacket packetMode = new PrologixModePacket();
-	private final PrologixPacket packetAddr = new PrologixAddrPacket();
-	private final PrologixPacket packetSaveCfg = new PrologixSaveCfgPacket();
-	private final PrologixPacket packetReadAfterWrite = new PrologixReadAfterWritePacket();
-	private final PrologixPacket packetEoi = new PrologixEoiPacket();
-	private final PrologixPacket packetRead = new PrologixReadPacket();
+	private final PrologixPacket packetMode 			= new PrologixModePacket();
+	private final PrologixPacket packetAddr 			= new PrologixAddrPacket();
+	private final PrologixPacket packetReadAfterWrite 	= new PrologixReadAfterWritePacket();
+	private final PrologixPacket packetEoi 				= new PrologixEoiPacket();
+	private final PrologixPacket packetRead 			= new PrologixReadPacket();
+	private final PrologixPacket packetSaveCfg 			= new PrologixSaveCfgPacket();
 
 	@FXML private AnchorPane anchorPane;
 	@FXML private GridPane gridPane;
@@ -78,103 +90,62 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 	@FXML private Label labelReadAfterWrite;
 	@FXML private Label labelEoi;
 
-	private final Observer oMode = (o, arg) -> {
-		executor.execute(() -> {
+    @FXML private ChoiceBox<PrologixCommands> choiceCommand;
+    @FXML private TextField tfValue;
+    @FXML private Button btnSend;
+    @FXML private Label lblResult;
 
-			final String text = Optional
-					.ofNullable(((PrologixPacket) o).getAnswer())
-					.map(PrologixDeviceType::valueOf)
-					.map(Objects::toString)
-					.orElse("No Answer");
-
-			Platform.runLater(() -> {
-				setText(labelOperatingMode, text);
-			});
-		});
-		o.deleteObservers();
-	};
-	private final Observer oAddr = (o, arg) -> {
-		executor.execute(() -> {
-			final String addr = Optional
-					.ofNullable(((PrologixPacket) o).getAnswer())
-					.map(String::new)
-					.map(String::trim)
-					.orElse("No Answer");
-			Platform.runLater(() -> setText(labelAddr, addr));
-		});
-		o.deleteObservers();
-	};
-	private final Observer oSaveCfg = (o, arg) -> {
-		executor.execute(() -> {
-
-			final String text = booleanToString(o);
-			Platform.runLater(() -> setText(labelSaveCfg, text));
-		});
-		o.deleteObservers();
-	};
-	private final Observer oReadAfterWrite = (o, arg) -> {
-		executor.execute(() -> {
-
-			final String text = booleanToString(o);
-			Platform.runLater(() -> setText(labelReadAfterWrite, text));
-		});
-		o.deleteObservers();
-	};
-	private final Observer oEoi = (o, arg) -> {
-		executor.execute(() -> {
-
-			final String text = booleanToString(o);
-			Platform.runLater(() -> setText(labelEoi, text));
-		});
-		o.deleteObservers();
-	};
-
-	private List<Consumer<Boolean>> statusChangeActions = new ArrayList<>();
+	private List<Consumer<SerialPortStatus>> statusChangeActions = new ArrayList<>();
 	private SerialPortStatus serialPortStatus = SerialPortStatus.NOT_SELECTED;		public SerialPortStatus getSerialPortStatus() { return serialPortStatus; }
 
 	@FXML public void initialize() {
+		logger.traceEntry();
+
+		new NumericChecker(labelAddr.textProperty());
 
 		serialPortFx.addObserver(this);
-		serialPortFx.initialize(PrologixFx.class.getSimpleName());
+		serialPortFx.initialize(KEY);
 		anchorPane.getChildren().remove(gridPane);
 
-		disableButtons(serialPortFx.getSerialPortStatus()!=SerialPortStatus.OPEND);
-		statusChangeActions.add(comPrtNotOpend->disableButtons(comPrtNotOpend));
+		disableButtons(serialPortFx.getSerialPortStatus());
+		statusChangeActions.add(sps->disableButtons(sps));
+
+		choiceCommand.setConverter(new StringConverter<PrologixCommands>() {
+			
+			@Override
+			public String toString(PrologixCommands object) {
+				return object.name();
+			}
+			
+			@Override
+			public PrologixCommands fromString(String string) {
+				// TODO Auto-generated method stub
+				throw new UnsupportedOperationException("Auto-generated method stub");
+			}
+		});
+		final PrologixCommands[] values = PrologixCommands.values();
+		Arrays.sort(values, (a, b)->a.name().compareTo(b.name()));
+		choiceCommand.getItems().addAll(values);
 	}
 
-	private void disableButtons(Boolean comPrtNotOpend) {
-		hBox.getChildren().parallelStream().filter(Button.class::isInstance).map(Button.class::cast).forEach(b->b.setDisable(comPrtNotOpend));
-	}
-
-	private void setText(Label label, final String text) {
-		logger.entry(text);
-
-		if(!text.equals(label.getText()))
-			label.setText(text);
-	}
-
-	private String booleanToString(Observable o) {
-		return Optional
-									.ofNullable(((PrologixPacket) o).getAnswer())
-									.map(String::new)
-									.map(String::trim)
-									.map(s->s.equals("1"))
-									.map(Objects::toString)
-									.orElse("No Answer");
+	private void disableButtons(SerialPortStatus serialPortStatus) {
+		hBox.getChildren().parallelStream().filter(Button.class::isInstance).map(Button.class::cast).forEach(b->b.setDisable(serialPortStatus!=SerialPortStatus.OPEND));
 	}
 
 	@FXML public void onGet() {
 		logger.traceEntry();
 
-		packetMode.addObserver(oMode);
+		Optional.ofNullable(serialPortFx.getSerialPort()).filter(sp->sp.isOpened()).orElseThrow(()->new RuntimeException("Serial port is not Opend."));
+
+		packetMode			.addObserver(new AnswerParser(labelOperatingMode));
 	   	send(packetMode);
-	   	packetAddr.addObserver(oAddr);
+	   	packetAddr			.addObserver(new AnswerParser(labelAddr));
     	send(packetAddr);
-    	packetEoi.addObserver(oEoi);
+    	packetEoi			.addObserver(new AnswerParser(labelEoi));
     	send(packetEoi);
-    	packetReadAfterWrite.addObserver(oReadAfterWrite);
+    	packetReadAfterWrite.addObserver(new AnswerParser(labelReadAfterWrite));
     	send(packetReadAfterWrite);
-    	packetSaveCfg.addObserver(oSaveCfg);
+    	packetSaveCfg		.addObserver(new AnswerParser(labelSaveCfg));
     	send(packetSaveCfg);
     }
 
@@ -208,10 +179,48 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 		}
     }
 
-	public void send(PacketToSend prologixPacket) {
-		logger.entry(prologixPacket);
+    @FXML void onSendCommand() {
+    	logger.traceEntry();
+    	lblResult.setText(null);
 
-		serialPortFx.queue.add(prologixPacket, false);
+    	final PrologixCommands selectedItem = choiceCommand.getSelectionModel().getSelectedItem();
+
+    	if(selectedItem==null)
+    		return;
+
+    	try{
+    		selectedItem.setValue(tfValue.getText());
+    	}catch (Exception e) {
+    		logger.catching(e);
+    		lblResult.setText(e.getLocalizedMessage());
+    		selectedItem.setValue(null);
+    	}
+
+
+		String text = Optional.ofNullable(selectedItem.getValue()).map(Object::toString).orElse(null);
+		Platform.runLater(()->tfValue.setText(text));
+		final PrologixPacket prologixPacket = new PrologixPacket(selectedItem);
+
+		if(text == null)
+			prologixPacket.addObserver((o, arg)->Platform.runLater(()->lblResult.setText(Optional.ofNullable(((PrologixPacket)o).parseAnswer()).map(Object::toString).orElse(null))));
+
+		else
+			Platform.runLater(()->lblResult.setText(text));
+
+		send(prologixPacket);
+
+		Platform.runLater(()->tfValue.setText(null));
+    }
+
+	public boolean send(PacketToSend prologixPacket) {
+
+		String prefsName = serialPortFx.getPrefsName();
+
+		logger.trace("prefsName: {}; prologixPacket: {}", prefsName, prologixPacket);
+
+		PacketsQueue queue = GlobalPacketsQueues.get(prefsName);
+
+		return queue.add(prologixPacket, false);
 	}
 
 	@Override public void send(String addr, PacketToSend packet) {
@@ -253,21 +262,20 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 
 	@Override
 	public void update(Observable o, Object arg) {
-		logger.entry(o, arg);
+		logger.entry(arg);
+
 		Optional
 		.ofNullable(arg)
-		.filter(SerialPortStatus.class::isInstance)
-		.map(sps->(SerialPortStatus) sps)
+		.filter(ComboBoxSerialPortFx.class::isInstance)
+		.map(sps->((ComboBoxSerialPortFx) sps).getSerialPortStatus())
 		.ifPresent(sps->{
 
 			serialPortStatus = sps;
 
-			boolean opend = sps == SerialPortStatus.OPEND;
-
-			if(opend)
+			if(sps == SerialPortStatus.OPEND)
 				onPreset();
 
-			statusChangeActions.parallelStream().forEach(a->a.accept(!opend));
+			statusChangeActions.parallelStream().forEach(a->a.accept(sps));
 		});
 	}
 
@@ -275,7 +283,34 @@ public class PrologixFx extends AnchorPane implements Prologix, Observer {
 		serialPortFx.closePort();
 	}
 
-	public void addStatusChangeAction(Consumer<Boolean> consumer) {
+	public void addSerialPortStatusChangeAction(Consumer<SerialPortStatus> consumer) {
 		statusChangeActions.add(consumer);
+		consumer.accept(serialPortStatus);
+	}
+
+	private class AnswerParser implements Observer{
+
+		private Label label;
+
+		public AnswerParser(Label label) {
+			this.label = label;
+		}
+
+		@Override
+		public void update(Observable o, Object arg) {
+			logger.entry( o, arg);
+
+			final String text = Optional
+					.ofNullable(((PrologixPacket) o).parseAnswer())
+					.map(Object::toString)
+					.orElse("No Answer");
+
+			Platform.runLater(() -> {
+				if(!text.equals(label.getText()))
+					label.setText(text);
+				});
+			o.deleteObservers();
+		}
+		
 	}
 }

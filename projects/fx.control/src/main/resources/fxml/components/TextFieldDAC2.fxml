@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<TextField fx:id="textField" onAction="#onActionTextField" prefColumnCount="5" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.TextFieldDAC2">
+   <contextMenu>
+      <ContextMenu>
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#onActionRemove" text="Remove" />
+        </items>
+      </ContextMenu>
+   </contextMenu>
+</TextField>

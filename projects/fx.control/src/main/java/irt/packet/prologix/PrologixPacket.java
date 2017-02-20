@@ -56,13 +56,11 @@ public class PrologixPacket extends MyObservable implements PacketToSend, WaitTi
 
 	@Override
 	public int hashCode() {
-		int hc = Optional
+		return 31 + Optional
 					.ofNullable(command)
 					.map(c->c.hashCode())
-					.map(h->h + (command.getValue()==null ? 0 : command.getValue().hashCode()))
+					.map(h->h + Optional.ofNullable(command.getValue()).map(v->v.hashCode()).orElse(0))
 					.orElse(0);
-
-		return 31 + hc;
 	}
 
 	@Override
@@ -81,8 +79,9 @@ public class PrologixPacket extends MyObservable implements PacketToSend, WaitTi
 		return true;
 	}
 
-	@Override public void clearAnswer() {
+	@Override public void clear() {
 		answer = null;
+//		command.setValue(null);
 	}
 
 	@Override public byte[] getAcknowledgement() {
@@ -108,7 +107,7 @@ public class PrologixPacket extends MyObservable implements PacketToSend, WaitTi
 
 	@Override
 	public int getWaitTime() {
-		return command.getValue()==null && command.getOldValue()==null ? PROLOGIX_WAIT_TIME : 1;
+		return command.getValue()==null && command.getOldValue()==null ? PROLOGIX_WAIT_TIME : 5;
 	}
 
 	@Override
@@ -118,5 +117,10 @@ public class PrologixPacket extends MyObservable implements PacketToSend, WaitTi
 
 	@Override public String toString() {
 		return getClass().getSimpleName() + " [" + command + ", answer=" + ToHex.bytesToHex(answer) + "]";
+	}
+
+	@SuppressWarnings("unchecked")
+	public<T> T parseAnswer() {
+		return (T) command.getCastValue().getValue(answer);
 	}
 }

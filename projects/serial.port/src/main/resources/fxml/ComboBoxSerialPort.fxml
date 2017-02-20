@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
 
-<ComboBox fx:id="comboBoxSerialPort" onAction="#onActionSelectSerialPort" promptText="Select The Serial Port" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.serial.port.controllers.ComboBoxSerialPort">
+<fx:root type="ComboBox" onAction="#onSelectSerialPort" promptText="Select The Serial Port" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <contextMenu>
       <ContextMenu>
         <items>
-          <MenuItem mnemonicParsing="false" onAction="#onActionMenuRefresg" text="Refresh" />
+          <MenuItem mnemonicParsing="false" onAction="#onMenuRefresg" text="Refresh" />
         </items>
       </ContextMenu>
    </contextMenu>
-</ComboBox>
+</fx:root>

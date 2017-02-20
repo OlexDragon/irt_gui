@@ -4,17 +4,19 @@
 <?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import irt.serial.port.controllers.*?>
 
 <fx:root type="HBox" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.40">
-   <children>
-      <ComboBox fx:id="comboBoxSerialPort" onAction="#onSelectSerialPort" promptText="Select The Serial Port">
-         <contextMenu>
-            <ContextMenu>
-              <items>
-                <MenuItem mnemonicParsing="false" onAction="#onMenuRefresg" text="Refresh" />
-              </items>
-            </ContextMenu>
-         </contextMenu></ComboBox>
-      <Button fx:id="serialPortButton" mnemonicParsing="false" onAction="#onSerialPortButton" text="Button" />
-   </children>
+	<children>
+		<ComboBoxSerialPortFx fx:id="comboBoxSerialPort" promptText="Select The Serial Port">
+			<contextMenu>
+				<ContextMenu>
+					<items>
+						<MenuItem mnemonicParsing="false" text="Refresh" />
+					</items>
+				</ContextMenu>
+			</contextMenu>
+		</ComboBoxSerialPortFx>
+		<ButtonOpenSerialPortFX fx:id="serialPortButton"  />
+	</children>
 </fx:root>

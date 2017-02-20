@@ -23,11 +23,14 @@ public class SocketWorker implements Runnable{
 
 	private ClientSocket clientSocket;
 
-	public void startServer(String serialPortName){
+	private String prefName;
 
-		if(serialPortName.equals(this.serialPortName))
+	public void startServer(String prefName, String serialPortName){
+
+		if(serialPortName==null || serialPortName.equals(this.serialPortName))
 			return;
 
+		this.prefName = prefName;
 		this.serialPortName = serialPortName;
 		ex.execute(this);
 	}
@@ -62,7 +65,7 @@ public class SocketWorker implements Runnable{
 
 				serverSocket = new ServerSocket(serverPortNumber);
 				logger.info("Server ({}) started", serverSocket);
-				new ServerHandler(serverSocket);
+				new ServerHandler(prefName, serverSocket);
 			}
 		}catch(Exception ex){
 			logger.catching(ex);
@@ -74,6 +77,7 @@ public class SocketWorker implements Runnable{
 	}
 
 	public ClientSocket getClientSocket(String host, int port) {
+		logger.entry(host, port);
 
 		if(clientSocket==null || !(clientSocket.getPort()==port && host==null ? clientSocket.getHost().equals(ClientSocket.LOCALHOST) : clientSocket.getHost().equals(host)))
 			clientSocket = new ClientSocket(host, port);

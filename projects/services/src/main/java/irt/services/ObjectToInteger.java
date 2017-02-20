@@ -2,6 +2,7 @@
 package irt.services;
 
 import java.util.InputMismatchException;
+import java.util.Optional;
 
 public class ObjectToInteger extends ObjectToAbstract<Integer> {
 
@@ -41,7 +42,9 @@ public class ObjectToInteger extends ObjectToAbstract<Integer> {
 					throw new InputMismatchException("Value '" + value + "' is out of ranger"); 
 
 				return super.setValue(parseInt);
-			}
+
+			}else
+				return super.setValue(null);
 		}
 
 		throw new InputMismatchException("The input does not contain numbers: " + value);
@@ -52,6 +55,22 @@ public class ObjectToInteger extends ObjectToAbstract<Integer> {
 
 		final Integer v = getValue();
 		return v ==null ? "" : (" " + v);
+	}
+
+	@Override
+	public String toString() {
+		return "ObjectToInteger [min=" + min + ", max=" + max + ", getValue()=" + getValue() + "]";
+	}
+
+	@Override
+	public Integer getValue(byte... bs) {
+		return Optional
+				.ofNullable(bs)
+				.map(String::new)
+				.map(str->str.replaceAll("\\D", ""))
+				.filter(str->!str.isEmpty())
+				.map(Integer::parseInt)
+				.orElseThrow(()->new IllegalArgumentException(new String(bs)));
 	}
 
 }

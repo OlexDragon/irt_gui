@@ -151,7 +151,7 @@ public class Value extends Observable{
 			if (value > maxValue) {
 				this.value = maxValue;
 				error = true;
-				notifyObservers(ValueStatus.MORE_THEN_RANGE);
+				notifyObservers(ValueStatus.OVER_RANGE);
 			} else if (value < minValue) {
 				error = true;
 				this.value = minValue;

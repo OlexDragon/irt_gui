@@ -1,6 +1,12 @@
 .button {
     -fx-font-weight: bold;
 }
-.error {
-	-fx-background-color: red;
+.button.error {
+	-fx-text-fill: red;
+}
+.button.muted {
+	-fx-text-fill: #8e8701;
+}
+.button.unmuted {
+	-fx-text-fill: green;
 }

@@ -1,11 +1,12 @@
 
 package irt.data.prologix;
 
-import irt.service.ObjectToEos;
-import irt.service.ObjectToNoValue;
-import irt.service.ObjectToPrologixDeviceType;
 import irt.services.ObjectToBoolean;
+import irt.services.ObjectToEos;
 import irt.services.ObjectToInteger;
+import irt.services.ObjectToNoValue;
+import irt.services.ObjectToPrologixDeviceType;
+import irt.services.ObjectToString;
 import irt.services.interfaces.CastValue;
 
 public enum PrologixCommands{
@@ -18,7 +19,7 @@ public enum PrologixCommands{
 	MODE		("++mode"		,PrologixDeviceType.FOR_BOTH	, new ObjectToPrologixDeviceType()),
 	RST			("++rst"		,PrologixDeviceType.FOR_BOTH	, new ObjectToNoValue()),
 	SAVECFG		("++savecfg"	,PrologixDeviceType.FOR_BOTH	, new ObjectToBoolean()),
-	VER			("++ver"		,PrologixDeviceType.FOR_BOTH	, new ObjectToNoValue()),
+	VER			("++ver"		,PrologixDeviceType.FOR_BOTH	, new ObjectToString()),
 	HELP		("++help"		,PrologixDeviceType.FOR_BOTH	, new ObjectToNoValue()),
 
 	READ_AFTER_WRITE("++auto"	,PrologixDeviceType.CONTROLLER	, new ObjectToBoolean()),
@@ -35,15 +36,20 @@ public enum PrologixCommands{
 	LON			("++lon"		,PrologixDeviceType.DEVICE		, new ObjectToBoolean()),
 	STATUS		("++status"		,PrologixDeviceType.DEVICE		, new ObjectToInteger(0, 255));
 
-	private String command;
+	private final String command;
+	private final CastValue<?> castValue;
+	private final PrologixDeviceType deviceType;
+
 	private Object oldValue;
-	private PrologixDeviceType deviceType;
-	private CastValue<?> castValue;
 
 	private PrologixCommands(String command, PrologixDeviceType deviceType, CastValue<?> castValue){
 		this.command = command;
 		this.deviceType = deviceType;
 		this.castValue = castValue;
+	}
+
+	public CastValue<?> getCastValue() {
+		return castValue;
 	}
 
 	public Object getValue() {

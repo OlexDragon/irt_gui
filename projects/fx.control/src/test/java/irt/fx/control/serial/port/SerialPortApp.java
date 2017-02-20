@@ -1,6 +1,5 @@
 package irt.fx.control.serial.port;
 
-import irt.fx.control.serial.port.SerialPortFX;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
@@ -11,6 +10,7 @@ public class SerialPortApp extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+
     	final HBox serialPort = new SerialPortFX();
         
         Scene scene = new Scene(serialPort);

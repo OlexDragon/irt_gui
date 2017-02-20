@@ -15,8 +15,10 @@ public class ServerHandler implements Runnable{
 	private final Logger logger = LogManager.getLogger();
 	private ExecutorService ex = Executors.newFixedThreadPool(100, new MyThreadFactory());
 	private ServerSocket serverSocket;
+	private String prefName;
 
-	public ServerHandler(ServerSocket serverSocket){
+	public ServerHandler(String prefName, ServerSocket serverSocket){
+		this.prefName = prefName;
 		this.serverSocket = serverSocket;
 		ex.execute(this);
 	}
@@ -25,7 +27,7 @@ public class ServerHandler implements Runnable{
 	public void run() {
 		while(!serverSocket.isClosed())
 			try {
-				ex.execute(new RequestHandler(serverSocket.accept()));
+				ex.execute(new RequestHandler(prefName, serverSocket.accept()));
 			} catch (IOException e) {
 				logger.catching(e);
 			}

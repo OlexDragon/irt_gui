@@ -7,6 +7,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import irt.packet.LinkHeader;
+import irt.packet.Packet;
 import irt.packet.PacketHeader;
 import irt.packet.PacketIdDetails;
 import irt.packet.Payload;
@@ -102,7 +103,7 @@ public class TestPacket  extends MyObservable implements LinkedPacket {
 	}
 
 	@Override
-	public void clearAnswer() {
+	public void clear() {
 	}
 
 	@Override
@@ -129,7 +130,6 @@ public class TestPacket  extends MyObservable implements LinkedPacket {
 
 	@Override
 	public byte[] getEndSequence() {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		return new byte[]{Packet.FLAG_SEQUENCE};
 	}
 }

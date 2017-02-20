@@ -8,7 +8,7 @@ public interface PacketToSend extends Comparable<PacketToSend> {
 
 	byte[] toBytes();
 	byte[] getAcknowledgement();
-	void clearAnswer();
+	void clear();
 	void setAnswer(byte[] data);
 	byte[] getAnswer();
 	Observer[] getObservers() throws Exception;

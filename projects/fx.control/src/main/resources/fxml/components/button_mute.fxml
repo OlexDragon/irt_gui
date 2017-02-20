@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tooltip?>
+
+<fx:root fx:id="btnMute" mnemonicParsing="false" onAction="#onMute" text="%status.mute" type="Button" stylesheets="@../../styles/Styles.css" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+   <tooltip>
+      <Tooltip fx:id="tooltip" text="%status.mute" />
+   </tooltip>
+   <cursor>
+      <Cursor fx:constant="HAND" />
+   </cursor>
+</fx:root>
