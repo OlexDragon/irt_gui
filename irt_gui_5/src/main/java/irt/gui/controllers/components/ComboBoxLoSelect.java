@@ -61,6 +61,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 		logger.traceEntry();
 		addPacket(packet);
 		loSelectComboBox.setUserData(this);
+		setPacket.addObserver(this);
 	}
 
 	@FXML private void onActionLoSelectComboBox() {
