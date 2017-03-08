@@ -66,7 +66,7 @@ public class TestPacket  extends Observable implements LinkedPacket {
 
 	@Override
 	public byte[] toBytes() {
-		return PacketAbstract.preparePacket(packetWithoutChecksum);
+		return PacketAbstract5.preparePacket(packetWithoutChecksum);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class TestPacket  extends Observable implements LinkedPacket {
 
 	@Override
 	public byte[] getAcknowledgement() {
-		return PacketAbstract.preparePacket(Arrays.copyOf(packetWithoutChecksum, 7));
+		return PacketAbstract5.preparePacket(Arrays.copyOf(packetWithoutChecksum, 7));
 	}
 
 	@Override

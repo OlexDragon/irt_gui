@@ -15,10 +15,10 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.ConfigurationGroup;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
-public class GainPacket extends PacketAbstract implements ConfigurationGroup {
+public class GainPacket extends PacketAbstract5 implements ConfigurationGroup {
 
 	public static final PacketId PACKET_ID = PacketId.CONFIGURATION_GAIN;
 

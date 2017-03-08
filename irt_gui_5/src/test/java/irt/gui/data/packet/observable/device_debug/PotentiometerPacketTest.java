@@ -26,7 +26,7 @@ import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 
@@ -99,13 +99,13 @@ public class PotentiometerPacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(new PacketProperties(RegisterPacket.PACKET_ID).setHasAcknowledgment(true), ((LinkedPacket)o).getAnswer()){
+					PacketAbstract5 bp = new PacketAbstract5(new PacketProperties(RegisterPacket.PACKET_ID).setHasAcknowledgment(true), ((LinkedPacket)o).getAnswer()){
 
 						@Override
 						public PacketId getPacketId() {
 							throw new UnsupportedOperationException("Auto-generated method stub");
 						}};
-					logger.debug("\n\t new PacketAbstract: {}\n", bp);
+					logger.debug("\n\t new PacketAbstract5: {}\n", bp);
 
 				} catch (PacketParsingException e) {
 					logger.catching(e);

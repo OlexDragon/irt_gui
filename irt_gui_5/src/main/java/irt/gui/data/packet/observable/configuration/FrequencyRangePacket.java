@@ -15,10 +15,10 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.RangePacket;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
-public class FrequencyRangePacket extends PacketAbstract implements RangePacket{
+public class FrequencyRangePacket extends PacketAbstract5 implements RangePacket{
 
 	public static final PacketId PACKET_ID = PacketId.CONFIGURATION_FREQUENCY_RANGE;
 	public static final PacketId FCM_PACKET_ID = PacketId.CONFIGURATION_FREQUENCY_RANGE_FCM;

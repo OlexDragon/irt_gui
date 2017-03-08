@@ -132,9 +132,10 @@ public class ComboBoxSerialPort extends Observable {
 
 			try {
 
-				if(serialPort.closePort())
+				if(serialPort.closePort()){
+					portStatus = SerialPortStatus.CLOSED;
 					logger.info("Serial Port {} is closed", serialPort.getPortName());
-				else
+				}else
 					logger.error("It is not posible to close {} port", serialPort);
 
 			} catch (SerialPortException e) {

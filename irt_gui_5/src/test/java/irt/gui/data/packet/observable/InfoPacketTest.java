@@ -57,13 +57,13 @@ public class InfoPacketTest {
 
 				try {
 
-					PacketAbstract bp = new PacketAbstract(new PacketProperties(InfoPacket.PACKET_ID).setHasAcknowledgment(true), ((LinkedPacket)o).getAnswer()){
+					PacketAbstract5 bp = new PacketAbstract5(new PacketProperties(InfoPacket.PACKET_ID).setHasAcknowledgment(true), ((LinkedPacket)o).getAnswer()){
 
 						@Override
 						public PacketId getPacketId() {
 							throw new UnsupportedOperationException("Auto-generated method stub");
 						}};
-					logger.debug("\n\t new PacketAbstract: {}\n", bp);
+					logger.debug("\n\t new PacketAbstract5: {}\n", bp);
 					assertNotNull(packet.getAnswer());
 
 					LinkedPacket p = new InfoPacket(packet.getAnswer(), true);

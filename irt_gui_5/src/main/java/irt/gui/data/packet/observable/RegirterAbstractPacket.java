@@ -9,7 +9,7 @@ import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.Payload;
 import irt.gui.errors.PacketParsingException;
 
-public abstract class RegirterAbstractPacket extends PacketAbstract{
+public abstract class RegirterAbstractPacket extends PacketAbstract5{
 
 	protected RegirterAbstractPacket(PacketHeader packetHeader, Payload payload) {
 		super(packetHeader, payload);

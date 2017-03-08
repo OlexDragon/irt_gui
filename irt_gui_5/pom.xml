@@ -4,7 +4,7 @@
 
 	<groupId>irt</groupId>
 	<artifactId>irt_gui</artifactId>
-	<version>5.0.1</version>
+	<version>5.0.2</version>
 	<packaging>jar</packaging>
 
 	<name>IRT Gui v.5.x</name>
@@ -22,14 +22,12 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.6.2</version>
-			<type>jar</type>
+			<version>2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.6.2</version>
-			<type>jar</type>
+			<version>2.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.scream3r</groupId>

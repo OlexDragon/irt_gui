@@ -16,11 +16,11 @@ import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
 //*********************************************  class  ConnectFCMPacket   ****************************************************************
-public class ConnectFCMPacket extends PacketAbstract implements WaitTime {
+public class ConnectFCMPacket extends PacketAbstract5 implements WaitTime {
 
 	@Override
 	public byte[] toBytes() {

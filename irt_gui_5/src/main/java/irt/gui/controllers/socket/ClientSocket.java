@@ -38,7 +38,7 @@ public class ClientSocket implements Runnable{
 		@Override
 		public synchronized boolean add(PacketToSend linkedPacket) {
 
-			filter.setLincedPacket(linkedPacket);
+			filter.setLinkedPacket(linkedPacket);
 			if (removeIf(filter))
 				logger.info("Paket removed:{}", linkedPacket);
 

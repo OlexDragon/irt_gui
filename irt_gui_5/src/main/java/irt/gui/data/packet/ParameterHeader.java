@@ -28,9 +28,11 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 		this( Optional.ofNullable(packetId).orElseThrow(()->new PacketParsingException("PacketId can not be null")).getParameterHeaderCode(), payloadSize);
 	}
 
-	public ParameterHeader(ParameterHeaderCode headerCode, PayloadSize payloadSize) throws PacketParsingException {
-		this.parameterHeaderCode = 	Optional.ofNullable(headerCode	).orElseThrow(()->new PacketParsingException("ParameterHeaderCode can not be null"));
-		this.payloadSize = 			Optional.ofNullable(payloadSize	).orElseThrow(()->new PacketParsingException("PayloadSize can not be null"));
+	public ParameterHeader(ParameterHeaderCode headerCode, PayloadSize payloadSize) {
+
+		setParameterHeaderCode(headerCode);
+
+		this.payloadSize = 			Optional.ofNullable(payloadSize	).orElseThrow(()->new IllegalArgumentException("PayloadSize can not be null"));
 	}
 
 	/** @return size of payload data */
@@ -39,6 +41,10 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 	}
 
 	public ParameterHeaderCode	getParameterHeaderCode(){ return parameterHeaderCode;	}
+
+	public void setParameterHeaderCode(ParameterHeaderCode parameterHeaderCode) {
+		this.parameterHeaderCode = Optional.ofNullable(parameterHeaderCode).orElseThrow(()->new IllegalArgumentException("ParameterHeaderCode can not be null"));
+	}
 
 	public void setSize(short size) {
 		payloadSize = new PayloadSize(size);

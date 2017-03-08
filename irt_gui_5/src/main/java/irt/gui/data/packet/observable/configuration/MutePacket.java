@@ -14,10 +14,10 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.ConfigurationGroup;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
-public class MutePacket extends PacketAbstract implements ConfigurationGroup{
+public class MutePacket extends PacketAbstract5 implements ConfigurationGroup{
 
 //	private static final Logger l = LogManager.getLogger();
 

@@ -15,10 +15,10 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.ConfigurationGroup;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
-public class AttenuationPacket extends PacketAbstract implements ConfigurationGroup{
+public class AttenuationPacket extends PacketAbstract5 implements ConfigurationGroup{
 
 	public static final PacketId PACKET_ID 		= PacketId.CONFIGURATION_ATTENUATION;
 	public static final PacketId FCM_PACKET_ID 	= PacketId.CONFIGURATION_ATTENUATION_FCM;

@@ -8,7 +8,12 @@ import irt.gui.data.packet.enums.PacketId;
 public class PacketIdDetails {
 
 	@JsonIgnore
-	private PacketId packetId;		public PacketId	getPacketId()		{ return packetId;		}
+	private PacketId packetId;
+								public PacketId	getPacketId()		{ return packetId; }
+								public void setPacketId(PacketId packetId) {
+									this.packetId = packetId;
+								}
+
 	@JsonIgnore
 	private String packetDetails;	public String	getPacketDetails()	{ return packetDetails; }
 

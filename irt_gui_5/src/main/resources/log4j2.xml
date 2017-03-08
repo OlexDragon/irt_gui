@@ -41,7 +41,7 @@
 		<!-- <logger name="irt.gui.data.packet.PacketHeader" level="ALL"/> -->
 
 <!-- 		<logger name="irt.gui.data.packet.observable.alarms.AlarmIDsPacket" level="ALL"/> -->
-		<!-- <logger name="irt.gui.data.packet.observable.PacketAbstract" level="ALL"/> -->
+		<!-- <logger name="irt.gui.data.packet.observable.PacketAbstract5" level="ALL"/> -->
 		<!-- <logger name="irt.gui.data.packet.observable.InfoPacket" level="all"/> -->
 		<!-- <logger name="irt.gui.data.packet.observable.BiasPacket" level="debug"/> -->
 		<!-- <logger name="irt.gui.data.packet.observable.CallibrationModePacket" level="debug"/> -->
@@ -89,6 +89,8 @@
 <!-- 		<logger name="irt.gui.controllers.calibration.process.SequentialProcess" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.calibration.process.CalibrationMap" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.calibration.process.AverageDouble" level="all"/> -->
+		<logger name="irt.gui.controllers.components.ComboBoxLoSelect" level="debug"/>
+<!-- 		<logger name="irt.gui.data.packet.observable.configuration.LoFrequenciesPacket" level="all"/> -->
 
 		<Root level="warn">
 			<AppenderRef ref="LogFile" />
