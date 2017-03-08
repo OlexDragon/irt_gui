@@ -30,7 +30,7 @@ import irt.gui.data.packet.interfaces.PacketToSend;
 import irt.gui.errors.PacketParsingException;
 
 @JsonTypeInfo(include=As.WRAPPER_OBJECT, use=Id.CLASS)
-public abstract class PacketAbstract extends MyObservable implements LinkedPacket {
+public abstract class PacketAbstract5 extends MyObservable implements LinkedPacket {
 
 	@JsonIgnore
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
@@ -43,13 +43,13 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 	protected List<Payload> payloads = new ArrayList<>();
 	protected byte[] answer;
 
-	public PacketAbstract(PacketHeader packetHeader, Payload payload) {
+	public PacketAbstract5(PacketHeader packetHeader, Payload payload) {
 
 		this.packetHeader = packetHeader;
 		payloads.add(payload);
 	}
 
-	public PacketAbstract(PacketProperties packetProperties, byte[] answer) throws PacketParsingException {
+	public PacketAbstract5(PacketProperties packetProperties, byte[] answer) throws PacketParsingException {
 
 		answer = Optional
 				.ofNullable(answer)
@@ -305,7 +305,7 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		PacketAbstract other = (PacketAbstract) obj;
+		PacketAbstract5 other = (PacketAbstract5) obj;
 		if (packetHeader == null) {
 			if (other.packetHeader != null)
 				return false;
@@ -318,7 +318,7 @@ public abstract class PacketAbstract extends MyObservable implements LinkedPacke
 		} else if (linkHeader.getAddr()!=other.linkHeader.getAddr())
 			return false;
 		
-		return this==obj || (obj instanceof PacketAbstract ? hashCode()==obj.hashCode() : false);
+		return this==obj || (obj instanceof PacketAbstract5 ? hashCode()==obj.hashCode() : false);
 	}
 
 	@Override public int compareTo(PacketToSend packet) {
