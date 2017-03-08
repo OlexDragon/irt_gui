@@ -44,12 +44,14 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	protected byte[] answer;
 
 	public PacketAbstract5(PacketHeader packetHeader, Payload payload) {
+		logger.entry(packetHeader, payload);
 
 		this.packetHeader = packetHeader;
 		payloads.add(payload);
 	}
 
 	public PacketAbstract5(PacketProperties packetProperties, byte[] answer) throws PacketParsingException {
+		logger.entry(packetHeader, answer);
 
 		answer = Optional
 				.ofNullable(answer)
@@ -64,6 +66,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	private byte[] removeAcknowledgmentAndChecksum(byte[] answer, PacketProperties packetProperties) throws PacketParsingException {
+		logger.entry(answer, packetProperties);
 
 		//Acknowledgement
 		int beginning = indexOf(answer, Packet.FLAG_SEQUENCE);
@@ -101,6 +104,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	protected boolean checkAcknowledgement(byte[] acknowledgement, PacketProperties packetProperties) {
+		logger.entry(acknowledgement, packetProperties);
 		final int length = acknowledgement.length;
 		final boolean isConverter = length==5;
 		packetProperties.setConverter(isConverter);
@@ -108,6 +112,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	private byte[] getPacketAsArray(byte[] answer, int beginning, PacketProperties packetProperties) throws PacketParsingException {
+		logger.entry(answer, beginning, packetProperties);
 		//Packet
 		beginning = indexOf(answer, beginning, Packet.FLAG_SEQUENCE);
 		if(beginning<0)
@@ -156,10 +161,12 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	@Override public LinkHeader getLinkHeader() {
+		logger.traceEntry();
 		return linkHeader.immutable();
 	}
 
 	protected synchronized void setPacketHeader(PacketHeader packetHeader) {
+		logger.entry(packetHeader);
 		 this.packetHeader = packetHeader;
 	}
 
@@ -192,6 +199,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 
 	/** set answer and notify observers */
 	@Override public void setAnswer(byte[] answer) {
+		logger.entry(answer);
 		this.answer = answer;
 
 		setChanged();
@@ -208,6 +216,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 
 	@Override @JsonIgnore
 	public byte[] getAcknowledgement() {
+		logger.traceEntry();
 		
 		byte[] b = null;
 		if(linkHeader!=null){
@@ -257,41 +266,19 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 		return data;
 	}
 
-	public static int checkControlEscape(byte[] surce, int surceIndex, byte[] destination, int destinationIndex) {
-		if(surce[surceIndex]==Packet.FLAG_SEQUENCE || surce[surceIndex]==Packet.CONTROL_ESCAPE){
-			destination[destinationIndex++] = Packet.CONTROL_ESCAPE;
-			destination[destinationIndex]	= (byte) (surce[surceIndex] ^ 0x20);
-		}else
-			destination[destinationIndex] = (byte) surce[surceIndex];
-		return destinationIndex;
-	}
-
-	public static byte[] byteStuffing(byte[] readBytes) {
-
-		byte[] result = null;
-		if(readBytes!=null){
-			final int length = readBytes.length;
-			result = new byte[length];
-
-			int index = 0;
-			int i=0;
-			for(; i<length; i++, index++)
-
-				if(readBytes[i]==Packet.CONTROL_ESCAPE){
-					if(i++<length)
-						result[index] = (byte)(readBytes[i]^0x20);
-				}else
-					result[index] = readBytes[i];
-
-			if(index<i)
-				result = Arrays.copyOf(result, index);
-		}
-
-		return result;
-	}
-
 	@Override public synchronized void setLinkHeaderAddr(byte addr) {
+		logger.entry(addr);
+
+		if(addr==linkHeader.getAddr())
+			return;
+
 		linkHeader.setAddr(addr);
+		packetHeader.getPacketIdDetails().setPacketId(getPacketId());
+		payloads
+		.parallelStream()
+		.forEach(pl->{
+			pl.getParameterHeader().setParameterHeaderCode(getPacketId().getParameterHeaderCode());
+		});
 	}
 
 	@Override public int hashCode() {
@@ -340,5 +327,38 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	public String toString() {
 		return "\n\t" + getClass().getSimpleName()+ " [linkHeader=" + linkHeader + ", packetHeader=" + packetHeader + ", payloads=" + payloads + ", \n\t answer=" + ToHex.bytesToHex(answer) +
 				"\n\t toBytes()=" + ToHex.bytesToHex(toBytes()) + "]";
+	}
+
+	public static int checkControlEscape(byte[] surce, int surceIndex, byte[] destination, int destinationIndex) {
+		if(surce[surceIndex]==Packet.FLAG_SEQUENCE || surce[surceIndex]==Packet.CONTROL_ESCAPE){
+			destination[destinationIndex++] = Packet.CONTROL_ESCAPE;
+			destination[destinationIndex]	= (byte) (surce[surceIndex] ^ 0x20);
+		}else
+			destination[destinationIndex] = (byte) surce[surceIndex];
+		return destinationIndex;
+	}
+
+	public static byte[] byteStuffing(byte[] readBytes) {
+
+		byte[] result = null;
+		if(readBytes!=null){
+			final int length = readBytes.length;
+			result = new byte[length];
+
+			int index = 0;
+			int i=0;
+			for(; i<length; i++, index++)
+
+				if(readBytes[i]==Packet.CONTROL_ESCAPE){
+					if(i++<length)
+						result[index] = (byte)(readBytes[i]^0x20);
+				}else
+					result[index] = readBytes[i];
+
+			if(index<i)
+				result = Arrays.copyOf(result, index);
+		}
+
+		return result;
 	}
 }
