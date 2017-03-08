@@ -24,6 +24,10 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 	//time between requests
 	private long period = 10000;			public long getPeriod(){ return period; }	public void setPeriod(long period){ this.period = period; }	
 
+	public StartStopAbstract() {
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> stop(true)));
+	}
+
 	@Override public void run() {
 //		logger.error(packets);
 		try{
@@ -78,6 +82,7 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 	}
 
 	public void send() {
+		logger.traceEntry();
 
 		packets
 		.stream()

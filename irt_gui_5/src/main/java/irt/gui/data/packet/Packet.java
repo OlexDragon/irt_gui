@@ -19,7 +19,7 @@ import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.PacketToSend;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 
 public class Packet {
 	private static final Logger logger = LogManager.getLogger();
@@ -371,7 +371,7 @@ public class Packet {
 				size[0],
 				size[1]};
 		bs = concat(bs, data);
-		bs = PacketAbstract.preparePacket(bs);
+		bs = PacketAbstract5.preparePacket(bs);
 		return bs;
 	}
 

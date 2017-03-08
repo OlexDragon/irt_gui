@@ -14,10 +14,10 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.ValuePacket;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
-public class OutputPowerPacket extends PacketAbstract implements ValuePacket{
+public class OutputPowerPacket extends PacketAbstract5 implements ValuePacket{
 
 	public static final PacketId PACKET_ID = PacketId.MEASUREMENT_OUTPUT_POWER;
 

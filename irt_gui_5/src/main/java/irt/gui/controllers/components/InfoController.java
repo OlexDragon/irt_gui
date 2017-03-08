@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
@@ -101,50 +102,52 @@ public class InfoController extends FieldsControllerAbstract {
 	}
 
 	private void changeAppenderSettings(String serialNumber) {
-		try{
-
-			final Path fileName = Paths.get(System.getProperty("user.home"), "irt", serialNumber, serialNumber + ".log");
-			final Path filePattern = Paths.get(System.getProperty("user.home"), "irt", serialNumber, serialNumber + "-%d{MM-dd-yyyy}-%i.log.gz");
-
-		
-			final Logger dumper = (Logger) LogManager.getLogger("dumper");
-			final Map<String, Appender> appenders = dumper.getAppenders();
-			final RollingRandomAccessFileAppender appender = (RollingRandomAccessFileAppender) appenders.get("DumpFile");
-
-			final RollingFileManager manager = appender.getManager();
-
-			if(rollingRandomAccessFileManager==null){
-				rollingRandomAccessFileManager = AbstractManager.getManager(manager.getFileName(), null, null);
-			}
-
-
-			final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-			final Configuration config = ctx.getConfiguration();
-			Layout<?> layout = PatternLayout.createLayout("%n%-5p %d%n %M (%F:%L)%n%m%n", null, config, null, Charset.forName("UTF-8"), true, false, null, null);
-
-			final RollingRandomAccessFileAppender newAppender = RollingRandomAccessFileAppender
-																		.createAppender(fileName.toString(),
-																				filePattern.toString(),
-																				"true",
-																				appender.getName(),
-																				"false",
-																				Integer.toString(manager.getBufferSize()),
-																				rollingRandomAccessFileManager.getTriggeringPolicy(),
-																				rollingRandomAccessFileManager.getRolloverStrategy(),
-																				layout,
-																				appender.getFilter(),
-																				null,
-																				"false",
-																				null,
-																				config);
-			appender.stop();
-			dumper.removeAppender(appender);
-			dumper.addAppender(newAppender);
-			newAppender.start();
-
-		}catch(Exception ex){
-			logger.catching(ex);
-		}
+		//TODO
+//		try{
+//
+//			final Path fileName = Paths.get(System.getProperty("user.home"), "irt", serialNumber, serialNumber + ".log");
+//			final Path filePattern = Paths.get(System.getProperty("user.home"), "irt", serialNumber, serialNumber + "-%d{MM-dd-yyyy}-%i.log.gz");
+//
+//		
+//			final Logger dumper = (Logger) LogManager.getLogger("dumper");
+//			final Map<String, Appender> appenders = dumper.getAppenders();
+//			final RollingRandomAccessFileAppender appender = (RollingRandomAccessFileAppender) appenders.get("DumpFile");
+//
+//			final RollingFileManager manager = appender.getManager();
+//
+//			if(rollingRandomAccessFileManager==null)
+//				Optional
+//				.ofNullable(manager.getFileName())
+//				.map(fn->(RollingRandomAccessFileManager)AbstractManager.getManager(fn, null, null))
+//				.ifPresent(m->rollingRandomAccessFileManager = m);
+//
+//			final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+//			final Configuration config = ctx.getConfiguration();
+//			Layout<?> layout = PatternLayout.createLayout("%n%-5p %d%n %M (%F:%L)%n%m%n", null, config, null, Charset.forName("UTF-8"), true, false, null, null);
+//
+//			final RollingRandomAccessFileAppender newAppender = RollingRandomAccessFileAppender
+//																		.createAppender(fileName.toString(),
+//																				filePattern.toString(),
+//																				"true",
+//																				appender.getName(),
+//																				"false",
+//																				Integer.toString(manager.getBufferSize()),
+//																				rollingRandomAccessFileManager.getTriggeringPolicy(),
+//																				rollingRandomAccessFileManager.getRolloverStrategy(),
+//																				layout,
+//																				appender.getFilter(),
+//																				null,
+//																				"false",
+//																				null,
+//																				config);
+//			appender.stop();
+//			dumper.removeAppender(appender);
+//			dumper.addAppender(newAppender);
+//			newAppender.start();
+//
+//		}catch(Exception ex){
+//			logger.catching(ex);
+//		}
  	}
 
 	public static Integer getDeviceType() {

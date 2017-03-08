@@ -1,4 +1,3 @@
-
 package irt.gui.data.packet.observable.configuration;
 
 import java.util.Optional;
@@ -15,31 +14,33 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.RangePacket;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
-public class LoFrequenciesPacket extends PacketAbstract implements RangePacket{
+public class LoFrequenciesPacket extends PacketAbstract5 implements RangePacket{
 
-	public static final PacketId PACKET_ID = PacketId.CONFIGURATION_LO_FREQUENCIES;
+	public static final PacketId PACKET_ID_BUC = PacketId.CONFIGURATION_LO_FREQUENCIES;
+	private static final PacketId PACKET_ID_FCM = PacketId.CONFIGURATION_FREQUENCY_RANGE_FCM;
 
 	public LoFrequenciesPacket() throws PacketParsingException {
 		super(
 				new PacketHeader(
 						PacketType.REQUEST,
 						new PacketIdDetails(
-								PACKET_ID, "Get Lo Frequencies"),
+								PACKET_ID_BUC, "Get Lo Frequencies"),
 						PacketErrors.NO_ERROR),
 				new Payload(
-						new ParameterHeader(PACKET_ID),
+						new ParameterHeader(PACKET_ID_BUC),
 						null));
 	}
 
 	public LoFrequenciesPacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") Boolean hasAcknowledgment) throws PacketParsingException {
-		super(new PacketProperties(PACKET_ID).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
+		super(new PacketProperties(PACKET_ID_BUC).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
 	}
 
 	@Override @JsonIgnore
 	public PacketId getPacketId() {
-		return PACKET_ID;
+		final byte addr = getLinkHeader().getAddr();
+		return addr==-1 ? PACKET_ID_FCM : PACKET_ID_BUC;
 	}
 }

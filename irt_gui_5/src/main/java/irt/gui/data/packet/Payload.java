@@ -1,5 +1,6 @@
 package irt.gui.data.packet;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -93,7 +94,7 @@ public class Payload {
 	public byte	getByte() { return getByte(0);	}
 	public byte getByte(int b) { return buffer!=null && buffer.length>b ? buffer[b] : 0;}
 	@JsonIgnore
-	public long	getLong() { return Packet.shiftAndAdd(buffer);	}
+	public long	getLong() { return ByteBuffer.wrap(buffer).getLong();	}
 	@JsonIgnore
 	public DeviceId getDeviceId() { return buffer!=null  ? new DeviceId(buffer) : null;	}
 

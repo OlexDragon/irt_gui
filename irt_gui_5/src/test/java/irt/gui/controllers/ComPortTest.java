@@ -13,7 +13,7 @@ import jssc.SerialPortException;
 
 public class ComPortTest {
 
-	public static final String COM_PORT = "COM2";
+	public static final String COM_PORT = "COM13";
 	Logger logger = LogManager.getLogger();
 
 	@Test

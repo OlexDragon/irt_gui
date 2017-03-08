@@ -16,9 +16,9 @@ public class LinkedPacketPriorityBlockingQueue extends PriorityBlockingQueue<Pac
 	/** remove duplicates packet and add new */
 	public boolean add(PacketToSend packet) {
 
-		filter.setLincedPacket(packet);
+		filter.setLinkedPacket(packet);
 		if(removeIf(filter))
-			logger.info("Paket removed:{}", packet);
+			logger.debug("Paket removed:{}", packet);
 
 		return super.add(packet);
 	}

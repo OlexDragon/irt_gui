@@ -18,7 +18,7 @@ import irt.gui.data.packet.enums.PacketType;
 import irt.gui.errors.PacketParsingException;
 
 //*********************************************   InfoPacket   ****************************************************************
-public class InfoPacket extends PacketAbstract implements WaitTime{
+public class InfoPacket extends PacketAbstract5 implements WaitTime{
 
 	public static final PacketId PACKET_ID = PacketId.DEVICE_INFO;
 

@@ -31,29 +31,9 @@ public class AbstractFlashPacket extends Observable implements LinkedPacket, Fla
 	}
 
 	@Override
-	public PacketId getPacketId() {
-		throw new UnsupportedOperationException("This function should not be used");
-	}
-
-	@Override
-	public LinkHeader getLinkHeader() {
-		throw new UnsupportedOperationException("This function should not be used");
-	}
-
-	@Override
-	public void setLinkHeaderAddr(byte addr) {
-		throw new UnsupportedOperationException("This function should not be used");
-	}
-
-	@Override
 	public PacketHeader getPacketHeader() {
 		notifyObservers();
 		return null;
-	}
-
-	@Override
-	public List<Payload> getPayloads() {
-		throw new UnsupportedOperationException("This function should not be used");
 	}
 
 	@Override
@@ -107,5 +87,25 @@ public class AbstractFlashPacket extends Observable implements LinkedPacket, Fla
 	public void notifyObservers(Object arg) {
 		setChanged();
 		super.notifyObservers(arg);
+	}
+
+	@Override
+	public List<Payload> getPayloads() {
+		throw new UnsupportedOperationException("This function should not be used");
+	}
+
+	@Override
+	public PacketId getPacketId() {
+		throw new UnsupportedOperationException("This function should not be used");
+	}
+
+	@Override
+	public LinkHeader getLinkHeader() {
+		throw new UnsupportedOperationException("This function should not be used");
+	}
+
+	@Override
+	public void setLinkHeaderAddr(byte addr) {
+		throw new UnsupportedOperationException("This function should not be used");
 	}
 }

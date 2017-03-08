@@ -12,7 +12,7 @@ public class PacketFilter implements Predicate<PacketToSend> {
 
 	private PacketToSend linkedPacket;
 
-	public void setLincedPacket(PacketToSend packet) {
+	public void setLinkedPacket(PacketToSend packet) {
 		this.linkedPacket = packet;
 	}
 

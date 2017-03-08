@@ -17,7 +17,7 @@ import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.observable.PacketAbstract;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.data.packet.observable.alarms.AlarmDescriptionPacket;
 import irt.gui.data.packet.observable.alarms.AlarmNamePacket;
 import irt.gui.data.packet.observable.alarms.AlarmStatusPacket;
@@ -67,7 +67,7 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 
 	@Override protected void updateFields(LinkedPacket packet) throws PacketParsingException {
 
-		LinkedPacket p = new PacketAbstract(new PacketProperties(packet.getPacketHeader().getPacketIdDetails().getPacketId()).setHasAcknowledgment(true), packet.getAnswer()) {
+		LinkedPacket p = new PacketAbstract5(new PacketProperties(packet.getPacketHeader().getPacketIdDetails().getPacketId()).setHasAcknowledgment(true), packet.getAnswer()) {
 			@Override
 			public PacketId getPacketId() {
 				throw new UnsupportedOperationException("Auto-generated method stub");

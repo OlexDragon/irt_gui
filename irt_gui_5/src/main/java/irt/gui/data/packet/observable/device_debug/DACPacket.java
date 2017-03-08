@@ -19,7 +19,8 @@ public class DACPacket extends RegisterPacket{
 		DAC1,
 		DAC2,
 		DAC3,
-		DAC4;
+		DAC4,
+		DAC5;
 
 		public int getIndex(UnitType type) {
 			final String format = String.format(type==UnitType.BUC ? BUC_PROPERTIES : FCM_PROPERTIES, ordinal()+1) + ".index";

@@ -158,7 +158,7 @@ public class PanelFlash extends Observable{
 		return result;
 	}
 
-	private static byte getCheckSum(byte... original) {
+	public static byte getCheckSum(byte... original) {
 		byte xor = 0;
 
 		for (byte b : original)

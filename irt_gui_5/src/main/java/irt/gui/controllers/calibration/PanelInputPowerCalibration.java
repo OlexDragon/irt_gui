@@ -92,7 +92,8 @@ public class PanelInputPowerCalibration implements CalibrationWindow{
     }
 
     @FXML  void onSetVariableName() {
-		final double angle = Double.parseDouble(textFieldAccuracy.getText());
+
+    	final double angle = Double.parseDouble(textFieldAccuracy.getText());
 		final CalibrationMap with = map.getWith(angle);
 		textAria.setText(with.toString(textFieldVariableName.getText()));
 
@@ -103,7 +104,6 @@ public class PanelInputPowerCalibration implements CalibrationWindow{
 		.entrySet()
 		.forEach(e->data.add(new Data<Number, Number>(e.getKey(), e.getValue())));
     }
-
 
     @FXML void onSetPrecision() {
     	prefs.putDouble(IP_PRECISION, Double.parseDouble(textFieldAccuracy.getText()));

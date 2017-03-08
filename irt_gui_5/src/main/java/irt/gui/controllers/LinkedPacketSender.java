@@ -224,7 +224,7 @@ public class LinkedPacketSender extends SerialPort {
 
 		if (!isOpened)
 			if (run) {
-				logger.debug("openPort() Port Name={}", this);
+				logger.debug("openPort() Port Name = '{}'", this);
 				isOpened = super.openPort();
 				if (isOpened) {
 					setParams();
