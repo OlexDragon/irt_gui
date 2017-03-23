@@ -7,7 +7,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
+import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.flash.enums.Command;
+import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.PacketHeader;
@@ -16,7 +18,7 @@ import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.PacketToSend;
 
-public class AbstractFlashPacket extends Observable implements LinkedPacket, FlashPacket{
+public abstract class AbstractFlashPacket extends Observable implements LinkedPacket, FlashPacket, WaitTime{
 
 	private Command command;
 	private byte[] answer;
@@ -107,5 +109,10 @@ public class AbstractFlashPacket extends Observable implements LinkedPacket, Fla
 	@Override
 	public void setLinkHeaderAddr(byte addr) {
 		throw new UnsupportedOperationException("This function should not be used");
+	}
+
+	@Override
+	public int getWaitTime() {
+		return LinkedPacketSender.FLASH_MEMORY_WAIT_TIME;
 	}
 }

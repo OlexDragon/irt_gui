@@ -4,7 +4,7 @@
 
 	<groupId>irt</groupId>
 	<artifactId>irt_gui</artifactId>
-	<version>5.0.2</version>
+	<version>5.0.180</version>
 	<packaging>jar</packaging>
 
 	<name>IRT Gui v.5.x</name>
