@@ -23,7 +23,7 @@ import jssc.SerialPortException;
 public class LinkedPacketSender extends SerialPort {
 
 	public static final int STANDARD_WAIT_TIME 		= 5;
-	public static final int FLASH_MEMORY_WAIT_TIME 	= 1;
+	public static final int FLASH_MEMORY_WAIT_TIME 	= 5;
 	public static final int FCM_BY_BAIS_WAIT_TIME 	= 1;
 	public static final int TOOLS_WAIT_TIME = 1000;
 

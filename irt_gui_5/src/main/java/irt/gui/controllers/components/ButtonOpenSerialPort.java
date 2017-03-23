@@ -1,7 +1,5 @@
 package irt.gui.controllers.components;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.enums.SerialPortStatus;
 import javafx.application.Platform;
@@ -30,7 +28,6 @@ public class ButtonOpenSerialPort {
 		}
 
 		comboBoxSerialPort.addObserver(( o, arg)->{
-			LogManager.getLogger().error("{}; {};", o, arg);
 			if(arg instanceof SerialPortStatus){
 				addStyleClass("error", "warning", "connected");
 				setText((SerialPortStatus) arg);
