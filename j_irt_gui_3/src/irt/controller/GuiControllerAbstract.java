@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -103,7 +104,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	protected SoftReleaseChecker softReleaseChecker = getSoftReleaseChecker();
 	protected Protocol protocol = getDefaultProtocol();
 
-	private Remover remover = new Remover(11000);
+	private Remover remover = new Remover(11, TimeUnit.SECONDS);
 
 	private static Map<LinkHeader, DeviceInfo>  deviceInfos = new HashMap<>();
 	public Map<LinkHeader, Boolean> mutes = new HashMap<>();
@@ -533,36 +534,36 @@ public abstract class GuiControllerAbstract extends Thread {
 	// ************************************************************************************************************
 	private class Remover{
 
-		private int waitTime;
-		private volatile Set<LinkHeaderController> controllers = new HashSet<>();
+		private long waitTime;
+		private volatile Set<LinkHeaderTread> controllers = new HashSet<>();
 		private Map<LinkHeader, String> serialNumbers = new TreeMap<>();
 
-		public Remover(int waitTime) {
-			this.waitTime = waitTime;
+		public Remover(long duration, TimeUnit timeUnit ) {
+			this.waitTime = timeUnit.toMillis(duration);
 		}
 
 		public void doDump(LinkHeader linkHeader) {
-			LinkHeaderController controller = getController(linkHeader);
+			LinkHeaderTread controller = getController(linkHeader);
 			if(controller!=null)
 				controller.doDump();
 		}
 
 		public void doDump(LinkHeader linkHeader , String text) {
-			LinkHeaderController controller = getController(linkHeader);
+			LinkHeaderTread controller = getController(linkHeader);
 			if(controller!=null)
 				controller.doDump(text);
 		}
 
 		public List<LinkHeader> getLinkHeaders() {
 			List<LinkHeader> linkSheaders = new ArrayList<>();
-			for(LinkHeaderController c:getControllers())
+			for(LinkHeaderTread c:getControllers())
 				linkSheaders.add(c.getLinkHeader());
 
 			return linkSheaders;
 		}
 
 		public void removeAll() {
-			for(LinkHeaderController c:getControllers())
+			for(LinkHeaderTread c:getControllers())
 				c.stopThread();
 
 			if (unitsPanel != null) {
@@ -573,14 +574,14 @@ public abstract class GuiControllerAbstract extends Thread {
 		}
 
 		public boolean isMute(Packet packet) {
-			LinkHeaderController controller = getController(getLinkHeader(packet));
+			LinkHeaderTread controller = getController(getLinkHeader(packet));
 			return controller!=null ? controller.isMute() : true;
 		}
 
-		private LinkHeaderController getController(LinkHeader linkHeader) {
-			LinkHeaderController controller = null;
+		private LinkHeaderTread getController(LinkHeader linkHeader) {
+			LinkHeaderTread controller = null;
 
-			for(LinkHeaderController c:getControllers()){
+			for(LinkHeaderTread c:getControllers()){
 				LinkHeader lh = c.getLinkHeader();
 				if(lh!=null ? lh.equals(linkHeader) : linkHeader==null){
 					controller = c;
@@ -593,7 +594,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		public boolean isMute() {
 			boolean isMute = false;
-			for(Iterator<LinkHeaderController> i = controllers.iterator(); i.hasNext();){
+			for(Iterator<LinkHeaderTread> i = controllers.iterator(); i.hasNext();){
 				boolean m = i.next().isMute();
 				if(m==true){
 					isMute = true;
@@ -621,7 +622,7 @@ public abstract class GuiControllerAbstract extends Thread {
 					if (payload != null) {
 						LinkHeader linkHeader = getLinkHeader(packet);
 
-						for (LinkHeaderController c : getControllers()) {
+						for (LinkHeaderTread c : getControllers()) {
 							LinkHeader lh = c.getLinkHeader();
 							if (linkHeader.equals(lh)) {
 								c.setMute((payload.getInt(0)&(linkHeader.getAddr()==0 || header.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_STATUS ? MonitorPanelConverter.MUTE : MonitorPanelSSPA.MUTE))>0);
@@ -632,15 +633,20 @@ public abstract class GuiControllerAbstract extends Thread {
 			}
 		}
 
-		public LinkHeaderController[] getControllers() {
-			LinkHeaderController[] lhc = new LinkHeaderController[controllers.size()];
+		public LinkHeaderTread[] getControllers() {
+			int size = controllers.size();
+
+			if(size<0)
+				size = 0;
+
+			LinkHeaderTread[] lhc = new LinkHeaderTread[size];
 			controllers.toArray(lhc);
 			return lhc;
 		}
 
 		public int getAlarm() {
 			int alarm = 0;
-			for(Iterator<LinkHeaderController> i = controllers.iterator(); i.hasNext();){
+			for(Iterator<LinkHeaderTread> i = controllers.iterator(); i.hasNext();){
 				int a = i.next().getAlarm();
 				if(alarm<a)
 					alarm = a;
@@ -658,7 +664,7 @@ public abstract class GuiControllerAbstract extends Thread {
 					if (payload != null) {
 						LinkHeader linkHeader = getLinkHeader(packet);
 
-						for (LinkHeaderController c : getControllers()) {
+						for (LinkHeaderTread c : getControllers()) {
 							LinkHeader lh = c.getLinkHeader();
 							if (linkHeader.equals(lh)) {
 								c.setAlarm(payload.getInt(0)&7);
@@ -672,13 +678,12 @@ public abstract class GuiControllerAbstract extends Thread {
 		public void setLinkHeader(LinkHeader linkHeader, DeviceInfo deviceInfo) {
 			logger.entry(linkHeader);
 
-			LinkHeaderController controller = new LinkHeaderController(linkHeader, deviceInfo);
+			LinkHeaderTread controller = new LinkHeaderTread(linkHeader, deviceInfo);
 			if(controllers.add(controller)){
 				new MyThreadFactory().newThread(controller).start();
-				startThread(controller);
 				gui.setConnected(true);
 			}else{
-				for (LinkHeaderController c:getControllers()) {
+				for (LinkHeaderTread c:getControllers()) {
 					if (c.equals(controller)){
 						c.reset();
 					}
@@ -688,15 +693,15 @@ public abstract class GuiControllerAbstract extends Thread {
 			logger.exit(controller);
 		}
 
-		public void update(LinkHeaderController linkHeaderController) {
-			logger.trace(linkHeaderController);
+		public void update(LinkHeaderTread linkHeaderTread) {
+			logger.trace(linkHeaderTread);
 
-			final LinkHeader linkHeader = linkHeaderController.getLinkHeader();
+			final LinkHeader linkHeader = linkHeaderTread.getLinkHeader();
 
 			if(unitsPanel.remove(linkHeader))
 					gui.repaint();
 
-			controllers.remove(linkHeaderController);
+			controllers.remove(linkHeaderTread);
 			serialNumbers.remove(linkHeader);
 
 			if(controllers.isEmpty()){
@@ -723,8 +728,8 @@ public abstract class GuiControllerAbstract extends Thread {
 			}
 		}
 
-		// ******************************* class LinkHeaderController *************************************
-		private class LinkHeaderController extends Thread {
+		// ******************************* class LinkHeaderTread *************************************
+		private class LinkHeaderTread extends Thread {
 			private LinkHeader linkHeader;
 			private volatile boolean reset;
 			protected DumpControllers dumpControllers;
@@ -732,8 +737,8 @@ public abstract class GuiControllerAbstract extends Thread {
 			private boolean isMute;
 			private DeviceInfo deviceInfo;
 
-			// LinkHeaderController start in class Remover setLinkHeader(LinkHeader linkHeader);
-			public LinkHeaderController(LinkHeader linkHeader, DeviceInfo deviceInfo){
+			// LinkHeaderTread start in class Remover setLinkHeader(LinkHeader linkHeader);
+			public LinkHeaderTread(LinkHeader linkHeader, DeviceInfo deviceInfo){
 				super(GuiControllerAbstract.class.getSimpleName()+".LinkHeaderController-"+new RundomNumber());
 				this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
 				this.deviceInfo = deviceInfo;
@@ -789,7 +794,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			@Override
 			public String toString() {
-				return "LinkHeaderController [linkHeader=" + linkHeader + "]";
+				return "LinkHeaderTread [linkHeader=" + linkHeader + "]";
 			}
 
 			public LinkHeader getLinkHeader() {
@@ -825,7 +830,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		public AlarmWorker(Packet packet) {
 			this.packet = packet;
-			startThread(this);
+			new MyThreadFactory().newThread(this).start();
 		}
 
 		@Override
@@ -839,7 +844,13 @@ public abstract class GuiControllerAbstract extends Thread {
 				vclc.fireValueChangeListener(new ValueChangeEvent(alarm, ALARM));
 				DevicePanel unitPanel = unitsPanel.getDevicePanel(linkHeader);
 				if(unitPanel!=null){
-					unitPanel.setAlarm(remover.getController(linkHeader).getAlarm());
+					final Remover.LinkHeaderTread controller = remover.getController(linkHeader);
+
+					if(controller==null)
+						return;
+
+					final int a = controller.getAlarm();
+					unitPanel.setAlarm(a);
 					alarms.put(linkHeader, alarm);
 				}
 //TODO			}
@@ -855,7 +866,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		public MeasurementWorker(Packet packet) {
 			this.packet = packet;
-			startThread(this);
+			new MyThreadFactory().newThread(this).start();
 		}
 
 		@Override
@@ -886,7 +897,7 @@ public abstract class GuiControllerAbstract extends Thread {
 		public PanelWorker(Packet packet, DeviceInfo deviceInfo) {
 			this.packet = packet;
 			this.deviceInfo = deviceInfo;
-			startThread(this);
+			new MyThreadFactory().newThread(this).start();
 		}
 
 		@Override
@@ -932,13 +943,5 @@ public abstract class GuiControllerAbstract extends Thread {
 				}
 			}
 		}
-	}
-
-	private void startThread(Thread thread) {
-		int priority = thread.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			thread.setPriority(priority-1);
-		thread.setDaemon(true);
-		thread.start();
 	}
 }

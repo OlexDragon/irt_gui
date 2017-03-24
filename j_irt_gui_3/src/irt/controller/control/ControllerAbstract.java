@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.FireValue;
+import irt.data.MyThreadFactory;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
@@ -154,9 +155,19 @@ public abstract class ControllerAbstract implements Runnable{
 		};
 	}
 
-	public synchronized void stop() {
+	public void stop() {
 		this.run = false;
-		notify();
+		final ControllerAbstract controller = this;
+
+		new MyThreadFactory().newThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				synchronized (controller) {
+					controller.notify();
+				}
+			}
+		}).start();
 	}
 
 	public synchronized boolean isSend() {

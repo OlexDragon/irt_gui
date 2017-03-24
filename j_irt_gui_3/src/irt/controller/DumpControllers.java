@@ -1,6 +1,7 @@
 package irt.controller;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
@@ -516,9 +517,12 @@ public class DumpControllers{
 		thread.start();
 	}
 
-	public void stop() {
-		for(DefaultController dc:dumpsList)
-			dc.stop();
+	public synchronized void stop() {
+		final Iterator<DefaultController> iterator = dumpsList.iterator();
+		while(iterator.hasNext()) {
+			final DefaultController next = iterator.next();
+			next.stop();
+		}
 		dumpsList.clear();
 	}
 
@@ -531,7 +535,7 @@ public class DumpControllers{
 		dumper.warn("\n\t{}\n\tUptime Counter = {}\n\tCommunication Lost", linkHeader, uptimeCounter);
 	}
 
-	public void setWaitTime(int waitTime) {
+	public synchronized void setWaitTime(int waitTime) {
 		logger.trace("setWaitTime(waitTime={})", waitTime);
 
 		for (DefaultController dc:dumpsList)
@@ -854,11 +858,14 @@ public class DumpControllers{
 //		}
 	}
 
-	public void notifyAllControllers() {
-		for(DefaultController d:dumpsList)
-			synchronized(d){
-				d.notify();
+	public synchronized void notifyAllControllers() {
+		final Iterator<DefaultController> iterator = dumpsList.iterator();
+		while(iterator.hasNext()){
+			final DefaultController next = iterator.next();
+			synchronized(next){
+				next.notify();
 			}
+		}
 	}
 
 	public void doDump(String text) {
