@@ -48,12 +48,13 @@ public class DeviceInfo {
 							DEVICE_TYPE_KU_TO_L		= 1011,
 							DEVICE_TYPE_C_TO_L		= 1012,
 							DEVICE_TYPE_L_TO_DBS	= 1013,
+							DEVICE_TYPE_L_TO_KA		= 1019,
 							DEVICE_TYPE_SSPA_CONVERTER = 1051,
-							DEVICE_TYPE_MODUL		= 1052;
+							DEVICE_TYPE_MODUL		= 1052,
 
-	public static final int DEVICE_TYPE_BIAS_BOARD_MODUL	= 2001;
+							DEVICE_TYPE_BIAS_BOARD_MODUL	= 2001;
 
-			private LinkHeader linkHeader;
+	private LinkHeader linkHeader;
 	private int type;
 	private int revision;
 	private int subtype;

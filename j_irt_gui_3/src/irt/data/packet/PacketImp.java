@@ -196,7 +196,7 @@ public class PacketImp implements Packet{
 							ERROR_TIMED_OUT						= 11;	//Timed out
 
 	//PicoBUC Bias board
-	public static final byte IRT_SLCP_PARAMETER_PICOBUC_LO_SELECT = 1;
+	public static final byte PARAMETER_PICOBUC_LO_SELECT = 1;
 
 	public static final byte PARAMETER_ID_CONFIGURATION_LO_SET 					= 1,
 							PARAMETER_ID_CONFIGURATION_MUTE 					= 2,

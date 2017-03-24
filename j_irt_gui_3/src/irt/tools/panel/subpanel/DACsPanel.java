@@ -174,7 +174,7 @@ public class DACsPanel extends JPanel {
 					startController(new AdcController(deviceType, "5.5V Controller", lbl5V5, new DeviceDebagGetter(null,  10, 6, PacketWork.PACKET_ID_FCM_ADC_5V5, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
 
 					value = new Value(0, 0, 4095, 0);
-					startController(new AdcController(deviceType, "3.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
+					startController(new AdcController(deviceType, "13.2V Controller", lbl13V2, new DeviceDebagGetter(null,  10, 7, PacketWork.PACKET_ID_FCM_ADC_13v2, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
 
 					value = new Value(0, 0, 4095, 0);
 					startController(new AdcController(deviceType, "-13.2V Controller", lbl13V2_neg, new DeviceDebagGetter(null,  10, 8, PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), value, 1));
