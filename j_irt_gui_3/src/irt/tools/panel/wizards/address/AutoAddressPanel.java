@@ -115,6 +115,9 @@ public class AutoAddressPanel extends JPanel {
 									controllers.add(target);
 							}
 							Thread t = new Thread(target, "AutoAddressPanel."+target.getName()+"-"+new RundomNumber());
+							int priority = t.getPriority();
+							if(priority>Thread.MIN_PRIORITY)
+								t.setPriority(priority-1);
 							t.setDaemon(true);
 							t.start();
 						}

@@ -33,6 +33,7 @@ import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
+import irt.data.MyThreadFactory;
 import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.StringData;
@@ -138,6 +139,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_140_TO_L:
 						case DeviceInfo.DEVICE_TYPE_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_L_TO_C:
+						case DeviceInfo.DEVICE_TYPE_L_TO_KA:
 						case DeviceInfo.DEVICE_TYPE_70_TO_KY:
 						case DeviceInfo.DEVICE_TYPE_KU_TO_70:
 						case DeviceInfo.DEVICE_TYPE_140_TO_KU:
@@ -158,6 +160,7 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_HPB_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_HPB_L_TO_C:
 						case DeviceInfo.DEVICE_TYPE_HPB_SSPA:
+						case DeviceInfo.DEVICE_TYPE_BIAS_BOARD_MODUL:
 							protocol = Protocol.LINKED.setDeviceType(type);
 							break;
 						default:
@@ -396,17 +399,17 @@ public abstract class GuiControllerAbstract extends Thread {
 		protocol = getDefaultProtocol();
 		logger.trace("protocol={}", protocol);
 	}
-
-	protected boolean removePanel(LinkHeader linkHeader) {
-//		comPortThreadQueue.getSerialPort().setRun(false, "Remove Panel");
-		boolean removed;
-		if (removed = unitsPanel.remove(linkHeader)) {
-			logger.warn("removePanel({})", linkHeader);
-			unitsPanel.revalidate();
-			unitsPanel.getParent().getParent().repaint();
-		}
-		return removed;
-	}
+//
+//	protected boolean removePanel(LinkHeader linkHeader) {
+////		comPortThreadQueue.getSerialPort().setRun(false, "Remove Panel");
+//		boolean removed;
+//		if (removed = unitsPanel.remove(linkHeader)) {
+//			logger.warn("removePanel({})", linkHeader);
+//			unitsPanel.revalidate();
+//			unitsPanel.getParent().getParent().repaint();
+//		}
+//		return removed;
+//	}
 
 	protected JComboBox<String> getSerialPortSelection() {
 		return serialPortSelection;
@@ -671,6 +674,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			LinkHeaderController controller = new LinkHeaderController(linkHeader, deviceInfo);
 			if(controllers.add(controller)){
+				new MyThreadFactory().newThread(controller).start();
 				startThread(controller);
 				gui.setConnected(true);
 			}else{
@@ -686,11 +690,14 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		public void update(LinkHeaderController linkHeaderController) {
 			logger.trace(linkHeaderController);
-			if(unitsPanel.remove(linkHeaderController.getLinkHeader()))
+
+			final LinkHeader linkHeader = linkHeaderController.getLinkHeader();
+
+			if(unitsPanel.remove(linkHeader))
 					gui.repaint();
 
 			controllers.remove(linkHeaderController);
-			serialNumbers.remove(linkHeaderController.getLinkHeader());
+			serialNumbers.remove(linkHeader);
 
 			if(controllers.isEmpty()){
 				gui.setConnected(false);
@@ -888,7 +895,7 @@ public abstract class GuiControllerAbstract extends Thread {
 			LinkHeader linkHeader = packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : new LinkHeader((byte)0, (byte)0, (short) 0);
 			deviceInfos.put(linkHeader, deviceInfo);
 
-			remover.setLinkHeader(packet instanceof LinkedPacket ? linkHeader : null, deviceInfo);
+			remover.setLinkHeader(linkHeader, deviceInfo);
 
 			unitsPanel.remove("DemoPanel");
 
