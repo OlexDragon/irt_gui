@@ -7,6 +7,7 @@ import javax.swing.JLabel;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
+import irt.data.PacketThreadWorker;
 import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
@@ -84,7 +85,9 @@ public class AdcController extends ControllerAbstract {
 
 		@Override
 		public void run() {
-			Object source = valueChangeEvent.getSource();
+			try{
+
+				Object source = valueChangeEvent.getSource();
 			if(source instanceof Byte){
 
 				Byte b = (Byte)source;
@@ -93,7 +96,8 @@ public class AdcController extends ControllerAbstract {
 
 			}else{
 				
-				RegisterValue urv = (RegisterValue)getPacketWork().getPacketThread().getValue();
+				final PacketThreadWorker packetThread = getPacketWork().getPacketThread();
+				RegisterValue urv = (RegisterValue)packetThread.getValue();
 				Value uv = urv.getValue();
 				long sourceValue = ((RegisterValue)source).getValue().getValue();
 				if(uv==null){
@@ -105,7 +109,10 @@ public class AdcController extends ControllerAbstract {
 				String string = value.toString();
 				setText(new DecimalFormat("#.### A").format(multiplier*sourceValue/1000), string);
 			}
-		}
 
+			}catch(Exception e){
+				logger.catching(e);
+			}
+		}
 	}
 }

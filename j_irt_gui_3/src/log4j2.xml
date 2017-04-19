@@ -39,6 +39,7 @@
   <Loggers>
  
 <!--  	<Logger name="irt.irt_gui.IrtGui" level="all"/> -->
+<!--  	<Logger name="irt.tools.textField.UnitAddressField" level="all"/> -->
 <!--  	<Logger name="irt.tools.ALCComboBox" level="all"/> -->
 <!--   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelHPB" level="all"/> -->
 <!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
@@ -48,6 +49,7 @@
 <!--  	<Logger name="irt.tools.combobox.LoSelectComboBox" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPort" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="all"/> -->
+ 	<Logger name="irt.controller.translation.Translation" level="debug"/>
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

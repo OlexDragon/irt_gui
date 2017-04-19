@@ -32,15 +32,15 @@ public abstract class IrtMainFrame extends JFrame {
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
-
-		Runtime.getRuntime().addShutdownHook(new Thread()
-		{
-		    @Override
-		    public void run()
-		    {
-		        logger.info("ShutdownHook");
-		    }
-		});
+//
+//		Runtime.getRuntime().addShutdownHook(new Thread()
+//		{
+//		    @Override
+//		    public void run()
+//		    {
+//		        logger.info("ShutdownHook");
+//		    }
+//		});
 
 		setSize(width, hight);
 

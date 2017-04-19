@@ -14,7 +14,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -53,12 +53,11 @@ import irt.tools.KeyValue;
 import irt.tools.panel.DevicePanel;
 import irt.tools.panel.head.Console;
 import irt.tools.panel.head.HeadPanel;
-import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.monitor.MonitorPanelConverter;
 import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
-import irt.tools.panel.wizards.address.AddressWizard;
+import irt.tools.textField.UnitAddressField;
 import jssc.SerialPortList;
 
 public abstract class GuiControllerAbstract extends Thread {
@@ -200,12 +199,13 @@ public abstract class GuiControllerAbstract extends Thread {
 		}
 	};
 
+
 	@SuppressWarnings("unchecked")
 	public GuiControllerAbstract(String threadName, IrtGui gui) {
 		super(threadName);
 		this.gui = gui;
+		guiController = this;
 
-		setRedundancy();
 		DevicePanel.DEBUG_PANEL.setGuiController(this);
 
 		comPortThreadQueue.setSerialPort(new ComPort(prefs.get(SERIAL_PORT, "COM1")));
@@ -251,39 +251,6 @@ public abstract class GuiControllerAbstract extends Thread {
 		comPortThreadQueue.addPacketListener(packetListener);
 	}
 
-
-	private void setRedundancy() {
-		address = (byte) prefs.getInt("address", IrtGui.DEFAULT_ADDRESS);
-
-		String addresses = null;
-		String lastModified = null;
-		String prefsLastModified = prefs.get("lastModified", null);
-
-		Properties p = IrtPanel.PROPERTIES;
-		for (Object s : p.keySet()) {
-			String str = (String) s;
-			if (str.equalsIgnoreCase("addresses"))
-				addresses = p.getProperty(str);
-			else if (str.equals("lastModified")) 
-				lastModified = p.getProperty(str);
-		}
-
-		if (prefsLastModified != null ? !prefsLastModified.equals(lastModified) : lastModified != null) {
-
-			if(lastModified==null)
-				prefs.remove("lastModified");
-			else
-				prefs.put("lastModified", lastModified);
-
-			if (addresses == null)
-				prefs.remove(AddressWizard.REDUNDANCY_ADDRESSES);
-			else if (addresses.isEmpty())
-				prefs.put(AddressWizard.REDUNDANCY_ADDRESSES, AddressWizard.REDUNDANCY_DEFAULT_ADDRESSES);
-			else
-				prefs.put(AddressWizard.REDUNDANCY_ADDRESSES, addresses);
-		}
-	}
-
 	public static DeviceInfo getDeviceInfo(LinkHeader linkHeader) {
 		return deviceInfos.get(linkHeader);
 	}
@@ -320,7 +287,7 @@ public abstract class GuiControllerAbstract extends Thread {
 				size.width = Translation.getValue(Integer.class, "serialPortSelection.width", 200);
 				serialPortSelection.setSize(size);
 
-				String portName = comPortThreadQueue.getSerialPort().getPortName();
+				String portName = ComPortThreadQueue.getSerialPort().getPortName();
 				if(defaultComboBoxModel.getIndexOf(portName)==-1){
 					if(defaultComboBoxModel.getSize()>1)
 						setSerialPort();
@@ -376,7 +343,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	protected void setSerialPort(String serialPortName) {
 
 		if (serialPortName == null || serialPortName.isEmpty())
-				comPortThreadQueue.getSerialPort().closePort();
+				ComPortThreadQueue.getSerialPort().closePort();
 
 		else {
 			comPortThreadQueue.setSerialPort(new ComPort(serialPortName));
@@ -433,7 +400,7 @@ public abstract class GuiControllerAbstract extends Thread {
 		boolean set = false;
 		if (serialPortSelection != null) {
 			Object selectedItem = serialPortSelection.getSelectedItem();
-			if (selectedItem != null && comPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString())) {
+			if (selectedItem != null && ComPortThreadQueue.getSerialPort().getPortName().equals(selectedItem.toString())) {
 				set = true;
 			}
 		}
@@ -441,7 +408,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	protected void getConverterInfo() {
-		if(protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL ) || protocol.equals(Protocol.CONVERTER)){
+		if(!protocol.equals(Protocol.LINKED)){
 			logger.trace("protocol = {}", protocol);
 
 			comPortThreadQueue.add(new DeviceInfoGetter() {
@@ -453,12 +420,18 @@ public abstract class GuiControllerAbstract extends Thread {
 		}
 	}
 
+	private static byte[] addresses = UnitAddressField.DEFAULT_ADDRESS;
+	private static GuiControllerAbstract guiController;
+
+	public static void setAddresses(byte[] addresses) {
+		GuiControllerAbstract.addresses = addresses;
+		Optional.ofNullable(guiController).ifPresent(gui->gui.reset());
+	}
+
 	protected void getUnitsInfo() {
-		if (protocol.equals(Protocol.DEMO) || protocol.equals(Protocol.ALL ) || protocol.equals(Protocol.LINKED)) {
+		if (!protocol.equals(Protocol.CONVERTER)) {
 
-			Set<Byte> addresses = getAddresses(address);
-
-			for(Byte b:addresses.toArray(new Byte[addresses.size()])){
+			for(Byte b:addresses){
 				DeviceInfoGetter packetWork = new DeviceInfoGetter(new LinkHeader(b, (byte) 0, (short) 0)) {
 					@Override
 					public Priority getPriority() {
@@ -468,29 +441,6 @@ public abstract class GuiControllerAbstract extends Thread {
 				comPortThreadQueue.add(packetWork);
 			}
 		}
-	}
-
-	public static Set<Byte> getAddresses(Byte addtess) {
-
-		String addressesStr = prefs.get(AddressWizard.REDUNDANCY_ADDRESSES, null);
-		Set<Byte> addresses = new HashSet<>();
-		if(addtess!=null)
-			addresses.add(addtess);
-		if(addressesStr!=null){
-			addressesStr = addressesStr.replaceAll("\\D+", ",");
-			String[] split = addressesStr.split(",");
-
-			for(String s:split)
-				if(!s.isEmpty()) {
-					int parseInt = Integer.parseInt(s);
-					addresses.add((byte) parseInt);
-				}
-		}
-
-		if(addresses.isEmpty())
-			addresses.add((byte) IrtGui.DEFAULT_ADDRESS);
-
-		return addresses;
 	}
 
 	public LinkHeader getLinkHeader(Packet packet) {

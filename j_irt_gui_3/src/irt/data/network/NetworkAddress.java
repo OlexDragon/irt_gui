@@ -77,12 +77,6 @@ public class NetworkAddress {
 		return returnStr;
 	}
 
-	@Override
-	public String toString() {
-		return "NetworkAddress [type=" + getTypeAsString() + ", address=" + getAddressAsString() + ", mask=" + getMaskAsString() + ", gateway=" + getGatewayAsString()
-				+ "]";
-	}
-
 	public String getTypeAsString() {
 		return AddressType.values()[type].toString();
 	}
@@ -186,5 +180,11 @@ public class NetworkAddress {
 		String[] split = text.split("\\.");
 		for(int i=0; i<split.length && i<field.length; i++)
 			field[i] = (byte) Integer.parseInt(split[i]);
+	}
+
+	@Override
+	public String toString() {
+		return "NetworkAddress [type=" + getTypeAsString() + ", address=" + getAddressAsString() + ", mask=" + getMaskAsString() + ", gateway=" + getGatewayAsString()
+				+ "]";
 	}
 }
