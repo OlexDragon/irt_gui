@@ -19,13 +19,13 @@ import java.util.ResourceBundle;
 import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 public class Translation {
 
 	private static final String DEFAULT_LANGUAGE = "en";
 
-	private static final Logger LOGGER = (Logger) LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private static final Preferences PREFS = GuiController.getPrefs();
 	private static Locale locale;
@@ -40,6 +40,7 @@ public class Translation {
 	private static ResourceBundle messages;
 
 	public static void setLocale(final String localeStr){
+		LOGGER.entry(localeStr);
 		font = null;
 
 		Thread t = new Thread(new Runnable() {
@@ -195,7 +196,7 @@ public class Translation {
 	}
 
 	public static void setFont(Font font) {
-		LOGGER.trace("setFont({})", font);
+		LOGGER.entry(font);
 		Translation.font = font;
 	}
 

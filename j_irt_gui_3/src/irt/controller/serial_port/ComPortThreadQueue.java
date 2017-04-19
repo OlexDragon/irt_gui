@@ -125,7 +125,7 @@ public class ComPortThreadQueue extends Thread {
 		return comPortQueue.size();
 	}
 
-	public ComPort getSerialPort() {
+	public static ComPort getSerialPort() {
 		return serialPort;
 	}
 
@@ -138,9 +138,7 @@ public class ComPortThreadQueue extends Thread {
 			clear();
 			oldSerialPort.setRun(false, "Reset Serial Port");
 
-			synchronized (ComPortThreadQueue.serialPort) {
-				oldSerialPort.closePort();
-			}
+			oldSerialPort.closePort();
 		}
 
 		ComPortThreadQueue.serialPort = serialPort;

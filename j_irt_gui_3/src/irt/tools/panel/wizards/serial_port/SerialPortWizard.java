@@ -3,6 +3,7 @@ package irt.tools.panel.wizards.serial_port;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPort;
 import irt.controller.serial_port.ComPort.Baudrate;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.listener.DragWorker;
 
 import java.awt.BorderLayout;
@@ -38,12 +39,14 @@ public class SerialPortWizard extends JDialog {
 		comboBox.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange()==ItemEvent.SELECTED){
-					GuiControllerAbstract.getComPortThreadQueue().getSerialPort().setBaudrate(((Baudrate)comboBox.getSelectedItem()).getBaudrate());
+					GuiControllerAbstract.getComPortThreadQueue();
+					ComPortThreadQueue.getSerialPort().setBaudrate(((Baudrate)comboBox.getSelectedItem()).getBaudrate());
 				}
 			}
 		});
 		comboBox.setModel(new DefaultComboBoxModel<>(Baudrate.values()));
-		GuiControllerAbstract.getComPortThreadQueue().getSerialPort();
+		GuiControllerAbstract.getComPortThreadQueue();
+		ComPortThreadQueue.getSerialPort();
 		comboBox.setSelectedItem(Baudrate.valueOf(ComPort.getBaudrate()));
 
 		JLabel label = new JLabel("Baudrate(bps):");

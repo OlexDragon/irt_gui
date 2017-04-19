@@ -8,7 +8,7 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.controller.control.ControllerAbstract.Style;
@@ -35,8 +35,8 @@ public class DumpControllers{
 	public static final String DUMP_WAIT = "DUMP_WAIT";
 
 	private static LoggerContext ctx = setSysSerialNumber(null);
-	private final Logger logger = (Logger) LogManager.getLogger();
-	public static final Logger dumper = (Logger) LogManager.getLogger("dumper");
+	private final Logger logger = LogManager.getLogger();
+	public static final Logger dumper = LogManager.getLogger("dumper");
 	public static final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private List<DefaultController> dumpsList = new ArrayList<>();

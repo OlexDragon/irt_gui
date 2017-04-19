@@ -60,7 +60,7 @@ public class ComPort extends SerialPort {
 
 		@Override
 		public String toString(){
-			return ""+baudrate;
+			return Integer.toString(baudrate);
 		}
 
 		public static Baudrate valueOf(int baudrate) {

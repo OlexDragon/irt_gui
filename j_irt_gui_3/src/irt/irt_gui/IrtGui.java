@@ -15,35 +15,24 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.apache.logging.log4j.LogManager;
@@ -54,41 +43,33 @@ import irt.controller.AlarmsController;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
-import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
-import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
-import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketImp;
 import irt.tools.KeyValue;
+import irt.tools.fx.BaudRateSelector;
+import irt.tools.fx.JavaFxFrame;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
-import irt.tools.panel.wizards.address.AddressWizard;
+import irt.tools.textField.UnitAddressField;
 
 public class IrtGui extends IrtMainFrame {
+	private static final String PREF_KEY_ADDRESS = "address";
+
 	private static final long serialVersionUID = 1611718189640547787L;
 
 	public static final int DEFAULT_ADDRESS = 254;
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.108";
-	private static final Preferences prefs = GuiController.getPrefs();
-	private static final AddressWizard ADDRESS_VIZARD = AddressWizard.getInstance();
-	private int address;
-	private Set<Integer> addressHistory =  new TreeSet<>();
+	public static final String VERTION = "- 3.111";
 	private boolean connected;
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
-	private JMenuItem mntmSet;
-	private JMenuItem mntmClear;
-	private JMenuItem mntmRemove;
-	private JMenuItem mntmAddressWizard;
 
 	protected ValueChangeListener valueChangeListener = new ValueChangeListener() {
 		@Override
@@ -162,237 +143,10 @@ public class IrtGui extends IrtMainFrame {
 			}
 		});
 
-		setAddressHistory(prefs.get("address_history", null));
-
-		address = prefs.getInt("address", DEFAULT_ADDRESS);
-		logger.debug("Address fom System Pref: {}", address);
-
-		Set<Byte> addresses = GuiControllerAbstract.getAddresses(null);
-		logger.debug("Set<Byte> addresses = {}", addresses);
-
-		if(!addresses.contains(address)){
-			address = addresses.iterator().next()&0xFF;
-			logger.trace("save 'address': {}", address);
-			prefs.putInt("address", address);
-		}
-		txtAddress = new JTextField();
-		txtAddress.setHorizontalAlignment(SwingConstants.CENTER);
-		txtAddress.setFont(new Font("Tahoma", Font.BOLD, 18));
-		txtAddress.setText(""+address);
-		txtAddress.setColumns(8);
-		txtAddress.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyPressed(KeyEvent keyEvent) {
-
-				try {
-					Object[] values = addressHistory.toArray();
-					int key = getKey(values);
-
-					int length = values.length-1;
-
-					if(values.length>0)
-					switch (keyEvent.getExtendedKeyCode()) {
-					case KeyEvent.VK_UP:
-						if (key < length)
-							txtAddress.setText(values[++key].toString());
-						else
-							txtAddress.setText(values[key = 0].toString());
-						break;
-					case KeyEvent.VK_DOWN:
-						if (key > 0)
-							txtAddress.setText(values[--key].toString());
-						else
-							txtAddress.setText(values[key = length].toString());
-					}
-
-					logger.trace("Key={}", key);
-				} catch (Exception ex) {
-					logger.catching(ex);
-				}
-			}
-
-			private int getKey(Object[] values) {
-				String text = txtAddress.getText();
-				int result = 0;
-
-				for(int i=0; i<values.length; i++)
-					if(values[i].toString().equals(text)){
-						result = i;
-						break;
-					}
-
-				return result;
-			}
-		});
-		if(addressHistory.isEmpty())
-			txtAddress.setToolTipText("Unit Address");
-		else
-			txtAddress.setToolTipText(addressHistory.toString());
-
-		JPopupMenu popupMenu_1 = new JPopupMenu();
-		addPopup(txtAddress, popupMenu_1);
-		
-		mntmClear = new JMenuItem(Translation.getValue(String.class, "clear", "Clear"));
-		mntmClear.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					txtAddress.setText("" + DEFAULT_ADDRESS);
-					prefs.remove("address_history");
-					prefs.remove(AddressWizard.REDUNDANCY_ADDRESSES);
-
-					logger.trace("save 'address': {}", DEFAULT_ADDRESS);
-					prefs.putInt("address", DEFAULT_ADDRESS);
-					address = DEFAULT_ADDRESS;
-
-				} catch (Exception ex) {
-					logger.catching(ex);
-				}
-			}
-		});
-		popupMenu_1.add(mntmClear);
-		
-		mntmRemove = new JMenuItem(Translation.getValue(String.class, "remove", "Remove"));
-		mntmRemove.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String text = txtAddress.getText();
-					if (text != null && !(text = text.replaceAll("\\D", "")).isEmpty()) {
-						addressHistory.remove(Integer.parseInt(text));
-						prefs.put("address_history", addressHistory.toString());
-						if (addressHistory.isEmpty())
-							txtAddress.setText("" + DEFAULT_ADDRESS);
-						else
-							txtAddress.setText("" + addressHistory.iterator().next());
-
-						txtAddress.setToolTipText(addressHistory.toString());
-					}
-				} catch (Exception ex) {
-					logger.catching(ex);
-				}
-			}
-		});
-		popupMenu_1.add(mntmRemove);
-		
-		mntmSet = new JMenuItem(Translation.getValue(String.class, "set", "Set"));
-		mntmSet.setVisible(false);
-		mntmSet.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String newAddressStr = txtAddress.getText();
-					logger.trace("Address = {}", newAddressStr);
-
-					if (newAddressStr != null && !(newAddressStr = newAddressStr.replaceAll("\\D", "")).isEmpty()) {
-						int newAddress = Integer.parseInt(newAddressStr);
-
-						if (newAddress > 0 && newAddress <= AddressWizard.MAX_ADDRESS) {
-							if (newAddress != address) {
-								if (JOptionPane.showConfirmDialog(IrtGui.this,
-										"Are you really want to change the address '" + address + "' to '" + newAddress
-												+ "'.",
-										"Address Change", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
-
-									byte na = (byte) newAddress;
-									Setter packetWork = new Setter(new LinkHeader((byte) address, (byte) 0, (short) 0),
-											PacketImp.PACKET_TYPE_COMMAND, PacketImp.GROUP_ID_PROTOCOL,
-											PacketImp.IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS,
-											PacketWork.PACKET_ID_PROTOCOL_ADDRESS, na);
-									logger.trace(packetWork);
-									guiController.setAddress(na);
-									GuiController.getComPortThreadQueue().add(packetWork);
-									logger.trace("save 'address': {}", address);
-									prefs.putInt("address", address);
-								} else
-									txtAddress.setText("" + address);
-							} else
-								JOptionPane.showMessageDialog(IrtGui.this, "First type the new address");
-						} else
-							JOptionPane.showMessageDialog(IrtGui.this,
-									"The address of unit should be between 0 and " + (AddressWizard.MAX_ADDRESS + 1));
-					} else
-						JOptionPane.showMessageDialog(IrtGui.this,
-								"The address of unit should be between 0 and " + (AddressWizard.MAX_ADDRESS + 1));
-				} catch (Exception ex) {
-					logger.catching(ex);
-				}
-			}
-		});
-		popupMenu_1.add(mntmSet);
-		txtAddress.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String text = txtAddress.getText();
-					logger.trace("Address={}", text);
-
-					if (text == null || (text = text.replaceAll("\\D", "")).isEmpty()
-							|| (address = Integer.parseInt(text)) < 1 || address > AddressWizard.MAX_ADDRESS)
-						JOptionPane.showMessageDialog(IrtGui.this,
-								"The address of unit should be between 0 and " + (AddressWizard.MAX_ADDRESS + 1));
-					else {
-						new SwingWorker<Void, Void>() {
-							@Override
-							protected Void doInBackground() throws Exception {
-								try {
-									logger.debug("Set Address to {}", address);
-									if (addressHistory.add(address)) {
-										prefs.put("address_history", addressHistory.toString());
-										logger.debug("address history = {}", addressHistory);
-										txtAddress.setToolTipText(addressHistory.toString());
-									}
-
-									logger.trace("save 'address': {}", address);
-									prefs.putInt("address", address);
-									txtAddress.setText("" + address);
-									guiController.setAddress((byte) address);
-									logger.debug("Address is set to {}", address);
-								} catch (Exception ex) {
-									logger.catching(ex);
-								}
-								return null;
-							}
-						}.execute();
-					}
-				} catch (Exception ex) {
-					logger.catching(ex);
-				}
-			}
-		});
+		txtAddress = new UnitAddressField(PREF_KEY_ADDRESS);
 		
 		ProgressBar progressBar = new ProgressBar();
 		
-		JPopupMenu popupMenu = new JPopupMenu();
-		addPopup(progressBar, popupMenu);
-		popupMenu.addPopupMenuListener(new PopupMenuListener() {
-			
-			@Override
-			public void popupMenuWillBecomeVisible(PopupMenuEvent popupMenuEvent) {
-				final JPopupMenu m = (JPopupMenu) popupMenuEvent.getSource();
-
-				EventQueue.invokeLater(new Runnable() {
-					
-					@Override 
-		            public void run() {
-		            	 Component[] components = m.getComponents();
-						for (Component c : components)
-							if (c instanceof JComponent) { // BasicComboPopup
-								c.repaint();
-							}
-					}
-				});
-			}
-			
-			@Override public void popupMenuWillBecomeInvisible(PopupMenuEvent e) { }
-			@Override public void popupMenuCanceled(PopupMenuEvent e) { }
-		});
-
-		mntmAddressWizard = new JMenuItem(Translation.getValue(String.class, "address_wizard", "Address Wizard..."));
-		mntmAddressWizard.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				JOptionPane.showMessageDialog(IrtGui.this, "Coming soon.");
-				ADDRESS_VIZARD.setVisible(true);
-			}
-		});
-		popupMenu.add(mntmAddressWizard);
 		GroupLayout groupLayout = new GroupLayout(getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -422,8 +176,6 @@ public class IrtGui extends IrtMainFrame {
 		);
 		getContentPane().setLayout(groupLayout);
 
-		ADDRESS_VIZARD.setOwner(this);
-
 		KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 		manager.addKeyEventDispatcher(new KeyEventDispatcher() {
 			
@@ -444,24 +196,26 @@ public class IrtGui extends IrtMainFrame {
 		});
 	}
 
-	private void setAddressHistory(String historyStr) {
-		logger.entry(historyStr);
-
-		if(historyStr!=null){
-			for(String s:historyStr.split(","))
-				try{
-					final String replaceAll = s.replaceAll("\\D", "");
-					if(!replaceAll.isEmpty())
-						addressHistory.add(Integer.parseInt(replaceAll));
-				}catch(Exception e){
-					logger.catching(e);
-				}
-
-			logger.debug("History={}", addressHistory);
-		}
-	}
-
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {
+		
+		JPopupMenu popupMenu = new JPopupMenu();
+		addPopup(headPanel, popupMenu);
+
+		JMenuItem baudrateMenuItem = new JMenuItem(Translation.getValue(String.class, "baudrates", "Baud Rates"));
+		baudrateMenuItem.addActionListener(new ActionListener() {
+			private JavaFxFrame javaFxFrame;
+
+			public void actionPerformed(ActionEvent e) {
+
+				if(javaFxFrame==null){
+					javaFxFrame = new JavaFxFrame(()->new BaudRateSelector());
+					javaFxFrame.setSize(200, 200);
+				}else
+					javaFxFrame.setVisible(true);
+			}
+		});
+		popupMenu.add(baudrateMenuItem);
+
 		final JLabel lblIrtTechnologies = new JLabel(IrtPanel.PROPERTIES.getProperty("company_name"));
 		lblIrtTechnologies.setForeground(Color.WHITE);
 		lblIrtTechnologies.setBounds(531, 10, 107, 14);
@@ -492,27 +246,15 @@ public class IrtGui extends IrtMainFrame {
 		final JComboBox<KeyValue<String, String>> comboBoxLanguage = new JComboBox<>();
 		comboBoxLanguage.setName("Language");
 		headPanel.add(comboBoxLanguage);
-		comboBoxLanguage.addItemListener(new ItemListener() {
-			
-			@Override
-			public void itemStateChanged(ItemEvent e) {
-				if(e.getStateChange()==ItemEvent.SELECTED){
-					new SwingWorker<Void, Void>() {
+		comboBoxLanguage.addActionListener(e->new SwingWorker<Void, Void>(){
 
-						@Override
-						protected Void doInBackground() throws Exception {
-							mntmClear.setText(Translation.getValue(String.class, "clear", "Clear"));
-							mntmAddressWizard.setText(Translation.getValue(String.class, "address_wizard", "Address Wizard..."));
-							mntmRemove.setText(Translation.getValue(String.class, "remove", "Remove"));
-							mntmSet.setText(Translation.getValue(String.class, "set", "Set"));
-							ADDRESS_VIZARD.refresh();
-							return null;
-						}
-						
-					}.execute();
-				}
+			@Override
+			protected Void doInBackground() throws Exception {
+				baudrateMenuItem.setText(Translation.getValue(String.class, "baudrates", "Baud Rates"));
+				return null;
 			}
-		});
+			
+		}.execute());
 
 		new SwingWorker<DefaultComboBoxModel<KeyValue<String, String>>, Void>() {
 			@SuppressWarnings("unchecked")
@@ -546,7 +288,6 @@ public class IrtGui extends IrtMainFrame {
 				comboBoxLanguage.setSelectedItem(keyValue);
 			}
 		}.execute();
-
 
 		comboBoxLanguage.addPopupMenuListener(Listeners.popupMenuListener);
 		comboBoxLanguage.setUI(
@@ -714,6 +455,5 @@ public class IrtGui extends IrtMainFrame {
 
 	public void setConnected(boolean connected) {
 		this.connected = connected;
-		mntmSet.setVisible(connected);
 	}
 }

@@ -36,6 +36,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.DumpControllers;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.ComPortThreadQueue;
@@ -433,6 +434,8 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 						final AddressType type = AddressType.values()[networkAddress.getType()];
 						comboBoxAddressType.setSelectedItem(type);
+
+						DumpControllers.dumper.info(DumpControllers.marker, "network Address: {}", networkAddress);
 
 						ipAddressTextField.setText(networkAddress.getAddressAsString());
 						ipMaskTextField.setText(networkAddress.getMaskAsString());
