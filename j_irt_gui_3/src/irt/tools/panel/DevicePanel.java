@@ -6,6 +6,7 @@ import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import javax.swing.JLabel;
@@ -76,7 +77,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 				monitorPanel = new MonitorPanelSwingWithFx();
 				monitorPanel.setLocation(10, 11);
 				monitorPanel.setSize(215, 210);
-				monitorPanel.setUnitAddress(linkHeader.getAddr());
+				Optional.ofNullable(linkHeader).ifPresent(lh->monitorPanel.setUnitAddress(lh.getAddr()));
 				userPanel.add((Component) monitorPanel);
 
 				controlPanel = getNewControlPanel();
