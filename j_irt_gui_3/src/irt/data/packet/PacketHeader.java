@@ -145,7 +145,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_MEASUREMENT_TEMPERATURE:
 				packetIdStr = "Bias Temperature("+packetId+")";
 				break;
-			case PacketWork.PACKET_DEVICE_INFO:
+			case PacketWork.PACKET_ID_DEVICE_INFO:
 				packetIdStr = "Device Info("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN:

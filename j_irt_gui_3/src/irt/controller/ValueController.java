@@ -66,7 +66,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 	}
 
 	@Override
-	public void packetRecived(final Packet packet) {
+	public void onPacketRecived(final Packet packet) {
 		scheduledThreadPool.execute(new Runnable() {
 
 			@Override

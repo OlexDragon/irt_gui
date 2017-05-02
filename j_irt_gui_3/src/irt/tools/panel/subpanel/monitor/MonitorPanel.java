@@ -16,7 +16,7 @@ import irt.tools.label.LED;
 
 
 @SuppressWarnings("serial")
-public class MonitorPanel extends MonitorPanelSSPA {
+public class MonitorPanel extends MonitorPanelSSPA implements Monitor {
 
 	protected JLabel lblInputPowerTxt;
 	protected JLabel lblInputPower;

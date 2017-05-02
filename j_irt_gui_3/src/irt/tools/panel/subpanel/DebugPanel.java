@@ -69,7 +69,7 @@ public class DebugPanel extends JPanel{
 										return new PacketListener() {
 								
 											@Override
-											public void packetRecived(Packet packet) {
+											public void onPacketRecived(Packet packet) {
 												if(getPacketWork().isAddressEquals(packet) &&
 														packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CLEAR_STATISTICS){
 

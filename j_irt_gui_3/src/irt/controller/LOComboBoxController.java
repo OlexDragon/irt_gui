@@ -76,7 +76,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 	private byte id;
 	int times = 5;
 	@Override
-	public void packetRecived(final Packet packet) {
+	public void onPacketRecived(final Packet packet) {
 		scheduledThreadPool.execute(new Runnable() {
 
 			@Override

@@ -123,7 +123,7 @@ public class DumpControllers{
 					protected PacketListener getNewPacketListener() {
 						return new PacketListener() {
 							@Override
-							public void packetRecived(Packet packet) {
+							public void onPacketRecived(Packet packet) {
 								byte groupId;
 
 								if(getPacketWork().isAddressEquals(packet) &&
@@ -618,7 +618,7 @@ public class DumpControllers{
 
 				switch(packetId){
 
-				case PacketWork.PACKET_DEVICE_INFO:
+				case PacketWork.PACKET_ID_DEVICE_INFO:
 						deviceInfo = new DeviceInfo(packet);
 					break;
 

@@ -116,7 +116,7 @@ public abstract class GuiControllerAbstract extends Thread {
 		private boolean powerIsOff;
 
 		@Override
-		public void packetRecived(Packet packet) {
+		public void onPacketRecived(Packet packet) {
 			logger.trace(packet);
 
 			if (packet != null && packet.getHeader() != null) {
@@ -421,6 +421,10 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	private static byte[] addresses = UnitAddressField.DEFAULT_ADDRESS;
+	public static byte[] getAddresses() {
+		return addresses;
+	}
+
 	private static GuiControllerAbstract guiController;
 
 	public static void setAddresses(byte[] addresses) {
@@ -444,11 +448,14 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	public LinkHeader getLinkHeader(Packet packet) {
-		LinkHeader linkHeader;
-		if (packet instanceof LinkedPacket) {
+		LinkHeader linkHeader = null;
+
+		if (packet instanceof LinkedPacket) 
 			linkHeader = ((LinkedPacket) packet).getLinkHeader();
-		}else
+
+		if(linkHeader==null)
 			linkHeader = new LinkHeader((byte)0, (byte)0, (short) 0);
+
 		return linkHeader;
 	}
 

@@ -87,7 +87,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 		}
 
 		@Override
-		public void packetRecived(Packet packet) {
+		public void onPacketRecived(Packet packet) {
 			new AlarmsBuilder(packet);
 		}
 	}
@@ -107,7 +107,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			synchronized (logger) {
 				if(!scheduleAtFixedRate.isCancelled())
 					if(packet!=null && packet.getHeader().getGroupId()==PacketImp.GROUP_ID_ALARM)
-						if(packet.getHeader().getOption()==PacketImp.NO_ERROR){
+						if(packet.getHeader().getOption()==PacketImp.ERROR_NO_ERROR){
 							final Payload payload = packet.getPayload(0);
 
 							if(payload.getParameterHeader().getCode()==PacketImp.ALARMS_IDs){

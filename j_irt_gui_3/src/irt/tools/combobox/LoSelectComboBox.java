@@ -53,7 +53,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	private final 	Updater			 			updater = new Updater();
 	private final 	PacketListener packetListener = new PacketListener() {
 		@Override
-		public void packetRecived(Packet packet) {
+		public void onPacketRecived(Packet packet) {
 			updater.setPacket(packet);
 			scheduledThreadPool.execute(updater);
 		}

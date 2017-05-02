@@ -1,19 +1,17 @@
 package irt.tools.panel;
 
+import java.awt.HeadlessException;
+
+import javax.swing.JPanel;
+
 import irt.controller.GuiControllerAbstract.Protocol;
 import irt.data.DeviceInfo;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9;
 import irt.tools.panel.subpanel.PLLsPanel;
-import irt.tools.panel.subpanel.control.ControlPanelImpl;
 import irt.tools.panel.subpanel.control.ControlPanelConverter;
 import irt.tools.panel.subpanel.control.ControlPanelDownConverter;
-import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-import irt.tools.panel.subpanel.monitor.MonitorPanelConverter;
-
-import java.awt.HeadlessException;
-
-import javax.swing.JPanel;
+import irt.tools.panel.subpanel.control.ControlPanelImpl;
 
 @SuppressWarnings("serial")
 public class ConverterPanel extends DevicePanel {
@@ -48,13 +46,6 @@ public class ConverterPanel extends DevicePanel {
 
 		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceInfo.getType(), null, this);
 		getTabbedPane().addTab("Info", null, infoPanel, null);
-	}
-
-	@Override
-	protected MonitorPanelAbstract getNewMonitorPanel() {
-		MonitorPanelConverter monitorPanel = new MonitorPanelConverter(deviceType);
-		monitorPanel.setLocation(10, 11);
-		return monitorPanel;
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import javax.swing.DefaultComboBoxModel;
@@ -373,9 +374,11 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		btnMute.setSize(size, size);
 		btnMute.setLocation(getMuteButtonPosition());
 
-		btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
-		btnStoreConfig.setSize(size, size);
-		btnStoreConfig.setLocation(getConfigButtonPosition());
+		Optional.ofNullable(btnStoreConfig).ifPresent(btn->{
+			btn.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
+			btn.setSize(size, size);
+			btn.setLocation(getConfigButtonPosition());
+		});
 
 		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);

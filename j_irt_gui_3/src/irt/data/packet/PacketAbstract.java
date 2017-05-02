@@ -13,7 +13,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	private Priority priority;
 
-	private final LinkHeader linkHeader;
+	private LinkHeader linkHeader;
 	private final PacketHeader header;
 	private final Payload payload;
 
@@ -110,6 +110,10 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	@Override
 	public LinkHeader getLinkHeader() {
 		return linkHeader;
+	}
+
+	public void setAddr(byte linkAddr) {
+		this.linkHeader = linkAddr!=0 ? new LinkHeader(linkAddr, (byte)0, (short)0) : null;
 	}
 
 	@Override

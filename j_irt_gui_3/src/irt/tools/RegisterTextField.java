@@ -98,7 +98,7 @@ public class RegisterTextField extends JTextField implements PacketListener {
 	}
 
 	@Override
-	public void packetRecived(Packet packet) {
+	public void onPacketRecived(Packet packet) {
 		updater.setPacket(packet);
 		service.execute(updater);
 	}
@@ -145,7 +145,7 @@ public class RegisterTextField extends JTextField implements PacketListener {
 		@Override
 		public void run() {
 			final PacketHeader header = packet.getHeader();
-			if(header.getOption()==PacketImp.NO_ERROR)
+			if(header.getOption()==PacketImp.ERROR_NO_ERROR)
 
 				try{
 

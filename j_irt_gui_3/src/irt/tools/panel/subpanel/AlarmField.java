@@ -71,7 +71,7 @@ public class AlarmField extends JPanel {
 			private final PacketListener packetListener = new PacketListener() {
 				
 				@Override
-				public void packetRecived(Packet packet) {
+				public void onPacketRecived(Packet packet) {
 					new FieldUpdater(packet);
 				}
 			};

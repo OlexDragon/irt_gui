@@ -148,7 +148,7 @@ public abstract class ControllerAbstract implements Runnable{
 		return new PacketListener() {
 
 			@Override
-			public void packetRecived(Packet packet) {
+			public void onPacketRecived(Packet packet) {
 				if (setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style == Style.CHECK_ONCE)
 					setSend(false);
 			}

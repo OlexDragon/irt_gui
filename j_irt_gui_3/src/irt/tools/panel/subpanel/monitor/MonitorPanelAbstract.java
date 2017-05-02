@@ -29,7 +29,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 
 @SuppressWarnings("serial")
-public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
+public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Monitor  {
 
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
@@ -44,7 +44,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 //	}
 
 	protected MonitorPanelAbstract(final int deviceType, LinkHeader linkHeader, String title, int width, int height) {
-		setName("MonitorPanel");
+		setName("MonitorPanelFx");
 		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short)0);
 		this.deviceType = deviceType;
 
@@ -125,7 +125,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh  {
 						return new PacketListener() {
 
 							@Override
-							public void packetRecived(final Packet packet) {
+							public void onPacketRecived(final Packet packet) {
 								new SwingWorker<Void, Void>(){
 
 									@Override
