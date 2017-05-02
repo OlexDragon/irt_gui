@@ -31,6 +31,8 @@ public class DeviceInfo {
 							DEVICE_TYPE_HPB_L_TO_KU		= 200,
 							DEVICE_TYPE_HPB_L_TO_C		= 201,
 							DEVICE_TYPE_HPB_SSPA		= 202,
+							DEVICE_TYPE_KA_BAND			= 210,
+							DEVICE_TYPE_KA_SSPA			= 211,
 
 							DEVICE_TYPE_DLRS		= 410,
 

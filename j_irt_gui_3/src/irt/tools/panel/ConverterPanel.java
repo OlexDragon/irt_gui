@@ -3,9 +3,11 @@ package irt.tools.panel;
 import java.awt.HeadlessException;
 
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
 import irt.controller.GuiControllerAbstract.Protocol;
 import irt.data.DeviceInfo;
+import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9;
 import irt.tools.panel.subpanel.PLLsPanel;
@@ -25,6 +27,12 @@ public class ConverterPanel extends DevicePanel {
 	public ConverterPanel(DeviceInfo deviceInfo, Protocol protocol, int maxHeight)	throws HeadlessException {
 		super(null, deviceInfo, 0, 0, 0, 0, maxHeight);
 
+		final JTabbedPane tabbedPane = getTabbedPane();
+
+		AlarmsPanel alarmPanel = new AlarmsPanel(deviceType, linkHeader);
+		alarmPanel.setBorder(null);
+		tabbedPane.addTab("alarms", alarmPanel);
+
 		hasDcOutput = 	deviceType == DeviceInfo.DEVICE_TYPE_L_TO_140 ||
 						deviceType == DeviceInfo.DEVICE_TYPE_L_TO_70 ||
 						deviceType == DeviceInfo.DEVICE_TYPE_C_TO_L;
@@ -35,17 +43,17 @@ public class ConverterPanel extends DevicePanel {
 						deviceType == DeviceInfo.DEVICE_TYPE_C_TO_L;
 
 		JPanel dacPanel = new DACsPanel(deviceType, null);
-		getTabbedPane().addTab("DACs", null, dacPanel, null);
+		tabbedPane.addTab("DACs", null, dacPanel, null);
 		dacPanel.setLayout(null);
 
 		JPanel registersPanel = protocol.getDeviceType()== DeviceInfo.DEVICE_TYPE_L_TO_KU ? new PLL_HMC807LP6CE_Reg9(deviceType) : new PLLsPanel(deviceType);
-		getTabbedPane().addTab("PLLs", null, registersPanel, null);
+		tabbedPane.addTab("PLLs", null, registersPanel, null);
 
 //		JPanel registerPanel = new RegistersPanel();
 //		getTabbedPane().addTab("Registers", null, registerPanel, null);
 
 		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceInfo.getType(), null, this);
-		getTabbedPane().addTab("Info", null, infoPanel, null);
+		tabbedPane.addTab("Info", null, infoPanel, null);
 	}
 
 	@Override
