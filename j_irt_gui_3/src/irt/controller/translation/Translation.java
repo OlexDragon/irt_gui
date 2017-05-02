@@ -98,8 +98,9 @@ public class Translation {
 					Thread.sleep(10);
 					if(times>10)
 						return defaultValue.get();
-				} catch (InterruptedException e) {
+				} catch (Exception e) {
 					LOGGER.catching(e);
+					return null;
 				}
 			}
 		String stringValue = map.get(key);
@@ -131,9 +132,12 @@ public class Translation {
 				LOGGER.warn("Have to do implementation for '{}'", clazz);
 			}
 		}else{
-			if(defaultValue!=null)
+			try{
+				returnValue = defaultValue.get();
+			}catch (NullPointerException e) {
 				LOGGER.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
-			returnValue = defaultValue.get();
+				returnValue = null;
+			}
 		}
 
 		return LOGGER.exit(returnValue);
