@@ -72,8 +72,11 @@ public class AlarmsPanel extends JPanel implements Refresh{
 
 		@Override
 		public void run() {
-			
-			cptq.add(packetWork);
+			try{
+				cptq.add(packetWork);
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 
 		}
 

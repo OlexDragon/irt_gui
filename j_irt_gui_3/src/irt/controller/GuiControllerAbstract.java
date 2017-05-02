@@ -160,7 +160,8 @@ public abstract class GuiControllerAbstract extends Thread {
 						case DeviceInfo.DEVICE_TYPE_HPB_L_TO_KU:
 						case DeviceInfo.DEVICE_TYPE_HPB_L_TO_C:
 						case DeviceInfo.DEVICE_TYPE_HPB_SSPA:
-						case DeviceInfo.DEVICE_TYPE_BIAS_BOARD_MODUL:
+						case DeviceInfo.DEVICE_TYPE_KA_BAND:
+						case DeviceInfo.DEVICE_TYPE_KA_SSPA:
 							protocol = Protocol.LINKED.setDeviceType(type);
 							break;
 						default:
