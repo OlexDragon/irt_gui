@@ -8,7 +8,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 	public static final short PACKET_UNNECESSARY = 0;
 
-	public static final short PACKET_DEVICE_INFO = 1;
+	public static final short PACKET_ID_DEVICE_INFO = 1;
 
 	public static final short PACKET_ID_MEASUREMENT_ALL 					= 9,
 							PACKET_ID_MEASUREMENT_STATUS 					= 10,

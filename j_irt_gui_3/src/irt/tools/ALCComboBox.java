@@ -75,9 +75,9 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	}
 
 	@Override
-	public void packetRecived(Packet packet) {
+	public void onPacketRecived(Packet packet) {
 		try{
-			if(packet.equals(this.packet) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE && packet.getHeader().getOption()==PacketImp.NO_ERROR){
+			if(packet.equals(this.packet) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE && packet.getHeader().getOption()==PacketImp.ERROR_NO_ERROR){
 				logger.trace(packet);
 
 				final Payload payload = packet.getPayload(0);

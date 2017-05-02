@@ -422,11 +422,11 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	}
 
 	@Override
-	public void packetRecived(Packet packet) {
+	public void onPacketRecived(Packet packet) {
 		try{
 			if(this.packet.equals(packet)){
 
-				if(packet.getHeader().getOption()==PacketImp.NO_ERROR){
+				if(packet.getHeader().getOption()==PacketImp.ERROR_NO_ERROR){
 
 					networkAddress.set(packet);
 

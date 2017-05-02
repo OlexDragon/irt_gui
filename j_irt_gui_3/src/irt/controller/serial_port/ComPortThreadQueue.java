@@ -1,13 +1,17 @@
 package irt.controller.serial_port;
 
 import java.awt.Color;
+import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.event.EventListenerList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
+import irt.data.MyThreadFactory;
 import irt.data.PacketThreadWorker;
 import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
@@ -17,77 +21,69 @@ import irt.data.value.StaticComponents;
 import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
 
-public class ComPortThreadQueue extends Thread {
+public class ComPortThreadQueue implements Runnable {
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
 	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300);
+	private final ScheduledExecutorService services = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 	private static ComPort serialPort;
 
 	public ComPortThreadQueue(){
-		super("ComPortThreadQueue");
-
-		int priority = getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			setPriority(priority-1);
-		setDaemon(true);
-		start();
+		services.scheduleAtFixedRate(this, 10, 10, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
 	public void run() {
-
 		boolean sent = false;
 		PacketWork packetWork = null;
-		while(true){
-			try {
+		try {
 
-				packetWork = comPortQueue.take();
+			packetWork = comPortQueue.take();
 
-				if(serialPort!=null){
-					PacketThreadWorker packetThread = packetWork.getPacketThread();
+			if (serialPort != null) {
+				PacketThreadWorker packetThread = packetWork.getPacketThread();
 
-					if(packetThread!=null){
-						packetThread.join();
+				if (packetThread != null) {
+					packetThread.join();
 
-						Packet packet = packetThread.getPacket();
-						if(packet==null){
-							logger.warn(packetWork);
-							continue;
-						}
+					Packet packet = packetThread.getPacket();
+					if (packet == null) {
+						logger.warn(packetWork);
+						return;
+					}
 
-//						if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND)
-//							logger.error(packetThread);
+					// if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND)
+					// logger.error(packetThread);
 
-						if(serialPort.isOpened() && packetThread.isReadyToSend()) {
-							sent = false;
+					if (serialPort.isOpened() && packetThread.isReadyToSend()) {
+						sent = false;
 
-							Packet send = serialPort.send(packetWork);
-							firePacketListener(send);
+						Packet send = serialPort.send(packetWork);
+						firePacketListener(send);
 
-							if(send==null || send.getHeader()==null)
-								StaticComponents.getLedRx().setLedColor(Color.WHITE);
-							else if(send.getHeader().getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
-								StaticComponents.getLedRx().setLedColor(Color.RED);
-							else
-								StaticComponents.getLedRx().setLedColor(Color.GREEN);
+						if (send == null || send.getHeader() == null)
+							StaticComponents.getLedRx().setLedColor(Color.WHITE);
+						else if (send.getHeader().getPacketType() != PacketImp.PACKET_TYPE_RESPONSE)
+							StaticComponents.getLedRx().setLedColor(Color.RED);
+						else
+							StaticComponents.getLedRx().setLedColor(Color.GREEN);
 
-							StaticComponents.getLedRx().blink();
-						}else if(!sent){
-							sent = true;
-							logger.warn("Serial port or Packet is not ready:\n{}", packetWork);
-						}
-					}else
-						logger.warn("packetThread==null; ({})", packetWork);
-//					if(comPortQueue.isEmpty()){
-//						serialPort.closePort();
-//					}
-				}else
-					logger.warn("serialPort==null");
-			} catch (Exception e) {
-				logger.catching(e);
-				Console.appendLn(e.getLocalizedMessage(), "ComPortThreadQueue:run");
-			}
+						StaticComponents.getLedRx().blink();
+					} else if (!sent) {
+						sent = true;
+						logger.warn("Serial port or Packet is not ready:\n{}", packetWork);
+					}
+				} else
+					logger.warn("packetThread==null; ({})", packetWork);
+				// if(comPortQueue.isEmpty()){
+				// serialPort.closePort();
+				// }
+			} else
+				logger.warn("serialPort==null");
+		} catch (Exception e) {
+			logger.catching(e);
+			Console.appendLn(e.getLocalizedMessage(), "ComPortThreadQueue:run");
 		}
 	}
 
@@ -171,7 +167,7 @@ public class ComPortThreadQueue extends Thread {
 		for (int i = 0; i < listeners.length; i++) {
 			Object l = listeners[i];
 			if (l == PacketListener.class)
-				((PacketListener) listeners[i + 1]).packetRecived(packet);
+				((PacketListener) listeners[i + 1]).onPacketRecived(packet);
 		}
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

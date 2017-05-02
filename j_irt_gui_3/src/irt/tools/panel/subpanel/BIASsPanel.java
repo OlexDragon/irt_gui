@@ -719,7 +719,7 @@ public class BIASsPanel extends JPanel {
 						return new PacketListener() {
 							
 							@Override
-							public void packetRecived(Packet packet) {
+							public void onPacketRecived(Packet packet) {
 
 								if(		getPacketWork().isAddressEquals(packet) &&
 										packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
@@ -766,7 +766,7 @@ public class BIASsPanel extends JPanel {
 						return new PacketListener() {
 							
 							@Override
-							public void packetRecived(Packet packet) {
+							public void onPacketRecived(Packet packet) {
 
 								if(		getPacketWork().isAddressEquals(packet) &&
 										packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&

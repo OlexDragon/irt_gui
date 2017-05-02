@@ -15,8 +15,6 @@ import irt.data.ToHex;
 
 public class PacketImp implements Packet{
 
-	public static final int NO_ERROR = 0;
-
 	public static final byte FLAG_SEQUENCE	= 0x7E;
 	public static final byte CONTROL_ESCAPE= 0x7D;
 

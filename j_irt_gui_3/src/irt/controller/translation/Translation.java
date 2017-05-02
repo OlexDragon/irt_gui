@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.function.Supplier;
 import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.LogManager;
@@ -81,8 +82,12 @@ public class Translation {
 		return map;
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <T> T getValue(Class<T> clazz, String key, T defaultValue){
+		return getValueWithSuplier(clazz, key, ()->defaultValue);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T getValueWithSuplier(Class<T> clazz, String key, Supplier<T> defaultValue){
 		LOGGER.entry(clazz, key, defaultValue);
 		T returnValue = null;
 
@@ -92,7 +97,7 @@ public class Translation {
 				try {
 					Thread.sleep(10);
 					if(times>10)
-						return defaultValue;
+						return defaultValue.get();
 				} catch (InterruptedException e) {
 					LOGGER.catching(e);
 				}
@@ -128,7 +133,7 @@ public class Translation {
 		}else{
 			if(defaultValue!=null)
 				LOGGER.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
-			returnValue = defaultValue;
+			returnValue = defaultValue.get();
 		}
 
 		return LOGGER.exit(returnValue);

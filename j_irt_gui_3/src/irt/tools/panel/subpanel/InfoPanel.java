@@ -74,7 +74,7 @@ public class InfoPanel extends JPanel implements Refresh {
 			private PacketListener packetListener = new PacketListener() {
 
 				@Override
-				public void packetRecived(Packet packet) {
+				public void onPacketRecived(Packet packet) {
 					if(packet!=null){
 						LinkHeader lh = null;
 
@@ -82,7 +82,7 @@ public class InfoPanel extends JPanel implements Refresh {
 							lh = ((LinkedPacket)packet).getLinkHeader();
 
 						PacketHeader h = packet.getHeader();
-						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_DEVICE_INFO && h.getPacketType()!=PacketImp.PACKET_TYPE_REQUEST){
+						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_ID_DEVICE_INFO && h.getPacketType()!=PacketImp.PACKET_TYPE_REQUEST){
 							int firmwareBuildCounter = new DeviceInfo(packet).getUptimeCounter();
 							if(secondsCount!=null)
 								secondsCount.setFirmwareBuildCounter(firmwareBuildCounter);

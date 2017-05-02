@@ -23,7 +23,7 @@ import irt.data.value.ValueDouble;
 import irt.data.value.ValueThreeState;
 
 
-public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract {
+public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implements Monitor {
 	private static final long serialVersionUID = 1L;
 	private JLabel lblTemperature;
 	private JLabel lblWGSPosition;

@@ -91,11 +91,11 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 	}
 
 	@Override
-	public void packetRecived(Packet packet) {
+	public void onPacketRecived(Packet packet) {
 		try{
 			if(this.packet.equals(packet)){
 
-				if(packet.getHeader().getOption()==PacketImp.NO_ERROR){
+				if(packet.getHeader().getOption()==PacketImp.ERROR_NO_ERROR){
 
 					final Payload payload = packet.getPayload(0);
 					MuteStatus muteStatus = MuteStatus.values()[payload.getByte()];

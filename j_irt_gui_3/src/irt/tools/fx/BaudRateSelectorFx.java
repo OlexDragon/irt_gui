@@ -16,13 +16,13 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 
-public class BaudRateSelector extends AnchorPane{
+public class BaudRateSelectorFx extends AnchorPane{
 
 	@FXML private VBox vBox;
 	@FXML private TitledPane titledPane;
 
-	public BaudRateSelector() {
-    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("BaudRateSelector.fxml"));
+	public BaudRateSelectorFx() {
+    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("BaudRateSelectorFx.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 
@@ -53,6 +53,5 @@ public class BaudRateSelector extends AnchorPane{
 			rb.setSelected(baudrate==v.getBaudrate());
 			vBox.getChildren().add(rb);
 		});
-
 	}
 }

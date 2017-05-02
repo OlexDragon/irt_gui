@@ -304,7 +304,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	}
 
 	@Override
-	public void packetRecived(Packet packet) {
+	public void onPacketRecived(Packet packet) {
 
 		final PacketHeader header = packet.getHeader();
 

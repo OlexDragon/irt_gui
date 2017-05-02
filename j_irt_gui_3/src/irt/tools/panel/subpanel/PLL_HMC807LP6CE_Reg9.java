@@ -119,7 +119,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 								return new PacketListener() {
 
 									@Override
-									public void packetRecived(Packet packet) {
+									public void onPacketRecived(Packet packet) {
 										PacketHeader header = packet.getHeader();
 										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG){
 

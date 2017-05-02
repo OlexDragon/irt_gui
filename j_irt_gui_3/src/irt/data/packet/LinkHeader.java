@@ -37,6 +37,10 @@ public class LinkHeader implements Comparable<LinkHeader>{
 		return addr;
 	}
 
+	public void setAddr(byte addr) {
+		this.addr = addr;
+	}
+
 	public int getIntAddr() {
 		return addr & 0xFF;
 	}

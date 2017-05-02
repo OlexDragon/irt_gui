@@ -23,7 +23,7 @@ import irt.tools.label.LED;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
 
 @SuppressWarnings("serial")
-public class MonitorPanelSSPA extends MonitorPanelAbstract {
+public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 
 	public static final byte
 			IRT_SLCP_PACKET_ID_MEASUREMENT = PacketImp.GROUP_ID_MEASUREMENT;

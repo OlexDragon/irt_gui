@@ -245,7 +245,7 @@ public class AlarmsController extends ControllerAbstract {
 	protected PacketListener getNewPacketListener() {
 		return new PacketListener() {
 			@Override
-			public void packetRecived(Packet packet) {
+			public void onPacketRecived(Packet packet) {
 				PacketWork packetWork = getPacketWork();
 				if (	packetWork!=null &&
 						packetWork.isAddressEquals(packet) &&

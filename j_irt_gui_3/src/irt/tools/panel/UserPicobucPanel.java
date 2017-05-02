@@ -56,7 +56,7 @@ public class UserPicobucPanel extends DevicePanel {
 			int tabCount = tabbedPane.getTabCount();
 			for (int i = 0; i < tabCount; i++) {
 				String title = tabbedPane.getTitleAt(i);
-				String value = Translation.getValue(String.class, title, null);
+				String value = Translation.getValueWithSuplier(String.class, title, null);
 				if (value != null) {
 					JLabel label = new JLabel(value);
 					label.setName(title);
@@ -94,7 +94,7 @@ public class UserPicobucPanel extends DevicePanel {
 											private RedundancyName name = null;
 
 											@Override
-											public void packetRecived(final Packet packet) {
+											public void onPacketRecived(final Packet packet) {
 												new SwingWorker<String, Void>() {
 
 													@Override
@@ -178,7 +178,7 @@ public class UserPicobucPanel extends DevicePanel {
 			if(label!=null){
 				String name = label.getName();
 				label.setFont(Translation.getFont().deriveFont(12f).deriveFont(Font.BOLD));
-				label.setText(Translation.getValue(String.class, name, null));
+				label.setText(Translation.getValueWithSuplier(String.class, name, null));
 			}
 		}
 		}catch(Exception ex){
@@ -191,7 +191,7 @@ public class UserPicobucPanel extends DevicePanel {
 
 		int index = tabbedPane.getTabCount()-1;
 		String title = tabbedPane.getTitleAt(index);
-		String value = Translation.getValue(String.class, title, null);
+		String value = Translation.getValueWithSuplier(String.class, title, null);
 		if (value != null) {
 			JLabel label = new JLabel(value);
 			label.setName(title);

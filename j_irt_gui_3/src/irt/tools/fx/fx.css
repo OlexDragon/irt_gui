@@ -1,0 +1,30 @@
+.monitor{
+	-fx-background-color: #0b173b;
+    -fx-background-radius: 5.0; 
+    -fx-border-color: white;
+    -fx-border-width: 2px;
+}
+.monitor .label.description{
+	-fx-text-fill: #99FFFF;
+}
+.monitor .label.value{
+	-fx-text-fill: white;
+}
+.monitor .label{
+	-fx-font-weight: bold;
+}
+.monitor .label.locked, .monitor .label.unmuted{
+	-fx-font-weight: bold;
+	-fx-text-fill: DARKBLUE;
+	-fx-background-color: LIMEGREEN;
+}
+.monitor .label.unlocked{
+	-fx-font-weight: bold;
+	-fx-text-fill: yellow;
+	-fx-background-color: red;
+}
+.monitor .label.muted{
+	-fx-font-weight: bold;
+	-fx-text-fill: black;
+	-fx-background-color: yellow;
+}

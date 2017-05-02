@@ -49,7 +49,9 @@
 <!--  	<Logger name="irt.tools.combobox.LoSelectComboBox" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPort" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="all"/> -->
- 	<Logger name="irt.controller.translation.Translation" level="debug"/>
+<!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
+<!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->
+<!--  	<Logger name="irt.tools.fx.MonitorPanelSwingWithFx" level="all"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

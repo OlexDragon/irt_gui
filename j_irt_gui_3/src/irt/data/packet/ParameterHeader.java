@@ -62,4 +62,22 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 				}
 		return codeStr;
 	}
+
+	@Override
+	public int hashCode() {
+		return 31 + Arrays.hashCode(parameterHeader);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		ParameterHeader other = (ParameterHeader) obj;
+		return Arrays.equals(parameterHeader, other.parameterHeader);
+	}
 }

@@ -21,13 +21,19 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
@@ -48,13 +54,15 @@ import irt.data.Listeners;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.tools.KeyValue;
-import irt.tools.fx.BaudRateSelector;
+import irt.tools.fx.BaudRateSelectorFx;
 import irt.tools.fx.JavaFxFrame;
+import irt.tools.fx.MonitorPanelFx;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
+import javafx.application.Platform;
 
 public class IrtGui extends IrtMainFrame {
 	private static final String PREF_KEY_ADDRESS = "address";
@@ -65,7 +73,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.111";
+	public static final String VERTION = "- 3.113";
 	private boolean connected;
 
 	protected HeadPanel headPanel;
@@ -99,12 +107,12 @@ public class IrtGui extends IrtMainFrame {
 				break;
 
 			case GuiController.CONNECTION:
-				headPanel.setPowerOn((boolean)source);
+//				headPanel.setPowerOn((boolean)source);
 				ProgressBar.setValue(0);
 				break;
 
 			case GuiController.MUTE:
-				headPanel.setMute((boolean) source);
+//				headPanel.setMute((boolean) source);
 			}
 		}
 	};
@@ -201,6 +209,31 @@ public class IrtGui extends IrtMainFrame {
 		JPopupMenu popupMenu = new JPopupMenu();
 		addPopup(headPanel, popupMenu);
 
+		JMenuItem monitortMenuItem = new JMenuItem(Translation.getValue(String.class, "monitor", "Monitor"));
+		monitortMenuItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				final MonitorPanelFx monitor = new MonitorPanelFx();
+				final JavaFxFrame javaFxFrame = new JavaFxFrame(()->monitor);
+
+				JMenu menu = javaFxFrame.getMenu();
+				menu.setText("Unit Address");
+				Optional.ofNullable(GuiController.getAddresses()).ifPresent(addrs->{
+					IntStream
+					.range(0, addrs.length)
+					.map(i->(addrs[i] & 0xFF))
+					.forEach(addr->{
+						final JCheckBoxMenuItem mItem = new JCheckBoxMenuItem("#" + Integer.toString(addr));
+						mItem.setName(Integer.toString(addr));
+						mItem.addActionListener(ae->{
+							monitor.setUnitAddress((byte) Integer.parseInt(((JCheckBoxMenuItem)ae.getSource()).getName()));
+						});
+						menu.add(mItem);
+					});
+				});
+			}
+		});
+		popupMenu.add(monitortMenuItem);
+
 		JMenuItem baudrateMenuItem = new JMenuItem(Translation.getValue(String.class, "baudrates", "Baud Rates"));
 		baudrateMenuItem.addActionListener(new ActionListener() {
 			private JavaFxFrame javaFxFrame;
@@ -208,7 +241,7 @@ public class IrtGui extends IrtMainFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				if(javaFxFrame==null){
-					javaFxFrame = new JavaFxFrame(()->new BaudRateSelector());
+					javaFxFrame = new JavaFxFrame(()->new BaudRateSelectorFx());
 					javaFxFrame.setSize(200, 200);
 				}else
 					javaFxFrame.setVisible(true);
@@ -251,6 +284,7 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected Void doInBackground() throws Exception {
 				baudrateMenuItem.setText(Translation.getValue(String.class, "baudrates", "Baud Rates"));
+				monitortMenuItem.setText(Translation.getValue(String.class, "monitor", "Monitor"));
 				return null;
 			}
 			
@@ -261,30 +295,33 @@ public class IrtGui extends IrtMainFrame {
 			@Override
 			protected DefaultComboBoxModel<KeyValue<String, String>> doInBackground() throws Exception {
 
-				try {
-					String[] languagesArr = Translation.getTranslationProperties("languages").split(",");
-					logger.entry((Object[]) languagesArr);
+				Optional<Stream<String>> o = Optional
+											.ofNullable(Translation.getTranslationProperties("languages"))
+											.map(s->s.split(","))
+											.map(a->Arrays.stream(a));
+				if(o.isPresent()){
+					final KeyValue<?, ?>[] languages = o.get()
+															.map(s->s.split(":"))
+															.filter(arr->arr.length>1)
+															.map(arr->new KeyValue<String, String>(arr[0], arr[1]))
+															.toArray(size->new KeyValue<?, ?>[size]);
 
-					KeyValue<?, ?>[] languages = new KeyValue[languagesArr.length];
-					for (int i = 0; i < languagesArr.length; i++) {
-						String[] split = languagesArr[i].split(":");
-						languages[i] = new KeyValue<String, String>(split[0], split[1]);
-					}
-					return logger.exit(new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages));
-				} catch (Exception e) {
-					logger.catching(e);
-					return null;
-				}
+					return new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages);
+				};
+				return new DefaultComboBoxModel<KeyValue<String, String>>();
 			}
 
 			@Override
 			protected void done() {
 				try {
-					comboBoxLanguage.setModel(get());
+					final DefaultComboBoxModel<KeyValue<String, String>> aModel = get();
+					comboBoxLanguage.setModel(aModel);
 				} catch (Exception e) {
 					logger.catching(e);
 				}
-				KeyValue<String, String> keyValue = new KeyValue<>(GuiController.getPrefs().get("locale", "en_US"), null);
+
+				final String key = Optional.ofNullable(GuiController.getPrefs().get("locale", "en_US")).orElse("en_US");
+				KeyValue<String, String> keyValue = new KeyValue<>(key, null);
 				comboBoxLanguage.setSelectedItem(keyValue);
 			}
 		}.execute();
@@ -399,6 +436,7 @@ public class IrtGui extends IrtMainFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					Platform.setImplicitExit(false); 
 					IrtGui frame = new IrtGui();
 
 	                // Set the window translucency, if supported.
@@ -456,4 +494,20 @@ public class IrtGui extends IrtMainFrame {
 	public void setConnected(boolean connected) {
 		this.connected = connected;
 	}
+//
+//	private class SwingW extends SwingWorker<Void, Void>{
+//
+//		private Runnable runnable;
+//
+//		public SwingW(Runnable runnable) {
+//			this.runnable = runnable;
+//			execute();
+//		}
+//
+//		@Override
+//		protected Void doInBackground() throws Exception {
+//			runnable.run();
+//			return null;
+//		}
+//	}
 }

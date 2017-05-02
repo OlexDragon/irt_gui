@@ -1,5 +1,6 @@
 package irt.tools.panel;
 
+import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
@@ -24,16 +25,15 @@ import irt.controller.interfaces.ControlPanel;
 import irt.data.DeviceInfo;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
+import irt.tools.fx.MonitorPanelSwingWithFx;
 import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.DebugPanel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanelSSPA;
 import irt.tools.panel.subpanel.control.ControlPanelUnit;
-import irt.tools.panel.subpanel.monitor.MonitorDownlinkRedundancySystem;
-import irt.tools.panel.subpanel.monitor.MonitorPanel;
+import irt.tools.panel.subpanel.monitor.Monitor;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
-import irt.tools.panel.subpanel.monitor.MonitorPanelSSPA;
 
 @SuppressWarnings("serial")
 public class DevicePanel extends Panel implements Comparable<DevicePanel>{
@@ -53,8 +53,8 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	protected final Preferences pref = GuiController.getPrefs();
 
 
-	private MonitorPanelAbstract monitorPanel;
-	public MonitorPanelAbstract getMonitorPanel() {
+	private MonitorPanelSwingWithFx monitorPanel;
+	public Monitor getMonitorPanel() {
 		return monitorPanel;
 	}
 
@@ -73,8 +73,11 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 			public void ancestorAdded(AncestorEvent event) {
 
-				monitorPanel = getNewMonitorPanel();
-				userPanel.add(monitorPanel);
+				monitorPanel = new MonitorPanelSwingWithFx();
+				monitorPanel.setLocation(10, 11);
+				monitorPanel.setSize(215, 210);
+				monitorPanel.setUnitAddress(linkHeader.getAddr());
+				userPanel.add((Component) monitorPanel);
 
 				controlPanel = getNewControlPanel();
 				userPanel.add(controlPanel);
@@ -147,23 +150,6 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		tabbedPane.setOpaque(false);
 		tabbedPane.setBounds(10, 118, 286, 296);
 		extraPanel.add(tabbedPane);
-	}
-
-	protected MonitorPanelAbstract getNewMonitorPanel() {
-		MonitorPanelAbstract monitorPanel;
-
-		switch(deviceType){
-		case DeviceInfo.DEVICE_TYPE_SSPA:
-			monitorPanel = new MonitorPanelSSPA(deviceType, linkHeader);
-			break;
-		case DeviceInfo.DEVICE_TYPE_DLRS:
-			monitorPanel = new MonitorDownlinkRedundancySystem(deviceType, linkHeader);
-			break;
-		default:
-			monitorPanel = new MonitorPanel(deviceType, linkHeader);
-		}
-		monitorPanel.setLocation(10, 11);
-		return monitorPanel;
 	}
 
 	protected JPanel getNewControlPanel(){

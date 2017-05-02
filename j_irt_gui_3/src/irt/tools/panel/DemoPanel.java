@@ -337,7 +337,7 @@ public class DemoPanel extends Panel {
 		int tabCount = tabbedPane.getTabCount();
 		for(int i=0; i<tabCount; i++){
 			String title = tabbedPane.getTitleAt(i);
-			String value = Translation.getValue(String.class, title, null);
+			String value = Translation.getValueWithSuplier(String.class, title, null);
 			if(value!=null){
 				JLabel label = new JLabel(value);
 				label.setName(title);
@@ -450,7 +450,7 @@ public class DemoPanel extends Panel {
 		int tabCount = tabbedPane.getTabCount();
 		for(int i=0; i<tabCount; i++){
 			String title = tabbedPane.getTitleAt(i);
-			String value = Translation.getValue(String.class, title, null);
+			String value = Translation.getValueWithSuplier(String.class, title, null);
 			if(value!=null){
 				JLabel label = new JLabel(value);
 				label.setName(title);
