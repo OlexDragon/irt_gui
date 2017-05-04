@@ -94,7 +94,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
     @FXML
     void onMouseClicked(MouseEvent event) {
-    	if(event.isControlDown() && event.getClickCount()==3)
+    	if(event.getClickCount()==3)
     		gridPane.getChildren().clear();
     }
 
@@ -120,6 +120,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			ofNullable= Optional.ofNullable(packet);
 
 		ofNullable
+		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.filter(p->p.getHeader().getPacketId()==packetToSend.getHeader().getPacketId())
 		.filter(p->p.getHeader().getGroupId()==packetToSend.getHeader().getGroupId())
 		.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR)

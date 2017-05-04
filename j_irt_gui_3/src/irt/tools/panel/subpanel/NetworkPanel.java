@@ -435,7 +435,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 						final AddressType type = AddressType.values()[networkAddress.getType()];
 						comboBoxAddressType.setSelectedItem(type);
 
-						DumpControllers.dumper.info(DumpControllers.marker, "network Address: {}", networkAddress);
+						synchronized (DumpControllers.dumper) {
+							DumpControllers.dumper.info(DumpControllers.marker, "network Address: {}", networkAddress);
+						}
 
 						ipAddressTextField.setText(networkAddress.getAddressAsString());
 						ipMaskTextField.setText(networkAddress.getMaskAsString());

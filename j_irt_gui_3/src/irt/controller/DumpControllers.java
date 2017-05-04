@@ -96,7 +96,9 @@ public class DumpControllers{
 		int waitTime = 1000*60*dumpWaitMinuts;
 
 		logger.trace("new DumpControllers({}, {}, waitTime={} msec({} min))", linkHeader, waitTime, dumpWaitMinuts);
-		dumper.info(marker, "\n******************** Start New Dump Block for {} ********************", linkHeader);
+		synchronized (dumper) {
+			dumper.info(marker, "\n******************** Start New Dump Block for {} ********************", linkHeader);
+		}
 
 //		this.parent = unitsPanel;
 
@@ -476,7 +478,9 @@ public class DumpControllers{
 		if(sysSerialNumber==null || !sysSerialNumber.equals(serialNumber)){
 
 			if(ctx!=null)
-				dumper.info(marker, "\n***** filename changed to {} *****", serialNumber);
+				synchronized (dumper) {
+					dumper.info(marker, "\n***** filename changed to {} *****", serialNumber);
+				}
 
 			System.setProperty("serialNumber", serialNumber);
 
@@ -484,7 +488,9 @@ public class DumpControllers{
 			ctx.reconfigure();
 
 			if(sysSerialNumber!=null)
-				dumper.info(marker, "\n***** continuation... beginning in the File {} *****", sysSerialNumber);
+				synchronized (dumper) {
+					dumper.info(marker, "\n***** continuation... beginning in the File {} *****", sysSerialNumber);
+				}
 		}
 
 		return ctx;
@@ -532,7 +538,9 @@ public class DumpControllers{
 		if(deviceInfo!=null) {
 			uptimeCounter = deviceInfo.getUptimeCounter();
 		}
-		dumper.warn("\n\t{}\n\tUptime Counter = {}\n\tCommunication Lost", linkHeader, uptimeCounter);
+		synchronized (dumper) {
+			dumper.warn("\n\t{}\n\tUptime Counter = {}\n\tCommunication Lost", linkHeader, uptimeCounter);
+		}
 	}
 
 	public synchronized void setWaitTime(int waitTime) {
@@ -794,7 +802,9 @@ public class DumpControllers{
 				if(deviceInfo!=null) {
 					uptimeCounter = deviceInfo.getUptimeCounter();
 				}
-				dumper.warn(marker, "\n\t{}\n\tUptime Counter = {}\n\t{}\n", linkHeader, uptimeCounter, header);
+				synchronized (dumper) {
+					dumper.warn(marker, "\n\t{}\n\tUptime Counter = {}\n\t{}\n", linkHeader, uptimeCounter, header);
+				}
 			}
 			return header;
 		}
@@ -840,7 +850,9 @@ public class DumpControllers{
 				if(deviceInfo!=null) {
 					uptimeCounter = deviceInfo.getUptimeCounter();
 				}
-				dumper.info(marker, "\n\t{};\n\t{};\n\t{};\n\tUptime Counter = {};\n{};\n", linkHeader, deviceInfo, packet.getHeader(), uptimeCounter, o);
+				synchronized (dumper) {
+					dumper.info(marker, "\n\t{};\n\t{};\n\t{};\n\tUptime Counter = {};\n{};\n", linkHeader, deviceInfo, packet.getHeader(), uptimeCounter, o);
+				}
 			}
 			return o;
 		}
@@ -869,6 +881,8 @@ public class DumpControllers{
 	}
 
 	public void doDump(String text) {
-		dumper.info(marker, text);
+		synchronized (dumper) {
+			dumper.info(marker, text);
+		}
 	}
 }
