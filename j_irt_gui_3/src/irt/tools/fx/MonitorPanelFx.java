@@ -48,7 +48,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	private final static Logger logger = LogManager.getLogger();
 
-	private static final byte CONVERTER = 0;
+	public static final byte CONVERTER = 0;
 
 	private static final String UNMUTED = "unmuted";
 	private static final String MUTED = "muted";

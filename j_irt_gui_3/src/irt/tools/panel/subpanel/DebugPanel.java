@@ -59,7 +59,7 @@ public class DebugPanel extends JPanel{
 										0,
 										0,
 										PacketWork.PACKET_ID_CLEAR_STATISTICS,
-										PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE,
+										PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE,
 										0
 								),
 								Style.CHECK_ALWAYS){

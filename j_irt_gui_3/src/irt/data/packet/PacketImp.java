@@ -126,7 +126,7 @@ public class PacketImp implements Packet{
 	public static final byte
 	PARAMETER_DEVICE_DEBAG_INFO 		= 1,		/* device information: parts, firmware and etc. */
 	PARAMETER_DEVICE_DEBAG_DUMP 		= 2,		/* dump of registers for specified device index */
-	PARAMETER_DEVICE_DEBAG_READ_WRITE 	= 3,		/* registers read/write operations */
+	PARAMETER_DEVICE_DEBUG_READ_WRITE 	= 3,		/* registers read/write operations */
 	PARAMETER_DEVICE_DEBAG_INDEX 		= 4,		/* device index information print */
 	PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE = 5,	/* calibration mode */
 	PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10;	/* operations with environment variables */

@@ -22,7 +22,7 @@ public class BaudRateSelectorFx extends AnchorPane{
 	@FXML private TitledPane titledPane;
 
 	public BaudRateSelectorFx() {
-    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("BaudRateSelectorFx.fxml"));
+    	FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("BaudRateSelector.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
 

@@ -193,7 +193,7 @@ public class DeviceDebugController extends ControllerAbstract {
 													index,
 													addrToSave,
 													(short) (((GetterAbstract)unitPacketWork).getPacketId()+1),
-													PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE,
+													PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE,
 													0),
 											Style.CHECK_ONCE);
 								}

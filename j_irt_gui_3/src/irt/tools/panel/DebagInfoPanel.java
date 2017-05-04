@@ -105,7 +105,7 @@ public class DebagInfoPanel extends JPanel {
 																		DebagInfoPanel.this.linkHeader,
 																		PacketImp.GROUP_ID_DEVICE_DEBAG,
 																		(byte) (cbCommand.getSelectedIndex()+1),
-																		PacketWork.PACKET_ID_DEVICE_DEBAG_DEVICE_INFO),
+																		PacketWork.PACKET_ID_DEVICE_DEBUG_DEVICE_INFO),
 																cbCommand,
 																cbParameter,
 																DebagInfoPanel.this.textArea);

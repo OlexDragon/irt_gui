@@ -111,8 +111,8 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 				controller = new DefaultController(deviceType, "PLL reg.N9", new DeviceDebagSetter(null,
 						INDEX,
 						ADDRESS,
-						PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG,
-						PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE), Style.CHECK_ONCE){
+						PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG,
+						PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE), Style.CHECK_ONCE){
 
 							@Override
 							protected PacketListener getNewPacketListener() {
@@ -121,10 +121,10 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 									@Override
 									public void onPacketRecived(Packet packet) {
 										PacketHeader header = packet.getHeader();
-										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG){
+										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG){
 
 											if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
-												Payload payload = packet.getPayload(PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE);
+												Payload payload = packet.getPayload(PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE);
 												if(payload!=null){
 													RegisterValue value = payload.getRegisterValue();
 													RegisterValue oldValue = PLL_HMC807LP6CE_Reg9.this.value;
