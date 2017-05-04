@@ -86,8 +86,8 @@ public class Getter extends GetterAbstract {
 								return false;
 							default:
 								switch (packetId2) {
-								case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0:
-								case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1:
+								case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0:
+								case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1:
 								case PacketWork.PACKET_ID_DUMP_REGISTER_1:
 								case PacketWork.PACKET_ID_DUMP_REGISTER_2:
 								case PacketWork.PACKET_ID_DUMP_REGISTER_3:

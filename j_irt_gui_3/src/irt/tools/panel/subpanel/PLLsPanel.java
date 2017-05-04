@@ -364,8 +364,8 @@ public class PLLsPanel extends JPanel {
 									new DeviceDebagSetter(null,
 											pllIndex,
 											9,
-											PacketWork.PACKET_ID_FCM_DEVICE_DEBAG_PLL_REG,
-											PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE),
+											PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG,
+											PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
 							0,
 							Style.CHECK_ONCE);
 

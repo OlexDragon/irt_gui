@@ -13,7 +13,7 @@ public class RegisterPacket extends PacketAbstract {
 						: PacketImp.PACKET_TYPE_REQUEST,
 				packetId,
 				PacketImp.GROUP_ID_DEVICE_DEBAG,
-				PacketImp.PARAMETER_DEVICE_DEBAG_READ_WRITE,
+				PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE,
 				value.toBytes(),
 				value.getValue()!=null
 					? Priority.COMMAND

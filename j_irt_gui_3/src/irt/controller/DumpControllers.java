@@ -209,7 +209,7 @@ public class DumpControllers{
 						linkHeader,
 						PacketImp.GROUP_ID_DEVICE_DEBAG,
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
-						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0,
 						0,
 						Priority.ALARM),
 				waitTime,
@@ -221,7 +221,7 @@ public class DumpControllers{
 						linkHeader,
 						PacketImp.GROUP_ID_DEVICE_DEBAG,
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
-						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1,
 						1,
 						Priority.ALARM),
 				waitTime,
@@ -233,7 +233,7 @@ public class DumpControllers{
 						linkHeader,
 						PacketImp.GROUP_ID_DEVICE_DEBAG,
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
-						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_2,
 						2,
 						Priority.ALARM),
 				waitTime,
@@ -244,7 +244,7 @@ public class DumpControllers{
 						linkHeader,
 						PacketImp.GROUP_ID_DEVICE_DEBAG,
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
-						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_3,
 						3,
 						Priority.ALARM),
 				waitTime,
@@ -255,7 +255,7 @@ public class DumpControllers{
 						linkHeader,
 						PacketImp.GROUP_ID_DEVICE_DEBAG,
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
-						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_4,
 						4,
 						Priority.ALARM),
 				waitTime,
@@ -266,7 +266,7 @@ public class DumpControllers{
 						linkHeader,
 						PacketImp.GROUP_ID_DEVICE_DEBAG,
 						PacketImp.PARAMETER_DEVICE_DEBAG_INFO,
-						PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10,
+						PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_10,
 						10,
 						Priority.ALARM),
 				waitTime,
@@ -567,7 +567,7 @@ public class DumpControllers{
 		case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
 			str = "Alarm Under Current("+id+")";
 			break;
-		case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10:
+		case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_10:
 			str = "1.10(PaketWork ID="+id+ ")";
 			break;
 		case PacketWork.PACKET_ID_DUMP_REGISTER_100:
@@ -622,31 +622,31 @@ public class DumpControllers{
 						deviceInfo = new DeviceInfo(packet);
 					break;
 
-				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_0:
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0:
 					if(error==0)
 						deviceInfo0 = dump(deviceInfo0);
 					else
 						deviceInfo0 = dumpError(deviceInfo0);
 					break;
-				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_1:
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1:
 					if(error==0)
 						deviceInfo1 = dump(deviceInfo1);
 					else
 						deviceInfo1 = dumpError(deviceInfo1);
 					break;
-				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_2:
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_2:
 					if(error==0)
 						deviceInfo2 = dump(deviceInfo2);
 					else
 						deviceInfo2 = dumpError(deviceInfo2);
 					break;
-				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_3:
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_3:
 					if(error==0)
 						deviceInfo3 = dump(deviceInfo3);
 					else
 						deviceInfo3 = dumpError(deviceInfo3);
 					break;
-				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_4:
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_4:
 					if(error==0)
 						deviceInfo4 = dump(deviceInfo4);
 					else
@@ -718,7 +718,7 @@ public class DumpControllers{
 					else
 						register6 = dumpError(register6);
 					break;
-				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBAG_DEVICE_INFO_10:
+				case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_10:
 					if(error==0)
 						register10 = dump(register10);
 					else

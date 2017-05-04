@@ -12,6 +12,7 @@
 }
 .monitor .label{
 	-fx-font-weight: bold;
+	-fx-font-size: 12px;
 }
 .monitor .label.locked, .monitor .label.unmuted{
 	-fx-font-weight: bold;

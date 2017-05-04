@@ -1,6 +1,7 @@
 package irt.controller.serial_port;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -153,7 +154,9 @@ public class ComPortThreadQueue implements Runnable {
 	private EventListenerList packetListeners = new EventListenerList();
 
 	public void addPacketListener(PacketListener packetListener) {
-		packetListeners.add(PacketListener.class, packetListener);
+		// Add if not exists
+		if(Arrays.stream(packetListeners.getListenerList()).parallel().filter(l->l.equals(packetListener)).map(l->false).findAny().orElse(true))
+			packetListeners.add(PacketListener.class, packetListener);
 	}
 
 	public void removePacketListener(PacketListener packetListener) {
