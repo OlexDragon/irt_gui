@@ -20,6 +20,8 @@ import irt.data.MyThreadFactory;
 import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 	private static final long serialVersionUID = 151272991200793236L;
@@ -27,15 +29,16 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	protected final 	ComPortThreadQueue 			cptq 				= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private final	PacketWork 					packetToSend;
-	private final 	ScheduledFuture<?> 			scheduleAtFixedRate;
+	private 	 	ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	Updater			 			updater = new Updater();
 	private final PacketListener packetListener = new PacketListener() {
 		@Override
 		public void onPacketRecived(Packet packet) {
 			updater.setPacket(packet);
-			scheduledThreadPool.execute(updater);
+			if(!service.isShutdown())
+				service.execute(updater);
 		}
 	};
 	final AncestorListener ancestorListener = new AncestorListener() {
@@ -46,15 +49,22 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 			cptq.removePacketListener(packetListener);
 		}
 		@Override public void ancestorMoved(AncestorEvent event) { }
-		@Override public void ancestorAdded(AncestorEvent event) { }
+		@Override public void ancestorAdded(AncestorEvent event) {
+			scheduleAtFixedRate = service.scheduleAtFixedRate(SwitchBoxImpl.this, 1, 5000, TimeUnit.MILLISECONDS);
+		}
 	};
 
 	public SwitchBoxImpl(Image offImage, Image onImage, PacketWork packetToSEnd) {
 		super(offImage, onImage);
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 		logger.entry(packetToSEnd);
 
 		this.packetToSend = packetToSEnd;
-		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
 		cptq.addPacketListener(packetListener);
 
 		addAncestorListener(ancestorListener);

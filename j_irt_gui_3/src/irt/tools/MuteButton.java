@@ -30,6 +30,8 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.tools.button.ImageButton;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class MuteButton extends ImageButton implements Runnable, PacketListener{
 	private static final long serialVersionUID = -2275767848687769406L;
@@ -37,7 +39,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 	protected final Logger logger = LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private	final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	List<JLabel> 				labels 					= new ArrayList<>(); 
 
@@ -47,6 +49,12 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 
 	public MuteButton(Byte linkAddr, Image image) {
 		super(image);
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		this.linkAddr = linkAddr;
 		packet = new MuteControlPacket(linkAddr, null);
@@ -56,7 +64,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 			@Override
 			public void ancestorAdded(AncestorEvent event) {
 				cptq.addPacketListener(MuteButton.this);
-				scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(MuteButton.this, 1, 30000, TimeUnit.MILLISECONDS);
+				scheduleAtFixedRate = service.scheduleAtFixedRate(MuteButton.this, 1, 30000, TimeUnit.MILLISECONDS);
 			}
 
 			@Override

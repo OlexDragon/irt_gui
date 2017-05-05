@@ -39,6 +39,8 @@ import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.value.ValueFrequency;
 import irt.tools.panel.head.UnitsContainer;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable{
 	private static final long serialVersionUID = -419940816764892955L;
@@ -47,7 +49,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 	private final 	DefaultComboBoxModel<IdValueFreq> model = new DefaultComboBoxModel<>();
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		PacketWork 					packetToSend;
 	private final 	ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	Updater			 			updater = new Updater();
@@ -55,7 +57,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		@Override
 		public void onPacketRecived(Packet packet) {
 			updater.setPacket(packet);
-			scheduledThreadPool.execute(updater);
+			service.execute(updater);
 		}
 	};
 	private final AncestorListener ancestorListener = new AncestorListener() {
@@ -92,6 +94,12 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	private final byte linkAddr;
 
 	public LoSelectComboBox(final byte linkAddr) {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		this.linkAddr = linkAddr;
 		setModel(model);
@@ -103,7 +111,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 		addAncestorListener(ancestorListener);
 
-		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
 		cptq.addPacketListener(packetListener);
 	}
 

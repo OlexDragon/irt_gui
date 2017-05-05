@@ -50,6 +50,8 @@ import irt.data.packet.RedundancyStatusPacket.RedundancyStatus;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class RedundancyPanel extends RedundancyPanelDemo implements PacketListener, Runnable{
 
@@ -62,7 +64,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	private static final ImageIcon ICON_BUC_A = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg"));
 
 	private final 	ComPortThreadQueue 			cptq 		= GuiControllerAbstract.getComPortThreadQueue();
-	public  final 	ScheduledExecutorService 	services 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	public  final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 
 	private final	RedundancyEnablePacket		redundancyEnablePacket;
@@ -92,6 +94,12 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 	//*************************************** constructor RedundancyPanel ********************************************
 	public RedundancyPanel(final int deviceType, final LinkHeader linkHeader) {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		final byte addr = linkHeader.getAddr();
 		redundancyEnablePacket = new RedundancyEnablePacket(addr, null);
@@ -294,7 +302,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	private void start() {
 		cptq.addPacketListener(this);
 		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate = services.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
 	}
 
 	private void stop() {

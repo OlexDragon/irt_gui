@@ -74,6 +74,8 @@ import irt.irt_gui.IrtGui;
 import irt.tools.RegisterTextField;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.button.ImageButton;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel implements PacketListener, Runnable {
@@ -89,7 +91,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	private static final int P6 = 170;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService services = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 	private final List<AdcWorker> adcWorkers = new ArrayList<>();
 
 	enum CalibrationMode{
@@ -155,6 +157,12 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	};
 
 	public BIASsPanel(final int deviceType, final LinkHeader linkHeader, final boolean isMainBoard) {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 		setLayout(null);
 
 		addAncestorListener(new AncestorListener() {
@@ -754,21 +762,21 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public synchronized void onPacketRecived(Packet packet) {
 		adcWorkers.parallelStream().forEach(adc->adc.update(packet));
 	}
 
 	@Override
-	public void run() {
+	public synchronized void run() {
 		adcWorkers.stream().forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.packetToSend));
 	}
 
-	private void start() {
+	private synchronized void start() {
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 
 		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate = services.scheduleAtFixedRate(this, 0, 1, TimeUnit.SECONDS);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 1, TimeUnit.SECONDS);
 	}
 
 	private void stop() {

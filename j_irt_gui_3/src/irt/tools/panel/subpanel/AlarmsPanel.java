@@ -25,6 +25,8 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class AlarmsPanel extends JPanel implements Refresh{
 	private static final long serialVersionUID = -3029893758378178725L;
@@ -32,8 +34,8 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	protected final Logger logger = (Logger) LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 		cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
-	private final 	ScheduledFuture<?> 		scheduleAtFixedRate;
+	private final 	ScheduledExecutorService service			 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private 	 	ScheduledFuture<?> 		scheduleAtFixedRate;
 	private final 	PacketSender 			alarmGetter 			= new PacketSender();
 
 	private final AlarmsIDsPacket packetWork;
@@ -42,6 +44,12 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	private final AlarmsPanel 	thisPanel;
 
 	public AlarmsPanel(final int deviceType, final LinkHeader linkHeader) {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		thisPanel = this;
 		setLayout(new GridLayout(0, 1, 0, 0));
@@ -53,13 +61,13 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			public void ancestorMoved(AncestorEvent arg0) { }
 
 			public void ancestorAdded(AncestorEvent arg0) {
+				scheduleAtFixedRate = service.scheduleAtFixedRate(alarmGetter, 1, 2000, TimeUnit.MILLISECONDS);
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
 				scheduleAtFixedRate.cancel(true);
 			}
 		});
 
-		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(alarmGetter, 1, 2000, TimeUnit.MILLISECONDS);
 		new AlarmIDsGetter();
 	}
 

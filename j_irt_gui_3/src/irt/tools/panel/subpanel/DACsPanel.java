@@ -57,6 +57,8 @@ import irt.tools.RegisterTextField;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.fx.MonitorPanelFx;
 import irt.tools.panel.subpanel.BIASsPanel.AdcWorker;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel implements PacketListener, Runnable {
@@ -95,7 +97,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	private JSlider sliderGainOffset;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService services = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 	private final List<AdcWorker> adcWorkers = new ArrayList<>();
 
 	private final FocusListener dacfocusListener = new FocusListener() {
@@ -126,6 +128,12 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	};
 
 	public DACsPanel(final int deviceType, final LinkHeader linkHeader) {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		setLayout(null);
 		final byte unitAddr = linkHeader==null ? 0 :  linkHeader.getAddr();
@@ -137,7 +145,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DACsPanel.this);
 
 				if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-					scheduleAtFixedRate = services.scheduleAtFixedRate(DACsPanel.this, 0, 1, TimeUnit.SECONDS);
+					scheduleAtFixedRate = service.scheduleAtFixedRate(DACsPanel.this, 0, 1, TimeUnit.SECONDS);
 
 				txtDAC1.start();
 				txtDAC2.start();

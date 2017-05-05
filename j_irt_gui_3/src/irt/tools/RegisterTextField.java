@@ -26,6 +26,8 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.RegisterPacket;
 import irt.data.value.Value;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class RegisterTextField extends JTextField implements PacketListener {
 	private static final long serialVersionUID = 517630309792962880L;
@@ -46,6 +48,12 @@ public class RegisterTextField extends JTextField implements PacketListener {
 	private final TextFieldUpdater updater 		= new TextFieldUpdater();
 
 	public RegisterTextField(Byte linkAddr, RegisterValue value, short packetId, int min, int max) {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		MIN = min;
 		MAX = max;

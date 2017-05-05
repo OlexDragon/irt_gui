@@ -11,6 +11,8 @@ import irt.tools.panel.subpanel.monitor.Monitor;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 	private static final long serialVersionUID = 1157429339979438261L;
@@ -19,6 +21,12 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 	private MonitorPanelFx root;
 
 	public MonitorPanelSwingWithFx() {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					root.shutdownNow();
+			}
+		});
 		logger.entry();
 
 		addAncestorListener(new AncestorListener() {
