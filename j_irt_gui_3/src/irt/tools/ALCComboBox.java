@@ -23,6 +23,8 @@ import irt.data.packet.ALCEnablePacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	private static final long serialVersionUID = 5927791917430153433L;
@@ -30,7 +32,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	protected final Logger logger = LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private	final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 
 	private final ALCEnablePacket packet;
@@ -39,6 +41,12 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 
 		public ALCComboBox(String text, final Byte linkAddr) {
 		super(text);
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		this.linkAddr = linkAddr;
 		packet = new ALCEnablePacket(linkAddr, null); 
@@ -48,7 +56,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 			@Override
 			public void ancestorAdded(AncestorEvent event) {
 				cptq.addPacketListener(ALCComboBox.this);
-				scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(ALCComboBox.this, 1, 3000, TimeUnit.MILLISECONDS);
+				scheduleAtFixedRate = service.scheduleAtFixedRate(ALCComboBox.this, 1, 3000, TimeUnit.MILLISECONDS);
 			}
 
 			@Override

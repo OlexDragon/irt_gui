@@ -10,6 +10,7 @@ package irt.data.packet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import irt.data.ToHex;
 
@@ -520,22 +521,33 @@ public class PacketImp implements Packet{
 
 	@Override
 	public boolean equals(Object obj) {
+
 		if (this == obj)
 			return true;
-		if (obj == null)
+
+		final Optional<Packet> sameInstance = Optional
+													.ofNullable(obj)
+													.filter(Packet.class::isInstance)
+													.map(Packet.class::cast);
+
+		if(!sameInstance.isPresent())
 			return false;
-		if (!(obj instanceof Packet))
-			return false;
+
 		Packet other = (Packet) obj;
 		if (header == null) {
 			if (other.getHeader() != null)
 				return false;
-		} else if (header.getPacketId()!=other.getHeader().getPacketId())
+		} 
+
+		if (header.getPacketId()!=other.getHeader().getPacketId())
 			return false;
-		if (payloads == null) {
-			if (other.getPayloads() != null)
+
+		if (payloads == null || payloads.size()==0) {
+			if (other.getPayloads() != null || payloads.size()!=0)
 				return false;
-		} else if (payloads.get(0).getParameterHeader().getCode()!=(other.getPayloads().get(0).getParameterHeader().getCode()))
+		}
+
+		if (payloads.get(0).getParameterHeader().getCode()!=other.getPayloads().get(0).getParameterHeader().getCode())
 			return false;
 		return true;
 	}

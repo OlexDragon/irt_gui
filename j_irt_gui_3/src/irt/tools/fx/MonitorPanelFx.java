@@ -58,7 +58,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private static final String MUTE_ID = "mute_status";
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService services = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 	private final MeasurementPacket packetToSend;
 	private byte unitAddress = CONVERTER;
@@ -364,7 +364,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	public void start(){
 		logger.entry();
 		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate = services.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 		logger.exit();
 	}
 
@@ -560,5 +560,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		public boolean isOn(int statusBits){
 			return (statusBits & bitMask) == value;
 		}
+	}
+
+	public void shutdownNow() {
+		service.shutdownNow();
 	}
 }

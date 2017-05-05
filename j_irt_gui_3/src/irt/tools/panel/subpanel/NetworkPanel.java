@@ -51,6 +51,8 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.ip_address.IpAddressTextField;
+import java.awt.event.HierarchyListener;
+import java.awt.event.HierarchyEvent;
 
 public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketListener {
 	private static final long serialVersionUID = 69871876592867701L;
@@ -58,7 +60,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	private final Logger logger = LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	public  final 	ScheduledExecutorService 	services = Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	public  final 	ScheduledExecutorService 	service = Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	NetworkAddressPacket 		packet;
 	private final 	NetworkAddress				networkAddress = new NetworkAddress();
@@ -141,6 +143,12 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	// ******************************* constructor NetworkPanel   ***************************************************
 	public NetworkPanel(final int deviceType, final LinkHeader linkHeader) {
+		addHierarchyListener(new HierarchyListener() {
+			public void hierarchyChanged(HierarchyEvent e) {
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
+					service.shutdownNow();
+			}
+		});
 
 		if(linkHeader==null){
 			packet = null;
@@ -499,7 +507,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	private void start() {
 		cptq.addPacketListener(this);
 		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate = services.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
 	}
 
 	private void stop() {
