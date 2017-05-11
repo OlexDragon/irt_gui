@@ -110,8 +110,6 @@ public abstract class ControllerAbstract implements Runnable{
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 			clear();
 		}
-
-		logger.exit();
 	}
 
 	protected boolean isWait() {

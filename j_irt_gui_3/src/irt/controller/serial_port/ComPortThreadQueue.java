@@ -2,6 +2,7 @@ package irt.controller.serial_port;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -26,7 +27,7 @@ public class ComPortThreadQueue implements Runnable {
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
-	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300);
+	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300, Collections.reverseOrder());
 	private final ScheduledExecutorService services = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 	private static ComPort serialPort;
 
@@ -41,6 +42,10 @@ public class ComPortThreadQueue implements Runnable {
 		try {
 
 			packetWork = comPortQueue.take();
+//			if(packetWork.getPriority()==Priority.COMMAND){
+//				logger.error("\n{}:{}", comPortQueue.size(), packetWork.getPriority());
+//				logger.error(packetWork);
+//			}
 
 			if (serialPort != null) {
 				PacketThreadWorker packetThread = packetWork.getPacketThread();
@@ -89,7 +94,7 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketWork packetWork){
-			
+	
 		try {
 			if(packetWork!=null)
 				if (comPortQueue.size() < 300)

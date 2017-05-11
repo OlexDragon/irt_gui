@@ -184,7 +184,6 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 	}
 
 	public void reset(final JComboBox<DescriptionPacketValue> comboBox) {
-		logger.entry();
 
 		synchronized (logger) {
 			descriptionPacketValue = (DescriptionPacketValue) comboBox.getSelectedItem();

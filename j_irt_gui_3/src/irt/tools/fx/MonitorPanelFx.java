@@ -44,7 +44,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
 
-public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListener{
+public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListener, JavaFxPanel{
 
 	private final static Logger logger = LogManager.getLogger();
 
@@ -362,17 +362,13 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public void start(){
-		logger.entry();
 		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
-		logger.exit();
 	}
 
 	public void stop(){
-		logger.entry();
 		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
 			scheduleAtFixedRate.cancel(true);
-		logger.exit();
 	}
 
 	private static NumberFormat nFormate1 = new DecimalFormat("#0.0");

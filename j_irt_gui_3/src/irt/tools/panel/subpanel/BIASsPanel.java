@@ -10,11 +10,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -74,8 +75,6 @@ import irt.irt_gui.IrtGui;
 import irt.tools.RegisterTextField;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.button.ImageButton;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
 
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel implements PacketListener, Runnable {
@@ -238,8 +237,8 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				index = isMainBoard ? 5 : 205;
 				adcWorkers.add(new AdcWorker(lblCurrent1, 	linkHeader.getAddr(), new RegisterValue(index, 1, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS1_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
 				adcWorkers.add(new AdcWorker(lblCurrent2, 	linkHeader.getAddr(), new RegisterValue(index, 2, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS2_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
-				adcWorkers.add(new AdcWorker(lblOPower, 	linkHeader.getAddr(), new RegisterValue(index, 3, null), PacketWork.PACKET_ID_DEVICE_DEBUG_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-				adcWorkers.add(new AdcWorker(lblTemp, 		linkHeader.getAddr(), new RegisterValue(index, 4, null), PacketWork.PACKET_ID_DEVICE_DEBUG_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+				adcWorkers.add(new AdcWorker(lblOPower, 	linkHeader.getAddr(), new RegisterValue(index, 3, null), PacketWork.PACKET_ID_DEVICE_DEBUG_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));
+				adcWorkers.add(new AdcWorker(lblTemp, 		linkHeader.getAddr(), new RegisterValue(index, 4, null), PacketWork.PACKET_ID_DEVICE_DEBUG_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));
 			}
 			public void ancestorMoved(AncestorEvent arg0) {}
 
@@ -801,7 +800,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		private final DecimalFormat format;
 
 		private boolean mousePressed;
-		private final List<Long> average = new  FixedSizeBuffer<>(100);
+		private final List<Double> average = new  FixedSizeBuffer<>(100);
 
 		public AdcWorker(JLabel label, byte linkAddr, RegisterValue registerValue, short packetId, byte parameterId, double multiplier, String pattern) {
 			packetToSend = new DeviceDebugPacket(linkAddr, registerValue, packetId, parameterId);
@@ -858,27 +857,28 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					.map(Value::getValue)
 					.ifPresent(v->{
 
+						final boolean useMultiplier = Double.compare(multiplier, 0)!=0;
 
+						double value = useMultiplier ? multiplier*v/1000 : v;
 
 						synchronized (this) {
-							average.add(v);
+							average.add(value);
 						}
 
-						String value;
 						if(mousePressed){
-							v = average.parallelStream().map(BigDecimal::new).reduce((a,b)->a.add(b)).map(sum->sum.divide(new BigDecimal(average.size()), RoundingMode.HALF_UP)).map(BigDecimal::longValue).get();
-							value = "x";
-						}else
-							value = "";
-
-						value += v + " mV";
-
-						if(!label.getText().equals(value)){
-							label.setText(value);
-							label.setToolTipText(format.format(multiplier*v/1000));
+							final int size = average.size();
+							value = average.parallelStream().map(BigDecimal::new).reduce((a,b)->a.add(b)).map(sum->sum.divide(new BigDecimal(size), BigDecimal.ROUND_HALF_UP)).map(BigDecimal::doubleValue).get();
 						}
-//						if(packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBUG_TEMPERATURE)
-//							logger.error("{}", average);
+
+						String text = useMultiplier ? format.format(value) : Long.toString(Math.round(value));
+
+						if(mousePressed)
+							text = "x" + text;
+
+						if(!label.getText().equals(text)){
+							label.setText(text);
+							label.setToolTipText(Long.toString(v));
+						}
 					});
 				});
 			});

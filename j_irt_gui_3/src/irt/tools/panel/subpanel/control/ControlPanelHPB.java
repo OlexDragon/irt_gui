@@ -396,7 +396,6 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 	private final ActionListener 	actionComboBoxListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
 			try {
-				logger.entry();
 				if (valueController != null) {
 					valueController.reset(actionComboBox);
 					presetDone = false;
@@ -453,21 +452,18 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		
 		@Override
 		public void removeUpdate(DocumentEvent e) {
-			logger.entry();
 			valueTextField.setBackground(new Color(0, 0, 139));
 			valueController.duUpdate(false);
 		}
 		
 		@Override
 		public void insertUpdate(DocumentEvent e) {
-			logger.entry();
 			valueTextField.setBackground(new Color(0, 0, 139));
 			valueController.duUpdate(false);
 		}
 		
 		@Override
 		public void changedUpdate(DocumentEvent e) {
-			logger.entry();
 			valueTextField.setBackground(new Color(0, 0, 139));
 			valueController.duUpdate(false);
 		}

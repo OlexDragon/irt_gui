@@ -131,6 +131,6 @@ public class Getter extends GetterAbstract {
 
 				}}
 		}
-		return logger.exit(isSet);
+		return isSet;
 	}
 }

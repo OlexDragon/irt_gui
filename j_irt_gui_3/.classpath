@@ -6,22 +6,22 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="resource/jssc-2.8.0.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/scream3r/jssc/2.8.0/jssc-2.8.0-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Oleksandr/.m2/repository/org/scream3r/jssc/2.8.0/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="resource/log4j-api-2.3.jar" sourcepath="resource/log4j-api-2.3-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/workspace/irt_gui_3/resource/log4j-api-2.0-rc2-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="resource/log4j-core-2.3.jar" sourcepath="resource/log4j-core-2.3-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/workspace/irt_gui_3/resource/log4j-core-2.3-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.8/log4j-api-2.8.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.8/log4j-api-2.8-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.8/log4j-api-2.8-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/scream3r/jssc/2.8.0/jssc-2.8.0.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/scream3r/jssc/2.8.0/jssc-2.8.0-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/.m2/repository/org/scream3r/jssc/2.8.0/jssc-2.8.0-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -85,7 +85,6 @@ public class UnitAddressField extends JTextField {
 	}
 
 	private void setText() {
-		logger.entry();
 
 		final String toSet = selectedAddressToString();
 		final String text = getText();

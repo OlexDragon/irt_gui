@@ -101,7 +101,6 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 		Payload payload = packet.getPayload(0);
 		payload.setBuffer(value);
 		data = preparePacket(packet.toBytes());
-		logger.exit(data);
 	}
 
 	public static int checkControlEscape(byte[] surce, int surceIndex, byte[] destination, int destinationIndex) {

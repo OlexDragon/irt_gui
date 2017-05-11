@@ -120,7 +120,6 @@ public class AlarmsController extends ControllerAbstract {
 			startController(alarmController, label);
 			alarmControllers.add(alarmController);
 		}
-		logger.exit();
 	}
 
 	@Override
@@ -305,7 +304,6 @@ public class AlarmsController extends ControllerAbstract {
 			} catch (Exception ex) {
 				logger.catching(ex);
 			}
-			logger.exit();
 		}
 
 		private void fillFields(short[] source) {

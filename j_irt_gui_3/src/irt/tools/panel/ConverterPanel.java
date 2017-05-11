@@ -7,7 +7,8 @@ import javax.swing.JTabbedPane;
 
 import irt.controller.GuiControllerAbstract.Protocol;
 import irt.data.DeviceInfo;
-import irt.tools.panel.subpanel.AlarmsPanel;
+import irt.tools.fx.AlarmPanelFx;
+import irt.tools.fx.JavaFxWrapper;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9;
 import irt.tools.panel.subpanel.PLLsPanel;
@@ -29,8 +30,9 @@ public class ConverterPanel extends DevicePanel {
 
 		final JTabbedPane tabbedPane = getTabbedPane();
 
-		AlarmsPanel alarmPanel = new AlarmsPanel(deviceType, linkHeader);
-		alarmPanel.setBorder(null);
+		JavaFxWrapper alarmPanel = new JavaFxWrapper(new AlarmPanelFx());
+		alarmPanel.setUnitAddress((byte) 0);
+//		alarmPanel.setBorder(null);
 		tabbedPane.addTab("alarms", alarmPanel);
 
 		hasDcOutput = 	deviceType == DeviceInfo.DEVICE_TYPE_L_TO_140 ||

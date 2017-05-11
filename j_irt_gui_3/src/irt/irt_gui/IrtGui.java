@@ -54,6 +54,7 @@ import irt.data.Listeners;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.tools.KeyValue;
+import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.BaudRateSelectorFx;
 import irt.tools.fx.JavaFxFrame;
 import irt.tools.fx.MonitorPanelFx;
@@ -73,7 +74,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.117";
+	public static final String VERTION = "- 3.119";
 	private boolean connected;
 
 	protected HeadPanel headPanel;
@@ -211,9 +212,17 @@ public class IrtGui extends IrtMainFrame {
 
 		JMenuItem monitortMenuItem = new JMenuItem(Translation.getValue(String.class, "monitor", "Monitor"));
 		monitortMenuItem.addActionListener(new ActionListener() {
+			private MonitorPanelFx monitorPanel;
+
 			public void actionPerformed(ActionEvent e) {
-				final MonitorPanelFx monitor = new MonitorPanelFx();
-				final JavaFxFrame javaFxFrame = new JavaFxFrame(()->monitor);
+
+				if(monitorPanel!=null){
+					monitorPanel.setVisible(true);
+					return;
+				}
+
+				monitorPanel = new MonitorPanelFx();
+				final JavaFxFrame javaFxFrame = new JavaFxFrame(()->monitorPanel);
 
 				JMenu menu = javaFxFrame.getMenu();
 				menu.setText("Unit Address");
@@ -225,7 +234,7 @@ public class IrtGui extends IrtMainFrame {
 						final JCheckBoxMenuItem mItem = new JCheckBoxMenuItem("#" + Integer.toString(addr));
 						mItem.setName(Integer.toString(addr));
 						mItem.addActionListener(ae->{
-							monitor.setUnitAddress((byte) Integer.parseInt(((JCheckBoxMenuItem)ae.getSource()).getName()));
+							monitorPanel.setUnitAddress((byte) Integer.parseInt(((JCheckBoxMenuItem)ae.getSource()).getName()));
 						});
 						menu.add(mItem);
 					});
@@ -236,17 +245,36 @@ public class IrtGui extends IrtMainFrame {
 
 		JMenuItem baudrateMenuItem = new JMenuItem(Translation.getValue(String.class, "baudrates", "Baud Rates"));
 		baudrateMenuItem.addActionListener(new ActionListener() {
-			private JavaFxFrame javaFxFrame;
+			private JavaFxFrame baudRateFrame;
 
 			public void actionPerformed(ActionEvent e) {
 
-				if(javaFxFrame==null){
-					javaFxFrame = new JavaFxFrame(()->new BaudRateSelectorFx());
-					javaFxFrame.setSize(200, 200);
+				if(baudRateFrame==null){
+					baudRateFrame = new JavaFxFrame(()->new BaudRateSelectorFx());
+					baudRateFrame.setSize(200, 200);
 				}else
-					javaFxFrame.setVisible(true);
+					baudRateFrame.setVisible(true);
 			}
 		});
+
+		JMenuItem mntmAlarms = new JMenuItem("Alarms");
+		mntmAlarms.addActionListener(new ActionListener() {
+
+			private JavaFxFrame alarmsFrame;
+			private AlarmPanelFx alarmPanelFx;
+
+			public void actionPerformed(ActionEvent e) {
+
+				alarmPanelFx = new AlarmPanelFx();
+				if(alarmsFrame==null){
+					alarmsFrame = new JavaFxFrame(()->alarmPanelFx);
+					alarmsFrame.setSize(200, 200);
+					alarmPanelFx.start();//TODO remove this code
+				}else
+					alarmsFrame.setVisible(true);
+			}
+		});
+		popupMenu.add(mntmAlarms);
 		popupMenu.add(baudrateMenuItem);
 
 		final JLabel lblIrtTechnologies = new JLabel(IrtPanel.PROPERTIES.getProperty("company_name"));
@@ -494,20 +522,4 @@ public class IrtGui extends IrtMainFrame {
 	public void setConnected(boolean connected) {
 		this.connected = connected;
 	}
-//
-//	private class SwingW extends SwingWorker<Void, Void>{
-//
-//		private Runnable runnable;
-//
-//		public SwingW(Runnable runnable) {
-//			this.runnable = runnable;
-//			execute();
-//		}
-//
-//		@Override
-//		protected Void doInBackground() throws Exception {
-//			runnable.run();
-//			return null;
-//		}
-//	}
 }
