@@ -20,14 +20,14 @@ public class AlarmStatusPacket extends PacketAbstract{
 	}
 
 	public enum AlarmSeverities{
-		NO_ALARM("no_alarm", Color.YELLOW, new Color(46, 139, 87)),
-		INFO	("no_alarm", Color.YELLOW, new Color(46, 139, 87)),
+		NO_ALARM("No Aalarm", Color.YELLOW, new Color(46, 139, 87)),
+		INFO	("No Alarm", Color.YELLOW, new Color(46, 139, 87)),
 
-		WARNING	("warning", Color.BLACK, new Color(255, 204, 102)),
-		MINOR	("warning", Color.BLACK, new Color(255, 204, 102)),
+		WARNING	("Warning", Color.BLACK, new Color(255, 204, 102)),
+		MINOR	("Warning", Color.BLACK, new Color(255, 204, 102)),
 
-		MAJOR	("alarm", Color.YELLOW, Color.RED),
-		CRITICAL("alarm", Color.YELLOW, Color.RED);
+		MAJOR	("Alarm", Color.YELLOW, Color.RED),
+		CRITICAL("Alarm", Color.YELLOW, Color.RED);
 
 		private String description;
 		private Color foreground; 	public Color getForeground() { return foreground; }

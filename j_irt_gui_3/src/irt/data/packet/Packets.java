@@ -4,7 +4,8 @@ import irt.data.PacketWork;
 
 public enum Packets {
 
-	MEASUREMENT_ALL(new MeasurementPacket());
+	MEASUREMENT_ALL	(new MeasurementPacket()),
+	ALARM_ID		(new AlarmsIDsPacket((byte) 0));
 
 	private PacketWork packetWork;
 

@@ -1,10 +1,5 @@
 package irt.controller.translation;
 
-import irt.controller.GuiController;
-import irt.data.RundomNumber;
-import irt.irt_gui.IrtGui;
-import irt.tools.panel.head.IrtPanel;
-
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
@@ -21,6 +16,11 @@ import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import irt.controller.GuiController;
+import irt.data.RundomNumber;
+import irt.irt_gui.IrtGui;
+import irt.tools.panel.head.IrtPanel;
 
 public class Translation {
 
@@ -60,7 +60,6 @@ public class Translation {
 					PREFS.put("locale", localeStr);
 
 				getFont(localeStr);
-				LOGGER.exit(locale);
 			}
 		}, "Translation.setLocale-"+new RundomNumber().toString());
 		int priority = t.getPriority();
@@ -140,7 +139,7 @@ public class Translation {
 			}
 		}
 
-		return LOGGER.exit(returnValue);
+		return returnValue;
 	}
 
 	private static Font getFont(String selectedLanguage) {
@@ -166,7 +165,7 @@ public class Translation {
 		if(font==null)
 			font = new Font("Tahoma", Font.PLAIN, 14);
 
-		return LOGGER.exit(font);
+		return font;
 	}
 
 	public static Font getSystemFont(String fontURL, int fontStyle, int fontSize) {
@@ -183,11 +182,10 @@ public class Translation {
 				break;
 			}
 
-		return LOGGER.exit(font);
+		return font;
 	}
 
 	public static Font getFont() {
-		LOGGER.entry();
 		while(font==null)
 			synchronized (LOGGER) {
 				try {
@@ -197,11 +195,11 @@ public class Translation {
 					LOGGER.catching(e);
 				}
 			}
-		return LOGGER.exit(font);
+		return font;
 	}
 
 	public static String getSelectedLanguage() {
-		return LOGGER.exit(locale!=null ? locale.toString() : Locale.getDefault().toString());
+		return locale!=null ? locale.toString() : Locale.getDefault().toString();
 	}
 
 	public static void setFont(Font font) {
@@ -210,11 +208,10 @@ public class Translation {
 	}
 
 	public static Locale getLocale() {
-		return LOGGER.exit(locale);
+		return locale;
 	}
 
 	private static Properties getTranslationProperties() {
-		LOGGER.entry();
 		if(translationProperties==null){
 			translationProperties = new Properties();
 			try(InputStream resourceAsStream = Translation.class.getResourceAsStream("translation.properties");) {
@@ -224,11 +221,11 @@ public class Translation {
 				LOGGER.catching(e);
 			}
 		}
-		return LOGGER.exit(translationProperties);
+		return translationProperties;
 	}
 
 	public static String getTranslationProperties(String key) {
 		LOGGER.entry(key);
-		return LOGGER.exit(getTranslationProperties().getProperty(key));
+		return getTranslationProperties().getProperty(key);
 	}
 }

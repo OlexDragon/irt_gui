@@ -1,10 +1,9 @@
 package irt.data.network;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 
 import irt.data.packet.Packet;
-import irt.data.packet.Payload;
 
 public class NetworkAddress {
 
@@ -31,18 +30,19 @@ public class NetworkAddress {
 	private byte[] gateway;
 
 	public void set(Packet packet) {
-		if(packet!=null){
-			List<Payload> payloads = packet.getPayloads();
-			if(payloads.size()>0) {
-				byte[] buffer = payloads.get(0).getBuffer();
-				if(buffer.length>=13){
-					type = buffer[0];
-					address = Arrays.copyOfRange(buffer, 1, 5);
-					mask = Arrays.copyOfRange(buffer, 5, 9);
-					gateway = Arrays.copyOfRange(buffer, 9,13);
-				}
-			}
-		}
+
+		Optional.ofNullable(packet)
+		.map(Packet::getPayloads)
+		.filter(pls->!pls.isEmpty())
+		.map(pls->pls.get(0).getBuffer())
+		.filter(b->b!=null)
+		.filter(b->b.length>=13)
+		.ifPresent(b->{
+			type = b[0];
+			address = Arrays.copyOfRange(b, 1, 5);
+			mask = Arrays.copyOfRange(b, 5, 9);
+			gateway = Arrays.copyOfRange(b, 9,13);
+		});
 	}
 
 	public String getAddressAsString(){

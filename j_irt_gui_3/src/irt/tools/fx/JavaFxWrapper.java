@@ -13,15 +13,19 @@ import org.apache.logging.log4j.Logger;
 import irt.tools.panel.subpanel.monitor.Monitor;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 
-public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
+public class JavaFxWrapper extends JFXPanel implements Monitor {
 	private static final long serialVersionUID = 1157429339979438261L;
 	private final Logger logger = LogManager.getLogger();
 
-	private MonitorPanelFx root;
+	private JavaFxPanel root;
 
-	public MonitorPanelSwingWithFx() {
+	public JavaFxWrapper(JavaFxPanel javaFxPanel) {
+
+		root = javaFxPanel;
+
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
 				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
@@ -47,8 +51,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 		Platform.runLater(()->{
 			try{
 
-				root = new MonitorPanelFx();
-				Scene scene = new Scene(root);
+				Scene scene = new Scene((Parent) root);
 				setScene(scene);
 
 			}catch (Exception e) {
@@ -60,8 +63,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 
 	@Override
 	public void refresh() {
-		logger.traceEntry();
-		//TODO
+		logger.error("refresh()");//TODO
 	}
 
 	public void setUnitAddress(byte unitAddress) {

@@ -79,12 +79,10 @@ public class DeviceDebugController extends ControllerAbstract {
 		this.value = value;
 		if(slider!=null)
 			slider.setMaximum((int) value.getRelativeMaxValue());
-		logger.exit();
 	}
 
 	public DeviceDebugController(int deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
 		super(deviceType, controllerName, packetWork, null, null);
-		logger.entry();
 
 		this.cbCommand = cbCommand;
 		this.cbParameter = cbParameter;
@@ -108,7 +106,6 @@ public class DeviceDebugController extends ControllerAbstract {
 		cbParameter.addPopupMenuListener(Listeners.popupMenuListener);
 		cbParameter.addItemListener(parameterItemListener);
 
-		logger.exit();
 	}
 
 	@Override
@@ -435,13 +432,11 @@ public class DeviceDebugController extends ControllerAbstract {
 				setPriority(priority-1);
 			setDaemon(true);
 			start();
-			logger.exit();
 		}
 
 		@Override
 		public void run() {
 			try {
-				logger.entry();
 				int id = valueChangeEvent.getID();
 
 				GetterAbstract pw = (GetterAbstract) getPacketWork();
@@ -489,7 +484,6 @@ public class DeviceDebugController extends ControllerAbstract {
 			} catch (Exception ex) {
 				logger.catching(ex);
 			}
-			logger.exit();
 		}
 
 	}

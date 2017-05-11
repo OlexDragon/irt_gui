@@ -20,10 +20,11 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.RedundancyNamePacket.RedundancyName;
+import irt.tools.fx.AlarmPanelFx;
+import irt.tools.fx.JavaFxWrapper;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
 import irt.tools.panel.head.IrtPanel;
-import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
@@ -46,7 +47,8 @@ public class UserPicobucPanel extends DevicePanel {
 				tabbedPane.addTab("IRT", lblNewLabel);
 			}
 
-			AlarmsPanel alarmPanel = new AlarmsPanel(deviceType, linkHeader);
+			JavaFxWrapper alarmPanel = new JavaFxWrapper(new AlarmPanelFx());
+			alarmPanel.setUnitAddress(linkHeader.getAddr());
 			alarmPanel.setBorder(null);
 			tabbedPane.addTab("alarms", alarmPanel);
 

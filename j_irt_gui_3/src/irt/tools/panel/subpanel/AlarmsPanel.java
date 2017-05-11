@@ -1,7 +1,10 @@
 package irt.tools.panel.subpanel;
 
 import java.awt.GridLayout;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -25,8 +28,6 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
 
 public class AlarmsPanel extends JPanel implements Refresh{
 	private static final long serialVersionUID = -3029893758378178725L;
@@ -64,7 +65,7 @@ public class AlarmsPanel extends JPanel implements Refresh{
 				scheduleAtFixedRate = service.scheduleAtFixedRate(alarmGetter, 1, 2000, TimeUnit.MILLISECONDS);
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-				scheduleAtFixedRate.cancel(true);
+				Optional.ofNullable(scheduleAtFixedRate).filter(ScheduledFuture::isCancelled).ifPresent(sch->sch.cancel(true));
 			}
 		});
 

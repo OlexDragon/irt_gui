@@ -1,31 +1,38 @@
 .monitor{
 	-fx-background-color: #0b173b;
     -fx-background-radius: 5.0; 
-    -fx-border-color: white;
+    -fx-border-color: WHITE;
     -fx-border-width: 2px;
 }
 .monitor .label.description{
 	-fx-text-fill: #99FFFF;
 }
 .monitor .label.value{
-	-fx-text-fill: white;
+	-fx-text-fill: WHITE;
 }
-.monitor .label{
-	-fx-font-weight: bold;
+.monitor .label, .alarms .label{
+	-fx-font-weight: BOLD;
 	-fx-font-size: 12px;
 }
-.monitor .label.locked, .monitor .label.unmuted{
-	-fx-font-weight: bold;
+.monitor .label.locked, .monitor .label.unmuted, .alarms .NO_ALARM, .alarms .INFO{
 	-fx-text-fill: DARKBLUE;
 	-fx-background-color: LIMEGREEN;
 }
-.monitor .label.unlocked{
-	-fx-font-weight: bold;
-	-fx-text-fill: yellow;
-	-fx-background-color: red;
+.monitor .label.unlocked, .alarms .MAJOR, .alarms .CRITICAL{
+	-fx-text-fill: YELLOW;
+	-fx-background-color: RED;
 }
 .monitor .label.muted{
-	-fx-font-weight: bold;
-	-fx-text-fill: black;
-	-fx-background-color: yellow;
+	-fx-text-fill: BLACK;
+	-fx-background-color: YELLOW;
+}
+.alarms{
+	-fx-background-color: TRANSPARENT;
+}
+.alarms .label.description{
+	-fx-text-fill: BLUE;
+}
+.alarms .WARNING, .alarms .MINOR{
+	-fx-text-fill: DARKBLUE;
+	-fx-background-color: BISQUE;
 }

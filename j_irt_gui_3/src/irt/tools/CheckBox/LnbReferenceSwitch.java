@@ -18,7 +18,6 @@ public class LnbReferenceSwitch extends SwitchBoxImpl {
 
 	@Override
 	protected void action() {
-		logger.entry();
 		PacketWork pw = new LnbReferencePacket(isSelected() ? ReferenceStatus.ON : ReferenceStatus.OFF);
 		cptq.add(pw);
 	}

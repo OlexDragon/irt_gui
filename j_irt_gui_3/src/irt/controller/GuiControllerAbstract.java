@@ -389,7 +389,7 @@ public abstract class GuiControllerAbstract extends Thread {
 	}
 
 	public byte getAddress() {
-		return logger.exit(address);
+		return address;
 	}
 
 	public void setAddress(byte address) {
@@ -647,8 +647,6 @@ public abstract class GuiControllerAbstract extends Thread {
 					}
 				}
 			}
-
-			logger.exit(controller);
 		}
 
 		public void update(LinkHeaderTread linkHeaderTread) {
@@ -731,7 +729,6 @@ public abstract class GuiControllerAbstract extends Thread {
 
 				dumpControllers.stop();
 				update(this);
-				logger.exit(linkHeader);
 			}
 
 			public synchronized void reset(){

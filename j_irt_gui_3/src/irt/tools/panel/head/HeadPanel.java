@@ -86,7 +86,7 @@ public class HeadPanel extends MainPanel {
 		add(ledMute);
 		new LedController(packet->Optional
 												.ofNullable(packet)
-												.filter(p->LogManager.getLogger().exit(p.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL))
+												.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
 												.map(p->p.getPayloads())
 												.flatMap(pls->pls.parallelStream().filter(pl->pl.getParameterHeader().getCode()==(isConverter(packet) ? ParameterHeaderCodeFCM.STATUS.getCode() : ParameterHeaderCodeBUC.STATUS.getCode())).findAny())
 												.ifPresent(pl->{

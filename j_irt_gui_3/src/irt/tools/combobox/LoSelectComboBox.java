@@ -83,9 +83,13 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		public void itemStateChanged(ItemEvent itemEvent) {
 			if(itemEvent.getStateChange()==ItemEvent.SELECTED){
 				final IdValueFreq idValueFreq = (IdValueFreq)model.getSelectedItem();
+
+				logger.error("********************************************************************");
 				if(linkAddr!=0)
+					//BUC
 					cptq.add(new LOPacket(linkAddr, idValueFreq.getId()));
 				else
+					//converter
 					cptq.add(new LOPacket(idValueFreq.getValueFrequency()));
 			}
 		}
