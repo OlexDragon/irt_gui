@@ -1,6 +1,6 @@
 package irt.data.packet;
 
-import irt.data.PacketWork;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueFrequency;
 
 public class LOPacket extends PacketAbstract{

@@ -11,10 +11,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -49,10 +52,9 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.NetworkAddressPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.LinkedPacket;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.ip_address.IpAddressTextField;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
 
 public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketListener {
 	private static final long serialVersionUID = 69871876592867701L;
@@ -141,6 +143,8 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		}
 	};
 
+	private byte unitAddress;
+
 	// ******************************* constructor NetworkPanel   ***************************************************
 	public NetworkPanel(final int deviceType, final LinkHeader linkHeader) {
 		addHierarchyListener(new HierarchyListener() {
@@ -150,7 +154,8 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			}
 		});
 
-		if(linkHeader==null){
+		//converter does not have network connection
+		if(linkHeader==null || linkHeader.getAddr()==0){
 			packet = null;
 			lblSubnetMask = null;
 			lblIpAddress = null;
@@ -161,6 +166,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			return;
 		}
 
+		unitAddress = linkHeader.getAddr();
 		packet = new NetworkAddressPacket(linkHeader.getAddr(), null);
 
 		addAncestorListener(new AncestorListener() {
@@ -431,35 +437,36 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		try{
-			if(this.packet.equals(packet)){
+		Optional
+		.ofNullable(packet)
+		.filter(LinkedPacket.class::isInstance)//converters do not have a network
+		.map(LinkedPacket.class::cast)
+		.filter(p->p.getLinkHeader()!=null)
+		.filter(p->p.getLinkHeader().getAddr()==unitAddress)
+		.map(Packet::getHeader)
+		.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+		.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+		.filter(h->h.getGroupId()==PacketImp.GROUP_ID_NETWORK)
+		.ifPresent(h->{
 
-				if(packet.getHeader().getOption()==PacketImp.ERROR_NO_ERROR){
+			networkAddress.set(packet);
 
-					networkAddress.set(packet);
+			if (!networkAddress.equals(networkAddressTmp)) {
 
-					if (!networkAddress.equals(networkAddressTmp)) {
+				final AddressType type = AddressType.values()[networkAddress.getType()];
+				comboBoxAddressType.setSelectedItem(type);
 
-						final AddressType type = AddressType.values()[networkAddress.getType()];
-						comboBoxAddressType.setSelectedItem(type);
+				synchronized (DumpControllers.dumper) {
+					DumpControllers.dumper.info(DumpControllers.marker, "network Address: {}", networkAddress);
+				}
 
-						synchronized (DumpControllers.dumper) {
-							DumpControllers.dumper.info(DumpControllers.marker, "network Address: {}", networkAddress);
-						}
+				ipAddressTextField.setText(networkAddress.getAddressAsString());
+				ipMaskTextField.setText(networkAddress.getMaskAsString());
+				ipGatewayTextField.setText(networkAddress.getGatewayAsString());
 
-						ipAddressTextField.setText(networkAddress.getAddressAsString());
-						ipMaskTextField.setText(networkAddress.getMaskAsString());
-						ipGatewayTextField.setText(networkAddress.getGatewayAsString());
-
-						networkAddressTmp = networkAddress.getCopy();
-					}
-				}else
-					logger.error(packet);
+				networkAddressTmp = networkAddress.getCopy();
 			}
-
-		}catch(Exception e){
-			logger.catching(e);
-		}
+		});
 	}
 
 	private void setButtonEnabled() {
@@ -512,7 +519,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	private void stop() {
 		cptq.removePacketListener(this);
-		if(scheduleAtFixedRate==null)
+		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
 			scheduleAtFixedRate.cancel(true);
 	}
 }

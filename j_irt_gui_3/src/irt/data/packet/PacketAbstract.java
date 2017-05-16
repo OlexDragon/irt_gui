@@ -14,9 +14,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import irt.data.PacketThread;
-import irt.data.PacketThreadWorker;
-import irt.data.PacketWork;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketThreadWorker;
+import irt.data.packet.interfaces.PacketWork;
 
 public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPacket{
 

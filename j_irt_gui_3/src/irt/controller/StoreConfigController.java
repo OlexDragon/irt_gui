@@ -7,12 +7,12 @@ import javax.swing.JOptionPane;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.Setter;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketWork;
 
 public class StoreConfigController extends ControllerAbstract {
 

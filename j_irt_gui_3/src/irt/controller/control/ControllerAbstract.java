@@ -14,12 +14,12 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.FireValue;
 import irt.data.MyThreadFactory;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
+import irt.data.packet.interfaces.PacketWork;
 
 public abstract class ControllerAbstract implements Runnable{
 

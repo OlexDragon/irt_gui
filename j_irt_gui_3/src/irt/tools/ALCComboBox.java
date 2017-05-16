@@ -1,7 +1,10 @@
 package irt.tools;
 
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -17,14 +20,13 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
-import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.ALCEnablePacket;
+import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketWork;
 
 public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	private static final long serialVersionUID = 5927791917430153433L;
@@ -37,7 +39,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 
 	private final ALCEnablePacket packet;
 
-	private final Byte linkAddr; 
+	private final Byte unitAddress; 
 
 		public ALCComboBox(String text, final Byte linkAddr) {
 		super(text);
@@ -48,7 +50,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 			}
 		});
 
-		this.linkAddr = linkAddr;
+		this.unitAddress = linkAddr;
 		packet = new ALCEnablePacket(linkAddr, null); 
 
 		addAncestorListener(new AncestorListener() {
@@ -85,12 +87,37 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	@Override
 	public void onPacketRecived(Packet packet) {
 		try{
-			if(packet.equals(this.packet) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE && packet.getHeader().getOption()==PacketImp.ERROR_NO_ERROR){
-				logger.trace(packet);
 
-				final Payload payload = packet.getPayload(0);
-				setSelected((payload.getByte()==1));
-			}
+			final Optional<Packet> o = Optional
+			.ofNullable(packet);
+
+			if(!o.isPresent())
+				return;
+
+			byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+
+			if(addr!=unitAddress)
+				return;
+
+			o.map(Packet::getHeader)
+			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+			.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION)
+			.map(h->packet.getPayloads())
+			.map(pls->pls.parallelStream())
+			.ifPresent(
+					stream->{
+						stream
+						.forEach(pl->{
+
+							final byte code = pl.getParameterHeader().getCode();
+
+							switch(code){
+							case PacketImp.PARAMETER_CONFIG_BUC_APC_ENABLE:
+								setSelected((pl.getByte()==1));
+							}
+						});
+					});
 		}catch(Exception e){
 			logger.catching(e);
 		}
@@ -100,7 +127,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 
-			PacketWork packet = new ALCEnablePacket(linkAddr, (byte) (e.getStateChange() == ItemEvent.DESELECTED ? 0 : 1));
+			PacketWork packet = new ALCEnablePacket(unitAddress, (byte) (e.getStateChange() == ItemEvent.DESELECTED ? 0 : 1));
 			cptq.add(packet);
 		}
 	};

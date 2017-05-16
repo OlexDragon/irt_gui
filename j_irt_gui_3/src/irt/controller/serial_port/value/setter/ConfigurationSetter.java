@@ -12,7 +12,6 @@ import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.LinkedPacketThread;
 import irt.data.PacketThread;
-import irt.data.PacketWork;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
@@ -20,6 +19,7 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.data.value.ValueFrequency;
 

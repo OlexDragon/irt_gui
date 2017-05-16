@@ -8,11 +8,11 @@ import javax.swing.JTextField;
 import javax.swing.Timer;
 
 import irt.controller.control.ControllerAbstract;
-import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.interfaces.PacketWork;
 
 public class DeviceDebagSaveController extends ControllerAbstract {
 

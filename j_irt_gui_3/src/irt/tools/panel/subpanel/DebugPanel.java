@@ -24,12 +24,12 @@ import irt.controller.DefaultController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketWork;
 
 public class DebugPanel extends JPanel{
 	private static final long serialVersionUID = 6314140030152046415L;

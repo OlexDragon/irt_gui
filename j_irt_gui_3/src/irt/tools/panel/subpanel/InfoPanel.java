@@ -25,15 +25,15 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketWork;
 import irt.tools.Transformer;
 
 @SuppressWarnings("serial")

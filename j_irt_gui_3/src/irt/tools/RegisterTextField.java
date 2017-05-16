@@ -1,10 +1,12 @@
-
 package irt.tools;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -18,16 +20,17 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.MyThreadFactory;
-import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.Payload;
 import irt.data.packet.RegisterPacket;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
 
 public class RegisterTextField extends JTextField implements PacketListener {
 	private static final long serialVersionUID = 517630309792962880L;
@@ -46,8 +49,10 @@ public class RegisterTextField extends JTextField implements PacketListener {
 	private ScheduledFuture<?> scheduleAtFixedRate;
 
 	private final TextFieldUpdater updater 		= new TextFieldUpdater();
+	private Byte unitAddress;
+	private short packetId;
 
-	public RegisterTextField(Byte linkAddr, RegisterValue value, short packetId, int min, int max) {
+	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, short packetId, int min, int max) {
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
 				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
@@ -57,15 +62,27 @@ public class RegisterTextField extends JTextField implements PacketListener {
 
 		MIN = min;
 		MAX = max;
+		unitAddress = linkAddr;
+		this.packetId = packetId;
 
-		value.setValue(null); // if value is null packet type is REQIEST
-		getPacket = new RegisterPacket(linkAddr, value, packetId);
+		registerValue.setValue(null); // if value is null packet type is REQIEST
+		getPacket = new RegisterPacket(linkAddr, registerValue, packetId);
+//		if(Optional
+//				.of(getPacket)
+//				.map(pw->pw.getPacketThread().getPacket())
+//				.filter(p->p.getHeader().getGroupId()==PacketImp.GROUP_ID_DEVICE_DEBAG)
+//				.map(p->p.getPayloads())
+//				.map(pls->pls.get(0))
+//				.map(Payload::getRegisterValue)
+//				.filter(pv->pv.getAddr()==4 && pv.getIndex()==100)
+//				.isPresent())
+//			throw new RuntimeException();
 
-		valueToSend = new RegisterValue(value);
+		valueToSend = new RegisterValue(registerValue);
 		valueToSend.setValue( new Value(896, MIN, MAX, 0)); // if value not null packet type is COMMAND
 		setPacket = new RegisterPacket(linkAddr, valueToSend, packetId);
 
-		valueSaveRegister = new RegisterValue(value.getIndex(), value.getAddr()+3, new Value(0, 0, 0, 0));
+		valueSaveRegister = new RegisterValue(registerValue.getIndex(), registerValue.getAddr()+3, new Value(0, 0, 0, 0));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 
@@ -91,18 +108,6 @@ public class RegisterTextField extends JTextField implements PacketListener {
 			@Override public void keyReleased(KeyEvent e) { }
 			@Override public void keyPressed(KeyEvent e) { }
 		});
-//		addFocusListener(new FocusListener() {
-//			
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				start();
-//			}
-//			
-//			@Override
-//			public void focusGained(FocusEvent e) {
-//				stop();
-//			}
-//		});
 	}
 
 	@Override
@@ -152,42 +157,88 @@ public class RegisterTextField extends JTextField implements PacketListener {
 
 		@Override
 		public void run() {
-			final PacketHeader header = packet.getHeader();
-			if(header.getOption()==PacketImp.ERROR_NO_ERROR)
 
-				try{
+			try{
 
-					if(packet.equals(getPacket)){
+				final Optional<Packet> o = Optional.ofNullable(packet);
 
-						final RegisterValue registerValue = packet.getPayload(0).getRegisterValue();
-						if(registerValue.equals(valueSaveRegister))
-							showSaved();
+				if(!o.isPresent())
+					return;
 
-						else
-							setValue(registerValue);
-					}
-				}catch(Exception e){
-					logger.catching(e);
+				byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+
+				if(addr!=unitAddress)
+					return;
+
+				final Optional<PacketHeader> sameGroupId = o.map(Packet::getHeader)
+															.filter(h->h.getPacketId()==packetId)
+															.filter(h->h.getGroupId()==PacketImp.GROUP_ID_DEVICE_DEBAG);
+
+				if(!sameGroupId.isPresent())
+					return;
+
+				Optional<PacketHeader> hasResponse = sameGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+
+				if(!hasResponse.isPresent()){
+					logger.warn("Unit is not connected {}", packet);
+					return;
 				}
+
+				final Optional<PacketHeader> noError = hasResponse
+														.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+
+				if(!noError.isPresent()){
+					logger.warn("Packet has error {}", packet);
+					return;
+				}
+				
+				noError
+				.map(h->packet.getPayloads())
+				.map(pls->pls.parallelStream())
+				.ifPresent(
+						stream->{
+							stream
+							.filter(pl->pl.getParameterHeader().getCode()==PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE)
+							.map(Payload::getRegisterValue)
+							.filter(rv->rv.getIndex()==valueToSend.getIndex())
+							.forEach(rv->{
+
+								final int aR = rv.getAddr();
+								final int aS = valueSaveRegister.getAddr();
+								final int aV = valueToSend.getAddr();
+
+								if(aR==aS)
+									showSaved();
+
+								else if(aR==aV)
+									setValue(rv);
+							});
+						});
+			}catch(Exception e){
+				logger.catching(e);
+			}
 		}
 
 		private void setValue(final RegisterValue registerValue) {
 			final String str = registerValue.getValue().toString();
 
-			if(!str.equals(getText()))
-				SwingUtilities.invokeLater(new Runnable() {
-					@Override public void run() {
-						setText(str);
-					}
-				});
+			SwingUtilities.invokeLater(()-> {
+				if(!str.equals(getText()))
+					setText(str);
+			});
 		}
 
-		private void showSaved() throws InterruptedException {
-			stop();
-			Thread.sleep(100);
-			setText("SAVED");
-			Thread.sleep(2000);
-			start();
+		private void showSaved() {
+
+			try {
+				stop();
+				Thread.sleep(100);
+				setText("SAVED");
+				Thread.sleep(2000);
+				start();
+			} catch (InterruptedException e) {
+				logger.catching(e);
+			}
 		}
 	}
 
@@ -195,7 +246,14 @@ public class RegisterTextField extends JTextField implements PacketListener {
 	private class Sender implements Runnable{
 		@Override
 		public void run() {
-			GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
+
+			try{
+
+				GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
+
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
 	}
 }

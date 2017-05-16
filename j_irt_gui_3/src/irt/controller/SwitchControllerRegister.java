@@ -8,11 +8,11 @@ import javax.swing.JCheckBox;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.PacketThreadWorker;
-import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.interfaces.PacketThreadWorker;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public class SwitchControllerRegister extends ControllerAbstract {

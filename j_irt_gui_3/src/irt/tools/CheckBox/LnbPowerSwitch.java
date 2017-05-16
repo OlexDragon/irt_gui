@@ -2,9 +2,9 @@ package irt.tools.CheckBox;
 
 import java.awt.Image;
 
-import irt.data.PacketWork;
 import irt.data.packet.LnbPowerPacket;
 import irt.data.packet.LnbPowerPacket.PowerStatus;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.Payload;

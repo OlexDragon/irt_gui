@@ -17,9 +17,10 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
-import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
+import irt.data.packet.interfaces.PacketWork;
+
 import java.awt.event.HierarchyListener;
 import java.awt.event.HierarchyEvent;
 

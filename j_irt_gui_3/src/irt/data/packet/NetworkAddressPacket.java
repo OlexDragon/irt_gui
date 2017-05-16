@@ -1,7 +1,7 @@
 package irt.data.packet;
 
-import irt.data.PacketWork;
 import irt.data.network.NetworkAddress;
+import irt.data.packet.interfaces.PacketWork;
 
 public class NetworkAddressPacket  extends PacketAbstract{
 

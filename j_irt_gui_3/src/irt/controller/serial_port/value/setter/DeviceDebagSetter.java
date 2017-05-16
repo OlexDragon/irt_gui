@@ -1,6 +1,5 @@
 package irt.controller.serial_port.value.setter;
 
-import irt.data.PacketThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
@@ -8,6 +7,7 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.value.Value;
 
 public class DeviceDebagSetter extends SetterAbstract {

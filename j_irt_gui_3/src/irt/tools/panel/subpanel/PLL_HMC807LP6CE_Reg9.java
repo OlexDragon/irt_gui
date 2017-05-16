@@ -34,13 +34,13 @@ import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
-import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public class PLL_HMC807LP6CE_Reg9 extends JPanel {

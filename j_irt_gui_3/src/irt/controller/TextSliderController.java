@@ -16,10 +16,10 @@ import javax.swing.event.ChangeListener;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.IdValue;
-import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public class TextSliderController extends ControllerAbstract {

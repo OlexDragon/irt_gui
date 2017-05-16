@@ -1,7 +1,7 @@
 package irt.data.packet;
 
 import irt.controller.DumpControllers;
-import irt.data.PacketWork;
+import irt.data.packet.interfaces.PacketWork;
 
 import java.util.Arrays;
 

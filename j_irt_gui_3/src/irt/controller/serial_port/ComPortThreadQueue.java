@@ -14,11 +14,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
 import irt.data.MyThreadFactory;
-import irt.data.PacketThreadWorker;
-import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketThreadWorker;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.StaticComponents;
 import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
@@ -94,8 +94,9 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketWork packetWork){
-	
+
 		try {
+
 			if(packetWork!=null)
 				if (comPortQueue.size() < 300)
 					if (!comPortQueue.contains(packetWork)) {

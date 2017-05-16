@@ -4,10 +4,10 @@ import java.awt.Component;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.ToDo;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.interfaces.PacketWork;
 
 public class SetterController extends ControllerAbstract {
 

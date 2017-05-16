@@ -6,15 +6,14 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.data.DeviceInfo;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.ToHex;
 import irt.data.listener.PacketListener;
@@ -24,9 +23,10 @@ import irt.data.packet.PacketAbstract.Priority;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.IrtPanel;
 
-public class DumpControllers{
+public class DumpControllers{// implements PacketListener{
 
 //	private static final int MAX_FILE_QUANTITY = 50;
 //	private static final int MAX_FILE_SIZE = 5000;
@@ -885,4 +885,13 @@ public class DumpControllers{
 			dumper.info(marker, text);
 		}
 	}
+//
+//	@Override
+//	public void onPacketRecived(Packet packet) {
+//		Optional
+//		.ofNullable(packet)
+//		.filter(DumpPacket.class::isInstance)
+//		.map(DumpPacket.class::cast)
+//		
+//	}
 }
