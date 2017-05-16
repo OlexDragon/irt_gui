@@ -3,10 +3,13 @@ package irt.tools;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -23,15 +26,14 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
-import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
 import irt.data.packet.MuteControlPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketWork;
 import irt.tools.button.ImageButton;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
 
 public class MuteButton extends ImageButton implements Runnable, PacketListener{
 	private static final long serialVersionUID = -2275767848687769406L;
@@ -45,7 +47,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 
 	private final 		PacketWork 	packet;
 	private volatile	MuteStatus 	muteStatus;
-	private 			Byte 		linkAddr;
+	private 			Byte 		unitAddress;
 
 	public MuteButton(Byte linkAddr, Image image) {
 		super(image);
@@ -56,7 +58,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 			}
 		});
 
-		this.linkAddr = linkAddr;
+		this.unitAddress = linkAddr;
 		packet = new MuteControlPacket(linkAddr, null);
 
 		addAncestorListener(new AncestorListener() {
@@ -101,29 +103,52 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 	@Override
 	public void onPacketRecived(Packet packet) {
 		try{
-			if(this.packet.equals(packet)){
 
-				if(packet.getHeader().getOption()==PacketImp.ERROR_NO_ERROR){
+			final Optional<Packet> o = Optional
+			.ofNullable(packet);
 
-					final Payload payload = packet.getPayload(0);
-					MuteStatus muteStatus = MuteStatus.values()[payload.getByte()];
-					if(this.muteStatus==null || this.muteStatus!=muteStatus){
-						this.muteStatus = muteStatus;
+			if(!o.isPresent())
+				return;
 
-						final String name = muteStatus.name();
-						final String text = Translation.getValue(String.class, MuteStatus.values()[muteStatus.ordinal()^1].name(), muteStatus==MuteStatus.MUTED ? "Unmute" : "Mute");
+			byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-						setName(name);
-						setToolTipText(text);
+			if(addr!=unitAddress)
+				return;
 
-						for(JLabel l:labels){
-							l.setName(name);
-							l.setText(text);
+			o.map(Packet::getHeader)
+			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+			.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION)
+			.map(h->packet.getPayloads())
+			.map(pls->pls.parallelStream())
+			.ifPresent(stream->{
+				stream
+				.forEach(pl->{
+
+					final byte code = pl.getParameterHeader().getCode();
+
+					switch(code){
+					case PacketImp.PARAMETER_ID_CONFIGURATION_MUTE:
+						final byte index = pl.getByte();
+
+						MuteStatus muteStatus = MuteStatus.values()[index];
+						if(this.muteStatus==null || this.muteStatus!=muteStatus){
+							this.muteStatus = muteStatus;
+
+							final String name = muteStatus.name();
+							final String text = Translation.getValue(String.class, MuteStatus.values()[muteStatus.ordinal()^1].name(), muteStatus==MuteStatus.MUTED ? "Unmute" : "Mute");
+
+							setName(name);
+							setToolTipText(text);
+
+							for(JLabel l:labels){
+								l.setName(name);
+								l.setText(text);
+							}
 						}
 					}
-				}else
-					logger.error(packet);
-			}
+				});
+			});
 
 		}catch(Exception e){
 			logger.catching(e);
@@ -162,7 +187,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener{
 	}
 	private void sendCommand() {
 		if(muteStatus!=null){
-			final MuteControlPacket packet = new MuteControlPacket(linkAddr, (byte)(muteStatus.ordinal()^1));
+			final MuteControlPacket packet = new MuteControlPacket(unitAddress, (byte)(muteStatus.ordinal()^1));
 			cptq.add(packet);
 		}
 	}

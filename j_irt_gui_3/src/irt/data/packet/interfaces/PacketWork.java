@@ -1,4 +1,4 @@
-package irt.data;
+package irt.data.packet.interfaces;
 
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;

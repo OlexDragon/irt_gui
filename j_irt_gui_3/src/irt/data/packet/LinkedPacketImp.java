@@ -2,6 +2,8 @@ package irt.data.packet;
 
 import java.util.Arrays;
 
+import irt.data.packet.interfaces.LinkedPacket;
+
 public class LinkedPacketImp extends PacketImp implements LinkedPacket{
 
 	public static final int PACKET_ID = 1;

@@ -18,11 +18,11 @@ import org.apache.logging.log4j.core.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
-import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
-import irt.data.packet.LinkedPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.StaticComponents;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;

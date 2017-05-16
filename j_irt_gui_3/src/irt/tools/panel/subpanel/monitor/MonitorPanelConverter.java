@@ -3,10 +3,10 @@ package irt.tools.panel.subpanel.monitor;
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
-import irt.data.PacketWork;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 

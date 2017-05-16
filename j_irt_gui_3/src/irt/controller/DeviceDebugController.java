@@ -26,8 +26,6 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.Listeners;
-import irt.data.PacketThreadWorker;
-import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ControllerFocusListener;
@@ -35,6 +33,8 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketThreadWorker;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public class DeviceDebugController extends ControllerAbstract {

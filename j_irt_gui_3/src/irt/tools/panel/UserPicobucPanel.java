@@ -13,13 +13,13 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.RedundancyNamePacket.RedundancyName;
+import irt.data.packet.interfaces.PacketWork;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.JavaFxWrapper;
 import irt.tools.label.ImageLabel;
@@ -44,7 +44,7 @@ public class UserPicobucPanel extends DevicePanel {
 
 			if (getClass().equals(UserPicobucPanel.class)) {
 				JLabel lblNewLabel = new ImageLabel(IrtPanel.logoIcon, "");
-				tabbedPane.addTab("IRT", lblNewLabel);
+				tabbedPane.addTab("Logo", lblNewLabel);
 			}
 
 			JavaFxWrapper alarmPanel = new JavaFxWrapper(new AlarmPanelFx());

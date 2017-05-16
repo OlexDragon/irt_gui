@@ -6,12 +6,12 @@ import javax.swing.JTextField;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.PacketWork;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueDouble;
 
 public class AttenuationController extends ValueRangeControllerAbstract {

@@ -3,11 +3,11 @@ package irt.controller.serial_port.value.getter;
 import java.util.List;
 
 import irt.data.PacketThread;
-import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketWork;
 
 public class DeviceMeasurement extends GetterAbstract {
 

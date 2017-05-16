@@ -10,6 +10,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -44,21 +46,19 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.data.MyThreadFactory;
-import irt.data.PacketWork;
 import irt.data.RegisterValue;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
 import irt.tools.RegisterTextField;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.fx.MonitorPanelFx;
 import irt.tools.panel.subpanel.BIASsPanel.AdcWorker;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
 
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel implements PacketListener, Runnable {
@@ -266,7 +266,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		}
 		RegisterValue registerValue = new RegisterValue(index, rAddr, null);
 		txtDAC1 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, 0, 4095);
-		txtDAC1.start();
 		txtDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC1.setColumns(10);
 		txtDAC1.setBounds(186, 16, 55, 20);
@@ -281,7 +280,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		registerValue = new RegisterValue(index, rAddr, null);
 		txtDAC2 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2, 0, 4095);
-		txtDAC2.start();
 		txtDAC2.setEnabled(false);
 		txtDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC2.setColumns(10);
@@ -297,7 +295,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		registerValue = new RegisterValue(index, rAddr, null);
 		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3, 0, 4095);
-		txtDAC3.start();
 		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC3.setColumns(10);
 		txtDAC3.setBounds(186, 72, 55, 20);
@@ -311,8 +308,8 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			rAddr++;
 
 		registerValue = new RegisterValue(index, rAddr, null);
+
 		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4, 0, 4095);
-		txtDAC4.start();
 		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC4.setColumns(10);
 		txtDAC4.setBounds(187, 100, 55, 20);

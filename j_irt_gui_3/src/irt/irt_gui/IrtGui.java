@@ -57,6 +57,7 @@ import irt.tools.KeyValue;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.BaudRateSelectorFx;
 import irt.tools.fx.JavaFxFrame;
+import irt.tools.fx.JavaFxPanel;
 import irt.tools.fx.MonitorPanelFx;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
@@ -74,7 +75,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.119";
+	public static final String VERTION = "- 3.120";
 	private boolean connected;
 
 	protected HeadPanel headPanel;
@@ -223,22 +224,11 @@ public class IrtGui extends IrtMainFrame {
 
 				monitorPanel = new MonitorPanelFx();
 				final JavaFxFrame javaFxFrame = new JavaFxFrame(()->monitorPanel);
+				javaFxFrame.setSize(200, 200);
 
 				JMenu menu = javaFxFrame.getMenu();
 				menu.setText("Unit Address");
-				Optional.ofNullable(GuiController.getAddresses()).ifPresent(addrs->{
-					IntStream
-					.range(0, addrs.length)
-					.map(i->(addrs[i] & 0xFF))
-					.forEach(addr->{
-						final JCheckBoxMenuItem mItem = new JCheckBoxMenuItem("#" + Integer.toString(addr));
-						mItem.setName(Integer.toString(addr));
-						mItem.addActionListener(ae->{
-							monitorPanel.setUnitAddress((byte) Integer.parseInt(((JCheckBoxMenuItem)ae.getSource()).getName()));
-						});
-						menu.add(mItem);
-					});
-				});
+				fillMenu(monitorPanel, menu);
 			}
 		});
 		popupMenu.add(monitortMenuItem);
@@ -257,7 +247,7 @@ public class IrtGui extends IrtMainFrame {
 			}
 		});
 
-		JMenuItem mntmAlarms = new JMenuItem("Alarms");
+		JMenuItem mntmAlarms = new JMenuItem(Translation.getValue(String.class, "alarms", "Alarms"));
 		mntmAlarms.addActionListener(new ActionListener() {
 
 			private JavaFxFrame alarmsFrame;
@@ -270,6 +260,7 @@ public class IrtGui extends IrtMainFrame {
 					alarmsFrame = new JavaFxFrame(()->alarmPanelFx);
 					alarmsFrame.setSize(200, 200);
 					alarmPanelFx.start();//TODO remove this code
+					fillMenu(alarmPanelFx, alarmsFrame.getMenu());
 				}else
 					alarmsFrame.setVisible(true);
 			}
@@ -521,5 +512,21 @@ public class IrtGui extends IrtMainFrame {
 
 	public void setConnected(boolean connected) {
 		this.connected = connected;
+	}
+
+	private void fillMenu(JavaFxPanel monitorPanel, JMenu menu) {
+		Optional.ofNullable(GuiController.getAddresses()).ifPresent(addrs->{
+			IntStream
+			.range(0, addrs.length)
+			.map(i->(addrs[i] & 0xFF))
+			.forEach(addr->{
+				final JCheckBoxMenuItem mItem = new JCheckBoxMenuItem("#" + Integer.toString(addr));
+				mItem.setName(Integer.toString(addr));
+				mItem.addActionListener(ae->{
+					monitorPanel.setUnitAddress((byte) Integer.parseInt(((JCheckBoxMenuItem)ae.getSource()).getName()));
+				});
+				menu.add(mItem);
+			});
+		});
 	}
 }

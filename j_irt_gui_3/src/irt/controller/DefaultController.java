@@ -3,8 +3,8 @@ package irt.controller;
 import java.awt.Component;
 
 import irt.controller.control.ControllerAbstract;
-import irt.data.PacketWork;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.interfaces.PacketWork;
 
 public class DefaultController extends ControllerAbstract {
 

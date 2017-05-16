@@ -17,17 +17,17 @@ import org.apache.logging.log4j.core.Logger;
 import irt.data.Checksum;
 import irt.data.LoggerWorker;
 import irt.data.PacketThread;
-import irt.data.PacketThreadWorker;
-import irt.data.PacketWork;
 import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.LinkedPacket;
 import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketThreadWorker;
+import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.Console;
 import irt.tools.panel.head.IrtPanel;
 import jssc.SerialPort;
@@ -344,7 +344,7 @@ do{
 
 		logged = readBytes==null || !isComfirm;
 
-		return logger.exit(isComfirm);
+		return isComfirm;
 	}
 
 	private short getPacketId(boolean isLinked, byte[] data) {

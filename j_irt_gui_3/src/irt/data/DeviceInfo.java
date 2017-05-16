@@ -8,11 +8,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
 import irt.data.packet.LinkHeader;
-import irt.data.packet.LinkedPacket;
 import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.LinkedPacket;
 import irt.tools.panel.subpanel.InfoPanel;
 
 public class DeviceInfo {

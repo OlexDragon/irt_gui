@@ -52,6 +52,7 @@
 <!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
 <!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.MonitorPanelSwingWithFx" level="all"/> -->
+<!--  	<Logger name="irt.tools.RegisterTextField" level="all"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

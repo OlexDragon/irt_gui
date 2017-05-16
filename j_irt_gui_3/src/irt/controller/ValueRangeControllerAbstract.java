@@ -11,9 +11,9 @@ import javax.swing.JTextField;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public abstract class ValueRangeControllerAbstract extends ControllerAbstract {

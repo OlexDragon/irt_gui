@@ -1,4 +1,4 @@
-package irt.data;
+package irt.data.packet.interfaces;
 
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;

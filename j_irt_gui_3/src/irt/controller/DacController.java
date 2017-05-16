@@ -11,9 +11,9 @@ import javax.swing.event.ChangeListener;
 
 import irt.controller.control.ControllerAbstract;
 import irt.data.DacValue;
-import irt.data.PacketWork;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public class DacController extends ControllerAbstract {

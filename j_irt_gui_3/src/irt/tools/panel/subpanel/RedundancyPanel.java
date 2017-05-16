@@ -4,10 +4,13 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.SystemColor;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -47,11 +50,10 @@ import irt.data.packet.RedundancyNamePacket.RedundancyName;
 import irt.data.packet.RedundancySetOnlinePacket;
 import irt.data.packet.RedundancyStatusPacket;
 import irt.data.packet.RedundancyStatusPacket.RedundancyStatus;
+import irt.data.packet.interfaces.LinkedPacket;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
 
 public class RedundancyPanel extends RedundancyPanelDemo implements PacketListener, Runnable{
 
@@ -83,14 +85,12 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	private ItemListener nameListener;
 
 	private ImageLabel lblImage;
-
 	private VarticalLabel lblSetOnline;
-
 	private JLabel lblRedundancy;
-
 	private JLabel lblMode;
-
 	private JLabel lblUnitName;
+
+	private byte unitAddress;
 
 	//*************************************** constructor RedundancyPanel ********************************************
 	public RedundancyPanel(final int deviceType, final LinkHeader linkHeader) {
@@ -101,12 +101,12 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 			}
 		});
 
-		final byte addr = linkHeader.getAddr();
-		redundancyEnablePacket = new RedundancyEnablePacket(addr, null);
-		redundancyModePacket = new RedundancyModePacket(addr, null);
-		redundancyNamePacket = new RedundancyNamePacket(addr, null);
-		redundancyStatusPacket = new RedundancyStatusPacket(addr, null);
-		redundancySetOnlinePacket = new RedundancySetOnlinePacket(addr);
+		unitAddress = linkHeader.getAddr();
+		redundancyEnablePacket = new RedundancyEnablePacket(unitAddress, null);
+		redundancyModePacket = new RedundancyModePacket(unitAddress, null);
+		redundancyNamePacket = new RedundancyNamePacket(unitAddress, null);
+		redundancyStatusPacket = new RedundancyStatusPacket(unitAddress, null);
+		redundancySetOnlinePacket = new RedundancySetOnlinePacket(unitAddress);
 
 		setBackground(SystemColor.inactiveCaption);
 		redundancyListener = new ItemListener() {
@@ -314,68 +314,118 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		final PacketHeader header = packet.getHeader();
+		try{
 
-		if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE  && header.getOption()==PacketImp.ERROR_NO_ERROR){
 
-			byte b = packet.getPayload(0).getByte();
-			if(packet.equals(redundancyEnablePacket)){
+			final Optional<Packet> o = Optional.ofNullable(packet);
 
-				//Set Enable status
+			if(!o.isPresent())
+				return;
 
-				final RedundancyEnable redundancyEnable = RedundancyEnable.values()[b];
-				cmbBxRedundancy.setSelectedItem(redundancyEnable);
+			byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-			}else if(packet.equals(redundancyModePacket)){
-			
-				// Set redundancy mode
+			if(addr!=unitAddress)
+				return;
 
-				final RedundancyMode redundancyMode = RedundancyMode.values()[b];
-				cmbBxMode.setSelectedItem(redundancyMode);
+			Optional<PacketHeader> sameGroupId = o.filter(LinkedPacket.class::isInstance)//converters do not have a network
+													.map(LinkedPacket.class::cast)
+													.filter(p->p.getLinkHeader()!=null)
+													.filter(p->p.getLinkHeader().getAddr()==unitAddress)
+													.map(Packet::getHeader)
+													.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION);
 
-			}else if(packet.equals(redundancyNamePacket)){
+			if(!sameGroupId.isPresent())
+				return;
 
-				// Set BUC Name
-				final RedundancyName redundancyName = RedundancyName.values()[b];
-				cmbBxName.removeItemListener(nameListener);
-				cmbBxName.setSelectedItem(redundancyName);
-				cmbBxName.addItemListener(nameListener);
-			
-			}else if(packet.equals(redundancyStatusPacket)){
-			
-				// Set Status and background image
-	
-				final RedundancyStatus redundancyStatus = RedundancyStatus.values()[b];
-				final RedundancyName selectedItem = (RedundancyName) cmbBxName.getSelectedItem();
+			Optional<PacketHeader> hasResponse = sameGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
 
-				if(redundancyStatus==RedundancyStatus.STANDBY){
-
-					lblSetOnline.setEnabled(true);
-					lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-					if(selectedItem==RedundancyName.BUC_B)
-						lblImage.setIcon(ICON_BUC_A);
-					else
-						lblImage.setIcon(ICON_BUC_B);
-
-				}else if(redundancyStatus==RedundancyStatus.ONLINE){
-
-					lblSetOnline.setEnabled(false);
-					lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-
-					if(selectedItem==RedundancyName.BUC_A)
-						lblImage.setIcon(ICON_BUC_A);
-					else
-						lblImage.setIcon(ICON_BUC_B);
-
-				}else{
-
-					lblSetOnline.setEnabled(false);
-					lblImage.setIcon(ICON_BUC_X);
-				}
+			if(!hasResponse.isPresent()){
+				logger.warn("Unit is not connected {}", packet);
+				return;
 			}
-		}
 
+			final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+
+			if(!noError.isPresent()){
+				logger.warn("Packet has error {}", packet);
+				return;
+			}
+
+			noError
+			.map(h->packet.getPayloads())
+			.map(pls->pls.parallelStream())
+			.ifPresent(
+					stream->{
+						stream.forEach(pl->{
+
+							final byte code = pl.getParameterHeader().getCode();
+							final byte index = pl.getByte();
+							switch(code){
+							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_ENABLE:
+
+								//Set Enable status
+
+								final RedundancyEnable redundancyEnable = RedundancyEnable.values()[index];
+								cmbBxRedundancy.setSelectedItem(redundancyEnable);
+								break;
+
+							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_MODE:
+
+								// Set redundancy mode
+
+								final RedundancyMode redundancyMode = RedundancyMode.values()[index];
+								cmbBxMode.setSelectedItem(redundancyMode);
+								break;
+
+							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME:
+
+								// Set BUC Name
+
+								final RedundancyName redundancyName = RedundancyName.values()[index];
+								cmbBxName.removeItemListener(nameListener);
+								cmbBxName.setSelectedItem(redundancyName);
+								cmbBxName.addItemListener(nameListener);
+								break;
+
+							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_STATUS:
+
+								// Set Status and background image
+		
+								final RedundancyStatus redundancyStatus = RedundancyStatus.values()[index];
+								final RedundancyName selectedItem = (RedundancyName) cmbBxName.getSelectedItem();
+
+								if(redundancyStatus==RedundancyStatus.STANDBY){
+
+									lblSetOnline.setEnabled(true);
+									lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+									if(selectedItem==RedundancyName.BUC_B)
+										lblImage.setIcon(ICON_BUC_A);
+									else
+										lblImage.setIcon(ICON_BUC_B);
+
+								}else if(redundancyStatus==RedundancyStatus.ONLINE){
+
+									lblSetOnline.setEnabled(false);
+									lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+									if(selectedItem==RedundancyName.BUC_A)
+										lblImage.setIcon(ICON_BUC_A);
+									else
+										lblImage.setIcon(ICON_BUC_B);
+
+								}else{
+
+									lblSetOnline.setEnabled(false);
+									lblImage.setIcon(ICON_BUC_X);
+								}
+								break;
+							}
+						});
+					});
+		}catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	@Override

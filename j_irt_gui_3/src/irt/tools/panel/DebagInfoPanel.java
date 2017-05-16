@@ -21,10 +21,10 @@ import irt.controller.DeviceDebugController;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.serial_port.value.getter.Getter;
-import irt.data.PacketWork;
 import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketWork;
 
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel {

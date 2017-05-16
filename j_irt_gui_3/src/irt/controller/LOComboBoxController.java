@@ -25,7 +25,6 @@ import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.IdValue;
 import irt.data.LOIdValue;
 import irt.data.MyThreadFactory;
-import irt.data.PacketWork;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LOFrequenciesPacket;
 import irt.data.packet.LOPacket;
@@ -33,6 +32,7 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueFrequency;
 
 public class LOComboBoxController extends Observable implements IrtController, Runnable, PacketListener {
