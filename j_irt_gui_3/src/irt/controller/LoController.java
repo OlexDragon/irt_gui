@@ -87,6 +87,7 @@ public class LoController extends ControllerAbstract {
 		@SuppressWarnings("unchecked")
 		@Override
 		public void run() {
+			try{
 			SetterAbstract pw = (SetterAbstract) getPacketWork();
 			PacketThreadWorker pt = pw.getPacketThread();
 
@@ -103,6 +104,9 @@ public class LoController extends ControllerAbstract {
 					cbLoSelect.setSelectedItem(new IdValueForComboBox((byte) source, null));
 					setSend(false);
 				}
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 

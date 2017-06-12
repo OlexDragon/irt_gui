@@ -1,19 +1,35 @@
 
 package irt.data.packet;
 
+import java.util.Optional;
+
 import irt.data.packet.interfaces.PacketWork;
 
-public class RedundancyModePacket extends PacketAbstract {
+public class RedundancyModePacket extends ConfifurationPacket {
 
 	public RedundancyModePacket(byte linkAddr, RedundancyMode redundancyMode) {
 		super(
 				linkAddr,
-				redundancyMode!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
 						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_MODE,
-						PacketImp.GROUP_ID_CONFIGURATION,
 						PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_MODE,
-						redundancyMode!=null ? redundancyMode.toBytes() : null,
-								redundancyMode!=null ? Priority.COMMAND : Priority.REQUEST);
+						redundancyMode!=null ? redundancyMode.toBytes() : null);
+	}
+
+	public RedundancyModePacket() {
+		this((byte) 0, null);
+	}
+
+	@Override
+	public Object getValue() {
+		final RedundancyMode[] values = RedundancyMode.values();
+		return Optional
+				.ofNullable(getPayloads())
+				.map(pls->pls.parallelStream())
+				.flatMap(stream->stream.findAny())
+				.map(Payload::getBuffer)
+				.map(d->d[0])
+				.filter(index->index<values.length)
+				.map(index->values[index]);
 	}
 
 	public enum RedundancyMode {

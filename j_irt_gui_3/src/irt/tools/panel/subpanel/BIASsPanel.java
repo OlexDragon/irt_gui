@@ -616,7 +616,11 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				EventQueue.invokeLater(new Runnable() {
 				    @Override
 				    public void run() {
-						JOptionPane.showMessageDialog(null, message);
+				    	try{
+				    		JOptionPane.showMessageDialog(null, message);
+				    	}catch (Exception e) {
+							logger.catching(e);
+						}
 				    }
 				});
 			}
@@ -767,7 +771,11 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 	@Override
 	public synchronized void run() {
-		adcWorkers.stream().forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.packetToSend));
+		try{
+			adcWorkers.stream().forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.packetToSend));
+		}catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	private synchronized void start() {

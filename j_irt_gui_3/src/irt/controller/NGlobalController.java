@@ -98,10 +98,14 @@ public class NGlobalController extends ControllerAbstract {
 
 		@Override
 		public void run() {
+			try{
 			Object source = valueChangeEvent.getSource();
 			if(source instanceof RegisterValue){
 				RegisterValue sv = (RegisterValue)source;
 				checkBox.setSelected((sv.getValue().getValue()&1)==1);
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 

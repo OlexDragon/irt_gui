@@ -43,7 +43,6 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 			public void ancestorMoved(AncestorEvent event) { }
 		});
 
-		logger.trace("before Platform.runLater");
 		Platform.runLater(()->{
 			try{
 
@@ -54,7 +53,6 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 			}catch (Exception e) {
 		        logger.catching(e);
 			}
-
 		});
 	}
 
@@ -65,6 +63,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 	}
 
 	public void setUnitAddress(byte unitAddress) {
+		logger.entry(unitAddress);
 		Platform.runLater(()->root.setUnitAddress(unitAddress));
 	}
 

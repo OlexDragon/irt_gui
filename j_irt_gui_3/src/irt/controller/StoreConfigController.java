@@ -77,11 +77,15 @@ public class StoreConfigController extends ControllerAbstract {
 
 	@Override
 	public void run() {
+		try{
 		if(JOptionPane.showConfirmDialog( owner, "Do you want to store the configuration?", "Store Config", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION){
 			setSend(true);
 			super.run();
 		}else
 			clear();
+		}catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 }

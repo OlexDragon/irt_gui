@@ -81,6 +81,7 @@ public abstract class ControllerAbstract implements Runnable{
 	@Override
 	public void run() {
 		logger.entry(run, packetListener);
+		try{
 
 		if(packetWork!=null){
 
@@ -109,6 +110,9 @@ public abstract class ControllerAbstract implements Runnable{
 			if(packetListener!=null)
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 			clear();
+		}
+		}catch (Exception e) {
+			logger.catching(e);
 		}
 	}
 
@@ -161,8 +165,12 @@ public abstract class ControllerAbstract implements Runnable{
 			
 			@Override
 			public void run() {
+				try{
 				synchronized (controller) {
 					controller.notify();
+				}
+				}catch (Exception e) {
+					logger.catching(e);
 				}
 			}
 		}).start();
@@ -220,7 +228,6 @@ public abstract class ControllerAbstract implements Runnable{
 
 	@Override
 	protected void finalize() throws Throwable {
-//		System.out.println("+++++++++++++++++++++++++++++++ - finalize - "+getClass().getSimpleName()+" - ++++++++++++++++++++++++++++++++++++++");
 		super.finalize();
 	}
 

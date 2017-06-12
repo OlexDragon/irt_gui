@@ -97,11 +97,15 @@ public class SwitchControllerRegister extends ControllerAbstract {
 
 		@Override
 		public void run() {
+			try{
 			int id = valueChangeEvent.getID();
 			if(id==getPacketWork().getPacketThread().getPacket().getHeader().getPacketId()){
 
 				RegisterValue crv = (RegisterValue)valueChangeEvent.getSource();
 				checkBox.setSelected((crv.getValue().getValue()&1)==1);
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 

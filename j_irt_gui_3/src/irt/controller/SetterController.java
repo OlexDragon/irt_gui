@@ -60,7 +60,11 @@ public class SetterController extends ControllerAbstract {
 
 		@Override
 		public void run() {
-			toDo.doIt(valueChangeEvent);
+			try{
+				toDo.doIt(valueChangeEvent);
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
 
 	}

@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.DumpControllers;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
@@ -22,8 +23,10 @@ import irt.data.packet.AlarmDescriptionPacket;
 import irt.data.packet.AlarmStatusPacket;
 import irt.data.packet.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.AlarmsIDsPacket;
+import irt.data.packet.AlarmsSummaryPacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
@@ -56,7 +59,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 	private final AlarmsIDsPacket packetToSend;
-//	private final AlarmsSummaryPacket packetSummary;
+	private final AlarmsSummaryPacket packetSummary;
 
 	private byte unitAddress = CONVERTER;
 												public byte getUnitAddress() {
@@ -65,6 +68,8 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 												public void setUnitAddress(byte unitAddress) {
 													this.unitAddress = unitAddress;
+													packetSummary.setAddr(unitAddress);
+													packetToSend.setAddr(unitAddress);
 												}
 
 	@FXML private GridPane 	gridPane;
@@ -72,7 +77,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	public AlarmPanelFx() {
 
 		packetToSend = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketWork();
-//		packetSummary = (AlarmsSummaryPacket) Packets.ALARMS_SUMMARY_STATUS.getPacketWork();
+		packetSummary = (AlarmsSummaryPacket) Packets.ALARMS_SUMMARY_STATUS.getPacketWork();//This packet is for DumpController
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("GridPanel.fxml"));
         fxmlLoader.setRoot(this);
@@ -90,7 +95,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		gridPane.getStyleClass().add("alarms");
 
 //		if(scheduledFuture==null || scheduledFuture.isCancelled())
-		scheduledFuture = service.scheduleAtFixedRate(this, 0, 1, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 2, 1, TimeUnit.SECONDS);
 	}
 
     @FXML
@@ -102,24 +107,30 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
     	}
     }
 
-	private short[] availableAlarms;
+ 	private short[] availableAlarms;
+	private long index ;
+	private boolean statusChamge;
+	private Object summaryAlarm;
 	private boolean run;
 
 	@Override
 	public void run() {
 
 		try{
-//			GuiControllerAbstract.getComPortThreadQueue().add(packetSummary);
+
+			GuiControllerAbstract.getComPortThreadQueue().add(packetSummary);// used by DumpController.onPacketReceived
 
 			if(availableAlarms==null || availableAlarms.length==0){
 				logger.trace(packetToSend);
-				packetToSend.setAddr(unitAddress);
 				GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
 				return;
 			}
 
-			if(!run)
+			if(!(run || statusChamge) && --index>0)
 				return;
+
+			index = DumpControllers.DUMP_TIME;
+			statusChamge = false;
 
 			IntStream
 			.range(0, availableAlarms.length)
@@ -149,20 +160,20 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	@Override
 	public void onPacketRecived(final Packet packet) {
 
+		final Optional<PacketHeader> alarmGroupId = filterByAddressAndGroup(packet);
 
-		final Optional<PacketHeader> sameGroupId = filterByAddressAndGroup(packet);
-
-		if(!sameGroupId.isPresent())
+		if(!alarmGroupId.isPresent())
 			return;
 
-		
-		final Optional<PacketHeader> hasResponse = sameGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+		// has response
+		final Optional<PacketHeader> hasResponse = alarmGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
 
 		if(!hasResponse.isPresent()){
 			logger.warn("Unit is not connected {}", packet);
 			return;
 		}
 
+		//no error
 		final Optional<PacketHeader> noError = hasResponse
 												.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
 
@@ -171,17 +182,19 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			return;
 		}
 
-//		//Summary alarm
-//		final Optional<Integer> summaryStatus = noError.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY)
-//											.map(h->packet.getPayloads())
-//											.filter(pls->!pls.isEmpty())
-//											.map(pls->pls.get(0).getInt(0));
-//
-//		//Summary alarm
-//		if(summaryStatus.isPresent()){
-//			dumpSummaryStatus(summaryStatus);
-//			return;
-//		}
+		//Summary alarm
+		noError
+		.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY)
+		.ifPresent(h->{
+			final Optional<? extends PacketAbstract> p = Packets.cast(packet);
+			p.ifPresent(pa->{
+				Object sa = pa.getValue();
+				if(!sa.equals(summaryAlarm)){
+					statusChamge = true;
+					summaryAlarm = sa;
+				};
+			});
+		});
 
 		//Available alarms
 		final Optional<short[]> alarms = noError.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_IDs)
@@ -220,22 +233,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 								.forEach(bs->setAlarmDescription(bs));
 		});
 	}
-
-//	private AlarmSeverities alarmSeverity;
-
-//	private void dumpSummaryStatus(final Optional<Integer> summaryStatus) {
-//
-//		int summary = summaryStatus.get()&0x07;
-//		AlarmSeverities as = AlarmStatusPacket.AlarmSeverities.values()[summary];
-//
-//		if(alarmSeverity==null || alarmSeverity!=as){
-//			alarmSeverity = as;
-//
-//			synchronized (dumper) {
-//				dumper.warn("\n\t{}\n\tUptime Counter = {}\n\tCommunication Lost", as);
-//			}
-//		}
-//	}
 
 	private Optional<PacketHeader> filterByAddressAndGroup(final Packet packet) {
 		final Optional<Packet> o = Optional.ofNullable(packet);
@@ -385,21 +382,55 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 	}
 
-	public class AlarmStatus {
+	public static class AlarmStatus {
 
 		private final short alarmCode;
 		private final AlarmSeverities alarmSeverities;
 
 		public AlarmStatus(byte[] bytes) {
+			logger.trace("{}", bytes);
 
 			final ByteBuffer buffer = ByteBuffer.wrap(bytes);
 			alarmCode =buffer.getShort();
-			final int status = buffer.getInt(2)&7;
-			logger.trace("\n{}\n{}\n{}", alarmCode, status, bytes);
-			alarmSeverities = AlarmStatusPacket.AlarmSeverities.values()[status];
 
-			logger.trace("\nbytes={}\nalarmCode={}\nalarmSeverities={}", bytes, alarmCode, alarmSeverities);
+			if(bytes.length<6){
+				alarmSeverities = null;
+				return;
+			}
+
+			final int status = buffer.getInt(2)&7;
+			alarmSeverities = AlarmStatusPacket.AlarmSeverities.values()[status];
 		}
 
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result  = prime + alarmCode;
+			return prime * result + ((alarmSeverities == null) ? 0 : alarmSeverities.hashCode());
+		}
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AlarmStatus other = (AlarmStatus) obj;
+			if (alarmCode != other.alarmCode)
+				return false;
+			if (alarmSeverities != other.alarmSeverities)
+				return false;
+			return true;
+		}
+
+
+		@Override
+		public String toString() {
+			return "AlarmStatus [alarmCode=" + alarmCode + ", alarmSeverities=" + alarmSeverities + "]";
+		}
 	}
 }

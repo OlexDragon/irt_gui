@@ -182,6 +182,7 @@ public class TextSliderController extends ControllerAbstract {
 
 		@Override
 		public void run() {
+			try{
 			ConfigurationSetter cs = (ConfigurationSetter)getPacketWork();
 			short packetId = cs.getPacketId();
 			if( valueChangeEvent.getID()==packetId){
@@ -210,6 +211,9 @@ public class TextSliderController extends ControllerAbstract {
 					else
 						((ConfigurationSetter)getPacketWork()).preparePacketToSend(new IdValue(packetId, null));
 				}
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 

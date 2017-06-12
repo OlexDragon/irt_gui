@@ -61,6 +61,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 
 		@Override
 		public void run() {
+			try{
 			Object source = valueChangeEvent.getSource();
 			if(source instanceof Range){
 				txtField.setToolTipText("");
@@ -74,6 +75,9 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 
 			}else if(source instanceof Byte)
 				txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
 
 	}

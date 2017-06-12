@@ -2,8 +2,15 @@
 package irt.data.packet;
 
 import java.awt.Color;
+import java.util.Optional;
+
+import irt.tools.fx.AlarmPanelFx.AlarmStatus;
 
 public class AlarmStatusPacket extends PacketAbstract{
+
+	public AlarmStatusPacket() {
+		this((byte)0, (short) 0);
+	}
 
 	public AlarmStatusPacket(byte linkAddr, short alarmId) {
 		this(linkAddr, PacketImp.ALARM_STATUS, alarmId);
@@ -12,15 +19,32 @@ public class AlarmStatusPacket extends PacketAbstract{
 	protected AlarmStatusPacket(byte linkAddr, byte alarmCommand, short alarmId){
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				(short) (linkAddr + alarmCommand + alarmId),
+				AlarmsPacketIds.valueOf(alarmId).orElse(AlarmsPacketIds.INDEFINED).getPacketId(),
 				PacketImp.GROUP_ID_ALARM,
 				alarmCommand,
 				PacketImp.toBytes(alarmId),
 				Priority.ALARM);
 	}
 
+	@Override
+	public Object getValue() {
+		return Optional
+				.ofNullable(getPayloads())
+				.filter(pls->!pls.isEmpty())
+				.map(pls->pls.parallelStream())
+				.flatMap(stream->{
+					return stream
+							.map(pl->pl.getBuffer())
+							.filter(b->b!=null)
+							.map(AlarmStatus::new)
+							.findAny();
+				})
+				.map(Object.class::cast)
+				.orElse(null);
+	}
+
 	public enum AlarmSeverities{
-		NO_ALARM("No Aalarm", Color.YELLOW, new Color(46, 139, 87)),
+		NO_ALARM("No Alarm", Color.YELLOW, new Color(46, 139, 87)),
 		INFO	("No Alarm", Color.YELLOW, new Color(46, 139, 87)),
 
 		WARNING	("Warning", Color.BLACK, new Color(255, 204, 102)),

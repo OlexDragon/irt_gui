@@ -14,7 +14,6 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.prefs.Preferences;
 
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -48,10 +47,9 @@ import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.value.Value;
-import irt.irt_gui.IrtGui;
 import irt.tools.ALCComboBox;
 import irt.tools.IrtComboBox;
-import irt.tools.MuteButton;
+import irt.tools.button.MuteButton;
 
 public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Observer{
 	private static final String ACTION = "Action";
@@ -102,18 +100,19 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		setLayout(null);
 		setSize(new Dimension(214, 180));
 
-		btnMute = new MuteButton(linkAddr, new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
+		btnMute = new MuteButton();
+		btnMute.setLinkAddr(linkAddr);
 		btnMute.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnMute.setBounds(16, 99, 35, 35);
 		add(btnMute);
 		
 		lblMute = new JLabel("Mute");
+		btnMute.setMuteLabel(lblMute);
 		lblMute.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
 		lblMute.setBounds(53, 99, 127, 35);
 		add(lblMute);
-		btnMute.addLabel(lblMute);
 
 		valueTextField = new JTextField();
 		valueTextField.setName("Text Gain");

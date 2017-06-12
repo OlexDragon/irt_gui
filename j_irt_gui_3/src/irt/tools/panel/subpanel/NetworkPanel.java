@@ -149,8 +149,16 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	public NetworkPanel(final int deviceType, final LinkHeader linkHeader) {
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
-					service.shutdownNow();
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null){
+
+					cptq.removePacketListener(NetworkPanel.this);
+
+					if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
+						scheduleAtFixedRate.cancel(true);
+
+					if(!service.isShutdown())
+						service.shutdownNow();
+				}
 			}
 		});
 
@@ -384,6 +392,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		panel_1.add(btnCansel);
 		setLayout(groupLayout);
 
+		cptq.addPacketListener(this);
+		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5, TimeUnit.SECONDS);
 	}
 
 	private DefaultComboBoxModel<AddressType> getComboboxModel() {
@@ -425,8 +436,12 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 //		logger.debug("comboBoxAddressType.getSelectedItem()={}", comboBoxAddressType.getSelectedItem());
 	}
 
+	private boolean run;
+	private int count;
+
 	@Override
 	public void run() {
+		if(run || --count<0)
 		try{
 			cptq.add(packet);
 
@@ -457,7 +472,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 				comboBoxAddressType.setSelectedItem(type);
 
 				synchronized (DumpControllers.dumper) {
-					DumpControllers.dumper.info(DumpControllers.marker, "network Address: {}", networkAddress);
+					DumpControllers.dumper.info(DumpControllers.marker, "{}", networkAddress);
 				}
 
 				ipAddressTextField.setText(networkAddress.getAddressAsString());
@@ -512,14 +527,10 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	}
 
 	private void start() {
-		cptq.addPacketListener(this);
-		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+		run = true;
 	}
 
 	private void stop() {
-		cptq.removePacketListener(this);
-		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate.cancel(true);
+		run = false;
 	}
 }

@@ -75,7 +75,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.120";
+	public static final String VERTION = "- 3.122";
 	private boolean connected;
 
 	protected HeadPanel headPanel;
@@ -247,7 +247,7 @@ public class IrtGui extends IrtMainFrame {
 			}
 		});
 
-		JMenuItem mntmAlarms = new JMenuItem(Translation.getValue(String.class, "alarms", "Alarms"));
+		JMenuItem mntmAlarms = new JMenuItem(Translation.getValue(String.class, "alarms", "AlarmsPacketIds"));
 		mntmAlarms.addActionListener(new ActionListener() {
 
 			private JavaFxFrame alarmsFrame;

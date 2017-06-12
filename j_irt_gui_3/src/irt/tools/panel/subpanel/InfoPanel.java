@@ -7,13 +7,22 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -21,10 +30,12 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.DumpControllers;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
+import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
@@ -97,7 +108,7 @@ public class InfoPanel extends JPanel implements Refresh {
 			public void ancestorRemoved(AncestorEvent arg0) {
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
 				if(secondsCount!=null)
-					secondsCount.setRunning(false);
+					secondsCount.stop();
 				packetListener = null;
 			}
 			public void ancestorMoved(AncestorEvent arg0) {	}
@@ -192,6 +203,39 @@ public class InfoPanel extends JPanel implements Refresh {
 		lblVersion.setBounds(84, 99, 198, 14);
 		lblVersion.setForeground(Color.WHITE);
 		lblVersion.setFont(new Font("Tahoma", Font.PLAIN, 14));
+		DumpControllers.addActionWhenDump(new BooleanSupplier() {
+
+			private final Timer timer = new Timer(true);
+
+			@Override
+			public boolean getAsBoolean() {
+
+				if(secondsCount==null)
+					return false;
+
+				final Border border = lblVersion.getBorder();
+
+				if(border!=null)
+					return secondsCount.isRun();
+
+				timer.schedule(new TimerTask() {
+					
+					@Override
+					public void run() {
+						new SwingWorker<Void, Void>(){
+
+							@Override
+							protected Void doInBackground() throws Exception {
+								lblVersion.setBorder(null);
+								return null;
+							}
+							
+						}.execute();
+					}
+				}, 1);
+				return secondsCount.isRun();
+			}
+		});
 
 		lblDeviceTxt = new JLabel(Translation.getValue(String.class, "device", "Device")+":");
 		lblDeviceTxt.setBounds(4, 116, 76, 14);
@@ -303,38 +347,27 @@ public class InfoPanel extends JPanel implements Refresh {
 	private class SecondsCount implements Runnable{
 
 		private volatile int firmwareBuildCounter;
-		private boolean running;
+
+		private ScheduledFuture<?> scheduledFuture;
+		private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 		public SecondsCount(int firmwareBuildCounter){
-			this.firmwareBuildCounter = firmwareBuildCounter;
-			Thread t = new Thread(this, "InfoPanel.SecondsCount-"+new RundomNumber());
-			int priority = t.getPriority();
-			if(priority>Thread.MIN_PRIORITY)
-				t.setPriority(priority-1);
-			t.setDaemon(true);
-			t.start();
+			scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
+		}
+
+		public boolean isRun() {
+			return scheduledFuture!=null && !scheduledFuture.isCancelled();
+		}
+
+		public void stop() {
+			Optional.ofNullable(scheduledFuture).filter(sf->!sf.isCancelled()).ifPresent(sf->sf.cancel(true));
+			if(!service.isShutdown())
+				service.shutdownNow();
 		}
 
 		@Override
 		public void run() {
-			running = true;
-			while(running){
-				try {
-					synchronized (this) {
-						wait(1000);
-					}
-					
-				} catch (InterruptedException e) {
-					logger.catching(e);
-				}
-
-				lblCount.setText(calculateTime(firmwareBuildCounter++));
-			}
-			lblCount = null;
-		}
-
-		public void setRunning(boolean running) {
-			this.running = running;
+			lblCount.setText(calculateTime(++firmwareBuildCounter));
 		}
 
 		public void setFirmwareBuildCounter(int firmwareBuildCounter) {

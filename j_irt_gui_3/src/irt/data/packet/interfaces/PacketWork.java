@@ -1,5 +1,8 @@
 package irt.data.packet.interfaces;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketAbstract.Priority;
@@ -131,8 +134,36 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_ALARMS_HARDWARE_FAULT		= 146,
 								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 147,
 								PACKET_ID_ALARMS_test				= 148,
-								PACKET_ID_NO_INPUT_SIGNAL 			= 149;
-								
+								PACKET_ID_NO_INPUT_SIGNAL 			= 149,
+								PACKET_ID_RF_OVERDRIVEL 			= 160;
+
+	public enum AlarmsPacketIds{
+
+		INDEFINED				((byte) 0, PACKET_UNNECESSARY),
+		PLL_OUT_OF_LOCK			((byte) 1, PACKET_ID_ALARMS_PLL_OUT_OF_LOCK),
+		OVER_CURRENT_ALARM		((byte) 4, PACKET_ID_ALARMS_OWER_CURRENT),
+		UNDER_CURRENT_ALARM		((byte) 5, PACKET_ID_ALARMS_UNDER_CURRENT),
+		OVER_TEMPERATURE_ALARM	((byte) 7, PACKET_ID_ALARMS_OWER_TEMPERATURE),
+		HW_FAULT				((byte)10, PACKET_ID_ALARMS_HARDWARE_FAULT),
+		REDUNDANCY_FAULT		((byte)11, PACKET_ID_ALARMS_REDUNDANT_FAULT),
+		RF_OVERDRIVE			((byte)12, PACKET_ID_RF_OVERDRIVEL);
+
+		private short alarmId;
+		private short packetId;
+
+		public short getPacketId() {
+			return packetId;
+		}
+
+		private AlarmsPacketIds(short alarmId, short packetId){
+			this.alarmId = alarmId;
+			this.packetId = packetId;
+		}
+
+		public static Optional<AlarmsPacketIds> valueOf(short alarmId){
+			return Arrays.stream(values()).parallel().filter(a->a.alarmId==alarmId).findAny();
+		}
+	}
 
 	public static final short	PACKET_ID_PROTOCOL_ADDRESS	= 150;
 
