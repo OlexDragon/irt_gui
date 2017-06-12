@@ -116,6 +116,7 @@ public class AlarmField extends JPanel {
 
 		@Override
 		public void run() {
+			try{
 			if(packet!=null)
 				if(packet.getHeader().getGroupId()==PacketImp.GROUP_ID_ALARM){
 					final PacketHeader header = packet.getHeader();
@@ -137,13 +138,20 @@ public class AlarmField extends JPanel {
 									
 									@Override
 									public void run() {
+										try{
 										final String text = payload.getStringData().toString();
 										lblTitle.setText(Translation.getValue(String.class, text, text));
+										}catch (Exception e) {
+											logger.catching(e);
+										}
 									}
 								});
 							}
 					}else
 						logger.warn("Not possible to get answer: {}", packet);
+				}
+				}catch (Exception e) {
+					logger.catching(e);
 				}
 		}
 
@@ -157,6 +165,7 @@ public class AlarmField extends JPanel {
 					
 					@Override
 					public void run() {
+						try{
 						final String text = alarmSeverities.toString();
 						logger.trace("\n\t{}", text);
 
@@ -168,6 +177,9 @@ public class AlarmField extends JPanel {
 						if(lblTitle.getName()==null){
 							final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
 							comPortThreadQueue.add(new AlarmDescriptionPacket(linkAddr, alarmId));
+						}
+						}catch (Exception e) {
+							logger.catching(e);
 						}
 					}
 				});

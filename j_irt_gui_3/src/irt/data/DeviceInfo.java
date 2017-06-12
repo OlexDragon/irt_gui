@@ -196,6 +196,10 @@ public class DeviceInfo {
 		return uptimeCounter;
 	}
 
+	public void setUptimeCounter(int uptimeCounter) {
+		this.uptimeCounter = uptimeCounter;
+	}
+
 	public StringData getUnitName() {
 		return unitName;
 	}

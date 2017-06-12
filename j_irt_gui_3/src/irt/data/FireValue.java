@@ -24,6 +24,7 @@ import irt.data.listener.ValueChangeListener;
 		@Override
 		public void run() {
 
+			try{
 			Object[] listeners = valueChangeListeners.getListenerList();
 			for (int i = 0; i < listeners.length; i++) {
 				Object l = listeners[i];
@@ -33,6 +34,9 @@ import irt.data.listener.ValueChangeListener;
 					}catch (Exception e) {
 						logger.catching(e);
 					}
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 	}

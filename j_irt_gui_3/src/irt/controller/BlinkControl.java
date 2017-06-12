@@ -73,6 +73,7 @@ public class BlinkControl implements Runnable {
 
 	@Override
 	public void run() {
+		try{
 		isRunning = true;
 
 		do {
@@ -92,5 +93,8 @@ public class BlinkControl implements Runnable {
 		led.setOn(false);
 
 		isRunning = false;
+		}catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 }

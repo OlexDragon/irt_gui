@@ -125,6 +125,7 @@ public class SwitchController extends ControllerAbstract {
 
 		@Override
 		public void run() {
+			try{
 			Object source = valueChangeEvent.getSource();
 			int id = valueChangeEvent.getID();
 
@@ -142,6 +143,9 @@ public class SwitchController extends ControllerAbstract {
 					checkBox.addActionListener(actionListener);
 					checkBox.setEnabled(true);
 				}
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 

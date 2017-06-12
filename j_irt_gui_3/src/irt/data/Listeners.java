@@ -7,7 +7,11 @@ import javax.swing.JComponent;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Listeners {
+	private static final Logger logger = LogManager.getLogger();
 
 	public static final PopupMenuListener popupMenuListener = new PopupMenuListener() {
 
@@ -22,11 +26,15 @@ public class Listeners {
 
 				@Override 
 	            public void run() {
+					try{
 					JComboBox<String> c = comboBox;
 	            	Object o = c.getAccessibleContext().getAccessibleChild(0);
 	            	if(o instanceof JComponent) { //BasicComboPopup
 	            		((JComponent)o).repaint();
 	            	}
+					}catch (Exception e) {
+						logger.catching(e);
+					}
 	            }
 	        });
 		}

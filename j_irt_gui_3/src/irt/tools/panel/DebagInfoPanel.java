@@ -4,13 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.prefs.Preferences;
 
 import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -18,8 +13,6 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import irt.controller.DeviceDebugController;
-import irt.controller.DumpControllers;
-import irt.controller.GuiController;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
@@ -34,39 +27,17 @@ public class DebagInfoPanel extends JPanel {
 	private JTextArea textArea;
 	private JComboBox<String> cbCommand;
 	private JComboBox<Integer> cbParameter;
-	private JPanel owner;
+//	private JPanel owner;
 
 	public DebagInfoPanel(final int deviceType, LinkHeader linkHeader, JPanel panel) {
 		this.linkHeader = linkHeader;
 
-		if(panel!=null)
-			owner = panel;
+//		if(panel!=null)
+//			owner = panel;
 
 			setLayout(new BorderLayout(0, 0));
 
 		textArea = new JTextArea();
-		textArea.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent mouseEvent) {
-				int modifiers = mouseEvent.getModifiers();
-				int mask = KeyEvent.VK_CONTROL|KeyEvent.VK_SHIFT;
-				if((modifiers&mask)==mask){
-					Preferences prefs = GuiController.getPrefs();
-					int prefsValue = prefs.getInt(DumpControllers.DUMP_WAIT,10);
-					String output = JOptionPane.showInputDialog(owner, "Put The Time in minutes ("+prefsValue+" min)");
-					if(output!=null){
-						output = output.replaceAll("\\D", "");
-						if(!output.isEmpty() && output.length()<10){
-							int waitTime = Integer.parseInt(output);
-							if(prefsValue!=waitTime)
-								prefs.putInt(DumpControllers.DUMP_WAIT, waitTime);
-						}else{
-							JOptionPane.showMessageDialog(owner, "Wrong input.");
-						}
-					}
-				}
-			}
-		});
 		JScrollPane scrollPane = new JScrollPane(textArea);
 		add(scrollPane, BorderLayout.CENTER);
 

@@ -109,7 +109,11 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 
 		@Override
 		public void run() {
-			update(packet);
+			try{
+				update(packet);
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
 	}
 }

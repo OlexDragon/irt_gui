@@ -147,9 +147,13 @@ public class DacController extends ControllerAbstract {
 
 		@Override
 		public void run() {
+			try{
 			DacValue dv = (DacValue)valueChangeEvent.getSource();
 			if(dv.getDacNumber()==dacNumber)
 				setAllValues(dv.getDacValue());
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
 
 	}

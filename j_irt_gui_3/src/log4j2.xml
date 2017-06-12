@@ -6,10 +6,10 @@
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
     </Console>
 
-    <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.log"
+    <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.3.122.log"
     						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{yyyy-MM-dd}-%i.log.gz"
     						  bufferedIO="false">
-		<PatternLayout pattern="%n%-5p %d%n %M (%F:%L)%n%m%n" />
+		<PatternLayout pattern="%d %n%m%n%n" />
 		<Policies>
 			<SizeBasedTriggeringPolicy size="20 MB" />
 		</Policies>
@@ -53,6 +53,8 @@
 <!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.MonitorPanelSwingWithFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.RegisterTextField" level="all"/> -->
+<!--  	<Logger name="irt.controller.DumpControllers" level="warn"/> -->
+<!--  	<Logger name="irt.tools.button.MuteButton" level="all"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

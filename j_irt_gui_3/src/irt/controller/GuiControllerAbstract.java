@@ -43,11 +43,11 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketAbstract.Priority;
-import irt.data.packet.interfaces.LinkedPacket;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketWork;
 import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.panel.DevicePanel;
@@ -130,6 +130,7 @@ public abstract class GuiControllerAbstract extends Thread {
 					case PacketImp.GROUP_ID_DEVICE_INFO:
 						deviceInfo = new DeviceInfo(packet);
 						logger.debug("{}\n", deviceInfo);
+						remover.updateDeviceInfo(deviceInfo);
 
 						int type = deviceInfo.getType();
 						switch (type) {
@@ -500,6 +501,10 @@ public abstract class GuiControllerAbstract extends Thread {
 			this.waitTime = timeUnit.toMillis(duration);
 		}
 
+		public void updateDeviceInfo(final DeviceInfo deviceInfo) {
+			controllers.parallelStream().forEach(c->c.updateDeviceInfo(deviceInfo));
+		}
+
 		public void doDump(LinkHeader linkHeader) {
 			LinkHeaderTread controller = getController(linkHeader);
 			if(controller!=null)
@@ -633,10 +638,9 @@ public abstract class GuiControllerAbstract extends Thread {
 			}
 		}
 
-		public void setLinkHeader(LinkHeader linkHeader, DeviceInfo deviceInfo) {
-			logger.entry(linkHeader);
+		public void setLinkHeader(DeviceInfo deviceInfo) {
 
-			LinkHeaderTread controller = new LinkHeaderTread(linkHeader, deviceInfo);
+			LinkHeaderTread controller = new LinkHeaderTread(deviceInfo);
 			if(controllers.add(controller)){
 				new MyThreadFactory().newThread(controller).start();
 				gui.setConnected(true);
@@ -686,7 +690,6 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		// ******************************* class LinkHeaderTread *************************************
 		private class LinkHeaderTread extends Thread {
-			private LinkHeader linkHeader;
 			private volatile boolean reset;
 			protected DumpControllers dumpControllers;
 			private int alarm;
@@ -694,14 +697,18 @@ public abstract class GuiControllerAbstract extends Thread {
 			private DeviceInfo deviceInfo;
 
 			// LinkHeaderTread start in class Remover setLinkHeader(LinkHeader linkHeader);
-			public LinkHeaderTread(LinkHeader linkHeader, DeviceInfo deviceInfo){
+			public LinkHeaderTread(DeviceInfo deviceInfo){
 				super(GuiControllerAbstract.class.getSimpleName()+".LinkHeaderController-"+new RundomNumber());
-				this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
 				this.deviceInfo = deviceInfo;
 			}
 
+			public void updateDeviceInfo(DeviceInfo deviceInfo) {
+				if(deviceInfo.getSerialNumber().equals(this.deviceInfo.getSerialNumber()))
+					this.deviceInfo.setUptimeCounter(deviceInfo.getUptimeCounter());
+			}
+
 			public void doDump(String text) {
-				dumpControllers.doDump(text);
+				dumpControllers.doDump(Optional.ofNullable(text));
 			}
 
 			public void doDump() {
@@ -710,11 +717,24 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			@Override
 			public void run() {
-				logger.entry(linkHeader);
-				dumpControllers = new DumpControllers(linkHeader, deviceInfo);
+				try{
+				logger.entry(deviceInfo);
+				dumpControllers = new DumpControllers(deviceInfo);
+
+				Optional.ofNullable(unitsPanel).ifPresent(up->up.addMouseListener(new MouseListener() {
+					
+					@Override public void mouseReleased	(MouseEvent e) { }
+					@Override public void mousePressed	(MouseEvent e) { }
+					@Override public void mouseExited	(MouseEvent e) { }
+					@Override public void mouseEntered	(MouseEvent e) { }
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						if(e.getClickCount()>3)
+							dumpControllers.doDump();
+					}
+				}));
 
 				do{
-					logger.trace("while loop");
 					reset = false;
 					synchronized (this) {
 						try {
@@ -723,12 +743,14 @@ public abstract class GuiControllerAbstract extends Thread {
 							logger.catching(e);
 						}
 					}
-					logger.trace("reset = {}", reset);
 
 				}while(reset);
 
 				dumpControllers.stop();
 				update(this);
+				}catch (Throwable e) {
+					logger.catching(e);
+				}
 			}
 
 			public synchronized void reset(){
@@ -739,7 +761,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			@Override
 			public int hashCode() {
-				return linkHeader!=null ? linkHeader.getIntAddr() : -1;
+				return deviceInfo.getSerialNumber().hashCode();
 			}
 
 			@Override
@@ -749,11 +771,11 @@ public abstract class GuiControllerAbstract extends Thread {
 
 			@Override
 			public String toString() {
-				return "LinkHeaderTread [linkHeader=" + linkHeader + "]";
+				return "LinkHeaderTread [deviceInfo=" + deviceInfo + "]";
 			}
 
 			public LinkHeader getLinkHeader() {
-				return linkHeader;
+				return deviceInfo.getLinkHeader();
 			}
 
 			public int getAlarm() {
@@ -790,6 +812,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		@Override
 		public void run() {
+			try{
 			remover.setAlarm(packet);
 			int alarm = remover.getAlarm();
 			LinkHeader linkHeader = getLinkHeader(packet);
@@ -809,8 +832,10 @@ public abstract class GuiControllerAbstract extends Thread {
 					alarms.put(linkHeader, alarm);
 				}
 //TODO			}
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
-
 	}
 
 	//************************************ class MeasurementWorker **********************************************
@@ -826,6 +851,7 @@ public abstract class GuiControllerAbstract extends Thread {
 
 		@Override
 		public void run() {
+			try{
 			logger.entry(packet);
 			remover.setMute(packet);
 			boolean isMute = remover.isMute();
@@ -839,6 +865,9 @@ public abstract class GuiControllerAbstract extends Thread {
 			DevicePanel unitPanel = unitsPanel.getDevicePanel(linkHeader);
 			if(unitPanel!=null)
 				unitPanel.setMute(remover.isMute(packet));
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
 	}
 
@@ -858,10 +887,11 @@ public abstract class GuiControllerAbstract extends Thread {
 		@Override
 		public void run() {
 
+			try{
 			LinkHeader linkHeader = packet instanceof LinkedPacket ? ((LinkedPacket) packet).getLinkHeader() : new LinkHeader((byte)0, (byte)0, (short) 0);
 			deviceInfos.put(linkHeader, deviceInfo);
 
-			remover.setLinkHeader(linkHeader, deviceInfo);
+			remover.setLinkHeader(deviceInfo);
 
 			unitsPanel.remove("DemoPanel");
 
@@ -897,6 +927,9 @@ public abstract class GuiControllerAbstract extends Thread {
 					ProgressBar.setMinMaxValue("-80", "120");
 				}
 			}
+		}catch (Exception e) {
+			logger.catching(e);
+		}
 		}
 	}
 }

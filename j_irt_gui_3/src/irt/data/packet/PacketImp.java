@@ -130,7 +130,7 @@ public class PacketImp implements Packet{
 	PARAMETER_DEVICE_DEBUG_READ_WRITE 	= 3,		/* registers read/write operations */
 	PARAMETER_DEVICE_DEBAG_INDEX 		= 4,		/* device index information print */
 	PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE = 5,	/* calibration mode */
-	PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10;	/* operations with environment variables */
+	PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10;		/* operations with environment variables */
 
 	/* Configuration codes. */
 	public static final byte
@@ -217,7 +217,7 @@ public class PacketImp implements Packet{
 
 	public static final byte IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS	= 3;
 
-	//Alarms
+	//AlarmsPacketIds
 	public static final byte NUMBER_OF_ALARMS 		= 1,
 							ALARMS_IDs				= 2,
 							ALARM_SUMMARY_STATUS	= 3,

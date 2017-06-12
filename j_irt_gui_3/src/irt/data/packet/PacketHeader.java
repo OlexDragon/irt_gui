@@ -57,195 +57,195 @@ public class PacketHeader{
 			short packetId = getPacketId();
 			switch (packetId) {
 			case PacketWork.PACKET_ID_CONFIGURATION_MUTE:
-				packetIdStr = "Mute("+packetId+")";
+				packetIdStr = "Mute ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N1:
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTRNTIOMETER_N1_SET:
-				packetIdStr = "Potentiometer_N1("+packetId+")";
+				packetIdStr = "Potentiometer_N1 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N2:
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTRNTIOMETER_N2_SET:
-				packetIdStr = "Potentiometer_N2("+packetId+")";
+				packetIdStr = "Potentiometer_N2 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N3:
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTRNTIOMETER_N3_SET:
-				packetIdStr = "Potentiometer_ N3("+packetId+")";
+				packetIdStr = "Potentiometer_ N3 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N4:
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTRNTIOMETER_N4_SET:
-				packetIdStr = "Potentiometer_N4("+packetId+")";
+				packetIdStr = "Potentiometer_N4 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N5:
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTRNTIOMETER_N5_SET:
-				packetIdStr = "Potentiometer_N5("+packetId+")";
+				packetIdStr = "Potentiometer_N5 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N6:
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_POTRNTIOMETER_N6_SET:
-				packetIdStr = "Potentiometer_N6("+packetId+")";
+				packetIdStr = "Potentiometer_N6 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_SWITCH_N1:
-				packetIdStr = "Switch_N1("+packetId+")";
+				packetIdStr = "Switch_N1 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_SWITCH_N2:
-				packetIdStr = "Switch_N2("+packetId+")";
+				packetIdStr = "Switch_N2 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_HS1_CURRENT:
-				packetIdStr = "HS1_Current("+packetId+")";
+				packetIdStr = "HS1_Current ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_HS2_CURRENT:
-				packetIdStr = "HS2_Current("+packetId+")";
+				packetIdStr = "HS2_Current ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_OUTPUT_POWER:
 			case PacketWork.PACKET_ID_MEASUREMENT_BAIAS_25W_OUTPUT_POWER:
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_OUTPUT_POWER:
-				packetIdStr = "OutputPower("+packetId+")";
+				packetIdStr = "OutputPower ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_TEMPERATURE:
-				packetIdStr = "Temperature("+packetId+")";
+				packetIdStr = "Temperature ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_NGLOBAL:
-				packetIdStr = "nGlobal("+packetId+")";
+				packetIdStr = "nGlobal ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_INPUT_POWER:
-				packetIdStr = "InputPower("+packetId+")";
+				packetIdStr = "InputPower ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_STATUS:
-				packetIdStr = "Status("+packetId+")";
+				packetIdStr = "Status ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_CPU_TEMPERATURE:
-				packetIdStr = "CPU Temperature("+packetId+")";
+				packetIdStr = "CPU Temperature ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE:
-				packetIdStr = "Unit Temperature("+packetId+")";
+				packetIdStr = "Unit Temperature ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_IDs:
-				packetIdStr = "Alarms("+packetId+")";
+				packetIdStr = "AlarmsPacketIds ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
-				packetIdStr = "Alarm - Over Current("+packetId+")";
+				packetIdStr = "Alarm - Over Current ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
-				packetIdStr = "Alarm - Over Temperature("+packetId+")";
+				packetIdStr = "Alarm - Over Temperature ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
-				packetIdStr = "Alarm - PLL out of Lock("+packetId+")";
+				packetIdStr = "Alarm - PLL out of Lock ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
-				packetIdStr = "Alarm - Under Current("+packetId+")";
+				packetIdStr = "Alarm - Under Current ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
-				packetIdStr = "Alarm - Other("+packetId+")";
+				packetIdStr = "Alarm - Other ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_SUMMARY:
-				packetIdStr = "Alarm - Summary("+packetId+")";
+				packetIdStr = "Alarm - Summary ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
 				packetIdStr = "Redundancy Fault ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_TEMPERATURE:
-				packetIdStr = "Bias Temperature("+packetId+")";
+				packetIdStr = "Bias Temperature ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_INFO:
-				packetIdStr = "Device Info("+packetId+")";
+				packetIdStr = "Device Info ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN:
-				packetIdStr = "Gain("+packetId+")";
+				packetIdStr = "Gain ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE:
-				packetIdStr = "GainRange("+packetId+")";
+				packetIdStr = "GainRange ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION:
-				packetIdStr = "Attenuation("+packetId+")";
+				packetIdStr = "Attenuation ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE:
-				packetIdStr = "AttenuationRange("+packetId+")";
+				packetIdStr = "AttenuationRange ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS:
-				packetIdStr = "FCM FLAGS("+packetId+")";
+				packetIdStr = "FCM FLAGS ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1:
-				packetIdStr = "DAC 1("+packetId+")";
+				packetIdStr = "DAC 1 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2:
-				packetIdStr = "DAC 2("+packetId+")";
+				packetIdStr = "DAC 2 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3:
-				packetIdStr = "DAC 3("+packetId+")";
+				packetIdStr = "DAC 3 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4:
-				packetIdStr = "DAC 4("+packetId+")";
+				packetIdStr = "DAC 4 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_13V2:
-				packetIdStr = "13.2V("+packetId+")";
+				packetIdStr = "13.2V ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_13V2_NEG:
 				packetIdStr = "-13.2V("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_MEASUREMENT_5V5:
-				packetIdStr = "5.5V("+packetId+")";
+				packetIdStr = "5.5V ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_CALIBRATION_MODE:
-				packetIdStr = "CalibrationMode("+packetId+")";
+				packetIdStr = "CalibrationMode ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEVICE_DEBUG_CONVERTER_PLL_1:
-				packetIdStr = "PLL 1("+packetId+")";
+				packetIdStr = "PLL 1 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEVICE_DEBUG_CONVERTER_PLL_2:
-				packetIdStr = "Pll 2("+packetId+")";
+				packetIdStr = "Pll 2 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY:
-				packetIdStr = "Frequency("+packetId+")";
+				packetIdStr = "Frequency ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE:
-				packetIdStr = "FrequencyRange("+packetId+")";
+				packetIdStr = "FrequencyRange ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_LO:
-				packetIdStr = "LO Bias Board("+packetId+")";
+				packetIdStr = "LO Bias Board ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES:
-				packetIdStr = "LO Frequencies("+packetId+")";
+				packetIdStr = "LO Frequencies ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET:
-				packetIdStr = "Gain Offset("+packetId+")";
+				packetIdStr = "Gain Offset ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER:
-				packetIdStr = "LNB On/Off("+packetId+")";
+				packetIdStr = "LNB On/Off ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_STORE_CONFIG:
-				packetIdStr = "Store Config("+packetId+")";
+				packetIdStr = "Store Config ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_ADC_13v2:
-				packetIdStr = "ADC 13.2V("+packetId+")";
+				packetIdStr = "ADC 13.2V ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_ADC_13V2_NEG:
-				packetIdStr = "ADC -13.2V("+packetId+")";
+				packetIdStr = "ADC -13.2V ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_ADC_5V5:
-				packetIdStr = "ADC 5.5V("+packetId+")";
+				packetIdStr = "ADC 5.5V ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_ADC_CURRENT:
-				packetIdStr = "ADC Current("+packetId+")";
+				packetIdStr = "ADC Current ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER:
-				packetIdStr = "ADC Input Power("+packetId+")";
+				packetIdStr = "ADC Input Power ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER:
-				packetIdStr = "ADC Output Power("+packetId+")";
+				packetIdStr = "ADC Output Power ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE:
-				packetIdStr = "ADC Temperature("+packetId+")";
+				packetIdStr = "ADC Temperature ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG:
-				packetIdStr = "PLL reg.N9("+packetId+")";
+				packetIdStr = "PLL reg.N9 ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DEVICE_DEBUG_DEVICE_INFO:
-				packetIdStr = "Device Debug Info("+packetId+")";
+				packetIdStr = "Device Debug Info ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE:
-				packetIdStr = "Initialize("+packetId+")";
+				packetIdStr = "Initialize ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_NETWORK_ADDRESS:
-				packetIdStr = "Network Address("+packetId+")";
+				packetIdStr = "Network Address ("+packetId+")";
 				break;
 			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0:
 			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1:

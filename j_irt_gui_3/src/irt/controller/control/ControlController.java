@@ -6,23 +6,20 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 
-import irt.controller.MuteController;
 import irt.controller.StoreConfigController;
 import irt.controller.SwitchController;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 public class ControlController extends ControllerAbstract {
-	private JButton btnMute;
-	private JLabel lblMute;
+//	private JButton btnMute;
+//	private JLabel lblMute;
 	private SwitchController lnbController; 
-	private MuteController muteController;
+//	private MuteController muteController;
 	private JButton btnStore;
 //	protected JComboBox<Object> comboBoxfreqSet;
 	protected ItemListener itemListenerComboBox;
@@ -36,13 +33,13 @@ public class ControlController extends ControllerAbstract {
 //		if(comboBoxfreqSet==null)
 //			setSend(false);
 
-		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
-		Thread t = new Thread(muteController, "ControlController.MuteController-"+new RundomNumber().toString());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+//		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
+//		Thread t = new Thread(muteController, "ControlController.MuteController-"+new RundomNumber().toString());
+//		int priority = t.getPriority();
+//		if(priority>Thread.MIN_PRIORITY)
+//			t.setPriority(priority-1);
+//		t.setDaemon(true);
+//		t.start();
 	}
 
 	@Override
@@ -52,33 +49,6 @@ public class ControlController extends ControllerAbstract {
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 				logger.entry("\n\t{}", valueChangeEvent);
-//				SetterAbstract pw = (SetterAbstract) getPacketWork();
-//
-//				if(valueChangeEvent.getID()==pw.getPacketId()){
-//					Object source = valueChangeEvent.getSource();
-//
-//					if(comboBoxfreqSet!=null){
-//						if(source instanceof Object[]){
-//							ComboBoxModel<Object> comboBoxModel = new DefaultComboBoxModel<>((Object[])source);
-//							comboBoxfreqSet.setModel(comboBoxModel);
-//
-//							pw.setPacketId(PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY);
-//							pw.setPacketParameterHeaderCode(PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY);
-//							pw.getPacketThread().preparePacket();
-//							setSend(true, false);
-//						}else if(source instanceof Long){
-//							setSend(false);
-//							ValueFrequency vf = new ValueFrequency((Long)source, Long.MIN_VALUE, Long.MAX_VALUE);
-//
-//							pw.setPacketType(PacketImp.PACKET_TYPE_COMMAND);
-//
-//							comboBoxfreqSet.setSelectedItem(vf.toString());
-//							comboBoxfreqSet.addItemListener(itemListenerComboBox);
-//
-//						}else if(source instanceof Range)
-//							comboBoxfreqSet.addItem(new ValueFrequency(((Range)source).getMinimum(), Long.MIN_VALUE, Long.MAX_VALUE).toString());
-//					}
-//				}
 			}
 		};
 	}
@@ -91,12 +61,12 @@ public class ControlController extends ControllerAbstract {
 
 		if(name!=null)
 			switch (name) {
-			case "Button Mute":
-				btnMute = (JButton)component;
-				break;
-			case "Label Mute":
-				lblMute = (JLabel)component;
-				break;
+//			case "Button Mute":
+//				btnMute = (JButton)component;
+//				break;
+//			case "Label Mute":
+//				lblMute = (JLabel)component;
+//				break;
 //			case "LO Select":
 //				comboBoxfreqSet = (JComboBox<Object>)component;
 //				break;
@@ -126,10 +96,10 @@ public class ControlController extends ControllerAbstract {
 	@Override
 	protected void clear() {
 		super.clear();
-		muteController.stop();
-		muteController = null;
-		btnMute = null;
-		lblMute = null;
+//		muteController.stop();
+//		muteController = null;
+//		btnMute = null;
+//		lblMute = null;
 
 		if(lnbController!=null){
 			lnbController.stop();
@@ -138,28 +108,5 @@ public class ControlController extends ControllerAbstract {
 	}
 
 	@Override protected void setListeners() {
-//		if(this instanceof ControlControllerPicobuc)
-//			itemListenerComboBox = new ItemListener() {
-//			@Override
-//			public void itemStateChanged(ItemEvent itemEvent) {
-//				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-//					((SetterAbstract)getPacketWork()).preparePacketToSend(new IdValue(PacketWork.PACKET_ID_CONFIGURATION_LO, (byte) ((IdValueForComboBox)comboBoxfreqSet.getSelectedItem()).getID()));
-//					setSend(true);
-//				}
-//			}
-//		};
-//		else
-//			itemListenerComboBox = new ItemListener() {
-//
-//			@Override
-//			public void itemStateChanged(ItemEvent itemEvent) {
-//				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-//					((SetterAbstract)getPacketWork()).preparePacketToSend(new IdValue(PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY,
-//							new ValueFrequency(comboBoxfreqSet.getSelectedItem().toString(),"0", ""+Long.MAX_VALUE)));
-//					setSend(true);
-//				}
-//			}
-//		};
-//
 	}
 }

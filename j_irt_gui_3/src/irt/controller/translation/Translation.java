@@ -23,6 +23,7 @@ import irt.irt_gui.IrtGui;
 import irt.tools.panel.head.IrtPanel;
 
 public class Translation {
+	private static final Logger logger = LogManager.getLogger();
 
 	private static final String DEFAULT_LANGUAGE = "en";
 
@@ -49,6 +50,7 @@ public class Translation {
 			@Override
 			public void run() {
 
+				try{
 				LOGGER.entry(localeStr);
 
 				locale = new Locale(localeStr);
@@ -60,6 +62,9 @@ public class Translation {
 					PREFS.put("locale", localeStr);
 
 				getFont(localeStr);
+				}catch (Exception e) {
+					logger.catching(e);
+				}
 			}
 		}, "Translation.setLocale-"+new RundomNumber().toString());
 		int priority = t.getPriority();

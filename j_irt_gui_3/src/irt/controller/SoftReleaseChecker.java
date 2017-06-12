@@ -41,6 +41,7 @@ public class SoftReleaseChecker extends Thread {
 	public void run() {
 
 		while (true) {
+			try{
 			synchronized (this) { try { wait(); } catch (InterruptedException e) { logger.catching(e); } }
 
 			String string = "\\\\192.168.2.250\\Share\\4alex\\boards\\SW release\\latest\\" + (deviceInfo.getType() < 1000 ? "picobuc.bin" : "fcm.bin");
@@ -57,6 +58,9 @@ public class SoftReleaseChecker extends Thread {
 
 				if (file.lastModified() > calendar.getTimeInMillis() + 10000)
 					deviceInfo.setError("Firmware Update is Available.", Color.RED);
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 	}

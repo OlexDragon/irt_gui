@@ -49,6 +49,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
 import irt.tools.button.ImageButton;
+import irt.tools.button.MuteButton;
 import irt.tools.combobox.LoSelectComboBox;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
@@ -80,7 +81,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	private JComboBox<IdValueFreq> cbLoSelect;
 //	private boolean hasFreqSet;
 	private JLabel lblMute; 							protected JLabel getLblMute() { return lblMute; }
-	private ImageButton btnMute; 						protected ImageButton getBtnMute() { return btnMute; }
+	private MuteButton btnMute; 						protected ImageButton getBtnMute() { return btnMute; }
 	protected ImageButton btnStoreConfig;
 	private int flags;
 
@@ -99,8 +100,8 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
-		btnMute = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
-		btnMute.setToolTipText(muteText);
+		btnMute = new MuteButton();
+		btnMute.setLinkAddr(linkHeader.getAddr());
 		btnMute.setName("Button Mute");
 		Point p = getMuteButtonPosition();
 		if(p==null)
@@ -117,6 +118,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 				.deriveFont(Font.BOLD);
 
 		lblMute = new JLabel(muteText);
+		btnMute.setMuteLabel(lblMute);
 		lblMute.setName("Label Mute");
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);

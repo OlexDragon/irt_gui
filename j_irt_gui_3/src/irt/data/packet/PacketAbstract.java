@@ -24,8 +24,8 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	private Priority priority;
 
 	private LinkHeader linkHeader;
-	private final PacketHeader header;
-	private final List<Payload> payloads = new ArrayList<>();
+	private PacketHeader header;
+	private List<Payload> payloads = new ArrayList<>();
 
 	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte payloadCommand, byte[] payloadData, Priority priority){
 		linkHeader = linkAddr!=0 ? new LinkHeader(linkAddr, (byte)0, (short)0) : null;
@@ -39,7 +39,12 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public int compareTo(PacketWork packetWork) {
-		return priority.compareTo(packetWork.getPriority());
+		int compareTo = priority.compareTo(packetWork.getPriority());
+
+		if(packetWork instanceof PacketAbstract && compareTo==0)
+			compareTo = Short.compare(((PacketAbstract)packetWork).getHeader().getPacketId(), getHeader().getPacketId());
+
+			return compareTo;
 	}
 
 	@Override
@@ -161,12 +166,16 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public Object getValue() {
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		return "not implemented";
 	}
 
 	@Override
 	public LinkHeader getLinkHeader() {
 		return linkHeader;
+	}
+
+	public void setLinkHeader(LinkHeader linkHeader) {
+		this.linkHeader = linkHeader;
 	}
 
 	public void setAddr(byte linkAddr) {
@@ -210,12 +219,12 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public void setHeader(PacketHeader packetHeader) {
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		header = packetHeader;
 	}
 
 	@Override
 	public void setPayloads(List<Payload> payloadsList) {
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		payloads = payloadsList;
 	}
 
 	@Override
@@ -287,7 +296,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public String toString() {
-		return "\n\t" + getClass().getSimpleName() + " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payloads=" + payloads.stream().map(Payload::toString).collect(Collectors.joining(",")) + "]";
+		return "\n\t" + getClass().getSimpleName() + " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payloads=" + payloads.stream().map(Payload::toString).collect(Collectors.joining(",")) + "] value=" + getValue();
 	}
 
 	public enum Priority {

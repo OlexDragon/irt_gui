@@ -6,7 +6,11 @@ import java.util.Map.Entry;
 
 import javax.swing.JComponent;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Transformer implements Runnable{
+	private final Logger logger = LogManager.getLogger();
 
 	public static final int ACTION_SHOW = 1;
 	
@@ -19,6 +23,7 @@ public class Transformer implements Runnable{
 
 	@Override
 	public void run() {
+		try{
 		if (component != null) {
 			int realWidth = component.getWidth();
 
@@ -27,6 +32,9 @@ public class Transformer implements Runnable{
 				if(transform(realWidth))
 					break;
 			}
+		}
+		}catch (Exception e) {
+			logger.catching(e);
 		}
 	}
 

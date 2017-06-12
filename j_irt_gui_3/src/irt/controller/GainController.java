@@ -57,12 +57,16 @@ public class GainController extends ValueRangeControllerAbstract {
 
 		@Override
 		public void run() {
+			try{
 			Object source = valueChangeEvent.getSource();
 			if(source instanceof Range){
 				Range r = (Range) source;
 				ValueDouble value = new ValueDouble(0, r.getMinimum(), r.getMaximum(), 1);
 				value.setPrefix(" dB");
 				startTextSliderController(GainController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_GAIN, PacketImp.PARAMETER_ID_CONFIGURATION_GAIN, style);
+			}
+			}catch (Exception e) {
+				logger.catching(e);
 			}
 		}
 

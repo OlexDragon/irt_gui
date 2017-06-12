@@ -407,6 +407,7 @@ public class PLLsPanel extends JPanel {
 
 		@Override
 		public void run() {
+			try{
 			long v = value.getValue();
 			if(v!=value.getOldValue()){
 				txtPllReg.setToolTipText(Long.toHexString(v).toUpperCase());
@@ -434,6 +435,9 @@ public class PLLsPanel extends JPanel {
 			this.txtCpDnGain = null;
 			this.txtCpUpGain = null;
 			this.txtOffsetCurr = null;
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		}
 		
 	}

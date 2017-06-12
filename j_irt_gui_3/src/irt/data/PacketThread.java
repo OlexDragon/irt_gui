@@ -119,7 +119,7 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 
 	@Override
 	public synchronized void start() {
-		if(packet==null)
+		if(getState()==State.NEW && packet==null)
 			super.start();
 	}
 

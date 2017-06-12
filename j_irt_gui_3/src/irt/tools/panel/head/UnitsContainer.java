@@ -30,7 +30,7 @@ public class UnitsContainer extends JPanel{
 		componentListener = new ComponentListener() {
 			
 			@Override public void componentShown(ComponentEvent arg0) { }
-			@Override public void componentMoved(ComponentEvent arg0) { } 
+			@Override public void componentMoved(ComponentEvent arg0) { }
 			@Override public void componentHidden(ComponentEvent arg0) { }
 			@Override public void componentResized(ComponentEvent componentEvent) {
 				setLocations();

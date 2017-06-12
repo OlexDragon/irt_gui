@@ -38,6 +38,9 @@ import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.GuiControllerAbstract;
 import irt.controller.SwitchController;
 import irt.controller.TextSliderController;
@@ -62,6 +65,7 @@ import irt.tools.panel.subpanel.BIASsPanel.AdcWorker;
 
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel implements PacketListener, Runnable {
+	private final Logger logger = LogManager.getLogger();
 
 	private RegisterTextField txtDAC1;
 	private RegisterTextField txtDAC2;
@@ -577,6 +581,10 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 	@Override
 	public void run() {
-		adcWorkers.stream().forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
+		try{
+			adcWorkers.stream().forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
+		}catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 }

@@ -81,6 +81,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 
 			@Override
 			public void run() {
+				try{
 				final PacketHeader header = packet.getHeader();
 				if(packetToSend.equals(packet) && header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE) {
 
@@ -122,6 +123,9 @@ public class LOComboBoxController extends Observable implements IrtController, R
 
 				}else
 					logger.info("No answer:{}", packet);
+				}catch (Exception e) {
+					logger.catching(e);
+				}
 			}
 		});
 	}

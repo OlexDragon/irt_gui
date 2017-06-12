@@ -5,7 +5,6 @@ import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -128,28 +127,29 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		.map(pls->pls.stream())
 		.ifPresent(stream->{
 			stream
-			.sorted(new Comparator<Payload>() {	//Set the same order as in the ParameterHeaderCode
-				@Override
-				public int compare(Payload payload1, Payload payload2) {
-
-					final boolean isConverter = unitAddress==CONVERTER;
-
-					final byte code1 = payload1.getParameterHeader().getCode();
-					final Optional<? extends ParameterHeaderCode> optional1 = (isConverter ? ParameterHeaderCodeFCM.valueOf(code1) : ParameterHeaderCodeBUC.valueOf(code1));
-					final Integer valueOf_o1 = optional1
-														.map(phc->phc.ordinal())
-														.orElse(ParameterHeaderCodeFCM.values().length);
-
-					final byte code2 = payload2.getParameterHeader().getCode();
-					final Optional<? extends ParameterHeaderCode> optional2 = (isConverter ? ParameterHeaderCodeFCM.valueOf(code2) : ParameterHeaderCodeBUC.valueOf(code2));
-					final Integer valueOf_o2 = optional2
-														.map(phc->phc.ordinal())
-														.orElse(ParameterHeaderCodeFCM.values().length);
-
-					return Integer.compare(valueOf_o1, valueOf_o2);
-				}
-			})
+//			.sorted(new Comparator<Payload>() {	//Set the same order as in the ParameterHeaderCode
+//				@Override
+//				public int compare(Payload payload1, Payload payload2) {
+//
+//					final boolean isConverter = unitAddress==CONVERTER;
+//
+//					final byte code1 = payload1.getParameterHeader().getCode();
+//					final Optional<? extends ParameterHeaderCode> optional1 = (isConverter ? ParameterHeaderCodeFCM.valueOf(code1) : ParameterHeaderCodeBUC.valueOf(code1));
+//					final Integer valueOf_o1 = optional1
+//														.map(phc->phc.ordinal())
+//														.orElse(ParameterHeaderCodeFCM.values().length);
+//
+//					final byte code2 = payload2.getParameterHeader().getCode();
+//					final Optional<? extends ParameterHeaderCode> optional2 = (isConverter ? ParameterHeaderCodeFCM.valueOf(code2) : ParameterHeaderCodeBUC.valueOf(code2));
+//					final Integer valueOf_o2 = optional2
+//														.map(phc->phc.ordinal())
+//														.orElse(ParameterHeaderCodeFCM.values().length);
+//
+//					return Integer.compare(valueOf_o1, valueOf_o2);
+//				}
+//			})
 			.forEach(pl->{
+				logger.entry(pl);
 
 				Platform.runLater(()->{
 

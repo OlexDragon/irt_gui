@@ -32,6 +32,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.DumpControllers;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
@@ -94,10 +95,19 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 	//*************************************** constructor RedundancyPanel ********************************************
 	public RedundancyPanel(final int deviceType, final LinkHeader linkHeader) {
+
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
-					service.shutdownNow();
+				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null){
+
+					cptq.removePacketListener(RedundancyPanel.this);
+
+					if(scheduleAtFixedRate==null)
+						scheduleAtFixedRate.cancel(true);
+
+					if(!service.isShutdown())
+						service.shutdownNow();
+				}
 			}
 		});
 
@@ -262,6 +272,10 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		);
 		panel.setLayout(gl_panel);
 		setLayout(groupLayout);
+
+		cptq.addPacketListener(this);
+		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 5000, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -300,15 +314,11 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	}
 
 	private void start() {
-		cptq.addPacketListener(this);
-		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+		run = true;
 	}
 
 	private void stop() {
-		cptq.removePacketListener(this);
-		if(scheduleAtFixedRate==null)
-			scheduleAtFixedRate.cancel(true);
+		run = false;
 	}
 
 	@Override
@@ -428,8 +438,16 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		}
 	}
 
+	private long count;
+	private boolean run;
+
 	@Override
 	public void run() {
+		if(run || --count>0){
+			count = DumpControllers.DUMP_TIME;
+			return;
+		}
+
 		try{
 
 			cptq.add(redundancyEnablePacket);

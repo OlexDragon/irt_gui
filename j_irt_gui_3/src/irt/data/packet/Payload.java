@@ -1,16 +1,17 @@
 package irt.data.packet;
 
+import java.util.Arrays;
+import java.util.Optional;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
+
 import irt.data.DacValue;
 import irt.data.DeviceId;
 import irt.data.RegisterValue;
 import irt.data.StringData;
 import irt.data.ToHex;
 import irt.data.value.Value;
-
-import java.util.Arrays;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
 
 
 public class Payload {
@@ -209,8 +210,17 @@ public class Payload {
 	}
 
 	public RegisterValue getRegisterValue() {
-		long value = getInt(2)&Long.MAX_VALUE;
-		return new RegisterValue( getInt(0), getInt(1), new Value(value, 0 , Long.MAX_VALUE, 0));
+
+		final Optional<byte[]> filter = Optional.ofNullable(buffer).filter(b->b.length>=8);
+		final Optional<RegisterValue> rv = filter.map(b->new RegisterValue( getInt(0), getInt(1), null));
+
+		filter.filter(b->b.length>=12).ifPresent(b->{
+			long v = getInt(2)&Long.MAX_VALUE;
+			Value value = new Value(v, 0 , Long.MAX_VALUE, 0);
+			rv.get().setValue(value);
+		});
+
+		return rv.orElse(null);
 	}
 
 	public long[] getArrayLong() {
