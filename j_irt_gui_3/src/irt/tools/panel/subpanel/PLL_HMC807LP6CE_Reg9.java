@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Optional;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
@@ -31,6 +32,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
@@ -95,7 +97,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 	private RegisterValue value;
 	private JButton btnClear;
 
-	public PLL_HMC807LP6CE_Reg9(final int deviceType) {
+	public PLL_HMC807LP6CE_Reg9(final Optional<DeviceType> deviceType) {
 
 		final ItemListener aListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {

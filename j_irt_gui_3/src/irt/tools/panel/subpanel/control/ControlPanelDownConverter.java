@@ -4,12 +4,14 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
+import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import irt.tools.CheckBox.LnbReferenceSwitch;
+import irt.data.DeviceInfo.DeviceType;
 import irt.tools.CheckBox.LnbPowerSwitch;
 import irt.tools.CheckBox.SpectrumInversionSwitch;
 import irt.tools.CheckBox.SwitchBox;
@@ -17,7 +19,7 @@ import irt.tools.CheckBox.SwitchBox;
 @SuppressWarnings("serial")
 public class ControlPanelDownConverter extends ControlPanelConverter {
 
-	public ControlPanelDownConverter(int deviceType) {
+	public ControlPanelDownConverter(Optional<DeviceType> deviceType) {
 		super(deviceType, false);
 
 		JLabel lblLnb = new JLabel("LNB");

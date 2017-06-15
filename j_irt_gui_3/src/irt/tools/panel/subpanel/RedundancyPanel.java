@@ -94,7 +94,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	private byte unitAddress;
 
 	//*************************************** constructor RedundancyPanel ********************************************
-	public RedundancyPanel(final int deviceType, final LinkHeader linkHeader) {
+	public RedundancyPanel(final LinkHeader linkHeader) {
 
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {

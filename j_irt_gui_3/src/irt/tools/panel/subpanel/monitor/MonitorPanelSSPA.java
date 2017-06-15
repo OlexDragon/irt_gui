@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -12,7 +13,7 @@ import javax.swing.SwingWorker;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
@@ -44,7 +45,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 
 	private int status;
 
-	public MonitorPanelSSPA(int deviceType, LinkHeader linkHeader) {
+	public MonitorPanelSSPA(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
 		super(deviceType, linkHeader, Translation.getValue(String.class, "monitor", "IrtControllPanel"), 214, 210);
 		
 		isSSPA = getClass().equals(MonitorPanelSSPA.class);
@@ -54,7 +55,9 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 		ledMute.setForeground(Color.GREEN);
 		add(ledMute);
 
-		if (deviceType != DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR) {
+		deviceType
+		.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
+		.ifPresent(dt->{
 			lblOutputPower = new JLabel(":");
 			lblOutputPower.setName("Output Power");
 			lblOutputPower.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -70,7 +73,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 			add(lblOutputPowerTxt);
 			new TextWorker(lblOutputPowerTxt, "output_power", "Output Power")
 					.execute();
-		}
+		});
 
 		lblTemperature = new JLabel(":");
 		lblTemperature.setName("Temperature");
@@ -122,10 +125,12 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 			protected void done() {
 				try{
 				Font font = get();
-				if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+				deviceType
+				.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
+				.ifPresent(dt->{
 					lblOutputPower.setFont(font);
 					lblOutputPowerTxt.setFont(font);
-				}
+				});
 				lblTemperature.setFont(font);
 				lblTemperatureTxt.setFont(font);
 				}catch(Exception e){
@@ -179,7 +184,11 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 	@Override
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> controllers = new ArrayList<>();
-		if(deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+		
+		if(		deviceType
+				.filter(dt->dt==DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
+				.isPresent()){
+
 			for(int i=0; i<controllerNames.length; i++){
 				controllers.add(
 						getController(
@@ -230,7 +239,10 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 		ValueDouble v;
 		switch(parameter){
 		case PacketImp.PARAMETER_MEASUREMENT_OUTPUT_POWER://or Packet.IRT_SLCP_PARAMETER_MEASUREMENT_FCM_STATUS
-			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+			if(		deviceType
+					.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
+					.isPresent()){
+
 				int hashCode = 31*flags + value;
 				if(flags==0)
 					lblOutputPower.setText("N/A");

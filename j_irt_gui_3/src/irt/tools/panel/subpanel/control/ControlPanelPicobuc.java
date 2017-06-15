@@ -8,6 +8,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -22,7 +23,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValueForComboBox;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
@@ -97,8 +98,8 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 	private DefaultController alcEnableGetterController;
 	private JLabel lblSave;
 
-	public ControlPanelPicobuc(int deviceType, LinkHeader linkHeader) {
-		super(deviceType, linkHeader, deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? (short)ActionFlags.FLAG_FREQUENCY.ordinal() : (short)ActionFlags.FLAG_ATTENUATION.ordinal());
+	public ControlPanelPicobuc(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
+		super(deviceType, linkHeader, deviceType.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR).map(dt->(short)ActionFlags.FLAG_FREQUENCY.ordinal()).orElse((short)ActionFlags.FLAG_ATTENUATION.ordinal()));
 		
 		Font font = Translation.getFont()
 				.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
@@ -126,29 +127,32 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 			}
 		});
 
-		if(deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+		deviceType
+		.filter(dt->dt==DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
+		.ifPresent(
+				dt->{
+			
+					Image imageOn = new ImageIcon(ControlPanelDownConverter.class.getResource("/irt/irt_gui/images/switch1.png")).getImage();
+					Image imageOff = new ImageIcon(ControlPanelDownConverter.class.getResource("/irt/irt_gui/images/switch2.png")).getImage();
+					switchBox = new SwitchBox(imageOff, imageOn);
+					switchBox.addItemListener(alcItemListener);
+					switchBox.setName("ALC");
+					switchBox.setBounds(128, 101, 27, 33);
+					switchBox.setCursor(new Cursor(Cursor.HAND_CURSOR));
+					add(switchBox);
 
-			Image imageOn = new ImageIcon(ControlPanelDownConverter.class.getResource("/irt/irt_gui/images/switch1.png")).getImage();
-			Image imageOff = new ImageIcon(ControlPanelDownConverter.class.getResource("/irt/irt_gui/images/switch2.png")).getImage();
-			switchBox = new SwitchBox(imageOff, imageOn);
-			switchBox.addItemListener(alcItemListener);
-			switchBox.setName("ALC");
-			switchBox.setBounds(128, 101, 27, 33);
-			switchBox.setCursor(new Cursor(Cursor.HAND_CURSOR));
-			add(switchBox);
+					lblSave.setText("ALC");
+					lblSave.addMouseListener(new MouseAdapter() {
+						@Override
+						public void mouseClicked(MouseEvent e) {
+							switchBox.setSelected(!switchBox.isSelected());
+						}
+					});
 
-			lblSave.setText("ALC");
-			lblSave.addMouseListener(new MouseAdapter() {
-				@Override
-				public void mouseClicked(MouseEvent e) {
-					switchBox.setSelected(!switchBox.isSelected());
-				}
-			});
+					cbActionSelector.addItem(new IdValueForComboBox((short) ActionFlags.FLAG_ALC.ordinal(), "ALC"));
 
-			cbActionSelector.addItem(new IdValueForComboBox((short) ActionFlags.FLAG_ALC.ordinal(), "ALC"));
-
-			startAlcEnableController();
-		}
+					startAlcEnableController();
+				});
 	}
 
 	private void startAlcEnableController() {

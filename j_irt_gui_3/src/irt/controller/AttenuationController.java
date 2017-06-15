@@ -1,11 +1,13 @@
 package irt.controller;
 
+import java.util.Optional;
+
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -17,9 +19,9 @@ import irt.data.value.ValueDouble;
 public class AttenuationController extends ValueRangeControllerAbstract {
 
 	private Style style;
-	protected int deviceType;
+	protected Optional<DeviceType> deviceType;
 
-	public AttenuationController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+	public AttenuationController(Optional<DeviceType> deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType,
 				"Attenuation Controller",
 				new ConfigurationSetter(linkHeader,
@@ -77,7 +79,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 
 				ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
 				value.setPrefix(prefix);
-				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, isConverter || deviceType==DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION : PacketImp.PARAMETER_ID_CONFIGURATION_ATTENUATION, style);
+				startTextSliderController(AttenuationController.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION, deviceType.filter(dt->isConverter || dt==DeviceType.CONVERTER_L_TO_KU_OUTDOOR).map(dt->PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION).orElse(PacketImp.PARAMETER_ID_CONFIGURATION_ATTENUATION), style);
 			}
 			}catch (Exception e) {
 				logger.catching(e);

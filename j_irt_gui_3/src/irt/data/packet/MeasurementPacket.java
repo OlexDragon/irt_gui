@@ -1,6 +1,18 @@
 package irt.data.packet;
 
+import java.util.AbstractMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import irt.data.packet.interfaces.PacketWork;
+import irt.tools.fx.MonitorPanelFx;
+import irt.tools.fx.MonitorPanelFx.ParameterHeaderCode;
+import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
+import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
+import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
+import irt.tools.fx.MonitorPanelFx.StatusBitsFCM;
 
 public class MeasurementPacket extends PacketAbstract{
 
@@ -24,5 +36,49 @@ public class MeasurementPacket extends PacketAbstract{
 				PacketImp.PARAMETER_ALL,
 				null,
 				Priority.REQUEST);
+	}
+
+	@Override
+	public Object getValue() {
+
+		final boolean 									isConverter 		= MonitorPanelFx.CONVERTER == getLinkHeader().getAddr();
+		final ParameterHeaderCode 						status 				= isConverter ? ParameterHeaderCodeFCM.STATUS : ParameterHeaderCodeBUC.STATUS;
+
+		// true  -> status bits,
+		// false -> measurement values
+		final Map<Boolean, List<Payload>> collect = getPayloads()
+														.parallelStream()
+														.collect(Collectors.partitioningBy(pl->pl.getParameterHeader().getCode()==status.getCode()));
+
+		//status
+		final Optional<Object[]> oStatusBits = collect
+											.get(true)
+											.stream()
+											.map(pl->pl.getInt(0))
+											.map(statusBits->(Object[])(isConverter ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits)))
+											.findAny();
+
+		//values
+		final Map<Object, Object> result = collect
+										.get(false)
+										.parallelStream()
+										.map(
+												pl->{
+
+													final byte code = pl.getParameterHeader().getCode();
+													final Optional<? extends ParameterHeaderCode> 	oParameterHeaderCode = isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code);
+
+													return oParameterHeaderCode
+													.map(phc->{
+														return  new AbstractMap.SimpleEntry<>(phc, phc.toString(pl.getBuffer()));
+													}).orElse(null);
+												})
+										.filter(m->m!=null)
+										.collect(Collectors.toMap(entry->entry.getKey(), entry->entry.getValue()));
+
+		oStatusBits
+		.ifPresent(sb->result.put(status, sb));
+
+		return result;
 	}
 }

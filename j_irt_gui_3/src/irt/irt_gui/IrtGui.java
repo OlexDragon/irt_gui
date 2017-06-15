@@ -45,14 +45,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
-import irt.controller.AlarmsController;
 import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
-import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ValueChangeListener;
 import irt.tools.KeyValue;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.BaudRateSelectorFx;
@@ -64,7 +61,6 @@ import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
-import javafx.application.Platform;
 
 public class IrtGui extends IrtMainFrame {
 	private static final String PREF_KEY_ADDRESS = "address";
@@ -75,49 +71,11 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.122";
+	public static final String VERTION = "- 3.125";
 	private boolean connected;
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
-
-	protected ValueChangeListener valueChangeListener = new ValueChangeListener() {
-		@Override
-		public void valueChanged(ValueChangeEvent valueChangeEvent) {
-
-			Object source = valueChangeEvent.getSource();
-
-			switch(valueChangeEvent.getID()){
-
-			case GuiController.ALARM:
-				switch((int)source){
-				case AlarmsController.ALARMS_STATUS_INFO:
-				case AlarmsController.ALARMS_STATUS_NO_ALARM:
-					headPanel.setAlarm(false);
-					break;
-				case AlarmsController.ALARMS_STATUS_WARNING:
-				case AlarmsController.ALARMS_STATUS_MINOR:
-					headPanel.setAlarm(true);
-					headPanel.setAlarmColor(AlarmsController.WARNING_COLOR);
-					break;
-				case AlarmsController.ALARMS_STATUS_ALARM:
-				case AlarmsController.ALARMS_STATUS_FAULT:
-					headPanel.setAlarm(true);
-					headPanel.setAlarmColor(Color.RED);
-					break;
-				}
-				break;
-
-			case GuiController.CONNECTION:
-//				headPanel.setPowerOn((boolean)source);
-				ProgressBar.setValue(0);
-				break;
-
-			case GuiController.MUTE:
-//				headPanel.setMute((boolean) source);
-			}
-		}
-	};
 
 	public IrtGui() {
 		super(700, 571);
@@ -455,7 +413,6 @@ public class IrtGui extends IrtMainFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					Platform.setImplicitExit(false); 
 					IrtGui frame = new IrtGui();
 
 	                // Set the window translucency, if supported.
@@ -473,9 +430,7 @@ public class IrtGui extends IrtMainFrame {
 
 	@Override
 	protected GuiControllerAbstract getNewGuiController() {
-		GuiController guiController = new GuiController("Gui Controller", this);
-		guiController.addChangeListener(valueChangeListener);
-		return guiController;
+		return new GuiController("Gui Controller", this);
 	}
 
 	@Override

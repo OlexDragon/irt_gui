@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
@@ -21,6 +22,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
@@ -37,13 +39,13 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 	protected TitledBorder titledBorder;
 	protected String selectedLanguage;
 
-	protected int deviceType;
+	protected Optional<DeviceType> deviceType;
 
 //	public MonitorPanelAbstract(LinkHeader linkHeader){
 //		this(linkHeader, "Monitor", 214, 210);
 //	}
 
-	protected MonitorPanelAbstract(final int deviceType, LinkHeader linkHeader, String title, int width, int height) {
+	protected MonitorPanelAbstract(final Optional<DeviceType> deviceType, LinkHeader linkHeader, String title, int width, int height) {
 		setName("MonitorPanelFx");
 		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short)0);
 		this.deviceType = deviceType;

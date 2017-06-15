@@ -3,6 +3,7 @@ package irt.controller.control;
 import java.awt.Component;
 import java.util.Objects;
 import java.util.Observable;
+import java.util.Optional;
 
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.FireValue;
 import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
@@ -43,9 +45,9 @@ public abstract class ControllerAbstract implements Runnable{
 
 	protected Observable observable;
 	private String name;
-	protected int deviceType;
+	protected Optional<DeviceType> deviceType;
 
-	public ControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style) {
+	public ControllerAbstract(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, JPanel panel, Style style) {
 		Objects.requireNonNull(packetWork);
 
 		this.packetWork = packetWork;
@@ -64,6 +66,10 @@ public abstract class ControllerAbstract implements Runnable{
 			setComponents(panel);
 			owner = panel;
 		}
+	}
+
+	public ControllerAbstract(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork2, Object panel, Style stile) {
+		// TODO Auto-generated constructor stub
 	}
 
 	protected abstract void 				setListeners();

@@ -3,6 +3,7 @@ package irt.controller;
 import java.awt.Component;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Optional;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
@@ -10,6 +11,7 @@ import javax.swing.JComboBox;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
@@ -25,7 +27,7 @@ public class LoController extends ControllerAbstract {
 	JComboBox<String> cbLoSelect;
 	private ItemListener itemListener;
 
-	public LoController(int deviceType, LinkHeader linkHeader, JComboBox<String> cbLoSelect, Style stile) {
+	public LoController(Optional<DeviceType> deviceType, LinkHeader linkHeader, JComboBox<String> cbLoSelect, Style stile) {
 		super(deviceType, "LoController", new ConfigurationSetter(linkHeader), null, stile);
 
 		this.cbLoSelect = cbLoSelect;

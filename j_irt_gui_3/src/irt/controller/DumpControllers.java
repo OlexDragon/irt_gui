@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
@@ -61,39 +61,29 @@ public class DumpControllers implements PacketListener, Runnable{
 			dumper.info(marker, "\n******************** Start New Dump Block for ********************\n{}", deviceInfo);
 		}
 
-		//TODO
-//		addDumpController(
-//				newGetter(linkHeader,
-//						PacketImp.GROUP_ID_CONFIGURATION,
-//						PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_STATUS,
-//						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_STATUS,
-//						Priority.ALARM),
-//				waitTime,
-//				"REDUNDANCY_STAT");
+		final byte addr = Optional.ofNullable(deviceInfo.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0);
 
-
-		final LinkHeader linkHeader = deviceInfo.getLinkHeader();
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 0, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 1, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 2, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_2, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 3, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_3, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 4, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_4, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 10, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_10, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 1, 	PacketWork.PACKET_ID_DUMP_REGISTER_1, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 2, 	PacketWork.PACKET_ID_DUMP_REGISTER_2, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 3, 	PacketWork.PACKET_ID_DUMP_REGISTER_3, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 4, 	PacketWork.PACKET_ID_DUMP_REGISTER_4, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 5, 	PacketWork.PACKET_ID_DUMP_REGISTER_5, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 6, 	PacketWork.PACKET_ID_DUMP_REGISTER_6, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 7, 	PacketWork.PACKET_ID_DUMP_REGISTER_7, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-		packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 100, 	PacketWork.PACKET_ID_DUMP_REGISTER_100, 				PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 0, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
+		packets.add( new DeviceDebugPacket(addr, 1, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
+		packets.add( new DeviceDebugPacket(addr, 2, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_2, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
+		packets.add( new DeviceDebugPacket(addr, 3, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_3, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
+		packets.add( new DeviceDebugPacket(addr, 4, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_4, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
+		packets.add( new DeviceDebugPacket(addr, 10, 	PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_10, 	PacketImp.PARAMETER_DEVICE_DEBAG_INFO));
+		packets.add( new DeviceDebugPacket(addr, 1, 	PacketWork.PACKET_ID_DUMP_REGISTER_1, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 2, 	PacketWork.PACKET_ID_DUMP_REGISTER_2, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 3, 	PacketWork.PACKET_ID_DUMP_REGISTER_3, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 4, 	PacketWork.PACKET_ID_DUMP_REGISTER_4, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 5, 	PacketWork.PACKET_ID_DUMP_REGISTER_5, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 6, 	PacketWork.PACKET_ID_DUMP_REGISTER_6, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 7, 	PacketWork.PACKET_ID_DUMP_REGISTER_7, 					PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+		packets.add( new DeviceDebugPacket(addr, 100, 	PacketWork.PACKET_ID_DUMP_REGISTER_100, 				PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
 
 		if(	deviceInfo.hasSlaveBiasBoard()){
-			packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 201, 	PacketWork.PACKET_ID_DUMP_REGISTER_201, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-			packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 202, 	PacketWork.PACKET_ID_DUMP_REGISTER_202, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-			packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 207, 	PacketWork.PACKET_ID_DUMP_REGISTER_207, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-			packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 220, 	PacketWork.PACKET_ID_DUMP_REGISTER_220, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
-			packets.add( new DeviceDebugPacket(linkHeader.getAddr(), 24, 	PacketWork.PACKET_ID_DUMP_POWER, 				PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+			packets.add( new DeviceDebugPacket(addr, 201, 	PacketWork.PACKET_ID_DUMP_REGISTER_201, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+			packets.add( new DeviceDebugPacket(addr, 202, 	PacketWork.PACKET_ID_DUMP_REGISTER_202, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+			packets.add( new DeviceDebugPacket(addr, 207, 	PacketWork.PACKET_ID_DUMP_REGISTER_207, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+			packets.add( new DeviceDebugPacket(addr, 220, 	PacketWork.PACKET_ID_DUMP_REGISTER_220, 		PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
+			packets.add( new DeviceDebugPacket(addr, 24, 	PacketWork.PACKET_ID_DUMP_POWER, 				PacketImp.PARAMETER_DEVICE_DEBAG_DUMP));
 		}
 
 		logger.trace(packets);
@@ -160,10 +150,14 @@ public class DumpControllers implements PacketListener, Runnable{
 
 	@Override
 	protected void finalize() throws Throwable {
+
 		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
 			scheduledFuture.cancel(true);
-		if(!service.isShutdown())
-			service.shutdownNow();
+
+		synchronized (service) {
+			if(!service.isShutdown())
+				service.shutdownNow();
+		}
 
 		synchronized (dumper) {
 			dumper.warn("Communication Lost: {} ", deviceInfo);
@@ -244,13 +238,24 @@ public class DumpControllers implements PacketListener, Runnable{
 	}
 
 	public synchronized void doDump() {
+
 		lastValues.clear();
 		count = 0;
+		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
+			scheduledFuture.cancel(true);
+
+		synchronized (service) {
+
+			if(service.isShutdown())
+				return;
+
+			scheduledFuture = service.scheduleAtFixedRate(this, 0, 1, TimeUnit.SECONDS);
+		}
 	}
 
-	private static List<BooleanSupplier> actionsWhenDump = new ArrayList<>();
-	public static void addActionWhenDump(BooleanSupplier runnable){
-		actionsWhenDump.add(runnable);
+	private static List<Consumer<String>> actionsWhenDump = new ArrayList<>();
+	public static void addActionWhenDump(Consumer<String> consumer){
+		actionsWhenDump.add(consumer);
 	}
 
 	public void doDump(Optional<String> o) {
@@ -258,7 +263,7 @@ public class DumpControllers implements PacketListener, Runnable{
 
 		o.ifPresent(text->{
 			final StringBuilder sb = new StringBuilder()
-											.append("addr=")	.append(deviceInfo.getLinkHeader().getAddr()&0xFF)	.append("; ")
+											.append("addr=")	.append(Optional.ofNullable(deviceInfo.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0)&0xFF)	.append("; ")
 											.append("SN: ")		.append(deviceInfo.getSerialNumber())				.append("; ")
 											.append(System.lineSeparator())
 											.append(text);
@@ -266,7 +271,7 @@ public class DumpControllers implements PacketListener, Runnable{
 				dumper.info(marker, sb);
 			}
 
-			actionsWhenDump.parallelStream().forEach(BooleanSupplier::getAsBoolean);
+			actionsWhenDump.parallelStream().forEach(c->c.accept(sb.toString()));
 		});
 	}
 
@@ -296,11 +301,6 @@ public class DumpControllers implements PacketListener, Runnable{
 
 		if(value!=null && (lastValue==null || !lastValue.equals(value))){
 
-
-			////TODO to remove
-//			if(packet.getHeader().getGroupId()==PacketImp.GROUP_ID_DEVICE_DEBAG)
-//				logger.error(cast);
-			logger.trace("\n packetId={}\n lastValue = {}\n value={}", packetId, lastValue, value);
 			if(packetId==PacketWork.PACKET_ID_ALARMS_SUMMARY)
 				doDump();
 

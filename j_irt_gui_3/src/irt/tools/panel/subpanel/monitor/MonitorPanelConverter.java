@@ -3,6 +3,7 @@ package irt.tools.panel.subpanel.monitor;
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
@@ -14,6 +15,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -49,7 +51,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 	private int mon_13v2_pos = Integer.MIN_VALUE;
 	private int mon_5v5 = Integer.MIN_VALUE;
 
-	public MonitorPanelConverter(int deviceType) {
+	public MonitorPanelConverter(Optional<DeviceType> deviceType) {
 		super(deviceType, null, "IrtControllPanel", 214, 210);
 		
 		ledMute = new LED(Color.YELLOW, "MUTE");

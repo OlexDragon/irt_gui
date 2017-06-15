@@ -59,8 +59,6 @@ public class UserIrtGui extends IrtGui {
 
 	@Override
 	protected GuiControllerAbstract getNewGuiController() {
-		GuiControllerUser guiControllerUser = new GuiControllerUser(this);
-		guiControllerUser.addChangeListener(valueChangeListener);
-		return guiControllerUser;
+		return new GuiControllerUser(this);
 	}
 }

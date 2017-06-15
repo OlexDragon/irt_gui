@@ -1,6 +1,7 @@
 package irt.controller;
 
 import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.Protocol;
 import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.DemoPanel;
@@ -11,32 +12,12 @@ public class GuiControllerUser extends GuiControllerAbstract {
 
 	public GuiControllerUser(IrtGui gui) {
 		super("Gui Controller", gui);
-	}
-
-	@Override
-	public void run() {
 		try {
-			synchronized (this) {
-				wait(1000);
-			}
 			unitsPanel.add(new DemoPanel());
 			unitsPanel.revalidate();
 			unitsPanel.repaint();
 		} catch (Exception e) {
 			logger.catching(e);
-		}
-
-		while (true) {
-			try {
-				if (isSerialPortSet())
-					getUnitsInfo();
-
-				synchronized (this) {
-					wait(5000);
-				}
-			} catch (Exception e) {
-				logger.catching(e);
-			}
 		}
 	}
 
@@ -53,5 +34,10 @@ public class GuiControllerUser extends GuiControllerAbstract {
 	@Override
 	public Protocol getDefaultProtocol() {
 		return Protocol.DEMO;
+	}
+
+	@Override
+	protected void getInfo() {
+		getUnitsInfo();
 	}
 }

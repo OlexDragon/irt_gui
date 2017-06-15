@@ -3,6 +3,7 @@ package irt.controller;
 import java.awt.Component;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.Optional;
 
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -11,6 +12,7 @@ import javax.swing.event.ChangeListener;
 
 import irt.controller.control.ControllerAbstract;
 import irt.data.DacValue;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.interfaces.PacketWork;
@@ -27,7 +29,7 @@ public class DacController extends ControllerAbstract {
 
 	private Value value;
 
-	public DacController(int deviceType, String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
+	public DacController(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, int dacNumber, JSlider slider, JTextField txtDacValue) {
 		super(deviceType, controllerName, packetWork, null, null);
 		value = setValue();
 		setListeners();

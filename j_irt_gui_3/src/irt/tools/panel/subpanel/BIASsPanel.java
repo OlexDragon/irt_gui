@@ -59,6 +59,7 @@ import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.to_do.InitializePicoBuc;
 import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
 import irt.data.RundomNumber;
@@ -155,7 +156,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		@Override public void focusLost(FocusEvent e) {}
 	};
 
-	public BIASsPanel(final int deviceType, final LinkHeader linkHeader, final boolean isMainBoard) {
+	public BIASsPanel(final Optional<DeviceType> deviceType, final LinkHeader linkHeader, final boolean isMainBoard) {
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
 				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
@@ -182,7 +183,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 				DeviceInfo deviceInfo = GuiController.getDeviceInfo(linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0));
 				logger.trace(deviceInfo);
-				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getType()<1000 && deviceInfo.getRevision()>=2 : true;
+				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getDeviceType().filter(dt->dt.TYPE_ID<1000).map(dt->true).orElse(false) && deviceInfo.getRevision()>=2 : true;
 
 				addController( new NGlobalController(deviceType,switchNGlobal,
 								new DeviceDebagGetter(linkHeader,
@@ -832,7 +833,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					final int clickCount = e.getClickCount();
-					if(clickCount>2){
+					if(clickCount==2){
 						label.setText("");
 						synchronized (this) {
 							average.clear();

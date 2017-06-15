@@ -18,6 +18,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
 import irt.data.packet.MuteControlPacket;
 import irt.data.packet.MuteControlPacket.MuteCommands;
 import irt.data.packet.MuteControlPacket.MuteStatus;
@@ -93,7 +94,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 		.filter(h->h.getGroupId()==MuteControlPacket.GROUP_ID)
 		.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.map(h->(LinkedPacket)packet)
-		.filter(p->p.getLinkHeader().getAddr()==linkAddr)
+		.filter(p->Optional.ofNullable(p.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0)==linkAddr)
 		.ifPresent(p->{
 			MuteControlPacket tmp = new MuteControlPacket(p);
 			((Optional<MuteStatus>) tmp.getValue())

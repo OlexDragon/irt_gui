@@ -4,12 +4,14 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
+import java.util.Optional;
 
 import javax.swing.JButton;
 
 import irt.controller.StoreConfigController;
 import irt.controller.SwitchController;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
@@ -28,7 +30,7 @@ public class ControlController extends ControllerAbstract {
 	 * Use for LO control
 	 * @param hasFreqSet 
 	 */
-	public ControlController(int deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel) {
+	public ControlController(Optional<DeviceType> deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel) {
 		super(deviceType, controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
 //		if(comboBoxfreqSet==null)
 //			setSend(false);

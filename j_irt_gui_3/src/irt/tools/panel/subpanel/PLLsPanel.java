@@ -10,6 +10,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Optional;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -39,6 +40,7 @@ import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
 import irt.data.PllRegisterTextFieldSlider;
 import irt.data.RundomNumber;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
@@ -74,9 +76,9 @@ public class PLLsPanel extends JPanel {
 	private JCheckBox chckbxUp;
 	private JCheckBox chckbxDn;
 	private DocumentListener documentListener;
-	private int deviceType;
+	private Optional<DeviceType> deviceType;
 
-	public PLLsPanel(int deviceType) {
+	public PLLsPanel(Optional<DeviceType> deviceType) {
 		this.deviceType = deviceType;
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {

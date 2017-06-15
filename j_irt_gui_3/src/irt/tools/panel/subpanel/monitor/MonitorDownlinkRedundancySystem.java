@@ -3,6 +3,7 @@ package irt.tools.panel.subpanel.monitor;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
@@ -12,6 +13,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
@@ -33,7 +35,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 	private JLabel labelLNB1Status;
 	private JLabel labelLNB2Status;
 
-	public MonitorDownlinkRedundancySystem(int deviceType, LinkHeader linkHeader) {
+	public MonitorDownlinkRedundancySystem(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
 		super(deviceType, linkHeader, Translation.getValue(String.class, "monitor", "IrtControllPanel"), 250, 210);
 		
 		lblTemperature = new JLabel(":");

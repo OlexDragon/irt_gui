@@ -1,8 +1,8 @@
 package irt.data.value;
 
-import irt.data.DeviceInfo;
-
 import java.text.NumberFormat;
+
+import irt.data.DeviceInfo.DeviceType;
 
 public class ValueFrequency extends Value implements Comparable<ValueFrequency>{
 
@@ -30,18 +30,22 @@ public class ValueFrequency extends Value implements Comparable<ValueFrequency>{
 	private void setMinMax(int converterType) {
 		super.setType(converterType);
 
-		switch(converterType){
-		case DeviceInfo.DEVICE_TYPE_70_TO_L:
-			setMinValue("950 MHz");
-			setMaxValue("2.15 GHz");
-			setPrefix(" MHz");
-			break;
-		case DeviceInfo.DEVICE_TYPE_L_TO_KU:
-			setMinValue("12.8 GHz");
-			setMaxValue("13.05 GHz");
-			setPrefix(" GHz");
-		}
-		
+		DeviceType.valueOf(converterType)
+		.ifPresent(dt->{
+
+			switch(dt){
+			case CONVERTER_70_TO_L:
+				setMinValue("950 MHz");
+				setMaxValue("2.15 GHz");
+				setPrefix(" MHz");
+				break;
+			case CONVERTER_L_TO_KU:
+				setMinValue("12.8 GHz");
+				setMaxValue("13.05 GHz");
+				setPrefix(" GHz");
+			default:
+			}
+		});		
 	}
 
 	@Override

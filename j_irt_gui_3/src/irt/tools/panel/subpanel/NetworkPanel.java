@@ -146,7 +146,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	private byte unitAddress;
 
 	// ******************************* constructor NetworkPanel   ***************************************************
-	public NetworkPanel(final int deviceType, final LinkHeader linkHeader) {
+	public NetworkPanel(final LinkHeader linkHeader) {
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
 				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null){

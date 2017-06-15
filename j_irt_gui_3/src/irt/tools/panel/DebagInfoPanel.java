@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Optional;
 
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -15,6 +16,7 @@ import javax.swing.event.AncestorListener;
 import irt.controller.DeviceDebugController;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.data.RundomNumber;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.PacketWork;
@@ -29,7 +31,7 @@ public class DebagInfoPanel extends JPanel {
 	private JComboBox<Integer> cbParameter;
 //	private JPanel owner;
 
-	public DebagInfoPanel(final int deviceType, LinkHeader linkHeader, JPanel panel) {
+	public DebagInfoPanel(final Optional<DeviceType> deviceType, LinkHeader linkHeader, JPanel panel) {
 		this.linkHeader = linkHeader;
 
 //		if(panel!=null)
