@@ -27,14 +27,12 @@ public class AlarmsSummaryPacket extends PacketAbstract {
 				.ofNullable(getPayloads())
 				.filter(pls->!pls.isEmpty())
 				.map(pls->pls.parallelStream())
-				.map(stream->{
+				.flatMap(stream->{
 					return stream
 							.filter(pl->pl.getParameterHeader().getSize()==4)
 							.map(pl->pl.getInt(0)&7)
 							.findAny();
 				})
-				.filter(o->o.isPresent())
-				.map(o->o.get())
 				.map(index->AlarmSeverities.values()[index])	
 				.map(Object.class::cast)
 				.orElse(getHeader().getOptionStr());

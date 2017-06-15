@@ -3,16 +3,18 @@ package irt.tools.panel.subpanel.control;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import irt.controller.control.ControlControllerPicobuc;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 
 @SuppressWarnings("serial")
 public class ControlPanelSSPA extends ControlPanelImpl {
 
-	public ControlPanelSSPA(int deviceType, LinkHeader linkHeader, int flags) {
+	public ControlPanelSSPA(Optional<DeviceType> deviceType, LinkHeader linkHeader, int flags) {
 		super(deviceType, linkHeader, (short)ActionFlags.FLAG_ATTENUATION.ordinal()|flags);
 	}
 

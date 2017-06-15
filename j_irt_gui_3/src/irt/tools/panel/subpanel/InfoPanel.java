@@ -14,8 +14,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -203,37 +204,42 @@ public class InfoPanel extends JPanel implements Refresh {
 		lblVersion.setBounds(84, 99, 198, 14);
 		lblVersion.setForeground(Color.WHITE);
 		lblVersion.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		DumpControllers.addActionWhenDump(new BooleanSupplier() {
+		DumpControllers.addActionWhenDump(new Consumer<String>() {
 
 			private final Timer timer = new Timer(true);
 
 			@Override
-			public boolean getAsBoolean() {
+			public void accept(String s) {
+				new SwingWorker<Void, Void>(){
 
-				if(secondsCount==null)
-					return false;
-
-				final Border border = lblVersion.getBorder();
-
-				if(border!=null)
-					return secondsCount.isRun();
-
-				timer.schedule(new TimerTask() {
-					
 					@Override
-					public void run() {
-						new SwingWorker<Void, Void>(){
+					protected Void doInBackground() throws Exception {
 
-							@Override
-							protected Void doInBackground() throws Exception {
-								lblVersion.setBorder(null);
-								return null;
-							}
+						final Border border = lblVersion.getBorder();
+						if(border!=null)
+							return null;
+
+						
+						lblVersion.setBorder(BorderFactory.createLineBorder(Color.YELLOW));
+
+						timer.schedule(new TimerTask() {
 							
-						}.execute();
+							@Override
+							public void run() {
+								new SwingWorker<Void, Void>(){
+
+									@Override
+									protected Void doInBackground() throws Exception {
+										lblVersion.setBorder(null);
+										return null;
+									}
+									
+								}.execute();
+							}
+						}, TimeUnit.SECONDS.toMillis(1));
+						return null;
 					}
-				}, 1);
-				return secondsCount.isRun();
+				}.execute();
 			}
 		});
 
@@ -307,7 +313,7 @@ public class InfoPanel extends JPanel implements Refresh {
 
 	public void setInfo(DeviceInfo deviceInfo) {
 		if(deviceInfo!=null){
-			lblDeviceId.setText(deviceInfo.getType()+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype());
+			lblDeviceId.setText(deviceInfo.getDeviceType()+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype());
 			lblVersion.setText(deviceInfo.getFirmwareVersion().toString());
 			lblBuiltDate.setText(deviceInfo.getFirmwareBuildDate().toString());
 			lblSn.setText(deviceInfo.getSerialNumber().toString());
@@ -353,10 +359,6 @@ public class InfoPanel extends JPanel implements Refresh {
 
 		public SecondsCount(int firmwareBuildCounter){
 			scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
-		}
-
-		public boolean isRun() {
-			return scheduledFuture!=null && !scheduledFuture.isCancelled();
 		}
 
 		public void stop() {

@@ -1,9 +1,12 @@
 package irt.controller;
 
+import java.util.Optional;
+
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -16,7 +19,7 @@ public class GainController extends ValueRangeControllerAbstract {
 
 	private Style style;
 
-	public GainController(int deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+	public GainController(Optional<DeviceType> deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType,
 				"Gain Controller",
 				new ConfigurationSetter(linkHeader,

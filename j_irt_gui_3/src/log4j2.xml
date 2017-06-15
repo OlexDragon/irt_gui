@@ -9,7 +9,7 @@
     <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.3.122.log"
     						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{yyyy-MM-dd}-%i.log.gz"
     						  bufferedIO="false">
-		<PatternLayout pattern="%d %n%m%n%n" />
+		<PatternLayout pattern="=== %d %m%n%n" />
 		<Policies>
 			<SizeBasedTriggeringPolicy size="20 MB" />
 		</Policies>

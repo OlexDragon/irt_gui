@@ -19,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -48,6 +49,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.serial_port.value.setter.Setter;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
 import irt.data.RundomNumber;
@@ -131,7 +133,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		@Override public void focusLost(FocusEvent e) {}
 	};
 
-	public DACsPanel(final int deviceType, final LinkHeader linkHeader) {
+	public DACsPanel(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
 		addHierarchyListener(new HierarchyListener() {
 			public void hierarchyChanged(HierarchyEvent e) {
 				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)

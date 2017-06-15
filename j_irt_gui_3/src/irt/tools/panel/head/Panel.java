@@ -1,10 +1,5 @@
 package irt.tools.panel.head;
 
-import irt.controller.AlarmsController;
-import irt.controller.interfaces.Refresh;
-import irt.tools.label.LED;
-import irt.tools.label.VarticalLabel;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -19,6 +14,9 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -36,8 +34,23 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
+import irt.controller.GuiControllerAbstract;
+import irt.controller.interfaces.Refresh;
+import irt.data.listener.PacketListener;
+import irt.data.packet.AlarmStatusPacket.AlarmSeverities;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketAbstract;
+import irt.data.packet.Packets;
+import irt.data.packet.interfaces.PacketWork;
+import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
+import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
+import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
+import irt.tools.fx.MonitorPanelFx.StatusBitsFCM;
+import irt.tools.label.LED;
+import irt.tools.label.VarticalLabel;
+
 @SuppressWarnings("serial")
-public class Panel extends JPanel {
+public class Panel extends JPanel implements PacketListener {
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
@@ -48,16 +61,12 @@ public class Panel extends JPanel {
 //	public int MAX_HEIGHT = 444;
 //	public int BTN_WIDTH;
 
-	private static final Color WARNING_COLOR = new Color(255, 204, 102);
 	protected Color backgroundColor = new Color(0x0B,0x17,0x3B);
 
 	private LED led;
 	private VarticalLabel verticalLabel;
 	protected JPanel userPanel;
 	protected JPanel extraPanel;
-
-	private int alarm;
-	private boolean isMute;
 
 	protected JLabel lblAddress;
 
@@ -266,6 +275,8 @@ public class Panel extends JPanel {
 		);
 		panel.setLayout(gl_panel);
 		setLayout(groupLayout);
+
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
 	public void setVerticalLabelForeground(Color labelForeground) {
@@ -308,36 +319,36 @@ public class Panel extends JPanel {
 			}
 	}
 
-	public void setMute(boolean isMute) {
-		this.isMute = isMute;
-		if(isMute){
-			if(alarm<AlarmsController.ALARMS_STATUS_WARNING)
-				setVerticalLabelBackground(Color.YELLOW);
-			if(led.getLedColor()!=Color.YELLOW)
-				led.setLedColor(Color.YELLOW);
-		}else
-			if(led.getLedColor()!=Color.GREEN)
-				led.setLedColor(Color.GREEN);
-	}
-	public void setAlarm(int alarm) {
-		this.alarm = alarm;
-
-		switch(alarm){
-		case AlarmsController.ALARMS_STATUS_INFO:
-		case AlarmsController.ALARMS_STATUS_NO_ALARM:
-			if(!isMute)
-				setVerticalLabelBackground(Color.GREEN);
-			break;
-		case AlarmsController.ALARMS_STATUS_WARNING:
-		case AlarmsController.ALARMS_STATUS_MINOR:
-			setVerticalLabelBackground(WARNING_COLOR);
-			break;
-		case AlarmsController.ALARMS_STATUS_ALARM:
-		case AlarmsController.ALARMS_STATUS_FAULT:
-			setVerticalLabelBackground(Color.RED);
-			break;
-		}
-	}
+//	public void setMute(boolean isMute) {
+//		this.isMute = isMute;
+//		if(isMute){
+//			if(alarm<AlarmsController.ALARMS_STATUS_WARNING)
+//				setVerticalLabelBackground(Color.YELLOW);
+//			if(led.getLedColor()!=Color.YELLOW)
+//				led.setLedColor(Color.YELLOW);
+//		}else
+//			if(led.getLedColor()!=Color.GREEN)
+//				led.setLedColor(Color.GREEN);
+//	}
+//	public void setAlarm(int alarm) {
+//		this.alarm = alarm;
+//
+//		switch(alarm){
+//		case AlarmsController.ALARMS_STATUS_INFO:
+//		case AlarmsController.ALARMS_STATUS_NO_ALARM:
+//			if(!isMute)
+//				setVerticalLabelBackground(Color.GREEN);
+//			break;
+//		case AlarmsController.ALARMS_STATUS_WARNING:
+//		case AlarmsController.ALARMS_STATUS_MINOR:
+//			setVerticalLabelBackground(WARNING_COLOR);
+//			break;
+//		case AlarmsController.ALARMS_STATUS_ALARM:
+//		case AlarmsController.ALARMS_STATUS_FAULT:
+//			setVerticalLabelBackground(Color.RED);
+//			break;
+//		}
+//	}
 
 	private void setAllPanelsVisible(boolean visible) {
 		userPanel.setVisible(visible);
@@ -348,5 +359,46 @@ public class Panel extends JPanel {
 	public void resize(){
 		if(!getSize().equals(getPreferredSize()))
 			setSize(getPreferredSize());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onPacketRecived(Packet packet) {
+
+		final Optional<? extends PacketAbstract> oP = Optional
+														.of(packet)
+														.filter(
+																p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY ||
+																p.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
+														.flatMap(Packets::cast);
+
+		final PacketAbstract p = oP.orElse(null);
+
+		if(p==null) return;
+
+		final Object value = p.getValue();
+
+		if(value instanceof AlarmSeverities){
+			AlarmSeverities as = (AlarmSeverities)value;
+
+			final Color background = as.getBackground();
+			if(!verticalLabel.getBackground().equals(background))
+				setVerticalLabelBackground(background);
+
+		}else if(value instanceof Map){
+
+			setVerticalLabelBackground(((Map<Object, Object>)value)
+					.entrySet()
+					.parallelStream()
+					.filter(es->(es.getKey().equals(ParameterHeaderCodeFCM.STATUS) || es.getKey().equals(ParameterHeaderCodeBUC.STATUS)))
+					.map(Map.Entry::getValue)
+					.filter(o->o instanceof Object[])
+					.map(v->(Object[])v)
+					.flatMap(Arrays::stream)
+					.filter(st->(st == StatusBitsBUC.MUTE || st == StatusBitsFCM.MUTE_TTL || st == StatusBitsFCM.MUTE))
+					.map(mute->Color.YELLOW)
+					.findAny()
+					.orElse(Color.green));
+		}
 	}
 }

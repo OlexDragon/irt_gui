@@ -7,6 +7,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Optional;
 
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -16,6 +17,7 @@ import javax.swing.event.ChangeListener;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.IdValue;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketHeader;
@@ -32,7 +34,7 @@ public class TextSliderController extends ControllerAbstract {
 	private ActionListener txtActionListener;
 	private KeyListener txtKeyListener;
 
-	public TextSliderController(int deviceType, String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
+	public TextSliderController(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, Value value, JTextField txtField, JSlider slider, Style style) {
 		super(deviceType, controllerName, packetWork, null, style);
 		this.value = value;
 		slider.setMinimum(value.getRelativeMinValue());

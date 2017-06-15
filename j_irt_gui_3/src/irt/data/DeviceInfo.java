@@ -3,6 +3,7 @@ package irt.data;
 import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
@@ -23,41 +24,71 @@ public class DeviceInfo {
 	public static final int SUBTYPE_FIRST_BYTE 	= 8;
 	public static final int SIZE 				= 12;
 
-	public static final int DEVICE_TYPE_BIAS_BOARD		= 2,
-							DEVICE_TYPE_PICOBUC_L_TO_KU = 100,
-							DEVICE_TYPE_PICOBUC_L_TO_C 	= 101,
-							DEVICE_TYPE_SSPA 			= 102,
-							DEVICE_TYPE_FUTURE_BIAS_BOARD= 199,
-							DEVICE_TYPE_HPB_L_TO_KU		= 200,
-							DEVICE_TYPE_HPB_L_TO_C		= 201,
-							DEVICE_TYPE_HPB_SSPA		= 202,
-							DEVICE_TYPE_KA_BAND			= 210,
-							DEVICE_TYPE_KA_SSPA			= 211,
+	public static enum Protocol{
+								ALL,
+								CONVERTER,
+								LINKED,
+								DEMO;
+	};
 
-							DEVICE_TYPE_DLRS		= 410,
+	public enum DeviceType{
+		BIAS_BOARD		(2, Protocol.LINKED, "BIAS_BOARD"),
+		PICOBUC_L_TO_KU	(100, Protocol.LINKED, "PICOBUC_L_TO_KU"),
+		PICOBUC_L_TO_C 	(101, Protocol.LINKED, "PICOBUC_L_TO_C"),
+		SSPA 			(102, Protocol.LINKED, "SSPA"),
+		FUTURE_BIAS_BOARD(199, Protocol.LINKED, "FUTURE_BIAS_BOARD"),
+		HPB_L_TO_KU		(200, Protocol.LINKED, "HPB_L_TO_KU"),
+		HPB_L_TO_C		(201, Protocol.LINKED, "HPB_L_TO_C"),
+		HPB_SSPA		(202, Protocol.LINKED, "HPB_SSPA"),
+		KA_BAND			(210, Protocol.LINKED, "KA_BAND"),
+		KA_SSPA			(211, Protocol.LINKED, "KA_SSPA"),
 
-							DEVICE_TYPE_L_TO_KU_OUTDOOR = 500,
-							DEVICE_TYPE_70_TO_L		= 1001,
-							DEVICE_TYPE_L_TO_70		= 1002,
-							DEVICE_TYPE_140_TO_L	= 1003,
-							DEVICE_TYPE_L_TO_140	= 1004,
-							DEVICE_TYPE_L_TO_KU		= 1005,
-							DEVICE_TYPE_L_TO_C		= 1006,
-							DEVICE_TYPE_70_TO_KY	= 1007,
-							DEVICE_TYPE_KU_TO_70	= 1008,
-							DEVICE_TYPE_140_TO_KU	= 1009,
-							DEVICE_TYPE_KU_TO_140	= 1010,
-							DEVICE_TYPE_KU_TO_L		= 1011,
-							DEVICE_TYPE_C_TO_L		= 1012,
-							DEVICE_TYPE_L_TO_DBS	= 1013,
-							DEVICE_TYPE_L_TO_KA		= 1019,
-							DEVICE_TYPE_SSPA_CONVERTER = 1051,
-							DEVICE_TYPE_MODUL		= 1052,
+		DLRS			(410, Protocol.LINKED, "DLRS"),
 
-							DEVICE_TYPE_BIAS_BOARD_MODUL	= 2001;
+		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.CONVERTER, "L to Ku Converter"),
+		CONVERTER_70_TO_L		(1001, Protocol.CONVERTER, "70 to L Converter"),
+		CONVERTER_L_TO_70		(1002, Protocol.CONVERTER, "L to 70 Converter"),
+		CONVERTER_140_TO_L		(1003, Protocol.CONVERTER, "140 to L Converter"),
+		CONVERTER_L_TO_140		(1004, Protocol.CONVERTER, "L to 140 Converter"),
+		CONVERTER_L_TO_KU		(1005, Protocol.CONVERTER, "L to Lu Converter"),
+		CONVERTER_L_TO_C		(1006, Protocol.CONVERTER, "L to C Converter"),
+		CONVERTER_70_TO_KY		(1007, Protocol.CONVERTER, "70 to Ku Converter"),
+		CONVERTER_KU_TO_70		(1008, Protocol.CONVERTER, "Ku to 70 Converter"),
+		CONVERTER_140_TO_KU		(1009, Protocol.CONVERTER, "140 to Ku Converter"),
+		CONVERTER_KU_TO_140		(1010, Protocol.CONVERTER, "Ku to 140 Converter"),
+		CONVERTER_KU_TO_L		(1011, Protocol.CONVERTER, "Lu to L Converter"),
+		CONVERTER_C_TO_L		(1012, Protocol.CONVERTER, "C to L Converter"),
+		CONVERTER_L_TO_DBS		(1013, Protocol.CONVERTER, "L to DBS Converter"),
+		CONVERTER_L_TO_KA		(1019, Protocol.CONVERTER, "L to KA Converter"),
+		CONVERTER_SSPA 			(1051, Protocol.CONVERTER, "L to SSPA Converter"),
+		CONVERTER_MODUL			(1052, Protocol.CONVERTER, "Modul"),
+
+		BIAS_BOARD_MODUL	(2001, Protocol.LINKED, "Bias Board Modul"),
+
+		IMPOSSIBLE				( 0, null, "Impossible meaning");
+
+		public final int TYPE_ID;
+		public final Protocol PROTOCOL;
+		public final String DESCRIPTION;
+
+		private DeviceType(int typeId, Protocol protocol, String description){
+			TYPE_ID = typeId;
+			PROTOCOL = protocol;
+			DESCRIPTION = description;
+		}
+
+		public static Optional<DeviceType> valueOf(int typeId){
+			return Arrays.stream(values()).parallel().filter(dt->dt.TYPE_ID==typeId).findAny();
+		}
+
+		public String toStrong(){
+			return DESCRIPTION;
+		}
+	}
 
 	private LinkHeader linkHeader;
-	private int type;
+	private int typeId;
+	private Optional<DeviceType> deviceType;
 	private int revision;
 	private int subtype;
 	private StringData unitPartNumber;
@@ -74,32 +105,6 @@ public class DeviceInfo {
 
 	public DeviceInfo() {}
 
-	public String getTypeStr() {
-		String deviceTypeStr = "Reconnect the Unit";
-
-		switch(type){
-		case DEVICE_TYPE_70_TO_L:
-			deviceTypeStr = "70 to L Converter";
-			break;
-		case DEVICE_TYPE_L_TO_70:
-			deviceTypeStr = "L to 70 Converter";
-			break;
-		case DEVICE_TYPE_140_TO_L:
-			deviceTypeStr = "140 to L Converter";
-			break;
-		case DEVICE_TYPE_L_TO_140:
-			deviceTypeStr = "L to 140 Converter";
-			break;
-		case DEVICE_TYPE_L_TO_KU:
-			deviceTypeStr = "L to Ku Converter";
-			break;
-		default:
-			deviceTypeStr = "N/A";
-		}
-
-		return deviceTypeStr;
-	}
-
 	public StringData getSerialNumber() {
 		return serialNumber;
 	}
@@ -112,12 +117,17 @@ public class DeviceInfo {
 		return subtype;
 	}
 
-	public int getType() {
-		return type;
+	public int getTypeId() {
+		return typeId;
 	}
 
-	public void setType(int type) {
-		this.type = type;
+	public Optional<DeviceType> getDeviceType() {
+		return deviceType;
+	}
+
+	public void setDeviceType(int typeId) {
+		this.typeId = typeId;
+		this.deviceType = DeviceType.valueOf(typeId);
 	}
 
 	public void setRevision(int revision) {
@@ -172,7 +182,7 @@ public class DeviceInfo {
 
 	public byte[] set(byte[]data){
 		if(data!=null && data.length>=SIZE){
-			type = (int) PacketImp.shiftAndAdd(Arrays.copyOf(data, REVISION_FIRST_BYTE));
+			deviceType = DeviceType.valueOf((int) PacketImp.shiftAndAdd(Arrays.copyOf(data, REVISION_FIRST_BYTE)));
 			revision = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(data, REVISION_FIRST_BYTE,SUBTYPE_FIRST_BYTE));
 			subtype = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(data, SUBTYPE_FIRST_BYTE,SIZE));
 		}
@@ -218,14 +228,17 @@ public class DeviceInfo {
 	}
 
 	public boolean hasSlaveBiasBoard() {
-		return 	getType()>=DeviceInfo.DEVICE_TYPE_BIAS_BOARD
-				&& getType()<=DeviceInfo.DEVICE_TYPE_SSPA
-				&& getSubtype()>=10;
+		return 	deviceType
+				.filter(dt->getSubtype()>10)
+				.filter(dt->dt.TYPE_ID>=DeviceType.BIAS_BOARD.TYPE_ID)
+				.filter(dt->dt.TYPE_ID<=DeviceType.SSPA.TYPE_ID)
+				.map(dt->true)
+				.orElse(false);
 	}
 
 	@Override
 	public String toString() {
-		return "\n\tDeviceInfo [linkHeader=" + linkHeader + ", type=" + type + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber
+		return "\n\tDeviceInfo [linkHeader=" + linkHeader + ", type=" + deviceType + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber
 				+ ", firmwareVersion=" + firmwareVersion + ", firmwareBuildDate=" + firmwareBuildDate + ", uptimeCounter=" + uptimeCounter + ", unitName="
 				+ unitName + "]";
 	}

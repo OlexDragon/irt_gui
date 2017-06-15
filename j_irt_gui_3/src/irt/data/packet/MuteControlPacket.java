@@ -27,7 +27,7 @@ public class MuteControlPacket extends PacketAbstract {
 	}
 
 	public MuteControlPacket(LinkedPacket packet) {
-		super(packet.getLinkHeader().getAddr(),
+		super(Optional.ofNullable(packet.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0),
 				packet.getHeader().getPacketType(),
 				PACKET_ID,
 				GROUP_ID,

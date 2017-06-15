@@ -5,8 +5,9 @@ import java.awt.HeadlessException;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import irt.controller.GuiControllerAbstract.Protocol;
 import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceInfo.Protocol;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.JavaFxWrapper;
 import irt.tools.panel.subpanel.DACsPanel;
@@ -35,26 +36,34 @@ public class ConverterPanel extends DevicePanel {
 //		alarmPanel.setBorder(null);
 		tabbedPane.addTab("alarms", alarmPanel);
 
-		hasDcOutput = 	deviceType == DeviceInfo.DEVICE_TYPE_L_TO_140 ||
-						deviceType == DeviceInfo.DEVICE_TYPE_L_TO_70 ||
-						deviceType == DeviceInfo.DEVICE_TYPE_C_TO_L;
+		hasDcOutput = 	deviceType
+				.filter(
+						dt->(dt==DeviceType.CONVERTER_L_TO_140 ||
+						dt == DeviceType.CONVERTER_L_TO_70 ||
+						dt == DeviceType.CONVERTER_C_TO_L))
+				.map(dt->true)
+				.orElse(false);
 
-		hasFreqSet 	= 	deviceType == DeviceInfo.DEVICE_TYPE_L_TO_KU||
-						deviceType == DeviceInfo.DEVICE_TYPE_L_TO_C	||
-						deviceType == DeviceInfo.DEVICE_TYPE_KU_TO_L||
-						deviceType == DeviceInfo.DEVICE_TYPE_C_TO_L;
+		hasFreqSet 	= 	deviceType
+				.filter(
+						dt->(dt == DeviceType.CONVERTER_L_TO_KU ||
+						dt == DeviceType.CONVERTER_L_TO_C ||
+						dt == DeviceType.CONVERTER_KU_TO_L||
+						dt == DeviceType.CONVERTER_C_TO_L))
+				.map(dt->true)
+				.orElse(false);
 
 		JPanel dacPanel = new DACsPanel(deviceType, null);
 		tabbedPane.addTab("DACs", null, dacPanel, null);
 		dacPanel.setLayout(null);
 
-		JPanel registersPanel = protocol.getDeviceType()== DeviceInfo.DEVICE_TYPE_L_TO_KU ? new PLL_HMC807LP6CE_Reg9(deviceType) : new PLLsPanel(deviceType);
+		JPanel registersPanel = deviceInfo.getDeviceType().filter(dt->dt==DeviceType.CONVERTER_L_TO_KU).map(dt->new PLL_HMC807LP6CE_Reg9(deviceType)).map(JPanel.class::cast).orElse(new PLLsPanel(deviceType));
 		tabbedPane.addTab("PLLs", null, registersPanel, null);
 
 //		JPanel registerPanel = new RegistersPanel();
 //		getTabbedPane().addTab("Registers", null, registerPanel, null);
 
-		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceInfo.getType(), null, this);
+		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceInfo.getDeviceType(), null, this);
 		tabbedPane.addTab("Info", null, infoPanel, null);
 	}
 

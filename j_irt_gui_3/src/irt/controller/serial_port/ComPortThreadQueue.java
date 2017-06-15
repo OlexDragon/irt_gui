@@ -37,6 +37,7 @@ public class ComPortThreadQueue implements Runnable {
 
 	@Override
 	public void run() {
+
 		boolean sent = false;
 		PacketWork packetWork = null;
 		try {
@@ -59,10 +60,7 @@ public class ComPortThreadQueue implements Runnable {
 						return;
 					}
 
-					// if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND)
-					// logger.error(packetThread);
-
-					if (serialPort.isOpened() && packetThread.isReadyToSend()) {
+					if (serialPort.isOpened()) {
 						sent = false;
 
 						Packet send = serialPort.send(packetWork);
@@ -82,9 +80,6 @@ public class ComPortThreadQueue implements Runnable {
 					}
 				} else
 					logger.warn("packetThread==null; ({})", packetWork);
-				// if(comPortQueue.isEmpty()){
-				// serialPort.closePort();
-				// }
 			} else
 				logger.warn("serialPort==null");
 		} catch (Exception e) {

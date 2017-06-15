@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -20,6 +21,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
@@ -43,7 +45,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 
 	private JLabel lblSwitch;
 
-	public ControlDownlinkRedundancySystem(final int deviceType, final LinkHeader linkHeader) {
+	public ControlDownlinkRedundancySystem(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
 		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 250, 180);
 
 		ldLnb1 = new LED(Color.YELLOW, (String) null);
@@ -117,7 +119,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract {
 		add(lblSwitch);
 	}
 
-	private void switchLNB(final int deviceType, final LinkHeader linkHeader) {
+	private void switchLNB(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
 		Setter setter = new Setter(
 							linkHeader,
 							PacketImp.PACKET_TYPE_COMMAND,

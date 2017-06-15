@@ -13,6 +13,7 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -52,7 +53,7 @@ public class UserPicobucPanel extends DevicePanel {
 			alarmPanel.setBorder(null);
 			tabbedPane.addTab("alarms", alarmPanel);
 
-			NetworkPanel networkPanel = new NetworkPanel(deviceType, linkHeader);
+			NetworkPanel networkPanel = new NetworkPanel(linkHeader);
 			tabbedPane.addTab("network", networkPanel);
 
 			int tabCount = tabbedPane.getTabCount();
@@ -71,11 +72,16 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		if(deviceType>=DeviceInfo.DEVICE_TYPE_BIAS_BOARD &&
-				deviceType<=DeviceInfo.DEVICE_TYPE_HPB_SSPA &&
-				(deviceType!=DeviceInfo.DEVICE_TYPE_BIAS_BOARD || deviceInfo.getRevision()>1))
-			showRedundant();
-			setRedundancyName();
+		deviceType
+		.map(dt->dt.TYPE_ID)
+		.filter(tId->tId>DeviceType.BIAS_BOARD.TYPE_ID)
+		.filter(tId->tId>DeviceType.HPB_SSPA.TYPE_ID)
+		.filter(tId->(tId!=DeviceType.BIAS_BOARD.TYPE_ID || deviceInfo.getRevision()>1))
+		.ifPresent(
+				tId->{
+					showRedundant();
+					setRedundancyName();
+				});
 	}
 
 	private void setRedundancyName() {
@@ -148,20 +154,21 @@ public class UserPicobucPanel extends DevicePanel {
 
 	@Override
 	protected JPanel getNewControlPanel() {
-		JPanel controlPanel;
-
-		switch(deviceType){
-		case DeviceInfo.DEVICE_TYPE_DLRS:
-			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
-			break;
-		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_C:
-		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_KU:
-		case DeviceInfo.DEVICE_TYPE_HPB_SSPA:
-			controlPanel = new ControlPanelHPB(linkHeader.getAddr());
-			break;
-		default:
-			controlPanel = new ControlPanelPicobuc(deviceType, linkHeader);
-		}
+		JPanel controlPanel = deviceType
+				.map(
+						dt->{
+			
+							switch(dt){
+							case DLRS:
+								return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+							case HPB_L_TO_C:
+							case HPB_L_TO_KU:
+							case HPB_SSPA:
+								return new ControlPanelHPB(linkHeader.getAddr());
+							default:
+								return new ControlPanelPicobuc(deviceType, linkHeader);
+							}
+						}).orElse(new ControlPanelPicobuc(deviceType, linkHeader));
 
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
@@ -189,7 +196,7 @@ public class UserPicobucPanel extends DevicePanel {
 	}
 
 	public void showRedundant() {
-		tabbedPane.addTab("redundancy", new RedundancyPanel(deviceType, getLinkHeader()));
+		tabbedPane.addTab("redundancy", new RedundancyPanel(getLinkHeader()));
 
 		int index = tabbedPane.getTabCount()-1;
 		String title = tabbedPane.getTitleAt(index);

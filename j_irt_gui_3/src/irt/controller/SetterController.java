@@ -1,9 +1,11 @@
 package irt.controller;
 
 import java.awt.Component;
+import java.util.Optional;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.ToDo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -17,7 +19,7 @@ public class SetterController extends ControllerAbstract {
  * @param packetWork should be command 
  * @param style Controller work style 
  */
-	public SetterController(int deviceType, String controllerName, PacketWork packetWork, ToDo toDo, Style style) {
+	public SetterController(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, ToDo toDo, Style style) {
 		super(deviceType, controllerName, packetWork, null, style);
 		this.toDo = toDo;
 

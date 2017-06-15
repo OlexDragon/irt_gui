@@ -1,11 +1,14 @@
 package irt.controller.control;
 
+import java.util.Optional;
+
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 public class ControlControllerPicobuc extends ControlController{
 
-	public ControlControllerPicobuc(int deviceType, LinkHeader linkHeader, MonitorPanelAbstract panel) {
+	public ControlControllerPicobuc(Optional<DeviceType> deviceType, LinkHeader linkHeader, MonitorPanelAbstract panel) {
 		super(deviceType, "ControlControllerPicobuc", linkHeader, panel);
 	}
 

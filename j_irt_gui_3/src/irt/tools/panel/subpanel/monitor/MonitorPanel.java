@@ -2,13 +2,14 @@ package irt.tools.panel.subpanel.monitor;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.value.ValueDouble;
@@ -23,7 +24,7 @@ public class MonitorPanel extends MonitorPanelSSPA implements Monitor {
 	private LED ledLock;
 	private int input;
 
-	public MonitorPanel(int deviceType, LinkHeader linkHeader) {
+	public MonitorPanel(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
 		super(deviceType, linkHeader);
 
 
@@ -31,7 +32,7 @@ public class MonitorPanel extends MonitorPanelSSPA implements Monitor {
 		lblInputPower.setName("Input Power");
 		lblInputPower.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblInputPower.setForeground(Color.WHITE);
-		int y = deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR ? 22 : 45;
+		int y = deviceType.filter(dt->dt==DeviceType.CONVERTER_L_TO_KU_OUTDOOR).map(dt->22).orElse(45);
 		lblInputPower.setBounds(99, y, 100, 17);
 		add(lblInputPower);
 
@@ -127,7 +128,11 @@ public class MonitorPanel extends MonitorPanelSSPA implements Monitor {
 		ValueDouble v;
 		switch(parameter){
 		case PacketImp.PARAMETER_MEASUREMENT_FCM_INPUT_POWER:
-			if(deviceType!=DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
+			
+			if(		deviceType
+					.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
+					.isPresent()){
+
 				super.packetRecived(parameter, flags, value);
 				break;
 			}

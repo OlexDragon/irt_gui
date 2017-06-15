@@ -39,7 +39,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.interfaces.ControlPanel;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.IdValueFreq;
@@ -86,7 +86,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	private int flags;
 
 	@SuppressWarnings("unused")
-	public ControlPanelImpl(final int deviceType, LinkHeader linkHeader, int flags) {
+	public ControlPanelImpl(final Optional<DeviceType> deviceType, LinkHeader linkHeader, int flags) {
 		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
 		setName("ControlPanelImpl");
 
@@ -101,7 +101,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
 		btnMute = new MuteButton();
-		btnMute.setLinkAddr(linkHeader.getAddr());
+		btnMute.setLinkAddr(Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte) 0));
 		btnMute.setName("Button Mute");
 		Point p = getMuteButtonPosition();
 		if(p==null)
@@ -161,15 +161,17 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		add(txtGain);
 		txtGain.setColumns(10);
 
-		if(deviceType>DeviceInfo.DEVICE_TYPE_L_TO_KU_OUTDOOR){
-			btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
-			btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-			btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
-			btnStoreConfig.setName("Store");
-			p = getConfigButtonPosition();
-			btnStoreConfig.setBounds(p.x, p.y, size, size);
-			add(btnStoreConfig);
-		}
+		deviceType.ifPresent(dt->{
+			if(dt.TYPE_ID>DeviceType.CONVERTER_L_TO_KU_OUTDOOR.TYPE_ID){
+				btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());
+				btnStoreConfig.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				btnStoreConfig.setToolTipText(Translation.getValue(String.class, "store_config", "Store Config"));
+				btnStoreConfig.setName("Store");
+				Point point = getConfigButtonPosition();
+				btnStoreConfig.setBounds(point.x, point.y, size, size);
+				add(btnStoreConfig);
+			}
+		});
 
 		cbActionSelector = new JComboBox<>();
 		cbActionSelector.addPopupMenuListener(Listeners.popupMenuListener);

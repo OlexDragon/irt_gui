@@ -13,6 +13,7 @@ import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
+import java.util.Optional;
 
 import javax.swing.JComboBox;
 import javax.swing.JSlider;
@@ -27,6 +28,7 @@ import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.Listeners;
 import irt.data.RegisterValue;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ControllerFocusListener;
 import irt.data.listener.ValueChangeListener;
@@ -62,7 +64,7 @@ public class DeviceDebugController extends ControllerAbstract {
 /**
  * @param addrToSave if addrToSave < 0 save command deasn't work
  */
-	public DeviceDebugController(int deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
+	public DeviceDebugController(Optional<DeviceType> deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
 		super(deviceType, controllerName, packetWork, null, style);
 		logger.entry(controllerName);
 
@@ -81,7 +83,7 @@ public class DeviceDebugController extends ControllerAbstract {
 			slider.setMaximum((int) value.getRelativeMaxValue());
 	}
 
-	public DeviceDebugController(int deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
+	public DeviceDebugController(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, JComboBox<String> cbCommand, JComboBox<Integer> cbParameter, JTextArea textArea) {
 		super(deviceType, controllerName, packetWork, null, null);
 
 		this.cbCommand = cbCommand;

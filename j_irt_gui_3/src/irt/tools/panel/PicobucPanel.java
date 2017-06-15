@@ -43,20 +43,19 @@ public class PicobucPanel extends UserPicobucPanel {
 
 	@Override
 	protected JPanel getNewControlPanel() {
-		JPanel controlPanel;
+		JPanel controlPanel = deviceType.map(dt->{
 
-		switch(deviceType){
-		case DeviceInfo.DEVICE_TYPE_DLRS:
-			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
-			break;
-		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_C:
-		case DeviceInfo.DEVICE_TYPE_HPB_L_TO_KU:
-		case DeviceInfo.DEVICE_TYPE_HPB_SSPA:
-			controlPanel = new ControlPanelHPB(linkHeader.getAddr());
-			break;
-		default:
-			controlPanel = new ControlPanelPicobuc(deviceType, linkHeader);
-		}
+			switch(dt){
+			case DLRS:
+				return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+			case HPB_L_TO_C:
+			case HPB_L_TO_KU:
+			case HPB_SSPA:
+				return new ControlPanelHPB(linkHeader.getAddr());
+			default:
+				return new ControlPanelPicobuc(deviceType, linkHeader);
+			}
+		}).orElse(new ControlPanelPicobuc(deviceType, linkHeader));
 
 		controlPanel.setLocation(10, 225);
 		return controlPanel;

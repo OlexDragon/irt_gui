@@ -3,6 +3,7 @@ package irt.controller;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Optional;
 
 import javax.swing.JCheckBox;
 
@@ -10,6 +11,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.serial_port.value.setter.SetterAbstract;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
@@ -21,7 +23,7 @@ public class SwitchController extends ControllerAbstract {
 	private JCheckBox checkBox;
 	private ActionListener actionListener;
 
-	public SwitchController(int deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork) {
+	public SwitchController(Optional<DeviceType> deviceType, String controllerName, JCheckBox checkBox, PacketWork packetWork) {
 		super(deviceType, controllerName, packetWork, null, null);
 		this.checkBox = checkBox;
 	}

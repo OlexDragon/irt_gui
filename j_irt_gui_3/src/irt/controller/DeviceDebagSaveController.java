@@ -3,6 +3,7 @@ package irt.controller;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Optional;
 
 import javax.swing.JTextField;
 import javax.swing.Timer;
@@ -10,6 +11,7 @@ import javax.swing.Timer;
 import irt.controller.control.ControllerAbstract;
 import irt.data.RegisterValue;
 import irt.data.RundomNumber;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.interfaces.PacketWork;
@@ -31,7 +33,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		}
 	};
 
-	public DeviceDebagSaveController(int deviceType, JTextField txtField, PacketWork packetWork, Style stile) {
+	public DeviceDebagSaveController(Optional<DeviceType> deviceType, JTextField txtField, PacketWork packetWork, Style stile) {
 		super(deviceType, "DeviceDebagSaveController", packetWork, null, stile);
 		this.txtField = txtField;
 

@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
+import java.util.Optional;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -24,6 +25,7 @@ import irt.controller.DefaultController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -39,7 +41,7 @@ public class DebugPanel extends JPanel{
 	private LinkHeader linkHeader;
 	private GuiControllerAbstract guiControllerAbstract;
 
-	public DebugPanel(final int deviceType) {
+	public DebugPanel(final Optional<DeviceType> deviceType) {
 		
 		JButton btnClearStatistic = new JButton("Clear Statistics");
 		btnClearStatistic.addActionListener(new ActionListener() {

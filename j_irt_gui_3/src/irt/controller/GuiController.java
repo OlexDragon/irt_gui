@@ -27,20 +27,10 @@ public class GuiController extends GuiControllerAbstract{
 	}
 
 	@Override
-	public void run() {
-		while (true) {
-			try {
-				if (isSerialPortSet()) {
-					getConverterInfo();
-					getUnitsInfo();
-				}
-				synchronized (this) {
-					wait(5000);
-				}
-			} catch (Exception e) {
-				logger.catching(e);
-			}
-		}
+	protected void getInfo(){
+		
+		getConverterInfo();
+		getUnitsInfo();
 	}
 
 	@Override

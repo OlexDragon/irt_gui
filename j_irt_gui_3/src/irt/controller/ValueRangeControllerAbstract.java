@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.Optional;
 
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -12,6 +13,7 @@ import javax.swing.JTextField;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.RundomNumber;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
@@ -31,7 +33,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 	protected TextSliderController textSliderController;
 
-	public ValueRangeControllerAbstract(int deviceType, String controllerName, PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
+	public ValueRangeControllerAbstract(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType, controllerName, packetWork, null, style);
 		this.txtField = txtField;
 		this.slider = slider;

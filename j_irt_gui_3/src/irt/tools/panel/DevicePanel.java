@@ -24,6 +24,7 @@ import org.apache.logging.log4j.core.Logger;
 import irt.controller.GuiController;
 import irt.controller.interfaces.ControlPanel;
 import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.fx.MonitorPanelSwingWithFx;
@@ -39,7 +40,7 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 @SuppressWarnings("serial")
 public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
-	public static final DebugPanel DEBUG_PANEL = new DebugPanel(0);
+	public static final DebugPanel DEBUG_PANEL = new DebugPanel(Optional.empty());
 
 	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
 
@@ -61,7 +62,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	private JPanel controlPanel;
 
-	protected int deviceType;
+	protected Optional<DeviceType> deviceType;
 
 	public DevicePanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
 		super( deviceInfo!=null ? "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName() : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
@@ -69,7 +70,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		setName("DevicePanel");
 		lblAddress.setText(lblAddress.getText()+(linkHeader!=null ? (linkHeader.getAddr()&0xFF) : "N/A"));
 		if(deviceInfo!=null)
-			this.deviceType = deviceInfo.getType();
+			this.deviceType = deviceInfo.getDeviceType();
 		addAncestorListener(new AncestorListener() {
 
 			public void ancestorAdded(AncestorEvent event) {
@@ -155,18 +156,18 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	protected JPanel getNewControlPanel(){
 		logger.error("deviceType: {}", deviceType);
-		MonitorPanelAbstract controlPanel;
 
-		switch(deviceType){
-		case DeviceInfo.DEVICE_TYPE_SSPA:
-			controlPanel = new ControlPanelSSPA(deviceType, linkHeader, 0);
-			break;
-		case DeviceInfo.DEVICE_TYPE_DLRS:
-			controlPanel = new ControlDownlinkRedundancySystem(deviceType, linkHeader);
-			break;
-		default:
-			controlPanel = new ControlPanelUnit(deviceType, linkHeader);
-		}
+		MonitorPanelAbstract controlPanel = deviceType.map(dt->{
+
+															switch(dt){
+															case SSPA:
+																return new ControlPanelSSPA(deviceType, linkHeader, 0);
+															case DLRS:
+																return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+															default:
+																return new ControlPanelUnit(deviceType, linkHeader);
+															}
+											}).orElse(new ControlPanelUnit(deviceType, linkHeader));
 
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
@@ -179,7 +180,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	@Override
 	public int hashCode() {
-		return linkHeader.getAddr();
+		return Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 	}
 
 	public JLabel getSource() {
