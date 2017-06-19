@@ -7,9 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -22,7 +19,6 @@ import org.apache.logging.log4j.core.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.Listeners;
-import irt.data.MyThreadFactory;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.wizards.serial_port.SerialPortWizard;
@@ -34,8 +30,6 @@ public abstract class IrtMainFrame extends JFrame {
 	private final Logger logger = (Logger) LogManager.getLogger();
 
 	protected GuiControllerAbstract guiController;
-//	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
@@ -103,8 +97,6 @@ public abstract class IrtMainFrame extends JFrame {
 			public void componentShown(ComponentEvent arg0) {
 
 				guiController = getNewGuiController();
-//				scheduledFuture = 
-						service.scheduleAtFixedRate(guiController, 2, 5, TimeUnit.SECONDS);
 			}
 		});
 	}

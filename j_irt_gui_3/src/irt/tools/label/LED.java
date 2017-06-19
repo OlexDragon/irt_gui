@@ -1,7 +1,5 @@
 package irt.tools.label;
 
-import irt.controller.BlinkControl;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -9,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.swing.JLabel;
+import javax.swing.Timer;
 
 @SuppressWarnings("serial")
 public class LED extends JLabel{
@@ -16,7 +15,6 @@ public class LED extends JLabel{
 	private Color color;
 	private int off = 30;
 	private volatile boolean isOn;
-	private BlinkControl blinkControl;
 
 	public LED(Color color, String title) {
 		super(title);
@@ -60,24 +58,14 @@ public class LED extends JLabel{
 		g2.dispose();
 	}
 
+	final Timer timer = new Timer(100, e->setOn(false));
 	public void blink() {
-		if(blinkControl==null)
-			blinkControl = new BlinkControl(this);
-		blinkControl.blink();
+		setOn(true);
+		timer.restart();
 	}
-
-//	public void blink(int time, boolean repeat){
-//		blink();
-//		blinkControl.setBlinkTime(time);
-//		blinkControl.setBlink(repeat);
-//	}
 
 	public boolean isOn() {
 		return isOn;
-	}
-
-	public boolean isBlink() {
-		return blinkControl.isBlink();
 	}
 
 	public Color getLedColor() {

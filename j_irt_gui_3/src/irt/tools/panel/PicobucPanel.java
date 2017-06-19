@@ -1,6 +1,7 @@
 package irt.tools.panel;
 
 import java.awt.Color;
+import java.util.Optional;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -18,10 +19,12 @@ public class PicobucPanel extends UserPicobucPanel {
 
 	private JTabbedPane tabbedPane;
 
-	public PicobucPanel(final LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight){
-		super(linkHeader, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+	public PicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight){
+		super(deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 
 		tabbedPane = getTabbedPane();
+
+		final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 
 		JPanel biasPanel = new BIASsPanel(deviceType, linkHeader, true);
 		biasPanel.setBackground(new Color(0xD1,0xD1,0xD1));
@@ -43,6 +46,9 @@ public class PicobucPanel extends UserPicobucPanel {
 
 	@Override
 	protected JPanel getNewControlPanel() {
+
+		final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
+
 		JPanel controlPanel = deviceType.map(dt->{
 
 			switch(dt){

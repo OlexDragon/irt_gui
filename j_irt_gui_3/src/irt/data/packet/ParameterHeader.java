@@ -48,7 +48,7 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 
 	@Override
 	public String toString() {
-		return "ParameterHeader [cod="+getCodeStr()+",size="+getSize()+ "]";
+		return "ParameterHeader";// [cod="+getCodeStr()+",size="+getSize()+ "]";
 	}
 
 	private String getCodeStr() {

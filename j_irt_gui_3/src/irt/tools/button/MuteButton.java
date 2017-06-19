@@ -31,7 +31,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 	private static final long serialVersionUID = 4101471002534919184L;
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 	private byte linkAddr = (byte) 254;
 											public byte getLinkAddr() {
@@ -60,7 +60,11 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(MuteButton.this);
-				scheduledFuture = service.scheduleAtFixedRate(MuteButton.this, 1, 5, TimeUnit.SECONDS);
+				if(service.isShutdown())
+					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+
+				if(scheduledFuture==null || scheduledFuture.isCancelled())
+					scheduledFuture = service.scheduleAtFixedRate(MuteButton.this, 1, 5, TimeUnit.SECONDS);
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 			public void ancestorRemoved(AncestorEvent event) {

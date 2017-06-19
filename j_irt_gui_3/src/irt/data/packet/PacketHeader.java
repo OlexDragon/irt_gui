@@ -1,9 +1,9 @@
 package irt.data.packet;
 
+import java.util.Arrays;
+
 import irt.controller.DumpControllers;
 import irt.data.packet.interfaces.PacketWork;
-
-import java.util.Arrays;
 
 public class PacketHeader{
 
@@ -45,11 +45,6 @@ public class PacketHeader{
 	public void setPacketId	(short irtSlcpPacketId)		{ System.arraycopy(PacketImp.toBytes(irtSlcpPacketId), 0, packetHeader, 1, 2);	}
 	public void setGroupId	(byte irtSlcpPacketGroupId) { packetHeader[3] = irtSlcpPacketGroupId;}
 	public void setOption	(byte option)			 	{ packetHeader[6] = option;	}
-
-	@Override
-	public String toString() {
-		return "PacketHeader [type="+getTypeStr()+",packetId=" +getPacketIdStr()+",groupId=" +getGroupIdStr()+",reserved=" +getReserved()+",option=" +getOptionStr()+"]";
-	}
 
 	public String getPacketIdStr() {
 		String packetIdStr = null;
@@ -346,7 +341,7 @@ public class PacketHeader{
 		return codeStr;
 	}
 
-	public String getTypeStr() {
+	public String getPacketTypeStr() {
 		String typeStr = null;
 		if(packetHeader!=null)
 		switch(getPacketType()){
@@ -419,5 +414,10 @@ public class PacketHeader{
 	@Override
 	public boolean equals(Object obj) {
 		return obj!=null ? obj.hashCode()==hashCode() : false;
+	}
+
+	@Override
+	public String toString() {
+		return "PacketHeader [type="+ getPacketTypeStr() + ",packetId=" +getPacketIdStr()+",groupId=" +getGroupIdStr()+",reserved=" +getReserved()+",option=" +getOptionStr()+"]";
 	}
 }

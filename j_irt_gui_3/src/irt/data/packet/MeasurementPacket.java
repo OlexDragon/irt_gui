@@ -41,6 +41,9 @@ public class MeasurementPacket extends PacketAbstract{
 	@Override
 	public Object getValue() {
 
+		if(getHeader().getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
+			return this;
+
 		final boolean 									isConverter 		= MonitorPanelFx.CONVERTER == getLinkHeader().getAddr();
 		final ParameterHeaderCode 						status 				= isConverter ? ParameterHeaderCodeFCM.STATUS : ParameterHeaderCodeBUC.STATUS;
 

@@ -2,7 +2,6 @@ package irt.controller;
 
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.Protocol;
-import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.DemoPanel;
 import irt.tools.panel.DevicePanel;
@@ -22,8 +21,8 @@ public class GuiControllerUser extends GuiControllerAbstract {
 	}
 
 	@Override
-	protected DevicePanel getNewBiasPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight,	int maxHeight) {
-		return new UserPicobucPanel(linkHeader, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+	protected DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight,	int maxHeight) {
+		return new UserPicobucPanel(deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 	}
 
 	@Override

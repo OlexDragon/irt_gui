@@ -33,6 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.DumpControllers;
 import irt.controller.GuiControllerAbstract;
+import irt.controller.SoftReleaseChecker;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -40,16 +41,14 @@ import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
-import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.PacketWork;
 import irt.tools.Transformer;
 
 @SuppressWarnings("serial")
-public class InfoPanel extends JPanel implements Refresh {
+public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
 
@@ -62,8 +61,8 @@ public class InfoPanel extends JPanel implements Refresh {
 	private JLabel lblCount;
 	private JLabel lblError;
 
-	private LinkHeader linkHeader;
-	private SecondsCount secondsCount;
+	private DeviceInfo deviceInfo;
+	private SecondsCount secondsCount = new SecondsCount();
 	private TitledBorder titledBorder;
 	private JLabel lblCountTxt;
 	private JLabel lblBuiltDateTxt;
@@ -75,7 +74,8 @@ public class InfoPanel extends JPanel implements Refresh {
 	private JLabel lblUnitPartNumberTxt;
 	private JButton btnPanelSize;
 
-	public InfoPanel(LinkHeader linkHeader) {
+	public InfoPanel(DeviceInfo deviceInfo) {
+
 		setForeground(Color.WHITE);
 		setBackground(new Color(0,0x33,0x33));
 		setSize(286, WINDOW_MIN_HEIGHT);
@@ -83,39 +83,19 @@ public class InfoPanel extends JPanel implements Refresh {
 
 		addAncestorListener(new AncestorListener() {
 
-			private PacketListener packetListener = new PacketListener() {
-
-				@Override
-				public void onPacketRecived(Packet packet) {
-					if(packet!=null){
-						LinkHeader lh = null;
-
-						if(packet instanceof LinkedPacket)
-							lh = ((LinkedPacket)packet).getLinkHeader();
-
-						PacketHeader h = packet.getHeader();
-						if((lh==null || lh.equals(InfoPanel.this.linkHeader)) && h!=null && h.getPacketId()==PacketWork.PACKET_ID_DEVICE_INFO && h.getPacketType()!=PacketImp.PACKET_TYPE_REQUEST){
-							int firmwareBuildCounter = new DeviceInfo(packet).getUptimeCounter();
-							if(secondsCount!=null)
-								secondsCount.setFirmwareBuildCounter(firmwareBuildCounter);
-						}
-					}
-				}
-			};
 
 			public void ancestorAdded(AncestorEvent arg0) {
-				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(packetListener);
+				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(InfoPanel.this);
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
+				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(InfoPanel.this);
 				if(secondsCount!=null)
 					secondsCount.stop();
-				packetListener = null;
 			}
 			public void ancestorMoved(AncestorEvent arg0) {	}
 		});
 
-		this.linkHeader = linkHeader;
+		this.deviceInfo = deviceInfo;
 
 		Font font = Translation.getFont()
 				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.size", 18))
@@ -134,6 +114,11 @@ public class InfoPanel extends JPanel implements Refresh {
 		font = font.deriveFont(Translation.getValue(Float.class, "infoPanel.labels.font.size", 16f));
 		
 				lblError = new JLabel();
+				lblError.setText("Firmware Update is Available.");
+				lblError.setVisible(false);
+				lblError.setBackground(new Color(0,0x33,0x33));
+				lblError.setOpaque(true);
+				lblError.setForeground(Color.RED);
 				lblError.setBounds(4, 0, 277, 21);
 				lblError.setFont(new Font("Tahoma", Font.BOLD, 17));
 				lblError.setHorizontalAlignment(SwingConstants.CENTER);
@@ -309,6 +294,7 @@ public class InfoPanel extends JPanel implements Refresh {
 			}
 		});
 
+		setInfo(deviceInfo);
 	}
 
 	public void setInfo(DeviceInfo deviceInfo) {
@@ -326,9 +312,8 @@ public class InfoPanel extends JPanel implements Refresh {
 			if(unitPartNumber!=null)
 				lblUnitPartNumber.setText(unitPartNumber.toString());
 
-			int firmwareBuildCounter = deviceInfo.getUptimeCounter();
-			lblCount.setText(calculateTime(firmwareBuildCounter));
-			secondsCount = new SecondsCount(firmwareBuildCounter);
+			int uptimeCounter = deviceInfo.getUptimeCounter();
+			secondsCount.setUptimeCounter(uptimeCounter);
 		}
 	}
 
@@ -352,12 +337,12 @@ public class InfoPanel extends JPanel implements Refresh {
 //********************************************************************************************************************
 	private class SecondsCount implements Runnable{
 
-		private volatile int firmwareBuildCounter;
+		private volatile int uptimeCounter;
 
 		private ScheduledFuture<?> scheduledFuture;
 		private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
-		public SecondsCount(int firmwareBuildCounter){
+		public SecondsCount(){
 			scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
 		}
 
@@ -369,11 +354,11 @@ public class InfoPanel extends JPanel implements Refresh {
 
 		@Override
 		public void run() {
-			lblCount.setText(calculateTime(++firmwareBuildCounter));
+			lblCount.setText(calculateTime(++uptimeCounter));
 		}
 
-		public void setFirmwareBuildCounter(int firmwareBuildCounter) {
-			this.firmwareBuildCounter = firmwareBuildCounter;
+		public void setUptimeCounter(int uptimeCounter) {
+			this.uptimeCounter = uptimeCounter;
 		}
 	}
 
@@ -399,5 +384,39 @@ public class InfoPanel extends JPanel implements Refresh {
 		lblSnTxt.setText(Translation.getValue(String.class, "sn", "SN")+":");
 		lblUnitPartNumberTxt.setFont(font);
 		lblUnitPartNumberTxt.setText(Translation.getValue(String.class, "part_number", "Part Number")+":");
+	}
+
+	private int softCheckerDeley;
+	@Override
+	public void onPacketRecived(Packet packet) {
+		if(deviceInfo == null)
+			return;
+
+		final Optional<PacketHeader> hasResponse = Optional
+				.ofNullable(packet)
+				.map(Packet::getHeader)
+				.filter(h->h.getPacketId()==PacketWork.PACKET_ID_DEVICE_INFO)
+				.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+
+		if(!hasResponse.isPresent())
+			return;
+
+		final DeviceInfo di = new DeviceInfo(packet);
+
+		if(!deviceInfo.getSerialNumber().equals(di.getSerialNumber()))
+			return;
+
+		setInfo(di);
+		deviceInfo.set(di);
+
+		if(secondsCount!=null)
+			secondsCount.setUptimeCounter(di.getUptimeCounter());
+
+		if(--softCheckerDeley<0){
+			softCheckerDeley = 250;
+
+			final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
+			lblError.setVisible(instance.check(di).orElse(false));
+		}
 	}
 }

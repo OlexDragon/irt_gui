@@ -1,21 +1,5 @@
 package irt.tools.panel;
 
-import irt.controller.translation.Translation;
-import irt.data.Listeners;
-import irt.data.packet.LinkHeader;
-import irt.data.value.Value;
-import irt.data.value.ValueDouble;
-import irt.irt_gui.IrtGui;
-import irt.tools.button.ImageButton;
-import irt.tools.label.ImageLabel;
-import irt.tools.label.LED;
-import irt.tools.panel.head.IrtPanel;
-import irt.tools.panel.head.Panel;
-import irt.tools.panel.subpanel.AlarmsPanel;
-import irt.tools.panel.subpanel.InfoPanel;
-import irt.tools.panel.subpanel.NetworkPanel;
-import irt.tools.panel.subpanel.RedundancyPanelDemo;
-
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Font;
@@ -36,6 +20,22 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+
+import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
+import irt.data.Listeners;
+import irt.data.value.Value;
+import irt.data.value.ValueDouble;
+import irt.irt_gui.IrtGui;
+import irt.tools.button.ImageButton;
+import irt.tools.label.ImageLabel;
+import irt.tools.label.LED;
+import irt.tools.panel.head.IrtPanel;
+import irt.tools.panel.head.Panel;
+import irt.tools.panel.subpanel.AlarmsPanel;
+import irt.tools.panel.subpanel.InfoPanel;
+import irt.tools.panel.subpanel.NetworkPanel;
+import irt.tools.panel.subpanel.RedundancyPanelDemo;
 
 @SuppressWarnings("serial")
 public class DemoPanel extends Panel {
@@ -220,7 +220,7 @@ public class DemoPanel extends Panel {
 		userPanel.add(slider);
 		slider.setOrientation(SwingConstants.VERTICAL);
 
-		infoPanel = new InfoPanel((LinkHeader) null);
+		infoPanel = new InfoPanel((DeviceInfo) null);
 		infoPanel.setBounds(10, 11, 286, 104);
 		extraPanel.add(infoPanel);
 

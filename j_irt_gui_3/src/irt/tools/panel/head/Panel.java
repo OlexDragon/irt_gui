@@ -361,6 +361,8 @@ public class Panel extends JPanel implements PacketListener {
 			setSize(getPreferredSize());
 	}
 
+	private AlarmSeverities alarmSeverities;
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onPacketRecived(Packet packet) {
@@ -379,15 +381,15 @@ public class Panel extends JPanel implements PacketListener {
 		final Object value = p.getValue();
 
 		if(value instanceof AlarmSeverities){
-			AlarmSeverities as = (AlarmSeverities)value;
+			alarmSeverities = (AlarmSeverities)value;
 
-			final Color background = as.getBackground();
-			if(!verticalLabel.getBackground().equals(background))
-				setVerticalLabelBackground(background);
+			final Color background = alarmSeverities.getBackground();
+			setVerticalLabelBackground(background);
 
 		}else if(value instanceof Map){
 
-			setVerticalLabelBackground(((Map<Object, Object>)value)
+			if(alarmSeverities==null || alarmSeverities == AlarmSeverities.NO_ALARM || alarmSeverities == AlarmSeverities.INFO)
+				setVerticalLabelBackground(((Map<Object, Object>)value)
 					.entrySet()
 					.parallelStream()
 					.filter(es->(es.getKey().equals(ParameterHeaderCodeFCM.STATUS) || es.getKey().equals(ParameterHeaderCodeBUC.STATUS)))
@@ -398,7 +400,7 @@ public class Panel extends JPanel implements PacketListener {
 					.filter(st->(st == StatusBitsBUC.MUTE || st == StatusBitsFCM.MUTE_TTL || st == StatusBitsFCM.MUTE))
 					.map(mute->Color.YELLOW)
 					.findAny()
-					.orElse(Color.green));
+					.orElse(AlarmSeverities.NO_ALARM.getBackground()));
 		}
 	}
 }

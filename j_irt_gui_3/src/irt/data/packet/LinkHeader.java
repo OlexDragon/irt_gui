@@ -23,6 +23,11 @@ public class LinkHeader implements Comparable<LinkHeader>{
 	}
 
 	public byte[] toBytes(){
+
+		//Converter
+		if(addr==0)
+			return new byte[0];
+
 		byte[] data = new byte[4];
 
 		data[0] = addr;
@@ -66,11 +71,6 @@ public class LinkHeader implements Comparable<LinkHeader>{
 	}
 
 	@Override
-	public String toString() {
-		return "LinkHeader [addr=" + getIntAddr() + ", control=" + getControl() + ", protocol=" + getProtocol() + "]";
-	}
-
-	@Override
 	public boolean equals(Object obj) {
 		return obj!=null ? obj.hashCode()==hashCode() : false;
 	}
@@ -83,5 +83,10 @@ public class LinkHeader implements Comparable<LinkHeader>{
 	@Override
 	public int compareTo(LinkHeader linkHeader) {
 		return linkHeader!=null ? addr-linkHeader.getAddr() :-1;
+	}
+
+	@Override
+	public String toString() {
+		return "LinkHeader [addr=" + getIntAddr() + ", control=" + getControl() + ", protocol=" + getProtocol() + "]";
 	}
 }

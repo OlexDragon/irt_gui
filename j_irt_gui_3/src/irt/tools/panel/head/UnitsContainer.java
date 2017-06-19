@@ -152,7 +152,7 @@ public class UnitsContainer extends JPanel{
 				}
 		}
 
-		return logger.exit(removed);
+		return removed;
 	}
 
 	public <T> void remove(Class<T> classToRemove) {

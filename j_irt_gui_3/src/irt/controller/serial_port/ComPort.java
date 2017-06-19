@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javax.swing.Timer;
 
@@ -130,7 +131,7 @@ public class ComPort extends SerialPort {
 		Packet packet;
 
 		if(p instanceof LinkedPacket){
-			linkHeader = ((LinkedPacket)p).getLinkHeader();
+			linkHeader = Optional.ofNullable(((LinkedPacket)p).getLinkHeader()).filter(lh->lh.getAddr()!=0).orElse(null);//
 			packet = new LinkedPacketImp(linkHeader);
 		}else{
 			linkHeader = null;
