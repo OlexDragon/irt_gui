@@ -53,9 +53,9 @@ public class DumpControllers implements PacketListener, Runnable{
 
 	private final ArrayList<DeviceDebugPacket> packets = new ArrayList<>();
 
-	public DumpControllers(DeviceInfo deviceInfos) {
+	public DumpControllers(DeviceInfo deviceInfo) {
 
-		this.deviceInfo = deviceInfos;
+		this.deviceInfo = deviceInfo;
 
 		synchronized (dumper) {
 			dumper.info(marker, "\n******************** Start New Dump Block for ********************\n{}", deviceInfo);

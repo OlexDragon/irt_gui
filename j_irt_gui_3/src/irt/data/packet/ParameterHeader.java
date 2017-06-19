@@ -51,7 +51,7 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 		return "ParameterHeader";// [cod="+getCodeStr()+",size="+getSize()+ "]";
 	}
 
-	private String getCodeStr() {
+	public String getCodeStr() {
 		String codeStr = null;
 				switch(getCode()){
 				case PacketImp.PARAMETER_ALL:
