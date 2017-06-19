@@ -47,7 +47,7 @@
 <!--  	<Logger name="irt.tools.CheckBox.LnbPowerSwitch" level="debug"/> -->
 <!--  	<Logger name="irt.tools.CheckBox.LnbReferenceSwitch" level="all"/> -->
 <!--  	<Logger name="irt.tools.combobox.LoSelectComboBox" level="all"/> -->
- 	<Logger name="irt.controller.serial_port.ComPort" level="all"/>
+<!--  	<Logger name="irt.controller.serial_port.ComPort" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="all"/> -->
 <!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
 <!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->

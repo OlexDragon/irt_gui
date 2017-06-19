@@ -21,6 +21,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
+import irt.controller.DumpControllers;
 import irt.controller.GuiController;
 import irt.controller.interfaces.ControlPanel;
 import irt.data.DeviceInfo;
@@ -58,7 +59,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 													return monitorPanel;
 												}
 
-	protected Optional<DeviceType> deviceType;
+	protected Optional<DeviceType> deviceType = Optional.empty();
 
 	private LinkHeader linkHeader;
 
@@ -70,12 +71,13 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		setName("DevicePanel");
 		this.deviceInfo = deviceInfo;
 		
-		final Optional<LinkHeader> oLinkHeader = Optional.ofNullable(deviceInfo.getLinkHeader());
+		final Optional<LinkHeader> oLinkHeader = Optional.ofNullable(deviceInfo).map(DeviceInfo::getLinkHeader).filter(lh->lh!=null);
 		lblAddress.setText(lblAddress.getText()+oLinkHeader.map(LinkHeader::getIntAddr).map(Object::toString).orElse("N/A"));
 		if(deviceInfo!=null)
 			this.deviceType = deviceInfo.getDeviceType();
 		addAncestorListener(new AncestorListener() {
 
+			private DumpControllers dumpController;
 			public void ancestorAdded(AncestorEvent event) {
 
 				monitorPanel = new MonitorPanelSwingWithFx();
@@ -95,12 +97,19 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 					userPanel.add(slider);
 					userPanel.revalidate();
 				}
-			}
-			public void ancestorMoved(AncestorEvent event) {
+				dumpController = new DumpControllers(deviceInfo);
 			}
 			public void ancestorRemoved(AncestorEvent event) {
 				userPanel.removeAll();
+				Optional.ofNullable(dumpController).ifPresent(dc->{
+					try {
+						dc.stop();
+					} catch (Throwable e) {
+						logger.catching(e);
+					}
+				});
 			}
+			public void ancestorMoved(AncestorEvent event) { }
 		});
 
 		linkHeader = oLinkHeader.orElse(new LinkHeader((byte)0, (byte)0, (short) 0));

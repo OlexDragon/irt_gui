@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
@@ -429,6 +430,8 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		private boolean demoPanelRemoved;
 		private Timer createPanel(DeviceInfo deviceInfo) {
 
+			setSysSerialNumber(deviceInfo);
+
 			deviceInfos.add(deviceInfo); //TODO check where used and remove this line of code
 
 			//Remove Demo Panel
@@ -448,6 +451,22 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			final Timer t = new Timer((int) TimeUnit.SECONDS.toMillis(11), e->removePanel(deviceInfo));
 			t.start();
 			return timers.put(deviceInfo, t);
+		}
+
+		private void setSysSerialNumber(DeviceInfo deviceInfo) {
+			Optional
+			.ofNullable(deviceInfo.getSerialNumber())
+			.map(sn->sn.toString())
+			.ifPresent(sn->{
+				final String collect = timers.entrySet().stream().map(t->t.getKey()).map(di->di.getSerialNumber().toString()).collect(Collectors.joining("_"));
+
+				if(!collect.isEmpty())
+					sn += "_" + collect;
+
+				logger.error(sn);
+
+				DumpControllers.setSysSerialNumber(sn);
+			});
 		}
 
 		private void removePanel(DeviceInfo di) {

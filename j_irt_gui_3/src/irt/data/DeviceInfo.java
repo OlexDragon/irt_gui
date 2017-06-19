@@ -86,7 +86,7 @@ public class DeviceInfo {
 
 	private LinkHeader linkHeader;
 	private int typeId;
-	private Optional<DeviceType> deviceType;
+	private Optional<DeviceType> deviceType = Optional.empty();
 	private int revision;
 	private int subtype;
 	private StringData unitPartNumber;
