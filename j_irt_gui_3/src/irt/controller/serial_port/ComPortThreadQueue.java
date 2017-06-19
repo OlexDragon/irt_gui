@@ -1,6 +1,5 @@
 package irt.controller.serial_port;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.Executors;
@@ -16,10 +15,8 @@ import org.apache.logging.log4j.core.Logger;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
-import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.packet.interfaces.PacketWork;
-import irt.data.value.StaticComponents;
 import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
 
@@ -43,10 +40,6 @@ public class ComPortThreadQueue implements Runnable {
 		try {
 
 			packetWork = comPortQueue.take();
-//			if(packetWork.getPriority()==Priority.COMMAND){
-//				logger.error("\n{}:{}", comPortQueue.size(), packetWork.getPriority());
-//				logger.error(packetWork);
-//			}
 
 			if (serialPort != null) {
 				PacketThreadWorker packetThread = packetWork.getPacketThread();
@@ -66,20 +59,13 @@ public class ComPortThreadQueue implements Runnable {
 						Packet send = serialPort.send(packetWork);
 						firePacketListener(send);
 
-						if (send == null || send.getHeader() == null)
-							StaticComponents.getLedRx().setLedColor(Color.WHITE);
-						else if (send.getHeader().getPacketType() != PacketImp.PACKET_TYPE_RESPONSE)
-							StaticComponents.getLedRx().setLedColor(Color.RED);
-						else
-							StaticComponents.getLedRx().setLedColor(Color.GREEN);
-
-						StaticComponents.getLedRx().blink();
 					} else if (!sent) {
 						sent = true;
 						logger.warn("Serial port or Packet is not ready:\n{}", packetWork);
 					}
-				} else
+				} else{
 					logger.warn("packetThread==null; ({})", packetWork);
+				}
 			} else
 				logger.warn("serialPort==null");
 		} catch (Exception e) {
@@ -88,7 +74,8 @@ public class ComPortThreadQueue implements Runnable {
 		}
 	}
 
-	public synchronized void add(PacketWork packetWork){
+	public void add(PacketWork packetWork){
+		logger.entry(packetWork);
 
 		try {
 

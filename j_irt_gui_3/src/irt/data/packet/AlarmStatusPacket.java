@@ -44,8 +44,8 @@ public class AlarmStatusPacket extends PacketAbstract{
 	}
 
 	public enum AlarmSeverities{
-		NO_ALARM("No Alarm", Color.YELLOW, new Color(46, 139, 87)),
-		INFO	("No Alarm", Color.YELLOW, new Color(46, 139, 87)),
+		NO_ALARM("No Alarm", Color.YELLOW, Color.GREEN),
+		INFO	("No Alarm", Color.YELLOW, Color.GREEN),
 
 		WARNING	("Warning", Color.BLACK, new Color(255, 204, 102)),
 		MINOR	("Warning", Color.BLACK, new Color(255, 204, 102)),

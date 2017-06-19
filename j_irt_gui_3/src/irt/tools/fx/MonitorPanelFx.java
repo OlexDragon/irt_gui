@@ -21,6 +21,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
+import irt.data.packet.LinkHeader;
 import irt.data.packet.MeasurementPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
@@ -59,22 +60,20 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private ScheduledFuture<?> scheduleAtFixedRate;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
-	private final MeasurementPacket packetToSend;
-	private byte unitAddress = CONVERTER;
+	private final MeasurementPacket packetToSend = (MeasurementPacket) Packets.MEASUREMENT_ALL.getPacketWork();
+
 												public byte getUnitAddress() {
-													return unitAddress;
+													return Optional.ofNullable(packetToSend.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte)0);
 												}
 
 												public void setUnitAddress(byte unitAddress) {
-													this.unitAddress = unitAddress;
+													packetToSend.setAddr(unitAddress);
 												}
 
 	@FXML private GridPane 	statusPane;
 	@FXML private GridPane 	gridPane;
 
 	public MonitorPanelFx() {
-
-		packetToSend = (MeasurementPacket) Packets.MEASUREMENT_ALL.getPacketWork();
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MonitorPanel.fxml"));
         fxmlLoader.setRoot(this);
@@ -88,7 +87,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	@FXML protected void initialize() {
-		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
     @FXML
@@ -99,9 +97,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	@Override
 	public void run() {
-		logger.entry(packetToSend);
 		try{
-			packetToSend.setAddr(unitAddress);
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
 		}catch (Exception e) {
 			logger.catching(e);
@@ -110,11 +106,14 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	@Override
 	public void onPacketRecived(final Packet packet) {
-		
+
 		final Optional<Packet> ofNullable;
 
 		if(packet instanceof LinkedPacket)
-			ofNullable = Optional.ofNullable((LinkedPacket)packet).filter(p->p.getLinkHeader()==null || p.getLinkHeader().getAddr()==unitAddress).map(Packet.class::cast);
+			ofNullable = Optional
+								.ofNullable((LinkedPacket)packet)
+								.filter(p->p.getLinkHeader()==null || p.getLinkHeader().getAddr()==packetToSend.getLinkHeader().getAddr())
+								.map(Packet.class::cast);
 		else
 			ofNullable= Optional.ofNullable(packet);
 
@@ -127,33 +126,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		.map(pls->pls.stream())
 		.ifPresent(stream->{
 			stream
-//			.sorted(new Comparator<Payload>() {	//Set the same order as in the ParameterHeaderCode
-//				@Override
-//				public int compare(Payload payload1, Payload payload2) {
-//
-//					final boolean isConverter = unitAddress==CONVERTER;
-//
-//					final byte code1 = payload1.getParameterHeader().getCode();
-//					final Optional<? extends ParameterHeaderCode> optional1 = (isConverter ? ParameterHeaderCodeFCM.valueOf(code1) : ParameterHeaderCodeBUC.valueOf(code1));
-//					final Integer valueOf_o1 = optional1
-//														.map(phc->phc.ordinal())
-//														.orElse(ParameterHeaderCodeFCM.values().length);
-//
-//					final byte code2 = payload2.getParameterHeader().getCode();
-//					final Optional<? extends ParameterHeaderCode> optional2 = (isConverter ? ParameterHeaderCodeFCM.valueOf(code2) : ParameterHeaderCodeBUC.valueOf(code2));
-//					final Integer valueOf_o2 = optional2
-//														.map(phc->phc.ordinal())
-//														.orElse(ParameterHeaderCodeFCM.values().length);
-//
-//					return Integer.compare(valueOf_o1, valueOf_o2);
-//				}
-//			})
 			.forEach(pl->{
 				logger.entry(pl);
 
 				Platform.runLater(()->{
 
-					boolean isConverter = unitAddress == CONVERTER;
+					boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
 					final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
 					final byte 							code 				= parameterHeader.getCode();
 
@@ -318,7 +296,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	private boolean isMuted(final int statusBits) {
 
-		if(unitAddress==CONVERTER)
+		if(packetToSend.getLinkHeader().getAddr()==CONVERTER)
 			return StatusBitsFCM.MUTE.isOn(statusBits) || StatusBitsFCM.MUTE_TTL.isOn(statusBits);
 
 		return StatusBitsBUC.MUTE.isOn(statusBits);
@@ -326,14 +304,14 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	private Boolean isLocked(final int statusBits) {
 
-		if(unitAddress==CONVERTER)
+		if(packetToSend.getLinkHeader().getAddr()==CONVERTER)
 			return StatusBitsFCM.LOCK_SUMMARY.isOn(statusBits);
 
 		return  StatusBitsBUC.PLL_UNKNOWN.isOn(statusBits) ? /*does not have PLL*/null : StatusBitsBUC.LOCKED.isOn(statusBits);
 	}
 
 	private String parseTooltip(final int statusBits) {
-		final Object[] sb = unitAddress==CONVERTER ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits);
+		final Object[] sb = packetToSend.getLinkHeader().getAddr()==CONVERTER ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits);
 		return Arrays.toString(sb).replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
 	}
 
@@ -343,7 +321,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	private Label createDescriptionLabel(Payload pl) {
 		final ParameterHeader parameterHeader = pl.getParameterHeader();
-		final Optional<? extends ParameterHeaderCode> code = unitAddress==CONVERTER ? ParameterHeaderCodeFCM.valueOf(parameterHeader.getCode()) : ParameterHeaderCodeBUC.valueOf(parameterHeader.getCode());
+		final Optional<? extends ParameterHeaderCode> code = packetToSend.getLinkHeader().getAddr()==CONVERTER ? ParameterHeaderCodeFCM.valueOf(parameterHeader.getCode()) : ParameterHeaderCodeBUC.valueOf(parameterHeader.getCode());
 
 		String text;
 		if(code.isPresent()) 
@@ -362,11 +340,17 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public void start(){
-		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+
+		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()){
+			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
+		}
 	}
 
 	public void stop(){
+
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+
 		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
 			scheduleAtFixedRate.cancel(true);
 	}

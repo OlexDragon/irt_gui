@@ -41,7 +41,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 
 	private final 	PacketListener 			pl 		= this;
 	private final 	ComPortThreadQueue 		cptq 	= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private final 	ScheduledExecutorService service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private final 	ScheduledFuture<?> 		scheduleAtFixedRate;
 	private final 	LOPacket 				loPacket;
 
@@ -57,7 +57,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 		comboBox.addAncestorListener(ancestorListener);
 
 		packetToSend = new LOFrequenciesPacket(linkAddr);
-		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5000, TimeUnit.MILLISECONDS);
 
 		loPacket = new LOPacket(linkAddr);
 	}
@@ -77,7 +77,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 	int times = 5;
 	@Override
 	public void onPacketRecived(final Packet packet) {
-		scheduledThreadPool.execute(new Runnable() {
+		service.execute(new Runnable() {
 
 			@Override
 			public void run() {
@@ -154,7 +154,7 @@ public class LOComboBoxController extends Observable implements IrtController, R
 			comboBox.removeItemListener(itemListener);
 			comboBox.removeAncestorListener(this);
 			scheduleAtFixedRate.cancel(true);
-			scheduledThreadPool.shutdown();
+			service.shutdown();
 		}
 		public void ancestorMoved(AncestorEvent event) { }
 	};

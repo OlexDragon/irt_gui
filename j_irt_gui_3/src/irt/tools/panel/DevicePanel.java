@@ -46,29 +46,32 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	protected final String selectedTab = "selected_tab_"+getClass().getSimpleName();
 
+	private JPanel controlPanel;
 	private JLabel clickedLabel;
 	private InfoPanel infoPanel;
 	private JTabbedPane tabbedPane;
 
-	protected LinkHeader linkHeader;
-
 	protected final Preferences pref = GuiController.getPrefs();
 
-
 	private MonitorPanelSwingWithFx monitorPanel;
-	public Monitor getMonitorPanel() {
-		return monitorPanel;
-	}
-
-	private JPanel controlPanel;
+												public Monitor getMonitorPanel() {
+													return monitorPanel;
+												}
 
 	protected Optional<DeviceType> deviceType;
 
-	public DevicePanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
+	private LinkHeader linkHeader;
+
+	protected DeviceInfo deviceInfo;
+
+	public DevicePanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
 		super( deviceInfo!=null ? "("+deviceInfo.getSerialNumber()+") "+deviceInfo.getUnitName() : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 		setBorder(null);
 		setName("DevicePanel");
-		lblAddress.setText(lblAddress.getText()+(linkHeader!=null ? (linkHeader.getAddr()&0xFF) : "N/A"));
+		this.deviceInfo = deviceInfo;
+		
+		final Optional<LinkHeader> oLinkHeader = Optional.ofNullable(deviceInfo.getLinkHeader());
+		lblAddress.setText(lblAddress.getText()+oLinkHeader.map(LinkHeader::getIntAddr).map(Object::toString).orElse("N/A"));
 		if(deviceInfo!=null)
 			this.deviceType = deviceInfo.getDeviceType();
 		addAncestorListener(new AncestorListener() {
@@ -78,7 +81,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 				monitorPanel = new MonitorPanelSwingWithFx();
 				monitorPanel.setLocation(10, 11);
 				monitorPanel.setSize(215, 210);
-				Optional.ofNullable(linkHeader).ifPresent(lh->monitorPanel.setUnitAddress(lh.getAddr()));
+				oLinkHeader.ifPresent(lh->monitorPanel.setUnitAddress(lh.getAddr()));
 				userPanel.add((Component) monitorPanel);
 
 				controlPanel = getNewControlPanel();
@@ -100,10 +103,10 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 			}
 		});
 
-		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0);
+		linkHeader = oLinkHeader.orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 		DEBUG_PANEL.setLinkHeader(linkHeader);
 
-		infoPanel = new InfoPanel(linkHeader);
+		infoPanel = new InfoPanel(deviceInfo);
 		infoPanel.setLocation(10, 11);
 		extraPanel.add(infoPanel);
 

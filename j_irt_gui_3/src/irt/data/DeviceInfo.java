@@ -1,6 +1,5 @@
 package irt.data;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +13,6 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
-import irt.tools.panel.subpanel.InfoPanel;
 
 public class DeviceInfo {
 
@@ -97,7 +95,6 @@ public class DeviceInfo {
 	private StringData firmwareBuildDate;
 	private int uptimeCounter;
 	private StringData unitName;
-	private InfoPanel infoPanel;
 
 	public DeviceInfo(Packet packet) {
 		set(packet);
@@ -145,8 +142,10 @@ public class DeviceInfo {
 	public boolean set(Packet packet) {
 		boolean isSet = false;
 		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getGroupId()==PacketImp.GROUP_ID_DEVICE_INFO){
+
 			linkHeader = packet instanceof LinkedPacket ? ((LinkedPacketImp)packet).getLinkHeader() : null;
 			List<Payload> payloads = packet.getPayloads();
+
 			if(payloads!=null){
 				for (Payload pl : payloads)
 					switch (pl.getParameterHeader().getCode()) {
@@ -191,7 +190,7 @@ public class DeviceInfo {
 	}
 
 	public LinkHeader getLinkHeader() {
-		return linkHeader;
+		return Optional.ofNullable(linkHeader).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 	}
 
 	public StringData getFirmwareVersion() {
@@ -214,15 +213,6 @@ public class DeviceInfo {
 		return unitName;
 	}
 
-	public void setError(String errorStr, Color errorColor) {
-		infoPanel.setError(errorStr, errorColor);
-	}
-
-	public void setInfoPanel(InfoPanel infoPanel) {
-		this.infoPanel = infoPanel;
-		infoPanel.setInfo(this);
-	}
-
 	public StringData getUnitPartNumber() {
 		return unitPartNumber;
 	}
@@ -237,9 +227,41 @@ public class DeviceInfo {
 	}
 
 	@Override
+	public int hashCode() {
+		return 31  + ((serialNumber == null) ? 0 : serialNumber.hashCode());
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DeviceInfo other = (DeviceInfo) obj;
+		if (serialNumber == null) {
+			if (other.serialNumber != null)
+				return false;
+		} else if (!serialNumber.equals(other.serialNumber))
+			return false;
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "\n\tDeviceInfo [linkHeader=" + linkHeader + ", type=" + deviceType + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber
 				+ ", firmwareVersion=" + firmwareVersion + ", firmwareBuildDate=" + firmwareBuildDate + ", uptimeCounter=" + uptimeCounter + ", unitName="
 				+ unitName + "]";
+	}
+
+	public void set(DeviceInfo deviceInfo) {
+
+		Optional.of(deviceInfo).map(DeviceInfo::getSerialNumber).filter(sn->sn.equals(serialNumber)).orElseThrow(()->new IllegalArgumentException());
+
+		setDeviceType(deviceInfo.typeId);
+		setRevision(deviceInfo.revision);
+		setSubtype(deviceInfo.subtype);
+		setUptimeCounter(deviceInfo.uptimeCounter);
 	}
 }

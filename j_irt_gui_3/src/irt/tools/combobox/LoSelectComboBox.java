@@ -144,7 +144,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 				return;
 
 			if(h.getPacketType()==PacketImp.PACKET_TYPE_REQUEST || h.getOption()!=0){
-				logger.error("Packet is wrong or no connection: {}", packet);
+				logger.warn("Packet is wrong or no connection: {}", packet);
 				return;
 			}
 

@@ -58,7 +58,6 @@ import irt.controller.serial_port.value.getter.DeviceDebagGetter;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.to_do.InitializePicoBuc;
-import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
@@ -181,9 +180,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				txtPotentiometer5.start();
 				txtPotentiometer6.start();
 
-				DeviceInfo deviceInfo = GuiController.getDeviceInfo(linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0));
-				logger.trace(deviceInfo);
-				boolean isNewBiasBoard = deviceInfo!=null ? deviceInfo.getDeviceType().filter(dt->dt.TYPE_ID<1000).map(dt->true).orElse(false) && deviceInfo.getRevision()>=2 : true;
+				boolean isNewBiasBoard = GuiController.getDeviceInfo(linkHeader).map(di->di.getDeviceType().filter(dt->dt.TYPE_ID<1000).map(dt->true).orElse(false) && di.getRevision()>=2).orElse(true);
 
 				addController( new NGlobalController(deviceType,switchNGlobal,
 								new DeviceDebagGetter(linkHeader,

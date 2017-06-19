@@ -8,14 +8,13 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
@@ -23,6 +22,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,18 +33,15 @@ import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
+import irt.data.MyThreadFactory;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.DeviceInfo.Protocol;
-import irt.data.MyThreadFactory;
-import irt.data.RundomNumber;
-import irt.data.StringData;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketAbstract.Priority;
-import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.irt_gui.IrtGui;
@@ -53,11 +50,10 @@ import irt.tools.panel.DevicePanel;
 import irt.tools.panel.head.Console;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.UnitsContainer;
-import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
 import jssc.SerialPortList;
 
-public abstract class GuiControllerAbstract implements Runnable{
+public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -71,7 +67,9 @@ public abstract class GuiControllerAbstract implements Runnable{
 
 	protected static ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
 
-	private IrtGui gui;
+	//	private ScheduledFuture<?> scheduledFuture;
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+
 	private Console console;
 	protected volatile UnitsContainer unitsPanel;
 	protected JComboBox<String> serialPortSelection;
@@ -79,87 +77,18 @@ public abstract class GuiControllerAbstract implements Runnable{
 	protected HeadPanel headPanel;
 
 	protected VCLC vclc =  new VCLC();
-	protected SoftReleaseChecker softReleaseChecker = getSoftReleaseChecker();
 	protected Protocol protocol = getDefaultProtocol();
 
-	private Remover remover = new Remover(11, TimeUnit.SECONDS);
+	private final PanelController panelController = new PanelController();
 
-	private static Map<LinkHeader, DeviceInfo>  deviceInfos = new HashMap<>();
+	private static Set<DeviceInfo>  deviceInfos = new HashSet<>();
 
 	private byte address;
 
-	private PacketListener packetListener = new PacketListener() {
-
-		private boolean powerIsOff;
-
-		@Override
-		public void onPacketRecived(Packet packet) {
-			logger.trace(packet);
-
-			if (packet != null && packet.getHeader() != null) {
-				PacketHeader header = packet.getHeader();
-
-				byte packetType = header.getPacketType();
-				if (packetType == PacketImp.PACKET_TYPE_RESPONSE) {
-
-					DeviceInfo deviceInfo;
-					switch (header.getGroupId()) {
-					case PacketImp.GROUP_ID_DEVICE_INFO:
-						deviceInfo = new DeviceInfo(packet);
-						logger.debug("{}\n", deviceInfo);
-						remover.updateDeviceInfo(deviceInfo);
-
-						Optional<DeviceType> oDeviceType = deviceInfo.getDeviceType();
-						oDeviceType.ifPresent(dt->{
-
-							if(dt==DeviceType.IMPOSSIBLE)
-								logger.warn("Can not connect. {}", packet);
-
-							else
-								protocol = dt.PROTOCOL;
-						});
-						if(!oDeviceType.isPresent()){
-
-								final int typeId = deviceInfo.getTypeId();
-								JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + typeId + ")");
-								logger.warn("The Device is not Supported.(device Id={})", typeId);
-						}
-
-						new PanelWorker(packet, deviceInfo);
-						break;
-//					case PacketImp.GROUP_ID_ALARM:
-//						if(header.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY && header.getOption()==0) 
-//							new AlarmWorker(packet);
-//						break;
-//					case PacketImp.GROUP_ID_MEASUREMENT:
-//						new MeasurementWorker(packet);
-//						break;
-					}
-				}
-
-				boolean powerIsOff = remover.controllers.isEmpty();
-				if (this.powerIsOff != powerIsOff){
-
-					if(powerIsOff)
-						vclc.fireValueChangeListener(new ValueChangeEvent(false, CONNECTION));
-					else
-						vclc.fireValueChangeListener(new ValueChangeEvent(true, CONNECTION));
-
-					this.powerIsOff = powerIsOff;
-				}
-
-			} else
-				vclc.fireValueChangeListener(new ValueChangeEvent(false, CONNECTION));
-		}
-	};
-
-
 	@SuppressWarnings("unchecked")
 	public GuiControllerAbstract(String threadName, IrtGui gui) {
-		this.gui = gui;
-		guiController = this;
 
-		DevicePanel.DEBUG_PANEL.setGuiController(this);
+		guiController = this;
 
 		comPortThreadQueue.setSerialPort(new ComPort(prefs.get(SERIAL_PORT, "COM1")));
 		console = new Console(gui, "Console");
@@ -201,19 +130,17 @@ public abstract class GuiControllerAbstract implements Runnable{
 				});
 			}
 		}
-		comPortThreadQueue.addPacketListener(packetListener);
+		comPortThreadQueue.addPacketListener(this);
+//		scheduledFuture = 
+				service.scheduleAtFixedRate(this, 2, 5, TimeUnit.SECONDS);
 	}
 
-	public static DeviceInfo getDeviceInfo(LinkHeader linkHeader) {
-		return deviceInfos.get(linkHeader);
-	}
-
-	protected SoftReleaseChecker getSoftReleaseChecker() {
-		return null;
+	public static Optional<DeviceInfo> getDeviceInfo(LinkHeader linkHeader) {
+		return deviceInfos.parallelStream().filter(di->di.getLinkHeader().equals(linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0))).findAny();
 	}
 
 	protected abstract DevicePanel getConverterPanel(DeviceInfo di);
-	protected abstract DevicePanel getNewBiasPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
+	protected abstract DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
 
 	public static ComPortThreadQueue getComPortThreadQueue() {
 		return comPortThreadQueue;
@@ -311,14 +238,9 @@ public abstract class GuiControllerAbstract implements Runnable{
 	}
 
 	private void reset() {
-
-		logger.trace("reset();");
+		panelController.removeAll();
 		comPortThreadQueue.clear();
-		gui.setConnected(false);
-		remover.removeAll();
-
 		protocol = getDefaultProtocol();
-		logger.trace("protocol={}", protocol);
 	}
 //
 //	protected boolean removePanel(LinkHeader linkHeader) {
@@ -405,23 +327,52 @@ public abstract class GuiControllerAbstract implements Runnable{
 		return Optional.of(packet).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 	}
 
-	public void doDump(LinkHeader linkHeader) {
-		remover.doDump(linkHeader);
-	}
-
-	public void doDump(LinkHeader linkHeader, String string) {
-		remover.doDump(linkHeader, string);
-	}
-
 	public Protocol getDefaultProtocol() {
 		return Protocol.ALL;
 	}
 
-	public void showDebugPanel(boolean show) {
-		for(LinkHeader lh: remover.getLinkHeaders()) {
-			DevicePanel devicePanel = unitsPanel.getDevicePanel(lh);
-			devicePanel.showDebugPanel(show);
-		}
+	@Override
+	public void onPacketRecived(Packet packet) {
+		logger.trace(packet);
+
+		final Optional<Packet> isDeviceInfo = Optional
+													.ofNullable(packet)
+													.filter(p->p.getHeader().getGroupId() == PacketImp.GROUP_ID_DEVICE_INFO);
+
+		//Return if not device info packet
+		if(!isDeviceInfo.isPresent())
+			return;
+
+		final Optional<Packet> hasAnswer = isDeviceInfo.filter(p->p.getHeader().getPacketType() == PacketImp.PACKET_TYPE_RESPONSE);
+
+		//return if no answer
+		if(!hasAnswer.isPresent())
+			return;
+
+		hasAnswer
+		.map(DeviceInfo::new)
+		.ifPresent(di->{
+
+
+			Optional<DeviceType> oDeviceType = di.getDeviceType();
+			oDeviceType.ifPresent(dt->{
+
+				if(dt==DeviceType.IMPOSSIBLE)
+					logger.warn("Can not connect. {}", packet);
+
+				else
+					protocol = dt.PROTOCOL;
+
+				panelController.control(di);
+			});
+			if(!oDeviceType.isPresent()){
+
+					final int typeId = di.getTypeId();
+					JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + typeId + ")");
+					logger.warn("The Device is not Supported.(device Id={})", typeId);
+			}
+
+		});
 	}
 
 	public void run() {
@@ -447,279 +398,64 @@ public abstract class GuiControllerAbstract implements Runnable{
 
 	}
 
-	// ************************************************************************************************************
-	private class Remover{
+	//************************************ class PanelWorker **********************************************
+	// Add Panels to the 'unitsPanel'
+	private class PanelController{
+		private Map<DeviceInfo, Timer> timers = new HashMap<>();
 
-		private long waitTime;
-		private volatile Set<LinkHeaderTread> controllers = new HashSet<>();
-		private Map<LinkHeader, String> serialNumbers = new TreeMap<>();
+		public void control(DeviceInfo di) {
 
-		public Remover(long duration, TimeUnit timeUnit ) {
-			this.waitTime = timeUnit.toMillis(duration);
-		}
+			final Timer timer = timers.get(di);
 
-		public void updateDeviceInfo(final DeviceInfo deviceInfo) {
-			controllers.parallelStream().forEach(c->c.updateDeviceInfo(deviceInfo));
-		}
-
-		public void doDump(LinkHeader linkHeader) {
-			LinkHeaderTread controller = getController(linkHeader);
-			if(controller!=null)
-				controller.doDump();
-		}
-
-		public void doDump(LinkHeader linkHeader , String text) {
-			LinkHeaderTread controller = getController(linkHeader);
-			if(controller!=null)
-				controller.doDump(text);
-		}
-
-		public List<LinkHeader> getLinkHeaders() {
-			List<LinkHeader> linkHeaders = new ArrayList<>();
-			for(LinkHeaderTread c:getControllers())
-				linkHeaders.add(c.getLinkHeader());
-
-			return linkHeaders;
+			if(timer!=null)
+				timer.restart();
+			else
+				createPanel(di);
 		}
 
 		public void removeAll() {
 
 			if (unitsPanel != null) {
+
+				timers.entrySet().parallelStream().map(ks->ks.getValue()).forEach(t->t.stop());
+				timers.clear();
+
 				unitsPanel.removeAll();
 				unitsPanel.revalidate();
-				unitsPanel.getParent().getParent();
-			}
-		}
-
-		private LinkHeaderTread getController(LinkHeader linkHeader) {
-			LinkHeaderTread controller = null;
-
-			for(LinkHeaderTread c:getControllers()){
-				LinkHeader lh = c.getLinkHeader();
-				if(lh!=null ? lh.equals(linkHeader) : linkHeader==null){
-					controller = c;
-					break;
-				}
-			}
-
-			return controller;
-		}
-
-		public LinkHeaderTread[] getControllers() {
-			int size = controllers.size();
-
-			if(size<0)
-				size = 0;
-
-			LinkHeaderTread[] lhc = new LinkHeaderTread[size];
-			controllers.toArray(lhc);
-			return lhc;
-		}
-
-
-		public void setLinkHeader(DeviceInfo deviceInfo) {
-
-			LinkHeaderTread controller = new LinkHeaderTread(deviceInfo);
-			if(controllers.add(controller)){
-				new MyThreadFactory().newThread(controller).start();
-				gui.setConnected(true);
-			}else{
-				for (LinkHeaderTread c:getControllers()) {
-					if (c.equals(controller)){
-						c.reset();
-					}
-				}
-			}
-		}
-
-		public void update(LinkHeaderTread linkHeaderTread) {
-			logger.trace(linkHeaderTread);
-
-			final LinkHeader linkHeader = Optional.ofNullable(linkHeaderTread.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
-
-			if(unitsPanel.remove(linkHeader))
-					gui.repaint();
-
-			controllers.remove(linkHeaderTread);
-			serialNumbers.remove(linkHeader);
-
-			if(controllers.isEmpty()){
-				gui.setConnected(false);
-				protocol = getDefaultProtocol();
-				softReleaseChecker = null;
-			}
-		}
-
-		public void setSerialNumbers(LinkHeader linkHeader, StringData serialNumber) {
-			if(serialNumber!=null) {
-				String sn = serialNumber.toString();
-				String oldSerialNumber = serialNumbers.put(linkHeader, sn);
-				if (!sn.equals(oldSerialNumber)) {
-					String fileName = null;
-					for (LinkHeader l : serialNumbers.keySet()) {
-						if (fileName == null)
-							fileName = serialNumbers.get(l);
-						else
-							fileName += "_" + serialNumbers.get(l);
-					}
-					DumpControllers.setSysSerialNumber(fileName);
-				}
-			}
-		}
-
-		// ******************************* class LinkHeaderTread *************************************
-		private class LinkHeaderTread extends Thread {
-			private volatile boolean reset;
-			protected DumpControllers dumpControllers;
-//			private int alarm;
-//			private boolean isMute;
-			private DeviceInfo deviceInfo;
-
-			// LinkHeaderTread start in class Remover setLinkHeader(LinkHeader linkHeader);
-			public LinkHeaderTread(DeviceInfo deviceInfo){
-				super(GuiControllerAbstract.class.getSimpleName()+".LinkHeaderController-"+new RundomNumber());
-				this.deviceInfo = deviceInfo;
-			}
-
-			public void updateDeviceInfo(DeviceInfo deviceInfo) {
-				if(deviceInfo.getSerialNumber().equals(this.deviceInfo.getSerialNumber()))
-					this.deviceInfo.setUptimeCounter(deviceInfo.getUptimeCounter());
-			}
-
-			public void doDump(String text) {
-				dumpControllers.doDump(Optional.ofNullable(text));
-			}
-
-			public void doDump() {
-				dumpControllers.notifyAllControllers();
-			}
-
-			@Override
-			public void run() {
-				try{
-				logger.entry(deviceInfo);
-				dumpControllers = new DumpControllers(deviceInfo);
-
-				Optional.ofNullable(unitsPanel).ifPresent(up->up.addMouseListener(new MouseListener() {
-					
-					@Override public void mouseReleased	(MouseEvent e) { }
-					@Override public void mousePressed	(MouseEvent e) { }
-					@Override public void mouseExited	(MouseEvent e) { }
-					@Override public void mouseEntered	(MouseEvent e) { }
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						if(e.getClickCount()==3)
-							dumpControllers.doDump();
-					}
-				}));
-
-				do{
-					reset = false;
-					synchronized (this) {
-						try {
-							wait(waitTime);
-						} catch (InterruptedException e) {
-							logger.catching(e);
-						}
-					}
-
-				}while(reset);
-
-				dumpControllers.stop();
-				comPortThreadQueue.clear();
-				update(this);
-				}catch (Throwable e) {
-					logger.catching(e);
-				}
-			}
-
-			public synchronized void reset(){
-				logger.trace("reset()");
-				reset = true;
-				notify();
-			}
-
-			@Override
-			public int hashCode() {
-				return deviceInfo.getSerialNumber().hashCode();
-			}
-
-			@Override
-			public boolean equals(Object obj) {
-				return obj!=null ? obj.hashCode()==hashCode() : false;
-			}
-
-			@Override
-			public String toString() {
-				return "LinkHeaderTread [deviceInfo=" + deviceInfo + "]";
-			}
-
-			public LinkHeader getLinkHeader() {
-				return Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 			}
 
 		}
-	}
 
-	//************************************ class PanelWorker **********************************************
-	// Add Panels to the 'unitsPanel'
-	public class PanelWorker extends Thread {
+		private boolean demoPanelRemoved;
+		private Timer createPanel(DeviceInfo deviceInfo) {
 
-		private Packet packet;
-		private DeviceInfo deviceInfo;
+			deviceInfos.add(deviceInfo); //TODO check where used and remove this line of code
 
-		public PanelWorker(Packet packet, DeviceInfo deviceInfo) {
-			this.packet = packet;
-			this.deviceInfo = deviceInfo;
-			new MyThreadFactory().newThread(this).start();
-		}
-
-		@Override
-		public void run() {
-
-			try{
-			LinkHeader linkHeader = Optional.of(packet).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
-			deviceInfos.put(linkHeader, deviceInfo);
-
-			remover.setLinkHeader(deviceInfo);
-
-			unitsPanel.remove("DemoPanel");
-
-			if (protocol != Protocol.ALL && packet.getPayloads() != null && !unitsPanel.contains(linkHeader)) {
-				GuiControllerAbstract.this.gui.setConnected(true);
-
-				remover.setSerialNumbers(linkHeader, deviceInfo.getSerialNumber()); ;
-
-				DevicePanel unitPanel;
-				if (protocol == Protocol.CONVERTER)
-					unitPanel = getConverterPanel(deviceInfo);
-				else
-					unitPanel = getNewBiasPanel(linkHeader, deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
-
-				unitsPanel.add(unitPanel);
-
-				softReleaseChecker =getSoftReleaseChecker();
-				if (softReleaseChecker != null)
-					softReleaseChecker.check(deviceInfo);
-
-				deviceInfo.setInfoPanel(unitPanel.getInfoPanel());
-				unitsPanel.revalidate();
-				unitsPanel.repaint();
-
-				StringData unitPartNumber = deviceInfo.getUnitPartNumber();
-				if (protocol == Protocol.LINKED) {
-					if (!unitPartNumber.equals("N/A")) {
-						logger.trace("protocol={}, unitPartNumber={}", protocol, unitPartNumber);
-						ProgressBar.setMinMaxValue("330", unitPartNumber.toString().substring(7, 11));
-					}
-				} else if (protocol == Protocol.CONVERTER) {
-					logger.trace(protocol);
-					ProgressBar.setMinMaxValue("-80", "120");
-				}
+			//Remove Demo Panel
+			if(!demoPanelRemoved){
+				unitsPanel.remove("DemoPanel");
+				demoPanelRemoved = true;
 			}
-		}catch (Exception e) {
-			logger.catching(e);
+
+			Component unitPanel;
+			if (protocol == Protocol.CONVERTER)
+				unitPanel = getConverterPanel(deviceInfo);
+			else
+				unitPanel = getNewBiasPanel(deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
+
+			unitsPanel.add(unitPanel);
+
+			final Timer t = new Timer((int) TimeUnit.SECONDS.toMillis(11), e->removePanel(deviceInfo));
+			t.start();
+			return timers.put(deviceInfo, t);
 		}
+
+		private void removePanel(DeviceInfo di) {
+
+			unitsPanel.remove(di.getLinkHeader());
+			unitsPanel.revalidate();
+			unitsPanel.getParent().getParent().repaint();
+			Optional.ofNullable(timers.remove(di)).ifPresent(t->t.stop());
 		}
 	}
 }

@@ -22,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
 import irt.controller.DefaultController;
-import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
@@ -39,7 +38,6 @@ public class DebugPanel extends JPanel{
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	private LinkHeader linkHeader;
-	private GuiControllerAbstract guiControllerAbstract;
 
 	public DebugPanel(final Optional<DeviceType> deviceType) {
 		
@@ -50,7 +48,7 @@ public class DebugPanel extends JPanel{
 				try{
 
 				count = 3;
-				guiControllerAbstract.doDump(linkHeader);
+//				guiControllerAbstract.doDump(linkHeader);
 
 				startThread(
 						new DefaultController(
@@ -77,12 +75,12 @@ public class DebugPanel extends JPanel{
 
 													if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 														stop();
-														guiControllerAbstract.doDump(linkHeader, "***** Statistics is cleared. *****");
+//														guiControllerAbstract.doDump(linkHeader, "***** Statistics is cleared. *****");
 														JOptionPane.showMessageDialog(null, "Statistics is cleared.");
 													}else{
 														if(--count<=0){
 															stop();
-															guiControllerAbstract.doDump(linkHeader, "***** tatistics can not be cleaned. *****");
+//															guiControllerAbstract.doDump(linkHeader, "***** tatistics can not be cleaned. *****");
 															JOptionPane.showMessageDialog(null, "Statistics can not be cleaned.");
 														}
 													}
@@ -165,10 +163,5 @@ public class DebugPanel extends JPanel{
 
 	public void setLinkHeader(LinkHeader linkHeader) {
 		this.linkHeader = linkHeader;
-	}
-
-	public void setGuiController(GuiControllerAbstract guiControllerAbstract) {
-		if(this.guiControllerAbstract==null)
-			this.guiControllerAbstract =guiControllerAbstract;
 	}
 }

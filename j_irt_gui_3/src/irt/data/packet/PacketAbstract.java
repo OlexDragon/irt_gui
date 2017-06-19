@@ -171,7 +171,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public LinkHeader getLinkHeader() {
-		return linkHeader;
+		return Optional.ofNullable(linkHeader).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 	}
 
 	public void setLinkHeader(LinkHeader linkHeader) {
@@ -296,7 +296,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public String toString() {
-		return "\n\t" + getClass().getSimpleName() + " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payloads=" + payloads.stream().map(Payload::toString).collect(Collectors.joining(",")) + "] value=" + getValue();
+		return "\n\t" + getClass().getSimpleName() + " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payloads=" + payloads.stream().map(Payload::toString).collect(Collectors.joining(",")) + "]";
 	}
 
 	public enum Priority {

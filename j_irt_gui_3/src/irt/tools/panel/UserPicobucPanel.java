@@ -1,6 +1,7 @@
 package irt.tools.panel;
 
 import java.awt.Font;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,8 +38,8 @@ public class UserPicobucPanel extends DevicePanel {
 
 	private JTabbedPane tabbedPane;
 
-	public UserPicobucPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
-		super(linkHeader, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+	public UserPicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+		super( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 
 		try {
 			tabbedPane = getTabbedPane();
@@ -47,6 +48,8 @@ public class UserPicobucPanel extends DevicePanel {
 				JLabel lblNewLabel = new ImageLabel(IrtPanel.logoIcon, "");
 				tabbedPane.addTab("Logo", lblNewLabel);
 			}
+
+			final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 
 			JavaFxWrapper alarmPanel = new JavaFxWrapper(new AlarmPanelFx());
 			alarmPanel.setUnitAddress(linkHeader.getAddr());
@@ -154,6 +157,9 @@ public class UserPicobucPanel extends DevicePanel {
 
 	@Override
 	protected JPanel getNewControlPanel() {
+
+		final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
+
 		JPanel controlPanel = deviceType
 				.map(
 						dt->{

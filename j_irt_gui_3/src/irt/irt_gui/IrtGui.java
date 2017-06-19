@@ -71,8 +71,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.125";
-	private boolean connected;
+	public static final String VERTION = "- 3.126";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -148,14 +147,14 @@ public class IrtGui extends IrtMainFrame {
 		manager.addKeyEventDispatcher(new KeyEventDispatcher() {
 			
 			private boolean isPressed;
-			private boolean isShowing;
+//			private boolean isShowing;
 
 			@Override
 			public boolean dispatchKeyEvent(KeyEvent e) {
 				if(e.getID() == KeyEvent.KEY_PRESSED){
 					if(!isPressed && e.isControlDown() && e.isAltDown() && e.getKeyCode()==KeyEvent.VK_D){
 						isPressed = true;
-						guiController.showDebugPanel(isShowing = !isShowing);
+//						guiController.showDebugPanel(isShowing = !isShowing);
 					}
 				}else
 					isPressed = false;
@@ -459,14 +458,6 @@ public class IrtGui extends IrtMainFrame {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
 		});
-	}
-
-	public boolean isConnected() {
-		return connected;
-	}
-
-	public void setConnected(boolean connected) {
-		this.connected = connected;
 	}
 
 	private void fillMenu(JavaFxPanel monitorPanel, JMenu menu) {

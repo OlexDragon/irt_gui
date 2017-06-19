@@ -122,6 +122,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 			if(availableAlarms==null || availableAlarms.length==0){
 				logger.trace(packetToSend);
+
 				GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
 				return;
 			}
@@ -154,11 +155,15 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		}
 	}
 
-//	private Logger dumper = DumpControllers.dumper;
-//	private Marker marker = DumpControllers.marker;
-
 	@Override
 	public void onPacketRecived(final Packet packet) {
+//
+//		new MyThreadFactory().newThread(()->{
+//			try {
+//				scheduledFuture.get(20, TimeUnit.SECONDS);
+//			} catch (Exception e) {
+//			logger.catching(e);
+//		}}).start();
 
 		final Optional<PacketHeader> alarmGroupId = filterByAddressAndGroup(packet);
 

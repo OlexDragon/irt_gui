@@ -26,7 +26,6 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.PacketWork;
-import irt.data.value.StaticComponents;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
 import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
@@ -39,7 +38,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
 	public static final Color BACKGROUND_COLOR = new Color(0x3B, 0x4A, 0x8B);
-	public static LED ledRx = StaticComponents.getLedRx();
+	public static LED ledRx = new LED(Color.GREEN, "");
 	private LED ledPowerOn;
 	private LED ledMute;
 	private LED ledAlarm;
@@ -258,8 +257,19 @@ public class HeadPanel extends MainPanel implements PacketListener {
 		final Optional<Packet> oPacket = Optional.ofNullable(packet).filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
 
 		//Power Status
-		if(!ledPowerOn.isOn())
-			oPacket.ifPresent(pl->ledPowerOn.setOn(true));// Has answer so unit is on
+		oPacket.ifPresent(pl->{
+			if(!ledPowerOn.isOn())
+				ledPowerOn.setOn(true);// Has answer so unit is on
+		});
+
+		if(!oPacket.isPresent()){
+			ledRx.setLedColor(Color.RED);
+			ledRx.blink();
+			return;
+		}
+
+		ledRx.setLedColor(Color.GREEN);
+		ledRx.blink();
 
 		//Mute Status
 		oPacket

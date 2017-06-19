@@ -27,7 +27,7 @@ public class ConverterPanel extends DevicePanel {
 	private boolean hasFreqSet;//Frequency Set(true) or Frequency range(false)
 
 	public ConverterPanel(DeviceInfo deviceInfo, Protocol protocol, int maxHeight)	throws HeadlessException {
-		super(null, deviceInfo, 0, 0, 0, 0, maxHeight);
+		super(deviceInfo, 0, 0, 0, 0, maxHeight);
 
 		final JTabbedPane tabbedPane = getTabbedPane();
 

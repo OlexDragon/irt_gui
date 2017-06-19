@@ -1,7 +1,6 @@
 package irt.controller;
 
 import irt.data.DeviceInfo;
-import irt.data.packet.LinkHeader;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.DevicePanel;
@@ -22,8 +21,8 @@ public class GuiController extends GuiControllerAbstract{
 	}
 
 	@Override
-	protected DevicePanel getNewBiasPanel(LinkHeader linkHeader, DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
-		return new PicobucPanel(linkHeader, deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+	protected DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+		return new PicobucPanel( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 	}
 
 	@Override
@@ -31,10 +30,5 @@ public class GuiController extends GuiControllerAbstract{
 		
 		getConverterInfo();
 		getUnitsInfo();
-	}
-
-	@Override
-	protected SoftReleaseChecker getSoftReleaseChecker() {
-		return SoftReleaseChecker.getInstance();
 	}
 }
