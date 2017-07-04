@@ -131,19 +131,6 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		panel.add(cbParameter, BorderLayout.EAST);
 	}
 
-
-//	deviceDebagInfoController = new DeviceDebugController(
-//													deviceType,
-//													"Info Controller",
-//													new Getter(
-//															DebagInfoPanel.this.linkHeader,
-//															PacketImp.GROUP_ID_DEVICE_DEBAG,
-//															(byte) (cbCommand.getSelectedIndex()+1),
-//															PacketWork.PACKET_ID_DEVICE_DEBUG_DEVICE_INFO),
-//													cbCommand,
-//													cbParameter,
-//													DebagInfoPanel.this.textArea);
-
 	public void restart() {
 
 		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())

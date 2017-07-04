@@ -78,11 +78,6 @@ public class Getter extends GetterAbstract {
 								break;
 							case 13:
 								//Moved to the NetworkPanel
-
-								//								NetworkAddress networkAddress = new NetworkAddress();
-//								networkAddress.set(packet);
-//								source = networkAddress;
-//								tmp = networkAddress.hashCode();
 								return false;
 							default:
 								switch (packetId2) {

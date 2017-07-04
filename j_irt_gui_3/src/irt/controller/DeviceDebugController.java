@@ -21,16 +21,14 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.EventListenerList;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.Listeners;
 import irt.data.RegisterValue;
-import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
-import irt.data.listener.ControllerFocusListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
@@ -251,8 +249,6 @@ public class DeviceDebugController extends ControllerAbstract {
 
 				slider.addFocusListener(sliderFocusListener);
 				slider.setValue(value.getRelativeValue());
-
-				fireFocusListener(new ValueChangeEvent(txtField, 0));
 			}
 
 			@Override
@@ -358,28 +354,6 @@ public class DeviceDebugController extends ControllerAbstract {
 	protected boolean setComponent(Component component) {
 		return false;
 	}
-
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	private EventListenerList focusListeners = new EventListenerList();
-
-	public void addFocusListener(ControllerFocusListener focusListener) {
-		focusListeners.add(ControllerFocusListener.class, focusListener);
-	}
-
-	public void removeFocusListener(ControllerFocusListener focusListener) {
-		focusListeners.remove(ControllerFocusListener.class, focusListener);
-	}
-
-	protected void fireFocusListener(ValueChangeEvent focusEvent) {
-		Object[] listeners = focusListeners.getListenerList();
-		for (int i = 0; i < listeners.length; i++) {
-			Object l = listeners[i];
-			if (l == ControllerFocusListener.class)
-				((ControllerFocusListener) listeners[i + 1]).focusGained(focusEvent);
-			;
-		}
-	}
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	@Override
 	protected void clear() {

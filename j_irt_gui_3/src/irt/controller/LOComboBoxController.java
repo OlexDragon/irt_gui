@@ -20,7 +20,6 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.interfaces.IrtController;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.IdValue;
 import irt.data.LOIdValue;
@@ -35,7 +34,7 @@ import irt.data.packet.Payload;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueFrequency;
 
-public class LOComboBoxController extends Observable implements IrtController, Runnable, PacketListener {
+public class LOComboBoxController extends Observable implements Runnable, PacketListener {
 
 	private final Logger logger = LogManager.getLogger();
 
