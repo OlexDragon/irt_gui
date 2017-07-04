@@ -32,7 +32,6 @@ import irt.tools.label.ImageLabel;
 import irt.tools.label.LED;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.Panel;
-import irt.tools.panel.subpanel.AlarmsPanel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanelDemo;
@@ -329,7 +328,7 @@ public class DemoPanel extends Panel {
 		NetworkPanel networkPanel = new NetworkPanel(null);
 		tabbedPane.addTab("network", networkPanel);
 
-		AlarmsPanel alarmsPanel = new AlarmsPanel(0, null);
+		JPanel alarmsPanel = new JPanel();
 		tabbedPane.addTab("alarms", alarmsPanel);
 
 		tabbedPane.addTab("redundancy", new RedundancyPanelDemo());

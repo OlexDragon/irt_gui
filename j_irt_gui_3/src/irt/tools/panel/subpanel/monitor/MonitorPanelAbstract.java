@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
@@ -18,15 +17,10 @@ import org.apache.logging.log4j.core.Logger;
 
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.interfaces.Refresh;
-import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 
 @SuppressWarnings("serial")
@@ -115,31 +109,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 	}
 
 	protected DefaultController getController(String controllerName, byte parameter, final short packetId) {
-		logger.entry(controllerName, parameter, packetId);
-		DefaultController defaultController = new DefaultController(
-				deviceType,
-				controllerName,
-				new MeasurementGetter(getLinkHeader(), parameter, packetId), Style.CHECK_ALWAYS){
-
-					@Override
-							public void onPacketRecived(final Packet packet) {
-								new SwingWorker<Void, Void>(){
-
-									@Override
-									protected Void doInBackground() throws Exception {
-										PacketHeader header = packet.getHeader();
-
-										if (	getPacketWork().isAddressEquals(packet) &&
-												header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
-												header.getPacketId() == packetId)
-
-											MonitorPanelAbstract.this.packetRecived(packet.getPayloads());
-										return null;
-									}
-								}.execute();
-							}			
-		};
-		return defaultController;
+		return null;
 	}
 
 	protected String getOperator(byte flags) {
