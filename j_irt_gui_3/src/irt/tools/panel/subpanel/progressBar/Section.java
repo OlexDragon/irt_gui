@@ -9,6 +9,8 @@ import java.awt.Color;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.swing.SwingWorker;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
@@ -42,20 +44,35 @@ public class Section extends IrtStylePanel implements Observer{
 	public void setValue(long value) {
 		logger.trace("setValue({})", value);
 		this.value.setValue(value);
-		logger.trace("setted value={}, min={}, max={}", this.value, this.value.getMinValue(), this.value.getMaxValue());
+		logger.debug("to set: {}; setted value={}, min={}, max={}, isError={}", value, this.value, this.value.getMinValue(), this.value.getMaxValue(), this.value.isError());
 
+		Color backgroundColor;
 		if(this.value.isError()){
 			if(this.value.getMaxValue()<value){
 				logger.trace("(this.value.getMaxValue()<value)");
-				setBackground(moreThenRangeColor);
+				backgroundColor = moreThenRangeColor;
 			}else{
-				logger.trace("(this.value.getMaxValue()>value)");
-				setBackground(underRangeColor);
+				logger.debug("(this.value.getMaxValue()>value);)");
+				backgroundColor = underRangeColor;
 			}
 		}else{
 			logger.trace("this.value.noError()");
-			setBackground(inRangeColor);
+			backgroundColor = inRangeColor;
 		}
+
+		logger.debug("setBackground({})", backgroundColor);
+		new SwingWorker<Void, Void>() {
+
+			@Override
+			protected Void doInBackground() throws Exception {
+				if(getBackground().equals(backgroundColor))
+					return null;
+
+				setBackground(backgroundColor);
+				invalidate();
+				return null;
+			}
+		}.execute();
 	}
 
 	@Override

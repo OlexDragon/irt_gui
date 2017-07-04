@@ -168,6 +168,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 		.findAny()
 		.map(MeasurementValue::new)
 		.ifPresent(mv->{
+
 			final int v = mv.getValue();
 			if(mv.getFlags().equals(MeasurementStatus.LESS_THAN) && value.getValue()!=v){
 				value.setMinValue(v);
@@ -197,10 +198,11 @@ public class ProgressBar extends JPanel implements PacketListener{
 			.filter(upn->Character.isDigit(upn.charAt(6)))
 			.filter(upn->Character.isDigit(upn.charAt(7)))
 			.filter(upn->Character.isDigit(upn.charAt(8)))
-			.map(upn->upn.substring(6, 9))
+			.filter(upn->Character.isDigit(upn.charAt(9)))
+			.map(upn->upn.substring(6, 10))
 			.map(Integer::parseInt)
 			.ifPresent(unitPower->{
-				value.setMinMax(unitPower-10, unitPower);
+				value.setMinMax(unitPower-100, unitPower);
 				setMinMaxValues();
 			});
 		});
