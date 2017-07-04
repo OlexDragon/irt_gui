@@ -38,18 +38,6 @@ public abstract class GetterAbstract extends ValueChangeListenerClass implements
 		this.packetParameterHeaderCode = packetParameterHeaderCode;
 		this.packetId = packetId;
 		byte[] command = getCommand();
-		logger.trace("\n\tpacketType=\t{},\n\t"
-				+ "groupId=\t{},\n\t"
-				+ "packetParameterHeaderCode=\t{},\n\t"
-				+ "packetId=\t{},\n\t"
-				+ "getCommand()=\t{},\n\t"
-				+ "linkHeader=\t{}",
-				packetType,
-				groupId,
-				packetParameterHeaderCode,
-				packetId,
-				Arrays.toString(command),
-				linkHeader);
 		packetThread = this.linkHeader.getAddr()!=0 ? new LinkedPacketThread(linkHeader, command, "LinkedPacketId="+packetId) : new PacketThread(command, "PacketId="+packetId);
 	}
 

@@ -21,7 +21,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
-import irt.controller.DumpControllers;
+import irt.controller.DumpController;
 import irt.controller.GuiController;
 import irt.controller.interfaces.ControlPanel;
 import irt.data.DeviceInfo;
@@ -77,7 +77,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 			this.deviceType = deviceInfo.getDeviceType();
 		addAncestorListener(new AncestorListener() {
 
-			private DumpControllers dumpController;
+			private DumpController dumpController;
 			public void ancestorAdded(AncestorEvent event) {
 
 				monitorPanel = new MonitorPanelSwingWithFx();
@@ -97,7 +97,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 					userPanel.add(slider);
 					userPanel.revalidate();
 				}
-				dumpController = new DumpControllers(deviceInfo);
+				dumpController = new DumpController(deviceInfo);
 			}
 			public void ancestorRemoved(AncestorEvent event) {
 				userPanel.removeAll();

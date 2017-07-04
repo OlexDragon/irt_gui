@@ -1,7 +1,6 @@
 package irt.tools;
 
 import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Optional;
@@ -27,6 +26,8 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.PacketWork;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	private static final long serialVersionUID = 5927791917430153433L;
@@ -43,12 +44,20 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 
 		public ALCComboBox(String text, final Byte linkAddr) {
 		super(text);
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
-					service.shutdownNow();
-			}
-		});
+
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(
+						c->{
+							cptq.removePacketListener(ALCComboBox.this);
+							service.shutdownNow();
+						}));
 
 		this.unitAddress = linkAddr;
 		packet = new ALCEnablePacket(linkAddr, null); 

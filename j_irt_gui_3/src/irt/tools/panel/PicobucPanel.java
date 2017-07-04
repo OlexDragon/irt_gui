@@ -10,6 +10,7 @@ import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.subpanel.BIASsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
+import irt.tools.panel.subpanel.DebagInfoPanel;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
 import irt.tools.panel.subpanel.control.ControlPanelHPB;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;

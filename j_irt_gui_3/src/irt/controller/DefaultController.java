@@ -28,5 +28,4 @@ public class DefaultController extends ControllerAbstract {
 	protected boolean setComponent(Component component) {
 		return false;
 	}
-
 }

@@ -1,5 +1,6 @@
 package irt.controller;
 
+import java.awt.event.HierarchyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +15,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import javax.swing.JComponent;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
@@ -22,7 +27,6 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
-import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.AlarmStatusPacket;
 import irt.data.packet.DeviceDebugPacket;
@@ -34,8 +38,10 @@ import irt.data.packet.Packets;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.PacketWork;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
-public class DumpControllers implements PacketListener, Runnable{
+public class DumpController implements PacketListener, Runnable{
 
 	public static final long DUMP_TIME = TimeUnit.MINUTES.toSeconds(15);
 
@@ -53,7 +59,7 @@ public class DumpControllers implements PacketListener, Runnable{
 
 	private final ArrayList<DeviceDebugPacket> packets = new ArrayList<>();
 
-	public DumpControllers(DeviceInfo deviceInfo) {
+	public DumpController(DeviceInfo deviceInfo) {
 
 		this.deviceInfo = deviceInfo;
 
@@ -122,21 +128,6 @@ public class DumpControllers implements PacketListener, Runnable{
 		return ctx;
 	}
 
-	public void addDumpController(DefaultController dumpController, int waitTime) {
-		dumpController.setWaitTime(waitTime);
-
-		startThread(new Thread(dumpController, "DumpControllers."+dumpController.getName()+"-"+new RundomNumber().toString()));
-		dumpsList.add(dumpController);
-	}
-
-	private void startThread(Thread thread) {
-		int priority = thread.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			thread.setPriority(priority-1);
-		thread.setDaemon(true);
-		thread.start();
-	}
-
 	public synchronized void stop() throws Throwable {
 
 		final Iterator<DefaultController> iterator = dumpsList.iterator();
@@ -151,6 +142,8 @@ public class DumpControllers implements PacketListener, Runnable{
 	@Override
 	protected void finalize() throws Throwable {
 
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+
 		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
 			scheduledFuture.cancel(true);
 
@@ -162,13 +155,6 @@ public class DumpControllers implements PacketListener, Runnable{
 		synchronized (dumper) {
 			dumper.warn("Communication Lost: {} ", deviceInfo);
 		}
-	}
-
-	public synchronized void setWaitTime(int waitTime) {
-		logger.trace("setWaitTime(waitTime={})", waitTime);
-
-		for (DefaultController dc:dumpsList)
-			dc.setWaitTime(waitTime);
 	}
 
 	public static String parseId(int id) {
@@ -227,16 +213,6 @@ public class DumpControllers implements PacketListener, Runnable{
 		return str;
 	}
 
-	public synchronized void notifyAllControllers() {
-		final Iterator<DefaultController> iterator = dumpsList.iterator();
-		while(iterator.hasNext()){
-			final DefaultController next = iterator.next();
-			synchronized(next){
-				next.notify();
-			}
-		}
-	}
-
 	public synchronized void doDump() {
 
 		lastValues.clear();
@@ -254,7 +230,26 @@ public class DumpControllers implements PacketListener, Runnable{
 	}
 
 	private static List<Consumer<String>> actionsWhenDump = new ArrayList<>();
-	public static void addActionWhenDump(Consumer<String> consumer){
+	public static void addActionWhenDump(JComponent component, Consumer<String> consumer){
+		component.addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->actionsWhenDump.remove(consumer)));
+
+		component.addAncestorListener(new AncestorListener() {
+			
+			@Override public void ancestorRemoved(AncestorEvent event) {
+				actionsWhenDump.remove(consumer);
+			}
+			@Override public void ancestorMoved(AncestorEvent event) { }
+			@Override public void ancestorAdded(AncestorEvent event) {}
+		});
+
 		actionsWhenDump.add(consumer);
 	}
 

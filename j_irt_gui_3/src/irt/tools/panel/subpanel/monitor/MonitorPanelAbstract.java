@@ -23,7 +23,6 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.value.getter.MeasurementGetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
@@ -123,10 +122,6 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 				new MeasurementGetter(getLinkHeader(), parameter, packetId), Style.CHECK_ALWAYS){
 
 					@Override
-					protected PacketListener getNewPacketListener() {
-						return new PacketListener() {
-
-							@Override
 							public void onPacketRecived(final Packet packet) {
 								new SwingWorker<Void, Void>(){
 
@@ -142,10 +137,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 										return null;
 									}
 								}.execute();
-							}
-						};
-					}
-			
+							}			
 		};
 		return defaultController;
 	}

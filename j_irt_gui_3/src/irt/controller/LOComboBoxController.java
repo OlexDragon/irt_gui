@@ -158,4 +158,10 @@ public class LOComboBoxController extends Observable implements IrtController, R
 		}
 		public void ancestorMoved(AncestorEvent event) { }
 	};
+
+	public void shutdownNow() {
+		cptq.removePacketListener(pl);
+		if(!service.isShutdown())
+			service.shutdownNow();
+	}
 }

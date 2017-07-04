@@ -11,7 +11,7 @@ public class DeviceDebugPacket extends PacketAbstract{
 	public DeviceDebugPacket(byte linkAddr, RegisterValue registerValue, short packetId, byte parameterId) {
 		super(
 				linkAddr,
-				PacketImp.PACKET_TYPE_REQUEST,
+				registerValue.getValue() ==null ? PacketImp.PACKET_TYPE_REQUEST : PacketImp.PACKET_TYPE_COMMAND,
 				packetId,
 				PacketImp.GROUP_ID_DEVICE_DEBAG,
 				parameterId,

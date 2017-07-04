@@ -3,6 +3,8 @@ package irt.tools.CheckBox;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -20,9 +22,8 @@ import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
 import irt.data.packet.interfaces.PacketWork;
-
-import java.awt.event.HierarchyListener;
-import java.awt.event.HierarchyEvent;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 	private static final long serialVersionUID = 151272991200793236L;
@@ -57,13 +58,21 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 
 	public SwitchBoxImpl(Image offImage, Image onImage, PacketWork packetToSEnd) {
 		super(offImage, onImage);
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
-					service.shutdownNow();
-			}
-		});
 		logger.entry(packetToSEnd);
+
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(
+						c->{
+							cptq.removePacketListener(packetListener);
+							service.shutdownNow();
+						}));
 
 		this.packetToSend = packetToSEnd;
 		cptq.addPacketListener(packetListener);

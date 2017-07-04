@@ -37,7 +37,6 @@ import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
 import irt.data.RegisterValue;
-import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
@@ -117,10 +116,6 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 						PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE), Style.CHECK_ONCE){
 
 							@Override
-							protected PacketListener getNewPacketListener() {
-								return new PacketListener() {
-
-									@Override
 									public void onPacketRecived(Packet packet) {
 										PacketHeader header = packet.getHeader();
 										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG){
@@ -199,8 +194,6 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 										return filter<<shift;
 									}
 								};
-							}
-				};
 				controller.setWaitTime(10000);
 				Thread t = new Thread(controller);
 				int priority = t.getPriority();

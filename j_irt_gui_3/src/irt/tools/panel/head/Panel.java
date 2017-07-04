@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
@@ -48,6 +49,8 @@ import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
 import irt.tools.fx.MonitorPanelFx.StatusBitsFCM;
 import irt.tools.label.LED;
 import irt.tools.label.VarticalLabel;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 @SuppressWarnings("serial")
 public class Panel extends JPanel implements PacketListener {
@@ -77,6 +80,16 @@ public class Panel extends JPanel implements PacketListener {
 	private JButton btnRight;
 
 	public Panel( String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->GuiControllerAbstract.getComPortThreadQueue().removePacketListener(Panel.this)));
+
 		setBorder(null);
 
 		setOpaque(false);
@@ -369,10 +382,12 @@ public class Panel extends JPanel implements PacketListener {
 
 		final Optional<? extends PacketAbstract> oP = Optional
 														.of(packet)
+														.map(p->p.getHeader())
 														.filter(
-																p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY ||
-																p.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
-														.flatMap(Packets::cast);
+																h->
+																h.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY ||
+																h.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
+														.flatMap(h->Packets.cast(packet));
 
 		final PacketAbstract p = oP.orElse(null);
 

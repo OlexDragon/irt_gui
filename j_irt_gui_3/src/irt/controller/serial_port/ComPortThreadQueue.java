@@ -142,6 +142,7 @@ public class ComPortThreadQueue implements Runnable {
 	private EventListenerList packetListeners = new EventListenerList();
 
 	public void addPacketListener(PacketListener packetListener) {
+
 		// Add if not exists
 		if(Arrays.stream(packetListeners.getListenerList()).parallel().filter(l->l.equals(packetListener)).map(l->false).findAny().orElse(true))
 			packetListeners.add(PacketListener.class, packetListener);
@@ -152,8 +153,6 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public void firePacketListener(Packet packet) {
-//		if(packet.getHeader().getGroupId()==PacketImp.GROUP_ID_NETWORK)
-//			logger.error("\n\t{}\n", packet);
 		Object[] listeners = packetListeners.getListenerList();
 		for (int i = 0; i < listeners.length; i++) {
 			Object l = listeners[i];

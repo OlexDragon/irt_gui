@@ -4,6 +4,8 @@ package irt.tools.panel.subpanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.HierarchyEvent;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,6 +23,7 @@ import irt.controller.AlarmPacketSender;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.AlarmDescriptionPacket;
 import irt.data.packet.AlarmStatusPacket;
@@ -29,8 +32,10 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
-public class AlarmField extends JPanel {
+public class AlarmField extends JPanel implements PacketListener{
 	private static final long serialVersionUID = 4201830616544799648L;
 
 	private final Logger logger = LogManager.getLogger();
@@ -65,28 +70,31 @@ public class AlarmField extends JPanel {
 		panel.add(lblTitle, BorderLayout.CENTER);
 		panel.add(lblValue, BorderLayout.EAST);
 
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->GuiControllerAbstract.getComPortThreadQueue().removePacketListener(AlarmField.this)));
+
 		addAncestorListener(new AncestorListener() {
 
 			private AlarmPacketSender alarmController;
-			private final PacketListener packetListener = new PacketListener() {
-				
-				@Override
-				public void onPacketRecived(Packet packet) {
-					new FieldUpdater(packet);
-				}
-			};
 
 			public void ancestorAdded(AncestorEvent event) {
 
 				alarmController = new AlarmPacketSender( linkAddr, alarmId);
 
 				final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
-				comPortThreadQueue.addPacketListener(packetListener);
+				comPortThreadQueue.addPacketListener(AlarmField.this);
 			}
 
 			public void ancestorRemoved(AncestorEvent event) {
 				final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
-				comPortThreadQueue.removePacketListener(packetListener);
+				comPortThreadQueue.removePacketListener(AlarmField.this);
 
 				alarmController.destroy();
 				alarmController = null;
@@ -99,7 +107,7 @@ public class AlarmField extends JPanel {
 	}
 
 	//************************************************************   FieldUpdater   *********************************************************************
-	public class FieldUpdater extends Thread{
+	public class FieldUpdater implements Runnable{
 
 		private Packet	packet;
 
@@ -107,11 +115,7 @@ public class AlarmField extends JPanel {
 
 			this.packet 	= packet;
 
-			int priority = getPriority();
-			if(priority>Thread.MIN_PRIORITY)
-				setPriority(--priority);
-			setDaemon(true);
-			start();
+			new MyThreadFactory().newThread(this).start();
 		}
 
 		@Override
@@ -186,5 +190,10 @@ public class AlarmField extends JPanel {
 
 			}
 		}
+	}
+
+	@Override
+	public void onPacketRecived(Packet packet) {
+		new FieldUpdater(packet);
 	}
 }

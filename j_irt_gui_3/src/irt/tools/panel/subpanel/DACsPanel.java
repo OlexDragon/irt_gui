@@ -2,7 +2,6 @@ package irt.tools.panel.subpanel;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -11,12 +10,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +20,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -43,27 +37,27 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.controller.SwitchController;
 import irt.controller.TextSliderController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.controller.serial_port.value.setter.Setter;
+import irt.data.AdcWorker;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
+import irt.data.packet.CallibrationModePacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
-import irt.irt_gui.IrtGui;
 import irt.tools.RegisterTextField;
-import irt.tools.CheckBox.SwitchBox;
+import irt.tools.button.Switch;
 import irt.tools.fx.MonitorPanelFx;
-import irt.tools.panel.subpanel.BIASsPanel.AdcWorker;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel implements PacketListener, Runnable {
@@ -80,7 +74,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	private JLabel lblDAC4;
 
 	private RegisterTextField activeTextField;
-	private SwitchBox switchBoxCalibrationModeswitchBox;
+	private Switch switchBoxCalibrationModeswitchBox;
 	private JTextField txtStep;
 	private JCheckBox chckbxStep;
 
@@ -134,12 +128,20 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	};
 
 	public DACsPanel(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
-					service.shutdownNow();
-			}
-		});
+
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(
+						c->{
+							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DACsPanel.this);
+							service.shutdownNow();
+						}));
 
 		setLayout(null);
 		final byte unitAddr = linkHeader==null ? 0 :  linkHeader.getAddr();
@@ -150,25 +152,18 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DACsPanel.this);
 
-				if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+				if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
 					scheduleAtFixedRate = service.scheduleAtFixedRate(DACsPanel.this, 0, 1, TimeUnit.SECONDS);
 
-				txtDAC1.start();
-				txtDAC2.start();
-				txtDAC3.start();
-				txtDAC4.start();
-
-				//Calibration mode
-				startController(new SwitchController(deviceType, "Calibration Mode Switch Controller", switchBoxCalibrationModeswitchBox, new Setter(linkHeader, PacketImp.GROUP_ID_DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE, PacketWork.PACKET_ID_DEVICE_DEBUG_CALIBRATION_MODE)));
 
 				if(unitAddr==0){
-					adcWorkers.add(new BIASsPanel.AdcWorker(lblInputPower, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 0, null), PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new BIASsPanel.AdcWorker(lblOutputPower, MonitorPanelFx.CONVERTER, new RegisterValue(10, 1, null), PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new BIASsPanel.AdcWorker(lblTemperature, MonitorPanelFx.CONVERTER, new RegisterValue(10, 2, null), PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new BIASsPanel.AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 4, null), PacketWork.PACKET_ID_FCM_ADC_CURRENT, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new BIASsPanel.AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 6, null), PacketWork.PACKET_ID_FCM_ADC_5V5, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new BIASsPanel.AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 7, null), PacketWork.PACKET_ID_FCM_ADC_13v2, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new BIASsPanel.AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 8, null), PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, new RegisterValue(10, 0, null), PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, new RegisterValue(10, 1, null), PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, new RegisterValue(10, 2, null), PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 4, null), PacketWork.PACKET_ID_FCM_ADC_CURRENT, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 6, null), PacketWork.PACKET_ID_FCM_ADC_5V5, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					adcWorkers.add(new AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 7, null), PacketWork.PACKET_ID_FCM_ADC_13v2, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 8, null), PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
 
 					Value value = new Value(0, -100, 100, 0);
 					startController(new TextSliderController(deviceType, "Gain Offset Controller", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
@@ -189,11 +184,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			public void ancestorMoved(AncestorEvent arg0) {
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-
-				txtDAC1.stop();
-				txtDAC2.stop();
-				txtDAC3.stop();
-				txtDAC4.stop();
 
 				for(ControllerAbstract t:threadList){
 					t.stop();
@@ -286,7 +276,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		registerValue = new RegisterValue(index, rAddr, null);
 		txtDAC2 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2, 0, 4095);
-		txtDAC2.setEnabled(false);
 		txtDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC2.setColumns(10);
 		txtDAC2.setBounds(186, 44, 55, 20);
@@ -353,20 +342,16 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		add(lblDAC3);
 		lblDAC3.setFont(font);
 
-		URL resource = IrtGui.class.getResource("/irt/irt_gui/images/switch_off.png");
-		Image offImage = resource!=null ? new ImageIcon(resource).getImage() : null;
-		resource = IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png");
-		Image onImage = resource!=null ? new ImageIcon(resource).getImage() : null;
-		switchBoxCalibrationModeswitchBox = new SwitchBox(offImage, onImage);
-		switchBoxCalibrationModeswitchBox.setEnabled(false);
-		switchBoxCalibrationModeswitchBox.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent arg0) {
-				boolean selected = switchBoxCalibrationModeswitchBox.isSelected();
-				if(txtDAC2.isFocusOwner())
-					txtDAC1.requestFocusInWindow();
-				txtDAC2.setEnabled(selected);
-			}
-		});
+		//Calibration mode
+		switchBoxCalibrationModeswitchBox = new Switch(new CallibrationModePacket(unitAddr));
+//		switchBoxCalibrationModeswitchBox.addItemListener(new ItemListener() {
+//			public void itemStateChanged(ItemEvent arg0) {
+//				boolean selected = switchBoxCalibrationModeswitchBox.isSelected();
+//				if(txtDAC2.isFocusOwner())
+//					txtDAC1.requestFocusInWindow();
+//				txtDAC2.setEnabled(selected);
+//			}
+//		});
 		switchBoxCalibrationModeswitchBox.setBounds(6, 26, 107, 44);
 		add(switchBoxCalibrationModeswitchBox);
 

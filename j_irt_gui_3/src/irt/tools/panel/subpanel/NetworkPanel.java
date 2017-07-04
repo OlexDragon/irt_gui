@@ -12,7 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -39,7 +38,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DumpControllers;
+import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.ComPortThreadQueue;
@@ -53,6 +52,8 @@ import irt.data.packet.NetworkAddressPacket;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.ip_address.IpAddressTextField;
 
@@ -147,20 +148,20 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	// ******************************* constructor NetworkPanel   ***************************************************
 	public NetworkPanel(final LinkHeader linkHeader) {
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null){
 
-					cptq.removePacketListener(NetworkPanel.this);
-
-					if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
-						scheduleAtFixedRate.cancel(true);
-
-					if(!service.isShutdown())
-						service.shutdownNow();
-				}
-			}
-		});
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(
+						c->{
+							cptq.removePacketListener(NetworkPanel.this);
+							service.shutdownNow();
+						}));
 
 		//converter does not have network connection
 		if(linkHeader==null || linkHeader.getAddr()==0){
@@ -393,7 +394,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		setLayout(groupLayout);
 
 		cptq.addPacketListener(this);
-		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5, TimeUnit.SECONDS);
 	}
 
@@ -471,8 +472,8 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 				final AddressType type = AddressType.values()[networkAddress.getType()];
 				comboBoxAddressType.setSelectedItem(type);
 
-				synchronized (DumpControllers.dumper) {
-					DumpControllers.dumper.info(DumpControllers.marker, "{}", networkAddress);
+				synchronized (DumpController.dumper) {
+					DumpController.dumper.info(DumpController.marker, "{}", networkAddress);
 				}
 
 				ipAddressTextField.setText(networkAddress.getAddressAsString());

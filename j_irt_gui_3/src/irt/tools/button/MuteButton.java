@@ -1,6 +1,7 @@
 package irt.tools.button;
 
 import java.awt.Image;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Optional;
@@ -26,6 +27,8 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.irt_gui.IrtGui;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 public class MuteButton extends ImageButton implements Runnable, PacketListener {
 	private static final long serialVersionUID = 4101471002534919184L;
@@ -56,12 +59,24 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 		setToolTipText(muteText);
-		
+
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(
+						c->{
+							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(MuteButton.this);
+							service.shutdownNow();
+						}));
+
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(MuteButton.this);
-				if(service.isShutdown())
-					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 				if(scheduledFuture==null || scheduledFuture.isCancelled())
 					scheduledFuture = service.scheduleAtFixedRate(MuteButton.this, 1, 5, TimeUnit.SECONDS);
@@ -71,9 +86,6 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 
 				if(scheduledFuture!=null && !scheduledFuture.isCancelled())
 						scheduledFuture.cancel(true);
-
-				if(!service.isShutdown())
-					service.shutdownNow();
 
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(MuteButton.this);
 			}

@@ -19,7 +19,7 @@ public class ValueChangeListenerClass {
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	protected 	final 	ScheduledExecutorService 	scheduledThreadPool 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	protected 	final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private 	final 	EventListenerList 			valueChangeListeners 	= new EventListenerList();
 
 	public void addVlueChangeListener(ValueChangeListener valueChangeListener) {
@@ -34,7 +34,7 @@ public class ValueChangeListenerClass {
 
 	public void fireValueChangeListener(ValueChangeEvent valueChangeEvent) {
 
-		scheduledThreadPool.execute(new FireValue(valueChangeListeners, valueChangeEvent));
+		service.execute(new FireValue(valueChangeListeners, valueChangeEvent));
 	}
 
 	public void removeVlueChangeListeners() {

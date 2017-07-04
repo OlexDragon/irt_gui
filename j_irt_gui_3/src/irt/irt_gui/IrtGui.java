@@ -45,7 +45,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 
-import irt.controller.DumpControllers;
+import irt.controller.DumpController;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
@@ -68,10 +68,10 @@ public class IrtGui extends IrtMainFrame {
 	private static final long serialVersionUID = 1611718189640547787L;
 
 	public static final int DEFAULT_ADDRESS = 254;
-	private static LoggerContext ctx = DumpControllers.setSysSerialNumber(null);//need for log file name setting
+	private static LoggerContext ctx = DumpController.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = (Logger) LogManager.getLogger();
 
-	public static final String VERTION = "- 3.127";
+	public static final String VERTION = "- 3.129";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -79,7 +79,7 @@ public class IrtGui extends IrtMainFrame {
 	public IrtGui() {
 		super(700, 571);
 		setMinimumSize(new Dimension(700, 571));
-		DumpControllers.setSysSerialNumber(null);
+		DumpController.setSysSerialNumber(null);
 		logger.trace(ctx);
 
 		UIManager.put("ToolTip.background", Color.WHITE);

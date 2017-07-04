@@ -91,7 +91,7 @@ public class Value extends Observable{
 		return 0;
 	}
 
-	protected void setMinValue(int minValue) {
+	public void setMinValue(int minValue) {
 		this.minValue = minValue;
 	}
 

@@ -89,12 +89,12 @@ public class DeviceInfo {
 	private Optional<DeviceType> deviceType = Optional.empty();
 	private int revision;
 	private int subtype;
-	private StringData unitPartNumber;
-	private StringData serialNumber = new StringData(null);
-	private StringData firmwareVersion;
-	private StringData firmwareBuildDate;
+	private Optional<String> unitPartNumber = Optional.empty();
+	private Optional<String> serialNumber = Optional.empty();
+	private Optional<String> firmwareVersion = Optional.empty();
+	private Optional<String> firmwareBuildDate = Optional.empty();
 	private int uptimeCounter;
-	private StringData unitName;
+	private Optional<String> unitName = Optional.empty();
 
 	public DeviceInfo(Packet packet) {
 		set(packet);
@@ -102,7 +102,7 @@ public class DeviceInfo {
 
 	public DeviceInfo() {}
 
-	public StringData getSerialNumber() {
+	public Optional<String> getSerialNumber() {
 		return serialNumber;
 	}
 
@@ -136,7 +136,7 @@ public class DeviceInfo {
 	}
 
 	public void setSerialNumber(StringData serialNumber) {
-		this.serialNumber = serialNumber;
+		this.serialNumber = Optional.ofNullable(serialNumber).map(StringData::toString);
 	}
 
 	public boolean set(Packet packet) {
@@ -153,22 +153,22 @@ public class DeviceInfo {
 						set(pl.getBuffer());
 						break;
 					case Payload.DI_DEVICE_SN:
-						serialNumber = pl.getStringData();
+						serialNumber = Optional.of(pl.getStringData()).map(StringData::toString);
 						break;
 					case Payload.DI_FIRMWARE_VERSION:
-						firmwareVersion = pl.getStringData();
+						firmwareVersion = Optional.of(pl.getStringData()).map(StringData::toString);
 						break;
 					case Payload.DI_FIRMWARE_BUILD_DATE:
-						firmwareBuildDate = pl.getStringData();
+						firmwareBuildDate = Optional.of(pl.getStringData()).map(StringData::toString);
 						break;
 					case Payload.DI_UNIT_UPTIME_COUNTER:
 						uptimeCounter = pl.getInt(0);
 						break;
 					case Payload.DI_UNIT_NAME:
-						unitName = pl.getStringData();
+						unitName = Optional.of(pl.getStringData()).map(StringData::toString);
 						break;
 					case Payload.DI_UNIT_PART_NUMBER:
-						unitPartNumber = pl.getStringData();
+						unitPartNumber = Optional.of(pl.getStringData()).map(StringData::toString);
 						break;
 					default:
 						logger.warn("not used - {}", packet);
@@ -193,11 +193,11 @@ public class DeviceInfo {
 		return Optional.ofNullable(linkHeader).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 	}
 
-	public StringData getFirmwareVersion() {
+	public Optional<String> getFirmwareVersion() {
 		return firmwareVersion;
 	}
 
-	public StringData getFirmwareBuildDate() {
+	public Optional<String> getFirmwareBuildDate() {
 		return firmwareBuildDate;
 	}
 
@@ -209,11 +209,11 @@ public class DeviceInfo {
 		this.uptimeCounter = uptimeCounter;
 	}
 
-	public StringData getUnitName() {
+	public Optional<String> getUnitName() {
 		return unitName;
 	}
 
-	public StringData getUnitPartNumber() {
+	public Optional<String> getUnitPartNumber() {
 		return unitPartNumber;
 	}
 
@@ -257,7 +257,7 @@ public class DeviceInfo {
 
 	public void set(DeviceInfo deviceInfo) {
 
-		Optional.of(deviceInfo).map(DeviceInfo::getSerialNumber).filter(sn->sn.equals(serialNumber)).orElseThrow(()->new IllegalArgumentException());
+		Optional.of(deviceInfo).map(DeviceInfo::getSerialNumber).filter(sn->sn.equals(serialNumber)).orElseThrow(()->new IllegalArgumentException(deviceInfo.toString()));
 
 		setDeviceType(deviceInfo.typeId);
 		setRevision(deviceInfo.revision);

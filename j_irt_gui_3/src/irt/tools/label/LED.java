@@ -8,6 +8,8 @@ import java.awt.Graphics2D;
 
 import javax.swing.JLabel;
 import javax.swing.Timer;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
 
 @SuppressWarnings("serial")
 public class LED extends JLabel{
@@ -18,6 +20,15 @@ public class LED extends JLabel{
 
 	public LED(Color color, String title) {
 		super(title);
+		addAncestorListener(new AncestorListener() {
+			public void ancestorAdded(AncestorEvent event) {
+			}
+			public void ancestorMoved(AncestorEvent event) {
+			}
+			public void ancestorRemoved(AncestorEvent event) {
+				timer.stop();
+			}
+		});
 		this.color = color;
 		setHorizontalAlignment(RIGHT);
 		setOn(false);

@@ -2,7 +2,6 @@ package irt.tools.panel.subpanel;
 
 import java.awt.GridLayout;
 import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -28,6 +27,8 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 public class AlarmsPanel extends JPanel implements Refresh{
 	private static final long serialVersionUID = -3029893758378178725L;
@@ -45,12 +46,6 @@ public class AlarmsPanel extends JPanel implements Refresh{
 	private final AlarmsPanel 	thisPanel;
 
 	public AlarmsPanel(final int deviceType, final LinkHeader linkHeader) {
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
-					service.shutdownNow();
-			}
-		});
 
 		thisPanel = this;
 		setLayout(new GridLayout(0, 1, 0, 0));
@@ -69,7 +64,20 @@ public class AlarmsPanel extends JPanel implements Refresh{
 			}
 		});
 
-		new AlarmIDsGetter();
+		final AlarmIDsGetter alarmIDsGetter = new AlarmIDsGetter();
+
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->{
+					cptq.removePacketListener(alarmIDsGetter);
+					service.shutdownNow();
+				}));
 	}
 
 	@Override
