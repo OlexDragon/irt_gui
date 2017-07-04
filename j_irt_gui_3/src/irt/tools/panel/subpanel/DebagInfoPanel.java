@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.Timer;
+import javax.swing.border.LineBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
@@ -151,17 +152,17 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 			String text;
 			if(h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 
-				textArea.setBackground(Color.PINK);
+				setBorder(new LineBorder(Color.PINK));
 				text = "No Communication";
 
 			}else if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
 
-				textArea.setBackground(Color.RED);
+				setBorder(new LineBorder(Color.RED));
 				text = "ERROR: " + h.getOptionStr();
 
 			}else{
 
-				textArea.setBackground(Color.YELLOW);
+				setBorder(new LineBorder(Color.YELLOW));
 				text = Optional.ofNullable(packet.getPayloads()).map(pls->pls.parallelStream()).orElse(Stream.empty()).findAny().map(Payload::getStringData).map(StringData::toString).orElse("No data.");
 			}
 
@@ -171,7 +172,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 			if(timer!=null && timer.isRunning())
 				return;
 
-			timer = new Timer(500, e->{textArea.setBackground(Color.WHITE); timer.stop();});
+			timer = new Timer(1000, e->{setBorder(null); timer.stop();});
 			timer.start();
 		});
 	}

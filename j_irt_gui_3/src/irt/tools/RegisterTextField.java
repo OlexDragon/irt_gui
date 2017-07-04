@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
@@ -190,12 +192,12 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		if(timer!=null && timer.isRunning())
 			return;
 
-		Color background = getBackground();
+		Border border = getBorder();
 
-		timer = new Timer(500, e->{setBackground(background); timer.stop();});
+		timer = new Timer(500, e->{setBorder(border); timer.stop();});
 		timer.start();
 
-		setBackground(bg);
+		setBorder(new LineBorder(bg));
 	}
 
 	public void start(){
@@ -215,6 +217,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 	public void saveRegister(){
 
+		start();
 		((RegisterPacket)setPacket).setValue(valueSaveRegister);
 		GuiControllerAbstract.getComPortThreadQueue().add(setPacket);
 	}
@@ -247,7 +250,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			try {
 				stop();
 				setText("SAVED");
-				new Timer(500, e->start()).start();;
+				new Timer(500, e->start()).start();
 			} catch (Exception e) {
 				logger.catching(e);
 			}

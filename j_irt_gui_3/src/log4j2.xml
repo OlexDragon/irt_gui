@@ -55,6 +55,7 @@
 <!--  	<Logger name="irt.tools.RegisterTextField" level="all"/> -->
 <!--  	<Logger name="irt.controller.DumpController" level="warn"/> -->
 <!--  	<Logger name="irt.tools.button.MuteButton" level="all"/> -->
+<!--  	<Logger name="irt.tools.panel.subpanel.progressBar.Section" level="debug"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />
