@@ -2,7 +2,7 @@
 package irt.tools.fx;
 
 import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
+import java.util.Optional;
 
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -10,6 +10,8 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.subpanel.monitor.Monitor;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -26,12 +28,15 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 
 		root = javaFxPanel;
 
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null)
-					root.shutdownNow();
-			}
-		});
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->root.shutdownNow()));
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
@@ -47,7 +52,6 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 			public void ancestorMoved(AncestorEvent event) { }
 		});
 
-		logger.trace("before Platform.runLater");
 		Platform.runLater(()->{
 			try{
 

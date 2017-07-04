@@ -1,9 +1,11 @@
 package irt.controller;
 
+import java.awt.event.HierarchyEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -26,6 +28,8 @@ import irt.data.packet.Payload;
 import irt.data.packet.RangePacket;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 public class ValueController extends ValueChangeListenerClass implements Runnable, PacketListener {
 
@@ -49,6 +53,19 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 		this.linkAddr = linkAddr;
 		this.comboBox = comboBox;
 		comboBox.addAncestorListener(ancesorListener);
+		comboBox.addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(
+						c->{
+							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(pl);
+							service.shutdownNow();
+						}));
 
 		reset(comboBox);
 	}
@@ -67,7 +84,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 
 	@Override
 	public void onPacketRecived(final Packet packet) {
-		scheduledThreadPool.execute(new Runnable() {
+		service.execute(new Runnable() {
 
 			@Override
 			public void run() {
@@ -126,7 +143,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 
 		if(doUpdate){
 			if(scheduleAtFixedRate.isCancelled())
-				scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(this, 1, 3000, TimeUnit.MILLISECONDS);
+				scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 3000, TimeUnit.MILLISECONDS);
 		}else
 			scheduleAtFixedRate.cancel(true);
 	}
@@ -194,7 +211,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 		if(scheduleAtFixedRate!=null)
 			scheduleAtFixedRate.cancel(true);
 
-		scheduleAtFixedRate = scheduledThreadPool.scheduleAtFixedRate(this, 1, 3000, TimeUnit.MILLISECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 3000, TimeUnit.MILLISECONDS);
 	}
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~   Listeners   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -223,7 +240,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 			comboBox.removeItemListener(itemListener);
 			comboBox.removeAncestorListener(this);
 			scheduleAtFixedRate.cancel(true);
-			scheduledThreadPool.shutdown();
+			service.shutdown();
 			removeVlueChangeListeners();
 		}
 		@Override public void ancestorMoved(AncestorEvent event) { }

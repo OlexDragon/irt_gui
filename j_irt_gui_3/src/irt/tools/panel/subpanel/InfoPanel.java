@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.HierarchyEvent;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,21 +32,23 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DumpControllers;
+import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.SoftReleaseChecker;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
-import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.PacketWork;
 import irt.tools.Transformer;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 @SuppressWarnings("serial")
 public class InfoPanel extends JPanel implements Refresh, PacketListener {
@@ -74,15 +77,31 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 	private JLabel lblUnitPartNumberTxt;
 	private JButton btnPanelSize;
 
+	private final Timer timer = new Timer(true);
+
 	public InfoPanel(DeviceInfo deviceInfo) {
 
 		setForeground(Color.WHITE);
 		setBackground(new Color(0,0x33,0x33));
 		setSize(286, WINDOW_MIN_HEIGHT);
 
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(
+						c->{
+							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(InfoPanel.this);
+							if(secondsCount!=null)
+								secondsCount.stop();
+							timer.cancel();
+						}));
 
 		addAncestorListener(new AncestorListener() {
-
 
 			public void ancestorAdded(AncestorEvent arg0) {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(InfoPanel.this);
@@ -91,6 +110,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(InfoPanel.this);
 				if(secondsCount!=null)
 					secondsCount.stop();
+				timer.cancel();
 			}
 			public void ancestorMoved(AncestorEvent arg0) {	}
 		});
@@ -189,9 +209,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		lblVersion.setBounds(84, 99, 198, 14);
 		lblVersion.setForeground(Color.WHITE);
 		lblVersion.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		DumpControllers.addActionWhenDump(new Consumer<String>() {
-
-			private final Timer timer = new Timer(true);
+		DumpController.addActionWhenDump(this, new Consumer<String>() {
 
 			@Override
 			public void accept(String s) {
@@ -299,29 +317,34 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 	public void setInfo(DeviceInfo deviceInfo) {
 		if(deviceInfo!=null){
-			lblDeviceId.setText(deviceInfo.getDeviceType()+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype());
-			lblVersion.setText(deviceInfo.getFirmwareVersion().toString());
-			lblBuiltDate.setText(deviceInfo.getFirmwareBuildDate().toString());
-			lblSn.setText(deviceInfo.getSerialNumber().toString());
 
-			StringData unitName = deviceInfo.getUnitName();
-			if(unitName!=null)
+			final String deviceId = deviceInfo.getDeviceType().map(DeviceType::ordinal).map(Object::toString).orElse("")+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype();
+			if(!deviceId.equals(lblDeviceId.getText()))
+				lblDeviceId.setText(deviceId);
+
+			final String version = deviceInfo.getFirmwareVersion().orElse("N/A");
+			if(!version.equals(lblVersion.getText()))
+				lblVersion.setText(version);
+
+			final String builtDate = deviceInfo.getFirmwareBuildDate().orElse("N/A");
+			if(!builtDate.equals(lblBuiltDate.getText()))
+				lblBuiltDate.setText(builtDate);
+
+			final String serialNumber = deviceInfo.getSerialNumber().orElse("N/A");
+			if(!serialNumber.equals(lblSn.getText()))
+				lblSn.setText(serialNumber);
+
+			final String unitName = deviceInfo.getUnitName().orElse("N/A");
+			if(!unitName.equals(lblUnitName.getText()))
 				lblUnitName.setText(unitName.toString());
 
-			StringData unitPartNumber = deviceInfo.getUnitPartNumber();
-			if(unitPartNumber!=null)
-				lblUnitPartNumber.setText(unitPartNumber.toString());
+			final String unitPartNumber = deviceInfo.getUnitPartNumber().orElse("N/A");
+			if(!unitPartNumber.equals(lblUnitPartNumber.getText()))
+				lblUnitPartNumber.setText(unitPartNumber);
 
 			int uptimeCounter = deviceInfo.getUptimeCounter();
 			secondsCount.setUptimeCounter(uptimeCounter);
 		}
-	}
-
-	public void setError(String errorStr, Color errorColor) {
-		lblError.setText(errorStr);
-		lblError.setForeground(errorColor);
-		lblError.setBackground(new Color(0, 51, 51));
-		lblError.setOpaque(true);
 	}
 
 	public static String calculateTime(long seconds) {
@@ -347,6 +370,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		}
 
 		public void stop() {
+			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(InfoPanel.this);
 			Optional.ofNullable(scheduledFuture).filter(sf->!sf.isCancelled()).ifPresent(sf->sf.cancel(true));
 			if(!service.isShutdown())
 				service.shutdownNow();

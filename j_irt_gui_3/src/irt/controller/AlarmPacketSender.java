@@ -17,7 +17,7 @@ public class AlarmPacketSender{
 
 	private final Logger logger = LogManager.getLogger();
 
-	private final ScheduledExecutorService scheduler =  Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private final ScheduledExecutorService service =  Executors.newScheduledThreadPool(1, new MyThreadFactory());
 	private final ScheduledFuture<?> processHandle;
 
 	private final AlarmStatusPacket packet; 			public AlarmStatusPacket getPacket() { return packet; }
@@ -40,12 +40,12 @@ public class AlarmPacketSender{
 				}
 			}
 		};
-		processHandle = scheduler.scheduleAtFixedRate(process, 1, 3, TimeUnit.SECONDS);
+		processHandle = service.scheduleAtFixedRate(process, 1, 3, TimeUnit.SECONDS);
 
 	}
 
 	public void destroy(){
 		processHandle.cancel(true);
-		scheduler.shutdownNow();
+		service.shutdownNow();
 	}
 }

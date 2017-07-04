@@ -8,10 +8,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import javax.swing.JCheckBox;
@@ -50,6 +52,8 @@ import irt.data.value.Value;
 import irt.tools.ALCComboBox;
 import irt.tools.IrtComboBox;
 import irt.tools.button.MuteButton;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Observer{
 	private static final String ACTION = "Action";
@@ -176,6 +180,16 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 		final LOComboBoxController loComboBoxController = new LOComboBoxController(cbLoSelect, linkAddr);
 		loComboBoxController.addObserver(this);
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->loComboBoxController.shutdownNow()));
+
 		valueController = new ValueController(linkAddr, actionComboBox);
 	}
 

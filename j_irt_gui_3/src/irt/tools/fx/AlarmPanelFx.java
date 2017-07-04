@@ -14,7 +14,7 @@ import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DumpControllers;
+import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
@@ -94,8 +94,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		gridPane.getStyleClass().add("alarms");
 
-//		if(scheduledFuture==null || scheduledFuture.isCancelled())
-		scheduledFuture = service.scheduleAtFixedRate(this, 2, 1, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
 	}
 
     @FXML
@@ -130,7 +129,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			if(!(run || statusChamge) && --index>0)
 				return;
 
-			index = DumpControllers.DUMP_TIME;
+			index = DumpController.DUMP_TIME;
 			statusChamge = false;
 
 			IntStream
@@ -364,6 +363,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	public void shutdownNow() {
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
 			scheduledFuture.cancel(true);
 		service.shutdownNow();

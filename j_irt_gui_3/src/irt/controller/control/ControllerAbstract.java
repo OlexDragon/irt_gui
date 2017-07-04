@@ -23,7 +23,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
-public abstract class ControllerAbstract implements Runnable{
+public abstract class ControllerAbstract implements Runnable, PacketListener{
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -32,7 +32,6 @@ public abstract class ControllerAbstract implements Runnable{
 		CHECK_ALWAYS
 	}
 	private PacketWork packetWork;
-	protected PacketListener packetListener;
 	protected ValueChangeListener valueChangeListener;
 
 	protected volatile boolean run = true;
@@ -60,7 +59,6 @@ public abstract class ControllerAbstract implements Runnable{
 		if(valueChangeListener!=null && packetWork!=null){
 			packetWork.addVlueChangeListener(valueChangeListener);
 		}
-		packetListener = getNewPacketListener();
 
 		if(panel!=null){
 			setComponents(panel);
@@ -86,13 +84,11 @@ public abstract class ControllerAbstract implements Runnable{
 
 	@Override
 	public void run() {
-		logger.entry(run, packetListener);
 		try{
 
 		if(packetWork!=null){
 
-			if(packetListener!=null)
-				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(packetListener);
+			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 
 			while(run){
 				synchronized (this) {
@@ -113,8 +109,7 @@ public abstract class ControllerAbstract implements Runnable{
 			}
 			logger.trace("{} is stopped", ControllerAbstract.this.getClass().getSimpleName());
 
-			if(packetListener!=null)
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(packetListener);
+			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 			clear();
 		}
 		}catch (Exception e) {
@@ -152,34 +147,23 @@ public abstract class ControllerAbstract implements Runnable{
 		return packetWork;
 	}
 
-	protected PacketListener getNewPacketListener() {
-		return new PacketListener() {
-
-			@Override
-			public void onPacketRecived(Packet packet) {
-				if (setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style == Style.CHECK_ONCE)
-					setSend(false);
-			}
-		};
-	}
-
 	public void stop() {
+
 		this.run = false;
+
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+
 		final ControllerAbstract controller = this;
 
-		new MyThreadFactory().newThread(new Runnable() {
-			
-			@Override
-			public void run() {
+		new MyThreadFactory().newThread(()->{
 				try{
-				synchronized (controller) {
-					controller.notify();
-				}
+					synchronized (controller) {
+						controller.notify();
+					}
 				}catch (Exception e) {
 					logger.catching(e);
 				}
-			}
-		}).start();
+			}).start();
 	}
 
 	public synchronized boolean isSend() {
@@ -235,6 +219,12 @@ public abstract class ControllerAbstract implements Runnable{
 	@Override
 	protected void finalize() throws Throwable {
 		super.finalize();
+	}
+
+	@Override
+	public void onPacketRecived(Packet packet) {
+		if (setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style == Style.CHECK_ONCE)
+			setSend(false);
 	}
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -2,7 +2,7 @@ package irt.data.packet;
 
 import java.util.Arrays;
 
-import irt.controller.DumpControllers;
+import irt.controller.DumpController;
 import irt.data.packet.interfaces.PacketWork;
 
 public class PacketHeader{
@@ -260,7 +260,7 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_DUMP_REGISTER_202:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_207:
 			case PacketWork.PACKET_ID_DUMP_REGISTER_220:
-				packetIdStr = "Dump "+DumpControllers.parseId(packetId);
+				packetIdStr = "Dump "+DumpController.parseId(packetId);
 				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
 				packetIdStr = "Redundancy Enable ("+packetId+")";

@@ -1,6 +1,7 @@
 package irt.tools.panel;
 
 import java.awt.Font;
+import java.awt.event.HierarchyEvent;
 import java.util.Optional;
 
 import javax.swing.JLabel;
@@ -15,8 +16,7 @@ import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.RundomNumber;
-import irt.data.listener.PacketListener;
+import irt.data.MyThreadFactory;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
@@ -37,9 +37,20 @@ import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 public class UserPicobucPanel extends DevicePanel {
 
 	private JTabbedPane tabbedPane;
+	private DefaultController target;
 
 	public UserPicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		super( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->Optional.ofNullable(target).ifPresent(DefaultController::stop)));
 
 		try {
 			tabbedPane = getTabbedPane();
@@ -77,9 +88,7 @@ public class UserPicobucPanel extends DevicePanel {
 
 		deviceType
 		.map(dt->dt.TYPE_ID)
-		.filter(tId->tId>DeviceType.BIAS_BOARD.TYPE_ID)
-		.filter(tId->tId>DeviceType.HPB_SSPA.TYPE_ID)
-		.filter(tId->(tId!=DeviceType.BIAS_BOARD.TYPE_ID || deviceInfo.getRevision()>1))
+		.filter(tId->tId>DeviceType.BIAS_BOARD.TYPE_ID || deviceInfo.getRevision()>1)
 		.ifPresent(
 				tId->{
 					showRedundant();
@@ -88,71 +97,58 @@ public class UserPicobucPanel extends DevicePanel {
 	}
 
 	private void setRedundancyName() {
-		startThread(
-				new DefaultController(
-						deviceType,
-						"Redundancy Enable",
-						new Getter(getLinkHeader(),
-								PacketImp.GROUP_ID_CONFIGURATION,
-								PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME,
-								PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
-									@Override
-									protected PacketListener getNewPacketListener() {
-										return new PacketListener() {
+		target = new DefaultController(
+				deviceType,
+				"Redundancy Enable",
+				new Getter(getLinkHeader(),
+						PacketImp.GROUP_ID_CONFIGURATION,
+						PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME,
+						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
 
-											private int count = 3;
-											private String text;
-											private RedundancyName name = null;
+			private int count = 3;
+			private String text;
+			private RedundancyName name = null;
 
-											@Override
-											public void onPacketRecived(final Packet packet) {
-												new SwingWorker<String, Void>() {
+			@Override
+			public void onPacketRecived(final Packet packet) {
+				new SwingWorker<String, Void>() {
 
-													@Override
-													protected String doInBackground() throws Exception {
-														if(
-																getPacketWork().isAddressEquals(packet) &&
-																packet.getHeader().getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
-																packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME
-															)
-															if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
-																RedundancyName n = RedundancyName.values()[packet.getPayload(0).getByte()];
-																if(n!=null && !n.equals(name) && n!=RedundancyName.NO_NAME){
+					@Override
+					protected String doInBackground() throws Exception {
+						if(
+								getPacketWork().isAddressEquals(packet) &&
+								packet.getHeader().getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
+								packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME)
+							if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+								RedundancyName n = RedundancyName.values()[packet.getPayload(0).getByte()];
+								if(n!=null && !n.equals(name) && n!=RedundancyName.NO_NAME){
 
-																	VarticalLabel varticalLabel = getVarticalLabel();
-																	text = varticalLabel.getText();
+									VarticalLabel varticalLabel = getVarticalLabel();
+									text = varticalLabel.getText();
 
-																	if(		text.startsWith(RedundancyName.BUC_A.toString()) ||
-																			text.startsWith(RedundancyName.BUC_B.toString()))
-																		text = text.substring(8);
+									if(		text.startsWith(RedundancyName.BUC_A.toString()) ||
+											text.startsWith(RedundancyName.BUC_B.toString()))
+										text = text.substring(8);
 
-																	name = n;
-																	varticalLabel.setText(n+" : "+text);
-																}
-																setSend(false);
-																count = 3;
-															}else{
-																if(--count<=0)
-																	stop();
-															}
-														return name.toString();
-													}
-												}.execute();
-											}
-										};
-									}
-					
-						}
-				);
+									name = n;
+									varticalLabel.setText(n+" : "+text);
+								}
+								setSend(false);
+								count = 3;
+							}else{
+								if(--count<=0)
+									stop();
+							}
+						return name.toString();
+					}
+				}.execute();
+			}			
+		};
+		startThread(target);
 	}
 
 	private void startThread(Runnable target) {
-		Thread t = new Thread(target, "UserPicobucPanel.PACKET_ID_ALARMS_IDs-"+new RundomNumber());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+		new MyThreadFactory().newThread(target).start();
 	}
 
 	@Override

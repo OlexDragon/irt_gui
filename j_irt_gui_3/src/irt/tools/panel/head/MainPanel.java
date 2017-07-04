@@ -12,6 +12,8 @@ import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
 
 @SuppressWarnings("serial")
 public class MainPanel extends IrtStylePanel {
@@ -27,6 +29,15 @@ public class MainPanel extends IrtStylePanel {
 	private boolean increase = true;
 
 	public MainPanel(final JFrame target, int width) {
+		addAncestorListener(new AncestorListener() {
+			public void ancestorAdded(AncestorEvent event) {
+			}
+			public void ancestorMoved(AncestorEvent event) {
+			}
+			public void ancestorRemoved(AncestorEvent event) {
+				timer.stop();
+			}
+		});
 		PANEL_WIDTH = width!=0 ? width : 650;
 		this.target = target;
 		this.addMouseMotionListener(new MouseAdapter() {

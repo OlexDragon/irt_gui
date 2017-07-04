@@ -27,13 +27,13 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	private PacketHeader header;
 	private List<Payload> payloads = new ArrayList<>();
 
-	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte payloadCommand, byte[] payloadData, Priority priority){
+	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
 		linkHeader = linkAddr!=0 ? new LinkHeader(linkAddr, (byte)0, (short)0) : null;
 		header = new PacketHeader();
 		header.setType(packetType);
 		header.setGroupId(groupId);
 		header.setPacketId(packetId);
-		payloads.add(new Payload( new ParameterHeader( payloadCommand), payloadData));
+		payloads.add(new Payload( new ParameterHeader( parameterHeaderCode), payloadData));
 		this.priority = priority;
 	}
 
@@ -203,8 +203,11 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	}
 
 	@Override
-	public void setValue(Object source) {
-		throw new UnsupportedOperationException("Auto-generated method stub");
+	public void setValue(Object value) {
+		getPayloads()
+		.parallelStream()
+		.findAny()
+		.ifPresent(pl->pl.setBuffer(value));
 	}
 
 	@Override

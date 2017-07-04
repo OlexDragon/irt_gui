@@ -31,6 +31,8 @@ import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
 import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
 import irt.tools.fx.MonitorPanelFx.StatusBitsFCM;
 import irt.tools.label.LED;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.AncestorEvent;
 
 @SuppressWarnings("serial")
 public class HeadPanel extends MainPanel implements PacketListener {
@@ -49,6 +51,15 @@ public class HeadPanel extends MainPanel implements PacketListener {
 
 	public HeadPanel(JFrame target) {
 		super(target, (int)Translation.getValue(Integer.class, "headPanel.max_width", 650));
+		addAncestorListener(new AncestorListener() {
+			public void ancestorAdded(AncestorEvent event) {
+			}
+			public void ancestorMoved(AncestorEvent event) {
+			}
+			public void ancestorRemoved(AncestorEvent event) {
+				timer.stop();
+			}
+		});
 
 		timer = new Timer(10000, e->{
 			ledPowerOn.setOn(false);
@@ -254,7 +265,11 @@ public class HeadPanel extends MainPanel implements PacketListener {
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		final Optional<Packet> oPacket = Optional.ofNullable(packet).filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+		final Optional<Packet> oPacket = Optional
+												.ofNullable(packet)
+												.map(p->p.getHeader())
+												.filter(h->h!=null)
+												.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(h->packet);
 
 		//Power Status
 		oPacket.ifPresent(pl->{
@@ -291,18 +306,22 @@ public class HeadPanel extends MainPanel implements PacketListener {
 		//Alarm Status
 		oPacket
 		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY)
-		.map(Packets::cast)
-		.filter(Optional::isPresent)
-		.map(Optional::get)
+		.flatMap(Packets::cast)
 		.map(PacketAbstract::getValue)
 		.filter(AlarmSeverities.class::isInstance)
 		.map(AlarmSeverities.class::cast)
-		.map(AlarmSeverities::getBackground)
-		.ifPresent(background->{
+		.ifPresent(as->{
 
-			if(!ledAlarm.isOn() || !ledAlarm.getBackground().equals(background)){
+			if(as==AlarmSeverities.NO_ALARM || as==AlarmSeverities.INFO){
+				if(ledAlarm.isOn())
+					ledAlarm.setOn(false);
+				return;
+			}
 
-				ledAlarm.setBackground(background);
+			Color background = as.getBackground();
+			if(!ledAlarm.isOn() || !ledAlarm.getLedColor().equals(background)){
+
+				ledAlarm.setLedColor(background);
 				ledAlarm.setOn(true);
 			}
 		});

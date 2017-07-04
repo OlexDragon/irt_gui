@@ -1,16 +1,12 @@
 package irt.tools.panel.subpanel.progressBar;
 
-import irt.data.value.Value;
-import irt.data.value.Value.Status;
-import irt.data.value.ValueDouble;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -19,7 +15,18 @@ import javax.swing.JPanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
-public class ProgressBar extends JPanel implements Observer{
+import irt.controller.GuiControllerAbstract;
+import irt.data.DeviceInfo;
+import irt.data.listener.PacketListener;
+import irt.data.packet.Packet;
+import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketWork;
+import irt.data.value.MeasurementValue;
+import irt.data.value.MeasurementValue.MeasurementStatus;
+import irt.data.value.Value;
+import irt.data.value.ValueDouble;
+
+public class ProgressBar extends JPanel implements PacketListener{
 	private static final long serialVersionUID = 1257848427070457804L;
 
 	private final static Logger logger = (Logger) LogManager.getLogger();
@@ -51,8 +58,6 @@ public class ProgressBar extends JPanel implements Observer{
 			}
 		});
 		setOpaque(false);
-
-		value.addObserver(this);
 
 		Section section1 = new Section();
 		section1.setPreferredSize(new Dimension(10, 300));
@@ -120,6 +125,8 @@ public class ProgressBar extends JPanel implements Observer{
 		section2.setLayout(null);
 		section1.setLayout(null);
 		setLayout(groupLayout);
+
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
 	private void setMinMaxValues() {
@@ -142,17 +149,60 @@ public class ProgressBar extends JPanel implements Observer{
 	}
 
 	@Override
-	public void update(Observable o, Object obj) {
-		if(obj instanceof Status){
-			Status s = (Status) obj;
-			if(s == Status.RANGE_SET){
-				setMinMaxValues();
-				logger.trace("update(Observable {}, Object {})", o, obj);
-			}
-		}
+	public void onPacketRecived(Packet packet) {
+		setMinMaxValue(packet);
+		setValue(packet);
 	}
 
-	public static void setValue(long value) {
-		ProgressBar.value.setValue(value);
+	private void setValue(Packet packet) {
+		Optional
+		.ofNullable(packet)
+		.map(Packet::getHeader)
+		.filter(h->h.getPacketId()	== PacketWork.PACKET_ID_MEASUREMENT_ALL)
+		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
+		.filter(h->h.getOption()	== PacketImp.ERROR_NO_ERROR)
+		.map(h->packet.getPayloads())
+		.map(pls->pls.parallelStream())
+		.orElse(Stream.empty())
+		.filter(pl->pl.getParameterHeader().getCode()==PacketImp.PARAMETER_MEASUREMENT_OUTPUT_POWER)
+		.findAny()
+		.map(MeasurementValue::new)
+		.ifPresent(mv->{
+			final int v = mv.getValue();
+			if(mv.getFlags().equals(MeasurementStatus.LESS_THAN) && value.getValue()!=v){
+				value.setMinValue(v);
+				setMinMaxValues();
+			}
+
+			value.setValue(v);
+		});
+	}
+
+	private void setMinMaxValue(Packet packet) {
+
+		if(value.getMaxValue()!=Integer.MAX_VALUE)
+			return; //already set
+
+		Optional
+		.ofNullable(packet)
+		.map(Packet::getHeader)
+		.filter(h->h.getPacketId()	== PacketWork.PACKET_ID_DEVICE_INFO)
+		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
+		.filter(h->h.getOption()	== PacketImp.ERROR_NO_ERROR)
+		.ifPresent(p->{
+			new DeviceInfo(packet)
+			.getUnitPartNumber()
+			.filter(upn->upn.length()>10)
+			.map(upn->upn.replaceAll("-", ""))
+			.filter(upn->Character.isDigit(upn.charAt(6)))
+			.filter(upn->Character.isDigit(upn.charAt(7)))
+			.filter(upn->Character.isDigit(upn.charAt(8)))
+			.map(upn->upn.substring(6, 9))
+			.map(Integer::parseInt)
+			.ifPresent(unitPower->{
+				value.setMinMax(unitPower-10, unitPower);
+				setMinMaxValues();
+			});
+		});
 	}
 }

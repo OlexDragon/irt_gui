@@ -53,7 +53,7 @@
 <!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.MonitorPanelSwingWithFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.RegisterTextField" level="all"/> -->
-<!--  	<Logger name="irt.controller.DumpControllers" level="warn"/> -->
+<!--  	<Logger name="irt.controller.DumpController" level="warn"/> -->
 <!--  	<Logger name="irt.tools.button.MuteButton" level="all"/> -->
 
     <Logger name="dumper" level="INFO">

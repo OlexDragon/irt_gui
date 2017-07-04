@@ -5,7 +5,6 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.SystemColor;
 import java.awt.event.HierarchyEvent;
-import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -32,7 +31,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DumpControllers;
+import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
@@ -55,6 +54,8 @@ import irt.data.packet.interfaces.LinkedPacket;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 
 public class RedundancyPanel extends RedundancyPanelDemo implements PacketListener, Runnable{
 
@@ -96,20 +97,18 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	//*************************************** constructor RedundancyPanel ********************************************
 	public RedundancyPanel(final LinkHeader linkHeader) {
 
-		addHierarchyListener(new HierarchyListener() {
-			public void hierarchyChanged(HierarchyEvent e) {
-				if((e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)==HierarchyEvent.PARENT_CHANGED && e.getComponent().getParent()==null){
-
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->{
 					cptq.removePacketListener(RedundancyPanel.this);
-
-					if(scheduleAtFixedRate==null)
-						scheduleAtFixedRate.cancel(true);
-
-					if(!service.isShutdown())
-						service.shutdownNow();
-				}
-			}
-		});
+					service.shutdownNow();
+				}));
 
 		unitAddress = linkHeader.getAddr();
 		redundancyEnablePacket = new RedundancyEnablePacket(unitAddress, null);
@@ -274,7 +273,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		setLayout(groupLayout);
 
 		cptq.addPacketListener(this);
-		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
+		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 5000, TimeUnit.MILLISECONDS);
 	}
 
@@ -444,7 +443,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	@Override
 	public void run() {
 		if(run || --count>0){
-			count = DumpControllers.DUMP_TIME;
+			count = DumpController.DUMP_TIME;
 			return;
 		}
 

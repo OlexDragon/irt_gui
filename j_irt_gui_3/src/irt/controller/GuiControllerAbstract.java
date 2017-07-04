@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -68,7 +69,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 	protected static ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
 
-	//	private ScheduledFuture<?> scheduledFuture;
+	private ScheduledFuture<?> scheduledFuture;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 	private Console console;
@@ -132,8 +133,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			}
 		}
 		comPortThreadQueue.addPacketListener(this);
-//		scheduledFuture = 
-				service.scheduleAtFixedRate(this, 2, 5, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 2, 5, TimeUnit.SECONDS);
 	}
 
 	public static Optional<DeviceInfo> getDeviceInfo(LinkHeader linkHeader) {
@@ -218,6 +218,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 
 	protected void setSerialPort() {
+
 		setSerialPort(serialPortSelection.getSelectedItem().toString());
 	}
 
@@ -236,6 +237,11 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		synchronized (this) {
 			notify();
 		}
+
+		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
+			scheduledFuture.cancel(true);
+
+		scheduledFuture = service.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
 	}
 
 	private void reset() {
@@ -338,7 +344,9 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		final Optional<Packet> isDeviceInfo = Optional
 													.ofNullable(packet)
-													.filter(p->p.getHeader().getGroupId() == PacketImp.GROUP_ID_DEVICE_INFO);
+													.map(p->p.getHeader())
+													.filter(h->h.getGroupId() == PacketImp.GROUP_ID_DEVICE_INFO)
+													.map(h->packet);
 
 		//Return if not device info packet
 		if(!isDeviceInfo.isPresent())
@@ -463,9 +471,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				if(!collect.isEmpty())
 					sn += "_" + collect;
 
-				logger.error(sn);
-
-				DumpControllers.setSysSerialNumber(sn);
+				DumpController.setSysSerialNumber(sn);
 			});
 		}
 
@@ -475,6 +481,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			unitsPanel.revalidate();
 			unitsPanel.getParent().getParent().repaint();
 			Optional.ofNullable(timers.remove(di)).ifPresent(t->t.stop());
+			comPortThreadQueue.clear();
 		}
 	}
 }

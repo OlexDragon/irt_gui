@@ -26,7 +26,6 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.RundomNumber;
-import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
@@ -65,10 +64,6 @@ public class DebugPanel extends JPanel{
 								Style.CHECK_ALWAYS){
 
 									@Override
-									protected PacketListener getNewPacketListener() {
-										return new PacketListener() {
-								
-											@Override
 											public void onPacketRecived(Packet packet) {
 												if(getPacketWork().isAddressEquals(packet) &&
 														packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CLEAR_STATISTICS){
@@ -85,10 +80,7 @@ public class DebugPanel extends JPanel{
 														}
 													}
 												}
-											}
-										};
-									}
-					
+											}					
 						}
 				);
 				}catch(Exception ex){

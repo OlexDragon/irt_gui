@@ -341,7 +341,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	public void start(){
 
-		if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()){
+		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())){
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 		}
@@ -543,6 +543,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public void shutdownNow() {
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		service.shutdownNow();
 	}
 }

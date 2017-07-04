@@ -11,6 +11,7 @@ import irt.data.DeviceInfo.Protocol;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.JavaFxWrapper;
 import irt.tools.panel.subpanel.DACsPanel;
+import irt.tools.panel.subpanel.DebagInfoPanel;
 import irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9;
 import irt.tools.panel.subpanel.PLLsPanel;
 import irt.tools.panel.subpanel.control.ControlPanelConverter;

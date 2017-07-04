@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import irt.data.packet.interfaces.PacketWork;
 import irt.tools.fx.MonitorPanelFx;
@@ -49,8 +50,10 @@ public class MeasurementPacket extends PacketAbstract{
 
 		// true  -> status bits,
 		// false -> measurement values
-		final Map<Boolean, List<Payload>> collect = getPayloads()
-														.parallelStream()
+		final Map<Boolean, List<Payload>> collect = Optional
+														.ofNullable(getPayloads())
+														.map(pls->pls.parallelStream())
+														.orElse(Stream.empty())
 														.collect(Collectors.partitioningBy(pl->pl.getParameterHeader().getCode()==status.getCode()));
 
 		//status

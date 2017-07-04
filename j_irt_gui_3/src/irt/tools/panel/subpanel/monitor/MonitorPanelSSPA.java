@@ -21,7 +21,6 @@ import irt.data.packet.Payload;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
-import irt.tools.panel.subpanel.progressBar.ProgressBar;
 
 @SuppressWarnings("serial")
 public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
@@ -55,6 +54,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 		ledMute.setForeground(Color.GREEN);
 		add(ledMute);
 
+		if(deviceType!=null)
 		deviceType
 		.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
 		.ifPresent(dt->{
@@ -251,7 +251,6 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 					v = new ValueDouble(value, 1);
 					v.setPrefix(Translation.getValue(String.class, "dbm", "dBm"));
 					lblOutputPower.setText(getOperator(flags)+v.toString());
-					ProgressBar.setValue(flags==1 ? v.getValue() : flags==3 ? Long.MAX_VALUE : 0);
 				}
 				logger.trace("PARAMETER_MEASUREMENT_PICOBUC_OUTPUT_POWER, flags={}, value={}", flags, value);
 			}else

@@ -49,7 +49,7 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM dd yyyy, HH:mm:ss");
 				Calendar calendar = simpleDateFormat.getCalendar();
 				try {
-					calendar.setTime(simpleDateFormat.parse(deviceInfo.getFirmwareBuildDate().toString()));
+					calendar.setTime(simpleDateFormat.parse(deviceInfo.getFirmwareBuildDate().orElse("00 00 0000")));
 				} catch (Exception e) {
 					logger.catching(e);
 				}
