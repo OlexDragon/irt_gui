@@ -1,4 +1,4 @@
-package irt.tools;
+package irt.tools.textField;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -39,6 +39,8 @@ import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class RegisterTextField extends JTextField implements PacketListener, Runnable {
 	private static final long serialVersionUID = 517630309792962880L;
@@ -61,6 +63,12 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	private Timer timer;
 
 	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, short packetId, int min, int max) {
+		addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+				stop();
+			}
+		});
 
 		MIN = min;
 		MAX = max;
@@ -113,9 +121,20 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			@Override
 			public void keyTyped(KeyEvent e) {
 				char c = e.getKeyChar();
-				if(!(Character.isDigit(c) || (c==KeyEvent.VK_BACK_SPACE || c==KeyEvent.VK_DELETE) || c==KeyEvent.VK_ENTER)){
-				    getToolkit().beep();
-				    e.consume();
+
+				 if(!e.isShiftDown() && c==KeyEvent.VK_ESCAPE){
+					 start();
+
+				 }else if(e.isShiftDown() && c==KeyEvent.VK_ESCAPE){
+					 stop();
+
+//				 }else  if(e.isControlDown() && c==KeyEvent.VK_SHIFT){// VK_SHIFT equals CTRL 'P'
+//					 logger.error("***");
+//						setToolTipText("Data copied to the clipboard.");
+
+				 }else if(!(Character.isDigit(c) || c==KeyEvent.VK_BACK_SPACE || c==KeyEvent.VK_DELETE) || c==KeyEvent.VK_ENTER || c==0){
+					getToolkit().beep();
+					e.consume();
 				}
 			}
 			
@@ -159,6 +178,8 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			if(!noError.isPresent()){
 				showAction(Color.RED);
 				logger.warn("Packet has error {}", packet);
+
+				setToolTipText(hasResponse.get().getOptionStr());
 				return;
 			}
 

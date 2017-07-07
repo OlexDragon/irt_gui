@@ -64,12 +64,12 @@ import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
-import irt.tools.RegisterTextField;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.button.ImageButton;
 import irt.tools.button.Switch;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
+import irt.tools.textField.RegisterTextField;
 
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel implements PacketListener, Runnable {

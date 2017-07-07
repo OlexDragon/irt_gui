@@ -462,11 +462,9 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		}
 
 		private void setSysSerialNumber(DeviceInfo deviceInfo) {
-			Optional
-			.ofNullable(deviceInfo.getSerialNumber())
-			.map(sn->sn.toString())
+			deviceInfo.getSerialNumber()
 			.ifPresent(sn->{
-				final String collect = timers.entrySet().stream().map(t->t.getKey()).map(di->di.getSerialNumber().toString()).collect(Collectors.joining("_"));
+				final String collect = timers.entrySet().stream().map(t->t.getKey()).map(di->di.getSerialNumber().get()).collect(Collectors.joining("_"));
 
 				if(!collect.isEmpty())
 					sn += "_" + collect;

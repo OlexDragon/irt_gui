@@ -53,11 +53,11 @@ import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
-import irt.tools.RegisterTextField;
 import irt.tools.button.Switch;
 import irt.tools.fx.MonitorPanelFx;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
+import irt.tools.textField.RegisterTextField;
 
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel implements PacketListener, Runnable {
