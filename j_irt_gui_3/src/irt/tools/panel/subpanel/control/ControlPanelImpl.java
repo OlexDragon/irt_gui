@@ -161,6 +161,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		add(txtGain);
 		txtGain.setColumns(10);
 
+		if(deviceType!=null)
 		deviceType.ifPresent(dt->{
 			if(dt.TYPE_ID>DeviceType.CONVERTER_L_TO_KU_OUTDOOR.TYPE_ID){
 				btnStoreConfig = new ImageButton(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png")).getImage());

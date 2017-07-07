@@ -70,7 +70,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DebagInfoPanel.this);
 
 				if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-					scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 0, 10, TimeUnit.SECONDS);
+					scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 1, 10, TimeUnit.SECONDS);
 
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {

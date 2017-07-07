@@ -8,12 +8,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.awt.event.HierarchyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import javax.swing.JCheckBox;
@@ -35,7 +33,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiController;
-import irt.controller.LOComboBoxController;
 import irt.controller.ValueController;
 import irt.controller.interfaces.ControlPanel;
 import irt.controller.interfaces.DescriptionPacketValue;
@@ -44,7 +41,7 @@ import irt.controller.translation.Translation;
 import irt.data.ALCSet;
 import irt.data.AttanuationSet;
 import irt.data.FrequencySet;
-import irt.data.IdValue;
+import irt.data.IdValueFreq;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -52,8 +49,7 @@ import irt.data.value.Value;
 import irt.tools.ALCComboBox;
 import irt.tools.IrtComboBox;
 import irt.tools.button.MuteButton;
-import irt.tools.panel.ConverterPanel;
-import irt.tools.panel.PicobucPanel;
+import irt.tools.combobox.LoSelectComboBox;
 
 public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Observer{
 	private static final String ACTION = "Action";
@@ -85,7 +81,7 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 	private JLabel lblMute;
 
-	private JComboBox<IdValue> cbLoSelect;
+	private JComboBox<IdValueFreq> cbLoSelect;
 
 	public ControlPanelHPB(byte linkAddr) {
 		addAncestorListener(new AncestorListener() {
@@ -159,7 +155,7 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		stepTextField.setBounds(69, 69, 127, 20);
 		add(stepTextField);
 
-		cbLoSelect = new IrtComboBox<>();
+		cbLoSelect = new LoSelectComboBox(linkAddr);
 		cbLoSelect.setForeground(Color.YELLOW);
 		cbLoSelect.setBackground( new Color(0x0B,0x17,0x3B));
 		cbLoSelect.setCursor( Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -177,18 +173,6 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 		refresh();
 		selectAction();
-
-		final LOComboBoxController loComboBoxController = new LOComboBoxController(cbLoSelect, linkAddr);
-		loComboBoxController.addObserver(this);
-		addHierarchyListener(
-				hierarchyEvent->
-				Optional
-				.of(hierarchyEvent)
-				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
-				.map(HierarchyEvent::getChanged)
-				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
-				.filter(c->c.getParent()==null)
-				.ifPresent(c->loComboBoxController.shutdownNow()));
 
 		valueController = new ValueController(linkAddr, actionComboBox);
 	}

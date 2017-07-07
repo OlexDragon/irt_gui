@@ -69,9 +69,9 @@ public class IrtGui extends IrtMainFrame {
 
 	public static final int DEFAULT_ADDRESS = 254;
 	private static LoggerContext ctx = DumpController.setSysSerialNumber(null);//need for log file name setting
-	private static final Logger logger = (Logger) LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.130";
+	public static final String VERTION = "- 3.133";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;

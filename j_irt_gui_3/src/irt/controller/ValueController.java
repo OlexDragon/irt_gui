@@ -22,7 +22,7 @@ import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.RangePacket;
@@ -89,26 +89,26 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 			@Override
 			public void run() {
 
-				try{
-				final PacketHeader header = packet.getHeader();
+					final short id = ((PacketAbstract)packetToSend).getHeader().getPacketId();
 
-				if(packetToSend.equals(packet) && header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE) {
-					logger.entry(packet);
+					Optional
+					.ofNullable(packet)
+					.map(Packet::getHeader)
+					.filter(h->h.getPacketId()==id)
+					.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+					.ifPresent(h->{
 
-					synchronized (logger) {
+						synchronized (logger) {
 
-						final Payload pl = packet.getPayload(0);
+							final Payload pl = packet.getPayload(0);
 
-						if(packetToSend instanceof RangePacket)
-							range(pl);
+							if(packetToSend instanceof RangePacket)
+								range(pl);
 
-						else
-							value(pl);
-					}
-				}
-				}catch(Exception e){
-					logger.catching(e);
-				}
+							else
+								value(pl);
+						}
+					});
 			}
 
 			private void value(final Payload payload) {

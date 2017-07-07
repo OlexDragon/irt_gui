@@ -250,14 +250,17 @@ public class DeviceInfo {
 
 	@Override
 	public String toString() {
-		return "\n\tDeviceInfo [linkHeader=" + linkHeader + ", type=" + deviceType + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber
-				+ ", firmwareVersion=" + firmwareVersion + ", firmwareBuildDate=" + firmwareBuildDate + ", uptimeCounter=" + uptimeCounter + ", unitName="
-				+ unitName + "]";
+		return "\n\tDeviceInfo [linkHeader=" + linkHeader + ", type=" + deviceType.map(dt->dt.TYPE_ID).orElse(null) + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber.orElse(null)
+				+ ", firmwareVersion=" + firmwareVersion.orElse(null) + ", firmwareBuildDate=" + firmwareBuildDate.orElse(null) + ", uptimeCounter=" + uptimeCounter + ", unitName="
+				+ unitName.orElse(null) + "]";
 	}
 
 	public void set(DeviceInfo deviceInfo) {
 
-		Optional.of(deviceInfo).map(DeviceInfo::getSerialNumber).filter(sn->sn.equals(serialNumber)).orElseThrow(()->new IllegalArgumentException(deviceInfo.toString()));
+		deviceInfo
+		.getSerialNumber()
+		.filter(sn->!sn.equals(serialNumber))
+		.orElseThrow(()->new IllegalArgumentException(this +  deviceInfo.toString()));
 
 		setDeviceType(deviceInfo.typeId);
 		setRevision(deviceInfo.revision);
