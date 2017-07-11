@@ -317,9 +317,9 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 	public void setInfo(DeviceInfo deviceInfo) {
 		if(deviceInfo!=null){
 
-			final String typeId = Integer.toString(deviceInfo.getTypeId());
-			if(!typeId.equals(lblDeviceId.getText()))
-				lblDeviceId.setText(typeId);
+			final String deviceId = deviceInfo.getTypeId()+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype();
+			if(!deviceId.equals(lblDeviceId.getText()))
+				lblDeviceId.setText(deviceId);
 
 			final String version = deviceInfo.getFirmwareVersion().orElse("N/A");
 			if(!version.equals(lblVersion.getText()))

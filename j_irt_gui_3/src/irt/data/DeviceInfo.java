@@ -181,7 +181,8 @@ public class DeviceInfo {
 
 	public byte[] set(byte[]data){
 		if(data!=null && data.length>=SIZE){
-			deviceType = DeviceType.valueOf((int) PacketImp.shiftAndAdd(Arrays.copyOf(data, REVISION_FIRST_BYTE)));
+			typeId = (int) PacketImp.shiftAndAdd(Arrays.copyOf(data, REVISION_FIRST_BYTE));
+			deviceType = DeviceType.valueOf(typeId);
 			revision = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(data, REVISION_FIRST_BYTE,SUBTYPE_FIRST_BYTE));
 			subtype = (int) PacketImp.shiftAndAdd(Arrays.copyOfRange(data, SUBTYPE_FIRST_BYTE,SIZE));
 		}
