@@ -30,7 +30,8 @@ public class ValueFrequency extends Value implements Comparable<ValueFrequency>{
 	private void setMinMax(int converterType) {
 		super.setType(converterType);
 
-		DeviceType.valueOf(converterType)
+		DeviceType
+		.valueOf(converterType)
 		.ifPresent(dt->{
 
 			switch(dt){

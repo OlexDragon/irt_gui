@@ -250,7 +250,7 @@ public class DeviceInfo {
 
 	@Override
 	public String toString() {
-		return "\n\tDeviceInfo [linkHeader=" + linkHeader + ", type=" + deviceType.map(dt->dt.TYPE_ID).orElse(null) + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber.orElse(null)
+		return "\n\tDeviceInfo [linkHeader=" + linkHeader + ", type=" + typeId + ", revision=" + revision + ", subtype=" + subtype + ", serialNumber=" + serialNumber.orElse(null)
 				+ ", firmwareVersion=" + firmwareVersion.orElse(null) + ", firmwareBuildDate=" + firmwareBuildDate.orElse(null) + ", uptimeCounter=" + uptimeCounter + ", unitName="
 				+ unitName.orElse(null) + "]";
 	}
