@@ -38,7 +38,6 @@ import irt.controller.SoftReleaseChecker;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
@@ -318,9 +317,9 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 	public void setInfo(DeviceInfo deviceInfo) {
 		if(deviceInfo!=null){
 
-			final String deviceId = deviceInfo.getDeviceType().map(DeviceType::ordinal).map(Object::toString).orElse("")+"."+deviceInfo.getRevision()+"."+deviceInfo.getSubtype();
-			if(!deviceId.equals(lblDeviceId.getText()))
-				lblDeviceId.setText(deviceId);
+			final String typeId = Integer.toString(deviceInfo.getTypeId());
+			if(!typeId.equals(lblDeviceId.getText()))
+				lblDeviceId.setText(typeId);
 
 			final String version = deviceInfo.getFirmwareVersion().orElse("N/A");
 			if(!version.equals(lblVersion.getText()))
