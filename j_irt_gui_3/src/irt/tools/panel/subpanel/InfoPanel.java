@@ -42,9 +42,6 @@ import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
-import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.Transformer;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
@@ -415,31 +412,24 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		if(deviceInfo == null)
 			return;
 
-		final Optional<PacketHeader> hasResponse = Optional
-				.ofNullable(packet)
-				.map(Packet::getHeader)
-				.filter(h->h.getPacketId()==PacketWork.PACKET_ID_DEVICE_INFO)
-				.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+		
+		DeviceInfo
+		.parsePacket(packet)
+		.filter(di->di.getSerialNumber().equals(deviceInfo.getSerialNumber()))
+		.ifPresent(di->{
 
-		if(!hasResponse.isPresent())
-			return;
+			setInfo(di);
+			deviceInfo.set(di);
 
-		final DeviceInfo di = new DeviceInfo(packet);
+			if(secondsCount!=null)
+				secondsCount.setUptimeCounter(di.getUptimeCounter());
 
-		if(!deviceInfo.getSerialNumber().equals(di.getSerialNumber()))
-			return;
+			if(--softCheckerDeley<0){
+				softCheckerDeley = 250;
 
-		setInfo(di);
-		deviceInfo.set(di);
-
-		if(secondsCount!=null)
-			secondsCount.setUptimeCounter(di.getUptimeCounter());
-
-		if(--softCheckerDeley<0){
-			softCheckerDeley = 250;
-
-			final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
-			lblError.setVisible(instance.check(di).orElse(false));
-		}
+				final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
+				lblError.setVisible(instance.check(di).orElse(false));
+			}
+		});
 	}
 }

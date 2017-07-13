@@ -7,14 +7,17 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
+import irt.controller.GuiControllerAbstract;
+import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.PacketWork;
 
-public class DeviceInfo {
+public class DeviceInfo implements PacketListener {
 
 	protected final Logger logger = (Logger) LogManager.getLogger();
 
@@ -98,6 +101,7 @@ public class DeviceInfo {
 
 	public DeviceInfo(Packet packet) {
 		set(packet);
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
 	public DeviceInfo() {}
@@ -123,6 +127,8 @@ public class DeviceInfo {
 	}
 
 	public void setDeviceType(int typeId) {
+		if(this.typeId == typeId)
+			return;
 		this.typeId = typeId;
 		this.deviceType = DeviceType.valueOf(typeId);
 	}
@@ -267,5 +273,22 @@ public class DeviceInfo {
 		setRevision(deviceInfo.revision);
 		setSubtype(deviceInfo.subtype);
 		setUptimeCounter(deviceInfo.uptimeCounter);
+	}
+
+	@Override
+	public void onPacketRecived(Packet packet) {
+		DeviceInfo
+		.parsePacket(packet)
+		.filter(di->di.serialNumber.equals(serialNumber))
+		.ifPresent(this::set);
+	}
+
+	static public Optional<DeviceInfo> parsePacket(Packet packet){
+
+		return Optional
+		.ofNullable(packet)
+		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_INFO)
+		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+		.map(DeviceInfo::new);		
 	}
 }
