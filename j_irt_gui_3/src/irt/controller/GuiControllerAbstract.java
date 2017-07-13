@@ -364,7 +364,8 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 
 			Optional<DeviceType> oDeviceType = di.getDeviceType();
-			oDeviceType.ifPresent(dt->{
+			oDeviceType
+			.ifPresent(dt->{
 
 				if(dt==DeviceType.IMPOSSIBLE)
 					logger.warn("Can not connect. {}", packet);
