@@ -37,6 +37,8 @@ import irt.controller.GuiController;
 import irt.controller.control.ControlController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.control.UnitAttenuationController;
+import irt.controller.control.UnitController;
 import irt.controller.interfaces.ControlPanel;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
@@ -44,7 +46,7 @@ import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.IdValueFreq;
 import irt.data.Listeners;
-import irt.data.RundomNumber;
+import irt.data.MyThreadFactory;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
@@ -74,7 +76,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	protected JComboBox<IdValue> cbActionSelector;
 	private JLabel lblChoice;
 
-	private ControllerAbstract controller;
+	private UnitController controller;
 	protected Cursor cursor;
 	protected Color color;
 	private IdValue selection;
@@ -324,30 +326,21 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		if(controller!=null)
 			controller.stop();
 
-		Thread t;
 		ActionFlags a = ActionFlags.values()[control];
 		switch(a){
 		case FLAG_GAIN:
-			t = new Thread(controller =  getNewGainController(), "ControlPanelImpl.GainController-"+new RundomNumber());
+			new MyThreadFactory().newThread(controller =  getNewGainController()).start();
 			break;
 		case FLAG_FREQUENCY:
-			t = new Thread(controller = getNewFreqController(), "ControlPanelImpl.FreqController-"+new RundomNumber());
+			new MyThreadFactory().newThread(controller =  getNewFreqController()).start();
 			break;
 		case FLAG_ALC:
-			t = new Thread(controller = getNewAlcController(), "ControlPanelImpl.AlcController-"+new RundomNumber());
+			new MyThreadFactory().newThread(controller =  getNewAlcController()).start();
 			break;
 		default:
-			t = new Thread(controller = getNewAttenController(), "ControlPanelImpl.AttenController-"+new RundomNumber());
+			controller =  new UnitAttenuationController(linkHeader!=null ? linkHeader.getAddr() : 0, txtGain, slider, txtStep);
+			controller.start();
 		}
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
-	}
-
-	protected AttenuationController getNewAttenController() {
-		return new AttenuationController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 	}
 
 	protected GainController getNewGainController() {

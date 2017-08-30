@@ -10,7 +10,7 @@ import irt.tools.panel.UserPicobucPanel;
 public class GuiControllerUser extends GuiControllerAbstract {
 
 	public GuiControllerUser(IrtGui gui) {
-		super("Gui Controller", gui);
+		super("Gui UnitController", gui);
 		try {
 			unitsPanel.add(new DemoPanel());
 			unitsPanel.revalidate();

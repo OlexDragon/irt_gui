@@ -21,7 +21,7 @@ public class GainController extends ValueRangeControllerAbstract {
 
 	public GainController(Optional<DeviceType> deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType,
-				"Gain Controller",
+				"Gain UnitController",
 				new ConfigurationSetter(linkHeader,
 						PacketImp.PARAMETER_ID_CONFIGURATION_GAIN_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE),

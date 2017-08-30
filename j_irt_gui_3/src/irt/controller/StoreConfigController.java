@@ -21,7 +21,7 @@ public class StoreConfigController extends ControllerAbstract {
 	private Component owner;
 
 	public StoreConfigController(Optional<DeviceType> deviceType, LinkHeader linkHeader, Component owner, Style style) {
-		super(deviceType, "Stor Config Controller", new Setter(linkHeader, PacketImp.GROUP_ID_CONFIG_PROFILE, PacketImp.PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style);
+		super(deviceType, "Stor Config UnitController", new Setter(linkHeader, PacketImp.GROUP_ID_CONFIG_PROFILE, PacketImp.PACKET_ID_CONFIG_PROFILE_SAVE, PacketWork.PACKET_ID_STORE_CONFIG), null, style);
 		setSend(false);
 		getPacketWork().getPacketThread().setDataPacketTypeCommand();
 

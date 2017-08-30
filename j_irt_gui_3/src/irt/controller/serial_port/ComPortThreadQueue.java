@@ -34,7 +34,6 @@ public class ComPortThreadQueue implements Runnable {
 
 	@Override
 	public void run() {
-
 		boolean sent = false;
 		PacketWork packetWork = null;
 		try {
@@ -153,12 +152,21 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public void firePacketListener(Packet packet) {
-		Object[] listeners = packetListeners.getListenerList();
-		for (int i = 0; i < listeners.length; i++) {
-			Object l = listeners[i];
-			if (l == PacketListener.class)
-				((PacketListener) listeners[i + 1]).onPacketRecived(packet);
-		}
+
+		Arrays
+		.stream(packetListeners.getListenerList())
+		.parallel()
+		.filter(PacketListener.class::isInstance)
+		.map(PacketListener.class::cast)
+		.forEach(l->{
+			try{
+
+				l.onPacketRecived(packet);
+
+			}catch (Exception e) {
+				logger.catching(e);
+			}
+		});
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

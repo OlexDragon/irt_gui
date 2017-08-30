@@ -18,12 +18,11 @@ import irt.data.FireValue;
 import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
-import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
-public abstract class ControllerAbstract implements Runnable, PacketListener{
+public abstract class ControllerAbstract implements UnitController{
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -66,8 +65,9 @@ public abstract class ControllerAbstract implements Runnable, PacketListener{
 		}
 	}
 
-	public ControllerAbstract(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork2, Object panel, Style stile) {
+	public ControllerAbstract(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, Object panel, Style stile) {
 		// TODO Auto-generated constructor stub
+		logger.error("*** ControllerAbstract ***");
 	}
 
 	protected abstract void 				setListeners();
@@ -147,6 +147,12 @@ public abstract class ControllerAbstract implements Runnable, PacketListener{
 		return packetWork;
 	}
 
+	@Override
+	public void start() {
+		
+	}
+
+	@Override
 	public void stop() {
 
 		this.run = false;

@@ -94,8 +94,7 @@ public class TextSliderController extends ControllerAbstract {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					value.setValue(txtField.getText());
-					((ConfigurationSetter) getPacketWork()).preparePacketToSend(new IdValue(
-							getPacketWork().getPacketThread().getPacket().getHeader().getPacketId(), value));
+					((ConfigurationSetter) getPacketWork()).preparePacketToSend(new IdValue(getPacketWork().getPacketThread().getPacket().getHeader().getPacketId(), value));
 					setSend(true);
 					slider.setValue(value.getRelativeValue());
 				} catch (Exception ex) {
@@ -191,7 +190,8 @@ public class TextSliderController extends ControllerAbstract {
 				logger.trace("valueChangeEvent: {}", valueChangeEvent);
 				Object source = valueChangeEvent.getSource();
 
-				switch(source.getClass().getSimpleName()){
+				final String simpleName = source.getClass().getSimpleName();
+				switch(simpleName){
 				case "Byte":
 					txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));
 					cs.preparePacketToSend(new IdValue(packetId, null));

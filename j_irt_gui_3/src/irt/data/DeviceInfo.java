@@ -287,6 +287,7 @@ public class DeviceInfo implements PacketListener {
 
 		return Optional
 		.ofNullable(packet)
+		.filter(p->p.getHeader()!=null)
 		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_INFO)
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.map(DeviceInfo::new);		

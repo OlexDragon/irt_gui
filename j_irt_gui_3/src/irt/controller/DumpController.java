@@ -259,7 +259,8 @@ public class DumpController implements PacketListener, Runnable{
 		o.ifPresent(text->{
 			final StringBuilder sb = new StringBuilder()
 											.append("addr=")	.append(Optional.ofNullable(deviceInfo.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0)&0xFF)	.append("; ")
-											.append("SN: ")		.append(deviceInfo.getSerialNumber().orElse(null))				.append("; ")
+											.append("SN: ")		.append(deviceInfo.getSerialNumber().orElse(null))	.append("; ")
+											.append("Uptime: ")	.append(deviceInfo.getUptimeCounter())				.append("; ")
 											.append(System.lineSeparator())
 											.append(text);
 			synchronized (dumper) {
