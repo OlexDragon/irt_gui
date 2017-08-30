@@ -31,19 +31,18 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.serial_port.ComPort;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.value.getter.DeviceInfoGetter;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.MyThreadFactory;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.DeviceInfo.Protocol;
+import irt.data.MyThreadFactory;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.DeviceInfoPacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Packet;
-import irt.data.packet.PacketAbstract.Priority;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.irt_gui.IrtGui;
@@ -291,15 +290,11 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getConverterInfo() {
+		logger.error("");
 		if(!protocol.equals(Protocol.LINKED)){
 			logger.trace("protocol = {}", protocol);
 
-			comPortThreadQueue.add(new DeviceInfoGetter() {
-				@Override
-				public Priority getPriority() {
-					return Priority.ALARM;
-				}
-			});
+			comPortThreadQueue.add(new DeviceInfoPacket(getAddress()));
 		}
 	}
 
@@ -316,16 +311,11 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getUnitsInfo() {
+		logger.error("");
 		if (!protocol.equals(Protocol.CONVERTER)) {
 
-			for(Byte b:addresses){
-				DeviceInfoGetter packetWork = new DeviceInfoGetter(new LinkHeader(b, (byte) 0, (short) 0)) {
-					@Override
-					public Priority getPriority() {
-						return Priority.ALARM;
-					}
-				};
-				comPortThreadQueue.add(packetWork);
+			for(Byte addr:addresses){
+				comPortThreadQueue.add(new DeviceInfoPacket(addr));
 			}
 		}
 	}

@@ -48,7 +48,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 			public void itemStateChanged(ItemEvent e) {
 
 				if(alcEnableSetterController!=null && alcEnableSetterController.isRun()){
-					logger.warn("ALC Eneble Controller Stoped");
+					logger.warn("ALC Eneble UnitController Stoped");
 					alcEnableSetterController.stop();
 				}
 
@@ -222,7 +222,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 		};
 		return new ValueRangeControllerAbstract(
 				deviceType,
-				"ALC Controller",
+				"ALC UnitController",
 				alcRangeGetter,
 				txtGain,
 				slider,

@@ -17,7 +17,7 @@ public class SetterController extends ControllerAbstract {
 /**
  * This thread run once
  * @param packetWork should be command 
- * @param style Controller work style 
+ * @param style UnitController work style 
  */
 	public SetterController(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, ToDo toDo, Style style) {
 		super(deviceType, controllerName, packetWork, null, style);

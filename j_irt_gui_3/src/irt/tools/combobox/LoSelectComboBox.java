@@ -135,7 +135,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-
+logger.error("first");
 		try{
 			Optional
 			.ofNullable(packet)
@@ -148,7 +148,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			.findAny()
 			.ifPresent(pl->{
 
-				logger.trace(packet);
+				logger.error(packet);
 				final Payload payload = packet.getPayloads().get(0);
 
 				switch(packet.getHeader().getPacketId()){
@@ -156,6 +156,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 					fillComboBox(payload);
 					break;
 				case PacketWork.PACKET_ID_CONFIGURATION_LO:
+					logger.error("1.2");
 					update(payload);
 				}
 			});
@@ -183,6 +184,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		}catch(Exception ex){
 			logger.catching(ex);
 		}
+		logger.error("last");
 	}
 
 	public void fillComboBox(Payload payload) {
@@ -288,10 +290,13 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	public void updateBias(final Payload payload) {
 		final byte loID = payload.getByte();
 		final IdValueFreq anObject = new IdValueFreq(loID, null);
-		if(!anObject.equals(model.getSelectedItem())){
-			removeItemListener(aListener);
+		if(!anObject.equals(model.getSelectedItem()))
 			setSelectedItem(anObject);
-			addItemListener(aListener);
-		}
+	}
+
+	private void setSelectedItem(final IdValueFreq itemAt) {
+		removeItemListener(aListener);
+		setSelectedItem(itemAt);
+		addItemListener(aListener);
 	}
 }

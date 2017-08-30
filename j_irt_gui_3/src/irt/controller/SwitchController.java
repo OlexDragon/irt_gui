@@ -61,7 +61,7 @@ public class SwitchController extends ControllerAbstract {
 							as.getPacketParameterHeaderCode(),
 							PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER,
 							value);
-					DefaultController controller = new DefaultController(deviceType, "Calibration Mode Controller", setter, Style.CHECK_ONCE){
+					DefaultController controller = new DefaultController(deviceType, "Calibration Mode UnitController", setter, Style.CHECK_ONCE){
 
 						@Override
 						protected ValueChangeListener addGetterValueChangeListener() {

@@ -459,7 +459,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					protected Void doInBackground() throws Exception {
 						logger.entry();
 						if(isMainBoard)
-							new SetterController(deviceType, "Initialize Controller",
+							new SetterController(deviceType, "Initialize UnitController",
 									new Setter(linkHeader,
 										PacketImp.PACKET_TYPE_COMMAND,
 										PacketImp.GROUP_ID_PRODUCTION_GENERIC_SET_1,

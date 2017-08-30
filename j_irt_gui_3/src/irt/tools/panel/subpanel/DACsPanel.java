@@ -166,7 +166,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 					adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 8, null), PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
 
 					Value value = new Value(0, -100, 100, 0);
-					startController(new TextSliderController(deviceType, "Gain Offset Controller", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
+					startController(new TextSliderController(deviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
 				}
 
 			}

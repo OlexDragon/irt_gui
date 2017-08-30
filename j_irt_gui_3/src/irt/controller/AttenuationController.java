@@ -23,7 +23,7 @@ public class AttenuationController extends ValueRangeControllerAbstract {
 
 	public AttenuationController(Optional<DeviceType> deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType,
-				"Attenuation Controller",
+				"Attenuation UnitController",
 				new ConfigurationSetter(linkHeader,
 						PacketImp.PARAMETER_CONFIG_ATTENUATION_RANGE,
 						PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE),

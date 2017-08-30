@@ -429,7 +429,7 @@ public class IrtGui extends IrtMainFrame {
 
 	@Override
 	protected GuiControllerAbstract getNewGuiController() {
-		return new GuiController("Gui Controller", this);
+		return new GuiController("Gui UnitController", this);
 	}
 
 	@Override

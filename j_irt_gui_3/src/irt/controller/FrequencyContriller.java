@@ -23,7 +23,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 
 	public FrequencyContriller(Optional<DeviceType> deviceType, LinkHeader linkHeader, JTextField txtField, JSlider slider, JTextField txtStep, Style style) {
 		super(deviceType,
-				"Frequency Controller",
+				"Frequency UnitController",
 				new ConfigurationSetter(
 						linkHeader,
 						linkHeader==null || linkHeader.getIntAddr()==0
