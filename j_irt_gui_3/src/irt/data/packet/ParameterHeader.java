@@ -1,6 +1,8 @@
 package irt.data.packet;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class ParameterHeader {	//irtalcp_parameter_header_t
 
@@ -25,9 +27,12 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 	}
 
 	public int getSize() {
-		return (int) (parameterHeader!=null && parameterHeader.length>=SIZE
-				? PacketImp.shiftAndAdd(Arrays.copyOfRange(parameterHeader, 1, parameterHeader.length))
-						: 0);
+
+		return Optional
+		.ofNullable(parameterHeader)
+		.filter(ph->ph.length>=SIZE)
+		.map(ph->(int)((ByteBuffer)ByteBuffer.wrap(parameterHeader).position(1)).getShort())
+		.orElse(0);
 	}
 
 	public byte[] getSizeAsBytes() {
@@ -44,11 +49,6 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 	public void setSize(short size) {
 		parameterHeader[1] = (byte)(size>>8);
 		parameterHeader[2] = (byte)size;
-	}
-
-	@Override
-	public String toString() {
-		return "ParameterHeader";// [cod="+getCodeStr()+",size="+getSize()+ "]";
 	}
 
 	public String getCodeStr() {
@@ -79,5 +79,10 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 
 		ParameterHeader other = (ParameterHeader) obj;
 		return Arrays.equals(parameterHeader, other.parameterHeader);
+	}
+
+	@Override
+	public String toString() {
+		return "ParameterHeader [cod="+getCode()+",size="+getSize()+ "]";
 	}
 }

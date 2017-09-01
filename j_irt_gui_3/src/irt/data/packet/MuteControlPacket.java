@@ -11,19 +11,15 @@ public class MuteControlPacket extends PacketAbstract {
 	public static final byte GROUP_ID = PacketImp.GROUP_ID_CONFIGURATION;
 	public static final short PACKET_ID = PacketWork.PACKET_ID_CONFIGURATION_MUTE;
 
-	public MuteControlPacket(Byte linkAddr, Byte value) {
+	public MuteControlPacket(Byte linkAddr, MuteCommands value) {
 		super(
 				linkAddr,
-				value!=null
-					? PacketImp.PACKET_TYPE_COMMAND
-					: PacketImp.PACKET_TYPE_REQUEST,
+				Optional.ofNullable(value).map(b->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
 				PACKET_ID,
 				GROUP_ID,
-				PacketImp.PARAMETER_ID_CONFIGURATION_MUTE,
-				value!=null ? PacketImp.toBytes(value) : null,
-				value!=null
-					? Priority.COMMAND
-					: Priority.REQUEST);
+				getParameterCode(linkAddr),
+				Optional.ofNullable(value).map(b->PacketImp.toBytes((byte)value.ordinal())).orElse(null),
+				Optional.ofNullable(value).map(b->Priority.COMMAND).orElse(Priority.REQUEST));
 	}
 
 	public MuteControlPacket(LinkedPacket packet) {
@@ -39,6 +35,22 @@ public class MuteControlPacket extends PacketAbstract {
 	}
 
 	@Override
+	public void setAddr(byte linkAddr) {
+
+		Optional
+		.ofNullable(getPayloads())
+		.flatMap(pls->pls.stream().findAny())
+		.map(pl->pl.getParameterHeader())
+		.ifPresent(ph->ph.setCode(getParameterCode(linkAddr)));
+
+		super.setAddr(linkAddr);
+	}
+
+	private static Byte getParameterCode(Byte linkAddr) {
+		return Optional.ofNullable(linkAddr).filter(b->b!=0).map(b->PacketImp.PARAMETER_ID_CONFIGURATION_MUTE).orElse(PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL);
+	}
+
+	@Override
 	public Object getValue() {
 		return getPayloads()
 				.parallelStream()
@@ -49,6 +61,7 @@ public class MuteControlPacket extends PacketAbstract {
 
 	@Override
 	public void setValue(Object value) {
+
 		final MuteCommands command = Optional
 											.of(value)
 											.filter(MuteCommands.class::isInstance)

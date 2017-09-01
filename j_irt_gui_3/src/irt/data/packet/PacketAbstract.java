@@ -27,8 +27,8 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	private PacketHeader header;
 	private List<Payload> payloads = new ArrayList<>();
 
-	protected PacketAbstract(byte linkAddr, byte packetType, short packetId, byte groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
-		linkHeader = linkAddr!=0 ? new LinkHeader(linkAddr, (byte)0, (short)0) : null;
+	protected PacketAbstract(Byte linkAddr, byte packetType, short packetId, byte groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
+		linkHeader = Optional.ofNullable(linkAddr).filter(la->la!=0).map(la-> new LinkHeader(linkAddr, (byte)0, (short)0)).orElse(null);
 		header = new PacketHeader();
 		header.setType(packetType);
 		header.setGroupId(groupId);
@@ -88,11 +88,11 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 	}
 
 	@Override
-	public void join() throws InterruptedException {
+	public void join(){
 	}
 
 	@Override
-	public void join(long i) throws InterruptedException {
+	public void join(long i){
 	}
 
 	@Override
