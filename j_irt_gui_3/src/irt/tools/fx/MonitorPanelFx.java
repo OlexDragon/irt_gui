@@ -423,8 +423,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		OUTPUT_POWER	( b->bytesToString(b, "dbm")),
 		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
 		STATUS			( b->Arrays.toString(b)),
-		LNB1_STATUS		( b->Arrays.toString(b)),
-		LNB2_STATUS		( b->Arrays.toString(b));
+		LNB1_STATUS		( b->lnbReady(b)),
+		LNB2_STATUS		( b->lnbReady(b));
 
 		private final Function<byte[], String> function;
 		private final byte code;
@@ -460,6 +460,17 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			sb.append(nFormate1.format(value)).append(" ").append(Translation.getValue(String.class, prefix, prefix));
 
 			return sb.toString();
+		}
+
+		private static String lnbReady(byte[] bytes) {
+			return Optional
+					.of(bytes)
+					.filter(b->b.length==1)
+					.map(b->{
+						final String string = b[0]==1 ? "ready" : "ready.not";
+						return Translation.getValue(String.class, string, string);
+					})
+					.orElse("N/A");
 		}
 	}
 

@@ -135,7 +135,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-logger.error("first");
+
 		try{
 			Optional
 			.ofNullable(packet)
@@ -148,7 +148,6 @@ logger.error("first");
 			.findAny()
 			.ifPresent(pl->{
 
-				logger.error(packet);
 				final Payload payload = packet.getPayloads().get(0);
 
 				switch(packet.getHeader().getPacketId()){
@@ -156,7 +155,6 @@ logger.error("first");
 					fillComboBox(payload);
 					break;
 				case PacketWork.PACKET_ID_CONFIGURATION_LO:
-					logger.error("1.2");
 					update(payload);
 				}
 			});
@@ -184,7 +182,6 @@ logger.error("first");
 		}catch(Exception ex){
 			logger.catching(ex);
 		}
-		logger.error("last");
 	}
 
 	public void fillComboBox(Payload payload) {
@@ -296,7 +293,7 @@ logger.error("first");
 
 	private void setSelectedItem(final IdValueFreq itemAt) {
 		removeItemListener(aListener);
-		setSelectedItem(itemAt);
+		super.setSelectedItem(itemAt);
 		addItemListener(aListener);
 	}
 }
