@@ -1,6 +1,7 @@
 package irt.tools.button;
 
 import java.awt.Image;
+import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -36,19 +37,22 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 	private ScheduledFuture<?> scheduledFuture;
 	private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
-	private byte linkAddr = (byte) 254;
+	private Byte linkAddr;
 											public byte getLinkAddr() {
 												return linkAddr;
 											}
 											public void setLinkAddr(byte linkAddr) {
+
 												this.linkAddr = linkAddr;
 												getPacket.setAddr(linkAddr);
 												setPacket.setAddr(linkAddr);
 											}
 
 	private MuteControlPacket getPacket = new MuteControlPacket(linkAddr, null);
-	private MuteControlPacket setPacket = new MuteControlPacket(linkAddr, (byte)0);
+	private MuteControlPacket setPacket = new MuteControlPacket(linkAddr, MuteCommands.MUTE);
 	private JLabel lblMute;
+
+	final ActionListener actionListener = e->GuiControllerAbstract.getComPortThreadQueue().add(setPacket);
 
 	public MuteButton() {
 		this(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/power-red.png")).getImage());
@@ -91,11 +95,15 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 			}
 		});
 
-		addActionListener(e->GuiControllerAbstract.getComPortThreadQueue().add(setPacket));
+		addActionListener(actionListener);
 	}
 
 	@Override
 	public void run() {
+
+		if(linkAddr==null)
+			return;
+
 		GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
 	}
 
@@ -134,25 +142,14 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 		this.lblMute = lblMute;
 		lblMute.addMouseListener(new MouseListener() {
 			
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-			
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-			
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-			
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
+			@Override public void mouseReleased	(MouseEvent e) { }
+			@Override public void mousePressed	(MouseEvent e) { }
+			@Override public void mouseExited	(MouseEvent e) { }
+			@Override public void mouseEntered	(MouseEvent e) { }
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				GuiControllerAbstract.getComPortThreadQueue().add(setPacket);
+				actionListener.actionPerformed(null);
 			}
 		});
 	}

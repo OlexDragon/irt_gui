@@ -54,6 +54,7 @@ public class UnitAttenuationController implements UnitController{
 
 	private ChangeListener sliderChange = e->{
 		value.setValue((short)slider.getValue());
+		logger.trace(value);
 		GuiControllerAbstract.getComPortThreadQueue().add(value);
 	};
 
