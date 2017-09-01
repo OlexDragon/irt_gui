@@ -74,6 +74,8 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, short packetId, int min, int max) {
 		addFocusListener(focusListener);
 
+		focusListenerTimer.setRepeats(false);
+
 		MIN = min;
 		MAX = max;
 		unitAddress = linkAddr;
@@ -143,7 +145,6 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 					focusListener.focusGained(null);
 				}
 			}
-			
 			@Override public void keyReleased(KeyEvent e) { }
 			@Override public void keyPressed(KeyEvent e) { }
 		});
