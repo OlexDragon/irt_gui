@@ -30,7 +30,6 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
-import irt.controller.AttenuationController;
 import irt.controller.FrequencyContriller;
 import irt.controller.GainController;
 import irt.controller.GuiController;

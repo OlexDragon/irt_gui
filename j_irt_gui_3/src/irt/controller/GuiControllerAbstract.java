@@ -290,7 +290,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getConverterInfo() {
-		logger.error("");
+
 		if(!protocol.equals(Protocol.LINKED)){
 			logger.trace("protocol = {}", protocol);
 
@@ -311,7 +311,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getUnitsInfo() {
-		logger.error("");
+
 		if (!protocol.equals(Protocol.CONVERTER)) {
 
 			for(Byte addr:addresses){
