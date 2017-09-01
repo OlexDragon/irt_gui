@@ -60,9 +60,7 @@ public class UnitAttenuationController implements UnitController{
 
 	private ChangeListener sliderUpdateText = e->txtGain.setText(df.format(slider.getValue()/10.0) + " " + Translation.getValue(String.class, "db", "dB"));
 
-	private Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->{
-		addChangeListener();
-	});
+	private Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->addChangeListener());
 	private FocusListener txtGainFocusListener = new FocusListener() {
 
 		@Override
