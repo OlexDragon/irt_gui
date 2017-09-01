@@ -60,15 +60,19 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 	private Byte unitAddress;
 	private short packetId;
-	private Timer timer;
+	private Timer showActionTimer;
+
+	private Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->start());
+	final FocusAdapter focusListener = new FocusAdapter() {
+		@Override
+		public void focusGained(FocusEvent e) {
+			focusListenerTimer.restart();
+			stop();
+		}
+	};
 
 	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, short packetId, int min, int max) {
-		addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent e) {
-				stop();
-			}
-		});
+		addFocusListener(focusListener);
 
 		MIN = min;
 		MAX = max;
@@ -120,21 +124,23 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			
 			@Override
 			public void keyTyped(KeyEvent e) {
-				char c = e.getKeyChar();
+				char keyChar = e.getKeyChar();
 
-				 if(!e.isShiftDown() && c==KeyEvent.VK_ESCAPE){
+				 if(!e.isShiftDown() && keyChar==KeyEvent.VK_ESCAPE){
 					 start();
 
-				 }else if(e.isShiftDown() && c==KeyEvent.VK_ESCAPE){
+				 }else if(e.isShiftDown() && keyChar==KeyEvent.VK_ESCAPE){
 					 stop();
 
 //				 }else  if(e.isControlDown() && c==KeyEvent.VK_SHIFT){// VK_SHIFT equals CTRL 'P'
 //					 logger.error("***");
 //						setToolTipText("Data copied to the clipboard.");
 
-				 }else if(!(Character.isDigit(c) || c==KeyEvent.VK_BACK_SPACE || c==KeyEvent.VK_DELETE) || c==KeyEvent.VK_ENTER || c==0){
+				 }else if(!(Character.isDigit(keyChar) || keyChar==KeyEvent.VK_BACK_SPACE || keyChar==KeyEvent.VK_DELETE) || keyChar==KeyEvent.VK_ENTER || keyChar==0){
 					getToolkit().beep();
 					e.consume();
+				}else{
+					focusListener.focusGained(null);
 				}
 			}
 			
@@ -210,13 +216,13 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 	public void showAction(Color bg) {
 
-		if(timer!=null && timer.isRunning())
+		if(showActionTimer!=null && showActionTimer.isRunning())
 			return;
 
 		Border border = getBorder();
 
-		timer = new Timer(500, e->{setBorder(border); timer.stop();});
-		timer.start();
+		showActionTimer = new Timer(500, e->{setBorder(border); showActionTimer.stop();});
+		showActionTimer.start();
 
 		setBorder(new LineBorder(bg));
 	}
