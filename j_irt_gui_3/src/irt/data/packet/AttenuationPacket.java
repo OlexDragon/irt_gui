@@ -21,4 +21,16 @@ public class AttenuationPacket extends PacketAbstract {
 					? Priority.COMMAND
 						: Priority.REQUEST);
 	}
+
+	public AttenuationPacket() {
+		this((byte)0, null);
+	}
+
+	@Override
+	public Object getValue() {
+		return getPayloads()
+				.stream()
+				.findAny()
+				.map(pl->pl.getShort(0));
+	}
 }

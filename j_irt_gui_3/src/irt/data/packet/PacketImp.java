@@ -139,7 +139,6 @@ public class PacketImp implements Packet{
 		PARAMETER_CONFIG_FCM_ATTENUATION								= 2,
 		PARAMETER_CONFIG_FCM_FREQUENCY									= 3,
 		PARAMETER_CONFIG_FCM_FREQUENCY_RANGE							= 4,
-		PARAMETER_CONFIG_FCM_GAIN_RANGE									= 5,
 		PARAMETER_CONFIG_ATTENUATION_RANGE								= 6,
 		PARAMETER_CONFIG_FCM_MUTE_CONTROL								= 7,
 		PARAMETER_CONFIG_LNB_POWER										= 8,
@@ -282,109 +281,6 @@ public class PacketImp implements Packet{
 		}
 		
 		return size;
-	}
-
-	public static PacketImp creatPacket(int optype) {
-		PacketImp packet = new PacketImp();
-
-		switch(optype){
-		case OPTYPE_SHOW_DEVICE:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_DEVICE_INFO,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_ALL,0,0});
-			break;
-		case OPTYPE_STATUS_GET_ALL:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_MEASUREMENT,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_ALL,0,0});
-			break;
-		case OPTYPE_CONFIG_GET_MUTE:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_MUTE_CONTROL,0,0});
-			break;
-		case OPTYPE_CONFIG_SET_MUTE:
-			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_MUTE_CONTROL,0,0});
-			break;
-		case OPTYPE_CONFIG_GET_FREQUENCY:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_FREQUENCY,0,0});
-			break;
-		case OPTYPE_CONFIG_SET_FREQUENCY:
-			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_FREQUENCY,0,0});
-			break;
-		case OPTYPE_CONFIG_GET_ATTENUATION:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_ATTENUATION,0,0});
-			break;
-		case OPTYPE_CONFIG_GET_ATTEN_RANGE:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_ATTENUATION_RANGE,0,0});
-			break;
-		case OPTYPE_CONFIG_SET_ATTENUATION:
-			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_ATTENUATION,0,0});
-			break;
-		case OPTYPE_CONFIG_SET_GAIN:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_DEVELOPER_GENERIC_SET_1,
-											PACKET_TYPE_SPONTANEOUS,
-											IRT_SLCP_PARAMETER_DEVELOPER_GENERIC_SET_1_DAC_CONFIG,0,0});
-			break;
-		case OPTYPE_CONFIG_GAIN_RANGE:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,
-											GROUP_ID_CONFIGURATION,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_CONFIG_FCM_GAIN_RANGE ,0,0});
-			break;
-		case OPTYPE_SAVE_CONFIG:
-			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
-											GROUP_ID_CONFIG_PROFILE,
-											PACKET_TYPE_SPONTANEOUS,
-											PACKET_ID_CONFIG_PROFILE_SAVE,0,0});
-			break;
-		case OPTYPE_ENVIRONMENT_CONFIGURATION:
-			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
-											GROUP_ID_PRODUCTION_GENERIC_SET_1,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_PRODUCTION_GENERIC_SET_1_ENVIRONMENT_CONFIG,0,0});
-			break;
-		case OPTYPE_CALIBRATION_ON_OFF:
-			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
-											GROUP_ID_PRODUCTION_GENERIC_SET_1,
-											PACKET_TYPE_SPONTANEOUS,
-											PARAMETER_PRODUCTION_GENERIC_SET_1_CALIBRATION_MODE_CONFIG,0,0});
-			break;
-		case OPTYPE_DAC_VALUE_GET:
-			packet.set(new byte[]{	PACKET_TYPE_REQUEST,//TODO
-											GROUP_ID_DEVELOPER_GENERIC_SET_1,
-											PACKET_TYPE_SPONTANEOUS,
-											IRT_SLCP_PARAMETER_DEVELOPER_GENERIC_SET_1_DAC_CONFIG,0,0});
-			break;
-		case OPTYPE_DAC_VALUE_SET:
-			packet.set(new byte[]{	PACKET_TYPE_COMMAND,
-											GROUP_ID_DEVELOPER_GENERIC_SET_1,
-											PACKET_TYPE_SPONTANEOUS,
-											IRT_SLCP_PARAMETER_DEVELOPER_GENERIC_SET_1_DAC_CONFIG,0,0});
-		}
-		return packet;
 	}
 
 	public Payload getPayload(int index) {

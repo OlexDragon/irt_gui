@@ -17,11 +17,23 @@ public enum Packets {
 	ALARM_ID				(()->new AlarmsIDsPacket()),
 	ALARMS_SUMMARY_STATUS	(()->new AlarmsSummaryPacket()),
 	ALARMS_STATUS			(()->new AlarmStatusPacket()),
+	DEVICE_INFO				(()->new DeviceInfoPacket()),
 	DEVICE_DEBUG			(()->new DeviceDebugPacket()),
-	REDUNDANCY_ENABLE_PACKET(()->new RedundancyEnablePacket()),
-	REDUNDANCY_MODE_PACKET	(()->new RedundancyModePacket()),
-	REDUNDANCY_NAME_PACKET	(()->new RedundancyNamePacket()),
-	REDUNDANCY_STATUS_PACKET(()->new RedundancyStatusPacket());
+	DEVICE_DEBUG_READ_WRITE	(()->new DeviceDebugReadWritePacket()),
+	DEVICE_DEBUG_HELP		(()->new DeviceDebugHelpPacket()),
+	REDUNDANCY_ENABLE		(()->new RedundancyEnablePacket()),
+	REDUNDANCY_MODE			(()->new RedundancyModePacket()),
+	REDUNDANCY_NAME			(()->new RedundancyNamePacket()),
+	REDUNDANCY_STATUS		(()->new RedundancyStatusPacket()),
+	LO_FREQUENCIES			(()->new LOFrequenciesPacket()),
+	LO						(()->new LOPacket()),
+	MUTE_CONTROL			(()->new MuteControlPacket()),
+	ATTENUATION_RANGE		(()->new AttenuationRangePacket()),
+	ATTENUATION				(()->new AttenuationPacket()),
+	FREQUENCY_RANGE			(()->new FrequencyRangePacket()),
+	FREQUENCY				(()->new FrequencyPacket()),
+	GAIN_RANGE				(()->new GainRangePacket()),
+	GAIN					(()->new GainPacket());
 
 	private final static Logger logger = LogManager.getLogger();
 	private Supplier<PacketWork> packetWork;
@@ -75,10 +87,13 @@ public enum Packets {
 		if(packet instanceof AlarmStatusPacket)
 			return Arrays.stream(AlarmsPacketIds.values()).filter(a->a.getPacketId()==packetId).findAny().isPresent();
 
-//		logger.error(packet);
-		if(packet instanceof DeviceDebugPacket)
-			return packetId>=PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0 && packetId<=PacketWork.PACKET_ID_DUMP_POWER;
+		if(packetId>=PacketWork.DUMPS) 
+			return packet.getClass() == DeviceDebugPacket.class;
 
+		if(packetId>=PacketWork.PACKET_ID_DEVICE_FCM_INDEX_1)
+			return packet.getClass() == DeviceDebugReadWritePacket.class;
+
+//		logger.error(packet);
 		final short pId = packet.getHeader().getPacketId();
 		
 		return pId==packetId;

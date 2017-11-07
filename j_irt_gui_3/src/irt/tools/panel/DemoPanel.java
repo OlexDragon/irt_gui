@@ -61,7 +61,7 @@ public class DemoPanel extends Panel {
 	private JLabel lblSave;
 
 	public DemoPanel() {
-		super(Translation.getValue(String.class, "vertical_label_text", "THE UNIT IS NOT CONNECTED"), 0, 0, 0, 0, 0);
+		super((byte) 0, Translation.getValue(String.class, "vertical_label_text", "THE UNIT IS NOT CONNECTED"), 0, 0, 0, 0, 0);
 
 		JPanel monitorPanel = new JPanel();
 		Font font = Translation.getFont();

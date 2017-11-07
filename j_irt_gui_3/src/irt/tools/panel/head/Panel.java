@@ -79,7 +79,10 @@ public class Panel extends JPanel implements PacketListener {
 
 	private JButton btnRight;
 
-	public Panel( String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+	private final byte addr;
+
+	public Panel(byte addr, String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+		this.addr = addr;
 		addHierarchyListener(
 				hierarchyEvent->
 				Optional
@@ -391,7 +394,7 @@ public class Panel extends JPanel implements PacketListener {
 
 		final PacketAbstract p = oP.orElse(null);
 
-		if(p==null) return;
+		if(p==null || p.getLinkHeader().getAddr()!=addr) return;
 
 		final Object value = p.getValue();
 

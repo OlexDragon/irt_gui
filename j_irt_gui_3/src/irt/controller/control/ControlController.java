@@ -32,6 +32,7 @@ public class ControlController extends ControllerAbstract {
 	 */
 	public ControlController(Optional<DeviceType> deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel) {
 		super(deviceType, controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
+		run = false;
 //		if(comboBoxfreqSet==null)
 //			setSend(false);
 

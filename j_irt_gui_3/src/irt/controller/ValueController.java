@@ -23,6 +23,7 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.RangePacket;
@@ -74,8 +75,9 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 	public void run() {
 		try{
 
-			logger.trace(packetToSend);
-			cptq.add(packetToSend);
+			synchronized (logger) {
+				cptq.add(packetToSend);
+			}
 
 		}catch(Exception e){
 			logger.catching(e);
@@ -84,58 +86,60 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 
 	@Override
 	public void onPacketRecived(final Packet packet) {
-		service.execute(new Runnable() {
 
-			@Override
-			public void run() {
+		synchronized (logger) {
+			final short id = ((PacketAbstract)packetToSend).getHeader().getPacketId();
 
-					final short id = ((PacketAbstract)packetToSend).getHeader().getPacketId();
+			final Optional<PacketHeader> p = Optional
+												.ofNullable(packet)
+												.map(Packet::getHeader)
+												.filter(h->h.getPacketId()==id);
 
-					Optional
-					.ofNullable(packet)
-					.map(Packet::getHeader)
-					.filter(h->h.getPacketId()==id)
-					.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-					.ifPresent(h->{
+			p
+			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.ifPresent(h->{
+					final Payload pl = packet.getPayload(0);
 
-						synchronized (logger) {
+					if(packetToSend instanceof RangePacket)
+						range(pl);
 
-							final Payload pl = packet.getPayload(0);
+					else
+						value(pl);
+			});
 
-							if(packetToSend instanceof RangePacket)
-								range(pl);
+			p
+			.filter(h->h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
+			.ifPresent(h->logger.error("the unit does not respond: {}", packet));
+		}
+	}
 
-							else
-								value(pl);
-						}
-					});
-			}
+	private void value(final Payload payload) {
+		final Value v = descriptionPacketValue.getValue(range.getMinimum(), range.getMaximum());
 
-			private void value(final Payload payload) {
-				final Value v = descriptionPacketValue.getValue(range.getMinimum(), range.getMaximum());
+		switch(payload.getParameterHeader().getSize()){
+		case 2:
+			v.setValue(payload.getShort(0));
+			break;
+		default:
+			v.setValue(payload.getLong(0));
+		}
 
-				switch(payload.getParameterHeader().getSize()){
-				case 2:
-					v.setValue(payload.getShort(0));
-					break;
-				default:
-					v.setValue(payload.getLong(0));
-				}
+		if(value==null || !value.equals(v)){
+			value = v;
+			fireValueChangeListener(new ValueChangeEvent(v, VALUE));
+		}
+	}
 
-				if(value==null || !value.equals(v)){
-					value = v;
-					fireValueChangeListener(new ValueChangeEvent(v, VALUE));
-				}
-			}
+	private void range(final Payload pl) {
+		range = new Range(pl);
 
-			private void range(final Payload pl) {
-				range = new Range(pl);
+		fireValueChangeListener(new ValueChangeEvent(range, RANGE));
 
-				fireValueChangeListener(new ValueChangeEvent(range, RANGE));
-				packetToSend = descriptionPacketValue.getPacketWork();
-				reset();
-			}
-		});
+		synchronized (logger) {
+			packetToSend = descriptionPacketValue.getPacketWork();
+		}
+
+		reset();
 	}
 
 	public void duUpdate(boolean doUpdate) {

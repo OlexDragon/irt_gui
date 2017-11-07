@@ -75,6 +75,10 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		addFocusListener(focusListener);
 
 		focusListenerTimer.setRepeats(false);
+		final int index = registerValue.getIndex();
+		final int addr = registerValue.getAddr();
+
+		setToolTipText("Address=" + addr + "; Index=" + index);
 
 		MIN = min;
 		MAX = max;
@@ -112,7 +116,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		valueToSend.setValue( new Value(896, MIN, MAX, 0)); // if value not null packet type is COMMAND
 		setPacket = new RegisterPacket(linkAddr, valueToSend, packetId);
 
-		valueSaveRegister = new RegisterValue(registerValue.getIndex(), registerValue.getAddr()+3, new Value(0, 0, 0, 0));
+		valueSaveRegister = new RegisterValue(index, addr+3, new Value(0, 0, 0, 0));
 
 		addActionListener(new ActionListener() {
 			

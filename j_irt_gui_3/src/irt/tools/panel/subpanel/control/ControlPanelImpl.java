@@ -31,13 +31,13 @@ import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import irt.controller.FrequencyContriller;
-import irt.controller.GainController;
 import irt.controller.GuiController;
 import irt.controller.control.ControlController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.control.UnitAttenuationController;
 import irt.controller.control.UnitController;
+import irt.controller.control.UnitGainController;
 import irt.controller.interfaces.ControlPanel;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
@@ -328,7 +328,8 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		ActionFlags a = ActionFlags.values()[control];
 		switch(a){
 		case FLAG_GAIN:
-			new MyThreadFactory().newThread(controller =  getNewGainController()).start();
+			controller =  new UnitGainController(linkHeader.getAddr(), txtGain, slider, txtStep);
+			controller.start();
 			break;
 		case FLAG_FREQUENCY:
 			new MyThreadFactory().newThread(controller =  getNewFreqController()).start();
@@ -337,14 +338,14 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 			new MyThreadFactory().newThread(controller =  getNewAlcController()).start();
 			break;
 		default:
-			controller =  new UnitAttenuationController(linkHeader!=null ? linkHeader.getAddr() : 0, txtGain, slider, txtStep);
+			controller =  new UnitAttenuationController(linkHeader.getAddr(), txtGain, slider, txtStep);
 			controller.start();
 		}
 	}
 
-	protected GainController getNewGainController() {
-		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
-	}
+//	protected GainController getNewGainController() {
+//		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+//	}
 
 	protected FrequencyContriller getNewFreqController() {
 		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);

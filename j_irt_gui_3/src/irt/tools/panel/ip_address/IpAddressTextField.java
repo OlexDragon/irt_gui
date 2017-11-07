@@ -190,7 +190,7 @@ public class IpAddressTextField extends GridbagPanel {
 
 		public synchronized void removeFocusListener(FocusListener l) {
 		    super.removeFocusListener(l);
-		    keyListenersList.remove(l);
+		    focusListenersList.remove(l);
 		}
 
 		public void setEnabled(boolean b) {
