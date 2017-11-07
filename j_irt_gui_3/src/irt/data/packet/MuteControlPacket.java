@@ -34,6 +34,10 @@ public class MuteControlPacket extends PacketAbstract {
 		Optional.of(packet).map(LinkedPacket::getHeader).filter(h->h.getGroupId()==GROUP_ID).filter(h->h.getPacketId()==PACKET_ID).orElseThrow(()->new IllegalArgumentException(packet.toString()));
 	}
 
+	public MuteControlPacket() {
+		this((byte)0, null);
+	}
+
 	@Override
 	public void setAddr(byte linkAddr) {
 

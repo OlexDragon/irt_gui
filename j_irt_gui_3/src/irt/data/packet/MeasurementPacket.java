@@ -1,8 +1,10 @@
 package irt.data.packet;
 
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,6 +87,38 @@ public class MeasurementPacket extends PacketAbstract{
 		oStatusBits
 		.ifPresent(sb->result.put(status, sb));
 
-		return result;
+		return new Measurements(result);
+	}
+
+	public class Measurements{
+
+		private final Map<Object, Object> measurements;
+
+		public Measurements(Map<Object, Object> measurements) {
+			this.measurements = measurements;
+		}
+
+		public Map<Object, Object> getMeasurements() {
+			return measurements;
+		}
+
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+
+			final Stream<Entry<Object, Object>> measurementStream = Optional .ofNullable(measurements) .map(m->m.entrySet().stream()) .orElse(Stream.empty());
+
+			measurementStream.forEach(es->{
+
+				if(sb.length()>0)
+					sb.append(", ");
+
+				final Object value = es.getValue();
+
+				sb.append(es.getKey()).append("=").append(value.getClass().isArray() ? Arrays.toString((Object[])value) : value);
+			});
+
+			return "Measurements [" + sb + "]";
+		} 
 	}
 }

@@ -203,7 +203,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		.map(Label.class::cast)
 		.ifPresent(lbl->{
 
-			final boolean isLocked = isLocked(statusBits);
+			final boolean isLocked = Optional.ofNullable(isLocked(statusBits)).orElse(false);
 			final String lockKey = isLocked ? LOCKED : UNLOCKED;
 			final String lockText = Translation.getValueWithSuplier(String.class, lockKey, ()->"TRANSLATE: " + lockKey);
 

@@ -99,7 +99,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 	private JLabel lblSave;
 
 	public ControlPanelPicobuc(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
-		super(deviceType, linkHeader, deviceType.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR).map(dt->(short)ActionFlags.FLAG_FREQUENCY.ordinal()).orElse((short)ActionFlags.FLAG_ATTENUATION.ordinal()));
+		super(deviceType, linkHeader, deviceType !=null ? deviceType.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR).map(dt->(short)ActionFlags.FLAG_FREQUENCY.ordinal()).orElse((short)ActionFlags.FLAG_ATTENUATION.ordinal()) : (short)ActionFlags.FLAG_ATTENUATION.ordinal());
 		
 		Font font = Translation.getFont()
 				.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
@@ -127,11 +127,13 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 			}
 		});
 
-		deviceType
+		Optional
+		.ofNullable(deviceType)
+		.flatMap(o->o)
 		.filter(dt->dt==DeviceType.CONVERTER_L_TO_KU_OUTDOOR)
 		.ifPresent(
 				dt->{
-			
+
 					Image imageOn = new ImageIcon(ControlPanelDownConverter.class.getResource("/irt/irt_gui/images/switch1.png")).getImage();
 					Image imageOff = new ImageIcon(ControlPanelDownConverter.class.getResource("/irt/irt_gui/images/switch2.png")).getImage();
 					switchBox = new SwitchBox(imageOff, imageOn);

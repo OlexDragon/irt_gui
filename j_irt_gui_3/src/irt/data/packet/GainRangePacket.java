@@ -3,19 +3,19 @@ package irt.data.packet;
 import irt.data.Range;
 import irt.data.packet.interfaces.PacketWork;
 
-public class AttenuationRangePacket extends PacketAbstract implements RangePacket{
+public class GainRangePacket extends PacketAbstract {
 
-	public AttenuationRangePacket( byte linkAddr) {
+	public GainRangePacket( byte linkAddr) {
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE,
+				PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				PacketImp.PARAMETER_CONFIG_ATTENUATION_RANGE,
+				PacketImp.PARAMETER_ID_CONFIGURATION_GAIN_RANGE,
 				null,
 				Priority.RANGE);
 	}
 
-	public AttenuationRangePacket() {
+	public GainRangePacket() {
 		this((byte)0);
 	}
 

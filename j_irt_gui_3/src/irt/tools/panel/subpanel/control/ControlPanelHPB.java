@@ -397,8 +397,7 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 					valueController.reset(actionComboBox);
 					presetDone = false;
 
-					final DescriptionPacketValue selectedItem = (DescriptionPacketValue) actionComboBox
-							.getSelectedItem();
+					final DescriptionPacketValue selectedItem = (DescriptionPacketValue) actionComboBox.getSelectedItem();
 					final String simpleName = selectedItem.getClass().getSimpleName();
 					prefs.put(ACTION, simpleName);
 				}

@@ -10,7 +10,6 @@ import org.apache.logging.log4j.core.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
@@ -149,7 +148,7 @@ public class DeviceInfo implements PacketListener {
 		boolean isSet = false;
 		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getGroupId()==PacketImp.GROUP_ID_DEVICE_INFO){
 
-			linkHeader = packet instanceof LinkedPacket ? ((LinkedPacketImp)packet).getLinkHeader() : null;
+			linkHeader = packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null;
 			List<Payload> payloads = packet.getPayloads();
 
 			if(payloads!=null){

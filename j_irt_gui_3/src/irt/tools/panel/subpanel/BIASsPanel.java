@@ -193,10 +193,11 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 					index = isMainBoard ? 7 : 207;
 					multiplier = 10.8;
-				}else
+				}else 
 					multiplier = 5.4;
 
 				index = isMainBoard ? 5 : 205;
+				
 				adcWorkers.add(new AdcWorker(lblCurrent1, 	addr, new RegisterValue(index, 1, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS1_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
 				adcWorkers.add(new AdcWorker(lblCurrent2, 	addr, new RegisterValue(index, 2, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS2_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
 				adcWorkers.add(new AdcWorker(lblOPower, 	addr, new RegisterValue(index, 3, null), PacketWork.PACKET_ID_DEVICE_DEBUG_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));

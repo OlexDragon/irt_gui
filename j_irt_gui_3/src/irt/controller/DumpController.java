@@ -41,14 +41,14 @@ import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 
-public class DumpController implements PacketListener, Runnable{
+public class DumpController implements PacketListener, Runnable, Dumper{
 
 	public static final long DUMP_TIME = TimeUnit.MINUTES.toSeconds(15);
 
 	private static LoggerContext ctx = setSysSerialNumber(null);
 	private final Logger logger = LogManager.getLogger();
-	public static final Logger dumper = LogManager.getLogger("dumper");
-	public static final Marker marker = MarkerManager.getMarker("FileWork");
+	private static final Logger dumper = LogManager.getLogger("dumper");
+	private static final Marker marker = MarkerManager.getMarker("FileWork");
 
 	private List<DefaultController> dumpsList = new ArrayList<>();
 
@@ -128,7 +128,8 @@ public class DumpController implements PacketListener, Runnable{
 		return ctx;
 	}
 
-	public synchronized void stop() throws Throwable {
+	@Override
+	public synchronized void stop(){
 
 		final Iterator<DefaultController> iterator = dumpsList.iterator();
 
@@ -136,7 +137,11 @@ public class DumpController implements PacketListener, Runnable{
 			iterator.next().stop();
 
 		dumpsList.clear();
-		finalize();
+		try {
+			finalize();
+		} catch (Throwable e) {
+			logger.catching(e);
+		}
 	}
 
 	@Override

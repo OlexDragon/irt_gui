@@ -127,6 +127,9 @@ public class Payload {
 			case "Byte":
 				setBuffer((byte)value);
 				break;
+			case "String":
+				setBuffer(((String)value).getBytes());
+				break;
 			default:
 				logger.warn("*TODO Payload setBuffer({} = {})", value.getClass().getSimpleName(), value);
 			}
@@ -214,7 +217,8 @@ public class Payload {
 		final Optional<byte[]> filter = Optional.ofNullable(buffer).filter(b->b.length>=8);
 		final Optional<RegisterValue> rv = filter.map(b->new RegisterValue( getInt(0), getInt(1), null));
 
-		filter.filter(b->b.length>=12).ifPresent(b->{
+		filter
+		.filter(b->b.length>=12).ifPresent(b->{
 			long v = getInt(2)&Long.MAX_VALUE;
 			Value value = new Value(v, 0 , Long.MAX_VALUE, 0);
 			rv.get().setValue(value);
@@ -261,6 +265,34 @@ public class Payload {
 				result = PacketImp.concat(result, buffer);
 		}
 		return result;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(buffer);
+		result = prime * result + ((parameterHeader == null) ? 0 : parameterHeader.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Payload other = (Payload) obj;
+		if (!Arrays.equals(buffer, other.buffer))
+			return false;
+		if (parameterHeader == null) {
+			if (other.parameterHeader != null)
+				return false;
+		} else if (!parameterHeader.equals(other.parameterHeader))
+			return false;
+		return true;
 	}
 
 	@Override

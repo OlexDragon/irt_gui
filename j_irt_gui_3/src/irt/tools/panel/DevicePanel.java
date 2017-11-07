@@ -21,7 +21,8 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 
-import irt.controller.DumpController;
+import irt.controller.DumpControllerFull;
+import irt.controller.Dumper;
 import irt.controller.GuiController;
 import irt.controller.interfaces.ControlPanel;
 import irt.data.DeviceInfo;
@@ -66,7 +67,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	protected DeviceInfo deviceInfo;
 
 	public DevicePanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
-		super( deviceInfo!=null ? "("+deviceInfo.getSerialNumber().orElse("N/A")+") "+deviceInfo.getUnitName().orElse("N/A") : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+		super(deviceInfo.getLinkHeader().getAddr(), deviceInfo!=null ? "("+deviceInfo.getSerialNumber().orElse("N/A")+") "+deviceInfo.getUnitName().orElse("N/A") : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 		setBorder(null);
 		setName("DevicePanel");
 		this.deviceInfo = deviceInfo;
@@ -77,7 +78,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 			this.deviceType = deviceInfo.getDeviceType();
 		addAncestorListener(new AncestorListener() {
 
-			private DumpController dumpController;
+			private Dumper dumpController;
 			public void ancestorAdded(AncestorEvent event) {
 
 				monitorPanel = new MonitorPanelSwingWithFx();
@@ -97,7 +98,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 					userPanel.add(slider);
 					userPanel.revalidate();
 				}
-				dumpController = new DumpController(deviceInfo);
+				dumpController = new DumpControllerFull(deviceInfo);
 			}
 			public void ancestorRemoved(AncestorEvent event) {
 				userPanel.removeAll();

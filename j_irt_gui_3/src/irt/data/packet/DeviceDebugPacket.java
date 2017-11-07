@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import irt.data.RegisterValue;
+import irt.data.packet.interfaces.PacketWork;
 
 public class DeviceDebugPacket extends PacketAbstract{
 
@@ -34,14 +35,46 @@ public class DeviceDebugPacket extends PacketAbstract{
 					Priority.REQUEST);
 	}
 
+	public enum Dump{
+		INFO,
+		DEVICE
+	}
+	public DeviceDebugPacket(byte linkAddr, int index, Dump dump){
+		super(
+				linkAddr,
+				PacketImp.PACKET_TYPE_REQUEST,
+				(short)(dump == Dump.INFO ? PacketWork.DUMPS + index : PacketWork.DEVICES + index),
+				PacketImp.GROUP_ID_DEVICE_DEBAG,
+				dump == Dump.INFO ? PacketImp.PARAMETER_DEVICE_DEBAG_INFO :PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
+				ByteBuffer.allocate(4).putInt(index).array(),
+				Priority.REQUEST);
+}
+
 	@Override
 	public Object getValue() {
 
-		final Optional<Payload> findAny = Optional.ofNullable(getPayloads()).map(pls->pls.parallelStream()).orElse(Stream.empty()).findAny();
+		final Optional<Payload> oPayload = Optional.ofNullable(getPayloads()).map(pls->pls.parallelStream()).orElse(Stream.empty()).findAny();
+		Optional<Integer> oSize = oPayload.map(Payload::getParameterHeader).map(ParameterHeader::getSize);
 
-		if(findAny.map(Payload::getParameterHeader).map(ParameterHeader::getSize).map(s->s>12).orElse(false))
-			return '\n' + new String(findAny.map(pl->pl.getBuffer()).orElse(new byte[]{'N', '/', 'A'})).trim();
+		//buffer size  bigger then register packet return String
+		if(oSize.filter(s->s>12).isPresent())
+			return '\n' + new String(oPayload.map(pl->pl.getBuffer()).orElse(new byte[]{'N', '/', 'A'})).trim();
 
-		return Optional.ofNullable(getPayloads()).map(pls->pls.parallelStream()).orElse(Stream.empty()).findAny().map(pl->pl.getRegisterValue()).orElse(null);
+		if(oSize.filter(s->s<4).isPresent())
+			return "N/A";
+
+		return oPayload.map(pl->pl.getRegisterValue()).orElse(null);
+	}
+
+	public String getParsePacketId() {
+		final short packetId = getHeader().getPacketId();
+
+		String result;
+		if(packetId>=PacketWork.DEVICES) 
+			result = "2." + (packetId -PacketWork.DEVICES);
+		else
+			result = "1." + (packetId -PacketWork.DUMPS);
+
+		return result;
 	}
 }

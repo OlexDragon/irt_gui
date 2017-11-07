@@ -2,7 +2,6 @@ package irt.data.packet;
 
 import java.util.Arrays;
 
-import irt.controller.DumpController;
 import irt.data.packet.interfaces.PacketWork;
 
 public class PacketHeader{
@@ -242,26 +241,27 @@ public class PacketHeader{
 			case PacketWork.PACKET_ID_NETWORK_ADDRESS:
 				packetIdStr = "Network Address ("+packetId+")";
 				break;
-			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0:
-			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1:
-			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_2:
-			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_3:
-			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_4:
-			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_10:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_1:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_2:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_3:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_4:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_5:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_6:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_7:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_100:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_201:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_202:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_207:
-			case PacketWork.PACKET_ID_DUMP_REGISTER_220:
-				packetIdStr = "Dump "+DumpController.parseId(packetId);
-				break;
+//			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0:
+//			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1:
+//			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_2:
+//			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_3:
+//			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_4:
+//			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_10:
+//			case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_11:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_1:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_2:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_3:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_4:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_5:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_6:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_7:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_100:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_201:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_202:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_207:
+//			case PacketWork.PACKET_ID_DUMP_REGISTER_220:
+//				packetIdStr = "Dump "+DumpController.parseId(packetId);
+//				break;
 			case PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_ENABLE:
 				packetIdStr = "Redundancy Enable ("+packetId+")";
 				break;
