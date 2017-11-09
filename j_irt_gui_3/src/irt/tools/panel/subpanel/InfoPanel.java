@@ -41,7 +41,7 @@ import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
-import irt.data.packet.Packet;
+import irt.data.packet.interfaces.Packet;
 import irt.tools.Transformer;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;

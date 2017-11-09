@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import irt.data.listener.ValueChangeListener;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketAbstract.Priority;
 
 public interface PacketWork extends Comparable<PacketWork>{

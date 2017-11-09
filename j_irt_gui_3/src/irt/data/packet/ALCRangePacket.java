@@ -1,6 +1,7 @@
 package irt.data.packet;
 
 import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.RangePacket;
 
 public class ALCRangePacket extends PacketAbstract implements RangePacket{
 

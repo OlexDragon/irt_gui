@@ -27,8 +27,8 @@ import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
 public class DebugPanel extends JPanel{

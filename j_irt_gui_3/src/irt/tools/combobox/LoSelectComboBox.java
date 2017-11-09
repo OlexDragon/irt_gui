@@ -3,6 +3,7 @@ package irt.tools.combobox;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.DefaultComboBoxModel;
@@ -27,17 +29,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.IdValueFreq;
 import irt.data.Listeners;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LOFrequenciesPacket;
 import irt.data.packet.LOPacket;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueFrequency;
 import irt.tools.panel.ConverterPanel;
@@ -53,14 +54,13 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
 
 	private final 	DefaultComboBoxModel<IdValueFreq> model = new DefaultComboBoxModel<>();
-	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
 	private 		PacketWork 					packetToSend;
 	private final AncestorListener ancestorListener = new AncestorListener() {
 		
 		@Override
 		public void ancestorRemoved(AncestorEvent event) {
 
-			cptq.removePacketListener(LoSelectComboBox.this);
+			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(LoSelectComboBox.this);
 			Optional.ofNullable(scheduleAtFixedRate).filter(sch->!sch.isCancelled()).ifPresent(sch->sch.cancel(true));
 		}
 		@Override
@@ -69,25 +69,28 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			if(service.isShutdown() || Optional.ofNullable(scheduleAtFixedRate).map(f->!f.isCancelled()).orElse(false))
 				return;
 
-			scheduleAtFixedRate = service.scheduleAtFixedRate(LoSelectComboBox.this, 1, TimeUnit.SECONDS.toMillis(10), TimeUnit.MILLISECONDS);
-			cptq.addPacketListener(LoSelectComboBox.this);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(LoSelectComboBox.this, 1, TimeUnit.SECONDS.toMillis(30), TimeUnit.MILLISECONDS);
+			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(LoSelectComboBox.this);
 		}
 		@Override public void ancestorMoved(AncestorEvent event) { }
 	};
 
-	private final ItemListener aListener = new ItemListener() {
+	private final ItemListener iListener = new ItemListener() {
 		
 		@Override
 		public void itemStateChanged(ItemEvent itemEvent) {
 			if(itemEvent.getStateChange()==ItemEvent.SELECTED){
 				final IdValueFreq idValueFreq = (IdValueFreq)model.getSelectedItem();
 
-				if(linkAddr!=0)
-					//BUC
-					cptq.add(new LOPacket(linkAddr, idValueFreq.getId()));
-				else
+				LOPacket packetWork;
+				if(linkAddr!=0) {
+					packetWork = new LOPacket(linkAddr, idValueFreq.getId());
+				} else
 					//converter
-					cptq.add(new LOPacket(idValueFreq.getValueFrequency()));
+					packetWork = new LOPacket(idValueFreq.getValueFrequency());
+
+				logger.error(packetWork);
+				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 			}
 		}
 	};
@@ -119,13 +122,15 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		packetToSend = new LOFrequenciesPacket(linkAddr);
 
 		addAncestorListener(ancestorListener);
+		addItemListener(iListener);
 	}
 
 	@Override
 	public void run() {
 		try{
 
-			cptq.add(packetToSend);
+			logger.trace(packetToSend);
+			GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
 
 		}catch(Exception e){
 			logger.catching(e);
@@ -146,6 +151,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			.orElse(Stream.empty())
 			.findAny()
 			.ifPresent(pl->{
+				logger.entry(pl);
 
 				final Payload payload = packet.getPayloads().get(0);
 
@@ -174,6 +180,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			break;
 		default:
 
+			removeItemListener(iListener);
 			if(linkAddr != 0)
 				setBiasBoardLOs(payload);
 			else
@@ -189,6 +196,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 						}
 					}.execute();
 				}
+			addItemListener(iListener);
 
 			packetToSend = new LOPacket(linkAddr);
 			LoSelectComboBox.this.run();
@@ -234,7 +242,8 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		}
 	}
 
-	private void update(Payload payload) {
+	private synchronized void update(Payload payload) {
+		logger.entry(payload);
 
 		if(linkAddr != 0)
 			updateBias(payload);
@@ -246,22 +255,23 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		logger.entry(payload);
 
 		final long fr = payload.getLong();
-		final int itemCount = getItemCount();
-		IdValueFreq ivf = (IdValueFreq)getSelectedItem();
 
-		if(ivf==null)
-			return;
-
-		final ValueFrequency valueFrequency = ivf.getValueFrequency();
-		if(valueFrequency.getValue()!=fr)
-			for(int i=0; i<itemCount; i++){
-				final IdValueFreq itemAt = getItemAt(i);
-				if(itemAt.getValueFrequency().getValue()==fr)
-					setSelectedItem(itemAt);
-			}
+		Optional
+		.ofNullable((IdValueFreq)getSelectedItem())
+		.map(IdValueFreq::getValueFrequency)
+		.map(ValueFrequency::getValue)
+		.filter(l->l!=fr)
+		.map(l->IntStream.range(0, getItemCount()))
+		.orElse(IntStream.empty())
+		.mapToObj(this::getItemAt)
+		.filter(item->item.getValueFrequency().getValue()==fr)
+		.findAny()
+		.ifPresent(this::setSelectedItem);
 	}
 
 	public void updateBias(final Payload payload) {
+		logger.entry(payload);
+
 		final byte loID = payload.getByte();
 		final IdValueFreq anObject = new IdValueFreq(loID, null);
 		if(!anObject.equals(model.getSelectedItem()))
@@ -269,8 +279,18 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	}
 
 	private synchronized void setSelectedItem(final IdValueFreq itemAt) {
-		removeItemListener(aListener);
+		logger.entry(itemAt);
+
+		removeItemListener(iListener);
 		super.setSelectedItem(itemAt);
-		addItemListener(aListener);
+		addItemListener(iListener);
+	}
+
+	@Override
+	public void addItemListener(ItemListener aListener) {
+
+		//if does not exists
+		if(!Arrays.stream(getItemListeners()).filter(il->il==aListener).findAny().isPresent())
+			super.addItemListener(aListener);
 	}
 }

@@ -9,7 +9,6 @@ import irt.data.packet.AttenuationRangePacket;
 public class UnitAttenuationController extends UnitControllerImp{
 
 	public UnitAttenuationController(Byte linkAddr, JTextField txtGain, JSlider slider, JTextField txtStep) {
-		super(txtGain, slider, txtStep, "gain_step", new AttenuationRangePacket(linkAddr), new AttenuationPacket(linkAddr, null));
+		super(txtGain, slider, txtStep, "att_step", new AttenuationRangePacket(linkAddr), new AttenuationPacket(linkAddr, null));
 	}
-	
 }

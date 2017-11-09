@@ -2,8 +2,8 @@ package irt.controller.serial_port.value.getter;
 
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
 public class DeviceInfoGetter extends GetterAbstract{

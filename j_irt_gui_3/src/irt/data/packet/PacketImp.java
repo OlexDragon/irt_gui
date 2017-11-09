@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import irt.data.ToHex;
+import irt.data.packet.interfaces.Packet;
 
 public class PacketImp implements Packet{
 
