@@ -9,7 +9,7 @@ import irt.data.packet.GainRangePacket;
 public class UnitGainController extends UnitControllerImp{
 
 	public UnitGainController(Byte linkAddr, JTextField txtGain, JSlider slider, JTextField txtStep) {
-		super(txtGain, slider, txtStep, "att_step", new GainRangePacket(linkAddr), new GainPacket(linkAddr, null));
+		super(txtGain, slider, txtStep, "gain_step", new GainRangePacket(linkAddr), new GainPacket(linkAddr, null));
 	}
 	
 }

@@ -21,12 +21,12 @@ import irt.data.PacketThread;
 import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacketImp;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.Console;
@@ -168,7 +168,7 @@ do{
 			Console.appendLn(p, prefix);
 			Console.appendLn(hexStr, prefix);
 
-			if(isRun() && data!=null){
+			if(isRun() && data!=null && isOpened()){
 				writeBytes(data);
 
 				if ((isConfirmBytes()) && isFlagSequence()){

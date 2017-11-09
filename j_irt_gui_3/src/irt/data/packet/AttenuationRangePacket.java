@@ -2,6 +2,7 @@ package irt.data.packet;
 
 import irt.data.Range;
 import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.RangePacket;
 
 public class AttenuationRangePacket extends PacketAbstract implements RangePacket{
 

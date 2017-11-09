@@ -1,5 +1,7 @@
 package irt.data;
 
+import java.util.Optional;
+
 import irt.data.packet.Payload;
 
 
@@ -9,8 +11,13 @@ public class Range {
 	private long maximum;
 
 	public Range(Payload pl) {
-		if(pl!=null && pl.getBuffer()!=null){
-			byte[] b = pl.getBuffer();
+
+		Optional
+		.ofNullable(pl)
+		.map(Payload::getBuffer)
+		.filter(b->b!=null)
+		.ifPresent(b->{
+
 			switch(b.length){
 			case 4:
 				minimum = pl.getShort(0);
@@ -23,7 +30,7 @@ public class Range {
 			default:
 				throw new IllegalStateException();
 			}
-		}
+		});
 	}
 
 	public long getMinimum() {

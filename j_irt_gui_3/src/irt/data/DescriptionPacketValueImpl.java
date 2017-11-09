@@ -2,8 +2,8 @@ package irt.data;
 
 import irt.controller.interfaces.DescriptionPacketValue;
 import irt.controller.translation.Translation;
-import irt.data.packet.RangePacket;
 import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.RangePacket;
 import irt.data.value.Value;
 
 public abstract class DescriptionPacketValueImpl implements Comparable<DescriptionPacketValueImpl>, DescriptionPacketValue{

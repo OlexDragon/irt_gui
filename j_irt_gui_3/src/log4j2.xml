@@ -39,24 +39,36 @@
   <Loggers>
  
 <!--  	<Logger name="irt.irt_gui.IrtGui" level="all"/> -->
-<!--  	<Logger name="irt.tools.textField.UnitAddressField" level="all"/> -->
+
 <!--  	<Logger name="irt.tools.ALCComboBox" level="all"/> -->
-<!--   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelHPB" level="all"/> -->
-<!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
+
 <!--  	<Logger name="irt.tools.CheckBox.SpectrumInversionSwitch" level="all"/> -->
 <!--  	<Logger name="irt.tools.CheckBox.LnbPowerSwitch" level="debug"/> -->
 <!--  	<Logger name="irt.tools.CheckBox.LnbReferenceSwitch" level="all"/> -->
+
 <!--  	<Logger name="irt.tools.combobox.LoSelectComboBox" level="all"/> -->
- 	<Logger name="irt.controller.DumpControllerFull" level="all"/>
-<!--  	<Logger name="irt.controller.serial_port.ComPort" level="warn"/> -->
-<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="all"/> -->
-<!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
+
 <!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.MonitorPanelSwingWithFx" level="all"/> -->
+
 <!--  	<Logger name="irt.tools.textField.RegisterTextField" level="all"/> -->
-<!--  	<Logger name="irt.controller.DumpController" level="warn"/> -->
+<!--  	<Logger name="irt.tools.textField.UnitAddressField" level="all"/> -->
+
 <!--  	<Logger name="irt.tools.button.MuteButton" level="all"/> -->
+
 <!--  	<Logger name="irt.tools.panel.subpanel.progressBar.Section" level="debug"/> -->
+<!--   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelHPB" level="all"/> -->
+<!--   	<Logger name="irt.tools.panel.subpanel.NetworkPanel" level="all"/> -->
+
+<!--  	<Logger name="irt.controller.DumpController" level="warn"/> -->
+<!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
+<!--  	<Logger name="irt.controller.DumpControllerFull" level="all"/> -->
+<!--  	<Logger name="irt.controller.DumpControllerFull" level="all"/> -->
+
+<!--  	<Logger name="irt.controller.serial_port.ComPort" level="warn"/> -->
+<!--  	<Logger name="irt.controller.control.UnitControllerImp" level="all"/> -->
+
+<!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

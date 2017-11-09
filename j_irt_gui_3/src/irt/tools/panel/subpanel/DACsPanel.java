@@ -49,8 +49,8 @@ import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.CallibrationModePacket;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.tools.button.Switch;
@@ -569,7 +569,9 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	@Override
 	public void run() {
 		try{
-			adcWorkers.stream().forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
+			adcWorkers
+			.stream()
+			.forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
 		}catch (Exception e) {
 			logger.catching(e);
 		}

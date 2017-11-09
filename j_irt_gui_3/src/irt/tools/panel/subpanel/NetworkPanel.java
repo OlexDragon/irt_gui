@@ -48,9 +48,9 @@ import irt.data.network.NetworkAddress;
 import irt.data.network.NetworkAddress.AddressType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.NetworkAddressPacket;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.Packet;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.head.IrtPanel;
@@ -441,12 +441,12 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	@Override
 	public void run() {
-		if(run || --count<0)
-		try{
-			cptq.add(packet);
+		if(run || --count<0) {
 
-		}catch(Exception e){
-			logger.catching(e);
+			logger.entry(run, count, packet);
+
+			cptq.add(packet);
+			count = 360; //Once in 30 minutes
 		}
 	}
 

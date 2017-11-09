@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.PacketWork.AlarmsPacketIds;
 
@@ -33,7 +34,8 @@ public enum Packets {
 	FREQUENCY_RANGE			(()->new FrequencyRangePacket()),
 	FREQUENCY				(()->new FrequencyPacket()),
 	GAIN_RANGE				(()->new GainRangePacket()),
-	GAIN					(()->new GainPacket());
+	GAIN					(()->new GainPacket()),
+	NETWORK_ADDRESS			(()->new NetworkAddressPacket());
 
 	private final static Logger logger = LogManager.getLogger();
 	private Supplier<PacketWork> packetWork;

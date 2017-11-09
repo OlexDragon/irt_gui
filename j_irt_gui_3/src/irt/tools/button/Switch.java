@@ -4,11 +4,13 @@ package irt.tools.button;
 import java.awt.Cursor;
 import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import javax.swing.ImageIcon;
 import javax.swing.event.AncestorEvent;
@@ -24,11 +26,11 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.CallibrationModePacket;
 import irt.data.packet.DeviceDebugPacket;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
@@ -142,13 +144,14 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 			Boolean isSelected;
 			if(h.getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBUG_CALIBRATION_MODE){
 
-				isSelected = packet
-									.getPayloads()
-									.parallelStream()
-									.map(pl->pl.getInt(0))
-									.map(i->i>0)
-									.findAny()
-									.orElse(false);
+				isSelected = Optional
+								.ofNullable(packet.getPayloads())
+								.map(List::stream)
+								.orElse(Stream.empty())
+								.map(pl->pl.getInt(0))
+								.map(i->i>0)
+								.findAny()
+								.orElse(false);
 						
 			}else{
 

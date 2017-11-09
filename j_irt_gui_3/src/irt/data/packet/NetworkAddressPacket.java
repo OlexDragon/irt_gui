@@ -1,5 +1,7 @@
 package irt.data.packet;
 
+import java.util.Optional;
+
 import irt.data.network.NetworkAddress;
 import irt.data.packet.interfaces.PacketWork;
 
@@ -14,5 +16,15 @@ public class NetworkAddressPacket  extends PacketAbstract{
 						PacketImp.PARAMETER_ID_NETWORK_ADDRESS,
 						networkAddress!=null ? networkAddress.toBytes() : null,
 						networkAddress!=null ? Priority.COMMAND : Priority.REQUEST);
+	}
+
+	public NetworkAddressPacket() {
+		this((byte) 0, null);
+	}
+
+	@Override
+	public Object getValue() {
+		return Optional
+				.of(new NetworkAddress().set(this));
 	}
 }

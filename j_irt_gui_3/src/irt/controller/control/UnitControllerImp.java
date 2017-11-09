@@ -6,7 +6,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.lang.reflect.Constructor;
-import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,13 +22,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
-import irt.data.packet.Packet;
+import irt.data.Range;
+import irt.data.packet.FrequencyPacket;
 import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.Payload;
+import irt.data.packet.Packets;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.RangePacket;
+import irt.data.packet.interfaces.ValueToString;
 
 public class UnitControllerImp implements UnitController{
 
@@ -43,38 +46,31 @@ public class UnitControllerImp implements UnitController{
 	private JSlider slider;
 	private JTextField txtStep;
 
-	private boolean limitsAreSet;
+	private boolean rangesAreSet;
 
-	private final PacketAbstract packet;
-	private PacketAbstract value;
-	private final PacketAbstract range;
+	private final RangePacket range;
+	private final ValueToString packet;
+	private final ValueToString value;
 
+	private final ChangeListener sliderChange;
 
-	DecimalFormat df = new DecimalFormat("0.0");  
+	private final ChangeListener sliderUpdateText;
 
-	private ChangeListener sliderChange = e->{
-		final short v = (short)slider.getValue();
-		value.setValue(v);
-		GuiControllerAbstract.getComPortThreadQueue().add(value);
-	};
-
-	private ChangeListener sliderUpdateText = e->txtGain.setText(df.format(slider.getValue()/10.0) + " " + Translation.getValue(String.class, "db", "dB"));
-
-	private Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->addChangeListener());
-	private FocusListener txtGainFocusListener = new FocusListener() {
+	private final Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->onFocusLost());
+	private final FocusListener txtGainFocusListener = new FocusListener() {
 
 		@Override
 		public void focusLost(FocusEvent e) {
-			addChangeListener();
+			onFocusLost();
 		}
 
 		@Override
 		public void focusGained(FocusEvent e) {
-			removeChangeListener();
+			onFocusGained();
 		}
 	};
 
-	private KeyListener txtGainKeyListener = new KeyListener() {
+	private final KeyListener txtGainKeyListener = new KeyListener() {
 		
 		@Override
 		public void keyTyped(KeyEvent e) {
@@ -82,14 +78,15 @@ public class UnitControllerImp implements UnitController{
 			if(e.getKeyChar()==KeyEvent.VK_ENTER)
 				return;
 
-			removeChangeListener();
+			onFocusGained();
 		}
 		
 		@Override public void keyReleased(KeyEvent e) {}
 		@Override public void keyPressed(KeyEvent e) {}
 	};
 
-	private ActionListener txtGainActionListener = a->{
+	private final ActionListener txtGainActionListener = a->{
+		logger.traceEntry();
 
 		Optional
 		.of(txtGain.getText().replaceAll("[^\\d.E-]", ""))
@@ -104,71 +101,126 @@ public class UnitControllerImp implements UnitController{
 				logger.catching(ex);
 			}
 		});
-		addChangeListener();
+		onFocusLost();
 	};
 
-	private ActionListener txtStepActionListener = a->{
+	private final ActionListener txtStepActionListener = a->{
 		txtGain.requestFocus();
 	};
 
-	private FocusListener txtStepFocusListener = new FocusListener() {
+	private final FocusListener txtStepFocusListener = new FocusListener() {
 		
 		@Override
 		public void focusLost(FocusEvent e) {
 
-			Optional
-			.of(txtStep.getText().replaceAll("[^\\d.E-]", ""))
-			.filter(text->!text.isEmpty())
-			.ifPresent(text->{
-				try{
+			if(!rangesAreSet)
+				return;
 
-					double value = Optional.of(Double.parseDouble(text)).filter(sp->sp>=0.1).orElse(0.1);
-					final int spacing = (int) (value*10);
-					slider.setMinorTickSpacing(spacing);
+			final ValueToString p = createValuePacket(packet);
+			p.setValue(txtStep.getText());
 
-					final String txt = df.format(value) + " " + Translation.getValue(String.class, "db", "dB");
+			((Optional<?>) p.getValue())
+			.filter(Number.class::isInstance)
+			.map(Number.class::cast)
+			.map(Number::intValue)
+			.ifPresent(spacing->{
+
+				final int maximum = slider.getMaximum();
+
+				if(spacing > maximum)
+					spacing = maximum;
+
+				if(spacing<=0)
+					spacing = 1;
+
+				slider.setMinorTickSpacing(spacing);
+				final String txt = value.valueToString(spacing);
+				if(!txtStep.getText().equals(txt)) {
+
 					txtStep.setText(txt);
+					logger.error("PUT: {}={}", KEY, txt);
 					GuiControllerAbstract.getPrefs().put(KEY, txt);
-
-				}catch(Exception ex){
-					logger.catching(ex);
 				}
 			});
-			addChangeListener();
+
+			onFocusLost();
 		}
 		
 		@Override public void focusGained(FocusEvent e) { }
 	};
 
-	public UnitControllerImp(JTextField txtGain, JSlider slider, JTextField txtStep, String key, PacketAbstract rangePacket, PacketAbstract packet) {
+	private long relative;
+
+	public UnitControllerImp(JTextField txtGain, JSlider slider, JTextField txtStep, String key, RangePacket rangePacket, ValueToString packet) {
 		KEY = key;
+
 		this.txtGain = txtGain;
 		this.slider = slider;
 		this.txtStep = txtStep;
 
 		range = rangePacket;
 		this.packet = packet;
+		value = createValuePacket(packet);
 
+		sliderChange = e->{
+
+			if(slider.getValueIsAdjusting())
+				return;
+
+			final int sliderValue = slider.getValue();
+			final long v = relative + sliderValue;
+
+			value.setValue(v);
+			GuiControllerAbstract.getComPortThreadQueue().add(value);
+		};
+
+		sliderUpdateText = e->{
+
+			final int sliderValue = slider.getValue();
+			final long v = relative + sliderValue;
+
+			final String valueToString = packet.valueToString(v);
+
+			if(!txtGain.getText().equals(valueToString))
+				txtGain.setText(valueToString);
+		};
+
+		focusListenerTimer.setRepeats(false);
+	}
+
+	private ValueToString createValuePacket(ValueToString packet) {
+		ValueToString vPacket;
 		try {
 
-			final Constructor<? extends PacketAbstract> constructor = packet.getClass().getConstructor(Byte.class, Short.class);
+			Class<?> clazz;
+			Object v;
+
+			if(packet instanceof FrequencyPacket) {
+				clazz = Long.class;
+				v = (long)0;
+
+			}else {
+				clazz = Short.class;
+				v = (short)0;
+			}
+				
+			final Constructor<? extends ValueToString> constructor =  packet.getClass().getConstructor(Byte.class, clazz);
 
 			final byte addr = packet.getLinkHeader().getAddr();
-			value = constructor.newInstance(new Object[]{addr, (short)0});
+			vPacket = constructor.newInstance(new Object[]{addr, v});
 
 		} catch (Exception e) {
 			logger.catching(e);
+			vPacket = null;
 		}
-//		value = new AttenuationPacket(linkAddr, (short) 0);
-
-		focusListenerTimer.setRepeats(false);
+		return vPacket;
 	}
 
 	@Override
 	public void run() {
 		
 		PacketWork p;
-		if(limitsAreSet)
+		if(rangesAreSet)
 			p = packet;
 		else
 			p = range;
@@ -178,27 +230,29 @@ public class UnitControllerImp implements UnitController{
 
 	@Override
 	public void start() {
+		logger.traceEntry("{}", ()->getClass().getSimpleName());
 
 		if(Optional.ofNullable(scheduledFuture).filter(sch->!sch.isCancelled()).isPresent())
 			return;
 
-		slider.addChangeListener(sliderChange);
-		slider.addChangeListener(sliderUpdateText);
+		addSliderChangeListener(sliderChange);
+		addSliderChangeListener(sliderUpdateText);
 		txtGain.addFocusListener(txtGainFocusListener);
 		txtGain.addKeyListener(txtGainKeyListener);
 		txtGain.addActionListener(txtGainActionListener);
 
-		txtStep.setText(GuiControllerAbstract.getPrefs().get(KEY, "1.0 " + Translation.getValue(String.class, "db", "dB")));
-		txtStep.addActionListener(txtStepActionListener);
+		final String txt = GuiControllerAbstract.getPrefs().get(KEY, "1.0 ");
+		txtStep.setText(txt);
 		txtStep.addFocusListener(txtStepFocusListener);
-		txtStepFocusListener.focusLost(null);
+		txtStep.addActionListener(txtStepActionListener);
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
-		scheduledFuture = service.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 0, 15, TimeUnit.SECONDS);
 	}
 
 	@Override
 	public void stop() {
+		logger.traceEntry("{}", ()->getClass().getSimpleName());
 
 		if(!Optional.ofNullable(scheduledFuture).map(sch->!sch.isCancelled()).isPresent())
 			return;
@@ -212,6 +266,7 @@ public class UnitControllerImp implements UnitController{
 		txtGain.removeActionListener(txtGainActionListener);
 
 		txtStep.removeActionListener(txtStepActionListener);
+		txtStep.removeFocusListener(txtStepFocusListener);
 
 		scheduledFuture.cancel(true);
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
@@ -221,10 +276,10 @@ public class UnitControllerImp implements UnitController{
 	public void onPacketRecived(Packet packet) {
 
 		if(isValuePacket(packet))
-			setValue(packet);
+			setValue(Packets.cast(packet));
 
 		else if(isRangePacket(packet))
-			setRange(packet);
+			setRange(Packets.cast(packet));
 	}
 
 	private boolean isValuePacket(Packet packet) {
@@ -241,42 +296,74 @@ public class UnitControllerImp implements UnitController{
 		return id1.isPresent() && id1.equals(id2);
 	}
 
-	private void setValue(Packet packet) {
-		Optional
-		.ofNullable(packet.getPayloads()).flatMap(pls->pls.stream().findAny())
-		.map(pl->pl.getShort(0))
-		.ifPresent(v->{
+	private void setValue(Optional<? extends PacketAbstract> optional) {
+
+		optional
+		.flatMap(p->(Optional<?>)p.getValue())
+		.filter(Number.class::isInstance)
+		.map(Number.class::cast)
+		.map(Number::longValue)
+		.ifPresent(value->{
+
+			int v = (int) (value - relative);
+
+			if(slider.getValue() == v)
+				return;
+
 			slider.removeChangeListener(sliderChange);
 			slider.setValue(v);
-			slider.addChangeListener(sliderChange);
+			addSliderChangeListener(sliderChange);
 		});
 	}
 
-	private void setRange(Packet packet) {
-		Optional
-		.ofNullable(packet.getPayloads()).flatMap(pls->pls.stream().findAny())
-		.map(Payload::getArrayShort)
-		.filter(arr->arr.length==2)
-		.ifPresent(arr->{
+	private void setRange(Optional<? extends PacketAbstract> optional) {
+		optional
+		.flatMap(p->(Optional<?>)p.getValue())
+		.filter(Range.class::isInstance)
+		.map(Range.class::cast)
+		.ifPresent(range->{
+
+			final long minimum = range.getMinimum();
+			final long maximum = range.getMaximum();
+			relative = minimum;
+
+			//TODO			slider.setToolTipText("from" + minimum + " to " + maximum);
 
 			slider.removeChangeListener(sliderChange);
-			slider.setMinimum(arr[0]);
-			slider.setMaximum(arr[1]);
-			slider.addChangeListener(sliderChange);
+			slider.removeChangeListener(sliderUpdateText);
+			slider.setMinimum(0);
+			final int sliderMax = (int) (maximum - minimum);
+			slider.setMaximum(sliderMax);
+			addSliderChangeListener(sliderUpdateText);
+			addSliderChangeListener(sliderChange);
+			logger.trace("minimum={}; maximum={}; sliderMax={}", minimum, maximum, sliderMax);
 
-			limitsAreSet = true;
+			rangesAreSet = true;
+			txtStepFocusListener.focusLost(null);
+
 			GuiControllerAbstract.getComPortThreadQueue().add(this.packet);
 		});
 	}
 
-	private void addChangeListener() {
+	private void onFocusLost() {
+		logger.traceEntry();
 		focusListenerTimer.stop();
 		sliderUpdateText.stateChanged(null);
-		slider.addChangeListener(sliderUpdateText);
+
+		addSliderChangeListener(sliderUpdateText);
 	}
 
-	private void removeChangeListener() {
+	private void onFocusGained() {
+		logger.traceEntry();
 		focusListenerTimer.restart();
+
 		slider.removeChangeListener(sliderUpdateText);
+	}
+
+	private void addSliderChangeListener(ChangeListener listener){
+
+		final boolean present = Arrays.stream(slider.getChangeListeners()).filter(cl->cl==listener).findAny().isPresent();
+		if(!present)
+			slider.addChangeListener(listener);
 	}
 }

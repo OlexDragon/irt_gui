@@ -1,9 +1,8 @@
 package irt.data.packet.interfaces;
 
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
 
-public interface PacketThreadWorker{
+public interface PacketThreadWorker extends ValuePacket{
 
 	LinkHeader getLinkHeader();
 	void 	join() throws InterruptedException;
@@ -12,7 +11,6 @@ public interface PacketThreadWorker{
 	byte[] 	getData();
 	boolean isReadyToSend();
 	void 	start();
-	Object 	getValue();
 	void 	setData(byte[] d);
 	void 	preparePacket();
 	void 	preparePacket(byte packetParameterHeaderCode, Object value);

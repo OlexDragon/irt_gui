@@ -1,9 +1,11 @@
 package irt.data.network;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import irt.data.packet.Packet;
+import irt.data.packet.interfaces.Packet;
 
 public class NetworkAddress {
 
@@ -29,12 +31,14 @@ public class NetworkAddress {
 	private byte[] mask;
 	private byte[] gateway;
 
-	public void set(Packet packet) {
+	public NetworkAddress set(Packet packet) {
 
 		Optional.ofNullable(packet)
 		.map(Packet::getPayloads)
-		.filter(pls->!pls.isEmpty())
-		.map(pls->pls.get(0).getBuffer())
+		.map(List::stream)
+		.orElse(Stream.empty())
+		.findAny()
+		.map(pl->pl.getBuffer())
 		.filter(b->b!=null)
 		.filter(b->b.length>=13)
 		.ifPresent(b->{
@@ -43,6 +47,8 @@ public class NetworkAddress {
 			mask = Arrays.copyOfRange(b, 5, 9);
 			gateway = Arrays.copyOfRange(b, 9,13);
 		});
+
+		return this;
 	}
 
 	public String getAddressAsString(){

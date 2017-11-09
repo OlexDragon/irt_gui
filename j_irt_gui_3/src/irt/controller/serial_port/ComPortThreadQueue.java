@@ -14,7 +14,7 @@ import org.apache.logging.log4j.core.Logger;
 
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.Packet;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.Console;
@@ -73,7 +73,7 @@ public class ComPortThreadQueue implements Runnable {
 		}
 	}
 
-	public void add(PacketWork packetWork){
+	public synchronized void add(PacketWork packetWork){
 		logger.entry(packetWork);
 
 		try {

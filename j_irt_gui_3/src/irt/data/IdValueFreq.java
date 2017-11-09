@@ -1,6 +1,8 @@
 
 package irt.data;
 
+import java.util.Optional;
+
 import irt.data.value.ValueFrequency;
 
 public class IdValueFreq {
@@ -37,6 +39,6 @@ public class IdValueFreq {
 
 	@Override
 	public String toString() {
-		return valueFrequency.toString();
+		return Optional.ofNullable(valueFrequency).map(Object::toString).orElse("N/A");
 	}
 }

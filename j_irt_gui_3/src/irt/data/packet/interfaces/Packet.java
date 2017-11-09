@@ -1,6 +1,9 @@
-package irt.data.packet;
+package irt.data.packet.interfaces;
 
 import java.util.List;
+
+import irt.data.packet.PacketHeader;
+import irt.data.packet.Payload;
 
 public interface Packet {
 

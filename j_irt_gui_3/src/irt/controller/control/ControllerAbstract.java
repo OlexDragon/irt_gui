@@ -19,7 +19,7 @@ import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
-import irt.data.packet.Packet;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
 public abstract class ControllerAbstract implements UnitController{

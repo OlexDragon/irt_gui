@@ -30,13 +30,12 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
-import irt.controller.FrequencyContriller;
 import irt.controller.GuiController;
 import irt.controller.control.ControlController;
 import irt.controller.control.ControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.control.UnitAttenuationController;
 import irt.controller.control.UnitController;
+import irt.controller.control.UnitFrequencyController;
 import irt.controller.control.UnitGainController;
 import irt.controller.interfaces.ControlPanel;
 import irt.controller.translation.Translation;
@@ -322,34 +321,47 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	}
 
 	private void setController(int control) {
-		if(controller!=null)
-			controller.stop();
+
 
 		ActionFlags a = ActionFlags.values()[control];
 		switch(a){
 		case FLAG_GAIN:
-			controller =  new UnitGainController(linkHeader.getAddr(), txtGain, slider, txtStep);
-			controller.start();
+			startNewController(UnitGainController.class);
 			break;
 		case FLAG_FREQUENCY:
-			new MyThreadFactory().newThread(controller =  getNewFreqController()).start();
+			startNewController(UnitFrequencyController.class);
 			break;
 		case FLAG_ALC:
 			new MyThreadFactory().newThread(controller =  getNewAlcController()).start();
 			break;
 		default:
-			controller =  new UnitAttenuationController(linkHeader.getAddr(), txtGain, slider, txtStep);
-			controller.start();
+			startNewController(UnitAttenuationController.class);
 		}
 	}
 
-//	protected GainController getNewGainController() {
+	private synchronized void startNewController(Class<? extends UnitController> clazz) {
+		
+		if(this.controller==null || !clazz.equals(this.controller.getClass())) {
+
+			Optional.ofNullable(this.controller).ifPresent(UnitController::stop);
+
+			try {
+				controller =  clazz.getConstructor(Byte.class, JTextField.class, JSlider.class, JTextField.class).newInstance(linkHeader.getAddr(), txtGain, slider, txtStep);
+				controller.start();
+
+			} catch (Exception e) {
+				logger.catching(e);
+			}
+		}
+	}
+
+	//	protected GainController getNewGainController() {
 //		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
 //	}
 
-	protected FrequencyContriller getNewFreqController() {
-		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
-	}
+//	protected FrequencyContriller getNewFreqController() {
+//		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
+//	}
 
 	protected ControllerAbstract getNewAlcController() {
 		return null;

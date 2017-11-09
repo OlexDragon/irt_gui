@@ -10,10 +10,10 @@ import org.apache.logging.log4j.core.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
 public class DeviceInfo implements PacketListener {

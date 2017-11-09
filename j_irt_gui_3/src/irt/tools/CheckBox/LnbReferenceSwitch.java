@@ -4,8 +4,8 @@ import java.awt.Image;
 
 import irt.data.packet.LnbReferencePacket;
 import irt.data.packet.LnbReferencePacket.ReferenceStatus;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
-import irt.data.packet.Packet;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.Payload;
 

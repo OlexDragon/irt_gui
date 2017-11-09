@@ -35,17 +35,25 @@ import irt.data.packet.GainPacket;
 import irt.data.packet.LOPacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.MuteControlPacket;
-import irt.data.packet.Packet;
+import irt.data.packet.NetworkAddressPacket;
 import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
 import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
 public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
-	public static final List<Class<? extends PacketAbstract>> packetsToControl = Arrays.asList(AttenuationPacket.class, FrequencyPacket.class, GainPacket.class, LOPacket.class, MuteControlPacket.class, DeviceDebugReadWritePacket.class);
+	public static final List<Class<? extends PacketAbstract>> packetsToControl = Arrays.asList(
+																								AttenuationPacket.class,
+																								FrequencyPacket.class,
+																								GainPacket.class,
+																								LOPacket.class,
+																								MuteControlPacket.class,
+																								DeviceDebugReadWritePacket.class,
+																								NetworkAddressPacket.class);
 
 	public static final Logger dumper = LogManager.getLogger("dumper");
 	public static final Marker marker = MarkerManager.getMarker("FileWork");
