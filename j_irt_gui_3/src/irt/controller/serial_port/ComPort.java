@@ -170,6 +170,7 @@ do{
 
 			if(isRun() && data!=null && isOpened()){
 				writeBytes(data);
+				logger.debug("writeBytes: {}", ()->Arrays.toString(data));
 
 				if ((isConfirmBytes()) && isFlagSequence()){
 
@@ -177,6 +178,7 @@ do{
 						if((readData=readLinkHeader())!=null)
 							checksum = new Checksum(readData);
 						else{
+							logger.warn("linkHeader==null");
 							Console.appendLn("LinkHeader", "Break");
 							break;
 						}
@@ -188,6 +190,7 @@ do{
 							checksum = new Checksum(readData);
 
 						packetHeader = new PacketHeader(readData);
+						logger.debug(packetHeader);
 
 						if (packetHeader.toBytes() != null && packetHeader.getGroupId()==groupId) {
 							packet.setHeader(packetHeader);
@@ -234,8 +237,10 @@ do{
 				}else if(!logged){
 					logger.warn("isFlagSequence() = false");
 				}
-			}else
+			}else {
+				logger.warn("the condition isRun() && data!=null && isOpened() does not hold");
 				setRun(false, "run="+run+", data="+data);
+			}
 }while(isComfirm && packet.getPayloads()==null && ++runTimes<3 && isRun());//if error repeat up to 3 times
 
 				if(isRun()) {
@@ -316,11 +321,14 @@ do{
 	private boolean isConfirmBytes() throws SerialPortException {
 
 		boolean isComfirm = false;
-		int ev = linkHeader!=null ? 11 : 7;
+		int ev = Optional.ofNullable(linkHeader).map(LinkHeader::getIntAddr).filter(addr->addr>0).map(a->11).orElse(7);
 		int index = ev - 3;
 		logger.debug("linkHeader = {}", linkHeader);
 
 		byte[] readBytes = readBytes(ev,100);
+
+		logger.debug("\n readBytes= {}", ()->Arrays.toString(readBytes));
+
 		this.isComfirm = readBytes!=null && readBytes[0]==PacketImp.FLAG_SEQUENCE && readBytes[readBytes.length-1]==PacketImp.FLAG_SEQUENCE;
 
 		//for converters
@@ -328,7 +336,11 @@ do{
 					linkHeader = null;
 
 		if(this.isComfirm){
+
 			byte[] data = Arrays.copyOfRange(readBytes, 1, index);
+
+			logger.debug("\n readBytes= {}\n LinkHeader data= {}", ()->Arrays.toString(readBytes), ()->Arrays.toString(data));
+
 			LinkHeader lh = new LinkHeader(data);
 			if((linkHeader==null || lh.equals(linkHeader)) && packetId==getPacketId(linkHeader!=null, data)){
 				Checksum cs = new Checksum(data);

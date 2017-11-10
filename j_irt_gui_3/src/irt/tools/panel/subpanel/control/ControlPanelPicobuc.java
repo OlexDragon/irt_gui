@@ -177,7 +177,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 					public boolean set(Packet packet) {
 						switch(packet.getHeader().getPacketId()){
 						case PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE:
-							boolean isOn = packet.getPayload(0).getByte()==1;
+							boolean isOn = packet.getPayloads().stream().findAny().map(Payload::getByte).filter(b->b==1).isPresent();
 							if(switchBox!=null && isOn != switchBox.isSelected()){
 								switchBox.removeItemListener(alcItemListener);
 								switchBox.setSelected(isOn);
