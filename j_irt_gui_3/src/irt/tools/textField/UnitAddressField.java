@@ -110,6 +110,7 @@ public class UnitAddressField extends JTextField {
 	}
 
 	private byte[] stringToByteArray(final String text) {
+		logger.error(text);
 		final int[] intArray = Optional
 									.ofNullable(text)
 									.map(t -> t.replaceAll("\\D+", " "))
@@ -118,7 +119,7 @@ public class UnitAddressField extends JTextField {
 									.orElse(Arrays.stream(DEFAULT_ADDRESS_STR))
 									.filter(s->!s.isEmpty())
 									.mapToInt(s->Integer.parseInt(s))
-									.filter(i->i>0)
+//									.filter(i->i>0)
 									.filter(i->i<=(DEFAULT_ADDRESS[0]&0xFF))
 									.sorted()
 									.toArray();
@@ -128,7 +129,7 @@ public class UnitAddressField extends JTextField {
 
 		for(int i=0; i<length; i++) sa[i] = (byte) intArray[i];
 
-		logger.trace("{}", sa);
+		logger.error("{}", sa);
 		return sa;
 	}		
 

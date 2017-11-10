@@ -135,4 +135,11 @@ public class AdcWorker {
 				});
 			});
 	}
+
+	@Override
+	public String toString() {
+		return "AdcWorker [packetToSend=" + packetToSend + ", label=" + label + ", packetId=" + packetId
+				+ ", multiplier=" + multiplier + ", format=" + format + ", mousePressed=" + mousePressed + ", average="
+				+ average + "]";
+	}
 }

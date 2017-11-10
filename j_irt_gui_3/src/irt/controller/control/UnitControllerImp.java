@@ -297,6 +297,7 @@ public class UnitControllerImp implements UnitController{
 	}
 
 	private void setValue(Optional<? extends PacketAbstract> optional) {
+		logger.entry(optional);
 
 		optional
 		.flatMap(p->(Optional<?>)p.getValue())
@@ -304,6 +305,7 @@ public class UnitControllerImp implements UnitController{
 		.map(Number.class::cast)
 		.map(Number::longValue)
 		.ifPresent(value->{
+			logger.trace("value={}", value);
 
 			int v = (int) (value - relative);
 

@@ -39,13 +39,17 @@ public class ComPortThreadQueue implements Runnable {
 		try {
 
 			packetWork = comPortQueue.take();
+			logger.trace(packetWork);
 
 			if (serialPort != null) {
+				logger.debug("serial port present");
 				PacketThreadWorker packetThread = packetWork.getPacketThread();
 
 				if (packetThread != null) {
+					logger.debug("packetThread present");
 					packetThread.join();
 
+					logger.debug("packetThread.join() done");
 					Packet packet = packetThread.getPacket();
 					if (packet == null) {
 						logger.warn(packetWork);
@@ -53,6 +57,7 @@ public class ComPortThreadQueue implements Runnable {
 					}
 
 					if (serialPort.isOpened()) {
+						logger.debug("serialPort.isOpened() = true");
 						sent = false;
 
 						Packet send = serialPort.send(packetWork);
@@ -67,6 +72,7 @@ public class ComPortThreadQueue implements Runnable {
 				}
 			} else
 				logger.warn("serialPort==null");
+
 		} catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortThreadQueue:run");
@@ -102,6 +108,7 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public void clear(){
+		logger.entry();
 		comPortQueue.clear();
 	}
 

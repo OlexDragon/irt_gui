@@ -11,6 +11,7 @@ public class Range {
 	private long maximum;
 
 	public Range(Payload pl) {
+//		LogManager.getLogger().error(pl);
 
 		Optional
 		.ofNullable(pl)

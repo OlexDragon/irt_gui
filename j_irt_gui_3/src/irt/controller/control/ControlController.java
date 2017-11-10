@@ -7,6 +7,7 @@ import java.awt.event.ItemListener;
 import java.util.Optional;
 
 import javax.swing.JButton;
+import javax.swing.JPanel;
 
 import irt.controller.StoreConfigController;
 import irt.controller.SwitchController;
@@ -25,6 +26,7 @@ public class ControlController extends ControllerAbstract {
 	private JButton btnStore;
 //	protected JComboBox<Object> comboBoxfreqSet;
 	protected ItemListener itemListenerComboBox;
+	private final byte linkAddr;
 
 	/**
 	 * Use for LO control
@@ -33,6 +35,7 @@ public class ControlController extends ControllerAbstract {
 	public ControlController(Optional<DeviceType> deviceType, String controllerName, LinkHeader linkHeader, MonitorPanelAbstract panel) {
 		super(deviceType, controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
 		run = false;
+		linkAddr = linkHeader.getAddr();
 //		if(comboBoxfreqSet==null)
 //			setSend(false);
 
@@ -79,8 +82,12 @@ public class ControlController extends ControllerAbstract {
 
 					@Override
 					public void actionPerformed(ActionEvent e) {
+
 						try{
-							new StoreConfigController(deviceType, getPacketWork().getPacketThread().getLinkHeader(), getOwner(), Style.CHECK_ONCE);
+
+							final JPanel owner = getOwner();
+							new StoreConfigController(linkAddr, owner);
+
 						}catch(Exception ex){
 							logger.catching(ex);
 						}

@@ -35,7 +35,8 @@ public enum Packets {
 	FREQUENCY				(()->new FrequencyPacket()),
 	GAIN_RANGE				(()->new GainRangePacket()),
 	GAIN					(()->new GainPacket()),
-	NETWORK_ADDRESS			(()->new NetworkAddressPacket());
+	NETWORK_ADDRESS			(()->new NetworkAddressPacket()),
+	STORE_CONFIG			(()->new SaveConfigPacket());
 
 	private final static Logger logger = LogManager.getLogger();
 	private Supplier<PacketWork> packetWork;

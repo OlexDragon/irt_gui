@@ -157,13 +157,15 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 
 				if(unitAddr==0){
-					adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, new RegisterValue(10, 0, null), PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, new RegisterValue(10, 1, null), PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, new RegisterValue(10, 2, null), PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 4, null), PacketWork.PACKET_ID_FCM_ADC_CURRENT, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 6, null), PacketWork.PACKET_ID_FCM_ADC_5V5, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 7, null), PacketWork.PACKET_ID_FCM_ADC_13v2, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-					adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 8, null), PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					synchronized (DACsPanel.this) {
+						adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, new RegisterValue(10, 0, null), PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, new RegisterValue(10, 1, null), PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, new RegisterValue(10, 2, null), PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 4, null), PacketWork.PACKET_ID_FCM_ADC_CURRENT, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 6, null), PacketWork.PACKET_ID_FCM_ADC_5V5, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 7, null), PacketWork.PACKET_ID_FCM_ADC_13v2, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 8, null), PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+					}
 
 					Value value = new Value(0, -100, 100, 0);
 					startController(new TextSliderController(deviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
@@ -191,7 +193,9 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 				threadList.clear();
 
 				//---------------------------------------------------------------------------------
-				adcWorkers.clear();
+				synchronized (DACsPanel.this) {
+					adcWorkers.clear();
+				}
 
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DACsPanel.this);
 
@@ -562,12 +566,12 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public synchronized void onPacketRecived(Packet packet) {
 		adcWorkers.parallelStream().forEach(adc->adc.update(packet));
 	}
 
 	@Override
-	public void run() {
+	public synchronized void run() {
 		try{
 			adcWorkers
 			.stream()
