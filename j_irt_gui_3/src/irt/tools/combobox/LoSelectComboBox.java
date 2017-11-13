@@ -89,7 +89,6 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 					//converter
 					packetWork = new LOPacket(idValueFreq.getValueFrequency());
 
-				logger.error(packetWork);
 				GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 			}
 		}
@@ -180,7 +179,9 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			break;
 		default:
 
-			removeItemListener(iListener);
+			final ItemListener[] itemListeners = getItemListeners();
+			Arrays.stream(itemListeners).forEach(il->removeItemListener(il));
+
 			if(linkAddr != 0)
 				setBiasBoardLOs(payload);
 			else
@@ -196,7 +197,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 						}
 					}.execute();
 				}
-			addItemListener(iListener);
+			Arrays.stream(itemListeners).forEach(il->addItemListener(il));
 
 			packetToSend = new LOPacket(linkAddr);
 			LoSelectComboBox.this.run();

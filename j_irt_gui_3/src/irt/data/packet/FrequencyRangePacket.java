@@ -11,7 +11,7 @@ public class FrequencyRangePacket extends PacketAbstract implements RangePacket{
 				PacketImp.PACKET_TYPE_REQUEST,
 				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				linkAddr>0 ? PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY_RANGE : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
+				linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY_RANGE : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
 				null,
 				Priority.RANGE);
 	}

@@ -256,14 +256,13 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 				cbActionSelector.setSelectedItem(new IdValue(control, null));
 				selectedItem = (IdValue) cbActionSelector.getSelectedItem();
 
-				setController(((IdValue)cbActionSelector.getSelectedItem()).getID());
+				setController(selectedItem.getID());
 			}
 
 			public void ancestorMoved(AncestorEvent event) {}
 
 			public void ancestorRemoved(AncestorEvent event) {
-				if(controller!=null)
-					controller.stop();
+				Optional.ofNullable(controller).ifPresent(UnitController::stop);
 				controller = null;
 			}
 		});
@@ -279,7 +278,14 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		cbLoSelect.setFont(font);
 		cbLoSelect.setBounds(10, 141, 194, 26);
 		add(cbLoSelect);
-		
+		cbLoSelect.addItemListener(e->{
+			//Reset Frequency controller
+			if(controller instanceof UnitFrequencyController){
+				Optional.ofNullable(controller).ifPresent(UnitController::stop);
+				controller = null;
+				startNewController(UnitFrequencyController.class);
+			}
+		});
 
 		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));
@@ -299,7 +305,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		chckbxStep.setFont(font);
 		chckbxStep.setBounds(14, 65, 62, 23);
 		add(chckbxStep);
-		
+
 		txtStep = new JTextField();
  		txtStep.setBackground(color);
 		txtStep.setForeground(Color.WHITE);
@@ -310,6 +316,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		txtStep.setBounds(75, 65, 127, 20);
 		txtStep.setCaretColor(Color.YELLOW);
 		add(txtStep);
+		
 	}
 
 	protected Point getConfigButtonPosition() {
@@ -321,7 +328,6 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	}
 
 	private void setController(int control) {
-
 
 		ActionFlags a = ActionFlags.values()[control];
 		switch(a){
@@ -341,9 +347,9 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 
 	private synchronized void startNewController(Class<? extends UnitController> clazz) {
 		
-		if(this.controller==null || !clazz.equals(this.controller.getClass())) {
+		if(controller==null || !clazz.equals(controller.getClass())) {
 
-			Optional.ofNullable(this.controller).ifPresent(UnitController::stop);
+			Optional.ofNullable(controller).ifPresent(UnitController::stop);
 
 			try {
 				controller =  clazz.getConstructor(Byte.class, JTextField.class, JSlider.class, JTextField.class).newInstance(linkHeader.getAddr(), txtGain, slider, txtStep);
