@@ -29,7 +29,7 @@ public class Range {
 				maximum = pl.getLong(1);
 				break;
 			default:
-				throw new IllegalStateException();
+				throw new IllegalStateException(pl.toString());
 			}
 		});
 	}

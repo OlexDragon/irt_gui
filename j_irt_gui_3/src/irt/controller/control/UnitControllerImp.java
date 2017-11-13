@@ -138,7 +138,6 @@ public class UnitControllerImp implements UnitController{
 				if(!txtStep.getText().equals(txt)) {
 
 					txtStep.setText(txt);
-					logger.error("PUT: {}={}", KEY, txt);
 					GuiControllerAbstract.getPrefs().put(KEY, txt);
 				}
 			});
@@ -218,13 +217,14 @@ public class UnitControllerImp implements UnitController{
 
 	@Override
 	public void run() {
-		
+
 		PacketWork p;
 		if(rangesAreSet)
 			p = packet;
 		else
 			p = range;
 
+		logger.trace(p);
 		GuiControllerAbstract.getComPortThreadQueue().add(p);
 	}
 

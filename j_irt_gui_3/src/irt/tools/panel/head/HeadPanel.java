@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.swing.JFrame;
@@ -61,7 +62,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			}
 		});
 
-		timer = new Timer(10000, e->{
+		timer = new Timer((int) TimeUnit.SECONDS.toMillis(10), e->{
 			ledPowerOn.setOn(false);
 			ledMute.setOn(false);
 			ledAlarm.setOn(false);
@@ -275,6 +276,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 		oPacket.ifPresent(pl->{
 			if(!ledPowerOn.isOn())
 				ledPowerOn.setOn(true);// Has answer so unit is on
+			timer.restart();
 		});
 
 		if(!oPacket.isPresent()){
