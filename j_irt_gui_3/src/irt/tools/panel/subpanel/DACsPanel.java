@@ -111,6 +111,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			if(text.isEmpty())
 				return;
 
+			slider.setMaximum(registerTextField.MAX);
 			slider.setValue(Integer.parseInt(text.replaceAll("\\D", "")));
 		}
 		private void setColors(RegisterTextField registerTextField) {
@@ -224,7 +225,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		slider = new JSlider();
 		slider.setMinimum(0);
-		slider.setMaximum(4095);
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setOpaque(false);
 		slider.setBounds(251, 8, 22, 260);
@@ -292,8 +292,11 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		else
 			rAddr++;
 
-		registerValue = new RegisterValue(index, rAddr, null);
-		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3, 0, 4095);
+		final Optional<DeviceType> kaBand = deviceType.filter(dt->dt==DeviceType.CONVERTER_L_TO_KA);
+		registerValue = kaBand.map(dt->new RegisterValue(30, 0, null)).orElse(new RegisterValue(index, rAddr, null));
+		final Integer maxValue = kaBand.map(dt->1023).orElse(4095);
+
+		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3, 0, maxValue);
 		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC3.setColumns(10);
 		txtDAC3.setBounds(186, 72, 55, 20);
@@ -306,9 +309,9 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		else
 			rAddr++;
 
-		registerValue = new RegisterValue(index, rAddr, null);
+		registerValue = kaBand.map(dt->new RegisterValue(30, 8, null)).orElse(new RegisterValue(index, rAddr, null));//TODO
 
-		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4, 0, 4095);
+		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4, 0, maxValue);
 		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC4.setColumns(10);
 		txtDAC4.setBounds(187, 100, 55, 20);

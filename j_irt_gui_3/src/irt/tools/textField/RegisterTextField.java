@@ -113,10 +113,17 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		getPacket = new RegisterPacket(linkAddr, registerValue, packetId);
 
 		valueToSend = new RegisterValue(registerValue);
-		valueToSend.setValue( new Value(896, MIN, MAX, 0)); // if value not null packet type is COMMAND
+		valueToSend.setValue( new Value(MAX, MIN, MAX, 0)); // if value not null packet type is COMMAND
 		setPacket = new RegisterPacket(linkAddr, valueToSend, packetId);
 
-		valueSaveRegister = new RegisterValue(index, addr+3, new Value(0, 0, 0, 0));
+		int a;
+		if(index==30){ //ka band
+			a = addr==0 ? 16 : 17;
+		}else
+			a = addr+3;
+
+		final Value value = new Value(0, 0, 0, 0);
+		valueSaveRegister = new RegisterValue(index, a, value);
 
 		addActionListener(new ActionListener() {
 			
@@ -131,23 +138,30 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			@Override
 			public void keyTyped(KeyEvent e) {
 				char keyChar = e.getKeyChar();
+				 logger.error("*** {} ***", keyChar);
 
 				 if(!e.isShiftDown() && keyChar==KeyEvent.VK_ESCAPE){
 					 start();
+					 return;
+				 }
 
-				 }else if(e.isShiftDown() && keyChar==KeyEvent.VK_ESCAPE){
+				 if(e.isShiftDown() && keyChar==KeyEvent.VK_ESCAPE){
 					 stop();
 
 //				 }else  if(e.isControlDown() && c==KeyEvent.VK_SHIFT){// VK_SHIFT equals CTRL 'P'
-//					 logger.error("***");
+					 logger.error("*** {} ***", keyChar);
 //						setToolTipText("Data copied to the clipboard.");
 
-				 }else if(!(Character.isDigit(keyChar) || keyChar==KeyEvent.VK_BACK_SPACE || keyChar==KeyEvent.VK_DELETE) || keyChar==KeyEvent.VK_ENTER || keyChar==0){
+					 return;
+				 }
+
+				 if(!(Character.isDigit(keyChar) || keyChar==KeyEvent.VK_BACK_SPACE || keyChar==KeyEvent.VK_DELETE) || keyChar==KeyEvent.VK_ENTER || keyChar==0){
 					getToolkit().beep();
 					e.consume();
-				}else{
-					focusListener.focusGained(null);
+					return;
 				}
+
+				 focusListener.focusGained(null);
 			}
 			@Override public void keyReleased(KeyEvent e) { }
 			@Override public void keyPressed(KeyEvent e) { }
@@ -250,6 +264,19 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	public void saveRegister(){
 
 		start();
+
+		//KA band
+		if(valueSaveRegister.getIndex()==30){
+			Optional
+			.ofNullable(getText())
+			.filter(String::isEmpty)
+			.map(Integer::parseInt)
+			.ifPresent(v->{
+				final Value value = new Value(v, v, v, 0);
+				valueSaveRegister.setValue(value);
+			});
+		}
+
 		((RegisterPacket)setPacket).setValue(valueSaveRegister);
 		GuiControllerAbstract.getComPortThreadQueue().add(setPacket);
 	}

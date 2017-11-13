@@ -18,7 +18,7 @@ public class FrequencyPacket extends PacketAbstract implements ValueToString{
 						: PacketImp.PACKET_TYPE_REQUEST,
 				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				linkAddr>0 ? PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY,
+				linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY,
 				value!=null ? PacketImp.toBytes(value) : null,
 				value!=null ? Priority.COMMAND : Priority.REQUEST);
 	}

@@ -103,9 +103,9 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		btnMute = new MuteButton();
 		btnMute.setLinkAddr(Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte) 0));
 //		btnMute.setName("Button Mute");
-		Point p = getMuteButtonPosition();
-		if(p==null)
-			p = new Point(14, 101);
+
+		Point p = Optional.ofNullable(getMuteButtonPosition()).orElse( new Point(14, 101));
+
 		int size = Translation.getValue(Integer.class, "control.buttons.size", 33);
 		btnMute
 		.setBounds(
