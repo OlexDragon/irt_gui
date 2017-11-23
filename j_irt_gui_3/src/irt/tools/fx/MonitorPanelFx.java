@@ -43,6 +43,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.layout.VBox;
 
 public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListener, JavaFxPanel{
 
@@ -70,8 +71,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 													packetToSend.setAddr(unitAddress);
 												}
 
-	@FXML private GridPane 	statusPane;
-	@FXML private GridPane 	gridPane;
+	private GridPane 	statusPane;
+	private GridPane 	gridPane;
 
 	public MonitorPanelFx() {
 
@@ -87,6 +88,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	@FXML protected void initialize() {
+		VBox box = (VBox) getChildren().get(0);
+		statusPane = (GridPane) box.getChildren().get(0);
+		gridPane = (GridPane) box.getChildren().get(1);
 	}
 
     @FXML

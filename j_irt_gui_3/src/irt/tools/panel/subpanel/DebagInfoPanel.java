@@ -115,13 +115,6 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		panel.add(cbParameterCode, BorderLayout.CENTER);
 
 		cbParameter = new JComboBox<Integer>();
-		cbParameter.addItemListener(itemEvent->{
-
-			if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-				packetToSend.setValue(cbParameter.getSelectedItem());
-				restart();
-			}
-		});
 		cbParameter.setMaximumRowCount(9);
 		cbParameter.setPreferredSize(new Dimension(50, 20));
 		cbParameter.setEditable(true);
@@ -130,6 +123,14 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		cbParameter.addItem(10);
 		cbParameter.addItem(100);
 		panel.add(cbParameter, BorderLayout.EAST);
+
+		cbParameter.addItemListener(itemEvent->{
+
+			if(itemEvent.getStateChange()==ItemEvent.SELECTED){
+				packetToSend.setValue(cbParameter.getSelectedItem());
+				restart();
+			}
+		});
 	}
 
 	public void restart() {

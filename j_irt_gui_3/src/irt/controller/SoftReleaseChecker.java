@@ -31,7 +31,7 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 		new MyThreadFactory().newThread(this).start();
 
 		try {
-			return Optional.ofNullable(get(1, TimeUnit.SECONDS));
+			return Optional.ofNullable(get(30, TimeUnit.SECONDS));
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -43,18 +43,21 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 
 			String string = "\\\\192.168.2.250\\Share\\4alex\\boards\\SW release\\latest\\" + (deviceInfo.getDeviceType().map(dt->dt.TYPE_ID).filter(i->i< 1000).map(i->"picobuc.bin").orElse("fcm.bin"));
 			File file = new File(string);
+			file.isDirectory();
 
 			if (file.exists()) {
 
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MMM dd yyyy, HH:mm:ss");
 				Calendar calendar = simpleDateFormat.getCalendar();
 				try {
+
 					calendar.setTime(simpleDateFormat.parse(deviceInfo.getFirmwareBuildDate().orElse("00 00 0000")));
+
+					return file.lastModified() > calendar.getTimeInMillis() + 10000;
+
 				} catch (Exception e) {
 					logger.catching(e);
 				}
-
-				return file.lastModified() > calendar.getTimeInMillis() + 10000;
 //					deviceInfo.setError("Firmware Update is Available.", Color.RED);
 			}
 			return false;

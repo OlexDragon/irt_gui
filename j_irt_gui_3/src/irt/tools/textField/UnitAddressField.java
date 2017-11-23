@@ -110,7 +110,7 @@ public class UnitAddressField extends JTextField {
 	}
 
 	private byte[] stringToByteArray(final String text) {
-		logger.error(text);
+		logger.info(text);
 		final int[] intArray = Optional
 									.ofNullable(text)
 									.map(t -> t.replaceAll("\\D+", " "))
@@ -131,7 +131,7 @@ public class UnitAddressField extends JTextField {
 
 		logger.error("{}", sa);
 		return sa;
-	}		
+	}
 
 	private static void addPopup(Component component, final JPopupMenu popup) {
 		component.addMouseListener(new MouseAdapter() {

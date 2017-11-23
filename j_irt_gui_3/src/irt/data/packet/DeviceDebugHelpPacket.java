@@ -51,7 +51,7 @@ public class DeviceDebugHelpPacket extends PacketAbstract {
 			switch(option) {
 
 			case 0:
-				text = packet.getPayloads().parallelStream().findAny().map(Payload::getStringData).map(StringData::toString).get();
+				text = packet.getPayloads().parallelStream().findAny().map(Payload::getStringData).filter(t->t!=null).map(StringData::toString).get();
 				break;
 
 			default:	//Error message
