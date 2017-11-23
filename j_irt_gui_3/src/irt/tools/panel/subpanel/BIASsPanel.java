@@ -180,7 +180,8 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				boolean isNewBiasBoard = GuiController.getDeviceInfo(linkHeader).map(di->di.getDeviceType().filter(dt->dt.TYPE_ID<1000).map(dt->true).orElse(false) && di.getRevision()>=2).orElse(true);
 
 
-				int index = isMainBoard ? 1 :201;
+				final Optional<DeviceType> hpBias = deviceType.filter(dt->dt.TYPE_ID>=DeviceType.HPB_L_TO_KU.TYPE_ID && dt.TYPE_ID>=DeviceType.KA_SSPA.TYPE_ID);
+				int index = hpBias.map(dt->20).orElse(isMainBoard ? 1 :201);
 
 				double multiplier;
 				if(isNewBiasBoard){
@@ -191,7 +192,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					lblPotentiometer5.setText("Driver:");
 					lblPotentiometer6.setText("Pred.Dr");
 
-					index = isMainBoard ? 7 : 207;
+//					index = isMainBoard ? 7 : 207;
 					multiplier = 10.8;
 				}else 
 					multiplier = 5.4;
@@ -200,7 +201,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				
 				adcWorkers.add(new AdcWorker(lblCurrent1, 	addr, new RegisterValue(index, 1, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS1_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
 				adcWorkers.add(new AdcWorker(lblCurrent2, 	addr, new RegisterValue(index, 2, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS2_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
-				adcWorkers.add(new AdcWorker(lblOPower, 	addr, new RegisterValue(index, 3, null), PacketWork.PACKET_ID_DEVICE_DEBUG_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));
+				adcWorkers.add(new AdcWorker(lblOPower, 	addr, new RegisterValue(index, hpBias.map(dt->0).orElse(3), null), PacketWork.PACKET_ID_DEVICE_DEBUG_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));
 				adcWorkers.add(new AdcWorker(lblTemp, 		addr, new RegisterValue(index, 4, null), PacketWork.PACKET_ID_DEVICE_DEBUG_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));
 			}
 			public void ancestorMoved(AncestorEvent arg0) {}

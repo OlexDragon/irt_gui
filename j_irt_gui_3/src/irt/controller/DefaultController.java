@@ -12,7 +12,6 @@ public class DefaultController extends ControllerAbstract {
 
 	public DefaultController(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, Style style) {
 		super(deviceType, controllerName, packetWork, null, style);
-		logger.trace("DefaultController({}, {})", packetWork, style);
 	}
 
 	@Override

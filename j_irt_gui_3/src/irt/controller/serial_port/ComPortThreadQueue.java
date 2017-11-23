@@ -80,26 +80,24 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketWork packetWork){
-		logger.entry(packetWork);
+//		if(packetWork instanceof AlarmDescriptionPacket)
+//			logger.error(packetWork);//catching(new Throwable());
 
 		try {
 
-			if(packetWork!=null)
-				if (comPortQueue.size() < 300)
+			if(packetWork!=null){
+				if (comPortQueue.size() < 300){
 					if (!comPortQueue.contains(packetWork)) {
 
 						packetWork.getPacketThread().start();
 
 						comPortQueue.add(packetWork);
 						logger.trace("<<< is added - {}", packetWork);
-					} else{
-						comPortQueue.remove(packetWork);
-						comPortQueue.add(packetWork);
-						logger.warn("Already contains. It was Replaced whith" + packetWork);
-					}
-				else
+					} else
+						logger.warn("Tis packet already in the queue. {}", packetWork);
+				}else
 					logger.warn("comPortQueue is FULL");
-			else
+			}else
 				logger.warn("packetWork!=null");
 		} catch (Exception e) {
 			logger.catching(e);

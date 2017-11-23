@@ -7,25 +7,16 @@ import java.util.Optional;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingWorker;
 
 import irt.controller.DefaultController;
-import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.interfaces.Refresh;
-import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketImp;
-import irt.data.packet.RedundancyNamePacket.RedundancyName;
-import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.JavaFxWrapper;
 import irt.tools.label.ImageLabel;
-import irt.tools.label.VarticalLabel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
@@ -92,64 +83,61 @@ public class UserPicobucPanel extends DevicePanel {
 		.ifPresent(
 				tId->{
 					showRedundant();
-					setRedundancyName();
+//					setRedundancyName();
 				});
 	}
 
-	private void setRedundancyName() {
-		target = new DefaultController(
-				deviceType,
-				"Redundancy Enable",
-				new Getter(getLinkHeader(),
-						PacketImp.GROUP_ID_CONFIGURATION,
-						PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME,
-						PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME), Style.CHECK_ALWAYS){
-
-			private int count = 3;
-			private String text;
-			private RedundancyName name = null;
-
-			@Override
-			public void onPacketRecived(final Packet packet) {
-				new SwingWorker<String, Void>() {
-
-					@Override
-					protected String doInBackground() throws Exception {
-						if(
-								getPacketWork().isAddressEquals(packet) &&
-								packet.getHeader().getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
-								packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME)
-							if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
-								RedundancyName n = RedundancyName.values()[packet.getPayload(0).getByte()];
-								if(n!=null && !n.equals(name) && n!=RedundancyName.NO_NAME){
-
-									VarticalLabel varticalLabel = getVarticalLabel();
-									text = varticalLabel.getText();
-
-									if(		text.startsWith(RedundancyName.BUC_A.toString()) ||
-											text.startsWith(RedundancyName.BUC_B.toString()))
-										text = text.substring(8);
-
-									name = n;
-									varticalLabel.setText(n+" : "+text);
-								}
-								setSend(false);
-								count = 3;
-							}else{
-								if(--count<=0)
-									stop();
-							}
-						return name.toString();
-					}
-				}.execute();
-			}			
-		};
-		startThread(target);
-	}
-
-	private void startThread(Runnable target) {
-		new MyThreadFactory().newThread(target).start();
-	}
+//	private void setRedundancyName() {
+//		target = new DefaultController(
+//				deviceType,
+//				"Redundancy Enable",
+//				new RedundancyNamePacket(getLinkHeader().getAddr(), null), Style.CHECK_ALWAYS){
+//
+//			private int count = 3;
+//			private String text;
+//			private RedundancyName name = null;
+//
+//			@Override
+//			public void onPacketRecived(final Packet packet) {
+//				new SwingWorker<String, Void>() {
+//
+//					@Override
+//					protected String doInBackground() throws Exception {
+//						if(
+//								getPacketWork().isAddressEquals(packet) &&
+//								packet.getHeader().getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
+//								packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_REDUNDANCY_NAME)
+//							if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+//								RedundancyName n = RedundancyName.values()[packet.getPayload(0).getByte()];
+//								if(n!=null && !n.equals(name) && n!=RedundancyName.NO_NAME){
+//
+//									VarticalLabel varticalLabel = getVarticalLabel();
+//									text = varticalLabel.getText();
+//
+//									if(		text.startsWith(RedundancyName.BUC_A.toString()) ||
+//											text.startsWith(RedundancyName.BUC_B.toString()))
+//										text = text.substring(8);
+//
+//									name = n;
+//									varticalLabel.setText(n+" : "+text);
+//								}
+//								setSend(false);
+//								count = 3;
+//							}else{
+//								if(--count<=0)
+//									stop();
+//							}
+//						return name.toString();
+//					}
+//				}.execute();
+//			}			
+//		};
+//		startThread(target);
+//	}
+//
+//	private void startThread(Runnable target) {
+//		new MyThreadFactory().newThread(target).start();
+//	}
 
 	@Override
 	protected JPanel getNewControlPanel() {

@@ -70,9 +70,10 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 													this.unitAddress = unitAddress;
 													packetSummary.setAddr(unitAddress);
 													packetToSend.setAddr(unitAddress);
+													clear();
 												}
 
-	@FXML private GridPane 	gridPane;
+	private GridPane 	gridPane;
 
 	public AlarmPanelFx() {
 
@@ -91,20 +92,29 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	@FXML protected void initialize() {
+		gridPane = (GridPane) getChildren().get(0);
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		gridPane.getStyleClass().add("alarms");
 
-		scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
 	}
 
-    @FXML
-    void onMouseClicked(MouseEvent event) {
-    	if(event.getClickCount()==3){
-    		gridPane.getChildren().clear();
-    		gridPane.getRowConstraints().clear();
-    		availableAlarms = null;
-    	}
-    }
+    @FXML  void onMouseClicked(MouseEvent event) { if(event.getClickCount()==3) clear(); }
+
+	private void clear() {
+		Optional
+		.ofNullable(gridPane)
+		.ifPresent(p->{
+
+			Platform.runLater(()->{
+				
+				gridPane.getChildren().clear();
+				gridPane.getRowConstraints().clear();
+				availableAlarms = null;
+				index = 0;
+			});
+		});
+	}
 
  	private short[] availableAlarms;
 	private long index ;
@@ -156,13 +166,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 	@Override
 	public void onPacketRecived(final Packet packet) {
-//
-//		new MyThreadFactory().newThread(()->{
-//			try {
-//				scheduledFuture.get(20, TimeUnit.SECONDS);
-//			} catch (Exception e) {
-//			logger.catching(e);
-//		}}).start();
 
 		final Optional<PacketHeader> alarmGroupId = filterByAddressAndGroup(packet);
 

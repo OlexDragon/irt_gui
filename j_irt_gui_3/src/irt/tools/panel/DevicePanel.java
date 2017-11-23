@@ -67,7 +67,15 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 	protected DeviceInfo deviceInfo;
 
 	public DevicePanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
-		super(deviceInfo.getLinkHeader().getAddr(), deviceInfo!=null ? "("+deviceInfo.getSerialNumber().orElse("N/A")+") "+deviceInfo.getUnitName().orElse("N/A") : null, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+		super(
+				deviceInfo!=null ? deviceInfo.getLinkHeader().getAddr() : (byte) 0,
+				deviceInfo!=null ? deviceInfo.getSerialNumber().orElse("N/A") + " : " + deviceInfo.getUnitName().orElse("N/A") : "N/A",
+				minWidth,
+				midWidth,
+				maxWidth,
+				minHeight,
+				maxHeight);
+
 		setBorder(null);
 		setName("DevicePanel");
 		this.deviceInfo = deviceInfo;

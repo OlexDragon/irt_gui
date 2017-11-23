@@ -67,7 +67,7 @@
 <!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
 <!--  	<Logger name="irt.controller.GuiController" level="all"/> -->
 
-<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="debug"/> -->
+<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="warn"/> -->
 
 <!--  	<Logger name="irt.controller.control.UnitControllerImp" level="all"/> -->
 

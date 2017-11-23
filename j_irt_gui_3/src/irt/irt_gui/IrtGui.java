@@ -30,7 +30,6 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -71,7 +70,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpController.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.143";
+	public static final String VERTION = "- 3.146";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -170,17 +169,17 @@ public class IrtGui extends IrtMainFrame {
 
 		JMenuItem monitortMenuItem = new JMenuItem(Translation.getValue(String.class, "monitor", "Monitor"));
 		monitortMenuItem.addActionListener(new ActionListener() {
-			private MonitorPanelFx monitorPanel;
+			private JavaFxFrame javaFxFrame;
 
 			public void actionPerformed(ActionEvent e) {
 
-				if(monitorPanel!=null){
-					monitorPanel.setVisible(true);
+				if(javaFxFrame!=null){
+					javaFxFrame.setVisible(true);
 					return;
 				}
 
-				monitorPanel = new MonitorPanelFx();
-				final JavaFxFrame javaFxFrame = new JavaFxFrame(()->monitorPanel);
+				MonitorPanelFx monitorPanel = new MonitorPanelFx();
+				final JavaFxFrame javaFxFrame = new JavaFxFrame(monitorPanel);
 				javaFxFrame.setSize(200, 200);
 
 				JMenu menu = javaFxFrame.getMenu();
@@ -197,7 +196,7 @@ public class IrtGui extends IrtMainFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				if(baudRateFrame==null){
-					baudRateFrame = new JavaFxFrame(()->new BaudRateSelectorFx());
+					baudRateFrame = new JavaFxFrame(new BaudRateSelectorFx());
 					baudRateFrame.setSize(200, 200);
 				}else
 					baudRateFrame.setVisible(true);
@@ -212,11 +211,10 @@ public class IrtGui extends IrtMainFrame {
 
 			public void actionPerformed(ActionEvent e) {
 
-				alarmPanelFx = new AlarmPanelFx();
 				if(alarmsFrame==null){
-					alarmsFrame = new JavaFxFrame(()->alarmPanelFx);
+					alarmPanelFx = new AlarmPanelFx();
+					alarmsFrame = new JavaFxFrame(alarmPanelFx);
 					alarmsFrame.setSize(200, 200);
-					alarmPanelFx.start();//TODO remove this code
 					fillMenu(alarmPanelFx, alarmsFrame.getMenu());
 				}else
 					alarmsFrame.setVisible(true);
@@ -460,19 +458,29 @@ public class IrtGui extends IrtMainFrame {
 		});
 	}
 
-	private void fillMenu(JavaFxPanel monitorPanel, JMenu menu) {
+	private void fillMenu(JavaFxPanel panel, final JMenu menu) {
 		Optional.ofNullable(GuiController.getAddresses()).ifPresent(addrs->{
 			IntStream
 			.range(0, addrs.length)
 			.map(i->(addrs[i] & 0xFF))
 			.forEach(addr->{
-				final JCheckBoxMenuItem mItem = new JCheckBoxMenuItem("#" + Integer.toString(addr));
+				final JMenuItem mItem = new JMenuItem("#" + Integer.toString(addr));
 				mItem.setName(Integer.toString(addr));
-				mItem.addActionListener(ae->{
-					monitorPanel.setUnitAddress((byte) Integer.parseInt(((JCheckBoxMenuItem)ae.getSource()).getName()));
+				mItem.addActionListener(al->{
+					final JMenuItem menuItem = (JMenuItem)al.getSource();
+
+					final String name = menuItem.getName();
+					panel.setUnitAddress((byte) Integer.parseInt(name));
+					menu.setText(name);
 				});
 				menu.add(mItem);
 			});
+			//select first menu item
+			if(menu.getItemCount()>0){
+				final String name = menu.getItem(0).getName();
+				panel.setUnitAddress((byte) Integer.parseInt(name));
+				menu.setText(name);
+			}
 		});
 	}
 }
