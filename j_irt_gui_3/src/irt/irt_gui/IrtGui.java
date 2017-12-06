@@ -70,7 +70,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpController.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.146";
+	public static final String VERTION = "- 3.147";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;

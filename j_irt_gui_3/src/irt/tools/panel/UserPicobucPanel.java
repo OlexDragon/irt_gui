@@ -51,14 +51,14 @@ public class UserPicobucPanel extends DevicePanel {
 				tabbedPane.addTab("Logo", lblNewLabel);
 			}
 
-			final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
+			final LinkHeader linkHeader = deviceInfo.getLinkHeader();
 
 			JavaFxWrapper alarmPanel = new JavaFxWrapper(new AlarmPanelFx());
 			alarmPanel.setUnitAddress(linkHeader.getAddr());
 			alarmPanel.setBorder(null);
 			tabbedPane.addTab("alarms", alarmPanel);
 
-			NetworkPanel networkPanel = new NetworkPanel(linkHeader);
+			NetworkPanel networkPanel = new NetworkPanel(deviceInfo);
 			tabbedPane.addTab("network", networkPanel);
 
 			int tabCount = tabbedPane.getTabCount();

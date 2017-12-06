@@ -36,3 +36,6 @@
 	-fx-text-fill: DARKBLUE;
 	-fx-background-color: BISQUE;
 }
+.button{
+	-fx-cursor: hand;
+}
