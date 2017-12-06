@@ -11,5 +11,4 @@ public class SaveConfigPacket extends PacketAbstract {
 	public SaveConfigPacket() {
 		this((byte) 0);
 	}
-
 }

@@ -328,11 +328,17 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		final Optional<? extends ParameterHeaderCode> code = packetToSend.getLinkHeader().getAddr()==CONVERTER ? ParameterHeaderCodeFCM.valueOf(parameterHeader.getCode()) : ParameterHeaderCodeBUC.valueOf(parameterHeader.getCode());
 
 		String text;
-		if(code.isPresent()) 
-			text = Translation.getValue(String.class, code.get().name(), "TODO: tarnslate = " + code.get().name());
+		if(code.isPresent()) {
 
-		else
-			text = "TODO: code = " + code;
+			ParameterHeaderCode c = code.get();
+
+			if(c==ParameterHeaderCodeBUC.LNB1_STATUS && parameterHeader.getSize()>0)
+				c = ParameterHeaderCodeBUC.REFLECTED_POWER;
+
+			text = Translation.getValue(String.class, c.name(), "* " + code.get().name());
+
+		} else
+			text = "* " + code;
 
 		final Label label = new Label(text + ":");
 		label.getStyleClass().add("description");
@@ -428,7 +434,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
 		STATUS			( b->Arrays.toString(b)),
 		LNB1_STATUS		( b->lnbReady(b)),
-		LNB2_STATUS		( b->lnbReady(b));
+		LNB2_STATUS		( b->lnbReady(b)),
+		REFLECTED_POWER ( b->bytesToString(b, "dbm"));
 
 		private final Function<byte[], String> function;
 		private final byte code;

@@ -28,6 +28,10 @@ public class Range {
 				minimum = pl.getLong(0);
 				maximum = pl.getLong(1);
 				break;
+			case 32:
+				minimum = pl.getLong(0);
+				maximum = pl.getLong(2);
+				break;
 			default:
 				throw new IllegalStateException(pl.toString());
 			}

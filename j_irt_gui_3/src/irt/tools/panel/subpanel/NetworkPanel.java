@@ -42,6 +42,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
+import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.network.NetworkAddress;
@@ -51,6 +52,7 @@ import irt.data.packet.NetworkAddressPacket;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.tools.fx.UpdateButtonJFXPanel;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.head.IrtPanel;
@@ -145,8 +147,10 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	private byte unitAddress;
 
+	private UpdateButtonJFXPanel updateButton;
+
 	// ******************************* constructor NetworkPanel   ***************************************************
-	public NetworkPanel(final LinkHeader linkHeader) {
+	public NetworkPanel(final DeviceInfo deviceInfo) {
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -162,8 +166,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 							service.shutdownNow();
 						}));
 
-		//converter does not have network connection
-		if(linkHeader==null || linkHeader.getAddr()==0){
+		final byte addr = Optional.ofNullable(deviceInfo).map(DeviceInfo::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+		//converters do not have a network connection
+		if(addr==0){
 			packet = null;
 			lblSubnetMask = null;
 			lblIpAddress = null;
@@ -174,8 +179,8 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			return;
 		}
 
-		unitAddress = linkHeader.getAddr();
-		packet = new NetworkAddressPacket(linkHeader.getAddr(), null);
+		unitAddress = addr;
+		packet = new NetworkAddressPacket(addr, null);
 
 		addAncestorListener(new AncestorListener() {
 
@@ -243,21 +248,28 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			}
 		});
 		btnDefault.setMargin(new Insets(0, 3, 0, 3));
+		
+		updateButton = new UpdateButtonJFXPanel(deviceInfo, networkAddress);
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGap(5)
-					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
-						.addComponent(lblAddressType, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblIpAddress, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblSubnetMask, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-						.addComponent(lblDefaultMask)
-						.addComponent(btnDefault))
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
+						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+							.addContainerGap()
+							.addComponent(updateButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+							.addGap(5)
+							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+								.addComponent(lblAddressType, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblIpAddress, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblSubnetMask, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+								.addComponent(lblDefaultMask)
+								.addComponent(btnDefault))))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(212, Short.MAX_VALUE))
+					.addGap(212))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -277,7 +289,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(1)
 							.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE)))
-					.addContainerGap(127, Short.MAX_VALUE))
+					.addGap(16)
+					.addComponent(updateButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(86, Short.MAX_VALUE))
 		);
 		groupLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {lblAddressType, lblIpAddress, lblSubnetMask, lblDefaultMask});
 		panel_1.setLayout(null);
