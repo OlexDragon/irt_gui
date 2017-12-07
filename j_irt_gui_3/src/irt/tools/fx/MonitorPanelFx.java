@@ -139,7 +139,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 					final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
 					final byte 							code 				= parameterHeader.getCode();
 
-					final Optional<? extends ParameterHeaderCode> parameterHeaderCode = isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code);
+					Optional<? extends ParameterHeaderCode> parameterHeaderCode = isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code);
 
 					final ParameterHeaderCode status = isConverter ? ParameterHeaderCodeFCM.STATUS : ParameterHeaderCodeBUC.STATUS;
 
@@ -182,7 +182,15 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 							final Label descriptionLabel = createDescriptionLabel(pl);
 							gridPane.add(descriptionLabel, 0, size);
 
-							final Label child = new Label(payloadToString(parameterHeaderCode, pl));
+							String payloadToString;
+							try{
+								payloadToString = payloadToString(parameterHeaderCode, pl);
+							}catch(Exception e){
+								payloadToString = "error";
+								logger.catching(e);
+							}
+
+							final Label child = new Label(payloadToString);
 							child.getStyleClass().add("value");
 							child.setUserData(code);
 							child.setTooltip(new Tooltip(descriptionLabel.getText()));
@@ -320,7 +328,17 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	private String payloadToString(final Optional<? extends ParameterHeaderCode> parameterHeaderCode, Payload pl) {
-		return parameterHeaderCode.isPresent() ? parameterHeaderCode.get().toString(pl.getBuffer()) : Arrays.toString(pl.getBuffer());
+		
+		if(!parameterHeaderCode.isPresent())
+			return Arrays.toString(pl.getBuffer());
+
+		ParameterHeaderCode c = parameterHeaderCode.get();
+
+		final ParameterHeader parameterHeader = pl.getParameterHeader();
+
+		c = checkLnbOrReflectedPower(parameterHeader, c);
+
+		return  c.toString(pl.getBuffer()) ; 
 	}
 
 	private Label createDescriptionLabel(Payload pl) {
@@ -332,8 +350,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 			ParameterHeaderCode c = code.get();
 
-			if(c==ParameterHeaderCodeBUC.LNB1_STATUS && parameterHeader.getSize()>0)
-				c = ParameterHeaderCodeBUC.REFLECTED_POWER;
+			c = checkLnbOrReflectedPower(parameterHeader, c);
 
 			text = Translation.getValue(String.class, c.name(), "* " + code.get().name());
 
@@ -347,6 +364,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		GridPane.setHalignment(label, HPos.RIGHT);
 
 		return label;
+	}
+
+	private ParameterHeaderCode checkLnbOrReflectedPower(final ParameterHeader parameterHeader, ParameterHeaderCode c) {
+		if(c==ParameterHeaderCodeBUC.LNB1_STATUS && parameterHeader.getSize()>0)
+			c = ParameterHeaderCodeBUC.REFLECTED_POWER;
+		return c;
 	}
 
 	public void start(){
@@ -411,19 +434,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 
 		private static String bytesToString(byte[] bytes, String prefix){
-
-			if(bytes==null || bytes.length<2)
-				return "N/A";
-
-			final StringBuilder sb = new StringBuilder();
-			if(bytes.length>2)
-				sb.append(ValueState.toString(bytes[0]));
-
-			final double value = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 1, 3)).getShort()/10.0;
-
-			sb.append(nFormate1.format(value)).append(" ").append(Translation.getValue(String.class, prefix, prefix));
-
-			return sb.toString();
+			return MonitorPanelFx.bytesToString(bytes, prefix);
 		}
 	}
 
@@ -458,19 +469,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 
 		private static String bytesToString(byte[] bytes, String prefix){
-
-			if(bytes==null || bytes.length<2)
-				return "N/A";
-
-			final StringBuilder sb = new StringBuilder();
-			if(bytes.length>2)
-				sb.append(ValueState.toString(bytes[0]));
-
-			final double value = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 1, 3)).getShort()/10.0;
-
-			sb.append(nFormate1.format(value)).append(" ").append(Translation.getValue(String.class, prefix, prefix));
-
-			return sb.toString();
+			return MonitorPanelFx.bytesToString(bytes, prefix);
 		}
 
 		private static String lnbReady(byte[] bytes) {
@@ -492,7 +491,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public enum ValueState{
-		UNDEFINED(""),
+		UNDEFINED("UNDEFINED"),
 		IN_RANGE(""),
 		LESS_THAN("<"),
 		MORE_THAN(">");
@@ -567,5 +566,33 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	public void shutdownNow() {
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		service.shutdownNow();
+	}
+
+	private static String bytesToString(byte[] bytes, String prefix) {
+		if(bytes==null || bytes.length<2)
+			return "N/A";
+
+		final StringBuilder sb = new StringBuilder();
+		double value;
+
+		if(bytes.length>2) {
+			byte index = (byte) (bytes[0]&3);// 2 bits used
+
+			final String status = ValueState.toString(index);
+			sb.append(status);
+
+			final ValueState[] values = ValueState.values();
+			if(values[index]==ValueState.UNDEFINED)
+				return sb.toString();			
+
+			value = ByteBuffer.wrap(Arrays.copyOfRange(bytes, 1, 3)).getShort()/10.0;
+
+		}else
+			// Two bytes - Old stile
+			value = ByteBuffer.wrap(bytes).getShort()/10.0;
+
+		sb.append(nFormate1.format(value)).append(" ").append(Translation.getValue(String.class, prefix, prefix));
+
+		return sb.toString();
 	}
 }
