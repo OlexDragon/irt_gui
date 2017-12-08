@@ -1,8 +1,11 @@
 package irt.gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +19,8 @@ import com.sun.javafx.application.LauncherImpl;
 import irt.gui.controllers.calibration.PanelTools;
 import irt.gui.controllers.components.SerialPortController;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.application.Preloader;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -28,21 +33,51 @@ public class IrtGuiApp extends Application {
 
 	public static final String BUNDLE = "bundles/bundle";
 	private final Logger logger = LogManager.getLogger();
+	private Scene scene;
+	private Properties properties;
+	private Image logo;
+
+	@Override
+	public void init() throws Exception {
+
+		final ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
+		notifyPreloader(new Preloader.ProgressNotification(0.2));
+		logo = new Image(getClass().getResourceAsStream("/images/logo.gif"));
+		notifyPreloader(new Preloader.ProgressNotification(0.4));
+		properties = new Properties();
+		properties.load(getClass().getResourceAsStream("/project.properties"));
+		notifyPreloader(new Preloader.ProgressNotification(0.6));
+
+		FutureTask<Boolean> ft = new FutureTask<>(()->{
+			try {
+
+				URL resource = getClass().getResource("/fxml/IrtGui.fxml");
+
+				notifyPreloader(new Preloader.ProgressNotification(0.8));
+
+				Parent parent = FXMLLoader.load(resource, bundle);
+				scene = new Scene(parent);
+				notifyPreloader(new Preloader.ProgressNotification(1));
+
+			} catch (IOException e) {
+				logger.catching(e);
+			}
+			return true;
+		});
+
+		Platform.runLater(ft);
+		try{
+			ft.get(10, TimeUnit.SECONDS);
+		}catch (Exception e) {
+			logger.catching(e);
+		}
+	}
 
 	@Override public void start(Stage primaryStage) {
-        try {
-
-         	URL resource = getClass().getResource("/fxml/IrtGui.fxml");
-
-			final ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
-			Parent parent = FXMLLoader.load(resource, bundle);
-			Scene scene = new Scene(parent);
+       try {
 			primaryStage.setScene(scene);
-			primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/logo.gif")));
-
-			Properties p = new Properties();
-			p.load(getClass().getResourceAsStream("/project.properties"));
-         	primaryStage.setTitle("IRT Gui v." + p.getProperty("version"));
+			primaryStage.getIcons().add(logo);
+         	primaryStage.setTitle("IRT Gui v." + properties.getProperty("version"));
         	primaryStage.show();
 
         }catch(Exception e){
@@ -87,6 +122,5 @@ public class IrtGuiApp extends Application {
 	public static void main(String[] args) {
 //		launch(args);
 		LauncherImpl.launchApplication(IrtGuiApp.class, IrtGuiPreloader.class, args);
-
 	}
 }

@@ -454,8 +454,18 @@ public class PanelRegisters implements Initializable, FieldController {
 	}
 
 	public void save() throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+
 		Stream<TextFieldRegister> controllers = getAllTextFieldControllers();
 		controllers.forEach(controller->save(controller));
+
+		final Stream<TextFieldConfiguration> tfControllers = (Stream<TextFieldConfiguration>) getAllControllersOf(TextFieldConfiguration.class);
+		tfControllers.forEach(controller->{
+			try {
+				controller.save();
+			} catch (PacketParsingException e) {
+				logger.catching(e);
+			}
+		});
 	}
 
 	private void save(TextFieldRegister controller) {

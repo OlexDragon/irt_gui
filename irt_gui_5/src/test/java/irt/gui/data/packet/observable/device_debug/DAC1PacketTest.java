@@ -12,6 +12,7 @@ import irt.gui.IrtGuiProperties;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.enums.ParameterHeaderCode;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.data.packet.observable.device_debug.DACPacket.DACs;
 import irt.gui.data.packet.observable.device_debug.DACPacket.UnitType;
 import irt.gui.errors.PacketParsingException;
@@ -22,7 +23,7 @@ public class DAC1PacketTest {
 	@Test
 	public void test1() throws PacketParsingException {
 		final DACPacket packet = new DACPacket(DACs.DAC1, null);
-		packet.setLinkHeaderAddr((byte) -1);//Converter
+		packet.setLinkHeaderAddr(PacketAbstract5.CONVERTER_ADDR);//Converter
 
 		logger.trace(packet);
 

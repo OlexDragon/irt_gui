@@ -31,7 +31,7 @@ public class ParameterHeaderTest {
 		new ParameterHeader(null);
 	}
 
-	@Test(expected=PacketParsingException.class)
+	@Test(expected=IllegalArgumentException.class)
 	public void tooShortTest() throws PacketParsingException {
 		 new ParameterHeader(PacketId.DEVICE_DEBAG_REGISTER, null);
 	}

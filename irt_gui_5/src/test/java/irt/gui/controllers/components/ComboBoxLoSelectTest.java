@@ -1,4 +1,3 @@
-
 package irt.gui.controllers.components;
 
 import java.net.URL;
@@ -22,7 +21,7 @@ import javafx.stage.Stage;
 public class ComboBoxLoSelectTest extends ApplicationTest {
 	private Logger logger = LogManager.getLogger();
 
-	private SerialPortController portController;
+//	private SerialPortController portController;
 	private ComboBoxLoSelect comboBoxLoSelect;
 
 	@Override
@@ -34,7 +33,7 @@ public class ComboBoxLoSelectTest extends ApplicationTest {
 		URL resource = getClass().getResource("/fxml/components/SerialPortSelector.fxml");
 		FXMLLoader fxmlLoader = new FXMLLoader(resource, bundle);
 		AnchorPane serioalPort = fxmlLoader.load();
-		portController = fxmlLoader.getController();
+//		portController = fxmlLoader.getController();
 
 		resource = getClass().getResource("/fxml/components/ComboBoxLoSelect.fxml");
 		fxmlLoader = new FXMLLoader(resource, bundle);

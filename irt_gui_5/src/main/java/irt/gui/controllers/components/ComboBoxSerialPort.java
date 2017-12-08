@@ -56,8 +56,10 @@ public class ComboBoxSerialPort extends Observable {
 			this.prefsName = prefsName;
 
 			String serialPortName = prefs.get(prefsName, null);
-			if(serialPortName!=null && !serialPortName.contains("Select")){
-				serialPortComboBox.getSelectionModel().select(serialPortName);
+			if(serialPortName!=null && !serialPortName.contains("Select") && serialPortComboBox.getItems().contains(serialPortName)){
+
+				final SingleSelectionModel<String> selectionModel = serialPortComboBox.getSelectionModel();
+				selectionModel.select(serialPortName);
 				onActionSelectSerialPort();
 			}
 		}catch(Exception ex){

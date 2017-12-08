@@ -3,8 +3,11 @@ package irt.gui.controllers.components;
 
 import java.net.URL;
 import java.time.Duration;
+import java.util.List;
 import java.util.Observer;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.UpdateController;
@@ -47,7 +50,7 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 		bundle = resources;
 //		this.location = location;
 
-		addLinkedPacket(mutePacket);
+		addPacketToSend(mutePacket);
 		doUpdate(true);
 
 		UpdateController.addController(this);
@@ -74,18 +77,21 @@ public class ButtonMute extends FieldsControllerAbstract implements Initializabl
 			if(packet.getPacketHeader().getPacketError()==PacketErrors.NO_ERROR){
 
 				MutePacket p = new MutePacket(packet.getAnswer(), true);
-				final byte index = p.getPayloads().get(0).getByte();
-				MuteStatus ms = MutePacket.MuteStatus.values()[index];
-				if(muteStatus!=ms){
-					muteStatus = ms;
-					final boolean muted = muteStatus==MuteStatus.MUTED;
-					final String string = bundle.getString(muted ? "unmute" : "mute");
-					Platform.runLater(()->{
-						button.setText(string);
-						button.getTooltip().setText(string);
-						addClass(muted);
-					});
-				}
+				Optional.ofNullable(p.getPayloads()).map(List::stream).orElse(Stream.empty()).findAny().ifPresent(pl->{
+					
+					final byte index = pl.getByte();
+					MuteStatus ms = MutePacket.MuteStatus.values()[index];
+					if(muteStatus!=ms){
+						muteStatus = ms;
+						final boolean muted = muteStatus==MuteStatus.MUTED;
+						final String string = bundle.getString(muted ? "unmute" : "mute");
+						Platform.runLater(()->{
+							button.setText(string);
+							button.getTooltip().setText(string);
+							addClass(muted);
+						});
+					}
+				});
 			}
 		}
 	}

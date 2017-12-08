@@ -15,7 +15,7 @@ import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 
-public abstract class FieldsControllerAbstract extends Observable implements Observer, FieldController  {
+public abstract class FieldsControllerAbstract extends Observable implements Observer, FieldController, Runnable  {
 
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -27,22 +27,13 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 	private 		String 			name; 			public String getName() { return name; } 		public void setName(String name) { this.name = name; }
 
 	protected 		Observer 		observer 		= this;
-	private final 	PacketSender 	packetSender 	= new PacketSender();
 	protected ScheduledFuture<?> 	scheduleAtFixedRate;
-
-	public void addLinkedPacket(LinkedPacket linkedPacket){
-		packetSender.addPacketToSend(linkedPacket);
-	}
-
-	public void removeLinkedPacket(LinkedPacket linkedPacket){
-		packetSender.removePacketToSend(linkedPacket);
-	}
 
 	/** update = true - start sending the packages to the device, false - stop*/
 	public void doUpdate(boolean update) {
 		if(update) {
 			if(scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())
-				scheduleAtFixedRate = LinkedPacketsQueue.SERVICES.scheduleAtFixedRate(packetSender, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);
+				scheduleAtFixedRate = LinkedPacketsQueue.SERVICES.scheduleAtFixedRate(this, 1, getPeriod().toMillis(), TimeUnit.MILLISECONDS);
 
 		}else if(scheduleAtFixedRate!=null)
 			scheduleAtFixedRate.cancel(false);
@@ -93,35 +84,33 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 	}
 
 	//*********************************************   InfoPacketSender   ****************************************************************
-	protected class PacketSender implements Runnable{
 
-		private final List<LinkedPacket> 	packetsToSend = new ArrayList<>(); 
+	private final List<LinkedPacket> 	packetsToSend = new ArrayList<>(); 
 
-		private boolean 			send;			public boolean isSend() { return send; }
-		public void setSend(boolean send) {
-			this.send = send;
-		}		
+	private boolean 			send;			public boolean isSend() { return send; }
+	public void setSend(boolean send) {
+		this.send = send;
+	}		
 
-		public void addPacketToSend(LinkedPacket linkedPacket){
+	public void addPacketToSend(LinkedPacket linkedPacket){
 
-			if(!packetsToSend.contains(linkedPacket)){
+		if(!packetsToSend.contains(linkedPacket)){
 
-				packetsToSend.add(linkedPacket);
-				linkedPacket.addObserver(observer);
-			}
+			packetsToSend.add(linkedPacket);
+			linkedPacket.addObserver(observer);
 		}
-		public void removePacketToSend(LinkedPacket linkedPacket) {
-			packetsToSend.remove(linkedPacket);
-			linkedPacket.deleteObserver(observer);
-		}
+	}
+	public void removePacketToSend(LinkedPacket linkedPacket) {
+		packetsToSend.remove(linkedPacket);
+		linkedPacket.deleteObserver(observer);
+	}
 
-		@Override
-		public void run(){
-			logger.traceEntry();
+	@Override
+	public void run(){
+		logger.traceEntry();
 
-			packetsToSend
+		packetsToSend
 			.stream()
 			.forEach(packet->SerialPortController.getQueue().add(packet, true));
-		}
 	}
 }

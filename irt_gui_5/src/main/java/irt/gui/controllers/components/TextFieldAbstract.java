@@ -253,11 +253,14 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 	protected void setSliderValue(Slider slider, ChangeListener<Number> sliderChangeListener, double value, double min, double max){
 
 		Platform.runLater(()->{
+
 			final DoubleProperty valueProperty = slider.valueProperty();
 			valueProperty.removeListener(sliderChangeListener);
+
 			setSliderMin(slider, min);
 			setSliderMax(slider, max);
 			setSliderValue(slider, value);
+
 			valueProperty.addListener(sliderChangeListener);
 		});
 	}
@@ -265,10 +268,33 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 		if(Double.compare(slider.getValue(), value)!=0)
 			slider.setValue(value);
 	}
+
 	public void setSliderMax(Slider slider, double max) {
-		if(Double.compare(slider.getMax(), max)!=0)
+		if(Double.compare(slider.getMax(), max)!=0){
+
+			final DoubleProperty majorTickUnitProperty = slider.majorTickUnitProperty();
+
+			final double range = max - slider.getMin();
+
+			final double minMajor = range/1000;//	2000 is the Maximum major ticks
+			final double major = majorTickUnitProperty.get();
+
+			if(Double.compare(minMajor, major)>0)
+				majorTickUnitProperty.set(Math.ceil(minMajor));
+
+//			final IntegerProperty minorTickCountProperty = slider.minorTickCountProperty();
+//
+//			final double minMinor = 10000;//	10000 is the Maximum major ticks
+//			final int minor = minorTickCountProperty.get();
+//			logger.error("minMinor = {}; minor = {}", minMinor, minor);
+//
+//			if(Double.compare(minMinor, minor)>0)
+//				minorTickCountProperty.set((int) Math.ceil(minMinor));
+
 			slider.setMax(max);
+		}
 	}
+
 	public void setSliderMin(Slider slider, double min) {
 		if(Double.compare(slider.getMin(), min)!=0)
 			slider.setMin(min);

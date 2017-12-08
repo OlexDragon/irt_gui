@@ -1,23 +1,6 @@
 package irt.gui.controllers.components;
 
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.Layout;
-import org.apache.logging.log4j.core.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.AbstractManager;
-import org.apache.logging.log4j.core.appender.RollingRandomAccessFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.RollingFileManager;
-import org.apache.logging.log4j.core.appender.rolling.RollingRandomAccessFileManager;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.UpdateController;
@@ -44,11 +27,11 @@ public class InfoController extends FieldsControllerAbstract {
 	@FXML private Label typeLabel;
 	@FXML private Label addressLabel;
 
-	private RollingRandomAccessFileManager rollingRandomAccessFileManager;
+//	private RollingRandomAccessFileManager rollingRandomAccessFileManager;
 
 	@FXML public void initialize() {
 		try {
-			addLinkedPacket(new InfoPacket());
+			addPacketToSend(new InfoPacket());
 			doUpdate(true);
 
 			UpdateController.addController(this);

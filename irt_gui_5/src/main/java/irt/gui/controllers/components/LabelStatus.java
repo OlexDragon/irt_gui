@@ -3,13 +3,17 @@ package irt.gui.controllers.components;
 
 import java.net.URL;
 import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Stream;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.controllers.UpdateController;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.enums.PacketErrors;
+import irt.gui.data.packet.enums.ParameterHeaderCode;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.alarms.AlarmStatusPacket.AlarmSeverities;
 import irt.gui.data.packet.observable.measurement.StatusPacket;
@@ -30,6 +34,7 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 
 
 
+	public static final int REFERENCE_10MHZ = 1100;
 	private final String LOCKED = AlarmSeverities.NO_ALARM.getStyleClass();
 	private final String NOTLOCKED = AlarmSeverities.CRITICAL.getStyleClass();
 
@@ -70,7 +75,7 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 		setAopc(false, null);
 		setLnbPowerEnable(false, null);
 
-		addLinkedPacket(statusPacket);
+		addPacketToSend(statusPacket);
 		doUpdate(true);
 
 		UpdateController.addController(this);
@@ -91,38 +96,64 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 		if(packet.getPacketHeader().getPacketError()==PacketErrors.NO_ERROR){
 
 			StatusPacket p = new StatusPacket(packet.getAnswer(), true);
-			final Integer status = p.getPayloads().get(0).getInt(0);
 
-			if(status.equals(this.status))
-				return;
+			final boolean isFcm = p.getLinkHeader().getAddr()==0;
 
-			this.status = status;
-			Platform.runLater(()->{
-				muteLabel.setTooltip(new Tooltip(ToHex.bytesToHex(Packet.toBytes(status))));
+			Optional
+			.ofNullable(p.getPayloads())
+			.map(List::stream)
+			.orElse(Stream.empty())
+			.findAny()
+			.ifPresent(pl->{
+
+				final Integer status = pl.getInt(0);
+
+				if(status.equals(this.status))
+					return;
+
+				this.status = status;
+				Platform.runLater(()->{
+					muteLabel.setTooltip(new Tooltip(ToHex.bytesToHex(Packet.toBytes(status))));
+				});
+
+
+				StatusByte sm = FcmStatusBits.MUTE;
+				if(isFcm){
+					setFcmLockStatus(status);
+
+				}else{
+					setBucLockStatus(status);
+				}
+
+				setLokDetails(isFcm, status);
+				setMuteStatus(sm.isOn(status));
+				setAopc(isFcm, status);
+				setLnbPowerEnable(isFcm, status);
 			});
-
-			final boolean isFcm = p.getLinkHeader().getAddr()==-1;
-
-			StatusByte sm;
-			if(isFcm){
-				sm = FcmStatusBits.MUTE;
-				setFcmLockStatus(status);
-
-			}else{
-				sm = BucStatusBits.MUTE;
-				setBucLockStatus(status);
-			}
-
-			setMuteStatus(sm.isOn(status));
-			setLokDetails(isFcm, status);
-			setAopc(isFcm, status);
-			setLnbPowerEnable(isFcm, status);
 		}
 	}
 
 	private void setLokDetails(boolean isFcm, Integer status) {
 
-		if(isFcm){
+		final Integer deviceType = InfoController.getDeviceType();
+		if(deviceType!=null && deviceType==REFERENCE_10MHZ){
+			String text;
+
+			if(ComboBox10MHzReferenceSource.Ref10MHzStatusBits.AUTOSENSE.isOn(status))
+				text = ComboBox10MHzReferenceSource.Ref10MHzStatusBits.AUTOSENSE.name();
+
+			else if(ComboBox10MHzReferenceSource.Ref10MHzStatusBits.EXTERNAL.isOn(status))
+				text = ComboBox10MHzReferenceSource.Ref10MHzStatusBits.EXTERNAL.name();
+
+			else if(ComboBox10MHzReferenceSource.Ref10MHzStatusBits.INTERNAL.isOn(status))
+				text = ComboBox10MHzReferenceSource.Ref10MHzStatusBits.INTERNAL.name();
+
+			else
+				text = ComboBox10MHzReferenceSource.Ref10MHzStatusBits.UNDEFINED.name();
+
+			Platform.runLater(()->pll1Label.setText(text));
+			addLabel( pll1Label, FcmStatusBits.LOCK1.isOn(status));
+		}else if(isFcm){
 			addLabel( pll1Label, FcmStatusBits.LOCK1.isOn(status));
 			addLabel( pll2Label, FcmStatusBits.LOCK2.isOn(status));
 			addLabel( pll3Label, FcmStatusBits.LOCK3.isOn(status));
@@ -212,8 +243,17 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 	}
 
 	private void setFcmLockStatus(Integer status) {
+//		logger.error(status);
 
-		if(FcmStatusBits.LOCK.isOn(status)){
+		final Integer deviceType = InfoController.getDeviceType();
+		boolean on;
+
+		if(deviceType!=null && deviceType==REFERENCE_10MHZ)
+			on = ComboBox10MHzReferenceSource.Ref10MHzStatusBits.LOCK_SUMMARY.isOn(status);
+		else
+			on = FcmStatusBits.LOCK.isOn(status);
+
+		if(on){
 			String value = bundle.getString("lock.locked");
 			Platform.runLater(()->{
 				if(lockLabel.getText().equals(value))
@@ -386,5 +426,22 @@ public class LabelStatus extends FieldsControllerAbstract implements Initializab
 		@Override public boolean isOn(Integer status) {
 			return (status & value) != 0;
 		}
+	}
+
+	@Override
+	public void run() {
+
+		Optional.ofNullable(InfoController.getDeviceType()).filter(dt->dt==REFERENCE_10MHZ).ifPresent(dt->{
+			
+			statusPacket
+			.getPayloads()
+			.stream()
+			.findAny()
+			.ifPresent(pl->{
+				pl.getParameterHeader().setParameterHeaderCode(ParameterHeaderCode.M_STATUS_10MHZ_REF);
+			});
+		});
+
+		super.run();
 	}
 }

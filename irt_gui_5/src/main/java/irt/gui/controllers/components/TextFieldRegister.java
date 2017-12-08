@@ -47,7 +47,7 @@ public class TextFieldRegister extends TextFieldAbstract implements Register{
 	public static final String FIELD_KEY_ID 		= RegistersController.REGISTER_PROPERTIES 		+ "textField.%d.";
 	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.3.5.7)
 
-	private static Alert alert = new Alert(AlertType.INFORMATION);
+	public static final Alert alert = new Alert(AlertType.INFORMATION);
 	static{
 		alert.setTitle("Save");
 		alert.setResizable(true);
@@ -276,7 +276,7 @@ public class TextFieldRegister extends TextFieldAbstract implements Register{
 //				throw new UnsupportedOperationException("Auto-generated method stub", e);
 //			}
 
-		if(packets.contains(observable))
+		if(packets.contains((LinkedPacket)observable))
 			LinkedPacketsQueue.SERVICES.execute(updater.setPacket(((LinkedPacket)observable)));
 
 		else

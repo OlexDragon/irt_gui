@@ -32,6 +32,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tooltip;
 
 public class ButtonErase extends Observable implements Observer, Initializable, EraseObject {
+	private static final int WAIT_TIME = 1000;
+
 	private Logger logger = LogManager.getLogger();
 
 	@FXML private Button button;
@@ -39,7 +41,7 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 	private Alert alert = new Alert(AlertType.CONFIRMATION);
 	private final ErasePacket erasePacket = new ErasePacket();
 	private final EmptyPacket emptyPacket = new EmptyPacket();
-	private final LinkedPacket dataPacket = new EmptyPacket(){ @Override public byte[] toBytes() { return pagesToErase; }};
+	private final LinkedPacket dataPacket = new EmptyPacket(){ @Override public int getWaitTime() { return ButtonErase.WAIT_TIME; } @Override public byte[] toBytes() { return pagesToErase; }};
 
 	private UnitAddress unitAddress;
 	private byte[] pagesToErase;
@@ -93,10 +95,10 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 
 				logger.trace(o);
 				LinkedPacket p = (LinkedPacket) o;
-				if(p.getAnswer()==null && count<1000){
+				if(p.getAnswer()==null && count<100){
 					count++;
 					try {
-						Thread.sleep(10);
+						Thread.sleep(WAIT_TIME);
 					} catch (Exception e) {
 						logger.catching(e);
 					}
