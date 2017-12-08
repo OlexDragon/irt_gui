@@ -66,11 +66,15 @@ public abstract class AbstractFlashPacket extends Observable implements LinkedPa
 
 	@Override
 	public Observer[] getObservers() throws Exception {
+		return getObservers(this);
+	}
+
+	public static Observer[] getObservers(LinkedPacket packet) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
 
 		final Field obs = Observable.class.getDeclaredField("obs");
 		obs.setAccessible(true);
 		@SuppressWarnings("unchecked")
-		final Vector<Observer> vector = (Vector<Observer>) obs.get(this);
+		final Vector<Observer> vector = (Vector<Observer>) obs.get(packet);
 		return vector.toArray(new Observer[vector.size()]);
 	}
 

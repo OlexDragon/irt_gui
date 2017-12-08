@@ -44,7 +44,7 @@ public class PanelNetworkController extends FieldsControllerAbstract {
 		networkPane.setUserData(this);
 		try {
 
-			addLinkedPacket(new NetworkAddressPacket((NetworkAddress)null));
+			addPacketToSend(new NetworkAddressPacket((NetworkAddress)null));
 
 			final NetworkAddressType[] values = NetworkAddressType.values();
 			addressType.setPromptText(values[0].toString());

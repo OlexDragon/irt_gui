@@ -26,8 +26,8 @@ public class MutePacket extends PacketAbstract5 implements ConfigurationGroup{
 
 	public enum MuteStatus{
 		UNMUTED,
-		MUTED
-		
+		MUTED,
+		UNKNOWN	
 	}
 
 	public MutePacket() throws PacketParsingException {
@@ -52,7 +52,7 @@ public class MutePacket extends PacketAbstract5 implements ConfigurationGroup{
 
 	@Override @JsonIgnore
 	public PacketId getPacketId() {
-		return linkHeader.getAddr()==-1 ? FCM_PACKET_ID : BUC_PACKET_ID;
+		return linkHeader.getAddr()==CONVERTER_ADDR ? FCM_PACKET_ID : BUC_PACKET_ID;
 	}
 
 	@Override public synchronized void setLinkHeaderAddr(byte addr) {
@@ -63,7 +63,7 @@ public class MutePacket extends PacketAbstract5 implements ConfigurationGroup{
 		super.setLinkHeaderAddr(addr);
 
 		try {
-			getPayloads().get(0).setParameterHeader(new ParameterHeader(addr==-1 ? FCM_PACKET_ID : BUC_PACKET_ID));
+			getPayloads().get(0).setParameterHeader(new ParameterHeader(addr==CONVERTER_ADDR ? FCM_PACKET_ID : BUC_PACKET_ID));
 		} catch (PacketParsingException e) {
 			logger.catching(e);
 		}

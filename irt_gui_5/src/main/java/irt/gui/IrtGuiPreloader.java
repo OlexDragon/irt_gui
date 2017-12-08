@@ -12,6 +12,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ProgressBar;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class IrtGuiPreloader extends Preloader {
 
@@ -24,6 +25,7 @@ public class IrtGuiPreloader extends Preloader {
 
 		this.primaryStage = primaryStage;
         try {
+     	   primaryStage.initStyle(StageStyle.UNDECORATED);
 
  //       	logger.trace(System.getProperty("sun.boot.class.path"));
         	URL resource = getClass().getResource("/fxml/Preloader.fxml");
@@ -53,5 +55,4 @@ public class IrtGuiPreloader extends Preloader {
 		if (evt.getType() == StateChangeNotification.Type.BEFORE_START)
 			primaryStage.hide();
 	}
-
 }

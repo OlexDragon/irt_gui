@@ -26,7 +26,7 @@ public class ButtonInitialize extends FieldsControllerAbstract{
 
 			callibrationModePacket = new CallibrationModePacket((CalibrationMode)null);
 			callibrationModePacket.addObserver(this);
-			addLinkedPacket(callibrationModePacket);
+			addPacketToSend(callibrationModePacket);
 
 			initializeBiasPacket = new InitializeBiasPacket();
 			initializeBiasPacket.addObserver(this);

@@ -60,9 +60,9 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 		alarmDescription = new AlarmDescriptionPacket(alarmId);
 		alarmName = new AlarmNamePacket(alarmId);
 
-		addLinkedPacket(alarmStatus);
-		addLinkedPacket(alarmDescription);
-		addLinkedPacket(alarmName);
+		addPacketToSend(alarmStatus);
+		addPacketToSend(alarmDescription);
+		addPacketToSend(alarmName);
 	}
 
 	@Override protected void updateFields(LinkedPacket packet) throws PacketParsingException {
@@ -115,7 +115,7 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 	private void setDescription(Payload pl) {
 		logger.entry(pl);
 
-		removeLinkedPacket(alarmDescription);
+		removePacketToSend(alarmDescription);
 
 		if(name==null){
 			final StringData stringData = pl.getStringData();
@@ -131,7 +131,7 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 	}
 
 	private void setName(Payload pl) {
-		removeLinkedPacket(alarmName);
+		removePacketToSend(alarmName);
 
 		if(name==null){
 			final StringData stringData = pl.getStringData();

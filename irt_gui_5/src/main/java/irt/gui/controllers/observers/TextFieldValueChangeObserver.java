@@ -34,15 +34,19 @@ public class TextFieldValueChangeObserver implements Observer {
 
 		Value v = (Value) o;
 		if(arg==ValueStatus.IN_RANGE){
+
+			final Long value = v.getValue();
+
 			if(o instanceof ValueDouble){
 
-				double rv = (double)v.getValue()/v.getFactor();
+				double rv = (double)value/v.getFactor();
 				if(Double.compare(slider.getValue() ,rv)!=0)
 					setSliderValue(rv);
 
 			}else{
 
-				Long rv = v.getValue() / multiplier;
+				Long rv = value / multiplier;
+//				logger.error("v={}; value={}; rv={}; multiplier=-{}", v, value, rv, multiplier);
 				if(Double.compare(slider.getValue(), rv)!=0)
 					setSliderValue(rv);
 

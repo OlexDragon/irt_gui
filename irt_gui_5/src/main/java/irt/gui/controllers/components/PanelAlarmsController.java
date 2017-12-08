@@ -33,7 +33,7 @@ public class PanelAlarmsController extends FieldsControllerAbstract {
 	}
 
 	@FXML public void initialize() {
-		addLinkedPacket(packet);
+		addPacketToSend(packet);
 		doUpdate(true);
 		UpdateController.addController(this);
 	}

@@ -13,7 +13,6 @@ import irt.gui.data.LinkedPacketPriorityBlockingQueue;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.interfaces.PacketToSend;
-import irt.gui.data.packet.observable.configuration.LoFrequenciesPacket;
 import javafx.util.Pair;
 
 public class LinkedPacketsQueue implements Runnable {

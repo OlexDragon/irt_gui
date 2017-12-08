@@ -18,6 +18,7 @@ import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.PacketToSend;
+import irt.gui.data.packet.observable.flash.AbstractFlashPacket;
 
 public class TestPacket  extends Observable implements LinkedPacket {
 
@@ -94,7 +95,7 @@ public class TestPacket  extends Observable implements LinkedPacket {
 
 	@Override
 	public Observer[] getObservers() throws Exception {
-		throw new UnsupportedOperationException("Auto-generated method stub");
+		return AbstractFlashPacket.getObservers(this);
 	}
 
 	@Override

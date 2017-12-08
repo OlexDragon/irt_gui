@@ -21,7 +21,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
 	private static boolean busy;
 	private static PathMatcher matcher;
 	private static FileFinder  fileFinder = new FileFinder();
-	private static List<Path> paches = new ArrayList<>();
+	private static List<Path> paths = new ArrayList<>();
 
 	// Invoke the pattern matching method on each file.
 	@Override public synchronized FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
@@ -34,7 +34,7 @@ public class FileFinder extends SimpleFileVisitor<Path> {
 
 		Path name = file.getFileName();
 		if (name != null && matcher.matches(name)) {
-			paches.add(file);
+			paths.add(file);
 		}
 		return FileVisitResult.CONTINUE;
 	}
@@ -44,19 +44,19 @@ public class FileFinder extends SimpleFileVisitor<Path> {
 		return busy ? FileVisitResult.CONTINUE : FileVisitResult.TERMINATE;
 	}
 
+	public static void stop() {
+		busy = false;
+	}
+
 	public static List<Path> findFilePathes(Path startDirectory, String fileName) throws IOException{
 		if(busy)
 			throw new IOException("Class FileFinder is busy.");
 
-		paches.clear();
+		paths.clear();
 		busy = true;
 		matcher = FileSystems.getDefault().getPathMatcher("glob:" + fileName);
 		Files.walkFileTree(startDirectory, fileFinder);
 
-		return Collections.unmodifiableList(paches);
-	}
-
-	public static void stop() {
-		busy = false;
+		return Collections.unmodifiableList(paths);
 	}
 }

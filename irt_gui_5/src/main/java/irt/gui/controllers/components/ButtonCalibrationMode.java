@@ -33,7 +33,7 @@ public class ButtonCalibrationMode extends FieldsControllerAbstract {
 
 			CallibrationModePacket packetGet = new CallibrationModePacket((CalibrationMode)null);
 			packetGet.addObserver(this);
-			addLinkedPacket(packetGet);
+			addPacketToSend(packetGet);
 
 			packetSetOn = new CallibrationModePacket(CalibrationMode.ON);
 			packetSetOn.addObserver(this);

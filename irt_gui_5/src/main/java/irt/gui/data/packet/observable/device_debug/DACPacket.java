@@ -3,6 +3,7 @@ package irt.gui.data.packet.observable.device_debug;
 import irt.gui.IrtGuiProperties;
 import irt.gui.data.RegisterValue;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.errors.PacketParsingException;
 
 public class DACPacket extends RegisterPacket{
@@ -60,7 +61,7 @@ public class DACPacket extends RegisterPacket{
 		final Payload payload = payloads.get(0);
 		final int length = payload.getBuffer().length;
 
-		UnitType ut = addr == -1 ? UnitType.FCM : UnitType.BUC;
+		UnitType ut = addr == PacketAbstract5.CONVERTER_ADDR ? UnitType.FCM : UnitType.BUC;
 		
 		if(length==12)
 			payload.setBuffer(dac.getIndex(ut), dac.getAddress(ut), payload.getInt(2));

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Tooltip?>
+
+<ComboBox fx:id="sourceSelectComboBox" onAction="#onActionSourceSelectComboBox" promptText="Source Select" visibleRowCount="3" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ComboBox10MHzReferenceSource">
+   <cursor>
+      <Cursor fx:constant="HAND" />
+   </cursor>
+   <tooltip>
+      <Tooltip text="%lo.select" />
+   </tooltip>
+   <contextMenu>
+      <ContextMenu>
+        <items>
+          <MenuItem mnemonicParsing="false" onAction="#onActionRemove" text="Remove" />
+        </items>
+      </ContextMenu>
+   </contextMenu>
+</ComboBox>

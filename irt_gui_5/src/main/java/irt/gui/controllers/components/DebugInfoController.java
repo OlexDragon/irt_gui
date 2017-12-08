@@ -66,7 +66,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 		try {
 
 			indexesPacket = new RegisterIndexesPacket();
-			addLinkedPacket(indexesPacket);
+			addPacketToSend(indexesPacket);
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -76,7 +76,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 
 	@FXML public void onAction(ActionEvent event){
 		doUpdate(false);
-		removeLinkedPacket(infoPacket);
+		removePacketToSend(infoPacket);
 		addPacket();
 		doUpdate(true);
 	}
@@ -130,6 +130,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 			return;
 		}
 
+		logger.error(p);
 		final Payload payload = p.getPayloads().get(0);
 		final StringData stringData = payload.getStringData();
 		logger.trace(stringData);
@@ -170,7 +171,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 			items.addAll(properties);
 			parameterComboBox.getSelectionModel().select(0);
 		}
-		removeLinkedPacket(indexesPacket);
+		removePacketToSend(indexesPacket);
 	}
 
 	private List<Integer> parseLine(String line) {
@@ -241,7 +242,7 @@ public class DebugInfoController extends FieldsControllerAbstract {
 				parameter = parameterComboBox.getSelectionModel().getSelectedItem();
 
 			infoPacket = new DebugInfoPacket(debugInfoCode, parameter);
-			addLinkedPacket(infoPacket);
+			addPacketToSend(infoPacket);
 
 		} catch (PacketParsingException e) {
 			logger.catching(e);

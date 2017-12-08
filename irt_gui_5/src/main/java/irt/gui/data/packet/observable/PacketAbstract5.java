@@ -32,6 +32,8 @@ import irt.gui.errors.PacketParsingException;
 @JsonTypeInfo(include=As.WRAPPER_OBJECT, use=Id.CLASS)
 public abstract class PacketAbstract5 extends MyObservable implements LinkedPacket {
 
+	public static final byte CONVERTER_ADDR = 0;
+
 	@JsonIgnore
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
@@ -60,7 +62,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 
 		byte[] bs  = removeAcknowledgmentAndChecksum(answer, packetProperties);
 
-		linkHeader = packetProperties.isConverter() ? new LinkHeader((byte)-1, (byte)0, (byte)0) : new LinkHeader(bs);
+		linkHeader = packetProperties.isConverter() ? new LinkHeader(CONVERTER_ADDR, (byte)0, (byte)0) : new LinkHeader(bs);
 		packetHeader = new PacketHeader(bs, packetProperties);
 		payloads.addAll(Payload.parsePayloads(packetProperties, bs));
 	}

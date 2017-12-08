@@ -4,21 +4,28 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.GuiUtility;
 import irt.gui.data.listeners.FractionalNumberPlusPrefixChecker;
 import irt.gui.data.listeners.NumericChecker;
+import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.interfaces.RangePacket;
+import irt.gui.data.packet.observable.ConverterStoreConfigPacket;
+import irt.gui.data.packet.observable.PacketAbstract5;
+import irt.gui.data.packet.observable.configuration.Dac10MHzPacket;
+import irt.gui.data.packet.observable.configuration.Dac10MHzRangePacket;
 import irt.gui.data.packet.observable.configuration.FrequencyPacket;
 import irt.gui.data.value.Value;
 import irt.gui.data.value.ValueDouble;
@@ -31,6 +38,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -52,6 +60,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	public static final String FIELD_KEY	 		= FIELD_KEY_ID 	+ "%d.%d";			//gui.regicter.controller.textField.profikeId.column.row (ex. gui.regicter.controller.textField.control.3.5.7)
 
 	public static final Class<? extends Node> rootClass = BorderPane.class;
+	private static final Alert alert = TextFieldRegister.alert;
 
 	private Class<? extends LinkedPacket> packetClass;
 
@@ -120,6 +129,10 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		if(packetClass == FrequencyPacket.class){
 			constructor = packetClass.getConstructor(Long.class);
 			newInstance = constructor.newInstance(value.longValue());
+			
+		}else if(packetClass == Dac10MHzPacket.class){
+			constructor = packetClass.getConstructor(Integer.class);
+			newInstance = constructor.newInstance(value.intValue());
 			
 		}else{
 			constructor = packetClass.getConstructor(Short.class);
@@ -201,9 +214,54 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	}
 
 	@Override protected void setPacket(String keyStartWith) throws PacketParsingException { }
-	@Override public void save() throws PacketParsingException { }
+	@Override public void save() throws PacketParsingException {
+		getPackets().stream().findAny().ifPresent(p->{
+			logger.error(p);
+			//Converter store configuration
+			final Optional<LinkHeader> notConverter = Optional.of(p).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).filter(lh->lh.getAddr()!=0);
+			if(!notConverter.isPresent())
+				try {
+
+					final ConverterStoreConfigPacket packet = new ConverterStoreConfigPacket();
+					Observer saveConfigObserver = (o, arg)->{
+						try {
+							final Optional<byte[]> oAnswer = Optional.ofNullable(((PacketAbstract5)o).getAnswer());
+
+							if(oAnswer.isPresent()){
+
+								if(alert.isShowing())
+									return;
+
+								final ConverterStoreConfigPacket answerPacket = new ConverterStoreConfigPacket(oAnswer.get());
+								final PacketErrors packetError = answerPacket.getPacketHeader().getPacketError();
+
+								Platform.runLater(()->{
+									
+									alert.setTitle("\nSave congiguration.");
+
+									if(packetError==PacketErrors.NO_ERROR)
+										alert.setContentText("\nSaved.");
+									else
+										alert.setContentText("\nImpossible to save.");
+
+									alert.show();
+								});
+							}
+						} catch (PacketParsingException e) {
+							// TODO Auto-generated catch block
+							throw new UnsupportedOperationException("Auto-generated method stub", e);
+						}
+					};
+					packet.addObserver(saveConfigObserver);
+					SerialPortController.getQueue().add(packet, true);
+				} catch (PacketParsingException e) {
+					logger.catching(e);
+				}
+		});
+	}
 
 	@Override public void setText(double value) {
+
 		Value v = this.value.getCopy();
 		if(v instanceof ValueFrequency){
 			BigDecimal bd = new BigDecimal(value);
@@ -224,7 +282,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	}
 
 	@Override public int getMultiplier() {
-		return MULTIPLIER;
+		return value==null ? MULTIPLIER : value.getFactor();
 	}
 
 	//********************************************** class Updater   ***************************************************
@@ -260,9 +318,8 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 					if(p instanceof RangePacket)
 						setRange(p);
 
-					else{
+					else
 						setTextFieldValue(p);
-					}
 				}
 			} catch (Exception e) {
 				logger.catching(e);
@@ -280,10 +337,11 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 				Optional
 				 .ofNullable(Packet.createNewPacketBy(packet.getClass().getName().replace("Range", "")))
 				 .ifPresent(p->{
+
 					 addPacket(p);
 					 packetClass = p.getClass();
 
-					 if(!scheduleAtFixedRate.isCancelled())
+					 if(scheduleAtFixedRate.isCancelled())
 						 start();
 				});
 			}
@@ -296,15 +354,30 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 					.orElse(0l)
 					.intValue();
 
-			if(precision==0){
+			if(packet instanceof Dac10MHzRangePacket){
 
-				final long[] array = packet.getPayloads().get(0).getArrayLong();
-				value = new ValueFrequency(array[0], array[0], array[1]);
+				Optional.ofNullable(packet.getPayloads()).map(List::stream).orElse(Stream.empty()).findAny().ifPresent(pl->{
+					
+					final long min = pl.getInt(0) & 0xFFFFFFFF;
+					final long max = pl.getInt(1) & 0xFFFFFFFF;
+
+					value = new Value(min, min, max, precision);
+				});
+
+			}else if(precision==0){
+
+				Optional.ofNullable(packet.getPayloads()).map(List::stream).orElse(Stream.empty()).findAny().ifPresent(pl->{
+					
+					final long[] array = pl.getArrayLong();
+					value = new ValueFrequency(array[0], array[0], array[1]);
+				});
 
 			}else{
+				Optional.ofNullable(packet.getPayloads()).map(List::stream).orElse(Stream.empty()).findAny().ifPresent(pl->{
 
-				final short[] array = packet.getPayloads().get(0).getArrayOfShort();
-				value = new ValueDouble(array[0], array[0], array[1], precision);
+					final short[] array = pl.getArrayOfShort();
+					value = new ValueDouble(array[0], array[0], array[1], precision);
+				});
 			}
 
 			 //Prefix
@@ -320,9 +393,12 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		}
 
 		private void setTextFieldValue(LinkedPacket packet) {
+
 			long v;
 			if(packet instanceof FrequencyPacket)
 				v = packet.getPayloads().get(0).getLong();
+			else if(packet instanceof Dac10MHzPacket)
+				v = packet.getPayloads().get(0).getInt(0) & 0xFFFFFFFF;
 			else
 				v = packet.getPayloads().get(0).getShort(0) & 0x0000FFFF;
 			value.setValue(v);

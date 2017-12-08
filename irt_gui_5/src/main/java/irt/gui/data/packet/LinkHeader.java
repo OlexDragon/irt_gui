@@ -5,6 +5,8 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import irt.gui.data.packet.observable.PacketAbstract5;
+
 public class LinkHeader implements Comparable<LinkHeader>{
 
 	public static final int SIZE = 4;
@@ -30,7 +32,7 @@ public class LinkHeader implements Comparable<LinkHeader>{
 
 	public byte[] toBytes(){
 
-		if(addr==-1)
+		if(addr==PacketAbstract5.CONVERTER_ADDR)
 			return new byte[0];
 
 		byte[] data = new byte[4];

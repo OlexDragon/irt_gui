@@ -74,7 +74,7 @@ public class RegistersController implements Observer, FieldController {
 	private static final String REGISTER_BACKGROUND	 		= REGISTER_PROPERTIES 		+ "background.";
 	private static final String REGISTER_BACKGROUND_ID	 	= REGISTER_BACKGROUND 		+ "%d";
 	private static final String REGISTER_ALIGNMENT_ID 		= REGISTER_PROPERTIES 		+ "alignment.%d.";
-	private static final String REGISTER_ALIGNMENT	 		= REGISTER_ALIGNMENT_ID 	+ "%d.%d";			//gui.regicter.controller.alignment.profikeId.column.row (ex. gui.regicter.controller.alignment.3.5.7)
+	private static final String REGISTER_ALIGNMENT	 		= REGISTER_ALIGNMENT_ID 	+ "%d.%d";			//gui.regicter.controller.alignment.profileId.column.row (ex. gui.regicter.controller.alignment.3.5.7)
 
 	private final Logger logger = LogManager.getLogger();
 
@@ -362,6 +362,7 @@ public class RegistersController implements Observer, FieldController {
     	int max = getNewProfileID(properties);
     	updateProperties(propertiesFromFile, max, name);
 
+    	//Save to file
     	try(final FileOutputStream outputStream = new FileOutputStream(new File(IrtGuiProperties.IRT_HOME, IrtGuiProperties.getPropertiesFileName()));){
     		propertiesFromFile.store(outputStream, "Gui5 Properties");
     		IrtGuiProperties.updateProperties(propertiesFromFile);
