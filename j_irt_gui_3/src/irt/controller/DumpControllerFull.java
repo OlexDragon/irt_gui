@@ -123,38 +123,35 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		.flatMap(p->Packets.cast(p))
 		.filter(haveToDoDump())
 		.ifPresent(p->{
-			final Optional<? extends PacketAbstract> cast = Packets.cast(p);
-			cast.ifPresent(c->{
 
-				checkSummaryAlarm(c);
-				Object value = c.getValue();
-				final PacketHeader header = c.getHeader();
+			checkSummaryAlarm(p);
+			Object value = p.getValue();
+			final PacketHeader header = p.getHeader();
 
-				if(deviceIndexes==null && c.getClass() == DeviceDebugHelpPacket.class)
-					getIndexxes(value);
+			if(deviceIndexes==null && p.getClass() == DeviceDebugHelpPacket.class)
+				getIndexxes(value);
 
-				// Remove unused indexes
-				else if(c.getClass() == DeviceDebugPacket.class) {
+			// Remove unused indexes
+			else if(p.getClass() == DeviceDebugPacket.class) {
 
-					if(Optional.ofNullable(value).filter(v->v.toString().trim().equals("Invalid index value")).map(v->true).orElse(false)) {
-						value = ((DeviceDebugPacket)c).getParsePacketId() + ": " + value;
-						removeUnusedIndexes(header);
+				if(Optional.ofNullable(value).filter(v->v.toString().trim().equals("Invalid index value")).map(v->true).orElse(false)) {
+					value = ((DeviceDebugPacket)p).getParsePacketId() + ": " + value;
+					removeUnusedIndexes(header);
 
-					}else if(header.getOption()!=PacketImp.ERROR_NO_ERROR) {
-						value = ((DeviceDebugPacket)c).getParsePacketId() + " - " + header.getOptionStr();	//Dump error message
-						removeUnusedIndexes(header);
-					}else
-						value = ((DeviceDebugPacket)c).getParsePacketId() + ": " + value;
+				}else if(header.getOption()!=PacketImp.ERROR_NO_ERROR) {
+					value = ((DeviceDebugPacket)p).getParsePacketId() + " - " + header.getOptionStr();	//Dump error message
+					removeUnusedIndexes(header);
+				}else
+					value = ((DeviceDebugPacket)p).getParsePacketId() + ": " + value;
 
-				}else if(header.getOption()!=PacketImp.ERROR_NO_ERROR)
-					value = header.getOptionStr();	//Dump error message
+			}else if(header.getOption()!=PacketImp.ERROR_NO_ERROR)
+				value = header.getOptionStr();	//Dump error message
 
-				if(value instanceof Optional)
-					value = ((Optional<?>)value).map(Object::toString).orElse("N/A");
+			if(value instanceof Optional)
+				value = ((Optional<?>)value).map(Object::toString).orElse("N/A");
 
-//				dumper.error(c);
-				doDump(c.getClass().getSimpleName() + " - " + value);
-			});
+//			dumper.error(c);
+			doDump(p.getClass().getSimpleName() + " - " + value);
 		});
 	}
 

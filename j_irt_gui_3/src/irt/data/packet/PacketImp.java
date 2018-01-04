@@ -20,46 +20,6 @@ public class PacketImp implements Packet{
 	public static final byte FLAG_SEQUENCE	= 0x7E;
 	public static final byte CONTROL_ESCAPE= 0x7D;
 
-	// What to do
-	public static final byte
-							OPTYPE_SHOW_DEVICE = 1;
-	public static final byte
-							OPTYPE_CONFIG_GET_ALL			= 100,
-							OPTYPE_CONFIG_SET_FREQUENCY		= 101,
-							OPTYPE_CONFIG_GET_FREQUENCY		= 102,
-							OPTYPE_CONFIG_SET_GAIN			= 103,
-							OPTYPE_CONFIG_GET_GAIN			= 104,
-							OPTYPE_CONFIG_SET_MUTE			= 105,
-							OPTYPE_CONFIG_GET_MUTE			= 106,
-							OPTYPE_CONFIG_SET_ATTENUATION	= 107,
-							OPTYPE_CONFIG_GET_ATTENUATION	= 108,
-							OPTYPE_CONFIG_GET_ATTEN_RANGE 	= 109,
-							OPTYPE_CONFIG_SET_BUC_PS_ENABLE	= 110,
-							OPTYPE_CONFIG_GET_BUC_PS_ENABLE	= 111,
-							OPTYPE_CONFIG_GAIN_RANGE		= 112,
-							OPTYPE_DAC1_VALUE_GET			= 113,
-							OPTYPE_DAC2_VALUE_GET			= 114,
-							OPTYPE_DAC3_VALUE_GET			= 115,
-							OPTYPE_DAC4_VALUE_GET			= 116,
-							OPTYPE_DAC1_VALUE_SET			= 117,
-							OPTYPE_DAC2_VALUE_SET			= 118,
-							OPTYPE_DAC3_VALUE_SET			= 119,
-							OPTYPE_DAC4_VALUE_SET			= 120,
-					
-							OPTYPE_STATUS_GET_ALL			= 124,
-							OPTYPE_SAVE_CONFIG				= 125,
-							OPTYPE_SHOW_ALARMS				= 126,
-							OPTYPE_ENVIRONMENT_CONFIGURATION= 127;
-
-	public static final short
-							OPTYPE_TEST_SET1_PLL_SET		= 10000,
-							OPTYPE_DAC_VALUE_SET			= 10001,
-							OPTYPE_DAC_VALUE_GET			= 10002,
-							OPTYPE_PLL_REGISTER_VALUE_SET	= 10003,
-							OPTYPE_VCO_SELECT_SET			= 10004,
-							OPTYPE_BAND_SELECT_SET			= 10005,
-							OPTYPE_CALIBRATION_ON_OFF 		= 10006;
-
 	/* 3.2 Packet header 
 	 * Packet header includes the following fields:
 	 */

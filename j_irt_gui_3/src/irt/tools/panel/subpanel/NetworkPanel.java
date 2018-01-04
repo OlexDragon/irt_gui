@@ -32,6 +32,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
+import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
@@ -52,6 +55,7 @@ import irt.data.packet.NetworkAddressPacket;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.tools.fx.OpenHTTPButtonJFXPanel;
 import irt.tools.fx.UpdateButtonJFXPanel;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
@@ -148,6 +152,10 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	private byte unitAddress;
 
 	private UpdateButtonJFXPanel updateButton;
+
+
+	private Timer timer;
+	private final LineBorder border2 = new LineBorder(Color.YELLOW);
 
 	// ******************************* constructor NetworkPanel   ***************************************************
 	public NetworkPanel(final DeviceInfo deviceInfo) {
@@ -250,16 +258,18 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		btnDefault.setMargin(new Insets(0, 3, 0, 3));
 		
 		updateButton = new UpdateButtonJFXPanel(deviceInfo, networkAddress);
+		
+		OpenHTTPButtonJFXPanel updateButtonJFXPanel = new OpenHTTPButtonJFXPanel(networkAddress);
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
 				.addGroup(groupLayout.createSequentialGroup()
-					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING, false)
-						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
+						.addGroup(groupLayout.createSequentialGroup()
 							.addContainerGap()
 							.addComponent(updateButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-						.addGroup(Alignment.LEADING, groupLayout.createSequentialGroup()
+						.addGroup(groupLayout.createSequentialGroup()
 							.addGap(5)
 							.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
 								.addComponent(lblAddressType, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -268,8 +278,10 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 								.addComponent(lblDefaultMask)
 								.addComponent(btnDefault))))
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE)
-					.addGap(212))
+					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING)
+						.addComponent(updateButtonJFXPanel, GroupLayout.PREFERRED_SIZE, 88, GroupLayout.PREFERRED_SIZE)
+						.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 153, GroupLayout.PREFERRED_SIZE))
+					.addGap(210))
 		);
 		groupLayout.setVerticalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)
@@ -290,7 +302,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 							.addGap(1)
 							.addComponent(panel_1, GroupLayout.PREFERRED_SIZE, 172, GroupLayout.PREFERRED_SIZE)))
 					.addGap(16)
-					.addComponent(updateButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+					.addGroup(groupLayout.createParallelGroup(Alignment.TRAILING)
+						.addComponent(updateButton, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+						.addComponent(updateButtonJFXPanel, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE))
 					.addContainerGap(86, Short.MAX_VALUE))
 		);
 		groupLayout.linkSize(SwingConstants.HORIZONTAL, new Component[] {lblAddressType, lblIpAddress, lblSubnetMask, lblDefaultMask});
@@ -303,6 +317,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		ipAddressTextField.setBounds(0, 45, 150, 20);
 		ipAddressTextField.addKeyListener(keyListener);
 		ipAddressTextField.addFocusListener(focusListener);
+		final Border border = ipAddressTextField.getBorder();
+		timer = new Timer((int) TimeUnit.SECONDS.toMillis(1), e->ipAddressTextField.setBorder(border));
+		timer.setRepeats(false);
 
 		GridBagLayout gridBagLayout = (GridBagLayout) ipAddressTextField.getLayout();
 		gridBagLayout.rowWeights = new double[]{0.0};
@@ -477,6 +494,10 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
 		.filter(h->h.getGroupId()==PacketImp.GROUP_ID_NETWORK)
 		.ifPresent(h->{
+
+			// show what the packet received
+			ipAddressTextField.setBorder(border2);
+			timer.restart();
 
 			networkAddress.set(packet);
 

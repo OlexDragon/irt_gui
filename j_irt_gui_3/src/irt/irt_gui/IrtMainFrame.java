@@ -36,15 +36,16 @@ public abstract class IrtMainFrame extends JFrame {
 
 		Platform.setImplicitExit(false); 
 
-		//
-//		Runtime.getRuntime().addShutdownHook(new Thread()
-//		{
-//		    @Override
-//		    public void run()
-//		    {
-//		        logger.info("ShutdownHook");
-//		    }
-//		});
+		
+		Runtime.getRuntime().addShutdownHook(new Thread()
+		{
+		    @Override
+		    public void run()
+		    {
+		    	Platform.exit();
+		        logger.info("ShutdownHook");
+		    }
+		});
 
 		setSize(width, hight);
 
