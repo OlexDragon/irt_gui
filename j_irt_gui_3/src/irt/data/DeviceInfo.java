@@ -81,6 +81,16 @@ public class DeviceInfo implements PacketListener {
 			return Arrays.stream(values()).parallel().filter(dt->dt.TYPE_ID==typeId).findAny();
 		}
 
+		public static Boolean isFCM(Integer typeId){
+
+			//0 - device type is not defined
+			if(typeId==null || typeId==0)
+				return null;
+
+			final Optional<DeviceType> valueOf = valueOf(typeId);
+			return valueOf.map(dt->dt.PROTOCOL).map(pr->pr==Protocol.CONVERTER).orElse(null);
+		}
+
 		public String toStrong(){
 			return DESCRIPTION;
 		}

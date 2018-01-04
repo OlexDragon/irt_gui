@@ -215,7 +215,7 @@ do{
 								logger.trace("parameterHeader.getSize()={}", ev);
 								if(parameterHeader.getCode()>300 || ev>3000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
-									logger.error("parameterHeader.getCode()>300({}) || ev>3000({})", parameterHeader.getCode(), ev);
+									logger.error("parameterHeader.getCode()>300({}) || ev>3000({}) \n{} \n{}", parameterHeader.getCode(), ev, packetHeader, parameterHeader);
 									break;
 								}
 								Console.appendLn("", "Payload ");

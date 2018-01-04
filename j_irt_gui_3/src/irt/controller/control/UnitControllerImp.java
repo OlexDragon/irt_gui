@@ -32,18 +32,20 @@ import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.RangePacket;
 import irt.data.packet.interfaces.ValueToString;
+import irt.data.value.Value;
+import irt.data.value.ValueDouble;
 
 public class UnitControllerImp implements UnitController{
 
 	private final String KEY;
 
-	private final Logger logger = LogManager.getLogger();
+	protected final Logger logger = LogManager.getLogger();
 
 	private ScheduledFuture<?> scheduledFuture;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
-	private JTextField txtGain;
-	private JSlider slider;
+	protected JTextField txtGain;
+	protected JSlider slider;
 	private JTextField txtStep;
 
 	private boolean rangesAreSet;
@@ -88,21 +90,27 @@ public class UnitControllerImp implements UnitController{
 	private final ActionListener txtGainActionListener = a->{
 		logger.traceEntry();
 
+		setUnitValue();
+		onFocusLost();
+	};
+
+	protected void setUnitValue() {
 		Optional
 		.of(txtGain.getText().replaceAll("[^\\d.E-]", ""))
 		.filter(text->!text.isEmpty())
 		.ifPresent(text->{
 			try{
 
-				double value = Double.parseDouble(text);
-				slider.setValue((int) (value*10));
+				double v = Double.parseDouble(text);
+
+				Value value = new ValueDouble(v, minimum, maximum, 1);
+				slider.setValue(value.getRelativeValue());
 
 			}catch(Exception ex){
 				logger.catching(ex);
 			}
 		});
-		onFocusLost();
-	};
+	}
 
 	private final ActionListener txtStepActionListener = a->{
 		txtGain.requestFocus();
@@ -148,7 +156,9 @@ public class UnitControllerImp implements UnitController{
 		@Override public void focusGained(FocusEvent e) { }
 	};
 
-	private long relative;
+	protected long relative;
+	protected long minimum;
+	protected long maximum;
 
 	public UnitControllerImp(JTextField txtGain, JSlider slider, JTextField txtStep, String key, RangePacket rangePacket, ValueToString packet) {
 		KEY = key;
@@ -325,8 +335,8 @@ public class UnitControllerImp implements UnitController{
 		.map(Range.class::cast)
 		.ifPresent(range->{
 
-			final long minimum = range.getMinimum();
-			final long maximum = range.getMaximum();
+			minimum = range.getMinimum();
+			maximum = range.getMaximum();
 			relative = minimum;
 
 			//TODO			slider.setToolTipText("from" + minimum + " to " + maximum);

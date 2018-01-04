@@ -73,6 +73,8 @@
 
 <!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
 
+ 	<Logger name="irt.data.profile.ProfileChecker" level="all"/>
+
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />
     </Logger>
