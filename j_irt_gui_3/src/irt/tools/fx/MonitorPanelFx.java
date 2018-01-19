@@ -133,15 +133,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			.forEach(pl->{
 				logger.entry(pl);
 
+				boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
+
+				final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
+				final byte 							code 				= parameterHeader.getCode();
+
+				Optional<? extends ParameterHeaderCode> parameterHeaderCode = isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code);
+
+				final ParameterHeaderCode status = isConverter ? ParameterHeaderCodeFCM.STATUS : ParameterHeaderCodeBUC.STATUS;
+
 				Platform.runLater(()->{
-
-					boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
-					final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
-					final byte 							code 				= parameterHeader.getCode();
-
-					Optional<? extends ParameterHeaderCode> parameterHeaderCode = isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code);
-
-					final ParameterHeaderCode status = isConverter ? ParameterHeaderCodeFCM.STATUS : ParameterHeaderCodeBUC.STATUS;
 
 					//Status bites
 					if(code==status.getCode()){
@@ -171,7 +172,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 													.map(Label.class::cast)
 													.findAny();
 
-						if(l.isPresent())
+						if(l.isPresent())	//set label text
+
 							setText(l.get(), payloadToString(parameterHeaderCode, pl));
 
 						else{	//Create new labels
@@ -184,7 +186,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 							String payloadToString;
 							try{
+
 								payloadToString = payloadToString(parameterHeaderCode, pl);
+
 							}catch(Exception e){
 								payloadToString = "error";
 								logger.catching(e);
@@ -342,8 +346,11 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	private Label createDescriptionLabel(Payload pl) {
+
 		final ParameterHeader parameterHeader = pl.getParameterHeader();
-		final Optional<? extends ParameterHeaderCode> code = packetToSend.getLinkHeader().getAddr()==CONVERTER ? ParameterHeaderCodeFCM.valueOf(parameterHeader.getCode()) : ParameterHeaderCodeBUC.valueOf(parameterHeader.getCode());
+		final Optional<? extends ParameterHeaderCode> code = packetToSend.getLinkHeader().getAddr()==CONVERTER 
+																					? ParameterHeaderCodeFCM.valueOf(parameterHeader.getCode())
+																							: ParameterHeaderCodeBUC.valueOf(parameterHeader.getCode());
 
 		String text;
 		if(code.isPresent()) {
@@ -401,15 +408,15 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		NONE			((byte) 0, b->Arrays.toString(b)),
 		SUMMARY_ALARM	((byte) 1, b->Arrays.toString(b)),
 		STATUS			((byte) 2, b->Arrays.toString(b)),
-		INPUT_POWER		((byte)11, b->bytesToString(b, "dbm")),
 		INPUT_POWER_FCM	((byte) 4, b->bytesToString(b, "dbm")),
 		OUTPUT_POWER	((byte) 5, b->bytesToString(b, "dbm")),
 		UNIT_TEMPERATURE((byte) 3, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
-		CPU_TEMPERATURE	((byte)10, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
 		V5_5			((byte) 6, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/1000.0) + " V" : Arrays.toString(b)),
 		V13_2			((byte) 7, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/1000.0) + " V" : Arrays.toString(b)),
 		V13_2_NEG		((byte) 8, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/1000.0) + " V" : Arrays.toString(b)),
 		CURRENT			((byte) 9, b->bytesToString(b, "A")),
+		CPU_TEMPERATURE	((byte)10, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
+		INPUT_POWER		((byte)11, b->bytesToString(b, "dbm")),
 		ATTENUATION		((byte)20, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " dB" : Arrays.toString(b)),
 		REFERENCE_SOURCE((byte)21, b->b!=null && b.length==1 && b[0]<3 ? ReferenceSource.values()[b[0]].name() : Arrays.toString(b));
 
@@ -509,12 +516,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public enum StatusBitsFCM{
-		LOCK_SUMMARY	(5),
 		PLL1			(0),
 		PLL2			(1),
-		PLL3			(4),
 		MUTE			(2),
 		MUTE_TTL		(3),
+		PLL3			(4),
+		LOCK_SUMMARY	(5),
 		INPUT_OVERDRIVE	(6),
 		INPUT_LOW		(7),
 		AOPC_0			(8),

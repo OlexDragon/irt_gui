@@ -51,7 +51,7 @@ public class OpenHTTPButtonJFXPanel extends JFXPanel {
 												.mapToObj(Integer::toString)
 												.collect(Collectors.joining("."));
 
-				if (Desktop.isDesktopSupported()) {
+				if (!addrStr.isEmpty() && Desktop.isDesktopSupported()) {
 					try {
 
 						Desktop.getDesktop().browse(new URI("http://" + addrStr));

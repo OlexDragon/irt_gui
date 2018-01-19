@@ -174,21 +174,10 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 							service.shutdownNow();
 						}));
 
-		final byte addr = Optional.ofNullable(deviceInfo).map(DeviceInfo::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
-		//converters do not have a network connection
-		if(addr==0){
-			packet = null;
-			lblSubnetMask = null;
-			lblIpAddress = null;
-			lblDefaultMask = null;
-			lblAddressType = null;
-			btnOk = null;
-			btnCansel = null;
-			return;
-		}
+		unitAddress = Optional.ofNullable(deviceInfo).map(DeviceInfo::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-		unitAddress = addr;
-		packet = new NetworkAddressPacket(addr, null);
+//		//converters do not have a network connection
+		packet = Optional.of(unitAddress).filter(ua->ua!=0).map(ua->new NetworkAddressPacket(ua, null)).orElse(null);
 
 		addAncestorListener(new AncestorListener() {
 
@@ -472,7 +461,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	@Override
 	public void run() {
-		if(run || --count<0) {
+		if(unitAddress!=0 && (run || --count<0)) {
 
 			logger.entry(run, count, packet);
 
