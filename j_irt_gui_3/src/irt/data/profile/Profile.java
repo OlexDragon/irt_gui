@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
@@ -21,7 +22,7 @@ import irt.irt_gui.IrtGui;
 
 public class Profile {
 
-	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd LLLL yyyy HH:mm:ss");
+	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy HH:mm");
 
 	public final static String charEncoding = System.getProperty("file.encoding");
 
@@ -39,7 +40,7 @@ public class Profile {
 			CharBuffer cb = Charset.forName(charEncoding).decode(mbb);
 
 			final ZonedDateTime now = ZonedDateTime.now();
-			String signature = "\n#Uploaded by IRT GUI - " + IrtGui.VERTION + " on " + now.format(formatter);
+			String signature = "\n#Uploaded by IRT GUI - " + IrtGui.VERTION + " on " + now.format(formatter) + " from "+ InetAddress.getLocalHost().getHostName() + " computer.";
 
 			// Copy buffer and add signature
 			charBuffer = CharBuffer.allocate(cb.capacity() + signature.length());
