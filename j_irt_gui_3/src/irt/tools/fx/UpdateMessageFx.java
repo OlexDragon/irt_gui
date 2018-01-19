@@ -2,7 +2,10 @@ package irt.tools.fx;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -281,6 +284,10 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 			FileChooser fileChooser = getFileChooser(lblProgram, "*.bin");
 
+			final File file = Paths.get("Z:", "4alex", "boards", "SW release", "latest").toFile();
+			if(file.exists() && file.isDirectory())
+				fileChooser.setInitialDirectory(file);
+
 			final File result = fileChooser.showOpenDialog(getOwner());
 			if(result!=null){
 				setLabelText(lblProgram, cbProgram, result.toPath());
@@ -353,7 +360,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		// When none production mode 'lblProfile' and 'lblProgram' equal null.
 		return Optional.ofNullable(lblProfile).map(lbl->validate(lbl.getText(), cbProfile)).orElse(false)
-				|| Optional.ofNullable(lblProgram).map(lbl->validate(lbl.getText(), cbProfile)).orElse(false);
+				|| Optional.ofNullable(lblProgram).map(lbl->validate(lbl.getText(), cbProgram)).orElse(false);
 	}
 
 	private boolean validate(String text, CheckBox cb){
@@ -482,6 +489,28 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 						return null;
 					});
+		}
+
+		public Optional<ByteBuffer> getByteBuffer(PacketFormats packetFormat) {
+			return Optional
+					.ofNullable(paths.get(packetFormat))
+					.map(path->{
+						try(	RandomAccessFile 	raf = new RandomAccessFile(path, "r");
+								FileChannel 		fileChannel 	= raf.getChannel()){
+
+							return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+
+						} catch (Exception e) {
+							logger.catching(e);
+						}
+						return null;
+					});
+		}
+
+		public Optional<Path> getPath(PacketFormats packetFormat) {
+			return Optional
+					.ofNullable(paths.get(packetFormat))
+					.map(path->Paths.get(path));
 		}
 	}
 

@@ -32,6 +32,7 @@ public class DeviceInfo implements PacketListener {
 	};
 
 	public enum DeviceType{
+		MAIN_CONTROLLER	(1, Protocol.LINKED, "MAIN CONTROLLER"),
 		BIAS_BOARD		(2, Protocol.LINKED, "BIAS_BOARD"),
 		PICOBUC_L_TO_KU	(100, Protocol.LINKED, "PICOBUC_L_TO_KU"),
 		PICOBUC_L_TO_C 	(101, Protocol.LINKED, "PICOBUC_L_TO_C"),

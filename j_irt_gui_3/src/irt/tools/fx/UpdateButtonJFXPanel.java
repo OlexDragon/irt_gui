@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
@@ -27,6 +28,7 @@ import irt.data.network.HttpUploader;
 import irt.data.network.NetworkAddress;
 import irt.data.profile.Profile;
 import irt.data.profile.ProfileValidator.ProfileErrors;
+import irt.tools.fx.UpdateMessageFx.PacketFormats;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -211,9 +213,34 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 						addToTar(tarArchiveOutputStream, "setup.md5", setuoMD5.toString().getBytes());
 
+						// PROGRAM
+						message
+						.getByteBuffer(PacketFormats.BINARY)
+						.map(bb->{
+							byte[] dst = new byte[bb.capacity()];
+							bb.get(dst);
+							return dst;
+						})
+						.ifPresent(bytes->{
+							message
+							.getPath(PacketFormats.BINARY)
+							.map(Path::getFileName)
+							.map(Path::toString)
+							.ifPresent(fileName->{
+
+								try {
+
+									addToTar(tarArchiveOutputStream, fileName, bytes);
+
+								} catch (IOException e1) {
+									logger.catching(e1);
+								}
+							});
+						});
+
 						ByteArrayInputStream is = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 						uploader.upload(is);
-						logger.error(new String(byteArrayOutputStream.toByteArray()));
+//						logger.error(new String(byteArrayOutputStream.toByteArray()));
 
 					} catch (NoSuchAlgorithmException | IOException e1) {
 						logger.catching(e1);
