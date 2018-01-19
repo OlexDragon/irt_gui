@@ -1,27 +1,32 @@
 
 package irt.tools.fx;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.swing.Timer;
+import javax.xml.bind.DatatypeConverter;
+
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceInfo;
+import irt.data.network.HttpUploader;
 import irt.data.network.NetworkAddress;
-import irt.irt_gui.IrtGui;
+import irt.data.profile.Profile;
+import irt.data.profile.ProfileValidator.ProfileErrors;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -31,9 +36,6 @@ import javafx.scene.control.Button;
 
 public class UpdateButtonJFXPanel extends JFXPanel {
 	private static final long serialVersionUID = -5186685111758208307L;
-	private static final String twoHyphens = "--";
-	private static final String lineEnd = "\r\n";
-	private static final int maxBufferSize = 1*1024*1024;
 
 	private final Logger logger = LogManager.getLogger();
 
@@ -58,9 +60,35 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 	// ******************************* constructor UpdateButtonFx   ***************************************************
 	public class UpdateButtonFx extends Button{
 
+		private UpdateMessageFx updateMessage;
+		private boolean timerDone;
+
 		public UpdateButtonFx() {
 			setText("Update");
+
+			addMouseListener(new MouseListener() {
+				Timer timer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->timerDone=true);
+				
+				@Override
+				public void mouseReleased(MouseEvent e) {
+					timer.stop();
+				}
+				
+				@Override
+				public void mousePressed(MouseEvent e) {
+					timer.restart();
+				}
+				
+				@Override public void mouseExited(MouseEvent e) { }
+				@Override public void mouseEntered(MouseEvent e) { }
+				@Override public void mouseClicked(MouseEvent e) { }
+			});
+
 			setOnAction(e->{
+
+				// Return if message already showing
+				if(updateMessage!=null && updateMessage.isShowing())
+					return;
 
 				final byte[] address = networkAddress.getAddress();
 				final String addrStr = Optional.ofNullable(address)
@@ -71,194 +99,137 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 												.mapToObj(Integer::toString)
 												.collect(Collectors.joining("."));
 
-				UpdateMessagePkgFx d = new UpdateMessagePkgFx(deviceInfo);
-				d.setIpAddress(addrStr);
-				
-				d.showAndWait()
+				updateMessage = new UpdateMessageFx(deviceInfo, timerDone);
+
+				timerDone = false;	//Reset the timer setting
+
+				updateMessage.setIpAddress(addrStr);
+				updateMessage.showAndWait()
 				.ifPresent(message->{
 
-					//IP Address
-					final String ipAddress = message.getAddress();
-					if(!isIpReachable(ipAddress)){
+					// Test IP Address
+					final HttpUploader uploader = new HttpUploader(message.getAddress());
+
+					// If IP address is not reachable show error message
+					if(!uploader.isIpReachable()){
+
+						String ipAddress = uploader.getIpAddress();
 						logger.warn("Can not reach the IP addredd {}", ipAddress);
 						showAlert("The IP Address '" + ipAddress + "' is not Reachable.");
 						return;
 					}
 
+					//***********************************************   Upload package   *******************************************************
 
-					String boundary =  "*****"+Long.toHexString(System.currentTimeMillis())+"*****";
+					if(message.isPackage()){
 
-					try {
+						Optional
+					    .ofNullable(message.getPacksgePath())
+					    .map(File::new)
+					    .ifPresent(file->{
+							try {
 
-						URL url = new URL("http://" + ipAddress + "/upgrade.cgi");
-						HttpURLConnection connection = (HttpURLConnection) url.openConnection();	
+								uploader.upload(file);
 
-						connection.setDoOutput(true);
-					    connection.setDoInput(true);
-					    connection.setUseCaches(false);
-					    connection.setRequestMethod("POST");
-						connection.setRequestProperty("Connection", "Keep-Alive");
-						final String value = "IRT GUI" + IrtGui.VERTION + "; User: " + System.getProperty("user.name") + "; os.name: " + System.getProperty("os.name") + "; os.arch: " + System.getProperty("os.arch") + ";";
-						connection.setRequestProperty("User-Agent", value);
-						connection.setRequestProperty("Content-Type", "multipart/form-data; boundary="+boundary);
+							} catch (IOException e2) {
+								logger.catching(e2);
+							}
+						});
 
-						try(	OutputStream outputStream = connection.getOutputStream();
-								DataOutputStream dataOutputStream = new DataOutputStream(outputStream);) {
+						return;
 
-							dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
-							dataOutputStream.writeBytes("Upgrade" + lineEnd);
-							dataOutputStream.writeBytes(lineEnd);
-
-						    Optional
-						    .ofNullable(message.getPacksgePath())
-						    .map(File::new)
-						    .ifPresent(file->{
-						    	
-								// Upload POST Data
-								try(FileInputStream fileInputStream = new FileInputStream(file);) {
-
-									int bytesAvailable = fileInputStream.available();
-									int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-									byte[] buffer = new byte[bufferSize];
-
-									int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-									while(bytesRead > 0) {
-										dataOutputStream.write(buffer, 0, bufferSize);
-										bytesAvailable = fileInputStream.available();
-										bufferSize = Math.min(bytesAvailable, maxBufferSize);
-										bytesRead = fileInputStream.read(buffer, 0, bufferSize);
-									}
-									
-									dataOutputStream.writeBytes(lineEnd);
-									dataOutputStream.flush();
-
-								} catch (IOException e1) {
-									logger.catching(e1);
-								}
-
-								// Read Response
-								try(InputStream in = connection.getInputStream()) {
-
-									BufferedReader r = new BufferedReader(new InputStreamReader(in));
-									StringBuffer buf = new StringBuffer();
-									String line;
-									while ((line = r.readLine())!=null) {
-										buf.append(line).append(System.getProperty("line.separator"));
-										final int indexOf = buf.indexOf("End of session");
-										if(indexOf>0)
-											return;
-									}
-
-									String m = "var httpd_message='";
-									final String errorMessage = Optional
-																	.of(buf.indexOf(m))
-																	.filter(index->index>0)
-																	.map(index->index+m.length())
-																	.map(index->buf.substring(index))
-																	.map(str->str.substring(0, str.indexOf("'")))
-																	.orElse("Ooops, there was an error!");
-																		
-									Alert alert = new Alert(AlertType.ERROR);
-									alert.setTitle("Upload Error");
-									alert.setHeaderText("Error Message:");
-									alert.setContentText(errorMessage);
-
-									alert.showAndWait();
-
-								} catch (IOException e1) { logger.catching(e1); }
-						    });
-						}
-
-
-					} catch (IOException e1) {
-						logger.catching(e1);
 					}
 
-//					final ErrorMessage errorMessage = Optional.ofNullable(packagePath).orElse(null);
+					//*************************************************   Create package   *****************************************************
 
-//					try {
-//						final MessageDigest md5 = MessageDigest.getInstance("MD5");
-//
-//						if(errorMessage!=null)
-//							if(errorMessage.getError()!=ProfileErrors.NO_ERROR){
-//
-//								showAlert("The profile '" + packagePath + "' has errors.");
-//								return;
-//
-//							} else {
-//								Optional
-//								.of(Paths.get(packagePath).toFile())
-//								.filter(File::exists)
-//								.filter(File::isFile)
-//								.ifPresent(f->{
-//
-//									String charEncoding = System.getProperty("file.encoding");
-//
-//									try(	RandomAccessFile 	raf = new RandomAccessFile(f, "r");
-//											FileChannel 		fileChannel 	= raf.getChannel()){
-//
-//										MappedByteBuffer mbb = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-//										CharBuffer charBuffer = Charset.forName(charEncoding).decode(mbb);
-//
-//
-//										final CharBuffer allocate = CharBuffer.allocate(charBuffer.length() + 10);
-//
-//										int r = allocate.read(charBuffer);
-//										allocate.put("1234567890");
-//										logger.error(allocate.position(0).toString());
-//										logger.error(charBuffer.position(0).toString());
-//										logger.error("sizes: {}:{}", charBuffer.length(), allocate.length());
-//
-//										logger.error(DatatypeConverter.printHexBinary(md5.digest(charBuffer.toString().getBytes(charEncoding))));
-//										logger.error(DatatypeConverter.printHexBinary(md5.digest(allocate.toString().getBytes(charEncoding))));
-//
-//									} catch (Exception e1) {
-//										logger.catching(e1);
-//									}
-//								});
-//
-//								try (FileChannel fileChannel = (FileChannel) Files.newByteChannel(Paths.get(packagePath), EnumSet.of(StandardOpenOption.READ))) {
-//
-//									Optional
-//									.ofNullable(fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size()))
-//									.ifPresent(mbb->{
-//
-//										logger.error("position={}", mbb.position());
-//										String charEncoding = System.getProperty("file.encoding");
-//										CharBuffer charBuffer = Charset.forName(charEncoding).decode(mbb);
-//
-//										logger.error("position={}", charBuffer.position());
-//										logger.error(charBuffer.toString());
-//										logger.error("position={}", charBuffer.position());
-//
-//										try {
-//
-//											byte[] hash = md5.digest(charBuffer.toString().getBytes(charEncoding));
-//											logger.error(DatatypeConverter.printHexBinary(hash));
-//
-//										} catch (UnsupportedEncodingException e1) {
-//											logger.catching(e1);
-//										}
-//									});
-//
-//								}
-//
-//									byte[] b = Files.readAllBytes(Paths.get(packagePath));
-//									byte[] hash = md5.digest(b);
-//									logger.error(DatatypeConverter.printHexBinary(hash));
-//							}
-//
-//						//If programPath != null
-////						Optional.ofNullable(message.getProgramPath()).ifPresent(pp->{
-////							//TODO Add action
-////							logger.error("programPath - {}", pp);
-////						});
-//					} catch (Exception e1) {
-//						logger.catching(e1);
-//					}
+					try(	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+							TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(byteArrayOutputStream);){
+								
+						StringBuffer setuoMD5 = new StringBuffer();
+						MessageDigest md5 = MessageDigest.getInstance("MD5");
 
+						//SETUP.INFO file
+						{
+
+							final String setupInfoFrame = "system any.any.any { %s }";
+							final String setupInfo = String.format(setupInfoFrame, message.getSetupInfo());
+							final byte[] setupInfoBytes = setupInfo.getBytes(Profile.charEncoding);
+
+							addToTar(tarArchiveOutputStream, "setup.info", setupInfo.getBytes(Profile.charEncoding));
+
+							setuoMD5.append(DatatypeConverter.printHexBinary(md5.digest(setupInfoBytes))).append(" *setup.info").append("\n") ;
+						}
+
+						final Optional<Profile> oProfile = message.getProfile();
+						final ProfileErrors profileErrors = oProfile.map(Profile::validate).orElse(ProfileErrors.DO_NOT_EXSISTS);
+
+						// PROFILE content
+						if(profileErrors!=ProfileErrors.DO_NOT_EXSISTS){
+
+							// If profile has error return
+							if(profileErrors!=ProfileErrors.NO_ERROR){
+								showAlert("Profile errorr: " + profileErrors);
+								return;
+							}
+
+							// if profile does not have errors prepare a profile for uploading
+							final String profileMD5 = oProfile
+															.map(p -> {
+																try {
+
+																	return p.getMD5();
+
+																} catch (Exception e1) {
+																	logger.catching(e1);
+																	return null;
+																}
+															}).orElse(null);
+
+							if(profileMD5==null){
+								showAlert("MD5 errorr.");
+								return;
+							}
+
+							// setup.md5 file content
+							final String fileName = oProfile.map(Profile::getFileName).orElse("");
+							setuoMD5.append(profileMD5).append(" *").append(fileName);
+
+							// Profile tar entry
+							oProfile
+							.map(Profile::getProfileCharBuffer)
+							.ifPresent(charBuffer->{
+								try {
+
+									charBuffer.rewind();
+									addToTar(tarArchiveOutputStream, fileName, charBuffer.toString().getBytes());
+
+								} catch (Exception e1) {
+									logger.catching(e1);
+								}
+							});
+						}
+
+						addToTar(tarArchiveOutputStream, "setup.md5", setuoMD5.toString().getBytes());
+
+						ByteArrayInputStream is = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+						uploader.upload(is);
+						logger.error(new String(byteArrayOutputStream.toByteArray()));
+
+					} catch (NoSuchAlgorithmException | IOException e1) {
+						logger.catching(e1);
+					}
 				});
 			});
+		}
+
+		private void addToTar(TarArchiveOutputStream tarArchiveOutputStream, String fileName, byte[] content) throws IOException {
+
+			TarArchiveEntry infoEntry = new TarArchiveEntry(fileName);
+			infoEntry.setSize(content.length);
+
+			tarArchiveOutputStream.putArchiveEntry(infoEntry);
+			tarArchiveOutputStream.write(content);
+			tarArchiveOutputStream.closeArchiveEntry();
 		}
 
 		private void showAlert(final String errorMessage) {
@@ -267,39 +238,8 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 			alert.setContentText(errorMessage);
 
 			Platform.runLater(()->{
-				alert.showAndWait();
+				alert.show();
 			});
 		}
 	}
-
-	private static boolean isIpReachable(String targetIp) {
-		 
-        try {
-            InetAddress target = InetAddress.getByName(targetIp);
-            return target.isReachable(5000);  //timeout 5sec
-
-        } catch (Exception ex) {
-            LogManager.getLogger().catching(ex);
-            return false;
-        }
-    }
-//
-//	//***************** class ErrorMessage ********************
-//	public class ErrorMessage{
-//
-//		private ProfileErrors error;
-//
-//		public ErrorMessage(ProfileErrors error) {
-//			this.error = error;
-//		}
-//
-//		public ProfileErrors getError() {
-//			return error;
-//		}
-//
-//		@Override
-//		public String toString() {
-//			return "ErrorMessage [error=" + error + "]";
-//		}
-//	}
 }

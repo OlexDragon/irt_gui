@@ -39,7 +39,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.DefaultController;
 import irt.controller.GuiController;
@@ -74,7 +74,7 @@ import irt.tools.textField.RegisterTextField;
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
-	protected final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = LogManager.getLogger();
 
 	private static final int MAX_POTENTIOMETER_VALUE = 896;
 	private static final int P1 = 13;
@@ -180,7 +180,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				boolean isNewBiasBoard = GuiController.getDeviceInfo(linkHeader).map(di->di.getDeviceType().filter(dt->dt.TYPE_ID<1000).map(dt->true).orElse(false) && di.getRevision()>=2).orElse(true);
 
 
-				final Optional<DeviceType> hpBias = deviceType.filter(dt->dt.TYPE_ID>=DeviceType.HPB_L_TO_KU.TYPE_ID && dt.TYPE_ID>=DeviceType.KA_SSPA.TYPE_ID);
+				final Optional<DeviceType> hpBias = deviceType.filter(dt->dt.TYPE_ID>=DeviceType.HPB_L_TO_KU.TYPE_ID && dt.TYPE_ID<=DeviceType.KA_SSPA.TYPE_ID);
 				int index = hpBias.map(dt->20).orElse(isMainBoard ? 1 :201);
 
 				double multiplier;
@@ -197,7 +197,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				}else 
 					multiplier = 5.4;
 
-				index = isMainBoard ? 5 : 205;
+				index = hpBias.map(dt->20).orElse(isMainBoard ? 5 : 205);
 				
 				adcWorkers.add(new AdcWorker(lblCurrent1, 	addr, new RegisterValue(index, 1, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS1_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
 				adcWorkers.add(new AdcWorker(lblCurrent2, 	addr, new RegisterValue(index, 2, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS2_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
@@ -214,8 +214,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					t.stop();
 				
 				threadList.clear();
-
-				adcWorkers.clear();
 			}
 		});
 
@@ -459,7 +457,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 					@Override
 					protected Void doInBackground() throws Exception {
-						logger.entry();
+
 						if(isMainBoard)
 							new SetterController(deviceType, "Initialize UnitController",
 									new Setter(linkHeader,
@@ -617,7 +615,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				}else
 					don = false;
 
-				return BIASsPanel.this.logger.exit(don);
+				return don;
 			}
 		});
 

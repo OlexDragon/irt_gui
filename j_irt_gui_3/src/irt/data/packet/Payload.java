@@ -218,7 +218,9 @@ public class Payload {
 		final Optional<RegisterValue> rv = filter.map(b->new RegisterValue( getInt(0), getInt(1), null));
 
 		filter
-		.filter(b->b.length>=12).ifPresent(b->{
+		.filter(b->b.length>=12)
+		.ifPresent(b->{
+
 			long v = getInt(2)&Long.MAX_VALUE;
 			Value value = new Value(v, 0 , Long.MAX_VALUE, 0);
 			rv.get().setValue(value);

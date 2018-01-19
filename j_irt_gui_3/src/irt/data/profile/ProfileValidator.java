@@ -1,9 +1,6 @@
 package irt.data.profile;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.CharBuffer;
 import java.util.Scanner;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,31 +8,20 @@ import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceInfo.DeviceType;
 
-public class ProfileChecker {
+public class ProfileValidator {
 
 	private final Logger logger = LogManager.getLogger();
 	private Boolean isFCM;
 	private ProfileErrors profileError;
 
-	public ProfileChecker(String pathToProfile) {
-		Path p = Paths.get(pathToProfile);
-		File f = p.toFile();
+	public ProfileValidator(CharBuffer charBuffer) {
 
-		//File does not exists
-		if(!(f.exists() && f.isFile())){
-			logger.info("The file does not exists ({})", f);
-			profileError = ProfileErrors.FILE_DOES_NOT_EXISTS;
-			return;
-		}
-
-		final StringBuffer fileContents = new StringBuffer();
 		final ProfileParser profileParser = new ProfileParser();
 
-		try (Scanner scanner = new Scanner(f)) {
+		try (Scanner scanner = new Scanner(charBuffer)) {
 
 			while (scanner.hasNextLine()){
 				final String trim = scanner.nextLine().trim();
-				fileContents.append(trim).append("\n");
 				profileParser.append(trim);
 			}
 
@@ -56,10 +42,6 @@ public class ProfileChecker {
 				return;
 			}
 
-		} catch (FileNotFoundException e) {
-			LogManager.getLogger().catching(e);
-			profileError = ProfileErrors.LODE_FILE_ERROR;
-			return;
 		}
 
 		profileError = ProfileErrors.NO_ERROR;
@@ -79,6 +61,7 @@ public class ProfileChecker {
 		FILE_DOES_NOT_EXISTS,
 		LODE_FILE_ERROR,
 		CAN_NOT_GET_DEVICE_TYPE,
-		ERROR
+		ERROR,
+		DO_NOT_EXSISTS
 	}
 }

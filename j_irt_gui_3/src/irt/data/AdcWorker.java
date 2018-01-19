@@ -37,6 +37,7 @@ public class AdcWorker {
 
 	public AdcWorker(JLabel label, byte linkAddr, RegisterValue registerValue, short packetId, byte parameterId, double multiplier, String pattern) {
 		packetToSend = new DeviceDebugPacket(linkAddr, registerValue, packetId, parameterId);
+
 		this.label = label;
 		this.packetId = packetId;
 		this.multiplier = multiplier;

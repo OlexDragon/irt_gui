@@ -1,13 +1,20 @@
 package irt.tools.fx;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,10 +24,14 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.file.FileScanner;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
+import irt.data.profile.Profile;
 import irt.tools.fx.UpdateMessageFx.Message;
 import irt.tools.panel.head.IrtPanel;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -32,6 +43,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
@@ -39,69 +51,46 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class UpdateMessageFx extends Dialog<Message>{
-	private static final String DID_NOT_SET = "did not set";
 
 	private final Logger logger = LogManager.getLogger();
 
-	private final TextField ipAddress;
-
-	private final Label lblProfile;
-	private final Label lblProgram;
-
-	private final CheckBox cbProfile;
-	private final CheckBox cbProgram;
+	private final TextField tfAddress;
 
 	private String ipAddressStr;
+
+	private CheckBox cbPackage;
+	private CheckBox cbProfile;
+	private CheckBox cbProgram;
+
+	private Label lblPackage;
+	private Label lblProfile;
+	private Label lblProgram;
+
+	private ChangeListener<? super String> textListener;
+	private ChangeListener<? super Boolean> cbListener;
+	
 	private FileScanner fileScanner;
 
+	private Button updateButton;
+
 	// ******************************* constructor UpdateMessageFx   ***************************************************
-	public UpdateMessageFx(DeviceInfo deviceInfo) {
-
-		// Search profile by serial number on the disk Z:
-		new MyThreadFactory().newThread(()->{
-			
-			deviceInfo.getSerialNumber().map(sn->sn + ".bin").ifPresent(f->{
-				
-				try {
-
-					fileScanner = new FileScanner( Paths.get(IrtPanel.PROPERTIES.getProperty("path_to_profiles")), f);
-					final List<Path> paths = fileScanner.get(10, TimeUnit.SECONDS);
-
-					if(paths.size()!=1)
-						return;
-
-					final Path path = paths.get(0);
-					setProfileLabel(path);
-
-				} catch (CancellationException e) {
-					logger.info("fileScaner has been canceled.");
-
-				} catch (Exception e) {
-					logger.catching(e);
-				}
-			});
-		})
-		.start();
+	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
 
 		setTitle("IP Address");
 		setHeaderText("Type a valid IP address.");
-
-		final EventHandler<ActionEvent> fileScannerCansel = e->fileScanner.cancel(true);
-		setOnCloseRequest(e->fileScanner.cancel(true));	// Cancel fileScaneron on close
 
 		final ButtonType updateButtonType = new ButtonType("Update", ButtonData.OK_DONE);
 		getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
 
 		// Update button
 
-		final Button updateButton = (Button) getDialogPane().lookupButton(updateButtonType);
+		updateButton = (Button) getDialogPane().lookupButton(updateButtonType);
 		updateButton.setDisable(true);
-		updateButton.setOnAction(fileScannerCansel);	// Cancel fileScaneron on click
 
 		// Cancel button
 
 		final Button cancelButton = (Button) getDialogPane().lookupButton(ButtonType.CANCEL);
-		cancelButton.setOnAction(fileScannerCansel);	// Cancel fileScaneron on click
+		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
 
 		GridPane grid = new GridPane();
 		grid.setHgap(10);
@@ -111,112 +100,178 @@ public class UpdateMessageFx extends Dialog<Message>{
 		//IP Address row #0
 
 		grid.add(new Label("IP Address:"), 0, 0);
-		ipAddress = new TextField();
-		final ChangeListener<? super String> textListener = (o, oV, nV)->enableUpdateButton(updateButton);
-		final ChangeListener<? super Boolean> cbListener = (o, oV, nV)->enableUpdateButton(updateButton);
-		ipAddress.textProperty().addListener(textListener);
-		grid.add(ipAddress, 1, 0);
+		tfAddress = new TextField();
+		textListener = (o, oV, nV)->enableUpdateButton(o);
+		cbListener = (o, oV, nV)->enableUpdateButton(o);
+		tfAddress.textProperty().addListener(textListener);
+		grid.add(tfAddress, 1, 0);
 
-		ipAddress.setPromptText("192.168.0.1");
-		ipAddress.textProperty().addListener(getListener(updateButton));
+		tfAddress.setPromptText("192.168.0.1");
+		tfAddress.textProperty().addListener(getListener(updateButton));
 
-		//Profile row #1
+		//Package selection row #1
 
-		cbProfile = new CheckBox("Profile:");
-		cbProfile.selectedProperty().addListener(cbListener);
-		grid.add(cbProfile, 0, 1);
-		lblProfile = new Label();
-		lblProfile.textProperty().addListener(textListener);
-		grid.add(lblProfile, 1, 1);
-		Button btnOrofileSelection = new Button("Profile Selection");
-		btnOrofileSelection.setOnAction(selectProfile());
-		grid.add(btnOrofileSelection, 2, 1);
+		cbPackage = new CheckBox("Package:");
+		cbPackage.setDisable(true);
+		cbPackage.selectedProperty().addListener(cbListener);
+		grid.add(cbPackage, 0, 1);
+		lblPackage = new Label();
+		StringProperty textProperty = lblPackage.textProperty();
+		textProperty.addListener(textListener);
+		textProperty.addListener(enableCheckBox(cbPackage));
+		grid.add(lblPackage, 1, 1);
+		Button btnPackageSelection = new Button("Package Selection");
+		btnPackageSelection.setMaxWidth(Double.MAX_VALUE);
+		btnPackageSelection.setOnAction(selectPackage());
+		grid.add(btnPackageSelection, 2, 1);
 
-		//Program row #2
+		if(!isProduction){
 
-		cbProgram = new CheckBox("Program:");
-		cbProgram.selectedProperty().addListener(cbListener);
-		grid.add(cbProgram, 0, 2);
-		lblProgram = new Label();
-		lblProgram.textProperty().addListener(textListener);
-		grid.add(lblProgram, 1, 2);
-		Button btnProgramSelection = new Button("Program Selection");
-		btnProgramSelection.setOnAction(selectProgram());
-		grid.add(btnProgramSelection, 2, 2);
+			// if the "Main-Class" of manifest.mf is "irt.irt_gui.IrtGui", this means that
+			// this is production GUI
+			try {
+				Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
+				while (resources.hasMoreElements()) {
+					Manifest manifest = new Manifest(resources.nextElement().openStream());
+
+					final Attributes.Name key = new Attributes.Name("Main-Class");
+					isProduction = manifest
+										.getMainAttributes()
+										.entrySet()
+										.stream()
+										.filter(es->es.getKey().equals(key))
+										.map(es->es.getValue())
+										.map(v->v.equals("irt.irt_gui.IrtGui"))
+										.findAny()
+										.orElse(false);
+					if(isProduction)
+						break;
+				}
+
+				if(!isProduction){
+					
+					final String property = System.getProperty("sun.java.command");
+					isProduction = "irt.irt_gui.IrtGui".equals(property);
+				}
+
+			} catch (IOException e) {
+				logger.catching(e);
+			}
+		}
+
+
+		if(isProduction){
+			createProductionFields(grid);
+
+			// Search profile by the unit serial number on the drive Z:
+			new MyThreadFactory().newThread(()->{
+
+				deviceInfo.getSerialNumber().map(sn->sn + ".bin").ifPresent(f->{
+					
+					try {
+
+						fileScanner = new FileScanner( Paths.get(IrtPanel.PROPERTIES.getProperty("path_to_profiles")), f);
+						final List<Path> paths = fileScanner.get(10, TimeUnit.SECONDS);
+
+						if(paths.size()!=1)
+							return;
+
+						final Path path = paths.get(0);
+						setLabelText(lblProfile, cbProfile, path);
+
+					} catch (CancellationException e) {
+						logger.info("fileScaner has been canceled.");
+
+					} catch (Exception e) {
+						logger.catching(e);
+					}
+				});
+			})
+			.start();
+		}
 
 		getDialogPane().setContent(grid);
+
 		setResultConverter(button->{
 
 			if(button == updateButtonType)
-				return new Message(
-						ipAddress.getText(),
-						Optional.ofNullable(lblProfile.getTooltip())
-						.map(Tooltip::getText)
-						.map(txt->cbProfile.isSelected() ? txt : null)
-						.orElse(cbProfile.isSelected() ? DID_NOT_SET : null),
-
-						Optional.ofNullable(lblProgram.getTooltip())
-						.map(Tooltip::getText)
-						.map(txt->cbProgram.isSelected() ? txt : null)
-						.orElse(cbProgram.isSelected() ? DID_NOT_SET : null));
+				return getMessage();
 
 			return null;
 		});
 	}
 
-	private void enableUpdateButton(final Node updateButton) {
+	private Message getMessage() {
+		final Message message = new Message(tfAddress.getText());
 
-		final boolean addressPresent = Optional.ofNullable(ipAddress.getText()).map(String::trim).filter(value->!value.isEmpty()).isPresent();
-		final boolean proflePresent = Optional.ofNullable(lblProfile.getText()).map(String::trim).filter(value->!value.isEmpty()).isPresent();
-		final boolean programPresent = Optional.ofNullable(lblProgram.getText()).map(String::trim).filter(value->!value.isEmpty()).isPresent();
+		if(cbPackage.isSelected()){
+			message.put(PacketFormats.PACKAGE, lblPackage.getTooltip().getText());
+			return message;
+		}
 
-		final boolean profileSelected = cbProfile.isSelected();
-		final boolean programSelected = cbProgram.isSelected();
+		if(cbProfile.isSelected())
+			message.put(PacketFormats.PROFILE, lblProfile.getTooltip().getText());
 
-		final boolean disable = !addressPresent || !(profileSelected || programSelected) || (profileSelected && !proflePresent)  || (programSelected && !programPresent);
+		if(cbProgram.isSelected())
+			message.put(PacketFormats.BINARY, lblProgram.getTooltip().getText());
 
-
-		Platform.runLater(()->updateButton.setDisable(disable));
+		return message;
 	}
 
-	private void setProfileLabel(final Path path) {
-		Platform.runLater(()->{
+	private ChangeListener<? super String> enableCheckBox(CheckBox checkBox) {
 
-			lblProfile.setTooltip(new Tooltip(path.toString()));
-			lblProfile.setText(path.getFileName().toString());
-			cbProfile.setSelected(true);
-		});
+		return (o, oV, nV)->checkBox.setDisable(!Optional.ofNullable(nV).filter(str->!str.isEmpty()).isPresent());
 	}
 
-	private void setProgramLabel(final Path path) {
-		Platform.runLater(()->{
+	private void createProductionFields(GridPane grid) {
+		final Separator separator = new Separator();
+		grid.add(separator, 0, 2, 3, 1);
 
-			lblProgram.setTooltip(new Tooltip(path.toString()));
-			lblProgram.setText(path.getFileName().toString());
-			cbProgram.setSelected(true);
-		});
+		//Profile row #1
+
+		cbProfile = new CheckBox("Profile:");
+		cbProfile.setDisable(true);
+		cbProfile.selectedProperty().addListener(cbListener);
+		grid.add(cbProfile, 0, 3);
+		lblProfile = new Label();
+		StringProperty textProperty = lblProfile.textProperty();
+		textProperty.addListener(textListener);
+		textProperty.addListener(enableCheckBox(cbProfile));
+		grid.add(lblProfile, 1, 3);
+		Button btnOrofileSelection = new Button("Profile Selection");
+		btnOrofileSelection.setMaxWidth(Double.MAX_VALUE);
+		btnOrofileSelection.setOnAction(selectProfile());
+		grid.add(btnOrofileSelection, 2, 3);
+
+		//Program row #2
+
+		cbProgram = new CheckBox("Program:");
+		cbProgram.setDisable(true);
+		cbProgram.selectedProperty().addListener(cbListener);
+		grid.add(cbProgram, 0, 4);
+		lblProgram = new Label();
+		textProperty = lblProgram.textProperty();
+		textProperty.addListener(textListener);
+		textProperty.addListener(enableCheckBox(cbProgram));
+		grid.add(lblProgram, 1, 4);
+		Button btnProgramSelection = new Button("Program Selection");
+		btnProgramSelection.setMaxWidth(Double.MAX_VALUE);
+		btnProgramSelection.setOnAction(selectProgram());
+		grid.add(btnProgramSelection, 2, 4);
+
+		getDialogPane().setContent(grid);
 	}
 
 	private EventHandler<ActionEvent> selectProfile() {
 		return e->{
 
-			FileChooser fileChooser = new FileChooser();
-			final ObservableList<ExtensionFilter> extensionFilters = fileChooser.getExtensionFilters();
-			extensionFilters.add(new ExtensionFilter("IRT Technologies BIN file", "*.bin"));
-			extensionFilters.add(new ExtensionFilter("All", "*.*"));
-
-			final Optional<File> file = Optional.ofNullable(lblProfile.getTooltip()).map(tt->tt.getText()).map(File::new);
-			if(file.isPresent()){
-
-				final File f = file.get();
-				fileChooser.setInitialDirectory(f.getParentFile());
-				fileChooser.setInitialFileName(f.getName());
-			}
+			FileChooser fileChooser = getFileChooser(lblProfile, "*.bin");
 
 			final File result = fileChooser.showOpenDialog(getOwner());
 			if(result!=null){
 				fileScanner.cancel(true);	// Cancel fileScaneron before the new path setting
-				setProfileLabel(result.toPath());
+				setLabelText(lblProfile, cbProfile, result.toPath());
+//				getDialogPane().getScene().getWindow().sizeToScene();
 			}
 		};
 	}
@@ -224,18 +279,111 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private EventHandler<ActionEvent> selectProgram() {
 		return e->{
 
-			FileChooser fileChooser = new FileChooser();
-			final ObservableList<ExtensionFilter> extensionFilters = fileChooser.getExtensionFilters();
-			extensionFilters.add(new ExtensionFilter("IRT Technologies BIN file", "*.bin"));
-			extensionFilters.add(new ExtensionFilter("All", "*.*"));
-
-			final File file = new File("Z:\\4alex\\boards\\SW release\\latest");
-			if(file.exists() && file.isDirectory())
-				fileChooser.setInitialDirectory(file);
+			FileChooser fileChooser = getFileChooser(lblProgram, "*.bin");
 
 			final File result = fileChooser.showOpenDialog(getOwner());
-			if(result!=null)
-				setProgramLabel(result.toPath());
+			if(result!=null){
+				setLabelText(lblProgram, cbProgram, result.toPath());
+//				getDialogPane().getScene().getWindow().sizeToScene();
+			}
+		};
+	}
+
+	private FileChooser getFileChooser(Label label, String ext) {
+		FileChooser fileChooser = new FileChooser();
+		final ObservableList<ExtensionFilter> extensionFilters = fileChooser.getExtensionFilters();
+		extensionFilters.add(new ExtensionFilter("IRT Technologies BIN file", ext));
+		extensionFilters.add(new ExtensionFilter("All", "*.*"));
+
+		Optional.ofNullable(label.getTooltip()).map(tt->tt.getText()).map(File::new).ifPresent(file->{
+
+			fileChooser.setInitialDirectory(file.getParentFile());
+			fileChooser.setInitialFileName(file.getName());
+		});
+
+		return fileChooser;
+	}
+
+	private void enableUpdateButton(final ObservableValue<?> observableValue) {
+
+		final Optional<CheckBox> oIsSelected = Optional.of(observableValue)
+														.filter(BooleanProperty.class::isInstance)
+														.map(BooleanProperty.class::cast)
+														.map(BooleanProperty::getBean)
+														.map(CheckBox.class::cast)
+														.filter(CheckBox::isSelected);
+
+		Optional.ofNullable(fileScanner)
+		.ifPresent(fs->{
+
+			if(oIsSelected.map(cb->cb==cbPackage).orElse(false)){
+
+				fs.cancel(true);
+				cbProfile.setSelected(false);
+				cbProgram.setSelected(false);
+			}
+		});
+
+
+		if(oIsSelected.map(cb->cb!=cbPackage).orElse(false)){
+
+			cbPackage.setSelected(false);
+		}
+
+		final boolean disable = !validateNodes();
+		Platform.runLater(()->updateButton.setDisable(disable));
+	}
+
+	private boolean validateNodes() {
+
+		// IP Address
+		boolean ipAddress = Optional
+						.ofNullable(tfAddress.getText())
+						.map(String::trim)
+						.map(value->!value.isEmpty())
+						.orElse(false);
+
+		if(!ipAddress)
+			return false;
+
+		// Package
+		// if is address and package return true
+		if(validate(lblPackage.getText(), cbPackage))
+			return true;
+
+		// When none production mode 'lblProfile' and 'lblProgram' equal null.
+		return Optional.ofNullable(lblProfile).map(lbl->validate(lbl.getText(), cbProfile)).orElse(false)
+				|| Optional.ofNullable(lblProgram).map(lbl->validate(lbl.getText(), cbProfile)).orElse(false);
+	}
+
+	private boolean validate(String text, CheckBox cb){
+
+		return Optional.ofNullable(text)
+				.filter(value->!value.isEmpty())
+				.map(v->cb.isSelected())
+				.orElse(false);
+	}
+
+	private void setLabelText(Label label, CheckBox checkBox, final Path path) {
+
+		Platform.runLater(()->{
+
+			label.setTooltip(new Tooltip(path.toString()));
+			label.setText(path.getFileName().toString());
+			checkBox.setSelected(true);
+		});
+	}
+
+	private EventHandler<ActionEvent> selectPackage() {
+		return e->{
+
+			FileChooser fileChooser = getFileChooser(lblPackage, "*.pkg");
+
+			final File result = fileChooser.showOpenDialog(getOwner());
+			if(result!=null){
+				setLabelText(lblPackage, cbPackage, result.toPath());
+//				getDialogPane().getScene().getWindow().sizeToScene();
+			}
 		};
 	}
 
@@ -245,7 +393,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 			final List<String> addr = Optional.ofNullable(nV).filter(a->!a.isEmpty()).map(a->a.split("\\D")).map(Arrays::stream).orElse(Stream.empty()).filter(s->!s.isEmpty()).collect(Collectors.toList());
 
 			if(addr.size()!=4){
-				button.setDisable(true);
+				final boolean disable = !validateNodes();
+				button.setDisable(disable);
 				return;
 			}
 
@@ -255,7 +404,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 	}
 
 	public void setIpAddress(String addrStr) {
-		ipAddress.setText(addrStr);
+		tfAddress.setText(addrStr);
 	}
 
 	public String getIpAddress() {
@@ -265,15 +414,11 @@ public class UpdateMessageFx extends Dialog<Message>{
 	//****************** class Message *****************************
 	public class Message{
 
+		private final Map<PacketFormats, String> paths = new HashMap<>();
 		private String address;
-		private String profilePath;
-		private String programPath;
 
-		public Message(String address, String profile, String program) {
-			super();
+		public Message(String address) {
 			this.address = address;
-			this.profilePath = profile;
-			this.programPath = program;
 		}
 
 		public String getAddress() {
@@ -284,25 +429,66 @@ public class UpdateMessageFx extends Dialog<Message>{
 			this.address = address;
 		}
 
-		public String getProfilePath() {
-			return profilePath;
+		public String put(PacketFormats packetFormats, String path) {
+			return paths.put(packetFormats, path);
 		}
 
-		public void setProfile(String profile) {
-			this.profilePath = profile;
+		public Map<PacketFormats, String> eetPaths() {
+			return paths;
 		}
 
-		public String getProgramPath() {
-			return programPath;
+		public boolean isPackage(){
+			return paths.get(PacketFormats.PACKAGE)!=null;
 		}
 
-		public void setProgram(String program) {
-			this.programPath = program;
-		}
-
+		private String format = "%s{path{%s}}";
 		@Override
 		public String toString() {
-			return "Message [\n\taddress=" + address + ", \n\tprofile=" + profilePath + ", \n\tprogram=" + programPath + "]";
+
+			return paths
+					.entrySet()
+					.stream()
+					.map(es->String.format(format, es.getKey().name().toLowerCase(), es.getValue()))
+					.collect(Collectors.joining("\n"));
 		}
+
+		public String getPacksgePath() {
+			return paths.get(PacketFormats.PACKAGE);
+		}
+
+		public final String setupInfoPathern = "%s { path {%s}}";
+		public String getSetupInfo() {
+
+			return paths
+					.entrySet()
+					.stream()
+					.map(es->new java.util.AbstractMap.SimpleEntry<String, String>(es.getKey().name().toLowerCase(), new File(es.getValue()).getName()))
+					.map(es->String.format(setupInfoPathern, es.getKey(), es.getValue()))
+					.collect(Collectors.joining("\n"));
+		}
+
+		public Optional<Profile> getProfile() {
+			return Optional
+					.ofNullable(paths.get(PacketFormats.PROFILE))
+					.map(path -> {
+
+						try {
+
+							return new Profile(path);
+
+						} catch (IOException e) {
+							logger.catching(e);
+						}
+
+						return null;
+					});
+		}
+	}
+
+	public enum PacketFormats{
+		PROFILE,
+		BINARY,
+		OEM,
+		IMAGE, PACKAGE
 	}
 }
