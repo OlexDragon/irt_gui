@@ -29,6 +29,7 @@ import irt.controller.file.FileScanner;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
 import irt.data.profile.Profile;
+import irt.irt_gui.IrtGui;
 import irt.tools.fx.UpdateMessageFx.Message;
 import irt.tools.panel.head.IrtPanel;
 import javafx.application.Platform;
@@ -48,11 +49,16 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -79,11 +85,16 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 	private Button updateButton;
 
+	private RadioButton cbBUC;
+
+	private RadioButton cbConv;
+
 	// ******************************* constructor UpdateMessageFx   ***************************************************
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
 
 		setTitle("IP Address");
-		setHeaderText("Type a valid IP address.");		
+		setHeaderText("Type a valid IP address.");
+		getDialogPane().getStylesheets().add(getClass().getResource("fx.css").toExternalForm());
 
 		final ButtonType updateButtonType = new ButtonType("Update", ButtonData.OK_DONE);
 		getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
@@ -103,9 +114,9 @@ public class UpdateMessageFx extends Dialog<Message>{
 		ColumnConstraints col1 = new ColumnConstraints();
 		col1.setPercentWidth(20);
 		ColumnConstraints col2 = new ColumnConstraints();
-		col2.setPercentWidth(55);
+		col2.setPercentWidth(40);
 		ColumnConstraints col3 = new ColumnConstraints();
-		col3.setPercentWidth(25);
+		col3.setPercentWidth(40);
 		grid.getColumnConstraints().addAll(col1,col2,col3);
 		grid.setHgap(10);
 		grid.setVgap(10);
@@ -285,7 +296,35 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		grid.addRow(4, cbProgram, lblProgram, btnProgramSelection);
 
-		getDialogPane().setContent(grid);
+		ImageView imageView = new ImageView();
+		final Image imageBuc = new Image(IrtGui.class.getResourceAsStream("images/AnrBUC.png"));
+		final Image imageConv = new Image(IrtGui.class.getResourceAsStream("images/converter.png"));
+
+		imageView.setImage(imageBuc);
+		grid.add(imageView, 1, 5);
+
+		VBox vBox = new VBox();
+
+		final ToggleGroup group = new ToggleGroup();
+		final EventHandler<ActionEvent> onAction = e->{
+			if(e.getSource()==cbBUC)
+				imageView.setImage(imageBuc);
+			else
+				imageView.setImage(imageConv);
+		};
+
+		cbBUC = new RadioButton("BUC");
+		cbBUC.setSelected(true);
+		cbBUC.setToggleGroup(group);
+		cbBUC.setOnAction(onAction);
+
+		cbConv = new RadioButton("Converter");
+		cbConv.setToggleGroup(group);
+		cbConv.setOnAction(onAction);
+
+		vBox.getChildren().add(cbBUC);
+		vBox.getChildren().add(cbConv);
+		grid.add(vBox, 0, 5);
 	}
 
 	private EventHandler<ActionEvent> selectProfile() {
@@ -486,14 +525,14 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
-		public final String setupInfoPathern = "%s { path {%s}}";
+		public final String setupInfoPathern = "%s any.any.any { %s { path {%s}} }";
 		public String getSetupInfo() {
 
 			return paths
 					.entrySet()
 					.stream()
 					.map(es->new java.util.AbstractMap.SimpleEntry<String, String>(es.getKey().name().toLowerCase(), new File(es.getValue()).getName()))
-					.map(es->String.format(setupInfoPathern, es.getKey(), es.getValue()))
+					.map(es->String.format(setupInfoPathern, (cbBUC.isSelected() ? "system" : "256"), es.getKey(), es.getValue()))
 					.collect(Collectors.joining("\n"));
 		}
 
