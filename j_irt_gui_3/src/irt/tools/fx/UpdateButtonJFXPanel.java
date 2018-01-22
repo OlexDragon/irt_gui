@@ -153,8 +153,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 						//SETUP.INFO file
 						{
 
-							final String setupInfoFrame = "system any.any.any { %s }";
-							final String setupInfo = String.format(setupInfoFrame, message.getSetupInfo());
+							final String setupInfo = message.getSetupInfo();
 							final byte[] setupInfoBytes = setupInfo.getBytes(Profile.charEncoding);
 
 							addToTar(tarArchiveOutputStream, "setup.info", setupInfo.getBytes(Profile.charEncoding));
