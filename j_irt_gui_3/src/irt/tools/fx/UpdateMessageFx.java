@@ -1,5 +1,6 @@
 package irt.tools.fx;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -38,17 +39,19 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -80,7 +83,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
 
 		setTitle("IP Address");
-		setHeaderText("Type a valid IP address.");
+		setHeaderText("Type a valid IP address.");		
 
 		final ButtonType updateButtonType = new ButtonType("Update", ButtonData.OK_DONE);
 		getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
@@ -96,18 +99,23 @@ public class UpdateMessageFx extends Dialog<Message>{
 		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
 
 		GridPane grid = new GridPane();
+		grid.setMinWidth(400);
+		ColumnConstraints col1 = new ColumnConstraints();
+		col1.setPercentWidth(20);
+		ColumnConstraints col2 = new ColumnConstraints();
+		col2.setPercentWidth(55);
+		ColumnConstraints col3 = new ColumnConstraints();
+		col3.setPercentWidth(25);
+		grid.getColumnConstraints().addAll(col1,col2,col3);
 		grid.setHgap(10);
 		grid.setVgap(10);
-		grid.setPadding(new Insets(20, 150, 10, 10));
 
 		//IP Address row #0
 
-		grid.add(new Label("IP Address:"), 0, 0);
 		tfAddress = new TextField();
-		textListener = (o, oV, nV)->enableUpdateButton(o);
 		cbListener = (o, oV, nV)->enableUpdateButton(o);
-		tfAddress.textProperty().addListener(textListener);
-		grid.add(tfAddress, 1, 0);
+		tfAddress.textProperty().addListener( textListener = (o, oV, nV)->enableUpdateButton(o) );
+		grid.addRow(0, new Label("IP Address:"), tfAddress);
 
 		tfAddress.setPromptText("192.168.0.1");
 		tfAddress.textProperty().addListener(getListener(updateButton));
@@ -117,16 +125,15 @@ public class UpdateMessageFx extends Dialog<Message>{
 		cbPackage = new CheckBox("Package:");
 		cbPackage.setDisable(true);
 		cbPackage.selectedProperty().addListener(cbListener);
-		grid.add(cbPackage, 0, 1);
 		lblPackage = new Label();
 		StringProperty textProperty = lblPackage.textProperty();
 		textProperty.addListener(textListener);
 		textProperty.addListener(enableCheckBox(cbPackage));
-		grid.add(lblPackage, 1, 1);
 		Button btnPackageSelection = new Button("Package Selection");
 		btnPackageSelection.setMaxWidth(Double.MAX_VALUE);
 		btnPackageSelection.setOnAction(selectPackage());
-		grid.add(btnPackageSelection, 2, 1);
+
+		grid.addRow(1, cbPackage, lblPackage, btnPackageSelection);
 
 		if(!isProduction){
 
@@ -161,7 +168,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 				logger.catching(e);
 			}
 		}
-
 
 		if(isProduction){
 			createProductionFields(grid);
@@ -235,32 +241,49 @@ public class UpdateMessageFx extends Dialog<Message>{
 		cbProfile = new CheckBox("Profile:");
 		cbProfile.setDisable(true);
 		cbProfile.selectedProperty().addListener(cbListener);
-		grid.add(cbProfile, 0, 3);
 		lblProfile = new Label();
 		StringProperty textProperty = lblProfile.textProperty();
 		textProperty.addListener(textListener);
 		textProperty.addListener(enableCheckBox(cbProfile));
-		grid.add(lblProfile, 1, 3);
+		final ChangeListener<? super String> listener = (o,oV,nV)->{
+
+			if(lblProfile.getContextMenu()!=null)
+				return;
+
+			ContextMenu contextMenu = new ContextMenu();
+			MenuItem menuItem = new MenuItem("Edit");
+			menuItem.setOnAction(e-> {
+				try {
+					Desktop.getDesktop().open(new File(lblProfile.getTooltip().getText()));
+				} catch (IOException e1) {
+					logger.catching(e1);
+				}
+			});
+			contextMenu.getItems().add(menuItem);
+			lblProfile.setContextMenu(contextMenu);
+
+		};
+		textProperty.addListener(listener);
 		Button btnOrofileSelection = new Button("Profile Selection");
 		btnOrofileSelection.setMaxWidth(Double.MAX_VALUE);
 		btnOrofileSelection.setOnAction(selectProfile());
-		grid.add(btnOrofileSelection, 2, 3);
+
+		grid.addRow(3, cbProfile, lblProfile, btnOrofileSelection);
 
 		//Program row #2
 
 		cbProgram = new CheckBox("Program:");
 		cbProgram.setDisable(true);
 		cbProgram.selectedProperty().addListener(cbListener);
-		grid.add(cbProgram, 0, 4);
 		lblProgram = new Label();
 		textProperty = lblProgram.textProperty();
 		textProperty.addListener(textListener);
 		textProperty.addListener(enableCheckBox(cbProgram));
-		grid.add(lblProgram, 1, 4);
 		Button btnProgramSelection = new Button("Program Selection");
 		btnProgramSelection.setMaxWidth(Double.MAX_VALUE);
 		btnProgramSelection.setOnAction(selectProgram());
-		grid.add(btnProgramSelection, 2, 4);
+
+		grid.addRow(4, cbProgram, lblProgram, btnProgramSelection);
 
 		getDialogPane().setContent(grid);
 	}
@@ -518,6 +541,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		PROFILE,
 		BINARY,
 		OEM,
-		IMAGE, PACKAGE
+		IMAGE,
+		PACKAGE
 	}
 }
