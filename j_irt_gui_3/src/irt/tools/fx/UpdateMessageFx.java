@@ -56,7 +56,6 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -110,14 +109,14 @@ public class UpdateMessageFx extends Dialog<Message>{
 		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
 
 		GridPane grid = new GridPane();
-		grid.setMinWidth(400);
-		ColumnConstraints col1 = new ColumnConstraints();
-		col1.setPercentWidth(20);
-		ColumnConstraints col2 = new ColumnConstraints();
-		col2.setPercentWidth(40);
-		ColumnConstraints col3 = new ColumnConstraints();
-		col3.setPercentWidth(40);
-		grid.getColumnConstraints().addAll(col1,col2,col3);
+//		grid.setMinWidth(400);
+//		ColumnConstraints col1 = new ColumnConstraints();
+//		col1.setPercentWidth(20);
+//		ColumnConstraints col2 = new ColumnConstraints();
+//		col2.setPercentWidth(40);
+//		ColumnConstraints col3 = new ColumnConstraints();
+//		col3.setPercentWidth(40);
+//		grid.getColumnConstraints().addAll(col1,col2,col3);
 		grid.setHgap(10);
 		grid.setVgap(10);
 
