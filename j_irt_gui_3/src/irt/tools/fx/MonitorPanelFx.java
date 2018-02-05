@@ -121,6 +121,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		else
 			ofNullable= Optional.ofNullable(packet);
 
+		final boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
+
 		ofNullable
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.filter(p->p.getHeader().getPacketId()==packetToSend.getHeader().getPacketId())
@@ -133,19 +135,23 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			.forEach(pl->{
 				logger.entry(pl);
 
-				boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
 
 				final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
 				final byte 							code 				= parameterHeader.getCode();
 
-				Optional<? extends ParameterHeaderCode> parameterHeaderCode = isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code);
+				Optional<? extends ParameterHeaderCode> parameterHeaderCode = (isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code))
+																				.map(phc->checkOverlaps(parameterHeader, phc));
 
-				final ParameterHeaderCode status = isConverter ? ParameterHeaderCodeFCM.STATUS : ParameterHeaderCodeBUC.STATUS;
+				// Downlink status is deprecated
+				if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeBUC.DOWNLINK_STATUS).isPresent())
+					return;
+
+				logger.trace("code: {}; parameterHeaderCode: {}", code, parameterHeaderCode);
 
 				Platform.runLater(()->{
 
 					//Status bites
-					if(code==status.getCode()){
+					if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeFCM.STATUS || phc==ParameterHeaderCodeBUC.STATUS).isPresent()){
 						
 						List<Label> statusLabels = statusPane
 													.getChildren()
@@ -160,10 +166,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 						else
 							setStatus(statusLabels, pl);
 
-						//Values (Power, Temperature, Current ...)
-					}else{
+						return;
+					}
 
-						final Optional<Label> l = gridPane
+					//Values (Power, Temperature, Current ...)
+
+					final Optional<Label> l = gridPane
 													.getChildren()
 													.parallelStream()
 													.filter(Label.class::isInstance)
@@ -172,36 +180,35 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 													.map(Label.class::cast)
 													.findAny();
 
-						if(l.isPresent())	//set label text
+					if(l.isPresent())	//set label text
 
-							setText(l.get(), payloadToString(parameterHeaderCode, pl));
+						setText(l.get(), payloadToString(parameterHeaderCode, pl));
 
-						else{	//Create new labels
+					else{	//Create new labels
 
-							final int size = gridPane.getRowConstraints().size();
-							gridPane.getRowConstraints().add(new RowConstraints());
+						final int size = gridPane.getRowConstraints().size();
+						gridPane.getRowConstraints().add(new RowConstraints());
 
-							final Label descriptionLabel = createDescriptionLabel(pl);
-							gridPane.add(descriptionLabel, 0, size);
+						final Label descriptionLabel = createDescriptionLabel(parameterHeaderCode);
+						gridPane.add(descriptionLabel, 0, size);
 
-							String payloadToString;
-							try{
+						String payloadToString;
+						try{
 
-								payloadToString = payloadToString(parameterHeaderCode, pl);
+							payloadToString = payloadToString(parameterHeaderCode, pl);
 
-							}catch(Exception e){
-								payloadToString = "error";
-								logger.catching(e);
-							}
-
-							final Label child = new Label(payloadToString);
-							child.getStyleClass().add("value");
-							child.setUserData(code);
-							child.setTooltip(new Tooltip(descriptionLabel.getText()));
-
-							gridPane.add(child, 1, size);
-							GridPane.setVgrow(child, Priority.ALWAYS);
+						}catch(Exception e){
+							payloadToString = "error";
+							logger.catching(e);
 						}
+
+						final Label child = new Label(payloadToString);
+						child.getStyleClass().add("value");
+						child.setUserData(code);
+						child.setTooltip(new Tooltip(descriptionLabel.getText()));
+
+						gridPane.add(child, 1, size);
+						GridPane.setVgrow(child, Priority.ALWAYS);
 					}
 				});
 			});
@@ -338,31 +345,20 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 		ParameterHeaderCode c = parameterHeaderCode.get();
 
-		final ParameterHeader parameterHeader = pl.getParameterHeader();
-
-		c = checkLnbOrReflectedPower(parameterHeader, c);
-
-		return  c.toString(pl.getBuffer()) ; 
+		return  c.toString(pl.getBuffer()); 
 	}
 
-	private Label createDescriptionLabel(Payload pl) {
-
-		final ParameterHeader parameterHeader = pl.getParameterHeader();
-		final Optional<? extends ParameterHeaderCode> code = packetToSend.getLinkHeader().getAddr()==CONVERTER 
-																					? ParameterHeaderCodeFCM.valueOf(parameterHeader.getCode())
-																							: ParameterHeaderCodeBUC.valueOf(parameterHeader.getCode());
+	private Label createDescriptionLabel(Optional<? extends ParameterHeaderCode> parameterHeaderCode) {
 
 		String text;
-		if(code.isPresent()) {
+		if(parameterHeaderCode.isPresent()) {
 
-			ParameterHeaderCode c = code.get();
+			ParameterHeaderCode c = parameterHeaderCode.get();
 
-			c = checkLnbOrReflectedPower(parameterHeader, c);
-
-			text = Translation.getValue(String.class, c.name(), "* " + code.get().name());
+			text = Translation.getValue(String.class, c.name(), "* " + parameterHeaderCode.get().name());
 
 		} else
-			text = "* " + code;
+			text = "* " + parameterHeaderCode;
 
 		final Label label = new Label(text + ":");
 		label.getStyleClass().add("description");
@@ -373,9 +369,17 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		return label;
 	}
 
-	private ParameterHeaderCode checkLnbOrReflectedPower(final ParameterHeader parameterHeader, ParameterHeaderCode c) {
-		if(c==ParameterHeaderCodeBUC.LNB1_STATUS && parameterHeader.getSize()>0)
-			c = ParameterHeaderCodeBUC.REFLECTED_POWER;
+	private ParameterHeaderCode checkOverlaps(final ParameterHeader parameterHeader, ParameterHeaderCode c) {
+
+		if(c==ParameterHeaderCodeBUC.INPUT_POWER && parameterHeader.getSize()==4)
+			return ParameterHeaderCodeBUC.DOWNLINK_STATUS;
+
+		if(c==ParameterHeaderCodeBUC.STATUS && parameterHeader.getSize()==1)
+			return ParameterHeaderCodeBUC.DOWNLINK_WAVEGUIDE_SWITCH;
+
+		if(c==ParameterHeaderCodeBUC.LNB1_STATUS && parameterHeader.getSize()>2)
+			return ParameterHeaderCodeBUC.REFLECTED_POWER;
+
 		return c;
 	}
 
@@ -453,7 +457,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		STATUS			( b->Arrays.toString(b)),
 		LNB1_STATUS		( b->lnbReady(b)),
 		LNB2_STATUS		( b->lnbReady(b)),
-		REFLECTED_POWER ( b->bytesToString(b, "dbm"));
+		REFLECTED_POWER ( b->bytesToString(b, "dbm")),
+		DOWNLINK_WAVEGUIDE_SWITCH( b->switchPosition(b)),
+		DOWNLINK_STATUS(b->null);// Downlink status is deprecated
 
 		private final Function<byte[], String> function;
 		private final byte code;
@@ -468,6 +474,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 
 		public static Optional<? extends ParameterHeaderCode> valueOf(byte code){
+			logger.entry(code);
 			return Arrays.stream(values()).parallel().filter(v->v.code==code).findAny();
 		}
 
@@ -486,6 +493,18 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 					.map(b->{
 						final String string = b[0]==1 ? "ready" : "ready.not";
 						return Translation.getValue(String.class, string, string);
+					})
+					.orElse("N/A");
+		}
+
+		private static String switchPosition(byte[] bytes) {
+			return Optional
+					.of(bytes)
+					.filter(b->b.length==1)
+					.map(b->b[0])
+					.filter(b->b!=0)
+					.map(b->{
+						return (b==1 ? "LNB 1" : "LNB 2");
 					})
 					.orElse("N/A");
 		}
