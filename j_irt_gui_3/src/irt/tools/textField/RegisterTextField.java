@@ -251,7 +251,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(RegisterTextField.this);
 
 		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 	}
 
 	public void stop(){

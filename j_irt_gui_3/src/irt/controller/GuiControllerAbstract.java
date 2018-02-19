@@ -29,8 +29,9 @@ import javax.swing.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.serial_port.ComPort;
 import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.MyComPort;
+import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -52,7 +53,7 @@ import irt.tools.panel.head.Console;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.textField.UnitAddressField;
-import jssc.SerialPortList;
+import purejavacomm.NoSuchPortException;
 
 public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
@@ -91,48 +92,70 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		guiController = this;
 
-		comPortThreadQueue.setSerialPort(new ComPort(prefs.get(SERIAL_PORT, "COM1")));
-		console = new Console(gui, "Console");
+		SerialPortInterface serialPort;
+		try {
 
-		JPanel contentPane = (JPanel) gui.getContentPane();
-		Component[] components = contentPane.getComponents();
-		for(Component c:components){
-			switch(c.getClass().getSimpleName()){
-			case "UnitsContainer":
-				unitsPanel = (UnitsContainer) c;
-				break;
-			case "JComboBox":
-				setComboBox((JComboBox<Object>)c);
-				break;
-			case "HeadPanel":
-				logger.trace("set HeadPanel");
-				headPanel = (HeadPanel)c;
-				Component[] cms = headPanel.getComponents();
-				for(Component cm:cms){
-					String n = cm.getName();
-					if(n!=null && n.equals("Language")){
-						setComboBox(cm);
-						break;
-					}
-				}
-			case "IrtPanel":
-				c.addMouseListener(new MouseListener() {
+			serialPort = new MyComPort(prefs.get(SERIAL_PORT, "COM1"));
 
-					@Override
-					public void mouseReleased(MouseEvent e) {
-						int modifiers = e.getModifiers();
-						if((modifiers&InputEvent.CTRL_MASK)>0)
-							console.setVisible(!console.isVisible());
-					}
-					@Override public void mousePressed(MouseEvent e) {}
-					@Override public void mouseExited(MouseEvent e) {}
-					@Override public void mouseEntered(MouseEvent e) {}
-					@Override public void mouseClicked(MouseEvent e) {}
-				});
-			}
+		} catch (NoSuchPortException e1) {
+//			logger.catching(e1);
+			serialPort = null;
 		}
-		comPortThreadQueue.addPacketListener(this);
-		scheduledFuture = service.scheduleAtFixedRate(this, 2, 5, TimeUnit.SECONDS);
+
+			comPortThreadQueue.setSerialPort(serialPort);
+			console = new Console(gui, "Console");
+
+			JPanel contentPane = (JPanel) gui.getContentPane();
+			Component[] components = contentPane.getComponents();
+			for (Component c : components) {
+				switch (c.getClass().getSimpleName()) {
+				case "UnitsContainer":
+					unitsPanel = (UnitsContainer) c;
+					break;
+				case "JComboBox":
+					setComboBox((JComboBox<Object>) c);
+					break;
+				case "HeadPanel":
+					logger.trace("set HeadPanel");
+					headPanel = (HeadPanel) c;
+					Component[] cms = headPanel.getComponents();
+					for (Component cm : cms) {
+						String n = cm.getName();
+						if (n != null && n.equals("Language")) {
+							setComboBox(cm);
+							break;
+						}
+					}
+				case "IrtPanel":
+					c.addMouseListener(new MouseListener() {
+
+						@Override
+						public void mouseReleased(MouseEvent e) {
+							int modifiers = e.getModifiers();
+							if ((modifiers & InputEvent.CTRL_MASK) > 0)
+								console.setVisible(!console.isVisible());
+						}
+
+						@Override
+						public void mousePressed(MouseEvent e) {
+						}
+
+						@Override
+						public void mouseExited(MouseEvent e) {
+						}
+
+						@Override
+						public void mouseEntered(MouseEvent e) {
+						}
+
+						@Override
+						public void mouseClicked(MouseEvent e) {
+						}
+					});
+				}
+			}
+			comPortThreadQueue.addPacketListener(this);
+			scheduledFuture = service.scheduleAtFixedRate(this, 2, 5, TimeUnit.SECONDS);
 	}
 
 	public static Optional<DeviceInfo> getDeviceInfo(LinkHeader linkHeader) {
@@ -160,14 +183,15 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 				float fontSize = Translation.getValue(Float.class, "serialPortSelection.font.size", 16f);
 				serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
-				DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
+				DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(MyComPort.getPortNames().toArray(new String[0]));
 				defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
 				serialPortSelection.setModel(defaultComboBoxModel);
 				Dimension size = serialPortSelection.getSize();
 				size.width = Translation.getValue(Integer.class, "serialPortSelection.width", 200);
 				serialPortSelection.setSize(size);
 
-				String portName = ComPortThreadQueue.getSerialPort().getPortName();
+				String portName = Optional.ofNullable(ComPortThreadQueue.getSerialPort()).map(sp->sp.getPortName()).orElse("");
+
 				if(defaultComboBoxModel.getIndexOf(portName)==-1){
 					if(defaultComboBoxModel.getSize()>1)
 						setSerialPort();
@@ -203,7 +227,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 							float fontSize = Translation.getValue(Float.class, "serialPortSelection.font.size", 16f);
 							serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
-							DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(SerialPortList.getPortNames());
+							DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(MyComPort.getPortNames().toArray(new String[0]));
 							defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
 							serialPortSelection.setModel(defaultComboBoxModel);
 							Dimension size = serialPortSelection.getSize();
@@ -227,10 +251,19 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				ComPortThreadQueue.getSerialPort().closePort();
 
 		else {
-			comPortThreadQueue.setSerialPort(new ComPort(serialPortName));
-			prefs.put(SERIAL_PORT, serialPortName);
+			SerialPortInterface serialPort;
+			try {
 
-			reset();
+				serialPort = new MyComPort(serialPortName);
+				comPortThreadQueue.setSerialPort(serialPort);
+				prefs.put(SERIAL_PORT, serialPortName);
+
+				reset();
+
+			} catch (NoSuchPortException e) {
+				comPortThreadQueue.setSerialPort(null);
+				logger.catching(e);
+			}
 		} 
 
 		synchronized (this) {
@@ -275,18 +308,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	public void setAddress(byte address) {
 		this.address = address;
 		reset();
-	}
-
-	protected boolean isSerialPortSet(){
-
-		return Optional
-				.ofNullable(serialPortSelection)
-				.map(sps->sps.getSelectedItem())
-				.filter(si->si!=null)
-				.map(Object::toString)
-				.filter(ComPortThreadQueue.getSerialPort().getPortName()::equals)
-				.map(spName->true)
-				.orElse(false);
 	}
 
 	protected void getConverterInfo() {
@@ -378,7 +399,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	public void run() {
 		try {
 
-			if(isSerialPortSet())
+			if(Optional.ofNullable(ComPortThreadQueue.getSerialPort()).map(SerialPortInterface::isOpened).orElse(false))
 				getInfo();
 
 		} catch (Exception e) {
@@ -448,6 +469,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			unitsPanel.add(unitPanel);
 
 			final Timer t = new Timer((int) TimeUnit.SECONDS.toMillis(11), e->removePanel(deviceInfo));
+			t.setRepeats(false);
 			t.start();
 			return timers.put(deviceInfo, t);
 		}
@@ -472,5 +494,12 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			Optional.ofNullable(timers.remove(di)).ifPresent(t->t.stop());
 			comPortThreadQueue.clear();
 		}
+	}
+
+	public void stop() {
+
+		comPortThreadQueue.stop();
+		Optional.ofNullable(scheduledFuture).filter(shf->!shf.isCancelled()).ifPresent(shf->shf.cancel(true));
+		Optional.of(service).filter(serv->!serv.isShutdown()).ifPresent(serv->serv.shutdownNow());
 	}
 }

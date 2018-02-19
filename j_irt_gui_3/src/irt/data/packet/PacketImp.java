@@ -44,6 +44,7 @@ public class PacketImp implements Packet{
 		GROUP_ID_RESET			= 5,		/* Device reset: generic command. */
 		GROUP_ID_DEVICE_INFO	= 8,		/* Device information: generic command. */
 		GROUP_ID_CONFIG_PROFILE	= 9,		/* Save configuration: generic command. */
+		GROUP_ID_PROTO			= 10,
 		GROUP_ID_DEVICE_DEBAG	= 61,		/* Device Debug. */
 
 	/* Protocol */
@@ -174,6 +175,9 @@ public class PacketImp implements Packet{
 
 	/* PicoBUC production procedures */
 	public static final byte PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT = 1; /* Re-init default values of RDAC */
+
+	//ProtoPacketIds
+	public static final byte PARAMETER_ID_RETRANSMIT 		= 5;
 
 	public static final byte IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS	= 3;
 
@@ -333,7 +337,7 @@ public class PacketImp implements Packet{
 		return bytes;
 	}
 
-	private static byte[] longToBytes(long value) {
+	public static byte[] longToBytes(long value) {
 		byte[] bs = new byte[8];
 
 		bs[7] = (byte)	value;
@@ -348,7 +352,7 @@ public class PacketImp implements Packet{
 		return bs;
 	}
 
-	private static byte[] intToBytes(int value) {
+	public static byte[] intToBytes(int value) {
 		byte[] bs = new byte[4];
 
 		bs[3] = (byte)	value;

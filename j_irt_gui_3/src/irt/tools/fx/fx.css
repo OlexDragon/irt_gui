@@ -39,3 +39,7 @@
 .button{
 	-fx-cursor: hand;
 }
+.yborder{
+	-fx-border-color: YELLOW;
+	-fx-border-width: 1px;
+}

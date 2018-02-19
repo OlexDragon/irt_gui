@@ -38,6 +38,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		this.txtField = txtField;
 
 		timer = new Timer(9000, timerListener);
+		timer.setRepeats(false);
 		timer.start();
 
 		Thread t = new Thread(this, "DeviceDebagSaveController-"+new RundomNumber().toString());

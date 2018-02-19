@@ -16,6 +16,8 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
@@ -121,9 +123,19 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private boolean statusChamge;
 	private Object summaryAlarm;
 	private boolean run;
+	private SerialPortInterface serialPort;
 
 	@Override
 	public void run() {
+
+		final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
+		if(this.serialPort==null)
+			this.serialPort = serialPort;
+
+		if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
+			shutdownNow();
+			return;
+		}
 
 		try{
 
@@ -362,13 +374,17 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	public void stop(){
+
 		run = false;
 	}
 
 	public void shutdownNow() {
+
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+
 		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
 			scheduledFuture.cancel(true);
+
 		service.shutdownNow();
 	}
 

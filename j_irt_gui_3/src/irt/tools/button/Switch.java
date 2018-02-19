@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
@@ -174,9 +175,20 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 		});
 	}
 
+	private int delay;
 	@Override
 	public void run() {
-		GuiControllerAbstract.getComPortThreadQueue().add(packetToGet);
+
+		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+		final int size = queue.size();
+
+		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
+			delay = ComPortThreadQueue.DELAY_TIMES;
+
+		if(delay<=0)
+			GuiControllerAbstract.getComPortThreadQueue().add(packetToGet);
+		else
+			delay--;
 	}
 
 }

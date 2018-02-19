@@ -1,6 +1,8 @@
 package irt.data;
 
 import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +21,6 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 	protected final Logger logger = LogManager.getLogger();
 
 	public static final byte FLAG_SEQUENCE	= 0x7E;
-	public static final byte CONTROL_ESCAPE= 0x7D;
 
 	protected byte[] data;
 	private Packet packet;
@@ -75,25 +76,35 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 		return preparePacket(data);
 	}
 
-	public static byte[] preparePacket(byte[] data) {
-		if(data!=null){
-			byte[] p = new byte[data.length*3];
-			int index = 0;
-			p[index++] = FLAG_SEQUENCE;
+	public static byte[] preparePacket(final byte[] data) {
+
+		if(data==null)
+			return null;
+
+
+		byte[] csTmp = PacketImp.toBytes((short)new Checksum(data).getChecksum());
+
+		byte[] result = Optional
+				.ofNullable(data)
+				.map(d->countFlags(data) + countFlags(csTmp))
+				.map(count->new byte[data.length + count + 4])
+				.orElse(new byte[data.length + 4]);
+
+
+			result[0] = result[result.length-1] = FLAG_SEQUENCE;
+
+			int index = 1;
 			for(int i=0; i< data.length; i++, index ++){
-				index = checkControlEscape(data, i, p, index);
+				index = checkControlEscape(data, i, result, index);
 			}
-
-			byte[] csTmp = PacketImp.toBytes((short)new Checksum(data).getChecksum());
 			for(int i=1; i>=0; i--, index ++)
-				index = checkControlEscape(csTmp, i, p, index);
+				index = checkControlEscape(csTmp, i, result, index);
 
-			p[index++] = FLAG_SEQUENCE;
+		return result;
+	}
 
-			data = new byte[index];
-			System.arraycopy(p, 0, data, 0, index);
-		}
-		return data;
+	private static int countFlags(final byte[] data) {
+		return (int) IntStream.range(0, data.length).filter(index->data[index]==PacketImp.CONTROL_ESCAPE || data[index]==PacketImp.FLAG_SEQUENCE).count();
 	}
 
 	public void preparePacket(byte value) {
@@ -105,8 +116,8 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 	}
 
 	public static int checkControlEscape(byte[] surce, int surceIndex, byte[] destination, int destinationIndex) {
-		if(surce[surceIndex]==FLAG_SEQUENCE || surce[surceIndex]==CONTROL_ESCAPE){
-			destination[destinationIndex++] = CONTROL_ESCAPE;
+		if(surce[surceIndex]==FLAG_SEQUENCE || surce[surceIndex]==PacketImp.CONTROL_ESCAPE){
+			destination[destinationIndex++] = PacketImp.CONTROL_ESCAPE;
 			destination[destinationIndex]	= (byte) (surce[surceIndex] ^ 0x20);
 		}else
 			destination[destinationIndex] = (byte) surce[surceIndex];

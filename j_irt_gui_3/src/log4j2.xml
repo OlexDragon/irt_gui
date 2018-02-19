@@ -67,13 +67,15 @@
 <!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
 <!--  	<Logger name="irt.controller.GuiController" level="all"/> -->
 
-<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="warn"/> -->
+<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="debug"/> -->
 
 <!--  	<Logger name="irt.controller.control.UnitControllerImp" level="all"/> -->
 
 <!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
 
-<!--  	<Logger name="irt.data.profile.ProfileValidator" level="all"/> -->
+<!--  	<Logger name="irt.controller.serial_port.MyComPort" level="debug"/> -->
+
+<!--  	<Logger name="irt.data.profile.ProfileValidator" level="debug"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />
@@ -83,7 +85,7 @@
       <AppenderRef ref="communication" />
     </Logger>
 
-    <Root level="error">
+    <Root level="warn">
       <AppenderRef ref="STDOUT"/>
       <AppenderRef ref="log"/>
     </Root>

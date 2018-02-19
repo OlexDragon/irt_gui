@@ -356,6 +356,7 @@ public class DumpController implements PacketListener, Runnable, Dumper{
 		try{
 			count = DUMP_TIME;
 			dumper.info(marker, deviceInfo);
+			logger.error("Dump Controller");
 
 			packets.stream().forEach(GuiControllerAbstract.getComPortThreadQueue()::add);
 

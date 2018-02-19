@@ -103,57 +103,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public byte[] getData() {
-		final byte[] l = linkHeader!=null ? linkHeader.toBytes() : new byte[0];
-		final byte[] h = header.toBytes();
-		final byte[] p = payloads.stream().map(Payload::toBytes).collect(new Collector<byte[], byte[], byte[]>(){
-
-									private byte[] result;
-
-									@Override
-									public Supplier<byte[]> supplier() {
-										return ()->new byte[0];
-									}
-
-									@Override
-									public BiConsumer<byte[], byte[]> accumulator() {
-										return (a, b)->{
-											result = Optional
-															.ofNullable(a)
-															.filter(r->a.length>0)
-															.map(r->{
-																r = new byte[a.length + b.length];
-																System.arraycopy(a, 0, result, 0, a.length);
-																System.arraycopy(b, 0, result, a.length, b.length);
-																return r;
-															})
-															.orElse(b);
-										};
-									}
-
-									@Override
-									public BinaryOperator<byte[]> combiner() {
-										return (a, b)->{
-											byte[] result = new byte[a.length + b.length];
-											System.arraycopy(a, 0, result, 0, a.length);
-											System.arraycopy(b, 0, result, a.length, b.length);
-											return result;
-										};
-									}
-
-									@Override
-									public Function<byte[], byte[]> finisher() {
-										return a->{
-											return result;
-										};
-									}
-
-									private final Set<Characteristics> set = new HashSet<>();
-									@Override
-									public Set<Characteristics> characteristics() {
-										return set;
-									}});
-
-		return PacketThread.preparePacket(PacketImp.concatAll(l, h, p));
+		return PacketThread.preparePacket(toBytes());
 	}
 
 	@Override
@@ -248,7 +198,57 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public byte[] toBytes() {
-		return getData();
+		final byte[] l = linkHeader!=null ? linkHeader.toBytes() : new byte[0];
+		final byte[] h = header.toBytes();
+		final byte[] p = payloads.stream().map(Payload::toBytes).collect(new Collector<byte[], byte[], byte[]>(){
+
+									private byte[] result;
+
+									@Override
+									public Supplier<byte[]> supplier() {
+										return ()->new byte[0];
+									}
+
+									@Override
+									public BiConsumer<byte[], byte[]> accumulator() {
+										return (a, b)->{
+											result = Optional
+															.ofNullable(a)
+															.filter(r->a.length>0)
+															.map(r->{
+																r = new byte[a.length + b.length];
+																System.arraycopy(a, 0, result, 0, a.length);
+																System.arraycopy(b, 0, result, a.length, b.length);
+																return r;
+															})
+															.orElse(b);
+										};
+									}
+
+									@Override
+									public BinaryOperator<byte[]> combiner() {
+										return (a, b)->{
+											byte[] result = new byte[a.length + b.length];
+											System.arraycopy(a, 0, result, 0, a.length);
+											System.arraycopy(b, 0, result, a.length, b.length);
+											return result;
+										};
+									}
+
+									@Override
+									public Function<byte[], byte[]> finisher() {
+										return a->{
+											return result;
+										};
+									}
+
+									private final Set<Characteristics> set = new HashSet<>();
+									@Override
+									public Set<Characteristics> characteristics() {
+										return set;
+									}});
+
+		return PacketImp.concatAll(l, h, p);
 	}
 
 	@Override

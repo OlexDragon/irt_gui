@@ -270,6 +270,16 @@ public class UpdateMessageFx extends Dialog<Message>{
 				}
 			});
 			contextMenu.getItems().add(menuItem);
+
+			menuItem = new MenuItem("Open file location");
+			menuItem.setOnAction(e-> {
+				try {
+					Runtime.getRuntime().exec("explorer.exe /select," + lblProfile.getTooltip().getText());
+				} catch (IOException e1) {
+					logger.catching(e1);
+				}
+			});
+			contextMenu.getItems().add(menuItem);
 			lblProfile.setContextMenu(contextMenu);
 
 		};

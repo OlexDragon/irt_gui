@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 
-import irt.controller.serial_port.ComPort;
-import irt.controller.serial_port.ComPort.Baudrate;
 import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.MyComPort.Baudrate;
 import irt.controller.translation.Translation;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -44,7 +43,7 @@ public class BaudRateSelectorFx extends AnchorPane{
 			});
 		});
 
-		final int baudrate = ComPort.getBaudrate();
+		final int baudrate = ComPortThreadQueue.getSerialPort().getBaudrate();
 
 		Arrays.stream(Baudrate.values()).forEach(v->{
 			final RadioButton rb = new RadioButton(v.toString());

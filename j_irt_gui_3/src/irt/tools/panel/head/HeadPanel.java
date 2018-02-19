@@ -67,6 +67,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			ledMute.setOn(false);
 			ledAlarm.setOn(false);
 		});
+		timer.setRepeats(false);
 		timer.start();
 
 		setSize(Translation.getValue(Integer.class, "headPanel.width", 650), Translation.getValue(Integer.class, "headPanel.height", 74));

@@ -98,7 +98,7 @@ public class MainPanel extends IrtStylePanel {
 
 			});
 
-			timer.setRepeats(true);
+//			timer.setRepeats(true);
 			timer.start();
 		}else
 			timer.restart();
