@@ -13,7 +13,8 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 	private int dataSize;		//irtstcp_parameter_size (uint16_t)
 */
 	public ParameterHeader(byte[] data) {
-		if(data!=null && data.length>=3){
+
+		if(data!=null && data.length>=SIZE){
 			parameterHeader = Arrays.copyOf(data, SIZE);
 		}else
 			parameterHeader = null;

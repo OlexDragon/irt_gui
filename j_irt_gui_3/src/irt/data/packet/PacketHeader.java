@@ -1,6 +1,7 @@
 package irt.data.packet;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import irt.data.packet.interfaces.PacketWork;
 
@@ -11,9 +12,10 @@ public class PacketHeader{
 	public static final int SIZE = 7;
 	byte[] packetHeader;
 
-	public PacketHeader(byte[] hrader) {
-		if(hrader!=null && hrader.length>=SIZE)
-			packetHeader = Arrays.copyOf(hrader, SIZE);
+	public PacketHeader(byte[] data) {
+
+		if(data!=null && data.length>=SIZE)
+			packetHeader = Arrays.copyOf(data, SIZE);
 	}
 
 	public PacketHeader() {
@@ -27,11 +29,11 @@ public class PacketHeader{
 	private byte 	code; 		6
 */
 	public byte[]	toBytes		()	{ return packetHeader;		}
-	public byte		getPacketType()	{ return packetHeader[0];	}
+	public byte		getPacketType()	{ return Optional.ofNullable(packetHeader).map(ph->ph[0]).orElse((byte) 0);	}
 	public short	getPacketId	()	{ return (short) PacketImp.shiftAndAdd(new byte[]{packetHeader[1], packetHeader[2]});	}
-	public byte		getGroupId	()	{ return packetHeader[3];	}
-	public short	getReserved	()	{ return (short) PacketImp.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6));	}
-	public byte		getOption	()	{ return packetHeader[6];	}
+	public byte		getGroupId	()	{ return Optional.ofNullable(packetHeader).map(ph->ph[3]).orElse((byte) 0);	}
+	public short	getReserved	()	{ return (short) Optional.ofNullable(packetHeader).map(ph->(short) PacketImp.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6))).orElse((short) 0);}
+	public byte		getOption	()	{ return Optional.ofNullable(packetHeader).map(ph->ph[6]).orElse((byte) 0);	}
 
 	public byte[] set(byte[]data){
 		if(data!=null && data.length>=SIZE)

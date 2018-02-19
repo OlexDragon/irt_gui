@@ -47,6 +47,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.SetterController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.to_do.InitializePicoBuc;
@@ -692,13 +693,26 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		adcWorkers.parallelStream().forEach(adc->adc.update(packet));
 	}
 
+	private int delay;
 	@Override
 	public synchronized void run() {
-		try{
-			adcWorkers.stream().forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
-		}catch (Exception e) {
-			logger.catching(e);
-		}
+
+		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+		final int size = queue.size();
+
+		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
+			delay = ComPortThreadQueue.DELAY_TIMES;
+		else if(size==0)
+			delay = 0;
+
+		if(delay<=0)
+			try{
+				adcWorkers.stream().forEach(adc->queue.add(adc.getPacketToSend()));
+			}catch (Exception e) {
+				logger.catching(e);
+			}
+		else
+			delay--;
 	}
 
 	private synchronized void start() {

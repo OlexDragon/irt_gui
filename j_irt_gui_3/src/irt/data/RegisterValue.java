@@ -1,6 +1,7 @@
 package irt.data;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import irt.data.packet.PacketImp;
 import irt.data.value.Value;
@@ -35,12 +36,23 @@ public class RegisterValue {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj!=null ?
-				obj.getClass().getSimpleName().equals("RegisterValue") ?
-						((RegisterValue)obj).getAddr()==addr &&
-						((RegisterValue)obj).getIndex() == index &&
-						(((RegisterValue)obj).getValue()==value ||
-								((RegisterValue)obj).getValue()!=null ? ((RegisterValue)obj).getValue().equals(value) : false) : false : false;
+
+		return Optional
+				.ofNullable(obj)
+				.filter(RegisterValue.class::isInstance)
+				.map(RegisterValue.class::cast)
+				.filter(rv->rv.getAddr()==addr)
+				.filter(rv->rv.getIndex()==index)
+				.flatMap(rv->Optional.ofNullable(rv.getValue()))
+				.filter(v->v.equals(value))
+				.isPresent();
+//
+//		return obj!=null ?
+//				obj.getClass().getSimpleName().equals("RegisterValue") ?
+//						((RegisterValue)obj).getAddr()==addr &&
+//						((RegisterValue)obj).getIndex() == index &&
+//						(((RegisterValue)obj).getValue()==value ||
+//								((RegisterValue)obj).getValue()!=null ? ((RegisterValue)obj).getValue().equals(value) : false) : false : false;
 	}
 
 	@Override

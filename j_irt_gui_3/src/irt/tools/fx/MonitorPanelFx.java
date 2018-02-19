@@ -18,6 +18,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
@@ -27,8 +29,10 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.data.packet.interfaces.PacketWork;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -69,8 +73,10 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 												public void setUnitAddress(byte unitAddress) {
 													packetToSend.setAddr(unitAddress);
+													retransmitPacket.setAddr(unitAddress);
 												}
 
+	private final RetransmitPacket retransmitPacket = new RetransmitPacket();
 	private GridPane 	statusPane;
 	private GridPane 	gridPane;
 
@@ -99,10 +105,33 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
     		gridPane.getChildren().clear();
     }
 
+	private SerialPortInterface serialPort;
+
+	private int retransmitDelay;
 	@Override
 	public void run() {
+
+		final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
+		if(this.serialPort==null)
+			this.serialPort = serialPort;
+
+		if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
+			shutdownNow();
+			return;
+		}
+
 		try{
+			logger.debug("Packet to send: {}", packetToSend);
+
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
+
+			if(retransmitDelay>0)
+				retransmitDelay--;
+			else{
+				retransmitDelay = 200;
+				GuiControllerAbstract.getComPortThreadQueue().add(retransmitPacket);
+			}
+
 		}catch (Exception e) {
 			logger.catching(e);
 		}
@@ -110,6 +139,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	@Override
 	public void onPacketRecived(final Packet packet) {
+		logger.trace(packet);
 
 		final Optional<Packet> ofNullable;
 
@@ -123,11 +153,13 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 		final boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
 
-		ofNullable
+		final Optional<Packet> oResponse = ofNullable
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+		.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR);
+
+		oResponse
 		.filter(p->p.getHeader().getPacketId()==packetToSend.getHeader().getPacketId())
 		.filter(p->p.getHeader().getGroupId()==packetToSend.getHeader().getGroupId())
-		.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR)
 		.map(Packet::getPayloads)
 		.map(pls->pls.stream())
 		.ifPresent(stream->{
@@ -212,6 +244,18 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 					}
 				});
 			});
+		});
+
+		//Check retransmits number
+		ofNullable
+		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_PROTO_RETRANSNIT)
+		.map(Packet::getPayloads)
+		.flatMap(pls->pls.stream().findAny())
+		.map(pl->pl.getByte())
+		.filter(b->b>0)
+		.ifPresent(b->{
+			final RetransmitPacket p = new RetransmitPacket(retransmitPacket.getLinkHeader().getAddr(), (byte) 0);
+			GuiControllerAbstract.getComPortThreadQueue().add(p);
 		});
 	}
 

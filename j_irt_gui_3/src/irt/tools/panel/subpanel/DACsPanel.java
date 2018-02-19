@@ -40,6 +40,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.TextSliderController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.AdcWorker;
 import irt.data.DeviceInfo.DeviceType;
@@ -573,14 +574,27 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		adcWorkers.parallelStream().forEach(adc->adc.update(packet));
 	}
 
+	private int delay;
 	@Override
 	public synchronized void run() {
-		try{
-			adcWorkers
-			.stream()
-			.forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
-		}catch (Exception e) {
-			logger.catching(e);
-		}
+
+		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+		final int size = queue.size();
+
+		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
+			delay = ComPortThreadQueue.DELAY_TIMES;
+		else if(size==0)
+			delay = 0;
+
+		if(delay<=0)
+			try{
+				adcWorkers
+				.stream()
+				.forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
+			}catch (Exception e) {
+				logger.catching(e);
+			}
+		else
+			delay--;
 	}
 }

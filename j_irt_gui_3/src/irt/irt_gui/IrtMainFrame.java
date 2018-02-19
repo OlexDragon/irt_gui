@@ -42,8 +42,8 @@ public abstract class IrtMainFrame extends JFrame {
 		    @Override
 		    public void run()
 		    {
+		    	guiController.stop();
 		    	Platform.exit();
-		        logger.info("ShutdownHook");
 		    }
 		});
 

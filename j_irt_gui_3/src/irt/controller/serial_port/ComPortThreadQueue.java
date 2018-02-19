@@ -2,9 +2,11 @@ package irt.controller.serial_port;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.event.EventListenerList;
@@ -18,18 +20,23 @@ import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.Console;
-import jssc.SerialPortException;
 
 public class ComPortThreadQueue implements Runnable {
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
+	public final static int QUEUE_SIZE_TO_DELAY = 5;
+	public final static int DELAY_TIMES = 10;
+	
+
 	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300, Collections.reverseOrder());
-	private final ScheduledExecutorService services = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
-	private static ComPort serialPort;
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private ScheduledFuture<?> scheduledFuture;
+
+	private static SerialPortInterface serialPort;
 
 	public ComPortThreadQueue(){
-		services.scheduleAtFixedRate(this, 10, 10, TimeUnit.MILLISECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 10, 10, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -39,17 +46,12 @@ public class ComPortThreadQueue implements Runnable {
 		try {
 
 			packetWork = comPortQueue.take();
-			logger.trace(packetWork);
+			logger.debug(packetWork);
+//			logger.error("queue size: {}\n{}", comPortQueue.size(), comPortQueue);
 
 			if (serialPort != null) {
-				logger.debug("serial port present");
 				PacketThreadWorker packetThread = packetWork.getPacketThread();
 
-				if (packetThread != null) {
-					logger.debug("packetThread present");
-					packetThread.join();
-
-					logger.debug("packetThread.join() done");
 					Packet packet = packetThread.getPacket();
 					if (packet == null) {
 						logger.warn(packetWork);
@@ -57,7 +59,6 @@ public class ComPortThreadQueue implements Runnable {
 					}
 
 					if (serialPort.isOpened()) {
-						logger.debug("serialPort.isOpened() = true");
 						sent = false;
 
 						Packet send = serialPort.send(packetWork);
@@ -67,9 +68,6 @@ public class ComPortThreadQueue implements Runnable {
 						sent = true;
 						logger.warn("Serial port or Packet is not ready:\n{}", packetWork);
 					}
-				} else{
-					logger.warn("packetThread==null; ({})", packetWork);
-				}
 			} else
 				logger.warn("serialPort==null");
 
@@ -80,25 +78,23 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketWork packetWork){
-//		if(packetWork instanceof AlarmDescriptionPacket)
-//			logger.error(packetWork);//catching(new Throwable());
+//		if(packetWork instanceof DeviceDebugInfoPacket)
+//			logger.debug(packetWork.getClass().getSimpleName());//catching(new Throwable());
 
 		try {
 
-			if(packetWork!=null){
-				if (comPortQueue.size() < 300){
-					if (!comPortQueue.contains(packetWork)) {
+			if (comPortQueue.size() < 300){
+				if (!comPortQueue.contains(packetWork)) {
 
-						packetWork.getPacketThread().start();
+					packetWork.getPacketThread().start();
 
-						comPortQueue.add(packetWork);
-						logger.trace("<<< is added - {}", packetWork);
-					} else
-						logger.warn("Tis packet already in the queue. {}", packetWork);
-				}else
-					logger.warn("comPortQueue is FULL");
+					comPortQueue.add(packetWork);
+					logger.trace("<<< is added - {}", packetWork);
+				} else
+					logger.warn("Tis packet already in the queue. {}", packetWork);
 			}else
-				logger.warn("packetWork!=null");
+				logger.warn("comPortQueue is FULL");
+
 		} catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:add");
@@ -114,13 +110,16 @@ public class ComPortThreadQueue implements Runnable {
 		return comPortQueue.size();
 	}
 
-	public static ComPort getSerialPort() {
+	public static SerialPortInterface getSerialPort() {
 		return serialPort;
 	}
 
-	public void setSerialPort(ComPort serialPort) {
+	public void setSerialPort(SerialPortInterface serialPort) {
 
-		ComPort oldSerialPort = ComPortThreadQueue.serialPort;
+		if(serialPort==null)
+			return;
+
+		SerialPortInterface oldSerialPort = ComPortThreadQueue.serialPort;
 
 		if(oldSerialPort!=null){
 			logger.warn("oldSerialPort={}, serialPort={}", oldSerialPort, serialPort);
@@ -175,12 +174,23 @@ public class ComPortThreadQueue implements Runnable {
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	public void close() throws SerialPortException {
-		if(serialPort.isOpened())
-			serialPort.closePort();
+	public void close() {
+
+		Optional
+		.ofNullable(serialPort)
+		.filter(sp->sp.isOpened())
+		.ifPresent(sp->sp.closePort());
+
 		serialPort = null;
 
 		comPortQueue.clear();
 		comPortQueue = null;
+	}
+
+	public void stop() {
+
+		close();
+		Optional.of(scheduledFuture).filter(shf->!shf.isCancelled()).ifPresent(serv->serv.cancel(true));
+		Optional.of(service).filter(serv->!serv.isShutdown()).ifPresent(serv->serv.shutdownNow());
 	}
 }

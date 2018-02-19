@@ -82,7 +82,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		infoTimer.start();
 
 		helpPacket = new DeviceDebugHelpPacket(addr);
-		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 15, TimeUnit.SECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 15, TimeUnit.MINUTES);
 	}
 
 	int devicesCount;

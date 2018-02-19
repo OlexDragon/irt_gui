@@ -181,6 +181,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 									PACKET_ID_DUMP_REGISTER_207					= DEVICES + 207,
 									PACKET_ID_DUMP_REGISTER_220					= DEVICES + 220;
 
+		public static final short	PACKET_ID_PROTO_RETRANSNIT	= DEVICES + 255;
 	public enum AlarmsPacketIds{
 
 		INDEFINED				((byte) 0, PACKET_UNNECESSARY),

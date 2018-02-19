@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
@@ -274,7 +275,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 		cptq.addPacketListener(this);
 		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 5000, TimeUnit.MILLISECONDS);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -439,13 +440,25 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 	private long count;
 	private boolean run;
+	private SerialPortInterface serialPort;
 
 	@Override
 	public void run() {
-		if(run || --count>0){
-			count = DumpController.DUMP_TIME;
+
+		final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
+		if(this.serialPort==null)
+			this.serialPort = serialPort;
+
+		if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
+			Optional.ofNullable(scheduleAtFixedRate).filter(sh->!sh.isCancelled()).ifPresent(sh->sh.cancel(true));
+			Optional.of(service).filter(serv->!serv.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 			return;
 		}
+
+		if(!run && --count>0)
+			return;
+
+		count = DumpController.DUMP_TIME;
 
 		try{
 
