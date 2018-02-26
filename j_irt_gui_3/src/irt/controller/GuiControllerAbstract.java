@@ -251,19 +251,19 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				ComPortThreadQueue.getSerialPort().closePort();
 
 		else {
-			SerialPortInterface serialPort;
+			SerialPortInterface serialPort = null;
 			try {
 
 				serialPort = new MyComPort(serialPortName);
-				comPortThreadQueue.setSerialPort(serialPort);
-				prefs.put(SERIAL_PORT, serialPortName);
-
-				reset();
 
 			} catch (NoSuchPortException e) {
-				comPortThreadQueue.setSerialPort(null);
-				logger.catching(e);
+//				logger.catching(e);
 			}
+
+			comPortThreadQueue.setSerialPort(serialPort);
+			prefs.put(SERIAL_PORT, serialPortName);
+
+			reset();
 		} 
 
 		synchronized (this) {
@@ -319,6 +319,16 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		}
 	}
 
+	protected void getUnitsInfo() {
+
+		if (!protocol.equals(Protocol.CONVERTER)) {
+
+			for(Byte addr:addresses){
+				comPortThreadQueue.add(new DeviceInfoPacket(addr));
+			}
+		}
+	}
+
 	private static byte[] addresses = UnitAddressField.DEFAULT_ADDRESS;
 	public static byte[] getAddresses() {
 		return addresses;
@@ -329,16 +339,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	public static void setAddresses(byte[] addresses) {
 		GuiControllerAbstract.addresses = addresses;
 		Optional.ofNullable(guiController).ifPresent(gui->gui.reset());
-	}
-
-	protected void getUnitsInfo() {
-
-		if (!protocol.equals(Protocol.CONVERTER)) {
-
-			for(Byte addr:addresses){
-				comPortThreadQueue.add(new DeviceInfoPacket(addr));
-			}
-		}
 	}
 
 	public LinkHeader getLinkHeader(Packet packet) {
@@ -384,7 +384,11 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				else
 					protocol = dt.PROTOCOL;
 
-				panelController.control(di);
+				try{
+					panelController.control(di);
+				}catch(Exception e){
+					logger.catching(e);
+				}
 			});
 			if(!oDeviceType.isPresent()){
 
@@ -392,7 +396,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 					JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + typeId + ")");
 					logger.warn("The Device is not Supported.(device Id={})", typeId);
 			}
-
 		});
 	}
 
@@ -482,7 +485,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				if(!collect.isEmpty())
 					sn += "_" + collect;
 
-				DumpController.setSysSerialNumber(sn);
+				DumpControllerFull.setSysSerialNumber(sn);
 			});
 		}
 

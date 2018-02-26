@@ -14,7 +14,6 @@ import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
@@ -56,11 +55,12 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private final static Logger logger = LogManager.getLogger();
 
 	public static final byte CONVERTER = MonitorPanelFx.CONVERTER;
+	private static final long DUMP_DELAY = 20;
 
 	private ScheduledFuture<?> scheduledFuture;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
-	private final AlarmsIDsPacket packetToSend;
+	private final AlarmsIDsPacket packetAlarmIDs;
 	private final AlarmsSummaryPacket packetSummary;
 
 	private byte unitAddress = CONVERTER;
@@ -71,7 +71,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 												public void setUnitAddress(byte unitAddress) {
 													this.unitAddress = unitAddress;
 													packetSummary.setAddr(unitAddress);
-													packetToSend.setAddr(unitAddress);
+													packetAlarmIDs.setAddr(unitAddress);
 													clear();
 												}
 
@@ -79,7 +79,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 	public AlarmPanelFx() {
 
-		packetToSend = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketWork();
+		packetAlarmIDs = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketWork();
 		packetSummary = (AlarmsSummaryPacket) Packets.ALARMS_SUMMARY_STATUS.getPacketWork();//This packet is for DumpController
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("GridPanel.fxml"));
@@ -98,7 +98,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		gridPane.getStyleClass().add("alarms");
 
-		scheduledFuture = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 	}
 
     @FXML  void onMouseClicked(MouseEvent event) { if(event.getClickCount()==3) clear(); }
@@ -125,6 +125,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private boolean run;
 	private SerialPortInterface serialPort;
 
+	private int delay;
 	@Override
 	public void run() {
 
@@ -132,6 +133,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		if(this.serialPort==null)
 			this.serialPort = serialPort;
 
+		//Stop this tread if serial port is changed
 		if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
 			shutdownNow();
 			return;
@@ -142,16 +144,28 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			GuiControllerAbstract.getComPortThreadQueue().add(packetSummary);// used by DumpController.onPacketReceived
 
 			if(availableAlarms==null || availableAlarms.length==0){
-				logger.trace(packetToSend);
 
-				GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
+				GuiControllerAbstract.getComPortThreadQueue().add(packetAlarmIDs);
 				return;
 			}
+
+			final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+			final int size = queue.size();
+
+			if(delay>0){
+				delay--;
+				return;
+			}
+
+			if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
+				delay = ComPortThreadQueue.DELAY_TIMES;
+			else if(size==0)
+				delay = 0;
 
 			if(!(run || statusChamge) && --index>0)
 				return;
 
-			index = DumpController.DUMP_TIME;
+			index = DUMP_DELAY;
 			statusChamge = false;
 
 			IntStream
@@ -202,9 +216,9 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		}
 
 		//Summary alarm
-		noError
-		.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY)
-		.ifPresent(h->{
+		if(noError
+		.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY).isPresent()){
+
 			final Optional<? extends PacketAbstract> p = Packets.cast(packet);
 			p.ifPresent(pa->{
 				Object sa = pa.getValue();
@@ -213,7 +227,8 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 					summaryAlarm = sa;
 				};
 			});
-		});
+			return;
+		}
 
 		//Available alarms
 		final Optional<short[]> alarms = noError.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_IDs)

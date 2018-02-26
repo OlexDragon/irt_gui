@@ -31,7 +31,6 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
@@ -67,6 +66,8 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	private static final ImageIcon ICON_BUC_X = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_X.jpg"));
 	private static final ImageIcon ICON_BUC_B = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg"));
 	private static final ImageIcon ICON_BUC_A = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg"));
+
+	private static final long DELEY_TIMES = 10;
 
 	private final 	ComPortThreadQueue 			cptq 		= GuiControllerAbstract.getComPortThreadQueue();
 	public  final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
@@ -458,7 +459,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		if(!run && --count>0)
 			return;
 
-		count = DumpController.DUMP_TIME;
+		count = DELEY_TIMES;
 
 		try{
 

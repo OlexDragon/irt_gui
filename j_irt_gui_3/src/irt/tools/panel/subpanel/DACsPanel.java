@@ -581,11 +581,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
 		final int size = queue.size();
 
-		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
-			delay = ComPortThreadQueue.DELAY_TIMES;
-		else if(size==0)
-			delay = 0;
-
 		if(delay<=0)
 			try{
 				adcWorkers
@@ -596,5 +591,10 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			}
 		else
 			delay--;
+
+		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
+			delay = ComPortThreadQueue.DELAY_TIMES;
+		else if(size==0)
+			delay = 0;
 	}
 }

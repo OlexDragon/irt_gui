@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
@@ -45,6 +46,8 @@ import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 
 public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
+
+	private static LoggerContext ctx = setSysSerialNumber(null);
 
 	public static final List<Class<? extends PacketAbstract>> packetsToControl = Arrays.asList(
 																								AttenuationPacket.class,
@@ -82,7 +85,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		infoTimer.start();
 
 		helpPacket = new DeviceDebugHelpPacket(addr);
-		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 15, TimeUnit.MINUTES);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 20, TimeUnit.SECONDS);
 	}
 
 	int devicesCount;
@@ -107,8 +110,8 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
 	@Override
 	public void stop(){
-		scheduleAtFixedRate.cancel(true);
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+		scheduleAtFixedRate.cancel(true);
 		infoTimer.stop();
 		synchronized (dumper) {
 			dumper.info(marker, "\n^^^^^^^^^^^^^^^^^^^ Stop Dump Block for ^^^^^^^^^^^^^^^^^{}\n", deviceInfo);
@@ -362,5 +365,35 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		synchronized (dumper) {
 			dumper.info(marker, sb);
 		}
+	}
+
+	public static LoggerContext setSysSerialNumber(String serialNumber) {
+
+		if(serialNumber==null)
+			serialNumber ="UnknownSerialNumber";
+		else
+			serialNumber = serialNumber.replaceAll("[:\\\\/*?|<>]", "x");
+
+		String sysSerialNumber = System.getProperty("serialNumber");
+
+		if(sysSerialNumber==null || !sysSerialNumber.equals(serialNumber)){
+
+			if(ctx!=null)
+				synchronized (dumper) {
+					dumper.info(marker, "\n***** filename changed to {} *****", serialNumber);
+				}
+
+			System.setProperty("serialNumber", serialNumber);
+
+			ctx = (LoggerContext) LogManager.getContext(false);
+			ctx.reconfigure();
+
+			if(sysSerialNumber!=null)
+				synchronized (dumper) {
+					dumper.info(marker, "\n***** continuation... beginning in the File {} *****", sysSerialNumber);
+				}
+		}
+
+		return ctx;
 	}
 }

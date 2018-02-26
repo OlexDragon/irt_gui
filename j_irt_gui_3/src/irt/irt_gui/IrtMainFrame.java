@@ -1,13 +1,17 @@
 package irt.irt_gui;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Optional;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -19,17 +23,26 @@ import org.apache.logging.log4j.core.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.Listeners;
+import irt.data.listener.PacketListener;
+import irt.data.packet.AlarmStatusPacket.AlarmSeverities;
+import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketImp;
+import irt.data.packet.Packets;
+import irt.data.packet.interfaces.Packet;
+import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.wizards.serial_port.SerialPortWizard;
 import javafx.application.Platform;
 
 @SuppressWarnings("serial")
-public abstract class IrtMainFrame extends JFrame {
+public abstract class IrtMainFrame extends JFrame implements PacketListener {
 
 	private final Logger logger = (Logger) LogManager.getLogger();
 
 	protected GuiControllerAbstract guiController;
+
+	private Object alarmSeverities;
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
@@ -100,6 +113,7 @@ public abstract class IrtMainFrame extends JFrame {
 				guiController = getNewGuiController();
 			}
 		});
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
 	protected void setIrtPanel(JPanel contentPane) {
@@ -112,4 +126,38 @@ public abstract class IrtMainFrame extends JFrame {
 	protected abstract Point getClosePanelPosition();
 	protected abstract Rectangle comboBoxBounds();
 	protected abstract GuiControllerAbstract getNewGuiController();
+
+	@Override
+	public void onPacketRecived(Packet packet) {
+
+		Optional
+		.ofNullable(packet)
+		.filter(p->p.getHeader().getGroupId()==PacketImp.GROUP_ID_ALARM)
+		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY)
+		.flatMap(Packets::cast)
+		.map(PacketAbstract::getValue)
+		.filter(AlarmSeverities.class::isInstance)
+		.map(AlarmSeverities.class::cast)
+		.ifPresent(as->{
+
+			if(alarmSeverities!=null && alarmSeverities == as)
+				return;
+
+			alarmSeverities = as;
+
+			final ImageIcon logoIcon = IrtPanel.logoIcon;
+			if(logoIcon!=null) {
+				Color background = as.getBackground();
+				final Image image = logoIcon.getImage();
+				final int iconWidth = logoIcon.getIconWidth();
+				final int iconHeight = logoIcon.getIconHeight();
+				final Image createdImage = createImage(iconWidth, iconHeight);
+				final Graphics2D g = (Graphics2D) createdImage.getGraphics();
+				g.setColor(background);
+				g.fillRect(0, 0, iconWidth, iconHeight);
+				g.drawImage(image, 0, 0, null);
+				setIconImage(createdImage);
+			}
+		});
+	}
 }

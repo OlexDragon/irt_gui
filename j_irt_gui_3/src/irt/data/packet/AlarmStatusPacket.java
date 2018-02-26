@@ -4,12 +4,13 @@ package irt.data.packet;
 import java.awt.Color;
 import java.util.Optional;
 
+import irt.data.packet.interfaces.PacketWork;
 import irt.tools.fx.AlarmPanelFx.AlarmStatus;
 
 public class AlarmStatusPacket extends PacketAbstract{
 
 	public AlarmStatusPacket() {
-		this((byte)0, (short) 0);
+		this((byte)0, PacketWork.PACKET_ID_ALARMS_STATUS);
 	}
 
 	public AlarmStatusPacket(byte linkAddr, short alarmId) {

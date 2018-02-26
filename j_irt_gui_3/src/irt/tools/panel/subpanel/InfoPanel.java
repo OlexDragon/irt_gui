@@ -10,21 +10,16 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.util.Optional;
 import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -32,7 +27,6 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DumpController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.SoftReleaseChecker;
 import irt.controller.interfaces.Refresh;
@@ -205,42 +199,6 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		lblVersion.setBounds(84, 99, 198, 14);
 		lblVersion.setForeground(Color.WHITE);
 		lblVersion.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		DumpController.addActionWhenDump(this, new Consumer<String>() {
-
-			@Override
-			public void accept(String s) {
-				new SwingWorker<Void, Void>(){
-
-					@Override
-					protected Void doInBackground() throws Exception {
-
-						final Border border = lblVersion.getBorder();
-						if(border!=null)
-							return null;
-
-						
-						lblVersion.setBorder(BorderFactory.createLineBorder(Color.YELLOW));
-
-						timer.schedule(new TimerTask() {
-							
-							@Override
-							public void run() {
-								new SwingWorker<Void, Void>(){
-
-									@Override
-									protected Void doInBackground() throws Exception {
-										lblVersion.setBorder(null);
-										return null;
-									}
-									
-								}.execute();
-							}
-						}, TimeUnit.SECONDS.toMillis(1));
-						return null;
-					}
-				}.execute();
-			}
-		});
 
 		lblDeviceTxt = new JLabel(Translation.getValue(String.class, "device", "Device")+":");
 		lblDeviceTxt.setBounds(4, 116, 76, 14);
@@ -411,7 +369,6 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 	public void onPacketRecived(Packet packet) {
 		if(deviceInfo == null)
 			return;
-
 		
 		DeviceInfo
 		.parsePacket(packet)
