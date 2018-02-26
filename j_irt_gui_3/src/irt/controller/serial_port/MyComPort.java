@@ -31,24 +31,36 @@ import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.Console;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.NoSuchPortException;
+import purejavacomm.PureJavaIllegalStateException;
+import purejavacomm.PureJavaSerialPort;
 import purejavacomm.SerialPort;
 import purejavacomm.UnsupportedCommOperationException;
 
-public class MyComPort implements SerialPortInterface,  AutoCloseable {
+public class MyComPort implements SerialPortInterface {
+
+	public static final int MAX_WAIT_TIME = 1500;
 
 	private final static Logger logger = LogManager.getLogger();
 
     public static final int BAUDRATE_115200 = 115200;
-	private static final int WAIT_TIME = 50;
+	private static final int WAIT_TIME = 100;
 
 	private final CommPortIdentifier portIdentifier;
 	private boolean opened ;
-	private SerialPort serialPort;
+	private PureJavaSerialPort serialPort;
 
 	private InputStream inputStream;
 	private OutputStream outputStream;
-	private int available;//The use to reduce the time ( inputStream.available() - takes a lot of time )
+//	private volatile int available;//The use to reduce the time ( inputStream.available() - takes a lot of time )
 	private byte[] buffer;//The use to read all available bytes ( inputStream.read(byte[]) - takes a lot of time )
+
+	/**
+	 * This variable use to reduce the time to send acknowledgment 
+	 */
+	private long flagSequenceCount;
+	private byte[] confirmBytes;
+
+	private boolean readToTheBuffer;
 
 	public MyComPort(String portName) throws NoSuchPortException {
 		portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
@@ -62,7 +74,7 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 	@Override
 	public Packet send(PacketWork packetWork) {
 
-		logger.entry(packetWork);
+//		logger.entry(packetWork);
 
 		long start = System.currentTimeMillis();
 
@@ -98,73 +110,76 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 
 	clear();
 
-			byte[] data = pt.getData();
-			String hexStr = ToHex.bytesToHex(data);
+	byte[] data = pt.getData();
+	String hexStr = ToHex.bytesToHex(data);
 
-			String prefix = (runTimes+1)+") send";
-			Console.appendLn(p, prefix);
-			Console.appendLn(hexStr, prefix);
+	String prefix = (runTimes+1)+") send";
+	Console.appendLn(p, prefix);
+	Console.appendLn(hexStr, prefix);
 
-			if(data!=null && isOpened()){
-				outputStream.write(data);
+	if(data!=null && opened){
+		outputStream.write(data);
 
-				logger.debug("writeBytes({})", hexStr);
+//		logger.debug("writeBytes({})", hexStr);
 
-				if (isConfirmBytes(p)){
-						if (isFlagSequence()) {
+		if (isConfirmBytes(p)){
 
-							if (linkHeader != null)
-								if ((readData = readLinkHeader()) != null)
-									checksum = new Checksum(byteStuffing(readData));
-								else {
-									logger.warn("\n\tlinkHeader==null\n\tSent packet {}", p);
-									Console.appendLn("LinkHeader", "Break");
-								}
+			if (isFlagSequence()) {
 
-							if ((readData = readHeader()) != null) {
-								final byte[] headerByteStuffing = byteStuffing(readData);
+				if (linkHeader != null)
+					if ((readData = readLinkHeader()) != null)
+						checksum = new Checksum(byteStuffing(readData));
+					else {
+						logger.warn("\n\tlinkHeader==null\n\tSent packet {}", p);
+						Console.appendLn("LinkHeader", "Break");
+					}
 
-								if (checksum != null)
-									checksum.add(headerByteStuffing);
-								else
-									checksum = new Checksum(headerByteStuffing);
+				if ((readData = readHeader()) != null) {
 
-								packetHeader = new PacketHeader(headerByteStuffing);
-								logger.debug(packetHeader);
+					final byte[] headerByteStuffing = byteStuffing(readData);
 
-								final byte newGroupId = packetHeader.getGroupId();
-								if (newGroupId == groupId) {
-									packet.setHeader(packetHeader);
-									payloadsList = new ArrayList<>();
+					if (checksum != null)
+						checksum.add(headerByteStuffing);
+					else
+						checksum = new Checksum(headerByteStuffing);
 
-									while (opened && (readData = readParameterHeader()) != null) {
+					packetHeader = new PacketHeader(headerByteStuffing);
+//					logger.debug(packetHeader);
 
-										if (containsFlagSequence(readData)) {
-											cs = checksum.getChecksumAsBytes();
+					final byte newGroupId = packetHeader.getGroupId();
+					if (newGroupId == groupId) {
+						packet.setHeader(packetHeader);
+						payloadsList = new ArrayList<>();
 
-											final byte[] rd = byteStuffing(readData);
+						while (opened && (readData = readParameterHeader()) != null) {
 
-											if (cs[0] == rd[0] && cs[1] == rd[1]) {
-												packet.setPayloads(payloadsList);
-											}else
-												logger.warn("checksum error: {} : {}", ()->ToHex.bytesToHex(cs), ()->ToHex.bytesToHex(rd));
+							if (containsFlagSequence(readData)) {
+								cs = checksum.getChecksumAsBytes();
 
-											logger.trace("END");
-											break;
-										}
+								final byte[] rd = byteStuffing(readData);
 
-										final byte[] byteStuffing = byteStuffing(readData);
-										checksum.add(byteStuffing);
-										parameterHeader = new ParameterHeader(byteStuffing);
-										logger.debug("{}\n {}", parameterHeader, ToHex.bytesToHex(buffer));
+								if (cs[0] == rd[0] && cs[1] == rd[1]) {
+									packet.setPayloads(payloadsList);
+								}else
+									logger.warn("checksum error: {} : {}", ()->ToHex.bytesToHex(cs), ()->ToHex.bytesToHex(rd));
 
-										int payloadSize = parameterHeader.getSize();
+//								logger.trace("END");
+								break;
+							}
 
-										if (parameterHeader.getCode()>300 || payloadSize>3000 || payloadSize<=0 ) {
-											Console.appendLn("ParameterHeader Sizes", "Break ");
-											logger.warn("parameterHeader.getCode()>300({}) || payloadSize>3000({}) || payloadSize<=0({}) \n{} \n{}\nSent Packet{}", parameterHeader.getCode(), payloadSize, payloadSize, packetHeader, parameterHeader, p);
-											break;
-										}
+							final byte[] byteStuffing = byteStuffing(readData);
+							checksum.add(byteStuffing);
+							parameterHeader = new ParameterHeader(byteStuffing);
+//							final ParameterHeader pHeader = parameterHeader;
+//							logger.debug("{} buffer: {}", ()->pHeader, ()->ToHex.bytesToHex(buffer));
+
+							int payloadSize = parameterHeader.getSize();
+
+							if (parameterHeader.getCode()>300 || payloadSize>3000 || payloadSize<=0 ) {
+								Console.appendLn("ParameterHeader Sizes", "Break ");
+								logger.warn("parameterHeader.getCode()>300({}) || payloadSize>3000({}) || payloadSize<=0({}) \n{} \n{}\nSent Packet{}", parameterHeader.getCode(), payloadSize, payloadSize, packetHeader, parameterHeader, p);
+								break;
+							}
 
 										Console.appendLn("", "Payload ");
 										if (payloadSize <= 0) {
@@ -173,12 +188,13 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 											break;
 										}
 
-										if(wait(payloadSize, Optional.of(payloadSize*10).filter(wt->wt<1000).orElse(1000))>=payloadSize){
+										if(waitComPort(payloadSize)){
 
-											final byte[] rd = readData = readBytes(payloadSize);
+											readData = readBytes(payloadSize);
 											final byte[] payloadByteStuffing = byteStuffing(readData);
 
-											logger.debug("payload size: {}; parameter data: {}", ()->payloadSize, ()->ToHex.bytesToHex(rd));
+//											final byte[] rd = readData;
+//											logger.debug("payload size: {}; parameter data: {}", ()->payloadSize, ()->ToHex.bytesToHex(rd));
 
 											if (payloadByteStuffing.length>=payloadSize) {
 
@@ -189,7 +205,7 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 											}else
 												logger.warn("readData.length>={}", payloadSize);
 										}else{
-											logger.warn("No data or wrong data size");
+											logger.warn("No data or wrong data size({}), buffer: {}", payloadSize, buffer);
 											break;
 										}
 									}
@@ -204,80 +220,91 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 			}else 
 				logger.warn("data!=null && isOpened() does not hold");
 
-				sendAcknowlwdge(p);
+	sendAcknowledge(p);
 
-				if(packet.getHeader()==null || packet.getPayloads()==null)
-					packet = p;
-
-		} catch (Exception e) {
+		} catch (InterruptedException | PureJavaIllegalStateException e) {
+			closePort();
+		}catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "Error");
+			closePort();
 		}
+
+		if(packet.getHeader()==null || packet.getPayloads()==null)
+			packet = p;
 
 		Console.appendLn(packet, "Get");
 		final long workTime = System.currentTimeMillis()-start;
 		Console.appendLn(""+workTime, "Time");
-		logger.debug("Time taken to send the packat: {}", workTime);
+//		logger.debug("Time taken to send the packet: {}", workTime);
 
-		logger.debug(packet);
+//		logger.traceExit(packet);
 		return packet;
 	}
 
-	private void sendAcknowlwdge(Packet p) throws IOException {
+	private void sendAcknowledge(Packet p) throws IOException {
 
 		byte[] acknowledge = getAcknowledge(p);
 		outputStream.write(acknowledge);
+//		logger.trace(()->ToHex.bytesToHex(acknowledge));
 	}
 
 	public void clear() throws Exception {
-		logger.traceEntry();
+//		logger.traceEntry();
 
-		buffer = null;
+		flagSequenceCount = 0;
+		confirmBytes = null;
 
-		wait(1, WAIT_TIME);
-		while (available!=0) {
 
-			logger.warn("{} bytes to clear", available);
-			inputStream.read(new byte[available]);
-			wait(1, WAIT_TIME*3);
-		}
+		 do{
+
+			setBuffer(null);
+
+			synchronized (this) { wait(50); }
+
+		 }while (readToTheBuffer || isBuffer());
+
+//		logger.traceExit();
 	}
 
-	public Integer wait(int watedBytes, int waitTime){
-		logger.trace("ENTRY: watedBytes: {}; available: {}; waitTime: {}; buffer.length: {}", ()->watedBytes, ()->available, ()->waitTime, ()->Optional.ofNullable(buffer).map(b->b.length).orElse(null));
+	public boolean waitComPort(int watedBytes){
+//		logger.debug("ENTRY: watedBytes: {}; WAIT_TIME: {}; buffer.length: {}", ()->watedBytes,  ()->WAIT_TIME, ()->Optional.ofNullable(buffer).map(b->b.length).orElse(null));
 		long start = System.currentTimeMillis();
 
+		// control maximum timeout
+		final int wait = Optional.of(watedBytes*WAIT_TIME).filter(wt->wt<MAX_WAIT_TIME).orElse(MAX_WAIT_TIME);
+
 		return Optional
-				.ofNullable(buffer)
+				.ofNullable(getBuffer())
 				.filter(b->b.length>=watedBytes)
-				.map(b->b.length)
+				.filter(b->b.length>=watedBytes + (int) IntStream.range(0, watedBytes-1).filter(index->b[index]==PacketImp.CONTROL_ESCAPE).count())
+				.map(b->true)
 				.orElseGet(
 
 						()->{
 
-							try {
+							int bufferLength = 0;
+							int newSize;
 
-								while(opened){
+							do{
 
-									long wt = Optional.of((waitTime - System.currentTimeMillis()-start)/10).filter(time->time>1).orElse(1L) ;
-									synchronized (this) { try { wait(wt); } catch (Exception e) { logger.catching(e); } }
+								synchronized (this) { try { MyComPort.this.wait(wait); } catch (InterruptedException e) { } }
 
-									available = inputStream.available();
+								final Optional<byte[]> oBuffer = Optional.ofNullable(getBuffer());
 
-									if(available>=watedBytes || System.currentTimeMillis()-start>=waitTime)
-										break;
-								}
+								newSize = watedBytes + oBuffer.filter(b->b.length>=watedBytes).map(b->(int) IntStream.range(0, watedBytes-1).filter(index->b[index]==PacketImp.CONTROL_ESCAPE).count()).orElse(0);
+								bufferLength = oBuffer.map(b->b.length).orElse(0);
 
-							} catch (IOException e) {
-								logger.catching(e);
-							}
-							logger.trace("EXIT:available: {}; buffer.length: {}", ()->available, ()->Optional.ofNullable(buffer).map(b->b.length).orElse(null));
-							return Optional.ofNullable(buffer).map(b->b.length+available).orElse(available);
+							}while(bufferLength<newSize && System.currentTimeMillis()-start < wait);
+
+							final int ns = newSize;
+							return Optional.ofNullable(getBuffer()).map(b->b.length>=ns).orElse(bufferLength>=ns);
+
 						});
 	}
 
 	private byte[] getAcknowledge(Packet packet) {
-		logger.traceEntry();
+//		logger.traceEntry();
 		byte[] b = Optional
 				.of(packet)
 				.filter(LinkedPacket.class::isInstance)
@@ -298,9 +325,7 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 	}
 
 	private boolean isConfirmBytes(Packet packet) throws Exception {
-		logger.traceEntry();
-
-		boolean isComfirm = false;
+//		logger.traceEntry();
 
 		final Optional<LinkHeader> oLinkHeader = Optional
 				.ofNullable(packet)
@@ -310,34 +335,44 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 				.filter(lh->lh.getAddr()!=0);	// 0 -> converter
 
 		int size = oLinkHeader
-				.map(LinkHeader::getAddr)
 				.map(a->11)
 				.orElse(7);
+//
+//		if(!waitComPort(size)){
+//			logger.warn("requires {} bytes, but is {} bytes", ()->size, ()->Optional.ofNullable(getBuffer()).map(b->b.length).orElse(0));
+//			return false;
+//		}
+
+		if(waitComPort(size));
+			confirmBytes = readBytes(size);
 
 
-		final int available = wait(size, WAIT_TIME*size);
-		if(available<size){
-			logger.warn("requires {} bytes, but is {} bytes", size, available);
-			return false;
-		}
+		boolean isFlafDequence = confirmBytes!=null && confirmBytes[0]==PacketImp.FLAG_SEQUENCE && confirmBytes[confirmBytes.length-1]==PacketImp.FLAG_SEQUENCE;
+//		final boolean fs = isFlafDequence;
 
-		byte[] readBytes = readBytes(size);
+//		logger.debug("\n need {} bytes\n readBytes= {}\n ConfirmBytes contain flag sequence: {}", ()->size, ()->ToHex.bytesToHex(confirmBytes), ()->fs);
 
-		logger.trace("\nneed {} bytes\n readBytes= {}", ()->size, ()->ToHex.bytesToHex(readBytes));
+		if(isFlafDequence){
 
-		isComfirm = readBytes!=null && readBytes[0]==PacketImp.FLAG_SEQUENCE && readBytes[readBytes.length-1]==PacketImp.FLAG_SEQUENCE;
+			final byte[] bufferCopy = getBuffer();
 
-		if(isComfirm){
+			flagSequenceCount += Optional.ofNullable(bufferCopy).map(b->IntStream.range(0, b.length)).orElse(IntStream.empty()).filter(index->bufferCopy[index]==PacketImp.FLAG_SEQUENCE).count();
+			if(flagSequenceCount>=2)
+				sendAcknowledge(packet);
 
 			int index = size - 3;
-			byte[] data = Arrays.copyOfRange(byteStuffing(readBytes), 1, index);
+			byte[] data = Arrays.copyOfRange(byteStuffing(confirmBytes), 1, index);
 
-			LinkHeader lh = new LinkHeader(data);
+			Boolean isLinked = null;
+			if(oLinkHeader.isPresent()){
 
-			// (isLinked == null) -> converter
-			final Boolean isLinked = oLinkHeader
-					.map(lh::equals)
-					.orElse(null);
+				LinkHeader lh = new LinkHeader(data);
+
+				// (isLinked == null) -> converter
+				isLinked = oLinkHeader
+						.map(lh::equals)
+						.orElse(null);
+			}
 
 			if(isLinked==null || isLinked){
 
@@ -349,29 +384,38 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 					Checksum cs = new Checksum(data);
 					byte[] b = cs.getChecksumAsBytes();
 
-					if(b[0]==readBytes[index] && b[1]==readBytes[++index])
-						isComfirm = true;
+					if(b[0]==confirmBytes[index] && b[1]==confirmBytes[++index])
+						isFlafDequence = true;
 					else
-						logger.warn("Checksum ERROR ({})", ToHex.bytesToHex(readBytes));
+						logger.warn("Checksum ERROR ({})", ToHex.bytesToHex(confirmBytes));
 				}else
 					logger.warn("Packet IDs are not equal (sent={}, received={}\nSent packet:{}", idSent, idReceived, packet);
 			}else
 				oLinkHeader
-				.ifPresent(linkHeader->logger.warn("LinckHeaders are not equal (sent={}, received={}", linkHeader, lh));
+				.ifPresent(linkHeader->logger.warn("LinckHeaders are not equal (sent linkHeader={}, received={}", linkHeader.toBytes(), ToHex.bytesToHex(confirmBytes)));
 		}
-
-		return isComfirm;
+//
+//		if(buffer!=null){
+//			long flagsSequence = IntStream.range(0, buffer.length).filter(index->buffer[index]==PacketImp.FLAG_SEQUENCE).count();
+//			if(isFlafDequence && flagsSequence>=2){
+//				outputStream.write(readBytes);
+//				logger.error("Sent Confirm Bytes Back: {}", ToHex.bytesToHex(readBytes));
+//			}
+//		}
+		return isFlafDequence;
 	}
 
-	private byte[] readBytes(int size) throws Exception {
-		logger.trace( "ENTRY size: {}; available: {}, ()->buffer.length", ()->size, ()->available, ()->Optional.ofNullable(buffer).map(b->b.length).orElse(null));
+	private byte[] readBytes(final int size) throws Exception {
 
-		 final Optional<byte[]> oBuffer = Optional
-				 							.ofNullable(buffer);
+		final Optional<byte[]> ofNullable = Optional.ofNullable(getBuffer());
 
-		 return oBuffer
-				 .filter(bf->bf.length>=size)
-				 .map(bf->{
+//		logger.trace( "ENTRY size: {}; buffer.length: {}; buffer: {}", ()->size, ()->ofNullable.map(b->b.length).orElse(null), ()->getBuffer());
+
+		final byte[] result = ofNullable
+				.map(bf->bf.length)
+				.filter(bLength->bLength >= size)
+				.filter(bLength->bLength >= size + (int) IntStream.range(0, size).filter(index->getBuffer()[index]==PacketImp.CONTROL_ESCAPE).count())
+				.map(bLength->{
 					try {
 						return getAPartFromTheBuffer(size);
 					} catch (IOException e1) {
@@ -379,99 +423,124 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 					}
 					return null;
 				})
-				 .orElseGet(()->{
-					 try {
+				.orElseGet(()->{
+					try {
 
-						 wait(size, Optional.of(WAIT_TIME*size).filter(t->t<1000).orElse(1000));
+						if(waitComPort(size))
+							return getAPartFromTheBuffer(size);
 
-						 read();
+					} catch (Exception e) {
+						logger.catching(e);
+					}
 
-						 if(buffer.length>=size)
-							 return getAPartFromTheBuffer(size);
+					return null;
+				});
 
-					 } catch (Exception e) {
-						 logger.catching(e);
-					 }
+//		logger.trace("EXIT result: {}", ()->ToHex.bytesToHex(result));
 
-					 logger.warn("Have to read: {}; available: {};", size, available);
-					 return null;
-				 });
+		return  result;
+
 	}
 
-	private void read() throws IOException {
-		available = inputStream.available();
-		if(available<=0)
-			return;
+	private synchronized void readToTheBuffer() throws IOException {
+//		logger.traceEntry();
 
-		final byte[] bytes = new byte[available];
-		inputStream.read(bytes);
-		available = 0;
+		readToTheBuffer = true;
 
-		buffer = Optional
-				.ofNullable(buffer)
-				.map(bf->{
+//		synchronized(MyComPort.this){
 
-					final int oldLength = bf.length;
-					bf = Arrays.copyOf(bf, oldLength + bytes.length);
-					System.arraycopy(bytes, 0, bf, oldLength, bytes.length);
+			final byte[] bytes = new byte[inputStream.available()];
 
-					return bf;
-				})
-				.orElse(bytes);
+			if(bytes.length==0)
+				return;
+
+			inputStream.read(bytes);
+//			logger.debug("read bytes: {}; bytes: {}\n buffer: {}", ()->bytes.length, ()->ToHex.bytesToHex(bytes), ()->ToHex.bytesToHex(buffer));
+
+			setBuffer(Optional
+					.ofNullable(buffer)
+					.map(bf->{
+
+						final int oldLength = bf.length;
+						bf = Arrays.copyOf(bf, oldLength + bytes.length);
+						System.arraycopy(bytes, 0, bf, oldLength, bytes.length);
+
+						return bf;
+					})
+					.orElse(bytes));
+
+			flagSequenceCount += Optional.ofNullable(buffer).map(b->IntStream.range(0, b.length)).orElse(IntStream.empty()).filter(index->buffer[index]==PacketImp.FLAG_SEQUENCE).count();
+			if(flagSequenceCount>=2 && confirmBytes!=null)
+				outputStream.write(confirmBytes);
+//		}
+
+		readToTheBuffer = false;
 	}
 
-	private byte[] getAPartFromTheBuffer(int size) throws IOException {
+	private synchronized byte[] getAPartFromTheBuffer(final int size) throws IOException {
+//		logger.trace("ENTRY size: {}; buffer: {}", ()->size, ()->ToHex.bytesToHex(buffer));
 
 		byte[] result;
 
-		if(buffer==null || buffer.length<size)
-			read();
+		final Optional<byte[]> oBuffer = Optional.ofNullable(getBuffer());
+		final int newSize = size + oBuffer.map(b->(int) IntStream.range(0, size).filter(index->getBuffer()[index]==PacketImp.CONTROL_ESCAPE).count()).orElse(0);
 
-		if(buffer==null || buffer.length<size)
+//		logger.debug("new size: {}", newSize);
+
+		if(buffer==null || buffer.length<newSize)
 			return null;
 
-		if(buffer.length==size){
-			 result = buffer;
-			 buffer = null;
+//		synchronized (MyComPort.class) {
+			
+			if(buffer.length==newSize){
+				 result = buffer;
+				 buffer = null;
 
-		}else{
-			result = Arrays.copyOf(buffer, size);
-			buffer = Arrays.copyOfRange(buffer, size, buffer.length);
-		}
+			}else{
+				result = Arrays.copyOf(buffer, newSize);
+				buffer = Arrays.copyOfRange(buffer, newSize, buffer.length);
+			}
+//		}
 
-		byte[] r = result;
-		result = Optional
-				.of(result)
-				.map(b->(int) IntStream.range(0, size).filter(index->b[index]==PacketImp.CONTROL_ESCAPE).count())
-				.filter(s->s!=0)
-				.map(s->{
-
-					byte[] copyOf;
-
-					try {
-
-						byte[] tmp = getAPartFromTheBuffer(s);
-						if(tmp==null || tmp.length<s)
-								return null;
-
-						copyOf = Arrays.copyOf(r, r.length + s);
-						System.arraycopy(tmp, 0, copyOf, r.length, tmp.length);
-
-					} catch (IOException e) {
-						logger.catching(e);
-						copyOf = r;
-					}
-
-					return copyOf;
-				})
-				.orElse(result);
+//		final byte[] r = result;
+//		result = Optional
+//				.of(result)
+//				.map(b->(int) IntStream.range(0, newSize).filter(index->b[index]==PacketImp.CONTROL_ESCAPE).count())
+//				.filter(s->s!=0)
+//				.map(s->{
+//
+//					byte[] copyOf;
+//
+//					try {
+//
+//						byte[] tmp = getAPartFromTheBuffer(s);
+//						if(tmp==null || tmp.length<s)
+//								return null;
+//
+//						copyOf = Arrays.copyOf(r, r.length + s);
+//						System.arraycopy(tmp, 0, copyOf, r.length, tmp.length);
+//
+//					} catch (IOException e) {
+//						logger.catching(e);
+//						copyOf = r;
+//					}
+//
+//					return copyOf;
+//				})
+//				.orElse(result);
 
 		return result;
 	}
 
 	public boolean isFlagSequence() throws Exception {
+//		logger.traceEntry();
 
-		return readBytes(1)[0] == PacketImp.FLAG_SEQUENCE;
+		waitComPort(10);//TODO - test with smaller value
+		final byte[] readBytes = readBytes(1);
+		if(readBytes==null)
+			return false;
+
+		return readBytes[0] == PacketImp.FLAG_SEQUENCE;
 	}
 
 	private short getPacketId(boolean isLinked, byte[] data) {
@@ -479,48 +548,43 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 	}
 
 	private byte[] readLinkHeader() throws Exception {
-		logger.traceEntry();
-
-		if(wait(LinkHeader.SIZE, WAIT_TIME*LinkHeader.SIZE)<LinkHeader.SIZE)
+	
+		if(!waitComPort(LinkHeader.SIZE))
 			return null;
 
 		final byte[] readBytes = readBytes(LinkHeader.SIZE);
 
-		logger.debug("readBytes={}", ()->ToHex.bytesToHex(readBytes));
+		logger.debug("Exit readBytes={}", ()->ToHex.bytesToHex(readBytes));
 
 		return readBytes;
 	}
 
 	private byte[] readHeader() throws Exception {
-		logger.traceEntry();
 
-		if(wait(PacketHeader.SIZE, WAIT_TIME*PacketHeader.SIZE)<PacketHeader.SIZE)
+		if(!waitComPort(PacketHeader.SIZE))
 			return null;
 
 		final byte[] readBytes = readBytes(PacketHeader.SIZE);
 
-		logger.debug("readBytes: {}", ()->ToHex.bytesToHex(readBytes));
+//		logger.debug("EXIT readBytes: {}", ()->ToHex.bytesToHex(readBytes));
 
 		return readBytes;
 	}
 
 	private byte[] readParameterHeader() throws Exception {
-		logger.traceEntry();
 
-		final byte[] readBytes;
+		if(!waitComPort(ParameterHeader.SIZE))
+			return null;
 
-		if(wait(ParameterHeader.SIZE, WAIT_TIME*ParameterHeader.SIZE)<ParameterHeader.SIZE)
-			readBytes = null;
-		else
-			readBytes = readBytes(ParameterHeader.SIZE);
+		byte[] readBytes = readBytes(ParameterHeader.SIZE);
 
-		logger.debug("size: {}; readBytes: {};", ()->ParameterHeader.SIZE, ()->ToHex.bytesToHex(readBytes));
+//		logger.debug("EXIT size: {}; readBytes: {};", ()->ParameterHeader.SIZE, ()->ToHex.bytesToHex(readBytes));
 
 		return readBytes;
 	}
 
 	private boolean containsFlagSequence(byte[] readBytes) {
-		logger.traceEntry(()->ToHex.bytesToHex(readBytes));
+//		logger.traceEntry(()->ToHex.bytesToHex(readBytes));
 
 		boolean isFlagSequence = false;
 		for(byte b:readBytes)
@@ -529,7 +593,7 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 				break;
 			}
 
-		logger.traceExit(isFlagSequence);
+//		logger.traceExit(isFlagSequence);
 		return isFlagSequence;
 	}
 
@@ -544,19 +608,48 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 
 	@Override
 	public boolean openPort() throws Exception {
-		logger.traceEntry();
-		serialPort = (SerialPort) portIdentifier.open(MyComPort.class.getName(), 1000);
+//		logger.traceEntry();
+
+		if(opened)
+			return true;
+
+		serialPort = (PureJavaSerialPort) portIdentifier.open(MyComPort.class.getName(), MyComPort.MAX_WAIT_TIME);
 		setBaudrate(BAUDRATE_115200);
-		serialPort.enableReceiveThreshold(1); 
-		serialPort.enableReceiveThreshold(1000);
+		serialPort.enableReceiveThreshold(MyComPort.MAX_WAIT_TIME);
 		inputStream = serialPort.getInputStream();
 		outputStream = serialPort.getOutputStream();
+
+		serialPort.notifyOnDataAvailable(true);
+		serialPort.addEventListener(e->{
+
+//			new MyThreadFactory().newThread(()->{
+			
+				if(opened)
+					try {
+
+						readToTheBuffer();
+					
+						synchronized (MyComPort.this) {
+							MyComPort.this.notify();					
+						}
+
+					} catch (IOException e1) { logger.catching(e1); }
+//			})
+//			.start();
+		});
+
 		return opened = true;
 	}
 
 	@Override
 	public boolean closePort() {
-		logger.traceEntry();
+//		logger.traceEntry(toString());
+
+		if(!opened)
+			return true;
+
+		opened = false;
+		buffer = null;
 
 		try {
 			if(inputStream!=null)
@@ -572,16 +665,18 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 			logger.catching(e);
 		}
 
-		serialPort.removeEventListener();
-		if(serialPort!=null)
+		if(serialPort!=null){
+			serialPort.removeEventListener();
+			serialPort.disableReceiveTimeout();
 			serialPort.close();
+		}
 
-		return opened = false;
+		return true;
 	}
 
 	@Override
 	public void setBaudrate(int baudrate) {
-		logger.entry(baudrate);
+//		logger.entry(baudrate);
 		try {
 			serialPort.setSerialPortParams(baudrate, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 		} catch (UnsupportedCommOperationException e) {
@@ -661,7 +756,19 @@ public class MyComPort implements SerialPortInterface,  AutoCloseable {
 	}
 
 	@Override
-	public void close() throws Exception {
-		closePort();
+	public String toString() {
+		return Optional.ofNullable(portIdentifier).map(CommPortIdentifier::getName).orElse(null);
+	}
+
+	public synchronized byte[] getBuffer() {
+		return buffer;
+	}
+
+	public synchronized void setBuffer(byte[] buffer) {
+		this.buffer = buffer;
+	}
+
+	private synchronized boolean isBuffer() {
+		return buffer!=null && buffer.length!=0;
 	}
 }

@@ -307,6 +307,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 		REQUEST,
 		RANGE,
 		ALARM,
+		IMPORTANT,
 		COMMAND
 	}
 }

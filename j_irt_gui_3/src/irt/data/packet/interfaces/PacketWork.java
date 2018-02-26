@@ -82,7 +82,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 								PACKET_ID_ALARMS_REDUNDANT_FAULT	= 147,
 								PACKET_ID_ALARMS_test				= 148,
 								PACKET_ID_NO_INPUT_SIGNAL 			= 149,
-								PACKET_ID_RF_OVERDRIVEL 			= 160;
+								PACKET_ID_RF_OVERDRIVEL 			= 160,
+								PACKET_ID_ALARMS_STATUS			 	= 161;
 
 	public static final short 	PACKET_ID_DEVICE_DEBUG			 		= 1147,
 
@@ -194,7 +195,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 		OVER_TEMPERATURE_ALARM	((byte) 7, PACKET_ID_ALARMS_OWER_TEMPERATURE),
 		HW_FAULT				((byte)10, PACKET_ID_ALARMS_HARDWARE_FAULT),
 		REDUNDANCY_FAULT		((byte)11, PACKET_ID_ALARMS_REDUNDANT_FAULT),
-		RF_OVERDRIVE			((byte)12, PACKET_ID_RF_OVERDRIVEL);
+		RF_OVERDRIVE			((byte)12, PACKET_ID_RF_OVERDRIVEL),
+		ALL_IDs					((byte)13, PACKET_ID_ALARMS_STATUS);//All possible data in one packet
 
 		private short alarmId;
 		private short packetId;
