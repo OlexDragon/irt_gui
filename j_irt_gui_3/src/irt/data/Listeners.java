@@ -11,9 +11,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class Listeners {
-	private static final Logger logger = LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
-	public static final PopupMenuListener popupMenuListener = new PopupMenuListener() {
+	public final static PopupMenuListener popupMenuListener = new PopupMenuListener() {
 
 
 		@Override

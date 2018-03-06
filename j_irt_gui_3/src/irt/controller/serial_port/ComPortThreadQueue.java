@@ -13,7 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.EventListenerList;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
@@ -25,7 +25,7 @@ import purejavacomm.PortInUseException;
 
 public class ComPortThreadQueue implements Runnable {
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	public final static int QUEUE_SIZE_TO_DELAY = 5;
 	public final static int DELAY_TIMES = 10;
@@ -109,7 +109,7 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public void clear(){
-		logger.entry();
+		logger.traceEntry();
 		comPortQueue.clear();
 	}
 
@@ -191,10 +191,7 @@ public class ComPortThreadQueue implements Runnable {
 
 	public void close() {
 
-		Optional
-		.ofNullable(serialPort)
-		.filter(sp->sp.isOpened())
-		.ifPresent(sp->sp.closePort());
+		new Thread(()->Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort())).start();
 
 		serialPort = null;
 

@@ -25,7 +25,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.DefaultController;
 import irt.controller.GuiControllerAbstract;
@@ -51,7 +51,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 
 	private static final long serialVersionUID = -4043876414280738077L;
 
-	protected final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = LogManager.getLogger();
 
 	private static final IdValueForComboBox[] OffsetControl55uAStep = new IdValueForComboBox[]{
 			new IdValueForComboBox((short) 0, "0 μA"),
@@ -180,7 +180,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 
 										long tmp = value & filter;
 
-										return PLL_HMC807LP6CE_Reg9.this.logger.exit((short) (tmp>>shift));
+										return PLL_HMC807LP6CE_Reg9.this.logger.traceExit((short) (tmp>>shift));
 									}
 
 									private long getFilter(int shift, int width) {
@@ -370,7 +370,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 
 			private int shift(int id, int shiftBy) {
 				logger.entry(id, shiftBy);
-				return logger.exit(id<<shiftBy);
+				return logger.traceExit(id<<shiftBy);
 			}
 		}.execute();
 	}

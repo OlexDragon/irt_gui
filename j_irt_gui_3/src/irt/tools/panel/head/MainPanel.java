@@ -18,7 +18,7 @@ import javax.swing.event.AncestorEvent;
 @SuppressWarnings("serial")
 public class MainPanel extends IrtStylePanel {
 
-	private final Logger logger = LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private final int PANEL_WIDTH;
 

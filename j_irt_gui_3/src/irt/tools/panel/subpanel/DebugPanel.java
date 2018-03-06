@@ -19,7 +19,7 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract.Style;
@@ -34,7 +34,7 @@ import irt.data.packet.interfaces.PacketWork;
 public class DebugPanel extends JPanel{
 	private static final long serialVersionUID = 6314140030152046415L;
 
-	private static final Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private LinkHeader linkHeader;
 

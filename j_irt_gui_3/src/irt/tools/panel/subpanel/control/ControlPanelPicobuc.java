@@ -202,7 +202,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 
 	@Override
 	protected ControllerAbstract getNewAlcController() {
-		logger.entry();
+		logger.traceEntry();
 
 		Getter alcRangeGetter = new Getter(
 				linkHeader,

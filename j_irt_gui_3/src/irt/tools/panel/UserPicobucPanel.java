@@ -8,6 +8,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.DefaultController;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
@@ -27,7 +30,9 @@ import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 @SuppressWarnings("serial")
 public class UserPicobucPanel extends DevicePanel {
 
-	private JTabbedPane tabbedPane;
+	private final static Logger logger = LogManager.getLogger();
+
+			private JTabbedPane tabbedPane;
 	private DefaultController target;
 
 	public UserPicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {

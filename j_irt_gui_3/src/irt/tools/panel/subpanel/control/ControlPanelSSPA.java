@@ -37,6 +37,6 @@ public class ControlPanelSSPA extends ControlPanelImpl {
 	protected Point getMuteButtonPosition() {
 		int x = Translation.getValue(Integer.class, "control.button.mute.x", 14);
 		int y = Translation.getValue(Integer.class, "control.button.mute.y", 101);
-		return logger.exit(new Point(x, y));
+		return logger.traceExit(new Point(x, y));
 	}
 }

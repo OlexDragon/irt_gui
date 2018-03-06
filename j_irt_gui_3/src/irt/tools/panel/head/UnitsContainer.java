@@ -12,12 +12,12 @@ import java.util.Arrays;
 import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class UnitsContainer extends JPanel{
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private final Logger logger = LogManager.getLogger();
 
 	private final int SPACE = 5;
 
@@ -59,7 +59,7 @@ public class UnitsContainer extends JPanel{
 				}
 			}
 		}
-		return logger.exit(result);
+		return logger.traceExit(result);
 	}
 
 	public boolean contains(Component component) {

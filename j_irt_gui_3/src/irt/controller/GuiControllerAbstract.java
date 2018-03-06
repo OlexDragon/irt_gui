@@ -24,6 +24,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +44,9 @@ import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.DeviceInfoPacket;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
+import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.irt_gui.IrtGui;
@@ -92,17 +95,42 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		guiController = this;
 
-		SerialPortInterface serialPort;
-		try {
+		new MyThreadFactory().newThread(()->{
+			try {
 
-			serialPort = new MyComPort(prefs.get(SERIAL_PORT, "COM1"));
+				MyComPort serialPort = new MyComPort(prefs.get(SERIAL_PORT, "COM1"));
+				comPortThreadQueue.setSerialPort(serialPort);
+				Optional.ofNullable(serialPortSelection).filter(sps->serialPort!=null).ifPresent(sps->{
+					final SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
 
-		} catch (NoSuchPortException e1) {
-//			logger.catching(e1);
-			serialPort = null;
-		}
+						@Override
+						protected Void doInBackground() throws Exception {
+							sps.removeActionListener(serialPortSelection);
+							sps.setSelectedItem(serialPort.getPortName());
+							sps.addActionListener(serialPortSelection);
+							return null;
+						}
+					};
+					swingWorker.execute();
+				});
 
-			comPortThreadQueue.setSerialPort(serialPort);
+			} catch (NoSuchPortException e1) {
+//				logger.catching(e1);
+				Optional.ofNullable(serialPortSelection).ifPresent(sps->{
+					final SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+
+						@Override
+						protected Void doInBackground() throws Exception {
+							sps.removeActionListener(serialPortSelection);
+							sps.setSelectedItem(0);
+							sps.addActionListener(serialPortSelection);
+							return null;
+						}
+					};
+					swingWorker.execute();
+				});
+			}
+		}).start();
 			console = new Console(gui, "Console");
 
 			JPanel contentPane = (JPanel) gui.getContentPane();
@@ -251,19 +279,35 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				ComPortThreadQueue.getSerialPort().closePort();
 
 		else {
-			SerialPortInterface serialPort = null;
-			try {
 
-				serialPort = new MyComPort(serialPortName);
+			new MyThreadFactory().newThread(()->{
+				try {
 
-			} catch (NoSuchPortException e) {
-//				logger.catching(e);
-			}
+					MyComPort serialPort = new MyComPort(serialPortName);
+					comPortThreadQueue.setSerialPort(serialPort);
 
-			comPortThreadQueue.setSerialPort(serialPort);
-			prefs.put(SERIAL_PORT, serialPortName);
+					comPortThreadQueue.setSerialPort(serialPort);
+					prefs.put(SERIAL_PORT, serialPortName);
 
-			reset();
+				} catch (NoSuchPortException e1) {
+//					logger.catching(e1);
+					comPortThreadQueue.setSerialPort(null);
+					Optional.ofNullable(serialPortSelection).ifPresent(sps->{
+						final SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+
+							@Override
+							protected Void doInBackground() throws Exception {
+								sps.setSelectedItem(0);
+								return null;
+							}
+						};
+						swingWorker.execute();
+					});
+				}
+
+				reset();
+
+			}).start();
 		} 
 
 		synchronized (this) {
@@ -311,6 +355,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getConverterInfo() {
+//		logger.error("getConverterInfo");
 
 		if(!protocol.equals(Protocol.LINKED)){
 			logger.trace("protocol = {}", protocol);
@@ -320,6 +365,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getUnitsInfo() {
+//		logger.error("getUnitsInfo; protocol: {}", protocol);
 
 		if (!protocol.equals(Protocol.CONVERTER)) {
 
@@ -372,6 +418,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		hasAnswer
 		.map(DeviceInfo::new)
 		.ifPresent(di->{
+//			logger.error(di);
 
 
 			Optional<DeviceType> oDeviceType = di.getDeviceType();
@@ -381,8 +428,20 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				if(dt==DeviceType.IMPOSSIBLE)
 					logger.warn("Can not connect. {}", packet);
 
-				else
+				else{
 					protocol = dt.PROTOCOL;
+
+						//set retransmits to 0 times
+					if(protocol==Protocol.LINKED )
+						Optional
+						.of(packet)
+						.filter(PacketAbstract.class::isInstance)
+						.map(PacketAbstract.class::cast)
+						.map(PacketAbstract::getLinkHeader)
+						.map(LinkHeader::getAddr)
+						.filter(addr->addr!=0)
+						.ifPresent(addr->comPortThreadQueue.add(new RetransmitPacket(addr, (byte) 0)));
+				}
 
 				try{
 					panelController.control(di);

@@ -27,7 +27,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.Document;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.text.document.DocumentsFactory;
 import irt.irt_gui.IrtGui;
@@ -35,7 +35,7 @@ import irt.irt_gui.IrtGui;
 
 public class IpAddressTextField extends GridbagPanel {
 
-	private static final Logger logger = (Logger) LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger();
 
 	private static final long serialVersionUID = -4163874955176718452L;
 

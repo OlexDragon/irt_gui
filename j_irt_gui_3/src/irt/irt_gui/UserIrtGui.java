@@ -1,21 +1,17 @@
 package irt.irt_gui;
 
-import irt.controller.GuiControllerAbstract;
-import irt.controller.GuiControllerUser;
-
 import java.awt.EventQueue;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-
-import javax.swing.JOptionPane;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.GuiControllerAbstract;
+import irt.controller.GuiControllerUser;
+
 @SuppressWarnings("serial")
 public class UserIrtGui extends IrtGui {
 
-	private final static Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	public UserIrtGui() {
 	}
@@ -23,21 +19,21 @@ public class UserIrtGui extends IrtGui {
 	public static void main(String[] args) {
 		
 		// Determine what the GraphicsDevice can support.
-        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice gd = ge.getDefaultScreenDevice();
-       final boolean isTranslucencySupported = gd.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
+//        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+//        GraphicsDevice gd = ge.getDefaultScreenDevice();
+//       final boolean isTranslucencySupported = gd.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.TRANSLUCENT);
 
         //If shaped windows aren't supported, exit.
-       if (!gd.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT)) {
-           JOptionPane.showMessageDialog(null, "Shaped windows are not supported");
-            System.exit(0);
-       }
+//       if (!gd.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT)) {
+//           JOptionPane.showMessageDialog(null, "Shaped windows are not supported");
+//            System.exit(0);
+//       }
 
         //If translucent windows aren't supported, 
         //create an opaque window.
-        if (!isTranslucencySupported) {
-        	JOptionPane.showMessageDialog(null, "Translucency is not supported");
-       }
+//        if (!isTranslucencySupported) {
+//        	JOptionPane.showMessageDialog(null, "Translucency is not supported");
+//       }
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {

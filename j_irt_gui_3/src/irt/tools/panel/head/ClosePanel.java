@@ -12,32 +12,26 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import javafx.application.Platform;
+
 
 @SuppressWarnings("serial")
 public class ClosePanel extends JPanel {
-
-//	private JFrame fraim;
 
 	/**
 	 * Create the panel.
 	 */
 	public ClosePanel(JFrame fraim) {
-//		this.fraim = fraim;
+
+		Platform.setImplicitExit(false); 
 
 		setOpaque(false);
 		setSize(25, 25);
-//		SwitchBox pin = new SwitchBox(new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/pin.gif")).getImage(), new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/pin-in.png")).getImage());
-//		pin.setBounds(0, 0, 37, 40);
-//		pin.addActionListener(new ActionListener() {
-//			public void actionPerformed(ActionEvent e) {
-//				ClosePanel.this.fraim.setAlwaysOnTop(((SwitchBox) e.getSource()).isSelected());
-//			}
-//		});
-//		add(pin);
 
 		JButton btnClose = new JButton("X");
 		btnClose.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+		    	Platform.exit();
 				System.exit(0);
 			}
 		});

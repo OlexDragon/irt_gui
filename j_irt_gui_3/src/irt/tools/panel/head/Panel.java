@@ -33,7 +33,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
@@ -55,7 +55,7 @@ import irt.tools.panel.PicobucPanel;
 @SuppressWarnings("serial")
 public class Panel extends JPanel implements PacketListener {
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 //	public int MIN_WIDTH = 25;
 //	public int MID_WIDTH = 310;

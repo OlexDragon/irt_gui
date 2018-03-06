@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.listener.PacketListener;
@@ -18,7 +18,7 @@ import irt.data.packet.interfaces.PacketWork;
 
 public class DeviceInfo implements PacketListener {
 
-	protected final Logger logger = (Logger) LogManager.getLogger();
+	protected final Logger logger = LogManager.getLogger();
 
 	public static final int REVISION_FIRST_BYTE = 4;
 	public static final int SUBTYPE_FIRST_BYTE 	= 8;

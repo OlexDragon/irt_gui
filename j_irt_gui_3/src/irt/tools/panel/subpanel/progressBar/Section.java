@@ -12,12 +12,12 @@ import java.util.Observer;
 import javax.swing.SwingWorker;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 public class Section extends IrtStylePanel implements Observer{
 	private static final long serialVersionUID = -3714457770555564111L;
 
-	private static final Logger logger = (Logger) LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger();
 
 	private Color inRangeColor = Color.GREEN;
 	private Color underRangeColor = Color.WHITE;
@@ -77,15 +77,22 @@ public class Section extends IrtStylePanel implements Observer{
 
 	@Override
 	public void update(Observable o, Object obj) {
-		Value v = (Value) o;
-		Status s = (Status) obj;
+		new SwingWorker<Void, Void>(){
 
-		if(s==Status.MORE_THEN_RANGE)
-			setValue(v.getValue()+1);
-		else if(s==Status.UNDER_RANGE)
-			setValue(v.getValue()-1);
-		else
-			setValue(v.getValue());
+			@Override
+			protected Void doInBackground() throws Exception {
+				Value v = (Value) o;
+				Status s = (Status) obj;
+
+				if(s==Status.MORE_THEN_RANGE)
+					setValue(v.getValue()+1);
+				else if(s==Status.UNDER_RANGE)
+					setValue(v.getValue()-1);
+				else
+					setValue(v.getValue());
+				return null;
+			}
+		}.execute();;
 	}
 
 	public Color getUnderRangeColor() {

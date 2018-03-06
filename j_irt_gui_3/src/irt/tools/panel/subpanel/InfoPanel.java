@@ -43,7 +43,7 @@ import irt.tools.panel.PicobucPanel;
 @SuppressWarnings("serial")
 public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
-	private final static Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private static final int WINDOW_MIN_HEIGHT = 105;
 	private static final int WINDOW_MAX_HEIGHT = 135;
