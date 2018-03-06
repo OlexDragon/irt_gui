@@ -16,8 +16,8 @@
 		<DefaultRolloverStrategy max="10" />
     </RollingFile>
 
-    <RollingRandomAccessFile name="communication" fileName="${sys:user.home}/irt\${sys:serialNumber}/comm_${sys:serialNumber}.log"
-    						  			filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/comm_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz">
+    <RollingRandomAccessFile name="communication" fileName="${sys:user.home}/irt/comm.log"
+    						  			filePattern="${sys:user.home}/irt//$${date:yyyy-MM}/comm-%d{MM-dd-yyyy}-%i.log.gz">
 		<PatternLayout pattern="%-5p %d %M (%F:%L) %m%n"/>
 		<Policies>
 			<SizeBasedTriggeringPolicy size="500 MB" />
@@ -25,8 +25,8 @@
 		<DefaultRolloverStrategy max="10" />
     </RollingRandomAccessFile>
 
-    <RollingRandomAccessFile name="log" fileName="${sys:user.home}/irt/${sys:serialNumber}/log_${sys:serialNumber}.log"
-    					filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/log_${sys:serialNumber}-%d{MM-dd-yyyy}-%i.log.gz">
+    <RollingRandomAccessFile name="log" fileName="${sys:user.home}/irt//gui3log.log"
+    					filePattern="${sys:user.home}/irt//$${date:yyyy-MM}/gui3log-%d{MM-dd-yyyy}-%i.log.gz">
 		<PatternLayout pattern="%-5p %d %M (%F:%L) %m%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
 		<Policies>
@@ -50,6 +50,7 @@
 
 <!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.MonitorPanelSwingWithFx" level="all"/> -->
+<!--  	<Logger name="irt.tools.fx.JavaFxWrapper" level="all"/> -->
 
 <!--  	<Logger name="irt.tools.textField.RegisterTextField" level="all"/> -->
 <!--  	<Logger name="irt.tools.textField.UnitAddressField" level="all"/> -->

@@ -26,7 +26,7 @@ import irt.tools.label.ImageLabel;
 @SuppressWarnings("serial")
 public class IrtPanel extends MainPanel {
 
-	private final static Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private static Map<String, Integer> fontStyle;
 

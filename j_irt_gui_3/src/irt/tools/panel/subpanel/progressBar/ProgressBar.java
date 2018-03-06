@@ -6,14 +6,16 @@ import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.DeviceInfo;
@@ -29,9 +31,11 @@ import irt.data.value.ValueDouble;
 public class ProgressBar extends JPanel implements PacketListener{
 	private static final long serialVersionUID = 1257848427070457804L;
 
-	private final static Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private static Value value = new ValueDouble(0, 0, Integer.MAX_VALUE, 0);
+
+	private Timer timer;
 
 	public ProgressBar() {
 		logger.trace("ProgressBar()");
@@ -126,6 +130,10 @@ public class ProgressBar extends JPanel implements PacketListener{
 		section1.setLayout(null);
 		setLayout(groupLayout);
 
+		timer = new Timer((int) TimeUnit.SECONDS.toMillis(10), e->{
+			value.setValue(Integer.MIN_VALUE);
+		});
+		timer.setRepeats(false);
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
@@ -168,6 +176,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 		.findAny()
 		.map(MeasurementValue::new)
 		.ifPresent(mv->{
+			timer.restart();
 
 			final int v = mv.getValue();
 			if(mv.getFlags().equals(MeasurementStatus.LESS_THAN) && value.getValue()!=v){

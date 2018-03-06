@@ -129,7 +129,7 @@ public class UnitAddressField extends JTextField {
 
 		for(int i=0; i<length; i++) sa[i] = (byte) intArray[i];
 
-		logger.error("{}", sa);
+		logger.debug("{}", sa);
 		return sa;
 	}
 

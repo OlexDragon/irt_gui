@@ -25,6 +25,7 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 	private JavaFxPanel root;
 
 	public JavaFxWrapper(JavaFxPanel javaFxPanel) {
+//		logger.error("Entry {} : {}", javaFxPanel.getClass().getSimpleName(), Platform.isImplicitExit());
 
 		root = javaFxPanel;
 
@@ -36,16 +37,22 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(c->root.shutdownNow()));
+				.ifPresent(c->{
+//					System.out.println("addHierarchyListener");
+					Platform.runLater(()->setVisible(false));
+					root.shutdownNow();
+				}));
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
 				Platform.runLater(()->{
+//					logger.error("Start {}", root.getClass().getSimpleName());
 					root.start();
 				});
 			}
 			public void ancestorRemoved(AncestorEvent event) {
 				Platform.runLater(()->{
+//					logger.error("stop {}", javaFxPanel.getClass().getSimpleName());
 					root.stop();
 				});
 			}
@@ -55,6 +62,7 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 		Platform.runLater(()->{
 			try{
 
+//				logger.error("Create {}", root.getClass().getSimpleName());
 				Scene scene = new Scene((Parent) root);
 				setScene(scene);
 
@@ -73,5 +81,4 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 	public void setUnitAddress(byte unitAddress) {
 		Platform.runLater(()->root.setUnitAddress(unitAddress));
 	}
-
 }

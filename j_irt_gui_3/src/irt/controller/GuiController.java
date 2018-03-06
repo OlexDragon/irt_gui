@@ -16,13 +16,13 @@ public class GuiController extends GuiControllerAbstract{
 	}
 
 	@Override
-	protected DevicePanel getConverterPanel(DeviceInfo di) {
-		return new ConverterPanel(di, protocol, unitsPanel.getHeight());
+	protected DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+		return new PicobucPanel( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 	}
 
 	@Override
-	protected DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
-		return new PicobucPanel( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
+	protected DevicePanel getConverterPanel(DeviceInfo di) {
+		return new ConverterPanel(di, protocol, unitsPanel.getHeight());
 	}
 
 	@Override

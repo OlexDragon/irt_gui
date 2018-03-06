@@ -47,9 +47,9 @@ import irt.data.packet.interfaces.PacketWork;
 
 public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
-	private static LoggerContext ctx = setSysSerialNumber(null);
+	private  static LoggerContext ctx = setSysSerialNumber(null);
 
-	public static final List<Class<? extends PacketAbstract>> packetsToControl = Arrays.asList(
+	public final static List<Class<? extends PacketAbstract>> packetsToControl = Arrays.asList(
 																								AttenuationPacket.class,
 																								FrequencyPacket.class,
 																								GainPacket.class,

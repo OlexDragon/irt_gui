@@ -165,7 +165,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 	@Override
 	public void refresh() {
 		super.refresh();
-		logger.entry();
+		logger.traceEntry();
 
 		titledBorder.setTitle(Translation.getValue(String.class, "monitor", "IrtControllPanel"));
 
@@ -175,7 +175,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 
 		swingWorkers();
 
-		logger.exit();
+		logger.traceExit();
 	}
 
 	private static final String[] controllerNames = new String[]{"Measurement_temperature", "Measurement_InputPower","Status"};

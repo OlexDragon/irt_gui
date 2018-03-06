@@ -1,7 +1,5 @@
 package irt.tools.panel.head;
 
-import irt.tools.button.ImageButton;
-
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.GradientPaint;
@@ -11,15 +9,13 @@ import java.awt.geom.Arc2D;
 
 import javax.swing.JPanel;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import irt.tools.button.ImageButton;
 
 public class IrtStylePanel extends JPanel {
 	public IrtStylePanel() {
 	}
 	private static final long serialVersionUID = 198707451482153465L;
 
-	private final static Logger logger = (Logger) LogManager.getLogger();
 
     private int cornerWidth = 50;
 	private int cornerHeight = 50;
@@ -34,7 +30,6 @@ public class IrtStylePanel extends JPanel {
 	@Override
 	protected void paintComponent(Graphics g) {
 		synchronized (g) {
-			logger.trace("paintComponent(Graphics g) {}", getClass().getSimpleName());
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setRenderingHints(ImageButton.RENDERING);
 			Color background = getBackground();

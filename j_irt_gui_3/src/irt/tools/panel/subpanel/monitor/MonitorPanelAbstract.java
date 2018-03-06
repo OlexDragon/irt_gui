@@ -13,7 +13,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
@@ -26,7 +26,7 @@ import irt.data.packet.Payload;
 @SuppressWarnings("serial")
 public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Monitor  {
 
-	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
+	protected final Logger logger = LogManager.getLogger(getClass());
 
 	protected LinkHeader linkHeader;
 	protected TitledBorder titledBorder;

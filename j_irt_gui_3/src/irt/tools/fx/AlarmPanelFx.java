@@ -63,12 +63,13 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private final AlarmsIDsPacket packetAlarmIDs;
 	private final AlarmsSummaryPacket packetSummary;
 
-	private byte unitAddress = CONVERTER;
+	private Byte unitAddress = CONVERTER;
 												public byte getUnitAddress() {
 													return unitAddress;
 												}
 
 												public void setUnitAddress(byte unitAddress) {
+//													logger.error("unitAddress: {}", unitAddress);
 													this.unitAddress = unitAddress;
 													packetSummary.setAddr(unitAddress);
 													packetAlarmIDs.setAddr(unitAddress);
@@ -78,6 +79,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private GridPane 	gridPane;
 
 	public AlarmPanelFx() {
+//		logger.error("AlarmPanelFx");
 
 		packetAlarmIDs = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketWork();
 		packetSummary = (AlarmsSummaryPacket) Packets.ALARMS_SUMMARY_STATUS.getPacketWork();//This packet is for DumpController
@@ -98,7 +100,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		gridPane.getStyleClass().add("alarms");
 
-		scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 	}
 
     @FXML  void onMouseClicked(MouseEvent event) { if(event.getClickCount()==3) clear(); }
@@ -128,6 +129,8 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private int delay;
 	@Override
 	public void run() {
+		if(unitAddress==null)
+			return;
 
 		final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
 		if(this.serialPort==null)
@@ -385,6 +388,10 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	public void start(){
+
+		if(scheduledFuture==null || scheduledFuture.isCancelled())
+			scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
+
 		run = true;
 	}
 

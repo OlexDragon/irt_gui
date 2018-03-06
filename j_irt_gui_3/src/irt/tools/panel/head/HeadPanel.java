@@ -15,7 +15,7 @@ import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
@@ -38,7 +38,7 @@ import javax.swing.event.AncestorEvent;
 @SuppressWarnings("serial")
 public class HeadPanel extends MainPanel implements PacketListener {
 
-	private static final Logger logger = (Logger) LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger();
 
 	public static final Color BACKGROUND_COLOR = new Color(0x3B, 0x4A, 0x8B);
 	public static LED ledRx = new LED(Color.GREEN, "");
@@ -246,8 +246,8 @@ public class HeadPanel extends MainPanel implements PacketListener {
 
 			@Override
 			protected Font doInBackground() throws Exception {
-				logger.entry();
-				return logger.exit(Translation.getFont());
+				logger.traceEntry();
+				return logger.traceExit(Translation.getFont());
 			}
 
 			@Override

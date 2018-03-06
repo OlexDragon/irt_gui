@@ -16,7 +16,7 @@ import irt.data.RundomNumber;
 @SuppressWarnings("serial")
 public class Console extends JDialog {
 
-	private final static Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private static final int MAX_QUEUE_SIZE = 50;
 

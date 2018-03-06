@@ -169,7 +169,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 							// If profile has error return
 							if(profileErrors!=ProfileErrors.NO_ERROR){
-								showAlert("Profile errorr: " + profileErrors);
+								showAlert("Profile error: " + profileErrors);
 								return;
 							}
 

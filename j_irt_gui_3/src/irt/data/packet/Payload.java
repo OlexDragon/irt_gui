@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.serial_port.MyComPort;
 import irt.data.DacValue;
@@ -17,7 +17,7 @@ import irt.data.value.Value;
 
 public class Payload {
 
-	private static final Logger logger = (Logger) LogManager.getLogger();
+	private static final Logger logger = LogManager.getLogger();
 
 	public static final byte 	DI_DEVICE_TYPE				= 1,
 								DI_FIRMWARE_VERSION			= 2,

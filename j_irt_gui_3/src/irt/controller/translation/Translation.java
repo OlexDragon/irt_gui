@@ -23,11 +23,10 @@ import irt.irt_gui.IrtGui;
 import irt.tools.panel.head.IrtPanel;
 
 public class Translation {
+
 	private static final Logger logger = LogManager.getLogger();
 
 	private static final String DEFAULT_LANGUAGE = "en";
-
-	private static final Logger LOGGER = LogManager.getLogger();
 
 	private static final Preferences PREFS = GuiController.getPrefs();
 	private static Locale locale;
@@ -42,7 +41,7 @@ public class Translation {
 	private static ResourceBundle messages;
 
 	public static void setLocale(final String localeStr){
-		LOGGER.entry(localeStr);
+		logger.entry(localeStr);
 		font = null;
 
 		Thread t = new Thread(new Runnable() {
@@ -51,7 +50,7 @@ public class Translation {
 			public void run() {
 
 				try{
-				LOGGER.entry(localeStr);
+				logger.entry(localeStr);
 
 				locale = new Locale(localeStr);
 
@@ -92,18 +91,18 @@ public class Translation {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T getValueWithSuplier(Class<T> clazz, String key, Supplier<T> defaultValue){
-		LOGGER.entry(clazz, key, defaultValue);
+		logger.entry(clazz, key, defaultValue);
 		T returnValue = null;
 
 		int times = 0;
 		while(map==null)
-			synchronized (LOGGER) {
+			synchronized (logger) {
 				try {
 					Thread.sleep(10);
 					if(times>10)
 						return defaultValue.get();
 				} catch (Exception e) {
-					LOGGER.catching(e);
+					logger.catching(e);
 					return null;
 				}
 			}
@@ -133,13 +132,13 @@ public class Translation {
 													Integer.parseInt(split[3]));
 				break;
 			default:
-				LOGGER.warn("Have to do implementation for '{}'", clazz);
+				logger.warn("Have to do implementation for '{}'", clazz);
 			}
 		}else{
 			try{
 				returnValue = defaultValue.get();
 			}catch (NullPointerException e) {
-				LOGGER.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
+				logger.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
 				returnValue = null;
 			}
 		}
@@ -148,7 +147,7 @@ public class Translation {
 	}
 
 	private static Font getFont(String selectedLanguage) {
-		LOGGER.entry(selectedLanguage);
+		logger.entry(selectedLanguage);
 		try {
 			String fontURL = getValue(String.class, "font_path", "fonts/TAHOMA.TTF");
 
@@ -156,7 +155,7 @@ public class Translation {
 			float fontSize = getValue(Float.class, "headPanel.font_size", 18f);
 
 			if (fontURL != null && (font = getSystemFont(fontURL, fontStyle, (int) fontSize)) == null) {
-				LOGGER.warn("The Operating System does not have {} font.", fontURL);
+				logger.warn("The Operating System does not have {} font.", fontURL);
 				URL resource = IrtGui.class.getResource(fontURL);
 				try (InputStream openStream = resource.openStream();) {
 					font = Font.createFont(Font.TRUETYPE_FONT, openStream);
@@ -164,7 +163,7 @@ public class Translation {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.catching(e);
+			logger.catching(e);
 		}
 
 		if(font==null)
@@ -174,7 +173,7 @@ public class Translation {
 	}
 
 	public static Font getSystemFont(String fontURL, int fontStyle, int fontSize) {
-		LOGGER.entry( fontURL, fontStyle, fontSize);
+		logger.entry( fontURL, fontStyle, fontSize);
 
 		Font font = null;
 		String[] split = fontURL.split("/");
@@ -192,12 +191,12 @@ public class Translation {
 
 	public static Font getFont() {
 		while(font==null)
-			synchronized (LOGGER) {
+			synchronized (logger) {
 				try {
-					LOGGER.trace("Wait for Font");
+					logger.trace("Wait for Font");
 					Thread.sleep(400);
 				} catch (InterruptedException e) {
-					LOGGER.catching(e);
+					logger.catching(e);
 				}
 			}
 		return font;
@@ -208,7 +207,7 @@ public class Translation {
 	}
 
 	public static void setFont(Font font) {
-		LOGGER.entry(font);
+		logger.entry(font);
 		Translation.font = font;
 	}
 
@@ -223,14 +222,14 @@ public class Translation {
 				
 				translationProperties.load(resourceAsStream);
 			} catch (Exception e) {
-				LOGGER.catching(e);
+				logger.catching(e);
 			}
 		}
 		return translationProperties;
 	}
 
 	public static String getTranslationProperties(String key) {
-		LOGGER.entry(key);
+		logger.entry(key);
 		return getTranslationProperties().getProperty(key);
 	}
 }

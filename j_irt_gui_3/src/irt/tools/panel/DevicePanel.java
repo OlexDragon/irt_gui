@@ -19,7 +19,7 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.DumpControllerFull;
 import irt.controller.Dumper;
@@ -42,9 +42,9 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 @SuppressWarnings("serial")
 public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
-	public static final DebugPanel DEBUG_PANEL = new DebugPanel(Optional.empty());
+	public final static DebugPanel DEBUG_PANEL = new DebugPanel(Optional.empty());
 
-	protected final Logger logger = (Logger) LogManager.getLogger(getClass());
+	protected final static Logger logger = LogManager.getLogger();
 
 	protected final String selectedTab = "selected_tab_"+getClass().getSimpleName();
 
@@ -89,11 +89,13 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 			private Dumper dumpController;
 			public void ancestorAdded(AncestorEvent event) {
 
+//				logger.error("*** 1 ***");
 				monitorPanel = new MonitorPanelSwingWithFx();
 				monitorPanel.setLocation(10, 11);
 				monitorPanel.setSize(215, 210);
 				oLinkHeader.ifPresent(lh->monitorPanel.setUnitAddress(lh.getAddr()));
 				userPanel.add((Component) monitorPanel);
+//				logger.error("*** 2 ***");
 
 				controlPanel = getNewControlPanel();
 				userPanel.add(controlPanel);

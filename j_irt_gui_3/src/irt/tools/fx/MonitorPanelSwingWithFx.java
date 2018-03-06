@@ -24,6 +24,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 	private MonitorPanelFx root;
 
 	public MonitorPanelSwingWithFx() {
+		logger.traceEntry();
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -34,25 +35,33 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
 				.ifPresent(
-						c->root.shutdownNow()));
+						c->{
+							Platform.runLater(()->setVisible(false));
+							root.shutdownNow();
+						}));
 
+//		logger.error("--- 1 ---");
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
 				Platform.runLater(()->{
+//					logger.error("Start {}", root.getClass().getSimpleName());
 					root.start();
 				});
 			}
 			public void ancestorRemoved(AncestorEvent event) {
 				Platform.runLater(()->{
+//					logger.error("stop {}", root.getClass().getSimpleName());
 					root.stop();
 				});
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 		});
 
+//		logger.error("--- 2 --- keep javafx alive: {}");
 		Platform.runLater(()->{
 			try{
 
+//				logger.error("*** Yee ***");
 				root = new MonitorPanelFx();
 				Scene scene = new Scene(root);
 				setScene(scene);
@@ -61,6 +70,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 		        logger.catching(e);
 			}
 		});
+//		logger.error("--- 3 ---");
 	}
 
 	@Override

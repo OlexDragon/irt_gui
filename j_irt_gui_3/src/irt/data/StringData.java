@@ -1,11 +1,11 @@
 package irt.data;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 public class StringData {
 
-	protected final Logger logger = (Logger) LogManager.getLogger(getClass().getName());
+	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	private String str;
 

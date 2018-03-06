@@ -114,11 +114,11 @@ public class MonitorPanel extends MonitorPanelSSPA implements Monitor {
 
 	@Override
 	public void refresh() {
-		logger.entry();
+		logger.traceEntry();
 		new TextWorker(ledLock, "lock", "LOCK").execute();
 		new TextWorker(lblInputPowerTxt, "input_power", "Input Power").execute();
 		super.refresh();
-		logger.exit();
+		logger.traceExit();
 	}
 
 	@Override

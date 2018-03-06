@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -17,9 +18,11 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingWorker;
+import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.Listeners;
@@ -33,30 +36,32 @@ import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.wizards.serial_port.SerialPortWizard;
-import javafx.application.Platform;
 
 @SuppressWarnings("serial")
 public abstract class IrtMainFrame extends JFrame implements PacketListener {
+	static{
+		System.setProperty("serialNumber", "UnknownSerialNumber");
+	}
 
-	private final Logger logger = (Logger) LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	protected GuiControllerAbstract guiController;
 
 	private Object alarmSeverities;
 
+	private Timer timer;
+
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
 
-		Platform.setImplicitExit(false); 
 
-		
 		Runtime.getRuntime().addShutdownHook(new Thread()
 		{
 		    @Override
-		    public void run()
-		    {
+		    public void run(){
+//		    	logger.error("addShutdownHook");
 		    	guiController.stop();
-		    	Platform.exit();
+		    	LogManager.shutdown();
 		    }
 		});
 
@@ -113,6 +118,18 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 				guiController = getNewGuiController();
 			}
 		});
+
+		timer = new Timer((int) TimeUnit.SECONDS.toMillis(10), e->{
+			new SwingWorker<Void, Void>() {
+
+				@Override
+				protected Void doInBackground() throws Exception {
+					Optional.ofNullable(IrtPanel.logoIcon).map(logo->logo.getImage()).ifPresent(IrtMainFrame.this::setIconImage);
+					return null;
+				}
+			}.execute();
+		});
+		timer.setRepeats(false);
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
@@ -139,6 +156,8 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		.filter(AlarmSeverities.class::isInstance)
 		.map(AlarmSeverities.class::cast)
 		.ifPresent(as->{
+
+			timer.restart();
 
 			if(alarmSeverities!=null && alarmSeverities == as)
 				return;
