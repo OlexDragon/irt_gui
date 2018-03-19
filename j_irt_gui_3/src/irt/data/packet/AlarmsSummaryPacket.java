@@ -14,7 +14,7 @@ public class AlarmsSummaryPacket extends PacketAbstract {
 	public AlarmsSummaryPacket(byte linkAddr){
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_ALARMS_SUMMARY,
+				PacketWork.PacketIDs.ALARMS_SUMMARY.getId(),
 				PacketImp.GROUP_ID_ALARM,
 				PacketImp.ALARM_SUMMARY_STATUS,
 				null,

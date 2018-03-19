@@ -85,13 +85,14 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		infoTimer.start();
 
 		helpPacket = new DeviceDebugHelpPacket(addr);
-		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 20, TimeUnit.SECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 5, 20, TimeUnit.MINUTES);
 	}
 
 	int devicesCount;
 	int dumpsCount;
 	@Override
 	public void run() {
+
 		if(deviceIndexes==null) {
 			GuiControllerAbstract.getComPortThreadQueue().add(helpPacket);
 			return;

@@ -1,7 +1,6 @@
 package irt.data.packet;
 
 import irt.data.Range;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.RangePacket;
 
 public class FrequencyRangePacket extends PacketAbstract implements RangePacket{
@@ -9,7 +8,7 @@ public class FrequencyRangePacket extends PacketAbstract implements RangePacket{
 	public FrequencyRangePacket( byte linkAddr) {
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE,
+				PacketIDs.CONFIGURATION_FREQUENCY_RANGE.getId(),
 				PacketImp.GROUP_ID_CONFIGURATION,
 				linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY_RANGE : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
 				null,

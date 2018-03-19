@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.MyComPort;
 import irt.data.MyThreadFactory;
+import irt.data.ToHex;
 import irt.data.listener.PacketListener;
 import irt.data.packet.AlarmsIDsPacket;
 import irt.data.packet.AlarmsSummaryPacket;
@@ -25,6 +26,9 @@ public class Test {
 	private final static Logger logger = LogManager.getLogger();
 
 	public static void main(String[] args) {
+
+		byteStuffingTest();
+
 		MyComPort port = null;
 		try {
 
@@ -73,6 +77,12 @@ public class Test {
 			if(port!=null)
 				port.closePort();
 		}
+	}
+
+	private static void byteStuffingTest() {
+		byte[] bytes = new byte[]{0, 00, 00, 01, 0x5C, (byte) 0xAF, (byte) 0xEA, (byte) 0x80, 00, 00, 00, 01, 0x7D, 0x5D, 0x78, 0x40, 00};
+		logger.error("*** Start byteStuffingTest - {}" + ToHex.bytesToHex(bytes));
+		logger.error("*** End byteStuffingTest - {}" + ToHex.bytesToHex(MyComPort.byteStuffing(bytes)));
 	}
 
 	public static class PacketListenerTest implements PacketListener, Callable<Packet>{

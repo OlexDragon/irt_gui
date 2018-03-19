@@ -18,7 +18,7 @@ public class AlarmsIDsPacket extends PacketAbstract{
 	}
 
 	public AlarmsIDsPacket(byte linkAddr){
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PACKET_ID_ALARMS_IDs, PacketImp.GROUP_ID_ALARM, PacketImp.ALARMS_IDs, null, Priority.ALARM);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PacketIDs.ALARMS_IDs.getId(), PacketImp.GROUP_ID_ALARM, PacketImp.ALARMS_IDs, null, Priority.ALARM);
 	}
 
 	@Override

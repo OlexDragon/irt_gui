@@ -41,9 +41,10 @@ public class ComPortThreadQueue implements Runnable {
 		scheduledFuture = service.scheduleAtFixedRate(this, 10, 10, TimeUnit.MILLISECONDS);
 	}
 
+	private boolean sent;
+
 	@Override
 	public void run() {
-		boolean sent = false;
 		PacketWork packetWork = null;
 		try {
 
@@ -146,7 +147,9 @@ public class ComPortThreadQueue implements Runnable {
 
 			} catch (PortInUseException e) {
 
-				final String errorMessage = String.format("Seriap port %s is in use.", sp);
+				logger.catching(e);
+
+				final String errorMessage = String.format("Serial port %s is in use.", sp);
 
 				JOptionPane.showMessageDialog(null, errorMessage);
 

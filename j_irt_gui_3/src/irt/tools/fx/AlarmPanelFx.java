@@ -90,6 +90,10 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
         try {
             fxmlLoader.load();
+
+    		if(scheduledFuture==null || scheduledFuture.isCancelled())
+    			scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
+
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
@@ -388,10 +392,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	public void start(){
-
-		if(scheduledFuture==null || scheduledFuture.isCancelled())
-			scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
-
 		run = true;
 	}
 
