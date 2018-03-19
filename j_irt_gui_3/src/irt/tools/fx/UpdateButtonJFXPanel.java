@@ -1,4 +1,3 @@
-
 package irt.tools.fx;
 
 import java.awt.event.MouseEvent;
@@ -161,56 +160,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 							setuoMD5.append(DatatypeConverter.printHexBinary(md5.digest(setupInfoBytes))).append(" *setup.info").append("\n") ;
 						}
 
-						final Optional<Profile> oProfile = message.getProfile();
-						final ProfileErrors profileErrors = oProfile.map(Profile::validate).orElse(ProfileErrors.DO_NOT_EXSISTS);
-
-						// PROFILE content
-						if(profileErrors!=ProfileErrors.DO_NOT_EXSISTS){
-
-							// If profile has error return
-							if(profileErrors!=ProfileErrors.NO_ERROR){
-								showAlert("Profile error: " + profileErrors);
-								return;
-							}
-
-							// if profile does not have errors prepare a profile for uploading
-							final String profileMD5 = oProfile
-															.map(p -> {
-																try {
-
-																	return p.getMD5();
-
-																} catch (Exception e1) {
-																	logger.catching(e1);
-																	return null;
-																}
-															}).orElse(null);
-
-							if(profileMD5==null){
-								showAlert("MD5 errorr.");
-								return;
-							}
-
-							// setup.md5 file content
-							final String fileName = oProfile.map(Profile::getFileName).orElse("");
-							setuoMD5.append(profileMD5).append(" *").append(fileName);
-
-							// Profile tar entry
-							oProfile
-							.map(Profile::getProfileCharBuffer)
-							.ifPresent(charBuffer->{
-								try {
-
-									charBuffer.rewind();
-									addToTar(tarArchiveOutputStream, fileName, charBuffer.toString().getBytes());
-
-								} catch (Exception e1) {
-									logger.catching(e1);
-								}
-							});
-						}
-
-						addToTar(tarArchiveOutputStream, "setup.md5", setuoMD5.toString().getBytes());
+						addProfileToTheTar(message.getProfile(), setuoMD5, tarArchiveOutputStream);
 
 						// PROGRAM
 						message
@@ -230,6 +180,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 								try {
 
 									addToTar(tarArchiveOutputStream, fileName, bytes);
+									setuoMD5.append(DatatypeConverter.printHexBinary(md5.digest(bytes))).append(" *" + fileName).append("\n") ;
 
 								} catch (IOException e1) {
 									logger.catching(e1);
@@ -237,14 +188,77 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 							});
 						});
 
+						addToTar(tarArchiveOutputStream, "setup.md5", setuoMD5.toString().getBytes());
+
 						ByteArrayInputStream is = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 						uploader.upload(is);
 //						logger.error(new String(byteArrayOutputStream.toByteArray()));
 
+						//TODO - this is the test code. Have to remove it.
+//						{
+//							File testF = new File("C:\\Users\\Oleksandr\\Desktop\\test.tar");
+//							if(testF.exists())
+//								testF.delete();
+//
+//							testF.createNewFile();
+//							try(FileOutputStream fos = new FileOutputStream(testF);){
+//								byteArrayOutputStream.writeTo(fos);
+//							}
+//
+//						}
 					} catch (NoSuchAlgorithmException | IOException e1) {
 						logger.catching(e1);
 					}
 				});
+			});
+		}
+
+		private void addProfileToTheTar(Optional<Profile> oProfile, StringBuffer setuoMD5, TarArchiveOutputStream tarArchiveOutputStream) {
+
+			final ProfileErrors profileErrors = oProfile.map(Profile::validate).orElse(ProfileErrors.DO_NOT_EXSISTS);
+			if(profileErrors==ProfileErrors.DO_NOT_EXSISTS)
+				return;
+
+			// If profile has error return
+			if(profileErrors!=ProfileErrors.NO_ERROR){
+				showAlert("Profile error: " + profileErrors);
+				return;
+			}
+
+			// if profile does not have errors prepare a profile for uploading
+			final String profileMD5 = oProfile
+											.map(p -> {
+												try {
+
+													return p.getMD5();
+
+												} catch (Exception e1) {
+													logger.catching(e1);
+													return null;
+												}
+											}).orElse(null);
+
+			if(profileMD5==null){
+				showAlert("MD5 errorr.");
+				return;
+			}
+
+			// setup.md5 file content
+			final String fileName = oProfile.map(Profile::getFileName).orElse("");
+			setuoMD5.append(profileMD5).append(" *").append(fileName);
+
+			// Profile tar entry
+			oProfile
+			.map(Profile::getProfileCharBuffer)
+			.ifPresent(charBuffer->{
+				try {
+
+					charBuffer.rewind();
+					addToTar(tarArchiveOutputStream, fileName, charBuffer.toString().getBytes());
+
+				} catch (Exception e1) {
+					logger.catching(e1);
+				}
 			});
 		}
 

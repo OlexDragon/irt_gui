@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.serial_port.MyComPort;
 import irt.data.DacValue;
 import irt.data.DeviceId;
 import irt.data.RegisterValue;
@@ -47,7 +46,7 @@ public class Payload {
 
 	public Payload(ParameterHeader parameterHeader, byte[] buffer) {
 		this.parameterHeader = parameterHeader;
-		this.buffer = MyComPort.byteStuffing(buffer);
+		this.buffer = buffer;
 		parameterHeader.setSize((short) (this.buffer!=null ? this.buffer.length : 0));
 	}
 

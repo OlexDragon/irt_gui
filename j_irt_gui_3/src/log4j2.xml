@@ -72,7 +72,7 @@
 
 <!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
 
-<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="debug"/> -->
+<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.MyComPort" level="all"/> -->
 
 <!--  	<Logger name="irt.data.profile.ProfileValidator" level="debug"/> -->

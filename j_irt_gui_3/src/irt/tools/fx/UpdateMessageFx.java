@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -63,6 +64,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class UpdateMessageFx extends Dialog<Message>{
 
+	private static final String SYSTEM = "system";
+
 	private final Logger logger = LogManager.getLogger();
 
 	private final TextField tfAddress;
@@ -87,6 +90,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private RadioButton cbBUC;
 
 	private RadioButton cbConv;
+
+	private String system = SYSTEM;
 
 	// ******************************* constructor UpdateMessageFx   ***************************************************
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
@@ -316,10 +321,13 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		final ToggleGroup group = new ToggleGroup();
 		final EventHandler<ActionEvent> onAction = e->{
-			if(e.getSource()==cbBUC)
+			if(e.getSource()==cbBUC){
 				imageView.setImage(imageBuc);
-			else
+				system = SYSTEM;
+			}else{
 				imageView.setImage(imageConv);
+				system = "256";
+			}
 		};
 
 		cbBUC = new RadioButton("BUC");
@@ -534,15 +542,32 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
-		public final String setupInfoPathern = "%s any.any.any { %s { path {%s}} }";
+		public final static String setupInfoPathern = "%s any.any.any { %s }";
+		public final static String pathPathern = "%s { path {%s} %s }";
 		public String getSetupInfo() {
 
-			return paths
-					.entrySet()
-					.stream()
-					.map(es->new java.util.AbstractMap.SimpleEntry<String, String>(es.getKey().name().toLowerCase(), new File(es.getValue()).getName()))
-					.map(es->String.format(setupInfoPathern, (cbBUC.isSelected() ? "system" : "256"), es.getKey(), es.getValue()))
-					.collect(Collectors.joining("\n"));
+			return String.format(
+					setupInfoPathern,
+					system,
+					paths
+						.entrySet()
+						.stream()
+						.map(es->new java.util.AbstractMap.SimpleEntry<String, String>(es.getKey().name().toLowerCase(), new File(es.getValue()).getName()))
+						.map(es->String.format(pathPathern, es.getKey(), es.getValue(), getAddress(es)))
+						.collect(Collectors.joining("\n")));
+		}
+
+		private String getAddress(SimpleEntry<String, String> es){
+
+			if(cbBUC.isSelected())
+				return "";
+
+			// Firmware address
+			if(PacketFormats.BINARY.equals(es.getValue()))
+				return "address {0x08000000}";
+
+			// Converter profile address
+			return "address {0x080c0000}";
 		}
 
 		public Optional<Profile> getProfile() {

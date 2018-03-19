@@ -33,10 +33,13 @@ public class AttenuationPacket extends PacketAbstract implements ValueToString{
 
 	@Override
 	public Object getValue() {
+
 		return getPayloads()
 				.stream()
 				.findAny()
 				.map(Payload::getBuffer)
+				.filter(b->b!=null)
+				.filter(b->b.length==2)
 				.map(ByteBuffer::wrap)
 				.map(ByteBuffer::getShort);
 	}

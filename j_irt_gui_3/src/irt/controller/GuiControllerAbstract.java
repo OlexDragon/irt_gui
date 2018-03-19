@@ -191,7 +191,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected abstract DevicePanel getConverterPanel(DeviceInfo di);
-	protected abstract DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
+	protected abstract DevicePanel getBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
 
 	public static ComPortThreadQueue getComPortThreadQueue() {
 		return comPortThreadQueue;
@@ -286,7 +286,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 					MyComPort serialPort = new MyComPort(serialPortName);
 					comPortThreadQueue.setSerialPort(serialPort);
 
-					comPortThreadQueue.setSerialPort(serialPort);
 					prefs.put(SERIAL_PORT, serialPortName);
 
 				} catch (NoSuchPortException e1) {
@@ -526,7 +525,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			if (protocol == Protocol.CONVERTER)
 				unitPanel = getConverterPanel(deviceInfo);
 			else
-				unitPanel = getNewBiasPanel(deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
+				unitPanel = getBiasPanel(deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
 
 			unitsPanel.add(unitPanel);
 
@@ -548,13 +547,14 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			});
 		}
 
-		private void removePanel(DeviceInfo di) {
+		private void removePanel(DeviceInfo deviceInfo) {
 
-			unitsPanel.remove(di.getLinkHeader());
+			unitsPanel.remove(deviceInfo.getLinkHeader());
 			unitsPanel.revalidate();
 			unitsPanel.getParent().getParent().repaint();
-			Optional.ofNullable(timers.remove(di)).ifPresent(t->t.stop());
+			Optional.ofNullable(timers.remove(deviceInfo)).ifPresent(t->t.stop());
 			comPortThreadQueue.clear();
+			setSysSerialNumber(deviceInfo);
 		}
 	}
 

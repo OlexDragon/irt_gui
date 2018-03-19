@@ -138,7 +138,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			@Override
 			public void keyTyped(KeyEvent e) {
 				char keyChar = e.getKeyChar();
-				 logger.error("*** {} ***", keyChar);
+//				 logger.error("*** {} ***", keyChar);
 
 				 if(!e.isShiftDown() && keyChar==KeyEvent.VK_ESCAPE){
 					 start();
@@ -149,7 +149,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 					 stop();
 
 //				 }else  if(e.isControlDown() && c==KeyEvent.VK_SHIFT){// VK_SHIFT equals CTRL 'P'
-					 logger.error("*** {} ***", keyChar);
+//					 logger.error("*** {} ***", keyChar);
 //						setToolTipText("Data copied to the clipboard.");
 
 					 return;

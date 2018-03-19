@@ -15,8 +15,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.swing.GroupLayout;
@@ -26,6 +24,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.SwingWorker;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.SoftBevelBorder;
@@ -42,11 +41,7 @@ import irt.data.packet.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.PacketAbstract;
 import irt.data.packet.Packets;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
-import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
-import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
-import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
-import irt.tools.fx.MonitorPanelFx.StatusBitsFCM;
+import irt.data.packet.interfaces.PacketWork.PacketIDs;
 import irt.tools.label.LED;
 import irt.tools.label.VarticalLabel;
 import irt.tools.panel.ConverterPanel;
@@ -379,21 +374,18 @@ public class Panel extends JPanel implements PacketListener {
 
 	private AlarmSeverities alarmSeverities;
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		final Optional<? extends PacketAbstract> oP = Optional
-														.of(packet)
-														.map(p->p.getHeader())
-														.filter(
-																h->
-																h.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY ||
-																h.getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
-														.flatMap(h->Packets.cast(packet));
+		final PacketAbstract p = Optional
+										.of(packet)
+										.map(pkt->pkt.getHeader())
+										.filter(
+												h->PacketIDs.ALARMS_SUMMARY.match(h.getPacketId()))
+										.flatMap(h->Packets.cast(packet))
+										.orElse(null);
 
-		final PacketAbstract p = oP.orElse(null);
-
+		// return if packet do not exists
 		if(p==null || p.getLinkHeader().getAddr()!=addr) return;
 
 		final Object value = p.getValue();
@@ -402,23 +394,15 @@ public class Panel extends JPanel implements PacketListener {
 			alarmSeverities = (AlarmSeverities)value;
 
 			final Color background = alarmSeverities.getBackground();
-			setVerticalLabelBackground(background);
+			new SwingWorker<Void, Void>() {
 
-		}else if(value instanceof Map){
+				@Override
+				protected Void doInBackground() throws Exception {
+					setVerticalLabelBackground(background);
+					return null;
+				}
+			}.execute();
 
-			if(alarmSeverities==null || alarmSeverities == AlarmSeverities.NO_ALARM || alarmSeverities == AlarmSeverities.INFO)
-				setVerticalLabelBackground(((Map<Object, Object>)value)
-					.entrySet()
-					.parallelStream()
-					.filter(es->(es.getKey().equals(ParameterHeaderCodeFCM.STATUS) || es.getKey().equals(ParameterHeaderCodeBUC.STATUS)))
-					.map(Map.Entry::getValue)
-					.filter(o->o instanceof Object[])
-					.map(v->(Object[])v)
-					.flatMap(Arrays::stream)
-					.filter(st->(st == StatusBitsBUC.MUTE || st == StatusBitsFCM.MUTE_TTL || st == StatusBitsFCM.MUTE))
-					.map(mute->Color.YELLOW)
-					.findAny()
-					.orElse(AlarmSeverities.NO_ALARM.getBackground()));
 		}
 	}
 }

@@ -72,7 +72,7 @@ public class MyComPort implements SerialPortInterface {
 	}
 
 	@Override
-	public Packet send(PacketWork packetWork) {
+	public synchronized Packet send(PacketWork packetWork) {
 
 		logger.entry(packetWork);
 
@@ -91,7 +91,7 @@ public class MyComPort implements SerialPortInterface {
 
 		LinkHeader linkHeader;
 		if(p instanceof LinkedPacket){
-			linkHeader = Optional.ofNullable(((LinkedPacket)p).getLinkHeader()).filter(lh->lh.getAddr()!=0).orElse(null);//
+			linkHeader = Optional.ofNullable(((LinkedPacket)p).getLinkHeader()).filter(lh->lh.getAddr()!=0).orElse(null);
 			packet = new LinkedPacketImp(linkHeader);
 		}else{
 			linkHeader = null;
@@ -197,7 +197,7 @@ public class MyComPort implements SerialPortInterface {
 											final byte[] rd = readData;
 											logger.debug("payload size: {}; parameter data: {}", ()->payloadSize, ()->ToHex.bytesToHex(rd));
 
-											if (payloadByteStuffing.length>=payloadSize) {
+											if (Optional.ofNullable(payloadByteStuffing).map(bs->bs.length).orElse(0)>=payloadSize) {
 
 												checksum.add(payloadByteStuffing);
 												Payload payload = new Payload(parameterHeader, payloadByteStuffing);
@@ -610,7 +610,7 @@ public class MyComPort implements SerialPortInterface {
 	}
 
 	@Override
-	public boolean openPort() throws Exception {
+	public synchronized boolean openPort() throws Exception {
 		logger.traceEntry();
 
 		if(opened)
@@ -645,7 +645,7 @@ public class MyComPort implements SerialPortInterface {
 	}
 
 	@Override
-	public boolean closePort() {
+	public synchronized boolean closePort() {
 		logger.entry(this);
 
 		if(!opened)

@@ -24,7 +24,7 @@ public class Profile {
 
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy HH:mm");
 
-	public final static String charEncoding = System.getProperty("file.encoding");
+	public final static String charEncoding = "UTF-8"; // System.getProperty("file.encoding");
 
 	private final CharBuffer charBuffer;
 	private final String fileName;
@@ -40,7 +40,7 @@ public class Profile {
 			CharBuffer cb = Charset.forName(charEncoding).decode(mbb);
 
 			final ZonedDateTime now = ZonedDateTime.now();
-			String signature = "\n#Uploaded by IRT GUI - " + IrtGui.VERTION + " on " + now.format(formatter) + " from "+ InetAddress.getLocalHost().getHostName() + " computer.";
+			String signature = "\n#Uploaded by IRT GUI" + IrtGui.VERTION + " on " + now.format(formatter) + " from "+ InetAddress.getLocalHost().getHostName() + " computer.";
 
 			// Copy buffer and add signature
 			charBuffer = CharBuffer.allocate(cb.capacity() + signature.length());
