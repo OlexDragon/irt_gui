@@ -16,7 +16,7 @@ public class GuiController extends GuiControllerAbstract{
 	}
 
 	@Override
-	protected DevicePanel getBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
+	protected DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		return new PicobucPanel( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 	}
 

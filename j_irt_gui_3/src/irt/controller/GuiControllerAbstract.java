@@ -191,7 +191,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected abstract DevicePanel getConverterPanel(DeviceInfo di);
-	protected abstract DevicePanel getBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
+	protected abstract DevicePanel getNewBiasPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight);
 
 	public static ComPortThreadQueue getComPortThreadQueue() {
 		return comPortThreadQueue;
@@ -525,7 +525,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			if (protocol == Protocol.CONVERTER)
 				unitPanel = getConverterPanel(deviceInfo);
 			else
-				unitPanel = getBiasPanel(deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
+				unitPanel = getNewBiasPanel(deviceInfo, 0, 0, 0, 0, unitsPanel.getHeight());
 
 			unitsPanel.add(unitPanel);
 
