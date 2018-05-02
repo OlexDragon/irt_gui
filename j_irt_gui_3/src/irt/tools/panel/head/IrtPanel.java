@@ -56,7 +56,7 @@ public class IrtPanel extends MainPanel {
 
 			PROPERTIES.load(resourceAsStream);
 
-			File f = new File(System.getProperty("user.dir")+File.separator+"gui.properties");
+			File f = new File(System.getProperty("user.dir"), "gui.properties");
 			if(f.exists() && !f.isDirectory()){
 				try (FileInputStream inStream = new FileInputStream(f);) {
 					PROPERTIES.load(inStream);

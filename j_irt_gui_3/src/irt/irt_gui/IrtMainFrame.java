@@ -170,6 +170,8 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 				final Image image = logoIcon.getImage();
 				final int iconWidth = logoIcon.getIconWidth();
 				final int iconHeight = logoIcon.getIconHeight();
+				if(iconWidth<=0 || iconHeight<=0)
+					return;
 				final Image createdImage = createImage(iconWidth, iconHeight);
 				final Graphics2D g = (Graphics2D) createdImage.getGraphics();
 				g.setColor(background);

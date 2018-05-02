@@ -61,6 +61,7 @@ public class DeviceInfo implements PacketListener {
 		CONVERTER_C_TO_L		(1012, Protocol.CONVERTER, "C to L Converter"),
 		CONVERTER_L_TO_DBS		(1013, Protocol.CONVERTER, "L to DBS Converter"),
 		CONVERTER_L_TO_KA		(1019, Protocol.CONVERTER, "L to KA Converter"),
+		CONVERTER_L_TO_X		(1021, Protocol.CONVERTER, "L to X Converter"),
 		CONVERTER_SSPA 			(1051, Protocol.CONVERTER, "L to SSPA Converter"),
 		CONVERTER_MODUL			(1052, Protocol.CONVERTER, "Modul"),
 
