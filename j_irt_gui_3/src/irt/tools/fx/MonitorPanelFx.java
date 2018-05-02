@@ -29,8 +29,10 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.data.packet.interfaces.PacketWork;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -71,10 +73,10 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 												public void setUnitAddress(byte unitAddress) {
 													packetToSend.setAddr(unitAddress);
-//													retransmitPacket.setAddr(unitAddress);
+													retransmitPacket.setAddr(unitAddress);
 												}
 
-//	private final RetransmitPacket retransmitPacket = new RetransmitPacket();
+	private final RetransmitPacket retransmitPacket = new RetransmitPacket();
 	private GridPane 	statusPane;
 	private GridPane 	gridPane;
 
@@ -106,7 +108,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	private SerialPortInterface serialPort;
 
-//	private int retransmitDelay;
+	private int retransmitDelay;
 	@Override
 	public void run() {
 
@@ -124,12 +126,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
 
-//			if(retransmitDelay>0)
-//				retransmitDelay--;
-//			else{
-//				retransmitDelay = 200;
-//				GuiControllerAbstract.getComPortThreadQueue().add(retransmitPacket);
-//			}
+			if(retransmitDelay>0)
+				retransmitDelay--;
+			else{
+				retransmitDelay = 200;
+				GuiControllerAbstract.getComPortThreadQueue().add(retransmitPacket);
+			}
 
 		}catch (Exception e) {
 			logger.catching(e);
@@ -246,16 +248,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		});
 
 		//Check retransmits number
-//		ofNullable
-//		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_PROTO_RETRANSNIT)
-//		.map(Packet::getPayloads)
-//		.flatMap(pls->pls.stream().findAny())
-//		.map(pl->pl.getByte())
-//		.filter(b->b>0)
-//		.ifPresent(b->{
-//			final RetransmitPacket p = new RetransmitPacket(retransmitPacket.getLinkHeader().getAddr(), (byte) 0);
-//			GuiControllerAbstract.getComPortThreadQueue().add(p);
-//		});
+		ofNullable
+		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_PROTO_RETRANSNIT)
+		.map(Packet::getPayloads)
+		.flatMap(pls->pls.stream().findAny())
+		.map(pl->pl.getByte())
+		.filter(b->b>0)
+		.ifPresent(b->{
+			final RetransmitPacket p = new RetransmitPacket(retransmitPacket.getLinkHeader().getAddr(), (byte) 0);
+			GuiControllerAbstract.getComPortThreadQueue().add(p);
+		});
 	}
 
 	private void setStatus(List<Label> statusLabels, Payload pl) {

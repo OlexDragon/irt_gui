@@ -18,7 +18,7 @@
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.15/commons-compress-1.15.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.15/commons-compress-1.15-sources.jar">
+	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.16.1/commons-compress-1.16.1.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.15/commons-compress-1.15-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.15/"/>
 		</attributes>
