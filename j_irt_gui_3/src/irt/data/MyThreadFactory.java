@@ -5,6 +5,13 @@ import java.util.concurrent.ThreadFactory;
 
 public class MyThreadFactory implements ThreadFactory {
 
+	public MyThreadFactory() {
+	}
+
+	public MyThreadFactory(Runnable runnable) {
+		 newThread(runnable).start();
+	}
+
 	@Override
 	public Thread newThread(Runnable r) {
 		Thread t = new Thread(r);

@@ -1,5 +1,6 @@
 package irt.tools.panel;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.HeadlessException;
 import java.awt.event.ContainerAdapter;
@@ -9,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.util.Optional;
 import java.util.prefs.Preferences;
 
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
@@ -30,17 +32,20 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.fx.MonitorPanelSwingWithFx;
+import irt.tools.fx.interfaces.StopInterface;
 import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.DebugPanel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
+import irt.tools.panel.subpanel.control.ControlPaneIrPc;
+import irt.tools.panel.subpanel.control.ControlPanelHPB;
+import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 import irt.tools.panel.subpanel.control.ControlPanelSSPA;
 import irt.tools.panel.subpanel.control.ControlPanelUnit;
 import irt.tools.panel.subpanel.monitor.Monitor;
-import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 @SuppressWarnings("serial")
-public class DevicePanel extends Panel implements Comparable<DevicePanel>{
+public class DevicePanel extends Panel implements Comparable<Component>{
 
 	public final static DebugPanel DEBUG_PANEL = new DebugPanel(Optional.empty());
 
@@ -48,7 +53,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 	protected final String selectedTab = "selected_tab_"+getClass().getSimpleName();
 
-	private JPanel controlPanel;
+	private JComponent controlPanel;
 	private JLabel clickedLabel;
 	private InfoPanel infoPanel;
 	private JTabbedPane tabbedPane;
@@ -84,33 +89,46 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		lblAddress.setText(lblAddress.getText()+oLinkHeader.map(LinkHeader::getIntAddr).map(Object::toString).orElse("N/A"));
 		if(deviceInfo!=null)
 			this.deviceType = deviceInfo.getDeviceType();
+
 		addAncestorListener(new AncestorListener() {
 
 			private Dumper dumpController;
 			public void ancestorAdded(AncestorEvent event) {
 
-//				logger.error("*** 1 ***");
-				monitorPanel = new MonitorPanelSwingWithFx();
-				monitorPanel.setLocation(10, 11);
-				monitorPanel.setSize(215, 210);
-				oLinkHeader.ifPresent(lh->monitorPanel.setUnitAddress(lh.getAddr()));
-				userPanel.add((Component) monitorPanel);
+				if(deviceType.map(dt->!dt.equals(DeviceType.IR_PC)).orElse(true)){
+					monitorPanel = new MonitorPanelSwingWithFx();
+					monitorPanel.setLocation(10, 11);
+					monitorPanel.setSize(215, 210);
+					oLinkHeader.ifPresent(lh->monitorPanel.setUnitAddress(lh.getAddr()));
+					userPanel.add((Component) monitorPanel);
 //				logger.error("*** 2 ***");
 
-				controlPanel = getNewControlPanel();
-				userPanel.add(controlPanel);
+					controlPanel = getNewControlPanel();
+					userPanel.add(controlPanel);
 
-				if(controlPanel instanceof ControlPanel){
-					JSlider slider = ((ControlPanel)controlPanel).getSlider();
-					slider.setOpaque(false);
-					slider.setOrientation(SwingConstants.VERTICAL);
-					slider.setBounds(230, 11, 33, 400);
-					userPanel.add(slider);
-					userPanel.revalidate();
+					if(controlPanel instanceof ControlPanel){
+						JSlider slider = ((ControlPanel)controlPanel).getSlider();
+						slider.setOpaque(false);
+						slider.setOrientation(SwingConstants.VERTICAL);
+						slider.setBounds(230, 11, 33, 400);
+						userPanel.add(slider);
+						userPanel.revalidate();
+					}
+				}else{
+					controlPanel = getNewControlPanel();
+					controlPanel.setSize(260, 410);
+					controlPanel.setLocation(5, 5);
+					final Color background = userPanel.getBackground();
+					controlPanel.setBackground(background);
+					userPanel.add(controlPanel);					
 				}
-				dumpController = new DumpControllerFull(deviceInfo);
+
+					dumpController = new DumpControllerFull(deviceInfo);
 			}
 			public void ancestorRemoved(AncestorEvent event) {
+
+				Optional.ofNullable(controlPanel).filter(StopInterface.class::isInstance).map(StopInterface.class::cast).ifPresent(StopInterface::stop);
+
 				userPanel.removeAll();
 				Optional.ofNullable(dumpController).ifPresent(dc->{
 					try {
@@ -134,7 +152,7 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		
 	}
 
-	public JPanel getControlPanel() {
+	public JComponent getControlPanel() {
 		return controlPanel;
 	}
 
@@ -177,20 +195,26 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 		extraPanel.add(tabbedPane);
 	}
 
-	protected JPanel getNewControlPanel(){
-		logger.error("deviceType: {}", deviceType);
+	protected JComponent getNewControlPanel(){
 
-		MonitorPanelAbstract controlPanel = deviceType.map(dt->{
+		JComponent controlPanel = deviceType.map(
+									dt->{
 
-															switch(dt){
-															case SSPA:
-																return new ControlPanelSSPA(deviceType, linkHeader, 0);
-															case DLRS:
-																return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
-															default:
-																return new ControlPanelUnit(deviceType, linkHeader);
-															}
-											}).orElse(new ControlPanelUnit(deviceType, linkHeader));
+										switch(dt){
+										case SSPA:
+											return new ControlPanelSSPA(deviceType, linkHeader, 0);
+										case DLRS:
+											return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
+										case IR_PC:
+											return new ControlPaneIrPc(deviceType, linkHeader);
+										case HPB_L_TO_C:
+										case HPB_L_TO_KU:
+										case HPB_SSPA:
+											return new ControlPanelHPB(linkHeader.getAddr());
+										default:
+											return new ControlPanelPicobuc(deviceType, linkHeader);
+										}
+									}).orElse(new ControlPanelUnit(deviceType, linkHeader));
 
 		controlPanel.setLocation(10, 225);
 		return controlPanel;
@@ -228,9 +252,8 @@ public class DevicePanel extends Panel implements Comparable<DevicePanel>{
 
 
 	@Override
-	public int compareTo(DevicePanel o) {
-		LinkHeader lh = o.getLinkHeader();
-		return linkHeader.compareTo(lh);
+	public int compareTo(Component o) {
+		return Optional.of(o).filter(DevicePanel.class::isInstance).map(DevicePanel.class::cast).map(DevicePanel::getLinkHeader).map(linkHeader::compareTo).orElse(1);
 	}
 
 	public void showDebugPanel(boolean show) {

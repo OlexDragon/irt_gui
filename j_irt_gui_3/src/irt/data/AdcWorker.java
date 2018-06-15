@@ -13,8 +13,8 @@ import javax.swing.JLabel;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
-import irt.data.packet.DeviceDebugPacket;
 import irt.data.packet.PacketImp;
+import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
 import irt.tools.panel.ConverterPanel;

@@ -43,8 +43,9 @@ public class PacketImp implements Packet{
 		GROUP_ID_MEASUREMENT	= 4,		/* Measurement: device status, content is product specific. */
 		GROUP_ID_RESET			= 5,		/* Device reset: generic command. */
 		GROUP_ID_DEVICE_INFO	= 8,		/* Device information: generic command. */
-		GROUP_ID_CONFIG_PROFILE	= 9,		/* Save configuration: generic command. */
+		GROUP_ID_CONTROL		= 9,		/* Device control operations. Save configuration: generic command. */
 		GROUP_ID_PROTO			= 10,
+		GROUP_ID_REDUNDANCY_CONTROLLER		= 12,
 		GROUP_ID_DEVICE_DEBAG	= 61,		/* Device Debug. */
 
 	/* Protocol */
@@ -131,7 +132,11 @@ public class PacketImp implements Packet{
 	/* Configuration saving parameter codes. */
 	public static final byte
 		PACKET_ID_CONFIG_PROFILE_NONE = (PARAMETER_NONE),
-		PACKET_ID_CONFIG_PROFILE_SAVE = 1;
+		PACKET_ID_CONFIG_PROFILE_SAVE = 1,
+		PACKET_ID_CONFIG_RESET = 2,
+		PACKET_ID_CONFIG_RESTORE_CONFIGURATION = 3,
+		PACKET_ID_CONFIG_ACTIVE_MODULE_INDEX = 10,
+		PACKET_ID_CONFIG_MODULE_LIST = 11;
 
 
 	/* Network */
@@ -189,6 +194,14 @@ public class PacketImp implements Packet{
 							ALARM_STATUS			= 5,
 							ALARM_DESCRIPTION 		= 6,
 							ALARM_NAME				= 7;
+
+	/* Redundancy Controller's commands. */
+	public static final byte
+		REDUNDANCY_CONTROLLER_NONE = 0,
+		REDUNDANCY_CONTROLLER_SWITCHOVER_MODE = 1,
+		REDUNDANCY_CONTROLLER_STANDBY_MODE = 2,
+		REDUNDANCY_CONTROLLER_STATUS = 3,
+		REDUNDANCY_CONTROLLER_SWITCHOVER = 4;
 
 	private PacketHeader header;	//irtslcp_packet_header
 	private List<Payload> payloads;	//irtslcp_payload

@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+
 /**
  * This class finds errors in the profile
  */
@@ -34,8 +36,13 @@ public class ProfileParser{
 
 	public boolean hasError() {
 
-		final Map<String, TestResult> collect = getReports();
-		return !collect.isEmpty();
+		try{
+			final Map<String, TestResult> collect = getReports();
+			return !collect.isEmpty();
+		}catch (Exception e) {
+			LogManager.getLogger().catching(e);
+		}
+		return true;
 	}
 
 	public Map<String, TestResult> getReports() {

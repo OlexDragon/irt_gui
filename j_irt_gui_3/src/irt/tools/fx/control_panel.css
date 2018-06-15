@@ -1,0 +1,24 @@
+AnchorPane{
+	-fx-background-color: #0b173b;
+}
+Text{
+	-fx-fill: yellow;
+}
+Line{
+	-fx-stroke: rgba(255, 255, 255, 0.3);
+}
+.title{
+	-fx-background-color: rgba(255, 255, 255, 0.3);
+}
+.warning{
+	-fx-background-color: yellow;
+}
+.alarm{
+	-fx-background-color: red;
+}
+.ok{
+	-fx-background-color: green;
+}
+.text_white{
+	-fx-fill: white;
+}

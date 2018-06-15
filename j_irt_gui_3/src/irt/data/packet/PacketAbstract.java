@@ -129,8 +129,9 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 		this.linkHeader = linkHeader;
 	}
 
-	public void setAddr(byte linkAddr) {
+	public PacketAbstract setAddr(byte linkAddr) {
 		this.linkHeader = linkAddr!=0 ? new LinkHeader(linkAddr, (byte)0, (short)0) : null;
+		return this;
 	}
 
 	@Override

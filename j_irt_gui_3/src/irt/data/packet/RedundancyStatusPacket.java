@@ -3,6 +3,7 @@ package irt.data.packet;
 
 import java.util.Optional;
 
+import irt.data.packet.configuration.ConfifurationPacket;
 import irt.data.packet.interfaces.PacketWork;
 
 public class RedundancyStatusPacket extends ConfifurationPacket {

@@ -1,6 +1,7 @@
 package irt.irt_gui;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
@@ -27,12 +28,13 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.data.Listeners;
 import irt.data.listener.PacketListener;
-import irt.data.packet.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
+import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
+import irt.tools.fx.module.ModuleSelectFxPanel;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.wizards.serial_port.SerialPortWizard;
@@ -50,6 +52,8 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 	private Object alarmSeverities;
 
 	private Timer timer;
+
+	private ModuleSelectFxPanel moduleSelectFxPanel;
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
@@ -82,7 +86,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		contentPane.setLayout(null);
 		setContentPane(contentPane);
 		setLocationRelativeTo(null);
-		
+
 		ClosePanel closePanel = new ClosePanel(this);
 		closePanel.setLocation(getClosePanelPosition());
 		contentPane.add(closePanel);
@@ -95,8 +99,15 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		serialPortSelection.setBounds(comboBoxBounds());
 		getContentPane().add(serialPortSelection);
 		
-		JPopupMenu popupMenu = new JPopupMenu();
-		IrtGui.addPopup(serialPortSelection, popupMenu);
+		JPopupMenu popupMenu = Optional
+								.ofNullable(serialPortSelection.getComponentPopupMenu())
+								.orElseGet(
+										()->{
+											final JPopupMenu jPopupMenu = new JPopupMenu();
+											serialPortSelection.setComponentPopupMenu(jPopupMenu);
+											return jPopupMenu;
+										});
+//		IrtGui.addPopup(serialPortSelection, popupMenu);
 		
 		JMenuItem mntmBaudrate = new JMenuItem("Baudrate");
 		mntmBaudrate.addActionListener(new ActionListener() {
@@ -180,5 +191,26 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 				setIconImage(createdImage);
 			}
 		});
+	}
+
+	public Optional<ModuleSelectFxPanel> getModuleSelectFxPanel() {
+		return Optional.ofNullable(moduleSelectFxPanel);
+	}
+
+	public void setModuleSelectFxPanel(ModuleSelectFxPanel moduleSelectFxPanel) {
+
+		final Container contentPane = getContentPane();
+		if(moduleSelectFxPanel==null){
+			getModuleSelectFxPanel().ifPresent(panel->{
+				contentPane.remove(panel);
+				panel.stop();
+			});
+			this.moduleSelectFxPanel = null;
+			return;
+		}
+
+		this.moduleSelectFxPanel = moduleSelectFxPanel;
+
+		contentPane.add(moduleSelectFxPanel);
 	}
 }

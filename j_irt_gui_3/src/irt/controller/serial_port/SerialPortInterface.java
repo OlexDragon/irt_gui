@@ -13,4 +13,5 @@ public interface SerialPortInterface {
 	boolean closePort();
 	void setBaudrate(int baudrate);
 	int getBaudrate();
+	byte[] readBytes(int size) throws Exception;
 }

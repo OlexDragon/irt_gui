@@ -32,7 +32,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
-import irt.data.packet.RegisterPacket;
+import irt.data.packet.denice_debag.RegisterPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;

@@ -3,8 +3,8 @@ package irt.controller.control;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import irt.data.packet.GainPacket;
-import irt.data.packet.GainRangePacket;
+import irt.data.packet.configuration.GainPacket;
+import irt.data.packet.configuration.GainRangePacket;
 
 public class UnitGainController extends UnitControllerImp{
 

@@ -24,19 +24,18 @@ import org.apache.logging.log4j.core.LoggerContext;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.AlarmsSummaryPacket;
-import irt.data.packet.AttenuationPacket;
-import irt.data.packet.DeviceDebugHelpPacket;
-import irt.data.packet.DeviceDebugHelpPacket.HelpValue;
-import irt.data.packet.DeviceDebugPacket;
-import irt.data.packet.DeviceDebugPacket.Dump;
-import irt.data.packet.DeviceDebugReadWritePacket;
-import irt.data.packet.FrequencyPacket;
-import irt.data.packet.GainPacket;
-import irt.data.packet.LOPacket;
+import irt.data.packet.alarm.AlarmsSummaryPacket;
+import irt.data.packet.configuration.AttenuationPacket;
+import irt.data.packet.configuration.FrequencyPacket;
+import irt.data.packet.configuration.GainPacket;
+import irt.data.packet.configuration.LOPacket;
+import irt.data.packet.configuration.MuteControlPacket;
+import irt.data.packet.denice_debag.DeviceDebugHelpPacket;
+import irt.data.packet.denice_debag.DeviceDebugPacket;
+import irt.data.packet.denice_debag.DeviceDebugReadWritePacket;
+import irt.data.packet.denice_debag.DeviceDebugHelpPacket.HelpValue;
+import irt.data.packet.denice_debag.DeviceDebugPacket.Dump;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.MuteControlPacket;
-import irt.data.packet.NetworkAddressPacket;
 import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
@@ -44,6 +43,7 @@ import irt.data.packet.Packets;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.network.NetworkAddressPacket;
 
 public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 

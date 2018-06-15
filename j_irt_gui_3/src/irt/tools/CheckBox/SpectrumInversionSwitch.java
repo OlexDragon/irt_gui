@@ -4,8 +4,8 @@ import java.awt.Image;
 
 import irt.data.packet.PacketHeader;
 import irt.data.packet.Payload;
-import irt.data.packet.SpectrumInversionPacket;
-import irt.data.packet.SpectrumInversionPacket.Spectrum;
+import irt.data.packet.configuration.SpectrumInversionPacket;
+import irt.data.packet.configuration.SpectrumInversionPacket.Spectrum;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 

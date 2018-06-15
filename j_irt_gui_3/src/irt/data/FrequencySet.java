@@ -1,8 +1,8 @@
 
 package irt.data;
 
-import irt.data.packet.FrequencyPacket;
-import irt.data.packet.FrequencyRangePacket;
+import irt.data.packet.configuration.FrequencyPacket;
+import irt.data.packet.configuration.FrequencyRangePacket;
 import irt.data.value.Value;
 import irt.data.value.ValueFrequency;
 
