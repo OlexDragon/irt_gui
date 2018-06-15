@@ -156,8 +156,8 @@ public class PacketHeader{
 		case PacketImp.GROUP_ID_DEVICE_INFO:
 			typeStr = "DeviceInfo("+ PacketImp.GROUP_ID_DEVICE_INFO+")";
 			break;
-		case PacketImp.GROUP_ID_CONFIG_PROFILE:
-			typeStr = "SaveConfigProfile("+ PacketImp.GROUP_ID_CONFIG_PROFILE+")";
+		case PacketImp.GROUP_ID_CONTROL:
+			typeStr = "SaveConfigProfile("+ PacketImp.GROUP_ID_CONTROL+")";
 			break;
 		case PacketImp.GROUP_ID_PROTOCOL:
 			typeStr = "Protocol("+ PacketImp.GROUP_ID_PROTOCOL+")";

@@ -1,8 +1,8 @@
 
 package irt.data;
 
-import irt.data.packet.ALCPacket;
-import irt.data.packet.ALCRangePacket;
+import irt.data.packet.configuration.ALCPacket;
+import irt.data.packet.configuration.ALCRangePacket;
 import irt.data.value.Value;
 import irt.data.value.ValueDouble;
 

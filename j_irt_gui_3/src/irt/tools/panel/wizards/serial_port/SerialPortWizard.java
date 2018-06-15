@@ -19,7 +19,7 @@ import javax.swing.border.TitledBorder;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.MyComPort.Baudrate;
+import irt.controller.serial_port.PureJavaComPort.Baudrate;
 import irt.data.listener.DragWorker;
 
 public class SerialPortWizard extends JDialog {

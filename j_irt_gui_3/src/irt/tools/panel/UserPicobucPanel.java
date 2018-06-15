@@ -5,7 +5,6 @@ import java.awt.event.HierarchyEvent;
 import java.util.Optional;
 
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,9 +22,6 @@ import irt.tools.label.ImageLabel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
-import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
-import irt.tools.panel.subpanel.control.ControlPanelHPB;
-import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 
 @SuppressWarnings("serial")
 public class UserPicobucPanel extends DevicePanel {
@@ -83,6 +79,7 @@ public class UserPicobucPanel extends DevicePanel {
 		}
 
 		deviceType
+		.filter(dt->!dt.equals(DeviceType.IR_PC))
 		.map(dt->dt.TYPE_ID)
 		.filter(tId->tId>DeviceType.BIAS_BOARD.TYPE_ID || deviceInfo.getRevision()>1)
 		.ifPresent(
@@ -143,31 +140,6 @@ public class UserPicobucPanel extends DevicePanel {
 //	private void startThread(Runnable target) {
 //		new MyThreadFactory().newThread(target).start();
 //	}
-
-	@Override
-	protected JPanel getNewControlPanel() {
-
-		final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
-
-		JPanel controlPanel = deviceType
-				.map(
-						dt->{
-			
-							switch(dt){
-							case DLRS:
-								return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
-							case HPB_L_TO_C:
-							case HPB_L_TO_KU:
-							case HPB_SSPA:
-								return new ControlPanelHPB(linkHeader.getAddr());
-							default:
-								return new ControlPanelPicobuc(deviceType, linkHeader);
-							}
-						}).orElse(new ControlPanelPicobuc(deviceType, linkHeader));
-
-		controlPanel.setLocation(10, 225);
-		return controlPanel;
-	}
 
 	@Override
 	public void refresh() {

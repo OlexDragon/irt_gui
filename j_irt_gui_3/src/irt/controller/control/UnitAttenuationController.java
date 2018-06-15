@@ -3,8 +3,8 @@ package irt.controller.control;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 
-import irt.data.packet.AttenuationPacket;
-import irt.data.packet.AttenuationRangePacket;
+import irt.data.packet.configuration.AttenuationPacket;
+import irt.data.packet.configuration.AttenuationRangePacket;
 
 public class UnitAttenuationController extends UnitControllerImp{
 

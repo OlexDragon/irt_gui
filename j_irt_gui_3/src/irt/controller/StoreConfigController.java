@@ -9,7 +9,7 @@ import javax.swing.Timer;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
-import irt.data.packet.SaveConfigPacket;
+import irt.data.packet.control.SaveConfigPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 

@@ -1,8 +1,5 @@
 package irt.tools.panel.head;
 
-import irt.data.packet.LinkHeader;
-import irt.tools.panel.DevicePanel;
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
@@ -13,6 +10,9 @@ import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import irt.data.packet.LinkHeader;
+import irt.tools.panel.DevicePanel;
 
 @SuppressWarnings("serial")
 public class UnitsContainer extends JPanel{

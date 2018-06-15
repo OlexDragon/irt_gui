@@ -1,0 +1,32 @@
+package irt.data.packet.configuration;
+
+import irt.data.Range;
+import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketImp;
+import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.RangePacket;
+
+public class AttenuationRangePacket extends PacketAbstract implements RangePacket{
+
+	public AttenuationRangePacket( byte linkAddr) {
+		super(linkAddr,
+				PacketImp.PACKET_TYPE_REQUEST,
+				PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE,
+				PacketImp.GROUP_ID_CONFIGURATION,
+				PacketImp.PARAMETER_CONFIG_ATTENUATION_RANGE,
+				null,
+				Priority.RANGE);
+	}
+
+	public AttenuationRangePacket() {
+		this((byte)0);
+	}
+
+	@Override
+	public Object getValue() {
+		return getPayloads()
+				.stream()
+				.findAny()
+				.map(Range::new);
+	}
+}

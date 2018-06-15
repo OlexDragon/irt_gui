@@ -7,10 +7,28 @@ import java.util.function.Supplier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.packet.alarm.AlarmStatusPacket;
+import irt.data.packet.alarm.AlarmsIDsPacket;
+import irt.data.packet.alarm.AlarmsSummaryPacket;
+import irt.data.packet.configuration.AttenuationPacket;
+import irt.data.packet.configuration.AttenuationRangePacket;
+import irt.data.packet.configuration.FrequencyPacket;
+import irt.data.packet.configuration.FrequencyRangePacket;
+import irt.data.packet.configuration.GainPacket;
+import irt.data.packet.configuration.GainRangePacket;
+import irt.data.packet.configuration.LOFrequenciesPacket;
+import irt.data.packet.configuration.LOPacket;
+import irt.data.packet.configuration.MuteControlPacket;
+import irt.data.packet.control.SaveConfigPacket;
+import irt.data.packet.denice_debag.DeviceDebugHelpPacket;
+import irt.data.packet.denice_debag.DeviceDebugPacket;
+import irt.data.packet.denice_debag.DeviceDebugReadWritePacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.PacketWork.AlarmsPacketIds;
+import irt.data.packet.measurement.MeasurementPacket;
+import irt.data.packet.network.NetworkAddressPacket;
 
 public enum Packets {
 

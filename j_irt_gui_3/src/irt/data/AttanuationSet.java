@@ -1,8 +1,8 @@
 
 package irt.data;
 
-import irt.data.packet.AttenuationPacket;
-import irt.data.packet.AttenuationRangePacket;
+import irt.data.packet.configuration.AttenuationPacket;
+import irt.data.packet.configuration.AttenuationRangePacket;
 import irt.data.value.Value;
 import irt.data.value.ValueDouble;
 

@@ -19,8 +19,8 @@ public class JavaFxFrame extends JFrame {
 	public JavaFxFrame(Parent root) throws HeadlessException {
 		final JFXPanel fxPanel = new JFXPanel();
 		getContentPane().add(fxPanel);
-		setVisible(true);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setVisible(true);
 		
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);

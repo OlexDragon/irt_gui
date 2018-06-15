@@ -14,6 +14,8 @@ import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.logging.log4j.LogManager;
 
@@ -142,9 +144,18 @@ public class HttpUploader {
 					alert.setHeaderText(type==AlertType.ERROR ? "Error Message:" : "Message:");
 					alert.setContentText(errorMessage);
 
+					TimerTask task = new TimerTask() {
+						
+						@Override
+						public void run() {
+							Platform.runLater(()->alert.close());
+						}
+					};
+					new Timer().schedule(task, 10*1000);
 					alert.show();
 				});
 			}
 		}
+		connection.disconnect();
 	}
 }
