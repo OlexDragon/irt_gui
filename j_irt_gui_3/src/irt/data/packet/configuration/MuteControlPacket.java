@@ -1,41 +1,51 @@
 
 package irt.data.packet.configuration;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.Packet;
 
-public class MuteControlPacket extends PacketAbstract {
+public class MuteControlPacket extends PacketSuper {
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Payload::getByte)
+																										.map(b->MuteStatus.values()[b]);
 
 	public static final byte GROUP_ID = PacketImp.GROUP_ID_CONFIGURATION;
-	public static final short PACKET_ID = PacketWork.PACKET_ID_CONFIGURATION_MUTE;
 
 	public MuteControlPacket(Byte linkAddr, MuteCommands value) {
 		super(
 				linkAddr,
 				Optional.ofNullable(value).map(b->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PACKET_ID,
+				PacketIDs.CONFIGURATION_MUTE,
 				GROUP_ID,
 				getParameterCode(linkAddr),
 				Optional.ofNullable(value).map(b->PacketImp.toBytes((byte)value.ordinal())).orElse(null),
 				Optional.ofNullable(value).map(b->Priority.COMMAND).orElse(Priority.REQUEST));
 	}
 
-	public MuteControlPacket(LinkedPacket packet) {
-		super(Optional.ofNullable(packet.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0),
+	public MuteControlPacket(Packet packet) {
+		super(Optional.ofNullable(packet).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0),
 				packet.getHeader().getPacketType(),
-				PACKET_ID,
+				PacketIDs.CONFIGURATION_MUTE,
 				GROUP_ID,
 				packet.getPayload(0).getParameterHeader().getCode(),
 				packet.getPayload(0).getBuffer(),
 				packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND ? Priority.COMMAND : Priority.REQUEST);
 
-		Optional.of(packet).map(LinkedPacket::getHeader).filter(h->h.getGroupId()==GROUP_ID).filter(h->h.getPacketId()==PACKET_ID).orElseThrow(()->new IllegalArgumentException(packet.toString()));
+		Optional.of(packet).map(Packet::getHeader).filter(h->h.getGroupId()==GROUP_ID).filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId())).orElseThrow(()->new IllegalArgumentException(packet.toString()));
 	}
 
 	public MuteControlPacket() {
@@ -43,7 +53,7 @@ public class MuteControlPacket extends PacketAbstract {
 	}
 
 	@Override
-	public PacketAbstract setAddr(byte linkAddr) {
+	public PacketSuper setAddr(byte linkAddr) {
 
 		Optional
 		.ofNullable(getPayloads())
@@ -60,11 +70,7 @@ public class MuteControlPacket extends PacketAbstract {
 
 	@Override
 	public Object getValue() {
-		return getPayloads()
-				.parallelStream()
-				.findAny()
-				.map(Payload::getByte)
-				.map(b->MuteStatus.values()[b]);
+		return parseValueFunction.apply(this);
 	}
 
 	@Override

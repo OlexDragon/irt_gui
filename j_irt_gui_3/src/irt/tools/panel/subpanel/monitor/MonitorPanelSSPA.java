@@ -18,7 +18,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 
@@ -180,7 +180,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 
 	private static final String[] controllerNames = new String[]{"Measurement_temperature", "Measurement_InputPower","Status"};
 	private static final byte[] parameters = new byte[]{PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE, PacketImp.PARAMETER_MEASUREMENT_FCM_INPUT_POWER, PacketImp.PARAMETER_MEASUREMENT_FCM_STATUS};
-	private static final short[] pacetId = new short[]{PacketWork.PACKET_ID_MEASUREMENT_UNIT_TEMPERATURE, PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketWork.PACKET_ID_MEASUREMENT_STATUS};
+	private static final PacketIDs[] pacetId = new PacketIDs[]{PacketIDs.MEASUREMENT_UNIT_TEMPERATURE, PacketIDs.FCM_ADC_INPUT_POWER, PacketIDs.MEASUREMENT_STATUS};
 	@Override
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> controllers = new ArrayList<>();
@@ -201,7 +201,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 					getController(
 							"Measurement",
 							PacketImp.IRT_SLCP_PARAMETER_MEASUREMENT_PICOBUC_ALL,
-							PacketWork.PACKET_ID_MEASUREMENT_ALL));
+							PacketIDs.MEASUREMENT_ALL));
 		}
 		return controllers;
 	}

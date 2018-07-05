@@ -29,9 +29,9 @@ import irt.data.packet.Packets;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.RetransmitPacket;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.measurement.MeasurementPacket;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -65,7 +65,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private ScheduledFuture<?> scheduleAtFixedRate;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
-	private final MeasurementPacket packetToSend = (MeasurementPacket) Packets.MEASUREMENT_ALL.getPacketWork();
+	private final MeasurementPacket packetToSend = (MeasurementPacket) Packets.MEASUREMENT_ALL.getPacketAbstract();
 
 												public byte getUnitAddress() {
 													return Optional.ofNullable(packetToSend.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte)0);
@@ -140,123 +140,127 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	@Override
 	public void onPacketRecived(final Packet packet) {
-		logger.trace(packet);
 
-		final Optional<Packet> ofNullable;
+		new MyThreadFactory(()->{
 
-		if(packet instanceof LinkedPacket)
-			ofNullable = Optional
-								.ofNullable((LinkedPacket)packet)
-								.filter(p->p.getLinkHeader()==null || p.getLinkHeader().getAddr()==packetToSend.getLinkHeader().getAddr())
-								.map(Packet.class::cast);
-		else
-			ofNullable= Optional.ofNullable(packet);
+			logger.trace(packet);
 
-		final boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
+			final Optional<Packet> ofNullable;
 
-		final Optional<Packet> oResponse = ofNullable
-		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-		.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR);
+			if(packet instanceof LinkedPacket)
+				ofNullable = Optional
+									.ofNullable((LinkedPacket)packet)
+									.filter(p->p.getLinkHeader()==null || p.getLinkHeader().getAddr()==packetToSend.getLinkHeader().getAddr())
+									.map(Packet.class::cast);
+			else
+				ofNullable= Optional.ofNullable(packet);
 
-		oResponse
-		.filter(p->p.getHeader().getPacketId()==packetToSend.getHeader().getPacketId())
-		.filter(p->p.getHeader().getGroupId()==packetToSend.getHeader().getGroupId())
-		.map(Packet::getPayloads)
-		.map(pls->pls.stream())
-		.ifPresent(stream->{
-			stream
-			.forEach(pl->{
-				logger.entry(pl);
+			final boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
+
+			final Optional<Packet> oResponse = ofNullable
+			.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR);
+
+			oResponse
+			.filter(p->p.getHeader().getPacketId()==packetToSend.getHeader().getPacketId())
+			.filter(p->p.getHeader().getGroupId()==packetToSend.getHeader().getGroupId())
+			.map(Packet::getPayloads)
+			.map(pls->pls.stream())
+			.ifPresent(stream->{
+				stream
+				.forEach(pl->{
+					logger.entry(pl);
 
 
-				final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
-				final byte 							code 				= parameterHeader.getCode();
+					final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
+					final byte 							code 				= parameterHeader.getCode();
 
-				Optional<? extends ParameterHeaderCode> parameterHeaderCode = (isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code))
-																				.map(phc->checkOverlaps(parameterHeader, phc));
+					Optional<? extends ParameterHeaderCode> parameterHeaderCode = (isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code))
+																					.map(phc->checkOverlaps(parameterHeader, phc));
 
-				// Downlink status is deprecated
-				if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeBUC.DOWNLINK_STATUS).isPresent())
-					return;
-
-				logger.trace("code: {}; parameterHeaderCode: {}", code, parameterHeaderCode);
-
-				Platform.runLater(()->{
-
-					//Status bites
-					if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeFCM.STATUS || phc==ParameterHeaderCodeBUC.STATUS).isPresent()){
-						
-						List<Label> statusLabels = statusPane
-													.getChildren()
-													.stream()
-													.filter(Label.class::isInstance)
-													.map(Label.class::cast)
-													.collect(Collectors.toList());
-
-						if(statusLabels.isEmpty())
-							createStatusLabels(pl);
-
-						else
-							setStatus(statusLabels, pl);
-
+					// Downlink status is deprecated
+					if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeBUC.DOWNLINK_STATUS).isPresent())
 						return;
-					}
 
-					//Values (Power, Temperature, Current ...)
+					logger.trace("code: {}; parameterHeaderCode: {}", code, parameterHeaderCode);
 
-					final Optional<Label> l = gridPane
-													.getChildren()
-													.parallelStream()
-													.filter(Label.class::isInstance)
-													.filter(label->label.getUserData()!=null)
-													.filter(label->label.getUserData().equals(code))
-													.map(Label.class::cast)
-													.findAny();
+					Platform.runLater(()->{
 
-					if(l.isPresent())	//set label text
+						//Status bites
+						if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeFCM.STATUS || phc==ParameterHeaderCodeBUC.STATUS).isPresent()){
+							
+							List<Label> statusLabels = statusPane
+														.getChildren()
+														.stream()
+														.filter(Label.class::isInstance)
+														.map(Label.class::cast)
+														.collect(Collectors.toList());
 
-						setText(l.get(), payloadToString(parameterHeaderCode, pl));
+							if(statusLabels.isEmpty())
+								createStatusLabels(pl);
 
-					else{	//Create new labels
+							else
+								setStatus(statusLabels, pl);
 
-						final int size = gridPane.getRowConstraints().size();
-						gridPane.getRowConstraints().add(new RowConstraints());
-
-						final Label descriptionLabel = createDescriptionLabel(parameterHeaderCode);
-						gridPane.add(descriptionLabel, 0, size);
-
-						String payloadToString;
-						try{
-
-							payloadToString = payloadToString(parameterHeaderCode, pl);
-
-						}catch(Exception e){
-							payloadToString = "error";
-							logger.catching(e);
+							return;
 						}
 
-						final Label child = new Label(payloadToString);
-						child.getStyleClass().add("value");
-						child.setUserData(code);
-						child.setTooltip(new Tooltip(descriptionLabel.getText()));
+						//Values (Power, Temperature, Current ...)
 
-						gridPane.add(child, 1, size);
-						GridPane.setVgrow(child, Priority.ALWAYS);
-					}
+						final Optional<Label> l = gridPane
+														.getChildren()
+														.parallelStream()
+														.filter(Label.class::isInstance)
+														.filter(label->label.getUserData()!=null)
+														.filter(label->label.getUserData().equals(code))
+														.map(Label.class::cast)
+														.findAny();
+
+						if(l.isPresent())	//set label text
+
+							setText(l.get(), payloadToString(parameterHeaderCode, pl));
+
+						else{	//Create new labels
+
+							final int size = gridPane.getRowConstraints().size();
+							gridPane.getRowConstraints().add(new RowConstraints());
+
+							final Label descriptionLabel = createDescriptionLabel(parameterHeaderCode);
+							gridPane.add(descriptionLabel, 0, size);
+
+							String payloadToString;
+							try{
+
+								payloadToString = payloadToString(parameterHeaderCode, pl);
+
+							}catch(Exception e){
+								payloadToString = "error";
+								logger.catching(e);
+							}
+
+							final Label child = new Label(payloadToString);
+							child.getStyleClass().add("value");
+							child.setUserData(code);
+							child.setTooltip(new Tooltip(descriptionLabel.getText()));
+
+							gridPane.add(child, 1, size);
+							GridPane.setVgrow(child, Priority.ALWAYS);
+						}
+					});
 				});
 			});
-		});
 
-		//Check retransmits number
-		ofNullable
-		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_PROTO_RETRANSNIT)
-		.map(Packet::getPayloads)
-		.flatMap(pls->pls.stream().findAny())
-		.map(pl->pl.getByte())
-		.filter(b->b>0)
-		.ifPresent(b->{
-			final RetransmitPacket p = new RetransmitPacket(retransmitPacket.getLinkHeader().getAddr(), (byte) 0);
-			GuiControllerAbstract.getComPortThreadQueue().add(p);
+			//Check retransmits number
+			ofNullable
+			.filter(p->PacketIDs.PROTO_RETRANSNIT.match(p.getHeader().getPacketId()))
+			.map(Packet::getPayloads)
+			.flatMap(pls->pls.stream().findAny())
+			.map(pl->pl.getByte())
+			.filter(b->b>0)
+			.ifPresent(b->{
+				final RetransmitPacket p = new RetransmitPacket(retransmitPacket.getLinkHeader().getAddr(), (byte) 0);
+				GuiControllerAbstract.getComPortThreadQueue().add(p);
+			});
 		});
 	}
 
@@ -281,8 +285,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 				styleClass.add(lockKey);
 			}
 
-			final StatusBitsFCM[] parse = StatusBitsFCM.parse(statusBits);
-			final String tooltipText = Arrays.toString(parse);
+			final List<StatusBits> parse = StatusBitsFCM.parse(statusBits);
+			final String tooltipText = parse.toString();
 			if(lbl.getTooltip().getText().equals(tooltipText))
 				lbl.setTooltip(new Tooltip(tooltipText));
 		});
@@ -379,8 +383,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	private String parseTooltip(final int statusBits) {
-		final Object[] sb = packetToSend.getLinkHeader().getAddr()==CONVERTER ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits);
-		return Arrays.toString(sb).replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
+		final List<StatusBits> sb = packetToSend.getLinkHeader().getAddr()==CONVERTER ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits);
+		return sb.toString().replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
 	}
 
 	private String payloadToString(final Optional<? extends ParameterHeaderCode> parameterHeaderCode, Payload pl) {
@@ -431,7 +435,11 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	public void start(){
 		logger.traceEntry();
 
-		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())){
+		if(service.isShutdown())
+			return;
+
+		if(!Optional.ofNullable(scheduleAtFixedRate).filter(sfr->!sfr.isDone()).isPresent()){
+			
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 		}
@@ -441,9 +449,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		logger.traceEntry();
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
-
-		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate.cancel(true);
+		Optional.ofNullable(scheduleAtFixedRate).filter(sfr->sfr.isDone()).ifPresent(sfr->sfr.cancel(true));
 	}
 
 	private static NumberFormat nFormate1 = new DecimalFormat("#0.0");
@@ -453,6 +459,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		int ordinal();
 		String name();
 		String toString(byte[] bytes);
+		ParameterHeaderCode getStatus();
+		List<StatusBits> parseStatusBits(int statusBits);
 	}
 
 	public enum ParameterHeaderCodeFCM implements ParameterHeaderCode{
@@ -483,7 +491,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			this.function = function;
 		}
 
-		public static Optional<? extends ParameterHeaderCode> valueOf(byte code){
+		public static Optional<? extends ParameterHeaderCode> valueOf(Byte code){
+			logger.entry(code);
 			return Arrays.stream(values()).parallel().filter(v->v.code==code).findAny();
 		}
 
@@ -493,6 +502,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 		private static String bytesToString(byte[] bytes, String prefix){
 			return MonitorPanelFx.bytesToString(bytes, prefix);
+		}
+
+		@Override
+		public ParameterHeaderCode getStatus() {
+			return STATUS;
+		}
+
+		@Override
+		public List<StatusBits> parseStatusBits(int statusBits) {
+			return StatusBitsFCM.parse(statusBits);
 		}
 	}
 
@@ -520,7 +539,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			this.function = function;
 		}
 
-		public static Optional<? extends ParameterHeaderCode> valueOf(byte code){
+		public static Optional<? extends ParameterHeaderCode> valueOf(Byte code){
 			logger.entry(code);
 			return Arrays.stream(values()).parallel().filter(v->v.code==code).findAny();
 		}
@@ -555,6 +574,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 					})
 					.orElse("N/A");
 		}
+
+		@Override
+		public ParameterHeaderCode getStatus() {
+			return STATUS;
+		}
+
+		@Override
+		public List<StatusBits> parseStatusBits(int statusBits) {
+			return StatusBitsBUC.parse(statusBits);
+		}
 	}
 
 	public enum ReferenceSource{
@@ -581,7 +610,11 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 	}
 
-	public enum StatusBitsFCM{
+	public interface StatusBits{
+		
+	}
+
+	public enum StatusBitsFCM implements StatusBits{
 		PLL1			(0),
 		PLL2			(1),
 		MUTE			(2),
@@ -608,12 +641,18 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			return (value & bitMask) != 0;
 		}
 
-		public static StatusBitsFCM[] parse(int statusBits){
-			return Arrays.stream(values()).filter(sb->(sb.bitMask&statusBits)!=0).toArray(size->new StatusBitsFCM[size]);
+		public static List<StatusBits> parse(int statusBits){
+			return Arrays.stream(values()).filter(sb->(sb.bitMask&statusBits)!=0).collect(Collectors.toList());
+		}
+
+		@Override
+		public String toString(){
+			return name();
 		}
 	}
 
-	public enum StatusBitsBUC{
+	public enum StatusBitsBUC implements StatusBits{
+
 		MUTE		(1, 1),
 		PLL_UNKNOWN	(0, 6),
 		LOCKED		(2, 6),
@@ -627,12 +666,17 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			this.bitMask = bitMask;
 		}
 
-		public static StatusBitsBUC[] parse(int statusBits) {
-			return Arrays.stream(values()).filter(sb->(sb.bitMask&statusBits)==sb.value).toArray(size->new StatusBitsBUC[size]);
+		public static List<StatusBits> parse(int statusBits) {
+			return Arrays.stream(values()).filter(sb->(sb.bitMask&statusBits)==sb.value).collect(Collectors.toList());
 		}
 
 		public boolean isOn(int statusBits){
 			return (statusBits & bitMask) == value;
+		}
+
+		@Override
+		public String toString(){
+			return name();
 		}
 	}
 

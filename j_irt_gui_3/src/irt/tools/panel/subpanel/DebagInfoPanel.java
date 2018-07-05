@@ -32,9 +32,9 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 
@@ -144,37 +144,41 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		Optional
-		.ofNullable(packet)
-		.map(p->p.getHeader())
-		.filter(h->h.getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBUG_DEVICE_INFO)
-		.ifPresent(h->{
 
-			String text;
-			if(h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
+		new MyThreadFactory(()->{
 
-				setBorder(new LineBorder(Color.PINK));
-				text = "No Communication";
+			Optional
+			.ofNullable(packet)
+			.map(p->p.getHeader())
+			.filter(h->PacketIDs.DEVICE_DEBUG_INFO.match(h.getPacketId()))
+			.ifPresent(h->{
 
-			}else if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
+				String text;
+				if(h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 
-				setBorder(new LineBorder(Color.RED));
-				text = "ERROR: " + h.getOptionStr();
+					setBorder(new LineBorder(Color.PINK));
+					text = "No Communication";
 
-			}else{
+				}else if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
 
-				setBorder(new LineBorder(Color.YELLOW));
-				text = Optional.ofNullable(packet.getPayloads()).map(pls->pls.parallelStream()).orElse(Stream.empty()).findAny().map(Payload::getStringData).map(StringData::toString).orElse("No data.");
-			}
+					setBorder(new LineBorder(Color.RED));
+					text = "ERROR: " + h.getOptionStr();
 
-			if(!text.equals(textArea.getText()))
-				textArea.setText(text);
+				}else{
 
-			if(timer!=null && timer.isRunning())
-				return;
+					setBorder(new LineBorder(Color.YELLOW));
+					text = Optional.ofNullable(packet.getPayloads()).map(pls->pls.parallelStream()).orElse(Stream.empty()).findAny().map(Payload::getStringData).map(StringData::toString).orElse("No data.");
+				}
 
-			timer = new Timer(1000, e->{setBorder(null); timer.stop();});
-			timer.start();
+				if(!text.equals(textArea.getText()))
+					textArea.setText(text);
+
+				if(timer!=null && timer.isRunning())
+					return;
+
+				timer = new Timer(1000, e->{setBorder(null); timer.stop();});
+				timer.start();
+			});
 		});
 	}
 

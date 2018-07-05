@@ -19,10 +19,11 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.DeviceInfo;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.MeasurementValue;
 import irt.data.value.MeasurementValue.MeasurementStatus;
 import irt.data.value.Value;
@@ -158,15 +159,19 @@ public class ProgressBar extends JPanel implements PacketListener{
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		setMinMaxValue(packet);
-		setValue(packet);
+
+		new MyThreadFactory(()->{
+
+			setMinMaxValue(packet);
+			setValue(packet);
+		});
 	}
 
 	private void setValue(Packet packet) {
 		Optional
 		.ofNullable(packet)
 		.map(Packet::getHeader)
-		.filter(h->h.getPacketId()	== PacketWork.PACKET_ID_MEASUREMENT_ALL)
+		.filter(h->PacketIDs.MEASUREMENT_ALL.match(h.getPacketId()))
 		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
 		.filter(h->h.getOption()	== PacketImp.ERROR_NO_ERROR)
 		.map(h->packet.getPayloads())
@@ -196,7 +201,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 		Optional
 		.ofNullable(packet)
 		.map(Packet::getHeader)
-		.filter(h->h.getPacketId()	== PacketWork.PACKET_ID_DEVICE_INFO)
+		.filter(h->PacketIDs.DEVICE_INFO.match(h.getPacketId()))
 		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
 		.filter(h->h.getOption()	== PacketImp.ERROR_NO_ERROR)
 		.ifPresent(p->{

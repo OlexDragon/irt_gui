@@ -10,6 +10,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,20 +21,22 @@ import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.alarm.AlarmDescriptionPacket;
-import irt.data.packet.alarm.AlarmStatusPacket;
-import irt.data.packet.alarm.AlarmsIDsPacket;
-import irt.data.packet.alarm.AlarmsSummaryPacket;
-import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketWork.AlarmsPacketIds;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Packets;
 import irt.data.packet.Payload;
+import irt.data.packet.alarm.AlarmDescriptionPacket;
+import irt.data.packet.alarm.AlarmStatusPacket;
+import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
+import irt.data.packet.alarm.AlarmStatusPacket.AlarmStatus;
+import irt.data.packet.alarm.AlarmsIDsPacket;
+import irt.data.packet.alarm.AlarmsSummaryPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -55,7 +58,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private final static Logger logger = LogManager.getLogger();
 
 	public static final byte CONVERTER = MonitorPanelFx.CONVERTER;
-	private static final long DUMP_DELAY = 20;
 
 	private ScheduledFuture<?> scheduledFuture;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
@@ -81,8 +83,8 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	public AlarmPanelFx() {
 //		logger.error("AlarmPanelFx");
 
-		packetAlarmIDs = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketWork();
-		packetSummary = (AlarmsSummaryPacket) Packets.ALARMS_SUMMARY_STATUS.getPacketWork();//This packet is for DumpController
+		packetAlarmIDs = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketAbstract();
+		packetSummary = (AlarmsSummaryPacket) Packets.ALARMS_SUMMARY_STATUS.getPacketAbstract();//This packet is for DumpController
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("GridPanel.fxml"));
         fxmlLoader.setRoot(this);
@@ -91,8 +93,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
         try {
             fxmlLoader.load();
 
-    		if(scheduledFuture==null || scheduledFuture.isCancelled())
-    			scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
+    		scheduledFuture = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
 
         } catch (IOException exception) {
             throw new RuntimeException(exception);
@@ -124,13 +125,13 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
  	private short[] availableAlarms;
-	private long index ;
-	private boolean statusChamge;
+	private int index ;
 	private Object summaryAlarm;
 	private boolean run;
 	private SerialPortInterface serialPort;
 
 	private int delay;
+	private boolean availableAlarmsSent;
 	@Override
 	public void run() {
 		if(unitAddress==null)
@@ -141,56 +142,76 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			this.serialPort = serialPort;
 
 		//Stop this tread if serial port is changed
-		if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
+		if(Optional
+				.ofNullable(this.serialPort)
+				.filter(sp->sp!=serialPort)
+				.isPresent()){
+
 			shutdownNow();
 			return;
 		}
 
 		try{
 
-			GuiControllerAbstract.getComPortThreadQueue().add(packetSummary);// used by DumpController.onPacketReceived
+			final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+			queue.add(packetSummary);// used by DumpController.onPacketReceived
 
-			if(availableAlarms==null || availableAlarms.length==0){
-
-				GuiControllerAbstract.getComPortThreadQueue().add(packetAlarmIDs);
+			boolean haveToGetAlarmIDs = !Optional.ofNullable(availableAlarms).filter(a->a.length>0).isPresent();
+			if(haveToGetAlarmIDs && availableAlarmsSent){
+				availableAlarmsSent = false;
 				return;
 			}
 
-			final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+			if(haveToGetAlarmIDs){
+
+				GuiControllerAbstract.getComPortThreadQueue().add(packetAlarmIDs);
+				availableAlarmsSent = true;
+				return;
+			}
+
 			final int size = queue.size();
 
-			if(delay>0){
+			if(!run && delay>0){
 				delay--;
 				return;
 			}
 
-			if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
+			if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<0)
 				delay = ComPortThreadQueue.DELAY_TIMES;
 			else if(size==0)
 				delay = 0;
 
-			if(!(run || statusChamge) && --index>0)
-				return;
+			if(++index>=availableAlarms.length)
+				index = 0;
 
-			index = DUMP_DELAY;
-			statusChamge = false;
 
-			IntStream
-			.range(0, availableAlarms.length)
-			.mapToObj(index->new AlarmStatusPacket( unitAddress, availableAlarms[index]))
-			.forEach(ap->GuiControllerAbstract.getComPortThreadQueue().add(ap));
+			if(run)
+				IntStream
+				.range(0, availableAlarms.length)
+				.mapToObj(i->new AlarmStatusPacket( unitAddress, AlarmsPacketIds.valueOf(availableAlarms[i], false).orElse(AlarmsPacketIds.STATUS)))
+				.forEach(queue::add);
+			else	// If panel is not visible send only one packet 
+				queue.add(new AlarmStatusPacket( unitAddress, AlarmsPacketIds.valueOf(availableAlarms[index], false).orElse(AlarmsPacketIds.STATUS)));
 
-			gridPane
-			.getChildren()
-			.parallelStream()
-			.filter(Label.class::isInstance)
-			.map(Label.class::cast)
-			.filter(l->l.getStyleClass().contains(DESCRIPTION))
-			.filter(l->l.getText().isEmpty())
-			.map(Label::getUserData)
-			.map(Short.class::cast)
-			.map(alarmCode->new AlarmDescriptionPacket(unitAddress, alarmCode))
-			.forEach(ad->GuiControllerAbstract.getComPortThreadQueue().add(ad));
+			final Stream<AlarmDescriptionPacket> descriptionPackets = gridPane
+
+					.getChildren()
+					.parallelStream()
+					.filter(Label.class::isInstance)
+					.map(Label.class::cast)
+					.filter(l->l.getStyleClass().contains(DESCRIPTION))
+					.filter(l->l.getText().isEmpty())
+					.map(Label::getUserData)
+					.map(Short.class::cast)
+					.map(alarmCode->new AlarmDescriptionPacket(unitAddress, AlarmsPacketIds.valueOf(alarmCode, true).orElse(AlarmsPacketIds.STATUS)));
+
+			if(run)
+				descriptionPackets
+				.forEach(queue::add);
+			else
+				descriptionPackets
+					.findAny()
+					.ifPresent(queue::add);
 
 		}catch (Exception e) {
 			logger.catching(e);
@@ -199,79 +220,81 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 	@Override
 	public void onPacketRecived(final Packet packet) {
+		new MyThreadFactory(()->{
+			
 
-		final Optional<PacketHeader> alarmGroupId = filterByAddressAndGroup(packet);
+			final Optional<PacketHeader> alarmGroupId = filterByAddressAndGroup(packet);
 
-		if(!alarmGroupId.isPresent())
-			return;
+			if(!alarmGroupId.isPresent())
+				return;
 
-		// has response
-		final Optional<PacketHeader> hasResponse = alarmGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+			// has response
+			final Optional<PacketHeader> hasResponse = alarmGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
 
-		if(!hasResponse.isPresent()){
-			logger.warn("Unit is not connected {}", packet);
-			return;
-		}
+			if(!hasResponse.isPresent()){
+				logger.warn("Unit is not connected {}", packet);
+				return;
+			}
 
-		//no error
-		final Optional<PacketHeader> noError = hasResponse
-												.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+			//no error
+			final Optional<PacketHeader> noError = hasResponse
+													.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
 
-		if(!noError.isPresent()){
-			logger.warn("Packet has error {}", packet);
-			return;
-		}
+			if(!noError.isPresent()){
+				logger.warn("Packet has error {}", packet);
+				return;
+			}
 
-		//Summary alarm
-		if(noError
-		.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY).isPresent()){
+			//Summary alarm
+			if(noError
+			.filter(h->PacketIDs.ALARMS_SUMMARY.match(h.getPacketId())).isPresent()){
 
-			final Optional<? extends PacketAbstract> p = Packets.cast(packet);
-			p.ifPresent(pa->{
-				Object sa = pa.getValue();
-				if(!sa.equals(summaryAlarm)){
-					statusChamge = true;
-					summaryAlarm = sa;
-				};
+				final Optional<? extends PacketSuper> p = Packets.cast(packet);
+				p.ifPresent(pa->{
+					Object sa = pa.getValue();
+					if(!sa.equals(summaryAlarm)){
+						summaryAlarm = sa;
+					};
+				});
+				return;
+			}
+
+			//Available alarms
+			final Optional<short[]> alarms = noError.filter(h->PacketIDs.ALARMS_IDs.match(h.getPacketId()))
+												.map(h->packet.getPayloads())
+												.filter(pls->!pls.isEmpty())
+												.map(pls->pls.get(0).getArrayShort());
+
+			//Initialize available alarms
+			if(alarms.isPresent()){
+
+				availableAlarms = alarms.get();
+				createLabels();
+
+				return;
+			}
+
+			//set alarm status
+			noError
+			.map(h->packet.getPayloads())
+			.filter(pls->!pls.isEmpty())
+			.map(pls->pls.stream())
+			.map(stream->stream.collect(Collectors.partitioningBy(pl->pl.getParameterHeader().getCode()==PacketImp.ALARM_STATUS)))
+			.ifPresent(map->{
+
+									//Alarm Status
+									map.get(true)
+									.parallelStream()
+									.map(Payload::getBuffer)
+									.forEach(bs->setAlarmStatus(bs));
+
+									//Alarm description
+									map.get(false)
+									.parallelStream()
+									.filter(pl->pl.getParameterHeader().getCode()==PacketImp.ALARM_DESCRIPTION)
+									.map(Payload::getBuffer)
+									.forEach(bs->setAlarmDescription(bs));
 			});
-			return;
-		}
-
-		//Available alarms
-		final Optional<short[]> alarms = noError.filter(h->h.getPacketId()==PacketWork.PACKET_ID_ALARMS_IDs)
-											.map(h->packet.getPayloads())
-											.filter(pls->!pls.isEmpty())
-											.map(pls->pls.get(0).getArrayShort());
-
-		//Initialize available alarms
-		if(alarms.isPresent()){
-
-			availableAlarms = alarms.get();
-			createLabels();
-
-			return;
-		}
-
-		//set alarm status
-		noError
-		.map(h->packet.getPayloads())
-		.filter(pls->!pls.isEmpty())
-		.map(pls->pls.stream())
-		.map(stream->stream.collect(Collectors.partitioningBy(pl->pl.getParameterHeader().getCode()==PacketImp.ALARM_STATUS)))
-		.ifPresent(map->{
-
-								//Alarm Status
-								map.get(true)
-								.parallelStream()
-								.map(Payload::getBuffer)
-								.forEach(bs->setAlarmStatus(bs));
-
-								//Alarm description
-								map.get(false)
-								.parallelStream()
-								.filter(pl->pl.getParameterHeader().getCode()==PacketImp.ALARM_DESCRIPTION)
-								.map(Payload::getBuffer)
-								.forEach(bs->setAlarmDescription(bs));
 		});
 	}
 
@@ -364,15 +387,15 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		.map(AlarmStatus::new)
 		.ifPresent(as->{
 
-			final String severityName = as.alarmSeverities.name();
-			final String textToSet = Translation.getValue(String.class, severityName, as.alarmSeverities.toString());
+			final String severityName = as.getAlarmSeverities().name();
+			final String textToSet = Translation.getValue(String.class, severityName, as.getAlarmSeverities().toString());
 
 			gridPane
 			.getChildren()
 			.parallelStream()
 			.filter(Label.class::isInstance)
 			.map(Label.class::cast)
-			.filter(n->n.getUserData().equals(as.alarmCode))
+			.filter(n->n.getUserData().equals(as.getAlarmCode()))
 			.filter(n->n.getStyleClass().contains(VALUE))
 			.findAny()
 			.ifPresent(label->{
@@ -404,7 +427,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 
-		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
+		if(scheduledFuture!=null && !scheduledFuture.isDone())
 			scheduledFuture.cancel(true);
 
 		service.shutdownNow();
@@ -426,57 +449,5 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			logger.trace("\nbytes={}\nalarmCode={}\nalarmDescription={}", bytes, alarmCode, alarmDescription);
 		}
 
-	}
-
-	public static class AlarmStatus {
-
-		private final short alarmCode;
-		private final AlarmSeverities alarmSeverities;
-
-		public AlarmStatus(byte[] bytes) {
-			logger.trace("{}", bytes);
-
-			final ByteBuffer buffer = ByteBuffer.wrap(bytes);
-			alarmCode =buffer.getShort();
-
-			if(bytes.length<6){
-				alarmSeverities = null;
-				return;
-			}
-
-			final int status = buffer.getInt(2)&7;
-			alarmSeverities = AlarmStatusPacket.AlarmSeverities.values()[status];
-		}
-
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result  = prime + alarmCode;
-			return prime * result + ((alarmSeverities == null) ? 0 : alarmSeverities.hashCode());
-		}
-
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			AlarmStatus other = (AlarmStatus) obj;
-			if (alarmCode != other.alarmCode)
-				return false;
-			if (alarmSeverities != other.alarmSeverities)
-				return false;
-			return true;
-		}
-
-
-		@Override
-		public String toString() {
-			return "AlarmStatus [alarmCode=" + alarmCode + ", alarmSeverities=" + alarmSeverities + "]";
-		}
 	}
 }

@@ -16,4 +16,5 @@ public interface Packet {
 	void setHeader	(PacketHeader packetHeader);
 	void setPayloads(List<Payload> payloadsList);
 	void set		(byte[] data);
+	byte[] 			getAcknowledg();
 }

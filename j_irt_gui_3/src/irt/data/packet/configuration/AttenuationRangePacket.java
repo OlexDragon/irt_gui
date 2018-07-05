@@ -1,17 +1,29 @@
 package irt.data.packet.configuration;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import irt.data.Range;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.RangePacket;
 
-public class AttenuationRangePacket extends PacketAbstract implements RangePacket{
+public class AttenuationRangePacket extends PacketSuper implements RangePacket{
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Range::new);
 
 	public AttenuationRangePacket( byte linkAddr) {
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION_RANGE,
+				PacketIDs.CONFIGURATION_ATTENUATION_RANGE,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_ATTENUATION_RANGE,
 				null,
@@ -24,9 +36,6 @@ public class AttenuationRangePacket extends PacketAbstract implements RangePacke
 
 	@Override
 	public Object getValue() {
-		return getPayloads()
-				.stream()
-				.findAny()
-				.map(Range::new);
+		return parseValueFunction.apply(this);
 	}
 }

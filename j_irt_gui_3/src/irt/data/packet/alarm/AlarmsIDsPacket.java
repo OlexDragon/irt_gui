@@ -1,27 +1,39 @@
 package irt.data.packet.alarm;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.Packet;
 
-public class AlarmsIDsPacket extends PacketAbstract{
+public class AlarmsIDsPacket extends PacketSuper{
 	final static Logger logger = LogManager.getLogger();
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Payload::getArrayShort)
+																										.map(MyArrayList::new);
 
 	public AlarmsIDsPacket() {
 		this((byte) 0);
 	}
 
 	public AlarmsIDsPacket(byte linkAddr){
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PacketIDs.ALARMS_IDs.getId(), PacketImp.GROUP_ID_ALARM, PacketImp.ALARMS_IDs, null, Priority.ALARM);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PacketIDs.ALARMS_IDs, PacketImp.GROUP_ID_ALARM, PacketImp.ALARMS_IDs, null, Priority.ALARM);
 	}
 
 	@Override

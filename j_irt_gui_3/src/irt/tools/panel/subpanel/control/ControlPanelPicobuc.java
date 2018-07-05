@@ -31,8 +31,8 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.ValueDouble;
 import irt.tools.CheckBox.SwitchBox;
 
@@ -52,23 +52,23 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 					alcEnableSetterController.stop();
 				}
 
-				ConfigurationSetter configurationSetter = new ConfigurationSetter(linkHeader, PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED, PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND){
+				ConfigurationSetter configurationSetter = new ConfigurationSetter(linkHeader, PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED, PacketIDs.CONFIGURATION_ALC_ENABLE){
 
 					private int times;
 
 					@Override
 					public boolean set(Packet packet) {
 
-						if(packet.getHeader().getPacketId() == PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND){
+						if(PacketIDs.CONFIGURATION_ALC_ENABLE.match(packet.getHeader().getPacketId())){
 
 							if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 								Boolean enabled = packet.getPayload(0).getByte()==1;
 								logger.trace(packet);
-								fireValueChangeListener(new ValueChangeEvent(enabled, PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND));
+								fireValueChangeListener(new ValueChangeEvent(enabled, PacketIDs.CONFIGURATION_ALC_ENABLE));
 							}else{
 								logger.warn(packet);
 								if(++times>=3)
-									fireValueChangeListener(new ValueChangeEvent("error", PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE_COMAND));
+									fireValueChangeListener(new ValueChangeEvent("error", PacketIDs.CONFIGURATION_ALC_ENABLE));
 							}
 						}
 
@@ -171,12 +171,15 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 						linkHeader,
 						PacketImp.GROUP_ID_CONFIGURATION,
 						PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED,
-						PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE){
+						PacketIDs.CONFIGURATION_ALC_ENABLE){
 
 					@Override
 					public boolean set(Packet packet) {
-						switch(packet.getHeader().getPacketId()){
-						case PacketWork.PACKET_ID_CONFIGURATION_ALC_ENABLE:
+						final int intId = packet.getHeader().getPacketId()&0xFF;
+						PacketIDs[] values = PacketIDs.values();
+						if(intId<values.length)
+						switch(values[intId]){
+						case CONFIGURATION_ALC_ENABLE:
 							boolean isOn = packet.getPayloads().stream().findAny().map(Payload::getByte).filter(b->b==1).isPresent();
 							if(switchBox!=null && isOn != switchBox.isSelected()){
 								switchBox.removeItemListener(alcItemListener);
@@ -184,6 +187,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 								switchBox.addItemListener(alcItemListener);
 								ControlPanelPicobuc.this.logger.entry(packet);
 							}
+						default:
 						}
 						return false;
 					}
@@ -208,15 +212,15 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 				linkHeader,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_FCM_ALC_RANGE,
-				PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE, logger){
+				PacketIDs.CONFIGURATION_ALC_RANGE, logger){
 
 					@Override
 					public boolean set(Packet packet) {
-						if(packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE){
+						if(PacketIDs.CONFIGURATION_ALC_RANGE.match(packet.getHeader().getPacketId())){
 							logger.debug(packet);
 							Payload payload = packet.getPayload(0);
 							if(payload!=null)
-								fireValueChangeListener(new ValueChangeEvent(new Range(payload), PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE));
+								fireValueChangeListener(new ValueChangeEvent(new Range(payload), PacketIDs.CONFIGURATION_ALC_RANGE));
 						}
 						return false;
 					}
@@ -237,7 +241,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 							
 							@Override
 							public void valueChanged(ValueChangeEvent valueChangeEvent) {
-								if(valueChangeEvent.getID()==PacketWork.PACKET_ID_CONFIGURATION_ALC_RANGE && valueChangeEvent.getSource() instanceof Range){
+								if(PacketIDs.CONFIGURATION_ALC_RANGE.match((short) valueChangeEvent.getID()) && valueChangeEvent.getSource() instanceof Range){
 									logger.debug(valueChangeEvent);
 									String prefix = Translation.getValue(String.class, "dbm", " dBm");
 
@@ -251,7 +255,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 
 									ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
 									value.setPrefix(prefix);
-									startTextSliderController(ControlPanelPicobuc.this.getName(), value, PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL, PacketImp.PARAMETER_CONFIG_FCM_ALC_LEVEL, style);
+									startTextSliderController(ControlPanelPicobuc.this.getName(), value, PacketIDs.CONFIGURATION_ALC_LEVEL, PacketImp.PARAMETER_CONFIG_FCM_ALC_LEVEL, style);
 								}
 							}
 						};

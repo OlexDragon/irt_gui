@@ -17,7 +17,7 @@ public class ParameterHeader {	//irtalcp_parameter_header_t
 		if(data!=null && data.length>=SIZE){
 			parameterHeader = Arrays.copyOf(data, SIZE);
 		}else
-			parameterHeader = null;
+			parameterHeader = new byte[SIZE];
 	}
 
 	public ParameterHeader(byte code) {

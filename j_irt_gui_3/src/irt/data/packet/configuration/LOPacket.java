@@ -1,81 +1,76 @@
 package irt.data.packet.configuration;
 
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import irt.data.packet.PacketAbstract;
+import irt.data.IdValueFreq;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.Packet;
 import irt.data.value.ValueFrequency;
 
-public class LOPacket extends PacketAbstract{
+public class LOPacket extends PacketSuper{
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Payload::getBuffer)
+																										.map(ByteBuffer::wrap)
+																										.map(bb->{
+																											final int capacity = bb.capacity();
+																											switch (capacity) {
+																											case 1:
+																												return bb.get();
+
+																											case 8:
+																												final long fr = bb.getLong();
+																												return new ValueFrequency(fr, fr, fr);
+
+																											default:
+																												return bb;
+																											}
+																										});
 
 	/**
 	 *  Converter request packet
 	 */
 	public LOPacket() {
-		this(null);
-	}
-
-	/**
-	 *  BIAS Board request packet
-	 * @param linkAddr
-	 */
-	public LOPacket(byte linkAddr) {
-		this(linkAddr, null);
+		this((byte) 0, null);
 	}
 
 	/**
 	 * BIAS Board command packet
 	 * @param linkAddr
-	 * @param id - select LO
+	 * @param loId - select LO
 	 */
-	public LOPacket(byte linkAddr, Byte id) {
+	public LOPacket(Byte linkAddr, IdValueFreq idValueFreq) {
 		super(
 				linkAddr,
-				id!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
-						PacketWork.PACKET_ID_CONFIGURATION_LO,
-						PacketImp.GROUP_ID_CONFIGURATION,
-						linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_LO_SET : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY,
-						id!=null ? PacketImp.toBytes(id) : null,
-						id!=null ? Priority.COMMAND : Priority.REQUEST);
-	}
-
-	/**
-	 * Converter command packet
-	 * @param id - select LO
-	 */
-	public LOPacket(ValueFrequency frequency) {
-		super(
-				(byte)0,
-				frequency!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_LO,
+				Optional.ofNullable(idValueFreq).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST) ,
+				PacketIDs.CONFIGURATION_LO,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY,
-				frequency!=null ? PacketImp.toBytes(frequency.getValue()) : null,
-				frequency!=null ? Priority.COMMAND : Priority.REQUEST);
+				Optional.ofNullable(linkAddr).filter(la->la!=0).map(v->PacketImp.PARAMETER_ID_CONFIGURATION_LO_SET).orElse(PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY) ,
+				Optional.ofNullable(idValueFreq).map(
+						id->
+						Optional
+						.ofNullable(linkAddr)
+						.filter(addr->addr!=0)
+						.map(b->idValueFreq.getId())
+						.map(Object.class::cast)
+						.orElse(idValueFreq.getValueFrequency().getValue()))
+				.map(v->PacketImp.toBytes(v))
+				.orElse(null) ,
+				Optional.ofNullable(idValueFreq).map(v->Priority.COMMAND).orElse(Priority.REQUEST));
 	}
 
 	@Override
 	public Object getValue() {
-		return getPayloads()
-				.stream()
-				.findAny()
-				.map(Payload::getBuffer)
-				.map(ByteBuffer::wrap)
-				.map(bb->{
-					final int capacity = bb.capacity();
-					switch (capacity) {
-					case 1:
-						return bb.get();
-
-					case 8:
-						final long fr = bb.getLong();
-						return new ValueFrequency(fr, fr, fr);
-
-					default:
-						return bb;
-					}
-				});
+		return parseValueFunction.apply(this);
 	}
 }

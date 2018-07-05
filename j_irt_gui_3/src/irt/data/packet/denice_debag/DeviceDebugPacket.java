@@ -4,55 +4,54 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import irt.data.RegisterValue;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.value.Value;
 
-public class DeviceDebugPacket extends PacketAbstract{
+public class DeviceDebugPacket extends PacketSuper{
 
-	public DeviceDebugPacket(byte linkAddr, RegisterValue registerValue, short packetId, byte parameterId) {
+	public DeviceDebugPacket(byte linkAddr, Value value, DeviceDebugPacketIds deviceDebugPacketId) {
 		super(
 				linkAddr,
-				registerValue.getValue() ==null ? PacketImp.PACKET_TYPE_REQUEST : PacketImp.PACKET_TYPE_COMMAND,
-				packetId,
+				value ==null ? PacketImp.PACKET_TYPE_REQUEST : PacketImp.PACKET_TYPE_COMMAND,
+				deviceDebugPacketId.getPacketId(),
 				PacketImp.GROUP_ID_DEVICE_DEBAG,
-				parameterId,
-				registerValue.toBytes(),
+				deviceDebugPacketId.getParameterCode(),
+				Optional.ofNullable(value).map(v->ByteBuffer.allocate(12).put(deviceDebugPacketId.getPayloadData()).put(v.toBytes()).array()).orElse(deviceDebugPacketId.getPayloadData()),
 				Priority.REQUEST);
 	}
 
 	public DeviceDebugPacket() {
-		this((byte)0, new RegisterValue(0, 0, null), (short)0, (byte) 0);
+		this((byte)0, DeviceDebugPacketIds.INFO);
 	}
 
-	public DeviceDebugPacket(byte linkAddr, int index, short packetId, byte parameterId){
+	public DeviceDebugPacket(byte linkAddr, DeviceDebugPacketIds deviceDebugPacketId){
 			super(
 					linkAddr,
 					PacketImp.PACKET_TYPE_REQUEST,
-					packetId,
+					deviceDebugPacketId.getPacketId(),
 					PacketImp.GROUP_ID_DEVICE_DEBAG,
-					parameterId,
-					ByteBuffer.allocate(4).putInt(index).array(),
+					deviceDebugPacketId.getParameterCode(),
+					deviceDebugPacketId.getPayloadData(),
 					Priority.REQUEST);
 	}
 
-	public enum Dump{
-		INFO,
-		DEVICE
+	public enum DeviceDebugType{
+		INFO(PacketImp.PARAMETER_DEVICE_DEBUG_INFO),
+		DEVICE(PacketImp.PARAMETER_DEVICE_DEBUG_DUMP);
+
+		private final byte parameterCode;
+
+		private DeviceDebugType(byte parameter){
+			this.parameterCode = parameter;
+		}
+
+		public byte getParameterCode() {
+			return parameterCode;
+		}
 	}
-	public DeviceDebugPacket(byte linkAddr, int index, Dump dump){
-		super(
-				linkAddr,
-				PacketImp.PACKET_TYPE_REQUEST,
-				(short)(dump == Dump.INFO ? PacketWork.DUMPS + index : PacketWork.DEVICES + index),
-				PacketImp.GROUP_ID_DEVICE_DEBAG,
-				dump == Dump.INFO ? PacketImp.PARAMETER_DEVICE_DEBAG_INFO :PacketImp.PARAMETER_DEVICE_DEBAG_DUMP,
-				ByteBuffer.allocate(4).putInt(index).array(),
-				Priority.REQUEST);
-}
 
 	@Override
 	public Object getValue() {
@@ -71,14 +70,11 @@ public class DeviceDebugPacket extends PacketAbstract{
 	}
 
 	public String getParsePacketId() {
-		final short packetId = getHeader().getPacketId();
+		final int intId = getHeader().getPacketId()&0xFF;
+		final PacketIDs[] values = PacketIDs.values();
+		PacketIDs packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
 
-		String result;
-		if(packetId>=PacketWork.DEVICES) 
-			result = "2." + (packetId -PacketWork.DEVICES);
-		else
-			result = "1." + (packetId -PacketWork.DUMPS);
 
-		return result;
+		return packetId.toString();
 	}
 }

@@ -40,15 +40,15 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.RedundancyEnablePacket;
-import irt.data.packet.RedundancyEnablePacket.RedundancyEnable;
-import irt.data.packet.RedundancyModePacket;
-import irt.data.packet.RedundancyModePacket.RedundancyMode;
-import irt.data.packet.RedundancyNamePacket;
-import irt.data.packet.RedundancyNamePacket.RedundancyName;
-import irt.data.packet.RedundancyStatusPacket;
-import irt.data.packet.RedundancyStatusPacket.RedundancyStatus;
+import irt.data.packet.configuration.RedundancyEnablePacket;
+import irt.data.packet.configuration.RedundancyModePacket;
+import irt.data.packet.configuration.RedundancyNamePacket;
 import irt.data.packet.configuration.RedundancySetOnlinePacket;
+import irt.data.packet.configuration.RedundancyStatusPacket;
+import irt.data.packet.configuration.RedundancyEnablePacket.RedundancyEnable;
+import irt.data.packet.configuration.RedundancyModePacket.RedundancyMode;
+import irt.data.packet.configuration.RedundancyNamePacket.RedundancyName;
+import irt.data.packet.configuration.RedundancyStatusPacket.RedundancyStatus;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.irt_gui.IrtGui;
@@ -325,118 +325,121 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		try{
+		new MyThreadFactory(()->{
+
+			try{
 
 
-			final Optional<Packet> o = Optional.ofNullable(packet);
+				final Optional<Packet> o = Optional.ofNullable(packet);
 
-			if(!o.isPresent())
-				return;
+				if(!o.isPresent())
+					return;
 
-			byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+				byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-			if(addr!=unitAddress)
-				return;
+				if(addr!=unitAddress)
+					return;
 
-			Optional<PacketHeader> sameGroupId = o.filter(LinkedPacket.class::isInstance)//converters do not have a network
-													.map(LinkedPacket.class::cast)
-													.filter(p->p.getLinkHeader()!=null)
-													.filter(p->p.getLinkHeader().getAddr()==unitAddress)
-													.map(Packet::getHeader)
-													.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION);
+				Optional<PacketHeader> sameGroupId = o.filter(LinkedPacket.class::isInstance)//converters do not have a network
+														.map(LinkedPacket.class::cast)
+														.filter(p->p.getLinkHeader()!=null)
+														.filter(p->p.getLinkHeader().getAddr()==unitAddress)
+														.map(Packet::getHeader)
+														.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION);
 
-			if(!sameGroupId.isPresent())
-				return;
+				if(!sameGroupId.isPresent())
+					return;
 
-			Optional<PacketHeader> hasResponse = sameGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+				Optional<PacketHeader> hasResponse = sameGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
 
-			if(!hasResponse.isPresent()){
-				logger.warn("Unit is not connected {}", packet);
-				return;
-			}
+				if(!hasResponse.isPresent()){
+					logger.warn("Unit is not connected {}", packet);
+					return;
+				}
 
-			final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+				final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
 
-			if(!noError.isPresent()){
-				logger.warn("Packet has error {}", packet);
-				return;
-			}
+				if(!noError.isPresent()){
+					logger.warn("Packet has error {}", packet);
+					return;
+				}
 
-			noError
-			.map(h->packet.getPayloads())
-			.map(pls->pls.parallelStream())
-			.ifPresent(
-					stream->{
-						stream.forEach(pl->{
+				noError
+				.map(h->packet.getPayloads())
+				.map(pls->pls.parallelStream())
+				.ifPresent(
+						stream->{
+							stream.forEach(pl->{
 
-							final byte code = pl.getParameterHeader().getCode();
-							final byte index = pl.getByte();
-							switch(code){
-							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_ENABLE:
+								final byte code = pl.getParameterHeader().getCode();
+								final byte index = pl.getByte();
+								switch(code){
+								case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_ENABLE:
 
-								//Set Enable status
+									//Set Enable status
 
-								final RedundancyEnable redundancyEnable = RedundancyEnable.values()[index];
-								cmbBxRedundancy.setSelectedItem(redundancyEnable);
-								break;
+									final RedundancyEnable redundancyEnable = RedundancyEnable.values()[index];
+									cmbBxRedundancy.setSelectedItem(redundancyEnable);
+									break;
 
-							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_MODE:
+								case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_MODE:
 
-								// Set redundancy mode
+									// Set redundancy mode
 
-								final RedundancyMode redundancyMode = RedundancyMode.values()[index];
-								cmbBxMode.setSelectedItem(redundancyMode);
-								break;
+									final RedundancyMode redundancyMode = RedundancyMode.values()[index];
+									cmbBxMode.setSelectedItem(redundancyMode);
+									break;
 
-							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME:
+								case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_NAME:
 
-								// Set BUC Name
+									// Set BUC Name
 
-								final RedundancyName redundancyName = RedundancyName.values()[index];
-								cmbBxName.removeItemListener(nameListener);
-								cmbBxName.setSelectedItem(redundancyName);
-								cmbBxName.addItemListener(nameListener);
-								break;
+									final RedundancyName redundancyName = RedundancyName.values()[index];
+									cmbBxName.removeItemListener(nameListener);
+									cmbBxName.setSelectedItem(redundancyName);
+									cmbBxName.addItemListener(nameListener);
+									break;
 
-							case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_STATUS:
+								case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_STATUS:
 
-								// Set Status and background image
-		
-								final RedundancyStatus redundancyStatus = RedundancyStatus.values()[index];
-								final RedundancyName selectedItem = (RedundancyName) cmbBxName.getSelectedItem();
+									// Set Status and background image
+			
+									final RedundancyStatus redundancyStatus = RedundancyStatus.values()[index];
+									final RedundancyName selectedItem = (RedundancyName) cmbBxName.getSelectedItem();
 
-								if(redundancyStatus==RedundancyStatus.STANDBY){
+									if(redundancyStatus==RedundancyStatus.STANDBY){
 
-									lblSetOnline.setEnabled(true);
-									lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+										lblSetOnline.setEnabled(true);
+										lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-									if(selectedItem==RedundancyName.BUC_B)
-										lblImage.setIcon(ICON_BUC_A);
-									else
-										lblImage.setIcon(ICON_BUC_B);
+										if(selectedItem==RedundancyName.BUC_B)
+											lblImage.setIcon(ICON_BUC_A);
+										else
+											lblImage.setIcon(ICON_BUC_B);
 
-								}else if(redundancyStatus==RedundancyStatus.ONLINE){
+									}else if(redundancyStatus==RedundancyStatus.ONLINE){
 
-									lblSetOnline.setEnabled(false);
-									lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+										lblSetOnline.setEnabled(false);
+										lblSetOnline.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 
-									if(selectedItem==RedundancyName.BUC_A)
-										lblImage.setIcon(ICON_BUC_A);
-									else
-										lblImage.setIcon(ICON_BUC_B);
+										if(selectedItem==RedundancyName.BUC_A)
+											lblImage.setIcon(ICON_BUC_A);
+										else
+											lblImage.setIcon(ICON_BUC_B);
 
-								}else{
+									}else{
 
-									lblSetOnline.setEnabled(false);
-									lblImage.setIcon(ICON_BUC_X);
+										lblSetOnline.setEnabled(false);
+										lblImage.setIcon(ICON_BUC_X);
+									}
+									break;
 								}
-								break;
-							}
+							});
 						});
-					});
-		}catch (Exception e) {
-			logger.catching(e);
-		}
+			}catch (Exception e) {
+				logger.catching(e);
+			}
+		});
 	}
 
 	private long count;

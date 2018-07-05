@@ -17,6 +17,7 @@ public class LinkHeader implements Comparable<LinkHeader>{
 	}
 
 	public LinkHeader(byte[] foureBytes) {
+
 		addr = foureBytes[0];
 		control = foureBytes[1];
 		protocol = (short) PacketImp.shiftAndAdd(Arrays.copyOfRange(foureBytes, 2, 4));

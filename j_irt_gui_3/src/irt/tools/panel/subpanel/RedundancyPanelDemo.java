@@ -17,9 +17,9 @@ import javax.swing.border.BevelBorder;
 
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
-import irt.data.packet.RedundancyEnablePacket.RedundancyEnable;
-import irt.data.packet.RedundancyModePacket.RedundancyMode;
-import irt.data.packet.RedundancyNamePacket.RedundancyName;
+import irt.data.packet.configuration.RedundancyEnablePacket.RedundancyEnable;
+import irt.data.packet.configuration.RedundancyModePacket.RedundancyMode;
+import irt.data.packet.configuration.RedundancyNamePacket.RedundancyName;
 import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;

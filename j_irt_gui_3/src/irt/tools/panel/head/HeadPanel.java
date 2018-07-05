@@ -13,27 +13,28 @@ import java.util.stream.Stream;
 import javax.swing.JFrame;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
 import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
 import irt.tools.fx.MonitorPanelFx.StatusBitsFCM;
 import irt.tools.label.LED;
-import javax.swing.event.AncestorListener;
-import javax.swing.event.AncestorEvent;
 
 @SuppressWarnings("serial")
 public class HeadPanel extends MainPanel implements PacketListener {
@@ -267,66 +268,72 @@ public class HeadPanel extends MainPanel implements PacketListener {
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		final Optional<Packet> oPacket = Optional
-												.ofNullable(packet)
-												.map(p->p.getHeader())
-												.filter(h->h!=null)
-												.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(h->packet);
+		new MyThreadFactory(()->{
 
-		//Power Status
-		oPacket.ifPresent(pl->{
-			if(!ledPowerOn.isOn())
-				ledPowerOn.setOn(true);// Has answer so unit is on
-			timer.restart();
-		});
+			final Optional<Packet> oPacket = Optional
+					.ofNullable(packet)
+					.map(p->p.getHeader())
+					.filter(h->h!=null)
+					.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(h->packet);
 
-		if(!oPacket.isPresent()){
-			ledRx.setLedColor(Color.RED);
-			ledRx.blink();
-			return;
-		}
+			//Power Status
+			oPacket.ifPresent(
+					pl->{
+						if(!ledPowerOn.isOn())
+							ledPowerOn.setOn(true);// Has answer so unit is on
+						timer.restart();
+					});
 
-		ledRx.setLedColor(Color.GREEN);
-		ledRx.blink();
-
-		//Mute Status
-		oPacket
-		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
-		.map(p->p.getPayloads())
-		.map(pls->pls.parallelStream())
-		.orElse(Stream.empty())
-		.filter(pl->pl.getParameterHeader().getCode()==getStatusCode(packet))
-		.findAny()
-		.ifPresent(pl->{
-			final int statusBits = pl.getInt(0);
-			boolean isConverter = isConverter(packet);
-			final boolean isMute = isConverter ? isMuteFCM(statusBits) : isMuteBUC(statusBits);
-			if(isMute!=ledMute.isOn())
-				ledMute.setOn(isMute);
-			timer.restart();
-		});
-
-		//Alarm Status
-		oPacket
-		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY)
-		.flatMap(Packets::cast)
-		.map(PacketAbstract::getValue)
-		.filter(AlarmSeverities.class::isInstance)
-		.map(AlarmSeverities.class::cast)
-		.ifPresent(as->{
-
-			if(as==AlarmSeverities.NO_ALARM || as==AlarmSeverities.INFO){
-				if(ledAlarm.isOn())
-					ledAlarm.setOn(false);
+			if(!oPacket.isPresent()){
+				ledRx.setLedColor(Color.RED);
+				ledRx.blink();
 				return;
 			}
 
-			Color background = as.getBackground();
-			if(!ledAlarm.isOn() || !ledAlarm.getLedColor().equals(background)){
+			ledRx.setLedColor(Color.GREEN);
+			ledRx.blink();
 
-				ledAlarm.setLedColor(background);
-				ledAlarm.setOn(true);
-			}
+			//Mute Status
+			oPacket
+			.filter(p->PacketIDs.MEASUREMENT_ALL.match(p.getHeader().getPacketId()))
+			.map(p->p.getPayloads())
+			.map(pls->pls.parallelStream())
+			.orElse(Stream.empty())
+			.filter(pl->pl.getParameterHeader().getCode()==getStatusCode(packet))
+			.findAny()
+			.ifPresent(
+					pl->{
+						final int statusBits = pl.getInt(0);
+						boolean isConverter = isConverter(packet);
+						final boolean isMute = isConverter ? isMuteFCM(statusBits) : isMuteBUC(statusBits);
+						if(isMute!=ledMute.isOn())
+							ledMute.setOn(isMute);
+						timer.restart();
+					});
+
+			//Alarm Status
+			oPacket
+			.filter(p->PacketIDs.ALARMS_SUMMARY.match(p.getHeader().getPacketId()))
+			.flatMap(Packets::cast)
+			.map(PacketSuper::getValue)
+			.filter(AlarmSeverities.class::isInstance)
+			.map(AlarmSeverities.class::cast)
+			.ifPresent(
+					as->{
+
+						if(as==AlarmSeverities.NO_ALARM || as==AlarmSeverities.INFO){
+							if(ledAlarm.isOn())
+								ledAlarm.setOn(false);
+							return;
+						}
+
+						Color background = as.getBackground();
+						if(!ledAlarm.isOn() || !ledAlarm.getLedColor().equals(background)){
+
+							ledAlarm.setLedColor(background);
+							ledAlarm.setOn(true);
+						}
+					});
 		});
 	}
 

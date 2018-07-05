@@ -31,10 +31,11 @@ import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public class DeviceDebugController extends ControllerAbstract {
@@ -150,7 +151,7 @@ public class DeviceDebugController extends ControllerAbstract {
 						ga.setPacketParameterHeaderCode((byte)code);
 
 						Payload pl = pt.getPacket().getPayload(0);
-						if(code==PacketImp.PARAMETER_DEVICE_DEBAG_INFO)
+						if(code==PacketImp.PARAMETER_DEVICE_DEBUG_INFO)
 							pl.setBuffer(null);
 						else
 							pl.setBuffer(DeviceDebugController.this.cbParameter.getSelectedItem());
@@ -184,12 +185,15 @@ public class DeviceDebugController extends ControllerAbstract {
 
 								if(addrToSave>=0 && oldValue!=uv.getValue()){
 									int index = urv.getIndex();
+									final int intId = ((GetterAbstract)unitPacketWork).getPacketId()+1;
+									final PacketIDs[] values = PacketIDs.values();
+									PacketIDs packetID = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
 									new DeviceDebagSaveController(
 											deviceType, txtField,
 											new DeviceDebagSetter(unitPacketThread.getLinkHeader(),
 													index,
 													addrToSave,
-													(short) (((GetterAbstract)unitPacketWork).getPacketId()+1),
+													packetID,
 													PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE,
 													0),
 											Style.CHECK_ONCE);

@@ -22,6 +22,7 @@ import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.configuration.MuteControlPacket;
 import irt.data.packet.configuration.MuteControlPacket.MuteCommands;
 import irt.data.packet.configuration.MuteControlPacket.MuteStatus;
@@ -82,7 +83,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 			public void ancestorAdded(AncestorEvent event) {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(MuteButton.this);
 
-				if(scheduledFuture==null || scheduledFuture.isCancelled())
+				if(scheduledFuture==null || scheduledFuture.isDone())
 					scheduledFuture = service.scheduleAtFixedRate(MuteButton.this, 1, 5, TimeUnit.SECONDS);
 			}
 			public void ancestorMoved(AncestorEvent event) { }
@@ -110,29 +111,44 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onPacketRecived(Packet packet) {
-		Optional
-		.ofNullable(packet)
-		.map(Packet::getHeader)
-		.filter(h->h.getPacketId()==MuteControlPacket.PACKET_ID)
-		.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
-		.filter(h->h.getGroupId()==MuteControlPacket.GROUP_ID)
-		.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-		.map(h->(LinkedPacket)packet)
-		.filter(p->Optional.ofNullable(p.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0)==linkAddr)
-		.ifPresent(p->{
-			MuteControlPacket tmp = new MuteControlPacket(p);
-			((Optional<MuteStatus>) tmp.getValue())
-			.ifPresent(ms->{
 
-				final MuteCommands command = ms.getCommand();
-				setPacket.setValue(command);
+		new MyThreadFactory(()->{
 
-				String muteText = Translation.getValue(String.class, command.name(), "MUTE");
-				final String toolTipText = getToolTipText();
+			final Optional<Packet> oPacket = Optional
+			.ofNullable(packet);
 
-				if(!toolTipText.equals(muteText)){
-					setToolTipText(muteText);
-					Optional.ofNullable(lblMute).ifPresent(ml->ml.setText(muteText));
+			oPacket
+			.map(Packet::getHeader)
+			.filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId()))
+			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+			.filter(h->h.getGroupId()==MuteControlPacket.GROUP_ID)
+			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.ifPresent(h->{
+
+				final Byte addr = oPacket
+
+						.filter(LinkedPacket.class::isInstance)
+						.map(LinkedPacket.class::cast)
+						.map(LinkedPacket::getLinkHeader)
+						.map(LinkHeader::getAddr)
+						.orElse((byte) 0);
+				if(addr==linkAddr){
+					
+					MuteControlPacket tmp = new MuteControlPacket(packet);
+					((Optional<MuteStatus>) tmp.getValue())
+					.ifPresent(ms->{
+
+						final MuteCommands command = ms.getCommand();
+						setPacket.setValue(command);
+
+						String muteText = Translation.getValue(String.class, command.name(), "MUTE");
+						final String toolTipText = getToolTipText();
+
+						if(!toolTipText.equals(muteText)){
+							setToolTipText(muteText);
+							Optional.ofNullable(lblMute).ifPresent(ml->ml.setText(muteText));
+						}
+					});
 				}
 			});
 		});

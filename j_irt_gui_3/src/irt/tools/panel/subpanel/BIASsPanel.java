@@ -59,10 +59,11 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.DeviceDebugPacketIds;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
 import irt.tools.CheckBox.SwitchBox;
@@ -182,7 +183,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 
 				final Optional<DeviceType> hpBias = deviceType.filter(dt->dt.TYPE_ID>=DeviceType.HPB_L_TO_KU.TYPE_ID && dt.TYPE_ID<=DeviceType.KA_SSPA.TYPE_ID);
-				int index = hpBias.map(dt->20).orElse(isMainBoard ? 1 :201);
+//				int index = hpBias.map(dt->20).orElse(isMainBoard ? 1 :201);
 
 				double multiplier;
 				if(isNewBiasBoard){
@@ -198,12 +199,23 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				}else 
 					multiplier = 5.4;
 
-				index = hpBias.map(dt->20).orElse(isMainBoard ? 5 : 205);
+//				index = hpBias.map(dt->20).orElse(isMainBoard ? 5 : 205);
 				
-				adcWorkers.add(new AdcWorker(lblCurrent1, 	addr, new RegisterValue(index, 1, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS1_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
-				adcWorkers.add(new AdcWorker(lblCurrent2, 	addr, new RegisterValue(index, 2, null), PacketWork.PACKET_ID_DEVICE_DEBUG_HS2_CURRENT, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, multiplier, "#.### A"));
-				adcWorkers.add(new AdcWorker(lblOPower, 	addr, new RegisterValue(index, hpBias.map(dt->0).orElse(3), null), PacketWork.PACKET_ID_DEVICE_DEBUG_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));
-				adcWorkers.add(new AdcWorker(lblTemp, 		addr, new RegisterValue(index, 4, null), PacketWork.PACKET_ID_DEVICE_DEBUG_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 0, "#.###"));
+				DeviceDebugPacketIds hs1 = hpBias.map(dt->DeviceDebugPacketIds.HS1_CURRENT_HP_BIAS).orElse(isMainBoard ? DeviceDebugPacketIds.HS1_CURRENT : DeviceDebugPacketIds.HS1_CURRENT_REMOTE_BIAS);
+				 AdcWorker adcWorker = new AdcWorker(lblCurrent1, addr, null, hs1, multiplier, "#.### A");
+				 synchronized(adcWorkers) { adcWorkers.add(adcWorker); }
+
+				DeviceDebugPacketIds hs2 = hpBias.map(dt->DeviceDebugPacketIds.HS2_CURRENT_HP_BIAS).orElse(isMainBoard ? DeviceDebugPacketIds.HS2_CURRENT : DeviceDebugPacketIds.HS2_CURRENT_REMOTE_BIAS);
+				adcWorker = new AdcWorker(lblCurrent2, 	addr, null, hs2, multiplier, "#.### A");
+				synchronized(adcWorkers) { adcWorkers.add(adcWorker); }
+
+				DeviceDebugPacketIds outputPower = hpBias.map(dt->DeviceDebugPacketIds.OUTPUT_POWER_HP_BIAS).orElse(isMainBoard ? DeviceDebugPacketIds.OUTPUT_POWER : DeviceDebugPacketIds.OUTPUT_POWER_REMOTE_BIAS);
+				adcWorker = new AdcWorker(lblOPower, 	addr, null, outputPower, 0, "#.###");
+				synchronized(adcWorkers) {	adcWorkers.add(adcWorker); }
+
+				DeviceDebugPacketIds temperature = hpBias.map(dt->DeviceDebugPacketIds.TEMPERATURE_HP_BIAS).orElse(isMainBoard ? DeviceDebugPacketIds.TEMPERATURE : DeviceDebugPacketIds.TEMPERATURE_REMOTE_BIAS);
+				adcWorker = new AdcWorker(lblTemp, 		addr, null, temperature, 0, "#.###");
+				synchronized(adcWorkers) {	adcWorkers.add(adcWorker); }
 			}
 			public void ancestorMoved(AncestorEvent arg0) {}
 
@@ -218,11 +230,11 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 		});
 
-		switch_1 = new Switch(new DeviceDebugPacket(addr, new RegisterValue(isMainBoard ? 3 : 203, 1, null), PacketWork.PACKET_ID_DEVICE_DEBUG_SWITCH_N1, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE));
+		switch_1 = new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.SWITCH_N1 : DeviceDebugPacketIds.SWITCH_N1_REMOTE_BIAS));
 		switch_1.setBounds(61, 2, 55, 25);
 		add(switch_1);
 
-		switch_2= new Switch(new DeviceDebugPacket(addr, new RegisterValue(isMainBoard ? 4 : 204, 1, null), PacketWork.PACKET_ID_DEVICE_DEBUG_SWITCH_N2, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE));
+		switch_2= new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.SWITCH_N2 : DeviceDebugPacketIds.SWITCH_N2_REMOTE_BIAS));
 		switch_2.setBounds(61, 30, 55, 25);
 		add(switch_2);
 
@@ -279,35 +291,35 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		add(txtStep);
 		txtStep.setFont(font);
 
-		txtPotentiometer1 = new RegisterTextField(addr, new RegisterValue(1, 8, null), PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N1, 0, 896);
+		txtPotentiometer1 = new RegisterTextField(addr, new RegisterValue(1, 8, null), PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N1, 0, 896);
 		txtPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer1.setBounds(184, P1, 55, 20);
 		txtPotentiometer1.setFont(font);
 		txtPotentiometer1.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer1);
 
-		txtPotentiometer2 = new RegisterTextField(addr, new RegisterValue(1, 0, null), PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N2, 0, 896);
+		txtPotentiometer2 = new RegisterTextField(addr, new RegisterValue(1, 0, null), PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N2, 0, 896);
 		txtPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer2.setFont(font);
 		txtPotentiometer2.setBounds(184, P2, 55, 20);
 		txtPotentiometer2.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer2);
 
-		txtPotentiometer3 = new RegisterTextField(addr, new RegisterValue(7, 8, null), PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N3, 0, 896);
+		txtPotentiometer3 = new RegisterTextField(addr, new RegisterValue(7, 8, null), PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N3, 0, 896);
 		txtPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer3.setFont(font);
 		txtPotentiometer3.setBounds(184, P3, 55, 20);
 		txtPotentiometer3.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer3);
 
-		txtPotentiometer4 = new RegisterTextField(addr, new RegisterValue(7, 0, null), PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N4, 0, 896);
+		txtPotentiometer4 = new RegisterTextField(addr, new RegisterValue(7, 0, null), PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N4, 0, 896);
 		txtPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer4.setFont(font);
 		txtPotentiometer4.setBounds(184, P4, 55, 20);
 		txtPotentiometer4.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer4);
 
-		txtPotentiometer5 = new RegisterTextField(addr, new RegisterValue(2, 0, null), PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N5, 0, 896);
+		txtPotentiometer5 = new RegisterTextField(addr, new RegisterValue(2, 0, null), PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N5, 0, 896);
 		txtPotentiometer5.setText("0");
 		txtPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -316,7 +328,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		txtPotentiometer5.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer5);
 		
-		txtPotentiometer6 = new RegisterTextField(addr, new RegisterValue(2, 8, null), PacketWork.PACKET_ID_DEVICE_DEBUG_POTENTIOMETER_N6, 0, 896);
+		txtPotentiometer6 = new RegisterTextField(addr, new RegisterValue(2, 8, null), PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N6, 0, 896);
 		txtPotentiometer6.setText("0");
 		txtPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -367,7 +379,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		lblLineUp.setBounds(10, 34, 57, 17);
 		add(lblLineUp);
 
-		switchNGlobal = new Switch(new DeviceDebugPacket(addr, new RegisterValue(isMainBoard ? 6 : 206, 0, null), PacketWork.PACKET_ID_DEVICE_DEBUG_NGLOBAL, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE));
+		switchNGlobal = new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.NGLOBAL : DeviceDebugPacketIds.NGLOBAL_REMOTE_BIAS));
 		switchNGlobal.setEnabled(false);
 		switchNGlobal.setBounds(61, 58, 55, 25);
 		add(switchNGlobal);
@@ -465,7 +477,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 										PacketImp.PACKET_TYPE_COMMAND,
 										PacketImp.GROUP_ID_PRODUCTION_GENERIC_SET_1,
 										PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
-										PacketWork.PACKET_ID_PRODUCTION_GENERIC_SET_1_INITIALIZE
+										PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE
 									),
 									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
 							);
@@ -510,7 +522,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				DeviceDebagSetter setter = new DeviceDebagSetter(linkHeader,
 						index,
 						addr,
-						PacketWork.PACKET_ID_DEVICE_POTENTIOMETERS_INIT,
+						PacketIDs.DEVICE_POTENTIOMETERS_INIT,
 						PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE);
 				PacketThreadWorker packetThread = setter.getPacketThread();
 				packetThread.start();
@@ -526,18 +538,21 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					@Override
 					public void onPacketRecived(Packet packet) {
 
-						if(		getPacketWork().isAddressEquals(packet) &&
-								packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
-								packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_POTENTIOMETERS_INIT){
+						new MyThreadFactory(()->{
 
-							BIASsPanel.this.logger.trace("\n\t{}", packet);
-							PacketHeader header = packet.getHeader();
-							if(header!=null && header.getOption()==0){
-								BIASsPanel.this.logger.info("\n\tPacket recived");
-								stop();
-							} else
-								showMessage("Some Problem("+header.getOptionStr()+")");
-						}
+							if(		getPacketWork().isAddressEquals(packet) &&
+									packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
+									PacketIDs.DEVICE_POTENTIOMETERS_INIT.match(packet.getHeader().getPacketId())){
+
+								BIASsPanel.this.logger.trace("\n\t{}", packet);
+								PacketHeader header = packet.getHeader();
+								if(header!=null && header.getOption()==0){
+									BIASsPanel.this.logger.info("\n\tPacket recived");
+									stop();
+								} else
+									showMessage("Some Problem("+header.getOptionStr()+")");
+							}
+						});
 					}
 				};
 			}
@@ -562,8 +577,8 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 						linkHeader,
 						PacketImp.PACKET_TYPE_COMMAND,
 						PacketImp.GROUP_ID_DEVICE_DEBAG,
-						PacketImp.PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE,
-						PacketWork.PACKET_ID_DEVICE_DEBUG_CALIBRATION_MODE,
+						PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE,
+						PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE,
 						(Integer)calibrationMode.ordinal()
 				);
 				controller = new DefaultController(deviceType, "CalibrationMode", setter, Style.CHECK_ONCE){
@@ -571,22 +586,25 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					@Override
 					public void onPacketRecived(Packet packet) {
 
-						if(		getPacketWork().isAddressEquals(packet) &&
-								packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
-								packet.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBUG_CALIBRATION_MODE){
+						new MyThreadFactory(()->{
 
-							BIASsPanel.this.logger.trace("\n\t{}", packet);
-									
-							PacketHeader header = packet.getHeader();
-							if(header!=null && header.getOption()==0){
-								BIASsPanel.this.logger.info("\n\tPacket recived");
-								stop();
-							}else{
-								String optionStr = header.getOptionStr();
-								BIASsPanel.this.logger.warn("\n\theader.getOptionStr() = {}", optionStr);
-								showMessage("Some Problem("+optionStr+")");
+							if(		getPacketWork().isAddressEquals(packet) &&
+									packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
+									PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.match(packet.getHeader().getPacketId())){
+
+								BIASsPanel.this.logger.trace("\n\t{}", packet);
+										
+								PacketHeader header = packet.getHeader();
+								if(header!=null && header.getOption()==0){
+									BIASsPanel.this.logger.info("\n\tPacket recived");
+									stop();
+								}else{
+									String optionStr = header.getOptionStr();
+									BIASsPanel.this.logger.warn("\n\theader.getOptionStr() = {}", optionStr);
+									showMessage("Some Problem("+optionStr+")");
+								}
 							}
-						}
+						});
 					}
 				};
 				return runController(controller);
@@ -689,20 +707,21 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	}
 
 	@Override
-	public synchronized void onPacketRecived(Packet packet) {
-		adcWorkers.parallelStream().forEach(adc->adc.update(packet));
+	public void onPacketRecived(Packet packet) {
+
+		synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->adc.update(packet))); }
 	}
 
 	private int delay;
 	@Override
-	public synchronized void run() {
+	public void run() {
 
 		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
 		final int size = queue.size();
 
 		if(delay<=0)
 			try{
-				adcWorkers.stream().forEach(adc->queue.add(adc.getPacketToSend()));
+				synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->queue.add(adc.getPacketToSend())));}
 			}catch (Exception e) {
 				logger.catching(e);
 			}
@@ -727,8 +746,10 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 
-		adcWorkers.parallelStream().forEach(AdcWorker::clear);
-		adcWorkers.clear();
+		synchronized(adcWorkers) {
+			adcWorkers.parallelStream().forEach(AdcWorker::clear);
+			adcWorkers.clear();
+		}
 
 		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
 			scheduleAtFixedRate.cancel(true);

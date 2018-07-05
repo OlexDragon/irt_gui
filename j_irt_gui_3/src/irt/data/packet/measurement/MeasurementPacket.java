@@ -1,26 +1,81 @@
 package irt.data.packet.measurement;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import irt.data.packet.PacketAbstract;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.LinkedPacket;
+import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.MonitorPanelFx;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCode;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
+import irt.tools.fx.MonitorPanelFx.StatusBits;
 import irt.tools.fx.MonitorPanelFx.StatusBitsBUC;
 import irt.tools.fx.MonitorPanelFx.StatusBitsFCM;
 
-public class MeasurementPacket extends PacketAbstract{
+public class MeasurementPacket extends PacketSuper{
+	private final static Logger logger = LogManager.getLogger();
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(p->p instanceof LinkedPacket && ((LinkedPacket)p).getLinkHeader().getAddr()!=0)	//is not a converter
+																										.map(b-> b ? ParameterHeaderCodeBUC.class : ParameterHeaderCodeFCM.class)
+																										.map(parameterHCodeClass->{
+																											try {
+																												return parameterHCodeClass.getMethod("valueOf", Byte.class);
+																											} catch (NoSuchMethodException | SecurityException e) {
+																												logger.catching(e);
+																											}
+																											return null;
+																										})
+																										.map(method->{
+
+																											return packet
+																													.getPayloads()
+																													.stream()
+																													.map(
+																															pl->{
+																																try {
+
+																																	byte code = pl.getParameterHeader().getCode();
+																																	final Optional<?> optional = (Optional<?>) method.invoke(null, code);
+
+																																	return optional
+																																			.map(ParameterHeaderCode.class::cast)
+																																			.map(
+																																					pc->{
+
+																																					// status flags
+																																						if(pc.getStatus().getCode()==code){
+																																							int statusBits = pl.getInt(0);
+																																							return new AbstractMap.SimpleEntry<>(pc, pc.parseStatusBits(statusBits));
+																																						}
+
+																																						return new AbstractMap.SimpleEntry<>(pc, pc.toString(pl.getBuffer()));
+																																					})
+																																			.orElse(null);
+
+																																} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+																																	logger.catching(e);
+																																}
+																																return null;
+																															})
+																													.collect(Collectors.toList());
+																										});
 
 	/**
 	 *  Converter request packet
@@ -37,7 +92,7 @@ public class MeasurementPacket extends PacketAbstract{
 		super(
 				linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_MEASUREMENT_ALL,
+				PacketIDs.MEASUREMENT_ALL,
 				PacketImp.GROUP_ID_MEASUREMENT,
 				PacketImp.PARAMETER_ALL,
 				null,
@@ -46,6 +101,7 @@ public class MeasurementPacket extends PacketAbstract{
 
 	@Override
 	public Object getValue() {
+
 
 		if(getHeader().getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
 			return this;
@@ -62,11 +118,11 @@ public class MeasurementPacket extends PacketAbstract{
 														.collect(Collectors.partitioningBy(pl->pl.getParameterHeader().getCode()==status.getCode()));
 
 		//status
-		final Optional<Object[]> oStatusBits = collect
+		final Optional<List<StatusBits>> oStatusBits = collect
 											.get(true)
 											.stream()
 											.map(pl->pl.getInt(0))
-											.map(statusBits->(Object[])(isConverter ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits)))
+											.map(statusBits->isConverter ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits))
 											.findAny();
 
 		//values

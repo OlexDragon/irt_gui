@@ -12,9 +12,9 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 
 public class DeviceInfo implements PacketListener {
 
@@ -71,7 +71,7 @@ public class DeviceInfo implements PacketListener {
 		CONVERTER_SSPA 			(1051, Protocol.CONVERTER, "L to SSPA Converter"),
 		CONVERTER_MODUL			(1052, Protocol.CONVERTER, "Modul"),
 
-		BIAS_BOARD_MODUL	(2001, Protocol.LINKED, "Bias Board Modul"),
+		BIAS_BOARD_MODUL	(2001, Protocol.CONVERTER, "Bias Board Modul"),
 
 		IMPOSSIBLE				( 0, null, "Impossible meaning");
 
@@ -294,10 +294,13 @@ public class DeviceInfo implements PacketListener {
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		DeviceInfo
-		.parsePacket(packet)
-		.filter(di->di.serialNumber.equals(serialNumber))
-		.ifPresent(this::set);
+		new MyThreadFactory(()->{
+	
+			DeviceInfo
+			.parsePacket(packet)
+			.filter(di->di.serialNumber.equals(serialNumber))
+			.ifPresent(this::set);
+		});
 	}
 
 	static public Optional<DeviceInfo> parsePacket(Packet packet){
@@ -305,7 +308,7 @@ public class DeviceInfo implements PacketListener {
 		return Optional
 		.ofNullable(packet)
 		.filter(p->p.getHeader()!=null)
-		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_DEVICE_INFO)
+		.filter(p->PacketIDs.DEVICE_INFO.match(p.getHeader().getPacketId()))
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.map(DeviceInfo::new);		
 	}

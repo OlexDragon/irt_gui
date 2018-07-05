@@ -2,6 +2,7 @@
 package irt.data.packet;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -13,39 +14,68 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.PacketThread;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.packet.interfaces.PacketWork;
 
-public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPacket{
+public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket{
 
 	private Priority priority;
 
 	private LinkHeader linkHeader;
 	private PacketHeader header;
 	private List<Payload> payloads = new ArrayList<>();
+	private long timestamp;
 
-	protected PacketAbstract(Byte linkAddr, byte packetType, short packetId, byte groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
+	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, byte groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
 		linkHeader = Optional.ofNullable(linkAddr).filter(la->la!=0).map(la-> new LinkHeader(linkAddr, (byte)0, (short)0)).orElse(null);
 		header = new PacketHeader();
 		header.setType(packetType);
 		header.setGroupId(groupId);
-		header.setPacketId(packetId);
+		header.setPacketId(packetID.getId());
 		payloads.add(new Payload( new ParameterHeader( parameterHeaderCode), payloadData));
 		this.priority = priority;
+		timestamp = System.currentTimeMillis();
+	}
+
+	public PacketSuper(ConfigurationSetter configurationSetter) {
+		this(
+				configurationSetter.getLinkHeader().getAddr(),
+				configurationSetter.getPacketType(),
+				PacketIDs.valueOf(configurationSetter.getPacketId()).orElse(PacketIDs.UNNECESSARY),
+				configurationSetter.getGroupId(),
+				configurationSetter.getPacketParameterHeaderCode(),
+				null,
+				Priority.REQUEST);
 	}
 
 	@Override
 	public int compareTo(PacketWork packetWork) {
-		int compareTo = priority.compareTo(packetWork.getPriority());
 
-		if(packetWork instanceof PacketAbstract && compareTo==0)
-			compareTo = Short.compare(((PacketAbstract)packetWork).getHeader().getPacketId(), getHeader().getPacketId());
+		return Optional
 
-			return compareTo;
+				.of(priority.compareTo(packetWork.getPriority()))
+				.filter(c->c!=0)
+				.orElse(
+						Optional
+						.of(packetWork)
+						.filter(p->p instanceof PacketSuper)
+						.map(PacketSuper.class::cast)
+						.map(p->Long.compare(p.timestamp, timestamp))
+						.orElseGet(
+								()->
+								Optional
+								.of(packetWork)
+								.map(PacketWork::getPacketThread)
+								.map(PacketThreadWorker::getPacket)
+								.map(Packet::getHeader)
+								.map(PacketHeader::getPacketType)
+								.filter(t->t==PacketImp.PACKET_TYPE_COMMAND)
+								.map(t->1)
+								.orElse(priority==Priority.REQUEST ? 0 : -1)));
 	}
 
 	@Override
@@ -103,7 +133,57 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public byte[] getData() {
-		return PacketThread.preparePacket(toBytes());
+		final byte[] l = linkHeader!=null ? linkHeader.toBytes() : new byte[0];
+		final byte[] h = header.toBytes();
+		final byte[] p = payloads.stream().map(Payload::toBytes).collect(new Collector<byte[], byte[], byte[]>(){
+
+									private byte[] result;
+
+									@Override
+									public Supplier<byte[]> supplier() {
+										return ()->new byte[0];
+									}
+
+									@Override
+									public BiConsumer<byte[], byte[]> accumulator() {
+										return (a, b)->{
+											result = Optional
+															.ofNullable(a)
+															.filter(r->a.length>0)
+															.map(r->{
+																r = new byte[a.length + b.length];
+																System.arraycopy(a, 0, result, 0, a.length);
+																System.arraycopy(b, 0, result, a.length, b.length);
+																return r;
+															})
+															.orElse(b);
+										};
+									}
+
+									@Override
+									public BinaryOperator<byte[]> combiner() {
+										return (a, b)->{
+											byte[] result = new byte[a.length + b.length];
+											System.arraycopy(a, 0, result, 0, a.length);
+											System.arraycopy(b, 0, result, a.length, b.length);
+											return result;
+										};
+									}
+
+									@Override
+									public Function<byte[], byte[]> finisher() {
+										return a->{
+											return result;
+										};
+									}
+
+									private final Set<Characteristics> set = new HashSet<>();
+									@Override
+									public Set<Characteristics> characteristics() {
+										return set;
+									}});
+
+		return PacketImp.concatAll(l, h, p);
 	}
 
 	@Override
@@ -117,7 +197,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public Object getValue() {
-		return "not implemented";
+		 return Optional.ofNullable(header).map(PacketHeader::getPacketId).flatMap(PacketIDs::valueOf).flatMap(pId->pId.valueOf(this)).map(Object.class::cast).orElse("not implemented");
 	}
 
 	@Override
@@ -129,7 +209,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 		this.linkHeader = linkHeader;
 	}
 
-	public PacketAbstract setAddr(byte linkAddr) {
+	public PacketSuper setAddr(byte linkAddr) {
 		this.linkHeader = linkAddr!=0 ? new LinkHeader(linkAddr, (byte)0, (short)0) : null;
 		return this;
 	}
@@ -199,57 +279,7 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public byte[] toBytes() {
-		final byte[] l = linkHeader!=null ? linkHeader.toBytes() : new byte[0];
-		final byte[] h = header.toBytes();
-		final byte[] p = payloads.stream().map(Payload::toBytes).collect(new Collector<byte[], byte[], byte[]>(){
-
-									private byte[] result;
-
-									@Override
-									public Supplier<byte[]> supplier() {
-										return ()->new byte[0];
-									}
-
-									@Override
-									public BiConsumer<byte[], byte[]> accumulator() {
-										return (a, b)->{
-											result = Optional
-															.ofNullable(a)
-															.filter(r->a.length>0)
-															.map(r->{
-																r = new byte[a.length + b.length];
-																System.arraycopy(a, 0, result, 0, a.length);
-																System.arraycopy(b, 0, result, a.length, b.length);
-																return r;
-															})
-															.orElse(b);
-										};
-									}
-
-									@Override
-									public BinaryOperator<byte[]> combiner() {
-										return (a, b)->{
-											byte[] result = new byte[a.length + b.length];
-											System.arraycopy(a, 0, result, 0, a.length);
-											System.arraycopy(b, 0, result, a.length, b.length);
-											return result;
-										};
-									}
-
-									@Override
-									public Function<byte[], byte[]> finisher() {
-										return a->{
-											return result;
-										};
-									}
-
-									private final Set<Characteristics> set = new HashSet<>();
-									@Override
-									public Set<Characteristics> characteristics() {
-										return set;
-									}});
-
-		return PacketImp.concatAll(l, h, p);
+		return PacketThread.preparePacket(getData());
 	}
 
 	@Override
@@ -264,44 +294,32 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = prime + ((header == null) ? 0 : header.getPacketId());
-		result = prime * result + payloads.hashCode();
-		return prime * result + ((linkHeader == null) ? 0 : linkHeader.hashCode());
+		return 31 + ((header == null) ? 0 : header.getPacketId());
 	}
 
 	@Override
 	public boolean equals(Object obj) {
+
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
 
-		if (!(obj instanceof LinkedPacket))
-			return false;
-		LinkedPacket other = (LinkedPacket) obj;
-		if (header == null) {
-			if (other.getHeader() != null)
-				return false;
-		} else if (header.getPacketId()!=other.getHeader().getPacketId())
-			return false;
-		if (linkHeader == null) {
-			if (other.getLinkHeader() != null)
-				return false;
-		} else if (!linkHeader.equals(other.getLinkHeader()))
-			return false;
-		if (payloads.isEmpty()) {
-			if (!other.getPayloads().isEmpty())
-				return false;
-		} else if (!payloads.equals(other.getPayloads()))
-			return false;
-		
-		return true;
+		return Optional
+
+				.ofNullable(obj)
+				.filter(Packet.class::isInstance)
+				.map(Packet.class::cast)
+				.map(Packet::getHeader)
+				.map(PacketHeader::getPacketId)
+				.filter(otherId->{
+					final Short id = Optional.ofNullable(header).map(PacketHeader::getPacketId).orElse((short) 0);
+					return id.equals(otherId);
+				})
+				.isPresent();
 	}
 
 	@Override
 	public String toString() {
-		return "\n\t" + getClass().getSimpleName() + " [priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payloads=" + payloads.stream().map(Payload::toString).collect(Collectors.joining(",")) + "]";
+		return "\n\t" + getClass().getSimpleName() + " [timestamp=" + timestamp + ", priority=" + priority + ", linkHeader=" + linkHeader + ", header=" + header + ", payloads=" + payloads.stream().map(Payload::toString).collect(Collectors.joining(",")) + "]";
 	}
 
 	public enum Priority {
@@ -310,5 +328,27 @@ public class PacketAbstract implements PacketWork, PacketThreadWorker, LinkedPac
 		ALARM,
 		IMPORTANT,
 		COMMAND
+	}
+
+	@Override
+	public byte[] getAcknowledg() {
+
+		final byte[] b = Optional.ofNullable(linkHeader).filter(lh->lh.getAddr()!=0).map(LinkHeader::toBytes).map(bs->Arrays.copyOf(bs, 7)).orElseGet(()->new byte[3]);
+		final byte[] idBytes = header.packetIdAsBytes();
+
+		int idPosition = b.length-3;
+		b[idPosition] = (byte) 0xFF;
+		b[++idPosition] = idBytes[0];
+		b[++idPosition] = idBytes[1];
+
+		return PacketThread.preparePacket(b);
+	}
+
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 }

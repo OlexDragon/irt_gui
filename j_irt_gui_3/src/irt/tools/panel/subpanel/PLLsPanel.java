@@ -44,7 +44,7 @@ import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
 import irt.tools.button.ImageButton;
@@ -57,9 +57,11 @@ public class PLLsPanel extends JPanel {
 	private static final int DN = 4194304;
 	private static final int UP = 2097152;
 	private static final int HIK = 8388608;
-	protected static final int ID_DOWN_GAIN = 0,
-								ID_UP_GAIN = 1,
-								ID_OFFSET = 2;
+
+	private static final PacketIDs ID_DOWN_GAIN = PacketIDs.FCM_DEVICE_DEBUG_PLL_REG_DOWN_GAIN;
+	private static final PacketIDs ID_UP_GAIN = PacketIDs.FCM_DEVICE_DEBUG_PLL_REG_UP_GAIN;
+	private static final PacketIDs ID_OFFSET = PacketIDs.FCM_DEVICE_DEBUG_PLL_REG_OFFSET;
+
 	private JTextField txtPllReg;
 	private JTextField txtCpDnGain;
 	private JTextField txtCpUpGain;
@@ -292,7 +294,7 @@ public class PLLsPanel extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS,
-							PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
+							PacketIDs.CONFIGURATION_FCM_FLAGS);
 					packetWork.preparePacketToSend(0);
 					GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 				} catch (Exception ex) {
@@ -322,7 +324,7 @@ public class PLLsPanel extends JPanel {
 		txtPllReg.getDocument().addDocumentListener(documentListener);
 	}
 
-	private void setTextFieldBackground(int id, JTextField textField) {
+	private void setTextFieldBackground(PacketIDs packetID, JTextField textField) {
 		if(selectedTextField!=null)
 			selectedTextField.setBackground(Color.WHITE);
 		if(pllReg!=null)
@@ -330,7 +332,7 @@ public class PLLsPanel extends JPanel {
 
 		selectedTextField = textField;
 		selectedTextField.setBackground(Color.YELLOW);
-		pllReg = new PllRegisterTextFieldSlider(id, textField, slider, selectedTextField==txtOffsetCurr ? 5 : 20);
+		pllReg = new PllRegisterTextFieldSlider(packetID, textField, slider, selectedTextField==txtOffsetCurr ? 5 : 20);
 		pllReg.addVlueChangeListener(new ValueChangeListener() {
 			
 			@Override
@@ -366,7 +368,7 @@ public class PLLsPanel extends JPanel {
 									new DeviceDebagSetter(null,
 											pllIndex,
 											9,
-											PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG,
+											PacketIDs.FCM_DEVICE_DEBUG_PLL_REG,
 											PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
 							0,
 							Style.CHECK_ONCE);

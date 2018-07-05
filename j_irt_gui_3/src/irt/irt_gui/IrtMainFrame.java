@@ -19,7 +19,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,13 +27,12 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.Listeners;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketAbstract;
-import irt.data.packet.PacketImp;
-import irt.data.packet.Packets;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.fx.module.ModuleSelectFxPanel;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
@@ -49,11 +48,12 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 
 	protected GuiControllerAbstract guiController;
 
-	private Object alarmSeverities;
-
 	private Timer timer;
 
-	private ModuleSelectFxPanel moduleSelectFxPanel;
+	private static ModuleSelectFxPanel moduleSelectFxPanel;
+	public static boolean isRedundancyController(){
+		return Optional.ofNullable(moduleSelectFxPanel).map(ModuleSelectFxPanel::countButtons).map(c->c>1).orElse(false);
+	}
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
@@ -131,14 +131,9 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		});
 
 		timer = new Timer((int) TimeUnit.SECONDS.toMillis(10), e->{
-			new SwingWorker<Void, Void>() {
 
-				@Override
-				protected Void doInBackground() throws Exception {
-					Optional.ofNullable(IrtPanel.logoIcon).map(logo->logo.getImage()).ifPresent(IrtMainFrame.this::setIconImage);
-					return null;
-				}
-			}.execute();
+			iconBackground = null;
+			SwingUtilities.invokeLater(()->Optional.ofNullable(IrtPanel.logoIcon).map(logo->logo.getImage()).ifPresent(IrtMainFrame.this::setIconImage));
 		});
 		timer.setRepeats(false);
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
@@ -155,42 +150,55 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 	protected abstract Rectangle comboBoxBounds();
 	protected abstract GuiControllerAbstract getNewGuiController();
 
+	private Color iconBackground;
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		Optional
+		
+		final Optional<Short> oPacket = Optional
 		.ofNullable(packet)
-		.filter(p->p.getHeader().getGroupId()==PacketImp.GROUP_ID_ALARM)
-		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_ALARMS_SUMMARY)
-		.flatMap(Packets::cast)
-		.map(PacketAbstract::getValue)
-		.filter(AlarmSeverities.class::isInstance)
-		.map(AlarmSeverities.class::cast)
-		.ifPresent(as->{
+		.map(Packet::getHeader)
+		.map(PacketHeader::getPacketId)
+		.filter(PacketIDs.ALARMS_SUMMARY::match);
 
-			timer.restart();
+		if(!oPacket.isPresent())
+			return;
 
-			if(alarmSeverities!=null && alarmSeverities == as)
-				return;
+		new MyThreadFactory(
+				()->
+				oPacket
+				.map(id->PacketIDs.ALARMS_SUMMARY)
+				.flatMap(pId->pId.valueOf(packet))
+				.filter(AlarmSeverities.class::isInstance)
+				.map(AlarmSeverities.class::cast)
+				.map(AlarmSeverities::getBackground)
+				.ifPresent(
+						bg->		
+						Optional
+						.ofNullable(IrtPanel.logoIcon)
+						.map(ImageIcon::getImage)
+						.ifPresent(image->{
 
-			alarmSeverities = as;
+							if(Optional.ofNullable(iconBackground).filter(iBg->iBg.equals(bg)).isPresent()){
+								timer.restart();
+								return;
+							}
 
-			final ImageIcon logoIcon = IrtPanel.logoIcon;
-			if(logoIcon!=null) {
-				Color background = as.getBackground();
-				final Image image = logoIcon.getImage();
-				final int iconWidth = logoIcon.getIconWidth();
-				final int iconHeight = logoIcon.getIconHeight();
-				if(iconWidth<=0 || iconHeight<=0)
-					return;
-				final Image createdImage = createImage(iconWidth, iconHeight);
-				final Graphics2D g = (Graphics2D) createdImage.getGraphics();
-				g.setColor(background);
-				g.fillRect(0, 0, iconWidth, iconHeight);
-				g.drawImage(image, 0, 0, null);
-				setIconImage(createdImage);
-			}
-		});
+							iconBackground = bg;
+							final int width = image.getWidth(null);
+							final int height = image.getHeight(null);
+							if(width<=0 || height<=0)
+								return;
+
+							final Image createdImage = createImage(width, height);
+							final Graphics2D g = (Graphics2D) createdImage.getGraphics();
+							g.setColor(bg);
+							g.fillRect(0, 0, width, height);
+							g.drawImage(image, 0, 0, null);
+							SwingUtilities.invokeLater(()->{
+								setIconImage(createdImage);
+							});
+						})));
 	}
 
 	public Optional<ModuleSelectFxPanel> getModuleSelectFxPanel() {
@@ -205,11 +213,11 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 				contentPane.remove(panel);
 				panel.stop();
 			});
-			this.moduleSelectFxPanel = null;
+			IrtMainFrame.moduleSelectFxPanel = null;
 			return;
 		}
 
-		this.moduleSelectFxPanel = moduleSelectFxPanel;
+		IrtMainFrame.moduleSelectFxPanel = moduleSelectFxPanel;
 
 		contentPane.add(moduleSelectFxPanel);
 	}

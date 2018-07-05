@@ -1,13 +1,25 @@
 package irt.data.packet.alarm;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.Packet;
 
-public class AlarmsSummaryPacket extends PacketAbstract {
+public class AlarmsSummaryPacket extends PacketSuper {
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.filter(pl->pl.getParameterHeader().getSize()==4)
+																										.map(pl->pl.getInt(0)&7)
+																										.map(index->AlarmSeverities.values()[index]);
 
 	public AlarmsSummaryPacket() {
 		this((byte) 0);
@@ -16,7 +28,7 @@ public class AlarmsSummaryPacket extends PacketAbstract {
 	public AlarmsSummaryPacket(byte linkAddr){
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PacketIDs.ALARMS_SUMMARY.getId(),
+				PacketIDs.ALARMS_SUMMARY,
 				PacketImp.GROUP_ID_ALARM,
 				PacketImp.ALARM_SUMMARY_STATUS,
 				null,
@@ -25,18 +37,6 @@ public class AlarmsSummaryPacket extends PacketAbstract {
 
 	@Override
 	public Object getValue() {
-		return Optional
-				.ofNullable(getPayloads())
-				.filter(pls->!pls.isEmpty())
-				.map(pls->pls.parallelStream())
-				.flatMap(stream->{
-					return stream
-							.filter(pl->pl.getParameterHeader().getSize()==4)
-							.map(pl->pl.getInt(0)&7)
-							.findAny();
-				})
-				.map(index->AlarmSeverities.values()[index])	
-				.map(Object.class::cast)
-				.orElse(getHeader().getOptionStr());
+		return parseValueFunction.apply(this);
 	}
 }

@@ -1,6 +1,9 @@
 package irt.controller.serial_port.value.getter;
 
 import java.util.Arrays;
+import java.util.Optional;
+
+import org.apache.logging.log4j.Logger;
 
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
@@ -9,18 +12,17 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.packet.interfaces.PacketWork;
 
 public class Getter extends GetterAbstract {
 
 	private long value;
 
-	public Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId) {
-		super(linkHeader, PacketImp.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId);
+	public Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketIDs packetID) {
+		super(linkHeader, PacketImp.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetID.getId());
 	}
 
-	public <T> Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, short packetId, T value) {
-		super(linkHeader, PacketImp.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetId, value);
+	public <T> Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketIDs packetID, Logger logger) {
+		super(linkHeader, PacketImp.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetID.getId(), logger);
 	}
 
 	@Override
@@ -28,10 +30,12 @@ public class Getter extends GetterAbstract {
 		boolean isSet = false;
 		if(isAddressEquals(packet)) {
 
+			final PacketIDs[] values = PacketIDs.values();
+
 			PacketThreadWorker 	upt = getPacketThread();
 			PacketHeader 		cph = packet.getHeader();
 			Packet 				up = upt.getPacket();
-			short 				packetId = getPacketId();
+			PacketIDs 				packetId = Optional.of(getPacketId()&0xFF).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
 
 			final boolean notNull = cph!=null && up!=null;
 			if (notNull) {
@@ -39,8 +43,9 @@ public class Getter extends GetterAbstract {
 				final byte packetType = cph.getPacketType();
 				final byte groupId = cph.getGroupId();
 				final byte groupId2 = up.getHeader().getGroupId();
-				final short packetId2 = cph.getPacketId();
-				final boolean prepared = packetType==PacketImp.PACKET_TYPE_RESPONSE && groupId==groupId2 && packetId2==packetId;
+
+				final PacketIDs packetId2 = Optional.of(cph.getPacketId()&0xFF).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+				final boolean prepared = packetType==PacketImp.PACKET_TYPE_RESPONSE && groupId==groupId2 && packetId2.equals(packetId);
 
 //				logger.debug("\n\t prepared:{}\n\t"
 //						+ "\n\t PacketType:{}:{}\n\t"
@@ -80,41 +85,40 @@ public class Getter extends GetterAbstract {
 								//Moved to the NetworkPanel
 								return false;
 							default:
-								switch (packetId2) {
-								case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_0:
-								case PacketWork.PACKET_ID_DUMP_DEVICE_DEBUG_DEVICE_INFO_1:
-								case PacketWork.PACKET_ID_DUMP_REGISTER_1:
-								case PacketWork.PACKET_ID_DUMP_REGISTER_2:
-								case PacketWork.PACKET_ID_DUMP_REGISTER_3:
-								case PacketWork.PACKET_ID_DUMP_REGISTER_4:
-								case PacketWork.PACKET_ID_DUMP_REGISTER_5:
-								case PacketWork.PACKET_ID_DUMP_REGISTER_6:
-								case PacketWork.PACKET_ID_DUMP_REGISTER_100:
-									source = pl.getStringData();
-									logger.trace("Dump, source={}", source);
-									tmp = value + 1;// I need all dumps. So
-													// tmp!=value
-									break;
-								case PacketWork.PACKET_ID_ALARMS_IDs:
-								case PacketWork.PACKET_ID_ALARMS_OWER_CURRENT:
-								case PacketWork.PACKET_ID_ALARMS_OWER_TEMPERATURE:
-								case PacketWork.PACKET_ID_ALARMS_PLL_OUT_OF_LOCK:
-								case PacketWork.PACKET_ID_ALARMS_UNDER_CURRENT:
-								case PacketWork.PACKET_ID_ALARMS_HARDWARE_FAULT:
-								case PacketWork.PACKET_ID_ALARMS_SUMMARY:
-								case PacketWork.PACKET_ID_ALARMS_REDUNDANT_FAULT:
-									source = pl.getArrayShort();
-									logger.trace("PacketWork.PACKET_ID_ALARMS, {}", source);
-									tmp = Arrays.hashCode((short[]) source);
-									break;
-								default:
-									source = pl.getStringData();
-									logger.trace("default, source=", source);
-									tmp = source.hashCode();
-								}
+									switch (packetId2) {
+									case DUMP_DEVICE_DEBUG_INFO_0:
+									case DUMP_DEVICE_DEBUG_INFO_1:
+									case DUMP_REGISTER_1:
+									case DUMP_REGISTER_2:
+									case DUMP_REGISTER_3:
+									case DUMP_REGISTER_4:
+									case DUMP_REGISTER_5:
+									case DUMP_REGISTER_6:
+									case DUMP_REGISTER_100:
+										source = pl.getStringData();
+										logger.trace("DeviceDebugType, source={}", source);
+										tmp = value + 1;// I need all dumps. So
+														// tmp!=value
+										break;
+									case ALARMS_IDs:
+									case ALARMS_OWER_CURRENT:
+									case ALARMS_OWER_TEMPERATURE:
+									case ALARMS_PLL_OUT_OF_LOCK:
+									case ALARMS_UNDER_CURRENT:
+									case ALARMS_HARDWARE_FAULT:
+									case ALARMS_SUMMARY:
+									case ALARMS_REDUNDANT_FAULT:
+										source = pl.getArrayShort();
+										logger.trace("PacketWork.PACKET_ID_ALARMS, {}", source);
+										tmp = Arrays.hashCode((short[]) source);
+										break;
+									default:
+										source = pl.getStringData();
+										logger.trace("default, source=", source);
+										tmp = source.hashCode();
+									}
 							}
-						}
-						isSet = true;
+						}						isSet = true;
 					}
 
 					if (source != null && tmp != value) {

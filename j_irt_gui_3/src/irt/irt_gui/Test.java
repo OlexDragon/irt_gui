@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.serial_port.ComPortAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.JsscComPort;
 import irt.controller.serial_port.PureJavaComPort;
@@ -18,11 +19,12 @@ import irt.controller.serial_port.SerialPortInterface;
 import irt.data.MyThreadFactory;
 import irt.data.ToHex;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.Payload;
+import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.redundancy.SwitchoverModePacket;
 
 public class Test {
 
@@ -38,9 +40,11 @@ public class Test {
 			logger.error("\n\n************************   START   ***********************************\n\n");
 
 //			final byte linkAddr = (byte) 101;
-			final byte linkAddr = (byte) 254;
+//			final byte linkAddr = (byte) 254;
+			final byte linkAddr = (byte) 0;
 //			port = new PureJavaComPort("COM13");
-			port = new JsscComPort("COM13");
+//			port = new JsscComPort("COM13");
+			port = new JsscComPort("COM14");
 			port.openPort();
 			logger.error("Serial port {} is opend={}", port, port.isOpened());
 			final ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
@@ -48,7 +52,7 @@ public class Test {
 			final PacketListenerTest packetListener = new PacketListenerTest();
 			comPortThreadQueue.addPacketListener(packetListener);
 
-			PacketAbstract[] packets = new PacketAbstract[]{
+			PacketSuper[] packets = new PacketSuper[]{
 
 //					new DeviceInfoPacket(linkAddr),
 //					new MeasurementPacket(linkAddr),
@@ -57,10 +61,11 @@ public class Test {
 //					new DeviceDebugInfoPacket(linkAddr, (byte)1),
 //					new ModuleListPacket(linkAddr),
 //					new ActiveModulePacket(linkAddr, null),
-					new SwitchoverModePacket(linkAddr, null)
+//					new SwitchoverModePacket(linkAddr, null),
+					new DeviceDebugPacket(linkAddr, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER)
 				};
 
-			for(int i=0, x=0;i<=2000; i++, x++){
+			for(int i=0, x=0;i<=1; i++, x++){
 				if(x>=packets.length)
 					x=0;
 				final long start = System.currentTimeMillis();
@@ -78,7 +83,7 @@ public class Test {
 					return;
 				}
 
-				logger.error("{} : {}\n{}", Optional.ofNullable(packet).map(Packet::getPayloads).map(List::stream).orElse(Stream.empty()).map(Payload::getBuffer).map(String::new).toArray(), packet, Optional.ofNullable(packet).map(Packet::toBytes).map(ToHex::bytesToHex).orElse(null));
+				logger.error("{} : {}\n{}", Optional.of(packet).map(Packet::getPayloads).map(List::stream).orElse(Stream.empty()).map(Payload::getBuffer).map(String::new).toArray(), packet, Optional.ofNullable(packet).map(Packet::toBytes).map(ToHex::bytesToHex).orElse(null));
 			}
 			logger.error("\n\n************************   STOP   ***********************************\n\n");
 
@@ -95,7 +100,7 @@ public class Test {
 	private static void byteStuffingTest() {
 		byte[] bytes = new byte[]{0, 00, 00, 01, 0x5C, (byte) 0xAF, (byte) 0xEA, (byte) 0x80, 00, 00, 00, 01, 0x7D, 0x5D, 0x78, 0x40, 00};
 		logger.error("*** Start byteStuffingTest - {}" + ToHex.bytesToHex(bytes));
-		logger.error("*** End byteStuffingTest - {}" + ToHex.bytesToHex(PureJavaComPort.byteStuffing(bytes)));
+		logger.error("*** End byteStuffingTest - {}" + ToHex.bytesToHex(ComPortAbstract.byteStuffing(bytes)));
 	}
 
 	public static class PacketListenerTest implements PacketListener, Callable<Packet>{
@@ -113,12 +118,16 @@ public class Test {
 
 		@Override
 		public void onPacketRecived(Packet packet) {
-			logger.error(packet);
-			this.packet = packet;
-			synchronized (this) {
-				notified = true;
-				notify();
-			}
+
+			new MyThreadFactory(()->{
+
+				logger.error(packet);
+				this.packet = packet;
+				synchronized (this) {
+					notified = true;
+					notify();
+				}
+			});
 		}
 
 		@Override

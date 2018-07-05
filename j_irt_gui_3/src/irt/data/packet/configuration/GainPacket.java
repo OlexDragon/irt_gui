@@ -6,19 +6,18 @@ import java.text.NumberFormat;
 import java.util.Optional;
 
 import irt.controller.translation.Translation;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.ValueToString;
 
-public class GainPacket extends PacketAbstract implements ValueToString{
+public class GainPacket extends PacketSuper implements ValueToString{
 
 	public GainPacket(Byte linkAddr, Short value) {
 		super(
 				linkAddr,
 				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketWork.PACKET_ID_CONFIGURATION_GAIN,
+				PacketIDs.CONFIGURATION_GAIN,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				Optional.ofNullable(linkAddr).filter(b->b!=0).map(b->PacketImp.PARAMETER_ID_CONFIGURATION_GAIN).orElse(PacketImp.PARAMETER_CONFIG_FCM_GAIN),
 				Optional.ofNullable(value).map(v->PacketImp.toBytes(value)).orElse(null),

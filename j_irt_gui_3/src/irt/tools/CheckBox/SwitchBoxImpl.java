@@ -20,8 +20,8 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 
@@ -32,7 +32,7 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 
 	protected final 	ComPortThreadQueue 			cptq 				= GuiControllerAbstract.getComPortThreadQueue();
 	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
-	private final	PacketWork 					packetToSend;
+	private final	PacketSuper 					packetToSend;
 	private 	 	ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	Updater			 			updater = new Updater();
 	private final PacketListener packetListener = new PacketListener() {
@@ -56,7 +56,7 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 		}
 	};
 
-	public SwitchBoxImpl(Image offImage, Image onImage, PacketWork packetToSEnd) {
+	public SwitchBoxImpl(Image offImage, Image onImage, PacketSuper packetToSEnd) {
 		super(offImage, onImage);
 		logger.entry(packetToSEnd);
 

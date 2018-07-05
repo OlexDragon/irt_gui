@@ -18,15 +18,17 @@ import javax.swing.event.AncestorListener;
 import irt.controller.interfaces.DescriptionPacketValue;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
+import irt.data.MyThreadFactory;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.RangePacket;
 import irt.data.value.Value;
 import irt.tools.panel.ConverterPanel;
@@ -34,8 +36,8 @@ import irt.tools.panel.PicobucPanel;
 
 public class ValueController extends ValueChangeListenerClass implements Runnable, PacketListener {
 
-	public static final int RANGE = 0;
-	public static final int VALUE = RANGE+1;
+	public static final PacketIDs RANGE = PacketIDs.CONFIGURATION_GAIN_RANGE;
+	public static final PacketIDs VALUE = PacketIDs.CONFIGURATION_GAIN;
 
 	private final 	PacketListener 			pl 		= this;
 	private final 	ComPortThreadQueue 		cptq 	= GuiControllerAbstract.getComPortThreadQueue();
@@ -87,30 +89,33 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 	@Override
 	public void onPacketRecived(final Packet packet) {
 
-		synchronized (logger) {
-			final short id = ((PacketAbstract)packetToSend).getHeader().getPacketId();
+		new MyThreadFactory(()->{
+			
+			synchronized (logger) {
+				final short id = ((PacketSuper)packetToSend).getHeader().getPacketId();
 
-			final Optional<PacketHeader> p = Optional
-												.ofNullable(packet)
-												.map(Packet::getHeader)
-												.filter(h->h.getPacketId()==id);
+				final Optional<PacketHeader> p = Optional
+													.ofNullable(packet)
+													.map(Packet::getHeader)
+													.filter(h->h.getPacketId()==id);
 
-			p
-			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-			.ifPresent(h->{
-					final Payload pl = packet.getPayload(0);
+				p
+				.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+				.ifPresent(h->{
+						final Payload pl = packet.getPayload(0);
 
-					if(packetToSend instanceof RangePacket)
-						range(pl);
+						if(packetToSend instanceof RangePacket)
+							range(pl);
 
-					else
-						value(pl);
-			});
+						else
+							value(pl);
+				});
 
-			p
-			.filter(h->h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
-			.ifPresent(h->logger.error("the unit does not respond: {}", packet));
-		}
+				p
+				.filter(h->h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
+				.ifPresent(h->logger.error("the unit does not respond: {}", packet));
+			}
+		});
 	}
 
 	private void value(final Payload payload) {

@@ -31,11 +31,12 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.denice_debag.RegisterPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
@@ -71,7 +72,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		}
 	};
 
-	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, short packetId, int min, int max) {
+	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, PacketIDs packetID, int min, int max) {
 		addFocusListener(focusListener);
 
 		focusListenerTimer.setRepeats(false);
@@ -83,7 +84,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		MIN = min;
 		MAX = max;
 		unitAddress = linkAddr;
-		this.packetId = packetId;
+		this.packetId = packetID.getId();
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -110,11 +111,11 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		});
 
 		registerValue.setValue(null); // if value is null packet type is REQIEST
-		getPacket = new RegisterPacket(linkAddr, registerValue, packetId);
+		getPacket = new RegisterPacket(linkAddr, registerValue, packetID);
 
 		valueToSend = new RegisterValue(registerValue);
 		valueToSend.setValue( new Value(MAX, MIN, MAX, 0)); // if value not null packet type is COMMAND
-		setPacket = new RegisterPacket(linkAddr, valueToSend, packetId);
+		setPacket = new RegisterPacket(linkAddr, valueToSend, packetID);
 
 		int a;
 		if(index==30){ //ka band
@@ -171,66 +172,69 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		try{
+		new MyThreadFactory(()->{
 
-			final Optional<Packet> o = Optional.ofNullable(packet);
+			try{
 
-			if(!o.isPresent())
-				return;
+				final Optional<Packet> o = Optional.ofNullable(packet);
 
-			byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+				if(!o.isPresent())
+					return;
 
-			if(addr!=unitAddress)
-				return;
+				byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-			final Optional<PacketHeader> sameGroupId = o.map(Packet::getHeader)
-														.filter(h->h.getPacketId()==packetId)
-														.filter(h->h.getGroupId()==PacketImp.GROUP_ID_DEVICE_DEBAG);
+				if(addr!=unitAddress)
+					return;
 
-			if(!sameGroupId.isPresent())
-				return;
+				final Optional<PacketHeader> sameGroupId = o.map(Packet::getHeader)
+															.filter(h->h.getPacketId()==packetId)
+															.filter(h->h.getGroupId()==PacketImp.GROUP_ID_DEVICE_DEBAG);
 
-			Optional<PacketHeader> hasResponse = sameGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+				if(!sameGroupId.isPresent())
+					return;
 
-			if(!hasResponse.isPresent()){
-				showAction(Color.PINK);
-				logger.warn("Unit is not connected {}", packet);
-				return;
+				Optional<PacketHeader> hasResponse = sameGroupId.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+
+				if(!hasResponse.isPresent()){
+					showAction(Color.PINK);
+					logger.warn("Unit is not connected {}", packet);
+					return;
+				}
+
+				final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+
+				if(!noError.isPresent()){
+					showAction(Color.RED);
+					logger.warn("Packet has error {}", packet);
+
+					setToolTipText(hasResponse.get().getOptionStr());
+					return;
+				}
+
+				showAction(Color.YELLOW);
+				noError
+				.map(h->packet.getPayloads())
+				.map(pls->pls.parallelStream())
+				.orElse(Stream.empty())
+				.filter(pl->pl.getParameterHeader().getCode()==PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE)
+				.map(Payload::getRegisterValue)
+				.filter(rv->rv.getIndex()==valueToSend.getIndex())
+				.forEach(rv->{
+
+					final int aR = rv.getAddr();
+					final int aS = valueSaveRegister.getAddr();
+					final int aV = valueToSend.getAddr();
+
+					if(aR==aS)
+						showSaved();
+
+					else if(aR==aV)
+						setValue(rv);
+				});
+			}catch(Exception e){
+				logger.catching(e);
 			}
-
-			final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
-
-			if(!noError.isPresent()){
-				showAction(Color.RED);
-				logger.warn("Packet has error {}", packet);
-
-				setToolTipText(hasResponse.get().getOptionStr());
-				return;
-			}
-
-			showAction(Color.YELLOW);
-			noError
-			.map(h->packet.getPayloads())
-			.map(pls->pls.parallelStream())
-			.orElse(Stream.empty())
-			.filter(pl->pl.getParameterHeader().getCode()==PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE)
-			.map(Payload::getRegisterValue)
-			.filter(rv->rv.getIndex()==valueToSend.getIndex())
-			.forEach(rv->{
-
-				final int aR = rv.getAddr();
-				final int aS = valueSaveRegister.getAddr();
-				final int aV = valueToSend.getAddr();
-
-				if(aR==aS)
-					showSaved();
-
-				else if(aR==aV)
-					setValue(rv);
-			});
-		}catch(Exception e){
-			logger.catching(e);
-		}
+		});
 	}
 
 	public void showAction(Color bg) {

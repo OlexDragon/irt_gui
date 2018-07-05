@@ -3,7 +3,7 @@ package irt.data.packet;
 import java.util.Arrays;
 import java.util.Optional;
 
-import irt.data.packet.interfaces.PacketWork.PacketIDs;
+import irt.data.packet.PacketWork.PacketIDs;
 
 public class PacketHeader{
 
@@ -31,6 +31,7 @@ public class PacketHeader{
 	public byte[]	toBytes		()	{ return packetHeader;		}
 	public byte		getPacketType()	{ return Optional.ofNullable(packetHeader).map(ph->ph[0]).orElse((byte) 0);	}
 	public short	getPacketId	()	{ return (short) PacketImp.shiftAndAdd(new byte[]{packetHeader[1], packetHeader[2]});	}
+	public byte[]	packetIdAsBytes	()	{ return new byte[]{packetHeader[1], packetHeader[2]};	}
 	public byte		getGroupId	()	{ return Optional.ofNullable(packetHeader).map(ph->ph[3]).orElse((byte) 0);	}
 	public short	getReserved	()	{ return (short) Optional.ofNullable(packetHeader).map(ph->(short) PacketImp.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6))).orElse((short) 0);}
 	public byte		getOption	()	{ return Optional.ofNullable(packetHeader).map(ph->ph[6]).orElse((byte) 0);	}

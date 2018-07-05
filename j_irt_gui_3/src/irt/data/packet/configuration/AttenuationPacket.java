@@ -4,30 +4,38 @@ package irt.data.packet.configuration;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import irt.controller.translation.Translation;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.ValueToString;
 
-public class AttenuationPacket extends PacketAbstract implements ValueToString{
+public class AttenuationPacket extends PacketSuper implements ValueToString{
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(pl->pl.getBuffer())
+																										.filter(b->b.length==2)
+																										.map(ByteBuffer::wrap)
+																										.map(ByteBuffer::getShort);
 
 	public AttenuationPacket(Byte linkAddr, Short value) {
 		super(
 				linkAddr,
-				value!=null
-				? PacketImp.PACKET_TYPE_COMMAND
-						: PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_ATTENUATION,
+				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
+				PacketIDs.CONFIGURATION_ATTENUATION,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				Optional.ofNullable(linkAddr).filter(b->b!=0).map(b->PacketImp.PARAMETER_ID_CONFIGURATION_ATTENUATION).orElse(PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION),
-				value!=null ? PacketImp.toBytes(value) : null,
-				value!=null
-					? Priority.COMMAND
-						: Priority.REQUEST);
+				Optional.ofNullable(value).map(v->PacketImp.toBytes(value)).orElse(null),
+				Optional.ofNullable(value).map(v->Priority.COMMAND).orElse(Priority.REQUEST));
 	}
 
 	public AttenuationPacket() {
@@ -37,14 +45,7 @@ public class AttenuationPacket extends PacketAbstract implements ValueToString{
 	@Override
 	public Object getValue() {
 
-		return getPayloads()
-				.stream()
-				.findAny()
-				.map(Payload::getBuffer)
-				.filter(b->b!=null)
-				.filter(b->b.length==2)
-				.map(ByteBuffer::wrap)
-				.map(ByteBuffer::getShort);
+		return parseValueFunction.apply(this);
 	}
 
 	@Override

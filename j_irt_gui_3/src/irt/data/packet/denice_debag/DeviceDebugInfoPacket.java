@@ -4,18 +4,27 @@ package irt.data.packet.denice_debag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.Packet;
 
-public class DeviceDebugInfoPacket extends PacketAbstract {
+public class DeviceDebugInfoPacket extends PacketSuper {
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																							.ofNullable(packet)
+																							.map(Packet::getPayloads)
+																							.map(List::stream)
+																							.flatMap(Stream::findAny)
+																							.map(Payload::getBuffer)
+																							.map(String::new);
 
 	public DeviceDebugInfoPacket(byte linkAddr, byte parameterHeaderCode) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PACKET_ID_DEVICE_DEBUG_DEVICE_INFO, PacketImp.GROUP_ID_DEVICE_DEBAG, parameterHeaderCode, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_INFO, PacketImp.GROUP_ID_DEVICE_DEBAG, parameterHeaderCode, null, Priority.REQUEST);
 	}
 
 	public void setParameterCode(byte parameterHeaderCode) {
@@ -34,5 +43,10 @@ public class DeviceDebugInfoPacket extends PacketAbstract {
 		List<Payload> payloadsList = new ArrayList<>();
 		payloadsList.add(payload);
 		setPayloads(payloadsList);
+	}
+
+	@Override
+	public Object getValue() {
+		return parseValueFunction.apply(this);
 	}
 }

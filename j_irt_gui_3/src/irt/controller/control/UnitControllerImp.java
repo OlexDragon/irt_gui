@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.event.ChangeListener;
 
@@ -24,12 +25,12 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.data.MyThreadFactory;
 import irt.data.Range;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketWork;
 import irt.data.packet.Packets;
 import irt.data.packet.configuration.FrequencyPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.RangePacket;
 import irt.data.packet.interfaces.ValueToString;
 import irt.data.value.Value;
@@ -285,11 +286,14 @@ public class UnitControllerImp implements UnitController{
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		if(isValuePacket(packet))
-			setValue(Packets.cast(packet));
+		new MyThreadFactory(()->{
+			
+			if(isValuePacket(packet))
+				setValue(Packets.cast(packet));
 
-		else if(isRangePacket(packet))
-			setRange(Packets.cast(packet));
+			else if(isRangePacket(packet))
+				setRange(Packets.cast(packet));
+		});
 	}
 
 	private boolean isValuePacket(Packet packet) {
@@ -306,7 +310,7 @@ public class UnitControllerImp implements UnitController{
 		return id1.isPresent() && id1.equals(id2);
 	}
 
-	private void setValue(Optional<? extends PacketAbstract> optional) {
+	private void setValue(Optional<? extends PacketSuper> optional) {
 		logger.entry(optional);
 
 		optional
@@ -322,13 +326,16 @@ public class UnitControllerImp implements UnitController{
 			if(slider.getValue() == v)
 				return;
 
-			slider.removeChangeListener(sliderChange);
-			slider.setValue(v);
-			addSliderChangeListener(sliderChange);
+			SwingUtilities.invokeLater(()->{
+
+				slider.removeChangeListener(sliderChange);
+				slider.setValue(v);
+				addSliderChangeListener(sliderChange);
+			});
 		});
 	}
 
-	private void setRange(Optional<? extends PacketAbstract> optional) {
+	private void setRange(Optional<? extends PacketSuper> optional) {
 		optional
 		.flatMap(p->(Optional<?>)p.getValue())
 		.filter(Range.class::isInstance)

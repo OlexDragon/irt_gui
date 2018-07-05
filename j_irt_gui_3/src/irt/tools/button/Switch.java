@@ -22,17 +22,15 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
-import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
-import irt.data.packet.ParameterHeader;
-import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.DeviceDebugPacketIds;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
 import irt.tools.CheckBox.SwitchBox;
@@ -45,30 +43,29 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	private ScheduledFuture<?> scheduledFuture;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
-	private PacketAbstract packetToGet;
+	private PacketSuper packetToGet;
 
 	private byte linkAddr;
-	private short packetId;
-	private Byte parameterId;
-
-	private RegisterValue registerValue;
+	private PacketIDs packetId;
 
 	final ActionListener actionListener = e->{
 
-		if(packetId==PacketWork.PACKET_ID_DEVICE_DEBUG_CALIBRATION_MODE){
+		if(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.equals(packetId)){
 			final CallibrationModePacket packet = new CallibrationModePacket(linkAddr, isSelected() ? 1 : 0);
 			GuiControllerAbstract.getComPortThreadQueue().add(packet);
 			return;
 		}
 
-		if(registerValue == null) return;
-
-		registerValue.setValue(new Value(isSelected() ? 3 : 2, 0, 3, 0));
-			DeviceDebugPacket packetToSet = new DeviceDebugPacket(linkAddr, registerValue, packetId, parameterId);
+		DeviceDebugPacketIds
+		.valueOf(packetId)
+		.ifPresent(deviceDebugPacketId->{
+			
+			DeviceDebugPacket packetToSet = new DeviceDebugPacket(linkAddr, new Value(isSelected() ? 3 : 2, 0, 3, 0), deviceDebugPacketId);
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToSet);
+		});
 	};
 
-	public Switch(PacketAbstract packet) {
+	public Switch(PacketSuper packet) {
 		super(Optional.ofNullable(IrtGui.class.getResource("/irt/irt_gui/images/switch_off.png")).map(r->new ImageIcon(r).getImage()).orElse(null),
 				Optional.ofNullable(IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png")).map(r->new ImageIcon(r).getImage()).orElse(null));
 
@@ -76,23 +73,10 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 		linkAddr = Optional.ofNullable(packet.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0);
-		packetId = packet.getHeader().getPacketId();
+		PacketIDs[] values = PacketIDs.values();
 
-		Optional
-		.ofNullable(packet.getValue())
-		.filter(RegisterValue.class::isInstance)
-		.map(RegisterValue.class::cast)
-		.ifPresent(rv->{
-
-			final Optional<Byte> oParameterId = packet.getPayloads().parallelStream().findAny().map(Payload::getParameterHeader).map(ParameterHeader::getCode);
-
-			if(!oParameterId.isPresent())
-				return;
-
-			parameterId = oParameterId.get();
-			registerValue = rv;
-
-		});
+		final int intId = packet.getHeader().getPacketId()&0xFF;
+		packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
 		
 
 		addHierarchyListener(
@@ -130,48 +114,51 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		Optional
-		.ofNullable(packet)
-		.map(p->p.getHeader())
-		.filter(h->h.getPacketId()==packetToGet.getHeader().getPacketId())
-		.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-		.ifPresent(h->{
+		new MyThreadFactory(()->{
 
-			if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
-				logger.warn("packet has error: {}", packet);
-				return;
-			}
+			Optional
+			.ofNullable(packet)
+			.map(p->p.getHeader())
+			.filter(h->h.getPacketId()==packetToGet.getHeader().getPacketId())
+			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.ifPresent(h->{
 
-			Boolean isSelected;
-			if(h.getPacketId()==PacketWork.PACKET_ID_DEVICE_DEBUG_CALIBRATION_MODE){
+				if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
+					logger.warn("packet has error: {}", packet);
+					return;
+				}
 
-				isSelected = Optional
-								.ofNullable(packet.getPayloads())
-								.map(List::stream)
-								.orElse(Stream.empty())
-								.map(pl->pl.getInt(0))
-								.map(i->i>0)
-								.findAny()
-								.orElse(false);
-						
-			}else{
+				Boolean isSelected;
+				if(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.match(h.getPacketId())){
 
-				isSelected = packet
-									.getPayloads()
-									.parallelStream()
-									.map(pl->pl.getRegisterValue())
-									.map(rv->rv.getValue())
-									.map(v->v.getValue())
-									.map(l->(l&1)>0)
+					isSelected = Optional
+									.ofNullable(packet.getPayloads())
+									.map(List::stream)
+									.orElse(Stream.empty())
+									.map(pl->pl.getInt(0))
+									.map(i->i>0)
 									.findAny()
 									.orElse(false);
-			}
+							
+				}else{
 
-			if(isSelected()!=isSelected){
-				removeActionListener(actionListener);
-				setSelected(isSelected);
-				addActionListener(actionListener);
-			}
+					isSelected = packet
+										.getPayloads()
+										.parallelStream()
+										.map(pl->pl.getRegisterValue())
+										.map(rv->rv.getValue())
+										.map(v->v.getValue())
+										.map(l->(l&1)>0)
+										.findAny()
+										.orElse(false);
+				}
+
+				if(isSelected()!=isSelected){
+					removeActionListener(actionListener);
+					setSelected(isSelected);
+					addActionListener(actionListener);
+				}
+			});
 		});
 	}
 
