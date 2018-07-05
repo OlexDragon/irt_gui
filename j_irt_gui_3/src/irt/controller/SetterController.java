@@ -9,7 +9,7 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork;
 
 public class SetterController extends ControllerAbstract {
 

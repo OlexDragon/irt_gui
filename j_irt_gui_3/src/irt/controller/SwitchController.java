@@ -15,8 +15,9 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.packet.interfaces.PacketWork;
 
 public class SwitchController extends ControllerAbstract {
 
@@ -59,7 +60,7 @@ public class SwitchController extends ControllerAbstract {
 							PacketImp.PACKET_TYPE_COMMAND,
 							as.getGroupId(),
 							as.getPacketParameterHeaderCode(),
-							PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER,
+							PacketIDs.CONFIGURATION_DLRS_WGS_SWITCHOVER,
 							value);
 					DefaultController controller = new DefaultController(deviceType, "Calibration Mode UnitController", setter, Style.CHECK_ONCE){
 

@@ -21,7 +21,7 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork;
 import irt.data.value.Value;
 
 public class TextSliderController extends ControllerAbstract {

@@ -6,14 +6,14 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.Range;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.value.ValueFrequency;
 
 public class FrequencyContriller extends ValueRangeControllerAbstract {
@@ -29,7 +29,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 						linkHeader==null || linkHeader.getIntAddr()==0
 												? PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE
 												: PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY_RANGE,
-				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
+												PacketIDs.CONFIGURATION_FREQUENCY_RANGE), txtField, slider, txtStep, Style.CHECK_ONCE);
 
 		isConverter = linkHeader==null || linkHeader.getIntAddr()==0;
 		this.style = style;
@@ -42,7 +42,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
 				int id = valueChangeEvent.getID();
-				if(id==PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY_RANGE)
+				if(PacketIDs.CONFIGURATION_FREQUENCY_RANGE.match((short) id))
 					new ControllerWorker(valueChangeEvent);
 			}
 		};
@@ -74,7 +74,7 @@ public class FrequencyContriller extends ValueRangeControllerAbstract {
 				long maximum = r.getMaximum();
 				setStepValue(new ValueFrequency(1, 1, maximum-minimum));
 
-				startTextSliderController(FrequencyContriller.this.getName(), new ValueFrequency(0,minimum, maximum), PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY, isConverter ? PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY : PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY, style);
+				startTextSliderController(FrequencyContriller.this.getName(), new ValueFrequency(0,minimum, maximum), PacketIDs.CONFIGURATION_FREQUENCY, isConverter ? PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY : PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY, style);
 
 			}else if(source instanceof Byte)
 				txtField.setToolTipText(PacketHeader.getOptionStr((byte) source));
