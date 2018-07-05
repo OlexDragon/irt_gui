@@ -2,7 +2,7 @@ package irt.controller.serial_port.value.setter;
 
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketAbstract.Priority;
+import irt.data.packet.PacketSuper.Priority;
 import irt.data.packet.interfaces.Packet;
 
 public abstract class SetterAbstract extends GetterAbstract{

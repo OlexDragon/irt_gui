@@ -10,19 +10,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import irt.data.StringData;
-import irt.data.packet.PacketAbstract;
-import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class DeviceDebugHelpPacket extends PacketAbstract {
+import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
+
+public class DeviceDebugHelpPacket extends PacketSuper {
+	private final static Logger logger = LogManager.getLogger();
 
 	public static final int DEVICES = 0, DUMP = 1;
 
 	public DeviceDebugHelpPacket(Byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PACKET_ID_DEVICE_DEBUG_HELP, PacketImp.GROUP_ID_DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBAG_INDEX, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, DeviceDebugPacketIds.HELP.getPacketId(), PacketImp.GROUP_ID_DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBAG_INDEX, null, Priority.REQUEST);
 	}
 
 	public DeviceDebugHelpPacket() {
@@ -31,36 +31,20 @@ public class DeviceDebugHelpPacket extends PacketAbstract {
 
 	@Override
 	public Object getValue() {
-		return new HelpValue(this);
+		return new HelpValue(PacketIDs.DEVICE_DEBUG_HELP.valueOf(this).map(String.class::cast).orElse(""));
 	}
 
 	// class HelpValue
 	public static final String[] dumpDevices = {"Potentiometers", "Switches"};
-	public class HelpValue{
+	public static class HelpValue{
 
+		private static final int SEQUENCE = 2;
+		private static final int RANGE = 1;
 		private final String text;
 		private IntStream[] indexes = new IntStream[2];
 
-		public HelpValue(DeviceDebugHelpPacket packet) {
-
-			PacketHeader header = packet.getHeader();
-
-			if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE) {
-				text = "the unit does not respond. Packet - " + packet;
-				return;
-			}
-
-			byte option = header.getOption();
-
-			switch(option) {
-
-			case 0:
-				text = packet.getPayloads().parallelStream().findAny().map(Payload::getStringData).filter(t->t!=null).map(StringData::toString).get();
-				break;
-
-			default:	//Error message
-				text = header.getOptionStr();
-			}
+		public HelpValue(String text) {
+			this.text = text;
 		}
 
 		@Override
@@ -69,6 +53,7 @@ public class DeviceDebugHelpPacket extends PacketAbstract {
 		}
 
 		public IntStream[] parse(){
+			logger.entry(text);
 
 			Map<Boolean, List<String>> collect = Optional
 													.ofNullable(text)
@@ -78,11 +63,12 @@ public class DeviceDebugHelpPacket extends PacketAbstract {
 													.filter(s->!s.isEmpty())
 													.collect(Collectors.partitioningBy(s->s.startsWith("devices")));
 
+			//Devices
 			List<String> list = collect.get(true);
-			indexes[DEVICES] = getIndexes(list).filter(i->i!=0 && i!=11);
+			indexes[DEVICES] = getIndexes(list);
 
 			list = collect.get(false);
-			indexes[DUMP] = getIndexes(list);
+			indexes[DUMP] = getIndexes(list).distinct();
 
 			return indexes;
 		}
@@ -92,7 +78,8 @@ public class DeviceDebugHelpPacket extends PacketAbstract {
 			return list
 					.stream()
 					.findAny()
-					.map(t->Arrays.stream(t.split("\n"))).orElse(Stream.empty())
+					.map(t->Arrays.stream(t.split("\n")))
+					.orElse(Stream.empty())
 					.map(String::trim)
 					.filter(s->!s.isEmpty())
 					.filter(s->s.charAt(0) == '[')
@@ -107,20 +94,21 @@ public class DeviceDebugHelpPacket extends PacketAbstract {
 				int caseValue;
 				String[] indexesStr;
 
-				if(split[0].contains("-")) {
+				final String string = split[0];
+				if(string.contains("-")) {
 
-					caseValue = 1;
-					indexesStr = split[0].split("-");
+					caseValue = RANGE;
+					indexesStr = string.split("-");
 
-				}else if(split[0].contains(",")) {
+				}else if(string.contains(",")) {
 
-					caseValue = 2;
-					indexesStr = split[0].split(",");
+					caseValue = SEQUENCE;
+					indexesStr = string.split(",");
 
 				}else {
 
 					caseValue = 0;
-					indexesStr = new String[]{split[0]};
+					indexesStr = new String[]{string};
 				}
 
 				Stream<Integer> indexes = Arrays
@@ -133,11 +121,11 @@ public class DeviceDebugHelpPacket extends PacketAbstract {
 
 				switch(caseValue) {
 
-				case 1:
+				case RANGE:
 					IntSummaryStatistics collect = indexes.collect(Collectors.summarizingInt(Integer::intValue));
 					int min = collect.getMin();
-					int count = collect.getMax() - min;
-					indexesStream = IntStream.range(0, ++count).map(c->min+c);
+					int max = collect.getMax() + 1;
+					indexesStream = IntStream.range(min, max);
 					break;
 
 				default:

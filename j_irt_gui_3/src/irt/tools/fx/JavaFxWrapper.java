@@ -69,7 +69,6 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 			}catch (Exception e) {
 		        logger.catching(e);
 			}
-
 		});
 	}
 

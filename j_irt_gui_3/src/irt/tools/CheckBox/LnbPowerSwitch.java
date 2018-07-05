@@ -2,12 +2,13 @@ package irt.tools.CheckBox;
 
 import java.awt.Image;
 
-import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.LnbPowerPacket;
 import irt.data.packet.configuration.LnbPowerPacket.PowerStatus;
+import irt.data.packet.interfaces.Packet;
 
 public class LnbPowerSwitch extends SwitchBoxImpl {
 	private static final long serialVersionUID = 312509249334409413L;
@@ -19,7 +20,7 @@ public class LnbPowerSwitch extends SwitchBoxImpl {
 	@Override
 	protected void action() {
 		final boolean selected = isSelected();
-		PacketWork pw = new LnbPowerPacket(selected ? PowerStatus.ON : PowerStatus.OFF);
+		PacketSuper pw = new LnbPowerPacket(selected ? PowerStatus.ON : PowerStatus.OFF);
 		logger.debug("selected={}; {}", selected, pw);
 		cptq.add(pw);
 	}
@@ -29,7 +30,7 @@ public class LnbPowerSwitch extends SwitchBoxImpl {
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
 
-		if(pID!=PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER)
+		if(!PacketIDs.CONFIGURATION_FCM_LNB_POWER.match(pID))
 			return;
 
 		logger.debug(packet);

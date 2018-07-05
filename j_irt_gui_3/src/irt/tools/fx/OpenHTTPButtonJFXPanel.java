@@ -16,6 +16,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.text.Font;
 
 public class OpenHTTPButtonJFXPanel extends JFXPanel {
 	private static final long serialVersionUID = -5186685111758208307L;
@@ -40,6 +41,7 @@ public class OpenHTTPButtonJFXPanel extends JFXPanel {
 
 		public OpenHTTPButtonFx() {
 			setText("Open HTTP");
+			setFont(new Font(12));
 			setOnAction(e->{
 
 				final byte[] address = networkAddress.getAddress();

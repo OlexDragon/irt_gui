@@ -8,12 +8,12 @@ import irt.data.LinkedPacketThread;
 import irt.data.PacketThread;
 import irt.data.RegisterValue;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketAbstract.Priority;
+import irt.data.packet.PacketSuper.Priority;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 

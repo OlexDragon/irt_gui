@@ -50,9 +50,10 @@ import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.DeviceDebugPacketIds;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 import irt.tools.button.Switch;
 import irt.tools.fx.MonitorPanelFx;
@@ -160,17 +161,17 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 				if(unitAddr==0){
 					synchronized (DACsPanel.this) {
-						adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, new RegisterValue(10, 0, null), PacketWork.PACKET_ID_FCM_ADC_INPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, new RegisterValue(10, 1, null), PacketWork.PACKET_ID_FCM_ADC_OUTPUT_POWER, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, new RegisterValue(10, 2, null), PacketWork.PACKET_ID_FCM_ADC_TEMPERATURE, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 4, null), PacketWork.PACKET_ID_FCM_ADC_CURRENT, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 6, null), PacketWork.PACKET_ID_FCM_ADC_5V5, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, new RegisterValue(10, 7, null), PacketWork.PACKET_ID_FCM_ADC_13v2, 		PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, new RegisterValue(10, 8, null), PacketWork.PACKET_ID_FCM_ADC_13V2_NEG, 	PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_OUTPUT_POWER, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_TEMPERATURE, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_CURRENT, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_5V5, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_13v2, 1, "#.###"));
+						adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_13V2_NEG, 1, "#.###"));
 					}
 
 					Value value = new Value(0, -100, 100, 0);
-					startController(new TextSliderController(deviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketWork.PACKET_ID_CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
+					startController(new TextSliderController(deviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketIDs.CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
 				}
 
 			}
@@ -266,7 +267,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			rAddr = 1;
 		}
 		RegisterValue registerValue = new RegisterValue(index, rAddr, null);
-		txtDAC1 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC1, 0, 4095);
+		txtDAC1 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC1, 0, 4095);
 		txtDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC1.setColumns(10);
 		txtDAC1.setBounds(186, 16, 55, 20);
@@ -280,7 +281,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			rAddr++;
 
 		registerValue = new RegisterValue(index, rAddr, null);
-		txtDAC2 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC2, 0, 4095);
+		txtDAC2 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC2, 0, 4095);
 		txtDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC2.setColumns(10);
 		txtDAC2.setBounds(186, 44, 55, 20);
@@ -297,7 +298,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		registerValue = kaBand.map(dt->new RegisterValue(30, 0, null)).orElse(new RegisterValue(index, rAddr, null));
 		final Integer maxValue = kaBand.map(dt->1023).orElse(4095);
 
-		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC3, 0, maxValue);
+		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC3, 0, maxValue);
 		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC3.setColumns(10);
 		txtDAC3.setBounds(186, 72, 55, 20);
@@ -312,7 +313,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		registerValue = kaBand.map(dt->new RegisterValue(30, 8, null)).orElse(new RegisterValue(index, rAddr, null));//TODO
 
-		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketWork.PACKET_ID_DEVICE_CONVERTER_DAC4, 0, maxValue);
+		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC4, 0, maxValue);
 		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC4.setColumns(10);
 		txtDAC4.setBounds(187, 100, 55, 20);
@@ -571,7 +572,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 	@Override
 	public synchronized void onPacketRecived(Packet packet) {
-		adcWorkers.parallelStream().forEach(adc->adc.update(packet));
+		adcWorkers.stream().filter(adc->adc.getDeviceDebugPacketIds().getPacketId().match(packet.getHeader().getPacketId())).findAny().ifPresent(adc->new MyThreadFactory(()->adc.update(packet)));
 	}
 
 	private int delay;

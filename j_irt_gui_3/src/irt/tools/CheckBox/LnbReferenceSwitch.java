@@ -2,12 +2,13 @@ package irt.tools.CheckBox;
 
 import java.awt.Image;
 
-import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.LnbReferencePacket;
 import irt.data.packet.configuration.LnbReferencePacket.ReferenceStatus;
+import irt.data.packet.interfaces.Packet;
 
 public class LnbReferenceSwitch extends SwitchBoxImpl {
 	private static final long serialVersionUID = 312509249334409413L;
@@ -18,7 +19,7 @@ public class LnbReferenceSwitch extends SwitchBoxImpl {
 
 	@Override
 	protected void action() {
-		PacketWork pw = new LnbReferencePacket(isSelected() ? ReferenceStatus.ON : ReferenceStatus.OFF);
+		PacketSuper pw = new LnbReferencePacket(isSelected() ? ReferenceStatus.ON : ReferenceStatus.OFF);
 		cptq.add(pw);
 	}
 
@@ -26,7 +27,7 @@ public class LnbReferenceSwitch extends SwitchBoxImpl {
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
 
-		if(pID!=PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_REFERENCE)
+		if(!PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE.match(pID))
 			return;
 
 		logger.debug(packet);

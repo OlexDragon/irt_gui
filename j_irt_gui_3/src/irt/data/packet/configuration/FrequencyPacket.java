@@ -2,28 +2,38 @@
 package irt.data.packet.configuration;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.ValueToString;
 import irt.data.value.ValueFrequency;
 
-public class FrequencyPacket extends PacketAbstract implements ValueToString{
+public class FrequencyPacket extends PacketSuper implements ValueToString{
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Payload::getBuffer)
+																										.map(ByteBuffer::wrap)
+																										.map(ByteBuffer::getLong);
 
 	public FrequencyPacket(Byte linkAddr, Long value) {
 		super(
 				linkAddr,
-				value!=null
-				? PacketImp.PACKET_TYPE_COMMAND
-						: PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_FREQUENCY,
+				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
+				PacketIDs.CONFIGURATION_FREQUENCY,
 				PacketImp.GROUP_ID_CONFIGURATION,
-				linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY,
-				value!=null ? PacketImp.toBytes(value) : null,
-				value!=null ? Priority.COMMAND : Priority.REQUEST);
+				Optional.ofNullable(linkAddr).filter(la->la!=0).map(v->PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY).orElse(PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY),
+				Optional.ofNullable(linkAddr).filter(la->la!=0).map(v->PacketImp.toBytes(value)).orElse(null),
+				Optional.ofNullable(linkAddr).filter(la->la!=0).map(v->Priority.COMMAND).orElse(Priority.REQUEST));
 	}
 
 	public FrequencyPacket() {

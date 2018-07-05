@@ -369,24 +369,27 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 	public void onPacketRecived(Packet packet) {
 		if(deviceInfo == null)
 			return;
-		
-		DeviceInfo
-		.parsePacket(packet)
-		.filter(di->di.getSerialNumber().equals(deviceInfo.getSerialNumber()))
-		.ifPresent(di->{
 
-			setInfo(di);
-			deviceInfo.set(di);
+		new MyThreadFactory(()->{
+			
+			DeviceInfo
+			.parsePacket(packet)
+			.filter(di->di.getSerialNumber().equals(deviceInfo.getSerialNumber()))
+			.ifPresent(di->{
 
-			if(secondsCount!=null)
-				secondsCount.setUptimeCounter(di.getUptimeCounter());
+				setInfo(di);
+				deviceInfo.set(di);
 
-			if(--softCheckerDeley<0){
-				softCheckerDeley = 250;
+				if(secondsCount!=null)
+					secondsCount.setUptimeCounter(di.getUptimeCounter());
 
-				final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
-				lblError.setVisible(instance.check(di).orElse(false));
-			}
+				if(--softCheckerDeley<0){
+					softCheckerDeley = 250;
+
+					final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
+					lblError.setVisible(instance.check(di).orElse(false));
+				}
+			});
 		});
 	}
 }

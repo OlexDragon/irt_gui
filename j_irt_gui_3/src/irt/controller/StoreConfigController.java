@@ -6,12 +6,13 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.control.SaveConfigPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 
 public class StoreConfigController implements PacketListener{
 
@@ -37,27 +38,31 @@ public class StoreConfigController implements PacketListener{
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		if(packet.getHeader().getPacketId()!=PacketWork.PACKET_ID_STORE_CONFIG)
-			return;
 
-		Packets
-		.cast(packet)
-		.ifPresent(p->{
+		new MyThreadFactory(()->{
+			
+			if(!PacketIDs.STORE_CONFIG.match(packet.getHeader().getPacketId()))
+				return;
 
-			timer.stop();
+			Packets
+			.cast(packet)
+			.ifPresent(p->{
 
-			final byte packetType = p.getHeader().getPacketType();
-			final byte option = p.getHeader().getOption();
+				timer.stop();
 
-			if(packetType!= PacketImp.PACKET_TYPE_RESPONSE || option!=PacketImp.ERROR_NO_ERROR)
-				if(JOptionPane.showConfirmDialog( owner, "Could not store the configuration. Try one more time?", "Store Config", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
-					timer.restart();
-					GuiControllerAbstract.getComPortThreadQueue().add(this.packet);
-					return;
-			}
+				final byte packetType = p.getHeader().getPacketType();
+				final byte option = p.getHeader().getOption();
 
-			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
-			JOptionPane.showMessageDialog( owner, "The Configuration has been stored.");
+				if(packetType!= PacketImp.PACKET_TYPE_RESPONSE || option!=PacketImp.ERROR_NO_ERROR)
+					if(JOptionPane.showConfirmDialog( owner, "Could not store the configuration. Try one more time?", "Store Config", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {
+						timer.restart();
+						GuiControllerAbstract.getComPortThreadQueue().add(this.packet);
+						return;
+				}
+
+				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+				JOptionPane.showMessageDialog( owner, "The Configuration has been stored.");
+			});
 		});
 	}
 

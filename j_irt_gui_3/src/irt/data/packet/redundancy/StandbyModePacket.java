@@ -2,14 +2,13 @@ package irt.data.packet.redundancy;
 
 import java.util.Optional;
 
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.fx.ControlPanelIrPcFx.StandbyModes;
 
-public class StandbyModePacket extends PacketAbstract{
+public class StandbyModePacket extends PacketSuper{
 
-	public static final short PACKET_ID = PacketWork.PACKET_ID_STANDBY_MODE;
+	public static final PacketIDs PACKET_ID = PacketIDs.CONFIGURATION_REDUNDANCY_MODE;
 
 	public StandbyModePacket(Byte linkAddr, StandbyModes standbyModes) {
 		super(

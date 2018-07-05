@@ -24,7 +24,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.SoftBevelBorder;
@@ -36,12 +36,14 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketAbstract;
-import irt.data.packet.Packets;
+import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
+import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork.PacketIDs;
 import irt.tools.label.LED;
 import irt.tools.label.VarticalLabel;
 import irt.tools.panel.ConverterPanel;
@@ -294,12 +296,6 @@ public class Panel extends JPanel implements PacketListener {
 		verticalLabel.setForeground(labelForeground);
 	}
 
-	public void setVerticalLabelBackground(Color labelBackground) {
-		if(!verticalLabel.getBackground().equals(labelBackground)){
-			verticalLabel.setBackground(labelBackground);
-		}
-	}
-
 	public void setVerticalLabelFont(Font font) {
 		verticalLabel.setFont(font);
 	}
@@ -372,37 +368,26 @@ public class Panel extends JPanel implements PacketListener {
 			setSize(getPreferredSize());
 	}
 
-	private AlarmSeverities alarmSeverities;
-
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		final PacketAbstract p = Optional
-										.of(packet)
-										.map(pkt->pkt.getHeader())
-										.filter(
-												h->PacketIDs.ALARMS_SUMMARY.match(h.getPacketId()))
-										.flatMap(h->Packets.cast(packet))
-										.orElse(null);
+		Optional<Packet> oPacket = Optional.of(packet);
+		byte a = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-		// return if packet do not exists
-		if(p==null || p.getLinkHeader().getAddr()!=addr) return;
+		if(addr!=a)
+			return;
 
-		final Object value = p.getValue();
-
-		if(value instanceof AlarmSeverities){
-			alarmSeverities = (AlarmSeverities)value;
-
-			final Color background = alarmSeverities.getBackground();
-			new SwingWorker<Void, Void>() {
-
-				@Override
-				protected Void doInBackground() throws Exception {
-					setVerticalLabelBackground(background);
-					return null;
-				}
-			}.execute();
-
-		}
+		new MyThreadFactory(
+				()->
+				oPacket
+				.map(Packet::getHeader)
+				.map(PacketHeader::getPacketId)
+				.filter(PacketIDs.ALARMS_SUMMARY::match)
+				.map(id->PacketIDs.ALARMS_SUMMARY)
+				.flatMap(pId->pId.valueOf(packet))
+				.filter(AlarmSeverities.class::isInstance)
+				.map(AlarmSeverities.class::cast)
+				.map(AlarmSeverities::getBackground)
+				.ifPresent(bg->SwingUtilities.invokeLater(()->verticalLabel.setBackground(bg))));
 	}
 }

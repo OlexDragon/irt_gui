@@ -22,15 +22,16 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.configuration.LnbSwitchPacket;
 import irt.data.packet.configuration.LnbSwitchPacket.LnbPosition;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.label.LED;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
@@ -172,11 +173,11 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> l = new ArrayList<>();
 
-		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_CONFIGURATION, PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER){
+		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_CONFIGURATION, PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketIDs.CONFIGURATION_DLRS_WGS_SWITCHOVER){
 
 			@Override
 			public boolean set(Packet packet) {
-				if(packet.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_WGS_POSITION && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+				if(PacketIDs.MEASUREMENT_WGS_POSITION.match(packet.getHeader().getPacketId()) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 					Payload payload = packet.getPayload(0);
 					if (payload != null) {
 						switch (payload.getByte()) {
@@ -231,42 +232,46 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		Optional
-		.of(packet)
-		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-		.filter(p->p.getHeader().getPacketId()==PacketWork.PACKET_ID_MEASUREMENT_ALL)
-		.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR)
-		.filter(LinkedPacket.class::isInstance)
-		.map(LinkedPacket.class::cast)
-		.filter(p->p.getLinkHeader().getAddr()==addr)
-		.map(Packet::getPayloads)
-		.orElseGet(ArrayList<Payload>::new)
-		.stream()
-		.filter(pl->pl.getParameterHeader().getCode()==4)	// Monitor packet
-		.findAny()
-		.map(Payload::getBuffer)
-		.filter(b->b.length==1)
-		.map(b->b[0])
-		.ifPresent(b->{
-			switch(b){
-			case 1:
-				ldLnb1.setOn(true);
-				ldLnb2.setOn(false);
-				switchBox.removeActionListener(switchBoxListener);
-				switchBox.setSelected(true);
-				switchBox.addActionListener(switchBoxListener);
-				break;
-			case 2:
-				ldLnb1.setOn(false);
-				ldLnb2.setOn(true);
-				switchBox.removeActionListener(switchBoxListener);
-				switchBox.setSelected(false);
-				switchBox.addActionListener(switchBoxListener);
-				break;
-			default:
-				ldLnb1.setOn(false);
-				ldLnb2.setOn(false);
-			}
+
+		new MyThreadFactory(()->{
+			
+			Optional
+			.of(packet)
+			.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.filter(p->PacketIDs.MEASUREMENT_ALL.match(p.getHeader().getPacketId()))
+			.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR)
+			.filter(LinkedPacket.class::isInstance)
+			.map(LinkedPacket.class::cast)
+			.filter(p->p.getLinkHeader().getAddr()==addr)
+			.map(Packet::getPayloads)
+			.orElseGet(ArrayList<Payload>::new)
+			.stream()
+			.filter(pl->pl.getParameterHeader().getCode()==4)	// Monitor packet
+			.findAny()
+			.map(Payload::getBuffer)
+			.filter(b->b.length==1)
+			.map(b->b[0])
+			.ifPresent(b->{
+				switch(b){
+				case 1:
+					ldLnb1.setOn(true);
+					ldLnb2.setOn(false);
+					switchBox.removeActionListener(switchBoxListener);
+					switchBox.setSelected(true);
+					switchBox.addActionListener(switchBoxListener);
+					break;
+				case 2:
+					ldLnb1.setOn(false);
+					ldLnb2.setOn(true);
+					switchBox.removeActionListener(switchBoxListener);
+					switchBox.setSelected(false);
+					switchBox.addActionListener(switchBoxListener);
+					break;
+				default:
+					ldLnb1.setOn(false);
+					ldLnb2.setOn(false);
+				}
+			});
 		});
 	}
 }

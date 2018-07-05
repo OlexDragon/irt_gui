@@ -1,16 +1,5 @@
 package irt.tools.panel.subpanel.monitor;
 
-import irt.controller.DefaultController;
-import irt.controller.control.ControllerAbstract;
-import irt.controller.translation.Translation;
-import irt.data.DeviceInfo.DeviceType;
-import irt.data.packet.PacketImp;
-import irt.data.packet.ParameterHeader;
-import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
-import irt.data.value.ValueDouble;
-import irt.tools.label.LED;
-
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
@@ -19,6 +8,17 @@ import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
+import irt.controller.DefaultController;
+import irt.controller.control.ControllerAbstract;
+import irt.controller.translation.Translation;
+import irt.data.DeviceInfo.DeviceType;
+import irt.data.packet.PacketImp;
+import irt.data.packet.ParameterHeader;
+import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.value.ValueDouble;
+import irt.tools.label.LED;
 
 @SuppressWarnings("serial")
 public class MonitorPanelConverter extends MonitorPanelAbstract {
@@ -187,7 +187,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		DefaultController defaultController = getController(
 				"IrtControllPanel",
 				PacketImp.PARAMETER_MEASUREMENT_FCM_ALL,
-				PacketWork.PACKET_ID_MEASUREMENT_ALL);
+				PacketIDs.MEASUREMENT_ALL);
 		controllers.add(defaultController);
 		return controllers;
 	}

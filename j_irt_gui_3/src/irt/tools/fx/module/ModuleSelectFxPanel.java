@@ -16,16 +16,21 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.control.ActiveModulePacket;
 import irt.data.packet.interfaces.Packet;
+import irt.tools.fx.ControlPanelIrPcFx;
 import irt.tools.fx.interfaces.StopInterface;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -34,45 +39,51 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.text.Font;
 
 public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketListener, StopInterface{
 	private static final long serialVersionUID = -7284252793969855433L;
-//	private final static Logger logger = LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private final ScheduledFuture<?> scheduledFuture;
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 
 	private Scene scene;
 	private final Byte linkAddr;
-	private Consumer<PacketAbstract> consumer;
+	private Consumer<PacketSuper> consumer;
 	private List<Button> buttons;
 
 	private final ComPortThreadQueue comPortThreadQueue;
 	private final  ActiveModulePacket packet;
 
-	public ModuleSelectFxPanel(Byte linkAddr, byte[] bytes, Consumer<PacketAbstract> consumer) throws HeadlessException {
+	public ModuleSelectFxPanel(Byte linkAddr, byte[] bytes, Consumer<PacketSuper> consumer) throws HeadlessException {
 
 		this.consumer = consumer;
 		this.linkAddr = linkAddr;
 		packet = new ActiveModulePacket(linkAddr, null);
 
 		Platform.runLater(()->{
-			HBox hBox = new HBox();
-			addButtons(hBox, bytes);
+			try{
 
-			AnchorPane root = new AnchorPane();
-	        root.getChildren().add(hBox);
-	        hBox.setStyle("-fx-background-color: BISQUE;");
+				HBox hBox = new HBox();
+				addButtons(hBox, bytes);
 
-	        AnchorPane.setLeftAnchor(hBox, 0.0);
-	        AnchorPane.setRightAnchor(hBox, 0.0);
-	        AnchorPane.setTopAnchor(hBox, 0.0);
-	        AnchorPane.setBottomAnchor(hBox, 0.0);
+				AnchorPane root = new AnchorPane();
+				root.getChildren().add(hBox);
+				hBox.setStyle("-fx-background-color: BISQUE;");
 
-	        scene = new Scene(root);
-			final String externalForm = getClass().getResource("../fx.css").toExternalForm();
-			scene.getStylesheets().add(externalForm);
-	        setScene(scene);
+				AnchorPane.setLeftAnchor(hBox, 0.0);
+				AnchorPane.setRightAnchor(hBox, 0.0);
+				AnchorPane.setTopAnchor(hBox, 0.0);
+				AnchorPane.setBottomAnchor(hBox, 0.0);
+
+				scene = new Scene(root);
+				final String externalForm = ControlPanelIrPcFx.class.getResource("fx.css").toExternalForm();
+				scene.getStylesheets().add(externalForm);
+				setScene(scene);
+			}catch (Exception e) {
+				logger.catching(e);
+			}
 		});
 
 		comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
@@ -83,6 +94,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 
 	private void addButtons(HBox hBox, byte[] bytes) {
 
+		// find end points
 		final int[] array = IntStream.range(0, bytes.length).filter(b->bytes[b]==0).toArray();
 
 		Map<Byte, String> map = new HashMap<>();
@@ -104,11 +116,12 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 
 											b.setMaxWidth(Double.MAX_VALUE);
 											b.setMaxHeight(Double.MAX_VALUE);
+											b.setFont(new Font(12));
 
 											HBox.setHgrow(b, Priority.ALWAYS);
 
 											b.setText(es.getValue());
-											final PacketAbstract p = new ActiveModulePacket(linkAddr, es.getKey());
+											final PacketSuper p = new ActiveModulePacket(linkAddr, es.getKey());
 											b.setOnAction(e->consumer.accept(p));
 											return b;
 										})
@@ -133,18 +146,25 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		final Optional<Packet> oPacket = Optional.of(packet);
-		final Optional<PacketHeader> oPacketHeader = oPacket.map(Packet::getHeader);
+		new MyThreadFactory(()->{
 
-		final boolean packetIdMach = oPacketHeader.map(PacketHeader::getPacketId).filter(pId->pId==ActiveModulePacket.PACKET_ID).isPresent();
-		final boolean isResponse = oPacketHeader.map(PacketHeader::getPacketType).filter(pId->pId==PacketImp.PACKET_TYPE_RESPONSE).isPresent();
-		final boolean noError = oPacketHeader.map(PacketHeader::getOption).filter(pId->pId==PacketImp.ERROR_NO_ERROR).isPresent();
+			final Optional<Packet> oPacket = Optional.of(packet);
+			final Optional<PacketHeader> oPacketHeader = oPacket.map(Packet::getHeader);
 
-		if(!(packetIdMach && isResponse && noError))
-			return;
+			final boolean packetIdMach = oPacketHeader.map(PacketHeader::getPacketId).filter(pId->PacketIDs.CONTROL_ACTIVE_MODULE.match(pId)).isPresent();
+			final boolean isResponse = oPacketHeader.map(PacketHeader::getPacketType).filter(pId->pId==PacketImp.PACKET_TYPE_RESPONSE).isPresent();
+			final boolean noError = oPacketHeader.map(PacketHeader::getOption).filter(pId->pId==PacketImp.ERROR_NO_ERROR).isPresent();
 
-		getButtons().forEach(b->b.getStyleClass().remove("activeButton"));
-		oPacket.map(Packet::getPayloads).filter(pl->!pl.isEmpty()).map(List::stream).flatMap(Stream::findAny).map(Payload::getByte).map(b->--b).map(buttons::get).ifPresent(b->b.getStyleClass().add("activeButton"));
+			if(!(packetIdMach && isResponse && noError))
+				return;
+
+			getButtons().forEach(b->b.getStyleClass().remove("activeButton"));
+			oPacket.map(Packet::getPayloads).filter(pl->!pl.isEmpty()).map(List::stream).flatMap(Stream::findAny).map(Payload::getByte).map(b->--b).map(buttons::get).ifPresent(b->b.getStyleClass().add("activeButton"));
+		});
+	}
+
+	public int countButtons(){
+		return Optional.ofNullable(buttons).map(List::size).orElse(0);
 	}
 
 	@Override
@@ -155,7 +175,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 	@Override
 	public void stop() {
 		comPortThreadQueue.removePacketListener(this);
-		Optional.of(scheduledFuture).filter(ft->!ft.isDone()).ifPresent(ft->ft.cancel(true));
+		Optional.ofNullable(scheduledFuture).filter(ft->!ft.isDone()).ifPresent(ft->ft.cancel(true));
 		Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 }

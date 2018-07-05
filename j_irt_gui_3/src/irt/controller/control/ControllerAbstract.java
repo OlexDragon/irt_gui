@@ -19,8 +19,8 @@ import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 
 public abstract class ControllerAbstract implements UnitController{
 
@@ -65,11 +65,6 @@ public abstract class ControllerAbstract implements UnitController{
 		}
 	}
 
-	public ControllerAbstract(Optional<DeviceType> deviceType, String controllerName, PacketWork packetWork, Object panel, Style stile) {
-		// TODO Auto-generated constructor stub
-		logger.error("*** ControllerAbstract ***");
-	}
-
 	protected abstract void 				setListeners();
 	protected abstract boolean 				setComponent(Component component);
 	protected abstract ValueChangeListener 	addGetterValueChangeListener();
@@ -84,9 +79,11 @@ public abstract class ControllerAbstract implements UnitController{
 
 	@Override
 	public void run() {
-		try{
 
-		if(packetWork!=null){
+		if(packetWork==null)
+			return;
+
+		try{
 
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 
@@ -111,7 +108,7 @@ public abstract class ControllerAbstract implements UnitController{
 
 			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 			clear();
-		}
+
 		}catch (Exception e) {
 			logger.catching(e);
 		}

@@ -27,12 +27,12 @@ import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.RedundancyControllerUnitStatus;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.redundancy.RedundancyControllerStatusPacket;
 import irt.data.packet.redundancy.StandbyModePacket;
 import irt.data.packet.redundancy.SwitchoverModePacket;
@@ -50,6 +50,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.SelectionModel;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Runnable, StopInterface {
@@ -58,7 +59,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 
 	protected final static String BUTTON_1_NAME = "Protection A";
 	protected final static String BUTTON_2_NAME = "Protection B";
-	protected final static String BUTTON_3_NAME = "Set Default";
+	protected final static String BUTTON_3_NAME = "Restor Default";
 	private Byte addr;
 
 	public ControlPanelIrPcFx(Byte addr) {
@@ -89,7 +90,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
 	private final ComPortThreadQueue comPortThreadQueue;
 
-	private final List<PacketAbstract> packets = new ArrayList<>();
+	private final List<PacketSuper> packets = new ArrayList<>();
 
 	@FXML private Button btn1;
 	@FXML private Button btn2;
@@ -121,7 +122,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 		try {
 
 			final Method method = enumValue.getClass().getMethod("getPacket");
-			final PacketAbstract packetWork = (PacketAbstract) method.invoke(enumValue);
+			final PacketSuper packetWork = (PacketSuper) method.invoke(enumValue);
 			packetWork.setAddr(addr);
 			comPortThreadQueue.add(packetWork);
 
@@ -137,18 +138,22 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 		cbSwitchoverMode.setItems(switchoverModesList);
 		cbSwitchoverMode.setUserData(SwitchoverModes.class);
 		cbSwitchoverMode.getSelectionModel().selectedItemProperty().addListener(switchoverModesListener);
+		cbSwitchoverMode.setStyle("-fx-font-size: 12px;");
 
 		final ObservableList<StandbyModes> standbyModesList = FXCollections.observableArrayList(StandbyModes.values());
 		standbyModesList.remove(StandbyModes.NONE);
 		cbStandbyMode.setItems(standbyModesList);
 		cbStandbyMode.setUserData(StandbyModes.class);
 		cbStandbyMode.getSelectionModel().selectedItemProperty().addListener(standbyModesListener);
+		cbStandbyMode.setStyle("-fx-font-size: 12px;");
+
 
 		bpSwitch1Ready.setUserData(YesNo.class);
 		bpSwitch2Ready.setUserData(YesNo.class);
 		bpRedundancyReady.setUserData(Ready.class);
 
-
+		btn1.setFont(new Font(12));
+		btn2.setFont(new Font(12));
 		//		showAllChildren(this);
 	}
 
@@ -181,19 +186,22 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 	@Override
 	public void onPacketRecived(Packet packet) {
 
-		final Optional<Packet> oPacket = Optional.of(packet);
-		final Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
+		new MyThreadFactory(()->{
 
-		// Return if not write packet
-		if(!oHeader.map(PacketHeader::getGroupId).filter(gId->gId==PacketImp.GROUP_ID_REDUNDANCY_CONTROLLER).isPresent())
-			return;
+			final Optional<Packet> oPacket = Optional.of(packet);
+			final Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
 
-		final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
+			// Return if not write packet
+			if(!oHeader.map(PacketHeader::getGroupId).filter(gId->gId==PacketImp.GROUP_ID_REDUNDANCY_CONTROLLER).isPresent())
+				return;
 
-		if(oPacketId.filter(pId->pId==PacketWork.PACKET_ID_REDUNDANCY_CONTROLLER_STATUS).isPresent()){
-			parseStatus(oPacket);
-			return;
-		}
+			final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
+
+			if(oPacketId.filter(pId->PacketIDs.CONFIGURATION_REDUNDANCY_STATUS.match(pId)).isPresent()){
+				parseStatus(oPacket);
+				return;
+			}
+		});
 	}
 
 	private final static int BITS_MASK_SW1_READY 			= 1;
@@ -224,11 +232,10 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 							uStatus->{
 
 								final int id = uStatus.getId();
-								final Optional<YesNo> oConnected = Optional.of(uStatus.getConnected()).filter(con->con.equals(YesNo.YES));
 								setStatus("#bpPresentUnit" + id, uStatus.getConnected());
-								setStatus("#bpSwitchhowerUnit" + id, oConnected.map(con->uStatus.getSwitchoverAlarm()).map(Alarms::toString).orElse(""));
-								setStatus("#bpUnitReady" + id, oConnected.map(con->uStatus.getOperational()).map(YesNo::toString).orElse(""));
-								setStatus("#bpRedundancyReady" + id, oConnected.map(con->uStatus.getAlarmName()).map(AlarmSeverityNames::toString).orElse(""));
+								setStatus("#bpSwitchhowerUnit" + id, uStatus.getSwitchoverAlarm());
+								setStatus("#bpUnitReady" + id, uStatus.getOperational());
+								setStatus("#bpRedundancyReady" + id, uStatus.getStatusName());
 
 								Boolean dis1 = true;
 								Boolean dis2 = true;
@@ -320,8 +327,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 					Optional.ofNullable(node.getUserData()).ifPresent(ud->{
 						try {
 
-							final Method method = ((Class<?>)ud).getMethod("parse", Integer.class);
-							final Object enumValue = method.invoke(null, e.getValue());
+							final Object enumValue = psrse(ud, e.getValue());
 
 							Platform.runLater(()->{
 								
@@ -349,6 +355,11 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 						}
 					});
 				});
+	}
+
+	private Object psrse(Object ud, final Integer value) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+		final Method method = ((Class<?>)ud).getMethod("parse", Integer.class);
+		return method.invoke(null, value);
 	}
 
 	private Function<Integer, Map<String, Integer>> splitFlags() {
@@ -389,7 +400,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 			return values()[f];
 		}
 
-		public PacketAbstract getPacket(){
+		public PacketSuper getPacket(){
 			return packet;
 		}
 	}
@@ -411,7 +422,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 			return values()[f];
 		}
 
-		public PacketAbstract getPacket(){
+		public PacketSuper getPacket(){
 			return packet;
 		}
 	}
@@ -437,11 +448,21 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 		}
 	}
 	public enum Alarms{
-		OK,
-		ALARM;
+		NO_ALARM("No Alarm"),
+		ALARM("Alarm");
+
+		private String message;
+		private Alarms(String message){
+			this.message = message;
+		}
 
 		public static Alarms parse(Integer flag){
-			return flag>0 ? ALARM : OK;
+			return flag>0 ? ALARM : NO_ALARM;
+		}
+
+		@Override
+		public String toString(){
+			return message;
 		}
 	}
 	public enum  UnitStatusNames{

@@ -25,11 +25,12 @@ import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.MyThreadFactory;
 import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 
 public class DebugPanel extends JPanel{
 	private static final long serialVersionUID = 6314140030152046415L;
@@ -57,30 +58,34 @@ public class DebugPanel extends JPanel{
 										linkHeader,
 										0,
 										0,
-										PacketWork.PACKET_ID_CLEAR_STATISTICS,
+										PacketIDs.CLEAR_STATISTICS,
 										PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE,
 										0
 								),
 								Style.CHECK_ALWAYS){
 
 									@Override
-											public void onPacketRecived(Packet packet) {
-												if(getPacketWork().isAddressEquals(packet) &&
-														packet.getHeader().getPacketId()==PacketWork.PACKET_ID_CLEAR_STATISTICS){
+									public void onPacketRecived(Packet packet) {
 
-													if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+										new MyThreadFactory(()->{
+
+											if(getPacketWork().isAddressEquals(packet) &&
+													PacketIDs.CLEAR_STATISTICS.match(packet.getHeader().getPacketId())){
+
+												if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+													stop();
+//													guiControllerAbstract.doDump(linkHeader, "***** Statistics is cleared. *****");
+													JOptionPane.showMessageDialog(null, "Statistics is cleared.");
+												}else{
+													if(--count<=0){
 														stop();
-//														guiControllerAbstract.doDump(linkHeader, "***** Statistics is cleared. *****");
-														JOptionPane.showMessageDialog(null, "Statistics is cleared.");
-													}else{
-														if(--count<=0){
-															stop();
-//															guiControllerAbstract.doDump(linkHeader, "***** tatistics can not be cleaned. *****");
-															JOptionPane.showMessageDialog(null, "Statistics can not be cleaned.");
-														}
+//														guiControllerAbstract.doDump(linkHeader, "***** tatistics can not be cleaned. *****");
+														JOptionPane.showMessageDialog(null, "Statistics can not be cleaned.");
 													}
 												}
-											}					
+									}
+										});
+									}					
 						}
 				);
 				}catch(Exception ex){
@@ -98,7 +103,7 @@ public class DebugPanel extends JPanel{
 			}
 		});
 		
-		JButton btnOpenDump = new JButton("Open Dump");
+		JButton btnOpenDump = new JButton("Open DeviceDebugType");
 		btnOpenDump.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String serialNumber = System.getProperty("serialNumber");

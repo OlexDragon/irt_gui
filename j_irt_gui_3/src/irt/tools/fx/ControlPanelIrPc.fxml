@@ -133,16 +133,24 @@
                                   <RowConstraints maxHeight="1.7976931348623157E308" vgrow="ALWAYS" />
                                 </rowConstraints>
                                  <children>
-                                    <Text text="Present" GridPane.rowIndex="1">
-                                       <font>
-                                          <Font name="System Bold" size="12.0" />
-                                       </font>
-                                    </Text>
-                                    <Text text="Switchover" GridPane.rowIndex="2">
-                                       <font>
-                                          <Font name="System Bold" size="12.0" />
-                                       </font>
-                                    </Text>
+                                    <BorderPane styleClass="title" GridPane.rowIndex="1">
+                                       <center>
+                                          <Text styleClass="text_white" text="Present">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                          </Text>
+                                       </center>
+                                    </BorderPane>
+                                    <BorderPane styleClass="title" GridPane.rowIndex="2">
+                                       <center>
+                                          <Text styleClass="text_white" text="Switchover">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                          </Text>
+                                       </center>
+                                    </BorderPane>
                                     <BorderPane styleClass="title" GridPane.columnIndex="1">
                                        <center>
                                           <Text styleClass="text_white" text=" A">
@@ -170,16 +178,24 @@
                                           </Text>
                                        </center>
                                     </BorderPane>
-                                    <Text text="Ready" GridPane.rowIndex="3">
-                                       <font>
-                                          <Font name="System Bold" size="12.0" />
-                                       </font>
-                                    </Text>
-                                    <Text text="Redundancy " GridPane.rowIndex="4">
-                                       <font>
-                                          <Font name="System Bold" size="12.0" />
-                                       </font>
-                                    </Text>
+                                    <BorderPane styleClass="title" GridPane.rowIndex="3">
+                                       <center>
+                                          <Text styleClass="text_white" text="Ready">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                          </Text>
+                                       </center>
+                                    </BorderPane>
+                                    <BorderPane styleClass="title" GridPane.rowIndex="4">
+                                       <center>
+                                          <Text styleClass="text_white" text="Redundancy ">
+                                             <font>
+                                                <Font name="System Bold" size="12.0" />
+                                             </font>
+                                          </Text>
+                                       </center>
+                                    </BorderPane>
                                     <BorderPane fx:id="bpPresentUnit1" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <center>
                                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text="No">
@@ -290,7 +306,7 @@
                                     </BorderPane>
                                     <BorderPane styleClass="title">
                                        <center>
-                                          <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Unit">
+                                          <Text strokeType="OUTSIDE" strokeWidth="0.0" styleClass="text_white" text="Unit">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
                                              </font>

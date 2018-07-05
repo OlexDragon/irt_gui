@@ -32,6 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
@@ -53,15 +54,15 @@ import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.DeviceInfoPacket;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.RetransmitPacket;
 import irt.data.packet.control.ModuleListPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.fx.module.ModuleSelectFxPanel;
@@ -186,8 +187,13 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 					});
 				}
 			}
-			comPortThreadQueue.addPacketListener(this);
-			scheduledFuture = service.scheduleAtFixedRate(this, 2, 5, TimeUnit.SECONDS);
+			comPortThreadQueue.addPacketListener(guiController);
+			restart();
+	}
+
+	private void restart() {
+		Optional.ofNullable(scheduledFuture).filter(f->!f.isDone()).ifPresent(f->f.cancel(true));
+		scheduledFuture = service.scheduleAtFixedRate(guiController, 2, 5, TimeUnit.SECONDS);
 	}
 
 	public static Optional<DeviceInfo> getDeviceInfo(LinkHeader linkHeader) {
@@ -208,7 +214,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	private ActionListener toJsscListener;
 	private ActionListener toPureJavaListener;
 
-	private Optional<PacketAbstract> oPacketToSend;
+	private Optional<PacketSuper> oPacketToSend;
 
 	private boolean setRetransmit = true;
 	private Object moduleList;
@@ -367,14 +373,11 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			}).start();
 		} 
 
-		synchronized (this) {
+		synchronized (guiController) {
 			notify();
 		}
 
-		if(scheduledFuture!=null && !scheduledFuture.isCancelled())
-			scheduledFuture.cancel(true);
-
-		scheduledFuture = service.scheduleAtFixedRate(this, 1, 5, TimeUnit.SECONDS);
+		restart();
 	}
 //
 //	protected boolean removePanel(LinkHeader linkHeader) {
@@ -416,7 +419,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getUnitsInfo() {
-//		logger.error("getUnitsInfo; protocol: {}; packetToSend: {}", protocol, packetToSend);
+//		logger.error("getUnitsInfo; protocol: {};", protocol);
 
 		if (!protocol.equals(Protocol.CONVERTER)) {
 
@@ -450,18 +453,22 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		logger.debug(packet);
 
-		final Optional<Packet> oPacket = Optional.ofNullable(packet);
+		final Optional<Packet> oPacket = Optional.of(packet);
+
+		if(!oPacket.isPresent())
+			return;
+
 		final Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
+
 		// Return if not response
-		final boolean noAnswer = oHeader.map(PacketHeader::getPacketType).map(pt->pt!=PacketImp.PACKET_TYPE_RESPONSE).orElse(true);
+		final boolean noAnswer = oHeader.map(PacketHeader::getPacketType).filter(pt->pt!=PacketImp.PACKET_TYPE_RESPONSE).isPresent();
 		if(noAnswer)
 			return;
 
 		//check retransmit packet
 		final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
-		final Boolean isRetransmitPacket = oPacketId.map(pid->pid==PacketWork.PACKET_ID_PROTO_RETRANSNIT).orElse(false);
+		final Boolean isRetransmitPacket = oPacketId.filter(PacketIDs.PROTO_RETRANSNIT::match).isPresent();
 		if(isRetransmitPacket){
 			setRetransmit = false;
 			return;
@@ -469,66 +476,82 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		final Optional<Byte> oPacketGroup = oHeader.map(PacketHeader::getGroupId);
 
-		//Check Control Group
+		//Check Redundancy Controller buttons
 		if(oPacketGroup.filter(gid->gid == PacketImp.GROUP_ID_CONTROL).isPresent()){
 
 			final Optional<Payload> oPayload = oPacket.map(Packet::getPayloads).map(List::stream).flatMap(Stream::findAny);
-			byte linkAddr = oPacket.map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+			byte linkAddr = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-			oPacketId.filter(pid->pid==PacketWork.PACKET_ID_MODULE_LIST).flatMap(pid->oPayload.map(Payload::getBuffer)).ifPresent(showModuleButtons(linkAddr));
+			oPacketId.filter(PacketIDs.CONTRO_MODULE_LIST::match).flatMap(pid->oPayload.map(Payload::getBuffer)).ifPresent(showModuleButtons(linkAddr));
 			return;
 		}
 
-		final boolean isDeviceInfo = oPacketGroup.map(gid->gid == PacketImp.GROUP_ID_DEVICE_INFO).orElse(false);
+		final boolean isDeviceInfo = oPacketGroup.filter(gid->gid == PacketImp.GROUP_ID_DEVICE_INFO).isPresent();
 
 		//Return if not device info packet
 		if(!isDeviceInfo)
 			return;
 
-		oPacket
-		.map(DeviceInfo::new)
-		.ifPresent(di->{
-//			logger.error(di);
+		new MyThreadFactory(()->{
 
+			oPacket
+			.map(DeviceInfo::new)
+			.ifPresent(di->{
+				logger.debug(di);
 
-			Optional<DeviceType> oDeviceType = di.getDeviceType();
-			oDeviceType
-			.ifPresent(dt->{
+				Optional<DeviceType> oDeviceType = di.getDeviceType();
+				oDeviceType
+				.ifPresent(dt->{
 
-				if(dt==DeviceType.IMPOSSIBLE)
-					logger.warn("Can not connect. {}", packet);
+					if(dt==DeviceType.IMPOSSIBLE)
+						logger.warn("Can not connect. {}", packet);
 
-				else{
-					protocol = dt.PROTOCOL;
+					else{
+						protocol = dt.PROTOCOL;
+						logger.debug("protocol: {}", protocol);
 
 						//set retransmits to 0 times
-					if(protocol==Protocol.LINKED ){
-						oPacket
-						.filter(p->setRetransmit)
-						.filter(PacketAbstract.class::isInstance)
-						.map(PacketAbstract.class::cast)
-						.map(PacketAbstract::getLinkHeader)
-						.map(LinkHeader::getAddr)
-						.filter(addr->addr!=0)
-						.ifPresent(addr->comPortThreadQueue.add(new RetransmitPacket(addr, (byte) 0)));
+						if(protocol==Protocol.LINKED ){
+							oPacket
+							.filter(p->setRetransmit)
+							.filter(PacketSuper.class::isInstance)
+							.map(PacketSuper.class::cast)
+							.map(PacketSuper::getLinkHeader)
+							.map(LinkHeader::getAddr)
+							.filter(addr->addr!=0)
+							.ifPresent(addr->comPortThreadQueue.add(new RetransmitPacket(addr, (byte) 0)));
 
-						if(moduleList==null)
-							oPacketToSend = Optional.of(new ModuleListPacket(address));
+							if(moduleList==null)
+								oPacketToSend = Optional.of(new ModuleListPacket(address));
+						}
 					}
-				}
 
-				try{
-					panelController.control(di);
-				}catch(Exception e){
-					logger.catching(e);
+					try{
+						panelController.control(di);
+					}catch(Exception e){
+						logger.catching(e);
+					}
+				});
+				if(!oDeviceType.isPresent()){
+
+					if(moduleList==null)
+						oHeader.map(PacketHeader::getOption).filter(o->o.equals(PacketImp.ERROR_INFORMATION_CANNOT_BE_GENERATED)).ifPresent(o->oPacketToSend = Optional.of(new ModuleListPacket(address)));
+
+					new MyThreadFactory(()->Optional
+							.ofNullable(scheduledFuture)
+							.filter(f->!f.isDone())
+							.ifPresent(
+									f->{
+										f.cancel(true);
+
+										final int typeId = di.getTypeId();
+										JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + typeId + ")");
+										logger.warn("The Device is not Supported.(device Id={})", typeId);
+
+										scheduledFuture = service.scheduleAtFixedRate(guiController, 5, 5, TimeUnit.SECONDS);
+									}));
 				}
 			});
-			if(!oDeviceType.isPresent()){
-
-					final int typeId = di.getTypeId();
-					JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + typeId + ")");
-					logger.warn("The Device is not Supported.(device Id={})", typeId);
-			}
 		});
 	}
 
@@ -539,13 +562,14 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			gui.getModuleSelectFxPanel().orElseGet(
 										()->{
 											ModuleSelectFxPanel msf = new ModuleSelectFxPanel(linkAddr, bytes, p->{ panelController.removeAll(); comPortThreadQueue.add(p);});
-											gui.setModuleSelectFxPanel(msf);
+											SwingUtilities.invokeLater(()->gui.setModuleSelectFxPanel(msf));
 											return msf;
 										});
 		};//TODO
 	}
 
 	public void run() {
+//		logger.error("RUN");
 		try {
 
 			final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
@@ -658,7 +682,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	public void stop() {
 
 		comPortThreadQueue.stop();
-		Optional.ofNullable(scheduledFuture).filter(shf->!shf.isCancelled()).ifPresent(shf->shf.cancel(true));
+		Optional.ofNullable(scheduledFuture).filter(shf->!shf.isDone()).ifPresent(shf->shf.cancel(true));
 		Optional.of(service).filter(serv->!serv.isShutdown()).ifPresent(serv->serv.shutdownNow());
 		gui.setModuleSelectFxPanel(null);
 	}

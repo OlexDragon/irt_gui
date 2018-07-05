@@ -125,6 +125,11 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 	}
 
 	public Packet getPacket() {
+		try {
+			join(10);
+		} catch (InterruptedException e) {
+			logger.catching(e);
+		}
 		return packet;
 	}
 

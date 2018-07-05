@@ -2,11 +2,14 @@ package irt.data.packet;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.packet.PacketWork.AlarmsPacketIds;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.alarm.AlarmStatusPacket;
 import irt.data.packet.alarm.AlarmsIDsPacket;
 import irt.data.packet.alarm.AlarmsSummaryPacket;
@@ -19,14 +22,16 @@ import irt.data.packet.configuration.GainRangePacket;
 import irt.data.packet.configuration.LOFrequenciesPacket;
 import irt.data.packet.configuration.LOPacket;
 import irt.data.packet.configuration.MuteControlPacket;
+import irt.data.packet.configuration.RedundancyEnablePacket;
+import irt.data.packet.configuration.RedundancyModePacket;
+import irt.data.packet.configuration.RedundancyNamePacket;
+import irt.data.packet.configuration.RedundancyStatusPacket;
 import irt.data.packet.control.SaveConfigPacket;
 import irt.data.packet.denice_debag.DeviceDebugHelpPacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.denice_debag.DeviceDebugReadWritePacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
-import irt.data.packet.interfaces.PacketWork.AlarmsPacketIds;
 import irt.data.packet.measurement.MeasurementPacket;
 import irt.data.packet.network.NetworkAddressPacket;
 
@@ -57,38 +62,37 @@ public enum Packets {
 	STORE_CONFIG			(()->new SaveConfigPacket());
 
 	private final static Logger logger = LogManager.getLogger();
-	private Supplier<PacketWork> packetWork;
+	private Supplier<PacketSuper> packetWork;
 
-	private Packets(Supplier<PacketWork> packetWork){
+	private Packets(Supplier<PacketSuper> packetWork){
 		this.packetWork = packetWork;
 	}
 
-	public PacketWork getPacketWork() {
+	public PacketSuper getPacketAbstract() {
 		return packetWork.get();
 	}
 
-	public static Optional<? extends PacketAbstract> cast(Packet packet){
+	public static Optional<? extends PacketSuper> cast(Packet packet){
 
-		Optional<PacketHeader> header = Optional
+		Optional<PacketHeader> oHeader = Optional
 											.ofNullable(packet)
 											.map(Packet::getHeader);
 
-		if(!header.isPresent())
+		if(!oHeader.isPresent())
 			return Optional.empty();
 
-		final short packetId = header.get().getPacketId();
+		final short packetId = oHeader.get().getPacketId();
 
 		return Arrays
 				.stream(Packets.values())
 				.parallel()
-				.map(Packets::getPacketWork)
-				.map(PacketAbstract.class::cast)
-				.filter(pa->equals(packetId, pa))
-				.map(PacketAbstract::getClass)
+				.map(Packets::getPacketAbstract)
+				.filter(matchIDs(packetId))
+				.map(PacketSuper::getClass)
 				.map(cl->{
 					try {
 
-						final PacketAbstract newInstance = cl.getConstructor().newInstance((Object[])null);
+						final PacketSuper newInstance = cl.getConstructor().newInstance((Object[])null);
 						newInstance.setLinkHeader(Optional.of(packet).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).orElse(null));
 						newInstance.setHeader(packet.getHeader());
 						newInstance.setPayloads(packet.getPayloads());
@@ -103,20 +107,22 @@ public enum Packets {
 				.findAny();
 	}
 
-	private static boolean equals(final short packetId, PacketAbstract packet) {
+	private static Predicate<? super PacketSuper> matchIDs(short packetId) {
+		return p->{
 
-		if(packet instanceof AlarmStatusPacket)
-			return Arrays.stream(AlarmsPacketIds.values()).filter(a->a.getPacketId()==packetId).findAny().isPresent();
+			if(p instanceof AlarmStatusPacket)
+				return Arrays.stream(AlarmsPacketIds.values()).filter(a->a.getPacketId().getId()==packetId).findAny().isPresent();
 
-		if(packetId>=PacketWork.DUMPS) 
-			return packet.getClass() == DeviceDebugPacket.class;
+			if(packetId>=PacketIDs.DUMPS.getId() && packetId<PacketIDs.CLEAR_STATISTICS.getId()) 
+				return p.getClass() == DeviceDebugPacket.class;
 
-		if(packetId>=PacketWork.PACKET_ID_DEVICE_FCM_INDEX_1)
-			return packet.getClass() == DeviceDebugReadWritePacket.class;
+			if(packetId>=PacketIDs.DEVICE_FCM_INDEX_1.getId() && packetId<PacketIDs.DEVICE_DEBUG_ADDR_0.getId())
+				return p.getClass() == DeviceDebugReadWritePacket.class;
 
-//		logger.error(packet);
-		final short pId = packet.getHeader().getPacketId();
-		
-		return pId==packetId;
+//			logger.error(packet);
+			final short pId = p.getHeader().getPacketId();
+			
+			return pId==packetId;
+		};
 	}
 }

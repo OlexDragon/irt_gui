@@ -2,47 +2,48 @@
 package irt.data.packet.alarm;
 
 import java.awt.Color;
+import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
-import irt.tools.fx.AlarmPanelFx.AlarmStatus;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.interfaces.Packet;
+import irt.data.packet.Payload;
 
-public class AlarmStatusPacket extends PacketAbstract{
+public class AlarmStatusPacket extends PacketSuper{
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Payload::getBuffer)
+																										.map(AlarmStatus::new);
 
 	public AlarmStatusPacket() {
-		this((byte)0, PacketWork.PACKET_ID_ALARMS_STATUS);
+		this((byte)0, AlarmsPacketIds.STATUS);
 	}
 
-	public AlarmStatusPacket(byte linkAddr, short alarmId) {
-		this(linkAddr, PacketImp.ALARM_STATUS, alarmId);
+	public AlarmStatusPacket(byte linkAddr, AlarmsPacketIds alarmsPacketIds) {
+		this(linkAddr, PacketImp.ALARM_STATUS, alarmsPacketIds);
 	}
 
-	protected AlarmStatusPacket(byte linkAddr, byte alarmCommand, short alarmId){
+	protected AlarmStatusPacket(byte linkAddr, byte alarmCommand, AlarmsPacketIds alarmsPacketIds){
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				AlarmsPacketIds.valueOf(alarmId).orElse(AlarmsPacketIds.INDEFINED).getPacketId(),
+				alarmsPacketIds.getPacketId(),
 				PacketImp.GROUP_ID_ALARM,
 				alarmCommand,
-				PacketImp.toBytes(alarmId),
-				Priority.ALARM);
+				PacketImp.toBytes(alarmsPacketIds.getAlarmId()),
+				Priority.REQUEST);
 	}
 
 	@Override
 	public Object getValue() {
-		return Optional
-				.ofNullable(getPayloads())
-				.filter(pls->!pls.isEmpty())
-				.map(pls->pls.parallelStream())
-				.flatMap(stream->{
-					return stream
-							.map(pl->pl.getBuffer())
-							.filter(b->b!=null)
-							.map(AlarmStatus::new)
-							.findAny();
-				})
-				.map(Object.class::cast)
+		return parseValueFunction.apply(this)
 				.orElse(null);
 	}
 
@@ -70,6 +71,78 @@ public class AlarmStatusPacket extends PacketAbstract{
 		public String toString(){
 			return description;
 			
+		}
+	}
+
+	public static class AlarmStatus {
+
+		private final Short alarmCode;
+		private final AlarmSeverities alarmSeverities;
+
+		public AlarmStatus(byte[] bytes) {
+
+			if(bytes==null || bytes.length<2){
+				alarmCode = null;
+				alarmSeverities = null;
+				return;
+			}
+
+			final ByteBuffer buffer = ByteBuffer.wrap(bytes);
+			alarmCode =buffer.getShort();
+
+			if(bytes.length<6){
+				alarmSeverities = null;
+				return;
+			}
+
+			final int status = buffer.getInt(2)&7;
+			alarmSeverities = AlarmStatusPacket.AlarmSeverities.values()[status];
+		}
+
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((getAlarmCode() == null) ? 0 : getAlarmCode().hashCode());
+			result = prime * result + ((getAlarmSeverities() == null) ? 0 : getAlarmSeverities().hashCode());
+			return result;
+		}
+
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AlarmStatus other = (AlarmStatus) obj;
+			if (getAlarmCode() == null) {
+				if (other.getAlarmCode() != null)
+					return false;
+			} else if (!getAlarmCode().equals(other.getAlarmCode()))
+				return false;
+			if (getAlarmSeverities() != other.getAlarmSeverities())
+				return false;
+			return true;
+		}
+
+
+		@Override
+		public String toString() {
+			return "AlarmStatus [alarmCode=" + getAlarmCode() + ", alarmSeverities=" + getAlarmSeverities() + "]";
+		}
+
+
+		public AlarmSeverities getAlarmSeverities() {
+			return alarmSeverities;
+		}
+
+
+		public Short getAlarmCode() {
+			return alarmCode;
 		}
 	}
 }

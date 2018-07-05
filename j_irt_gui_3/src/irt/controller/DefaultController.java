@@ -6,7 +6,7 @@ import java.util.Optional;
 import irt.controller.control.ControllerAbstract;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.listener.ValueChangeListener;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork;
 
 public class DefaultController extends ControllerAbstract {
 

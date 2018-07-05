@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 import javax.swing.event.EventListenerList;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,8 +20,11 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiController;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
 import purejavacomm.PortInUseException;
@@ -52,6 +56,7 @@ public class ComPortThreadQueue implements Runnable {
 
 		try {
 			PacketWork packetWork = comPortQueue.take();
+			logger.debug(packetWork);
 
 			Optional
 			.ofNullable(serialPort)
@@ -61,31 +66,12 @@ public class ComPortThreadQueue implements Runnable {
 				Optional
 				.ofNullable(packetWork)
 				.map(sp::send)
-				.ifPresent(p->firePacketListener(p));
+				.ifPresent(
+						p->{
+							logger.trace(p);
+							firePacketListener(p);
+						});
 			});
-//			if (serialPort != null) {
-//				PacketThreadWorker packetThread = packetWork.getPacketThread();
-//
-//					Packet packet = packetThread.getPacket();
-//					if (packet == null) {
-//						logger.warn(packetWork);
-//						return;
-//					}
-//
-//					if (serialPort.isOpened()) {
-//						sent = false;
-//
-//						Packet send = serialPort.send(packetWork);
-//						firePacketListener(send);
-//
-//					} else if (!sent) {
-//						sent = true;
-//						String message = String.format("The serial port %s is not ready.", serialPort.getPortName());
-//						JOptionPane.showMessageDialog(null, message);
-//						logger.warn("The Serial port is not ready:\n{}", packetWork);
-//					}
-//			} else
-//				logger.warn("serialPort==null");
 
 		} catch (InterruptedException e) {
 			Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort());
@@ -96,29 +82,39 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketWork packetWork){
-		logger.entry(packetWork);
+//		logger.error(packetWork);
 //		if(packetWork instanceof DeviceDebugInfoPacket)
 //			logger.debug(packetWork.getClass().getSimpleName());//catching(new Throwable());
 
 		try {
 
-			if (comPortQueue.size() < 300){
+			final Optional<PacketSuper> oPacket = Optional.of(packetWork).filter(PacketSuper.class::isInstance).map(PacketSuper.class::cast);
+
+			if(oPacket.map(PacketSuper::getHeader).map(PacketHeader::getPacketType).filter(pt->pt==PacketImp.PACKET_TYPE_COMMAND).isPresent()){
+
+				comPortQueue.add(packetWork);
+				return;
+			}
+
+			if (comPortQueue.size() < 100){
 				if (!comPortQueue.contains(packetWork)) {
 
 					packetWork.getPacketThread().start();
 
+					oPacket.ifPresent(p->p.setTimestamp(System.nanoTime()));
+
 					comPortQueue.add(packetWork);
+
 					logger.trace("<<< is added - {}", packetWork);
 				} else
 					logger.warn("Tis packet already in the queue. {}", packetWork);
 			}else
-				logger.warn("comPortQueue is FULL");
+				logger.error("comPortQueue is FULL");
 
 		} catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:add");
 		}
-		logger.debug("queue size: {}\n{}", comPortQueue.size(), comPortQueue);
 	}
 
 	public synchronized void clear(){
@@ -137,7 +133,6 @@ public class ComPortThreadQueue implements Runnable {
 
 		// Close old serial p[ort
 		Optional.ofNullable(ComPortThreadQueue.serialPort).ifPresent(sp->{
-			sp.setRun(false, "Reset Serial Port");
 			sp.closePort();
 		});
 		clear();
@@ -159,7 +154,14 @@ public class ComPortThreadQueue implements Runnable {
 
 				final String errorMessage = String.format("Serial port %s is in use.", sp);
 
-				JOptionPane.showMessageDialog(null, errorMessage);
+				new SwingWorker<Object, Object>() {
+
+					@Override
+					protected Object doInBackground() throws Exception {
+						JOptionPane.showMessageDialog(null, errorMessage);
+						return null;
+					}
+				}.execute();
 
 			} catch (Exception e) {
 				logger.catching(e);

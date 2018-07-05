@@ -1,7 +1,9 @@
 package irt.data.packet;
 
 import java.util.Arrays;
+import java.util.Optional;
 
+import irt.data.PacketThread;
 import irt.data.packet.interfaces.LinkedPacket;
 
 public class LinkedPacketImp extends PacketImp implements LinkedPacket{
@@ -36,12 +38,11 @@ public class LinkedPacketImp extends PacketImp implements LinkedPacket{
 	}
 
 	@Override
-	public byte[] toBytes() {
-
+	public byte[] getData() {
 		byte[] b = null;
 		if(linkHeader!=null){
 			b = linkHeader.toBytes();
-			byte[] p = super.toBytes();
+			byte[] p = super.getData();
 
 			if(p!=null){
 				b = Arrays.copyOf(b, LinkHeader.SIZE+p.length);
@@ -58,6 +59,20 @@ public class LinkedPacketImp extends PacketImp implements LinkedPacket{
 
 	public LinkHeader getLinkHeader() {
 		return linkHeader;
+	}
+
+	@Override
+	public byte[] getAcknowledg() {
+
+		final byte[] b = Optional.ofNullable(linkHeader).filter(lh->lh.getAddr()!=0).map(LinkHeader::toBytes).map(bs->Arrays.copyOf(bs, 7)).orElseGet(()->new byte[3]);
+		final byte[] idBytes = getHeader().packetIdAsBytes();
+
+		int idPosition = b.length-3;
+		b[idPosition] = (byte) 0xFF;
+		b[++idPosition] = idBytes[0];
+		b[++idPosition] = idBytes[1];
+
+		return PacketThread.preparePacket(b);
 	}
 
 	@Override

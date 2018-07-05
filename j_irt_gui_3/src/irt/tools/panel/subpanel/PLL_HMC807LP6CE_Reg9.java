@@ -36,12 +36,13 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
+import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.value.Value;
 
 public class PLL_HMC807LP6CE_Reg9 extends JPanel {
@@ -112,33 +113,37 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 				controller = new DefaultController(deviceType, "PLL reg.N9", new DeviceDebagSetter(null,
 						INDEX,
 						ADDRESS,
-						PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG,
+						PacketIDs.FCM_DEVICE_DEBUG_PLL_REG,
 						PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE), Style.CHECK_ONCE){
 
 							@Override
-									public void onPacketRecived(Packet packet) {
-										PacketHeader header = packet.getHeader();
-										if(header.getPacketId()==PacketWork.PACKET_ID_FCM_DEVICE_DEBUG_PLL_REG){
+							public void onPacketRecived(Packet packet) {
 
-											if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
-												Payload payload = packet.getPayload(PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE);
-												if(payload!=null){
-													RegisterValue value = payload.getRegisterValue();
-													RegisterValue oldValue = PLL_HMC807LP6CE_Reg9.this.value;
-													PLL_HMC807LP6CE_Reg9.this.logger.trace("Old Value={}, New Value={}", oldValue, value);
+								new MyThreadFactory(()->{
+									
+									PacketHeader header = packet.getHeader();
+									if(PacketIDs.FCM_DEVICE_DEBUG_PLL_REG.match(header.getPacketId())){
 
-													if(oldValue==null || !oldValue.equals(value)){
-														PLL_HMC807LP6CE_Reg9.this.logger.debug("Value={}, {}",value, packet);
-														oldValue = value;
-														parse(value.getValue().getValue());
-														textField.setText("0x"+Long.toHexString(value.getValue().getValue()).toUpperCase());
-													}
-												}else
-													textField.setText("Payload N/A");
+										if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+											Payload payload = packet.getPayload(PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE);
+											if(payload!=null){
+												RegisterValue value = payload.getRegisterValue();
+												RegisterValue oldValue = PLL_HMC807LP6CE_Reg9.this.value;
+												PLL_HMC807LP6CE_Reg9.this.logger.trace("Old Value={}, New Value={}", oldValue, value);
+
+												if(oldValue==null || !oldValue.equals(value)){
+													PLL_HMC807LP6CE_Reg9.this.logger.debug("Value={}, {}",value, packet);
+													oldValue = value;
+													parse(value.getValue().getValue());
+													textField.setText("0x"+Long.toHexString(value.getValue().getValue()).toUpperCase());
+												}
 											}else
-												textField.setText("N/A");
-										}
+												textField.setText("Payload N/A");
+										}else
+											textField.setText("N/A");
 									}
+								});
+							}
 
 									private void parse(long value) {
 
@@ -268,7 +273,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS,
-							PacketWork.PACKET_ID_CONFIGURATION_FCM_FLAGS);
+							PacketIDs.CONFIGURATION_FCM_FLAGS);
 					packetWork.preparePacketToSend(0);
 					GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 				} catch (Exception ex) {

@@ -1,6 +1,6 @@
 package irt.controller.interfaces;
 
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.RangePacket;
 import irt.data.value.Value;
 

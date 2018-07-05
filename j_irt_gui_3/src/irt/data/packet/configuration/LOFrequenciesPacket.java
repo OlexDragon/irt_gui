@@ -9,19 +9,28 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import irt.data.IdValueFreq;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.interfaces.Packet;
 import irt.data.value.ValueFrequency;
 
-public class LOFrequenciesPacket  extends PacketAbstract{
+public class LOFrequenciesPacket  extends PacketSuper{
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Payload::getBuffer)
+																										.map(ByteBuffer::wrap)
+																										.map(toIdValueFreq());
 
 	public LOFrequenciesPacket(byte linkAddr) {
 		super(
 				linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_LO_FREQUENCIES,
+				PacketIDs.CONFIGURATION_LO_FREQUENCIES,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_LO_FREQUENCIES : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
 				null,
@@ -34,40 +43,34 @@ public class LOFrequenciesPacket  extends PacketAbstract{
 
 	@Override
 	public Object getValue() {
-		return Optional
-				.ofNullable(getPayloads())
-				.map(List::stream)
-				.flatMap(Stream::findAny)
-				.map(Payload::getBuffer)
-				.map(ByteBuffer::wrap)
-				.map(toIdValueFreq());
+		return parseValueFunction.apply(this);
 	}
 
-	private Function<ByteBuffer, List<IdValueFreq>> toIdValueFreq() {
+	private static Function<ByteBuffer, List<IdValueFreq>> toIdValueFreq() {
 		return bb->{
-			final byte addr = getLinkHeader().getAddr();
+			int size = bb.remaining();
 
-			if(addr != 0)
+			if(size%9 == 0)
 				return biasBoardLOs(bb);
 
-			return onverterLOs(bb);
+			return converterLOs(bb);
 		};
 	}
 
-	private List<IdValueFreq> onverterLOs(ByteBuffer bb) {
+	private static List<IdValueFreq> converterLOs(ByteBuffer bb) {
 		List<IdValueFreq> l = new ArrayList<>();
 
-		final LongBuffer asLongBuffer = bb.asLongBuffer();
+		final LongBuffer longBuffer = bb.asLongBuffer();
 
-		while(asLongBuffer.position()<asLongBuffer.capacity()) {
-			final long value = asLongBuffer.get();
-			l.add(new IdValueFreq((byte) asLongBuffer.position(), new ValueFrequency(value, value, value)));
+		while(longBuffer.position()<longBuffer.capacity()) {
+			final long value = longBuffer.get();
+			l.add(new IdValueFreq((byte) longBuffer.position(), new ValueFrequency(value, value, value)));
 		}
 
 		return l;
 	}
 
-	private List<IdValueFreq> biasBoardLOs(ByteBuffer bb) {
+	private static List<IdValueFreq> biasBoardLOs(ByteBuffer bb) {
 		List<IdValueFreq> l = new ArrayList<>();
 		while(bb.position()<bb.capacity()) {
 			final byte freqId = bb.get();

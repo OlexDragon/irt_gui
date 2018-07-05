@@ -1,12 +1,35 @@
 package irt.data.packet.configuration;
 
-import irt.data.packet.PacketAbstract;
+import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.Payload;
+import irt.data.packet.interfaces.Packet;
 
-public class LnbPowerPacket  extends PacketAbstract{
+public class LnbPowerPacket  extends PacketSuper{
 
-	private static final short PACKET_ID 	= PacketWork.PACKET_ID_CONFIGURATION_FCM_LNB_POWER;
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(Packet::getPayloads)
+																										.map(List::stream)
+																										.flatMap(Stream::findAny)
+																										.map(Payload::getBuffer)
+																										.map(ByteBuffer::wrap)
+																										.filter(bb->bb.remaining()==1)
+																										.flatMap(
+																												bb->{
+																													final int index = bb.get()&7;
+																													return Optional
+																															.of( PowerStatus.values())
+																															.map(v->v[index]);
+																												});
+
+	private static final PacketIDs PACKET_ID 	= PacketIDs.CONFIGURATION_FCM_LNB_POWER;
 	private static final byte GROUP_ID 		= PacketImp.GROUP_ID_CONFIGURATION;
 	private static final byte PARAMETER 	= PacketImp.PARAMETER_CONFIG_LNB_POWER;
 

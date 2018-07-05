@@ -6,30 +6,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import javax.swing.Timer;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.apache.logging.log4j.core.Logger;
 
 import irt.data.Checksum;
 import irt.data.LoggerWorker;
-import irt.data.MyThreadFactory;
 import irt.data.PacketThread;
 import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.head.Console;
 import irt.tools.panel.head.IrtPanel;
 import jssc.SerialPort;
@@ -40,7 +39,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 	private static final String LOGGER_NAME = "comPort";
 
-	private final Logger logger = (Logger) LogManager.getLogger(LOGGER_NAME);
+	private final Logger logger = LogManager.getLogger();
 	private final Marker marker = MarkerManager.getMarker("FileWork");
 
 	public enum Baudrate{
@@ -80,17 +79,13 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 	private static int baudrate = BAUDRATE_115200;
 
-	private boolean run = true;
 	private int timeout = 3000;
-	private int timesTimeout;
 	private Timer timer;
 	private SerialPortEvent serialPortEvent = new SerialPortEvent();
 	private LinkHeader linkHeader;
 	private short packetId;
 	private boolean isSerialPortEven;
 	private boolean isComfirm;
-
-	private boolean logged = false;
 
 	public JsscComPort(String portName) {
 		super(portName);
@@ -116,29 +111,29 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 	}
 
 	public Packet send(PacketWork packetWork){
-		logger.trace(packetWork);
+		logger.debug("ENTRY: {}", packetWork);
+
+		Packet packet = packetWork.getPacketThread().getPacket();
 
 		long start = System.currentTimeMillis();
-		PacketThreadWorker pt = packetWork.getPacketThread();
-		try {
-			pt.join(500);
-		} catch (Exception e1) {
-			logger.catching(e1);
+
+		if(packet == null)
 			return null;
-		}
-		Packet p = pt.getPacket();
-		PacketHeader ph = p.getHeader();
+
+		PacketHeader ph = packet.getHeader();
 		byte groupId = ph.getGroupId();
 		packetId = ph.getPacketId();
-		Packet packet;
+		Packet readPacket;
 
-		if(p instanceof LinkedPacket){
-			linkHeader = Optional.ofNullable(((LinkedPacket)p).getLinkHeader()).filter(lh->lh.getAddr()!=0).orElse(null);//
-			packet = new LinkedPacketImp(linkHeader);
+
+		if(packet instanceof LinkedPacket){
+			linkHeader = Optional.ofNullable(packet).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).filter(lh->lh.getAddr()!=0).orElse(null);//
+			readPacket = new LinkedPacketImp(linkHeader);
 		}else{
 			linkHeader = null;
-			packet = new PacketImp();
+			readPacket = new PacketImp();
 		}
+		logger.debug("linkHeader = {}", linkHeader);
 
 		int runTimes = 0;
 		byte[] readData;
@@ -149,10 +144,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 		ParameterHeader parameterHeader;
 		try {
 
-if(!isRun())
-	setRun(true, "Restart");
 
-do{
 
 	Checksum checksum = null;
 	logger.trace("\n\t {}\n\t", ph);
@@ -160,30 +152,31 @@ do{
 			timer.restart();
 			clear();
 
-			byte[] data = pt.getData();
+			byte[] data = packet.toBytes();
 			String hexStr = ToHex.bytesToHex(data);
 
 			String prefix = (runTimes+1)+") send";
 
-			logger.info(marker, ">> {}: {}", prefix, p);
+			logger.info(marker, ">> {}: {}", prefix, packet);
 			logger.info(marker, ">> {}: {}", prefix, hexStr);
-			Console.appendLn(p, prefix);
+			Console.appendLn(packet, prefix);
 			Console.appendLn(hexStr, prefix);
 
-			if(isRun() && data!=null && isOpened()){
+			if(data!=null && isOpened()){
 				writeBytes(data);
 				logger.debug("writeBytes: {}", ()->Arrays.toString(data));
 
 				if ((isConfirmBytes()) && isFlagSequence()){
 
-					if(linkHeader!=null)
+					if(linkHeader!=null){
 						if((readData=readLinkHeader())!=null)
 							checksum = new Checksum(readData);
 						else{
 							logger.warn("linkHeader==null");
 							Console.appendLn("LinkHeader", "Break");
-							break;
+							return packet;
 						}
+					}
 
 					if((readData=readHeader())!=null) {
 						if(checksum!=null)
@@ -195,17 +188,16 @@ do{
 						logger.debug(packetHeader);
 
 						if (packetHeader.toBytes() != null && packetHeader.getGroupId()==groupId) {
-							packet.setHeader(packetHeader);
+							readPacket.setHeader(packetHeader);
 							payloadsList = new ArrayList<>();
 
-							while ((readData = readParameterHeader())!=null && isRun()) {
+							while ((readData = readParameterHeader())!=null) {
 
 								if (containsFlagSequence(readData)) {
 									cs = checksum.getChecksumAsBytes();
 
 									if (cs[0] == readData[0] && cs[1] == readData[1]){
-										timesTimeout = 0;
-										packet.setPayloads(payloadsList);
+										readPacket.setPayloads(payloadsList);
 									}
 									logger.trace("END");
 									break;
@@ -236,43 +228,31 @@ do{
 							logger.warn("packetHeader.asBytes() == null || packetHeader.getGroupId()!=groupId");
 					}else
 						logger.warn("(readData=readHeader())==null");
-				}else if(!logged){
-					logger.warn("isFlagSequence() = false");
-				}
+				}else 
+					logger.warn("isFlagSequence() = false {}", packet);
 			}else {
-				logger.warn("the condition isRun() && data!=null && isOpened() does not hold");
-				setRun(false, "run="+run+", data="+data);
+				logger.warn("the condition data!=null && isOpened({}) does not hold", isOpened());
 			}
-}while(isComfirm && packet.getPayloads()==null && ++runTimes<3 && isRun());//if error repeat up to 3 times
 
-				if(isRun()) {
-					byte[] acknowledge = getAcknowledge();
-					writeBytes(acknowledge);
-					logger.info(marker, "acknowledge={}", ToHex.bytesToHex(acknowledge));
-				}
+			Optional.ofNullable(getAcknowledge()).ifPresent(acknowledge->{ try { writeBytes(acknowledge); } catch (SerialPortException e) { logger.catching(e); }});
 
-				if(packet.getHeader()==null || packet.getPayloads()==null && isRun())
-					packet = p;
+				if(readPacket.getHeader()==null || readPacket.getPayloads()==null)
+					readPacket = packet;
 
 		} catch (Exception e) {
 			logger.catching(e);
-			if(timesTimeout<3){
-				timesTimeout++;
-				setRun(false, "Times Timeout");
-			}
 			Console.appendLn(e.getLocalizedMessage(), "Error");
 		}
 
 		timer.stop();
 
-		Console.appendLn(packet, "Get");
+		Console.appendLn(readPacket, "Get");
 		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 
-		return packet;
+		return readPacket;
 	}
 
 	private byte[] getAcknowledge() {
-		logger.entry();
 		byte[] b;
 
 		if(linkHeader!=null)
@@ -286,7 +266,10 @@ do{
 		byte[] packetId = PacketImp.toBytes(this.packetId);
 		System.arraycopy(packetId, 0, b, ++idPosition, 2);
 
-		return logger.exit(PacketThread.preparePacket(b));
+		final byte[] preparePacket = PacketThread.preparePacket(b);
+		logger.debug("{}", preparePacket);
+
+		return preparePacket;
 	}
 
 	private byte[] readLinkHeader() throws SerialPortException {
@@ -306,7 +289,7 @@ do{
 		byte[] readBytes = readByte(2500);
 		boolean isFlagSequence = readBytes!=null && readBytes[0] == PacketImp.FLAG_SEQUENCE;
 
-		return logger.exit(isFlagSequence);
+		return isFlagSequence;
 	}
 
 	private boolean containsFlagSequence(byte[] readBytes) {
@@ -325,11 +308,10 @@ do{
 		boolean isComfirm = false;
 		int ev = Optional.ofNullable(linkHeader).map(LinkHeader::getIntAddr).filter(addr->addr>0).map(a->11).orElse(7);
 		int index = ev - 3;
-		logger.debug("linkHeader = {}", linkHeader);
 
-		byte[] readBytes = readBytes(ev,100);
+		byte[] readBytes = readBytes(ev, 100);
 
-		logger.debug("\n readBytes= {}", ()->Arrays.toString(readBytes));
+		logger.debug("readBytes= {}", readBytes);
 
 		this.isComfirm = readBytes!=null && readBytes[0]==PacketImp.FLAG_SEQUENCE && readBytes[readBytes.length-1]==PacketImp.FLAG_SEQUENCE;
 
@@ -341,7 +323,7 @@ do{
 
 			byte[] data = Arrays.copyOfRange(readBytes, 1, index);
 
-			logger.debug("\n readBytes= {}\n LinkHeader data= {}", ()->Arrays.toString(readBytes), ()->Arrays.toString(data));
+			logger.trace("\n readBytes= {}\n LinkHeader data= {}", ()->Arrays.toString(readBytes), ()->Arrays.toString(data));
 
 			LinkHeader lh = new LinkHeader(data);
 			if((linkHeader==null || lh.equals(linkHeader)) && packetId==getPacketId(linkHeader!=null, data)){
@@ -353,12 +335,10 @@ do{
 					logger.warn("Checksum ERROR ({})", ToHex.bytesToHex(readBytes));
 			}else
 				logger.warn("LinckHeaders are not equal (sent={}, received={}", linkHeader, lh);
-		}else if(!logged){
-			logger.warn("Acknowledge is wrong({})", ToHex.bytesToHex(readBytes));
-		}
+		}else
+			logger.warn("Acknowledge is wrong({})", readBytes);
 
-		logged = readBytes==null || !isComfirm;
-
+		logger.debug("RETURN: {}; size:{}; read bytes:{}", isComfirm, ev, readBytes);
 		return isComfirm;
 	}
 
@@ -368,7 +348,7 @@ do{
 
 	@Override
 	public String toString() {
-		return "JsscComPort Thread Name - "+Thread.currentThread().getName();
+		return "JsscComPort  - "+ getPortName();
 	}
 
 	public int getTimeout() {
@@ -387,11 +367,10 @@ do{
 	public byte[] clear() throws SerialPortException {
 		byte[] readBytes = null;
 		if (wait(1, 20)){
-			if(isRun()) {
-				byte[] acknowledge = getAcknowledge();
-				writeBytes(acknowledge);
-				logger.info(marker, "acknowledge={}", ToHex.bytesToHex(acknowledge));
-			}
+			byte[] acknowledge = getAcknowledge();
+			writeBytes(acknowledge);
+			logger.info(marker, "acknowledge={}", ToHex.bytesToHex(acknowledge));
+
 			do {
 				readBytes = super.readBytes(getInputBufferBytesCount());
 				String readBytesStr = ToHex.bytesToHex(readBytes);
@@ -403,54 +382,50 @@ do{
 	}
 
 	public byte[] readByte(int timeout) throws SerialPortException {
+		logger.debug("timeout: {}", timeout);
 		return readBytes(1, timeout);
 	}
 
 	@Override
-	public byte[] readBytes(int byteCount) throws SerialPortException {
+	public byte[] readBytes(int byteCount) {
+		logger.debug("ENTRY byteCount: {}", byteCount);
 
 		return readBytes(byteCount, 50);
 	}
 
-	public byte[] readBytes(int byteCount, int waitTime) throws SerialPortException {
+	public byte[] readBytes(int byteCount, int waitTime) {
+		logger.debug("ENTRY byteCount: {}; waitTime: {}", byteCount, waitTime);
 
-		byte[] readBytes = null;
+		byte[] readBytes;
+		try {
 
-		int escCount = 0;
-		boolean hasEsc = false;
+			if(!wait(byteCount, waitTime))
+				return null;
 
-		do{
-			byte[] tmpBytes = null;
+			readBytes = super.readBytes(byteCount);
 
-			synchronized (this) {
-				if(wait(hasEsc ? escCount : byteCount, waitTime) && isOpened())
-					escCount = hasEsc(tmpBytes = super.readBytes(readBytes==null ? byteCount : escCount));
-			}
+			final int escapes = escapeCount(readBytes);
+			logger.debug("readBytes: {}", readBytes);
+			if(escapes==0)
+				return readBytes;
 
-			Console.appendLn(ToHex.bytesToHex(tmpBytes), "Read");
+			final byte[] tmp = readBytes(escapes);
 
-			if(hasEsc){
-				if(tmpBytes!=null){
-					int index = readBytes.length;
-					readBytes = Arrays.copyOf(readBytes, index+tmpBytes.length);
-					System.arraycopy(tmpBytes, 0, readBytes, index, tmpBytes.length);
-				}
-			}else
-				readBytes = tmpBytes;
+			if(tmp==null)
+				return byteStuffing(readBytes);
 
-			if(escCount>0){
-				byteCount += escCount;
-				hasEsc = true;
-			}
+			final int newLength = byteCount + escapes;
+			readBytes = Arrays.copyOf(readBytes, newLength);
+			System.arraycopy(tmp, 0, readBytes, byteCount, escapes);
 
-		}while(escCount>0 && readBytes!=null && readBytes.length<byteCount);
+			Console.appendLn(ToHex.bytesToHex(readBytes), "Read");
 
-		if(hasEsc)
-			readBytes = byteStuffing(readBytes);
+			return byteStuffing(readBytes);
 
-		logger.info(marker, "<< get:{}, hasEsc={}", ToHex.bytesToHex(readBytes), hasEsc);
-
-		return readBytes;
+		} catch (SerialPortException e) {
+			logger.catching(e);
+			return null;
+		}
 	}
 
 	public byte[] readBytes(byte[] readEnd, int waitTime) throws SerialPortException {
@@ -503,16 +478,8 @@ do{
 		return readBytes;
 	}
 
-	private int hasEsc(byte[] readBytes) {
-
-		int escCount = 0;
-
-		if(readBytes!=null)
-			for(byte b:readBytes)
-				if(b==PacketImp.CONTROL_ESCAPE)
-					escCount++;
-
-		return escCount;
+	private int escapeCount(final byte[] readBytes) {
+		return (int) IntStream.range(0, readBytes.length).filter(i->readBytes[i]==PacketImp.CONTROL_ESCAPE).count();
 	}
 
 	private byte[] byteStuffing(byte[] readBytes) {
@@ -532,25 +499,13 @@ do{
 		return readBytes==null ? null : index==readBytes.length ? readBytes : Arrays.copyOf(readBytes, index);
 	}
 
-	public void setRun(boolean run, String why) {
-		logger.warn("setRun({}, {})", run, why);
-		synchronized (this) {
-			this.run = run;
-			notify();
-		}
-	}
-
-	public synchronized boolean isRun() {
-		return run;
-	}
-
 	public boolean wait(int eventValue, int waitTime) throws SerialPortException {
-		logger.entry(eventValue, waitTime);
 		boolean isReady = false;
 		long start = System.currentTimeMillis();
 		long waitTimeL = waitTime*eventValue;
+		logger.entry(eventValue, waitTime);
 
-		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTimeL && isRun()){
+		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTimeL){
 			synchronized (this) {
 
 				try {
@@ -566,17 +521,11 @@ do{
 
 		isSerialPortEven = false;
 
-		return logger.exit(isReady);
+		return isReady;
 	}
 
 	@Override
 	public synchronized boolean openPort() throws SerialPortException {
-		logger.debug(this);
-
-		if (!run){
-			new MyThreadFactory(()->closePort());
-			return false;
-		}
 
 		if (isOpened()) return true;
 		
@@ -586,6 +535,7 @@ do{
 
 		setBaudrate();
 
+		logger.debug("Serial port {} is OPEND", this);
 		return true;
 	}
 
@@ -593,7 +543,6 @@ do{
 	public synchronized boolean closePort(){
 		logger.debug(this);
 
-		run = false;
 		if (!isOpened()) return true;
 
 		try { removeEventListener(); } catch (SerialPortException e) { logger.catching(e); }

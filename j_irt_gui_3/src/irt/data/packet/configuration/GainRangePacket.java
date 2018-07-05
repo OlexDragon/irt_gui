@@ -1,17 +1,16 @@
 package irt.data.packet.configuration;
 
 import irt.data.Range;
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
 import irt.data.packet.interfaces.RangePacket;
 
-public class GainRangePacket extends PacketAbstract implements RangePacket {
+public class GainRangePacket extends PacketSuper implements RangePacket {
 
 	public GainRangePacket( byte linkAddr) {
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_GAIN_RANGE,
+				PacketIDs.CONFIGURATION_GAIN_RANGE,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				PacketImp.PARAMETER_ID_CONFIGURATION_GAIN_RANGE,
 				null,

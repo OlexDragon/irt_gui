@@ -34,6 +34,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.text.Font;
 
 public class UpdateButtonJFXPanel extends JFXPanel {
 	private static final long serialVersionUID = -5186685111758208307L;
@@ -66,6 +67,9 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 		public UpdateButtonFx() {
 			setText("Update");
+
+			final Font font = new Font(12);
+			setFont(font);
 
 			addMouseListener(new MouseListener() {
 				Timer timer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->timerDone=true);

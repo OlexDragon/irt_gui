@@ -2,7 +2,7 @@ package irt.data;
 
 import irt.controller.interfaces.DescriptionPacketValue;
 import irt.controller.translation.Translation;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.RangePacket;
 import irt.data.value.Value;
 

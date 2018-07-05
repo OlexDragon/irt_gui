@@ -10,10 +10,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
@@ -28,18 +30,18 @@ public class AdcWorker {
 														return packetToSend;
 													}
 	private final JLabel label;
-	private final short packetId;
+	private final DeviceDebugPacketIds deviceDebugPacketIds;
 	private final double multiplier;
 	private final DecimalFormat format;
 
 	private boolean mousePressed;
 	private final List<Double> average = new  FixedSizeBuffer<>(100);
 
-	public AdcWorker(JLabel label, byte linkAddr, RegisterValue registerValue, short packetId, byte parameterId, double multiplier, String pattern) {
-		packetToSend = new DeviceDebugPacket(linkAddr, registerValue, packetId, parameterId);
+	public AdcWorker(JLabel label, byte linkAddr, Value value, DeviceDebugPacketIds packetID, double multiplier, String pattern) {
+		packetToSend = new DeviceDebugPacket(linkAddr, value, packetID);
 
 		this.label = label;
-		this.packetId = packetId;
+		this.deviceDebugPacketIds = packetID;
 		this.multiplier = multiplier;
 		this.format = new DecimalFormat(pattern);
 
@@ -94,12 +96,16 @@ public class AdcWorker {
 	}
 
 	public void update(final Packet packet) {
+
+		final Thread currentThread = Thread.currentThread();
+		currentThread.setName(deviceDebugPacketIds.name() + ":" + currentThread.getId());
+
 		Optional
 		.ofNullable(packet)
 		.map(Packet::getHeader)
 		.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
-		.filter(h->h.getPacketId()==packetId)
+		.filter(h->deviceDebugPacketIds.getPacketId().match(h.getPacketId()))
 		.map(h->packet.getPayloads())
 		.map(pls->pls.parallelStream())
 		.orElse(Stream.empty())
@@ -129,18 +135,28 @@ public class AdcWorker {
 					if(mousePressed)
 						text = "x" + text;
 
-					if(!label.getText().equals(text)){
-						label.setText(text);
-						label.setToolTipText(Long.toString(v));
-					}
+					final String t = text;
+
+					SwingUtilities.invokeLater(
+							()-> {
+
+								if(!label.getText().equals(t)){
+									label.setText(t);
+									label.setToolTipText(Long.toString(v));
+								}
+							});
 				});
 			});
 	}
 
 	@Override
 	public String toString() {
-		return "AdcWorker [packetToSend=" + packetToSend + ", label=" + label + ", packetId=" + packetId
+		return "AdcWorker [packetToSend=" + packetToSend + ", label=" + label + ", packetId=" + deviceDebugPacketIds
 				+ ", multiplier=" + multiplier + ", format=" + format + ", mousePressed=" + mousePressed + ", average="
 				+ average + "]";
+	}
+
+	public DeviceDebugPacketIds getDeviceDebugPacketIds() {
+		return deviceDebugPacketIds;
 	}
 }

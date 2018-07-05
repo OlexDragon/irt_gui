@@ -2,12 +2,13 @@ package irt.tools.CheckBox;
 
 import java.awt.Image;
 
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.SpectrumInversionPacket;
 import irt.data.packet.configuration.SpectrumInversionPacket.Spectrum;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 
 public class SpectrumInversionSwitch extends SwitchBoxImpl {
 	private static final long serialVersionUID = 312509249334409413L;
@@ -18,7 +19,7 @@ public class SpectrumInversionSwitch extends SwitchBoxImpl {
 
 	@Override
 	protected void action() {
-		PacketWork pw = new SpectrumInversionPacket(isSelected() ? Spectrum.INVERTED : Spectrum.NOT_INVERTED);
+		PacketSuper pw = new SpectrumInversionPacket(isSelected() ? Spectrum.INVERTED : Spectrum.NOT_INVERTED);
 		cptq.add(pw);
 	}
 
@@ -26,7 +27,7 @@ public class SpectrumInversionSwitch extends SwitchBoxImpl {
 	protected void update(Packet packet) {
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
-		if(!(pID==PacketWork.PACKET_ID_CONFIGURATION_SPECTRUM_INVERSION || pID==PacketWork.PACKET_ID_CONFIGURATION_SET_SPECTRUM_INVERSION))
+		if(!PacketIDs.CONFIGURATION_SPECTRUM_INVERSION.match(pID))
 			return;
 
 		logger.trace(packet);

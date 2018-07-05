@@ -21,11 +21,11 @@ import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
 import irt.data.packet.configuration.ALCEnablePacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketWork;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 
@@ -95,48 +95,52 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		try{
 
-			final Optional<Packet> o = Optional
-			.ofNullable(packet);
+		new MyThreadFactory(()->{
 
-			if(!o.isPresent())
-				return;
+			try{
 
-			byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+				final Optional<Packet> o = Optional
+				.ofNullable(packet);
 
-			if(addr!=unitAddress)
-				return;
+				if(!o.isPresent())
+					return;
 
-			o.map(Packet::getHeader)
-			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
-			.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION)
-			.map(h->packet.getPayloads())
-			.map(pls->pls.parallelStream())
-			.ifPresent(
-					stream->{
-						stream
-						.forEach(pl->{
+				byte addr = o.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
-							final byte code = pl.getParameterHeader().getCode();
+				if(addr!=unitAddress)
+					return;
 
-							switch(code){
-							case PacketImp.PARAMETER_CONFIG_BUC_APC_ENABLE:
-								setSelected((pl.getByte()==1));
-							}
+				o.map(Packet::getHeader)
+				.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+				.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+				.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION)
+				.map(h->packet.getPayloads())
+				.map(pls->pls.parallelStream())
+				.ifPresent(
+						stream->{
+							stream
+							.forEach(pl->{
+
+								final byte code = pl.getParameterHeader().getCode();
+
+								switch(code){
+								case PacketImp.PARAMETER_CONFIG_BUC_APC_ENABLE:
+									setSelected((pl.getByte()==1));
+								}
+							});
 						});
-					});
-		}catch(Exception e){
-			logger.catching(e);
-		}
+			}catch(Exception e){
+				logger.catching(e);
+			}
+		});
 	}
 
 	final ItemListener checkBoxItemListener = new ItemListener() {
 		@Override
 		public void itemStateChanged(ItemEvent e) {
 
-			PacketWork packet = new ALCEnablePacket(unitAddress, (byte) (e.getStateChange() == ItemEvent.DESELECTED ? 0 : 1));
+			PacketSuper packet = new ALCEnablePacket(unitAddress, (byte) (e.getStateChange() == ItemEvent.DESELECTED ? 0 : 1));
 			cptq.add(packet);
 		}
 	};

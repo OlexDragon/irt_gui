@@ -15,7 +15,8 @@ import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.RundomNumber;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketWork;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.value.Value;
 
 public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
@@ -115,7 +116,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 	}
 
-	protected void startTextSliderController(String controllerName, Value value, short packetId, byte parameterId, Style style) {
+	protected void startTextSliderController(String controllerName, Value value, PacketIDs packetID, byte parameterId, Style style) {
 
 		stepPref = GuiControllerAbstract.getPrefs().getInt(getClass().getSimpleName()+" Step", 1);
 
@@ -130,7 +131,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
-		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetId), value, txtField, slider, style);
+		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetID), value, txtField, slider, style);
 		Thread t = new Thread(textSliderController, ValueRangeControllerAbstract.class.getSimpleName()+".TextSliderController-"+new RundomNumber());
 		int priority = t.getPriority();
 		if(priority>Thread.MIN_PRIORITY)

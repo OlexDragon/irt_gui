@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import irt.data.PacketThread;
 import irt.data.ToHex;
 import irt.data.packet.interfaces.Packet;
 
@@ -88,11 +89,11 @@ public class PacketImp implements Packet{
 
 	/*Device Debug - IRT_SLCP_PACKET_ID_DEVICE_DEBAG*/
 	public static final byte
-	PARAMETER_DEVICE_DEBAG_INFO 		= 1,		/* device information: parts, firmware and etc. */
-	PARAMETER_DEVICE_DEBAG_DUMP 		= 2,		/* dump of registers for specified device index */
+	PARAMETER_DEVICE_DEBUG_INFO 		= 1,		/* device information: parts, firmware and etc. */
+	PARAMETER_DEVICE_DEBUG_DUMP 		= 2,		/* dump of registers for specified device index */
 	PARAMETER_DEVICE_DEBUG_READ_WRITE 	= 3,		/* registers read/write operations */
 	PARAMETER_DEVICE_DEBAG_INDEX 		= 4,		/* device index information print */
-	PARAMETER_DEVICE_DEBAG_CALIBRATION_MODE = 5,	/* calibration mode */
+	PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE = 5,	/* calibration mode */
 	PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10;		/* operations with environment variables */
 
 	/* Configuration codes. */
@@ -213,6 +214,10 @@ public class PacketImp implements Packet{
 	}
 
 	public byte[] toBytes() {
+		return PacketThread.preparePacket(getData());
+	}
+
+	public byte[] getData() {
 		byte[] d = header!=null ? header.toBytes() : null;
 		if(payloads!=null)
 			for(Payload b:payloads)
@@ -387,10 +392,7 @@ public class PacketImp implements Packet{
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = prime + ((header == null) ? 0 : header.getPacketId());
-		result = prime * result + ((payloads == null) ? 0 : payloads.get(0).getParameterHeader().getCode());
-		return result;
+		return 32 + ((header == null) ? 0 : header.getPacketId());
 	}
 
 	@Override
@@ -399,35 +401,34 @@ public class PacketImp implements Packet{
 		if (this == obj)
 			return true;
 
-		final Optional<Packet> sameInstance = Optional
-													.ofNullable(obj)
-													.filter(Packet.class::isInstance)
-													.map(Packet.class::cast);
+		return Optional
 
-		if(!sameInstance.isPresent())
-			return false;
-
-		Packet other = (Packet) obj;
-		if (header == null) {
-			if (other.getHeader() != null)
-				return false;
-		} 
-
-		if (header.getPacketId()!=other.getHeader().getPacketId())
-			return false;
-
-		if (payloads == null || payloads.size()==0) {
-			if (other.getPayloads() != null || payloads.size()!=0)
-				return false;
-		}
-
-		if (payloads.get(0).getParameterHeader().getCode()!=other.getPayloads().get(0).getParameterHeader().getCode())
-			return false;
-		return true;
+				.ofNullable(obj)
+				.filter(Packet.class::isInstance)
+				.map(Packet.class::cast)
+				.filter(other->{
+					final Short id = Optional.ofNullable(header).map(PacketHeader::getPacketId).orElse((short) 0);
+					final Short otherId = Optional.ofNullable(other.getHeader()).map(PacketHeader::getPacketId).orElse((short) 0);
+					return id.equals(otherId);
+				})
+				.isPresent();
 	}
 
 	@Override
 	public String toString() {
-		return "Packet=[\n\t"+header + ",\n\t" + payloads+"] toBytes()=" + ToHex.bytesToHex(toBytes());
+		return getClass().getSimpleName() + "=[\n\t"+header + ",\n\t" + payloads+"] toBytes()=" + ToHex.bytesToHex(toBytes());
+	}
+
+	@Override
+	public byte[] getAcknowledg() {
+
+		final byte[] b = new byte[3];
+		final byte[] idBytes = header.packetIdAsBytes();
+
+		b[0] = (byte) 0xFF;
+		b[1] = idBytes[0];
+		b[2] = idBytes[1];
+
+		return PacketThread.preparePacket(b);
 	}
 }

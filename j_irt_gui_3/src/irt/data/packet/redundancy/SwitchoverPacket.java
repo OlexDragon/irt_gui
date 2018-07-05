@@ -3,13 +3,12 @@ package irt.data.packet.redundancy;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-import irt.data.packet.PacketAbstract;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
 
-public class SwitchoverPacket extends PacketAbstract{
+public class SwitchoverPacket extends PacketSuper{
 
-	public static final short PACKET_ID = PacketWork.PACKET_ID_SWITCHOVER;
+	public static final PacketIDs PACKET_ID = PacketIDs.CONFIGURATION_REDUNDANCY_SWITCHOVER;
 
 	public SwitchoverPacket(Byte linkAddr, Integer switchNumber) {
 		super(

@@ -1,24 +1,21 @@
 
 package irt.data.packet.configuration;
 
-import irt.data.packet.PacketAbstract;
-import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
+import java.util.Optional;
 
-public class ALCPacket extends PacketAbstract {
+import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketImp;
+
+public class ALCPacket extends PacketSuper {
 
 	public ALCPacket(Byte linkAddr, Short value) {
 		super(
 				linkAddr,
-				value!=null
-					? PacketImp.PACKET_TYPE_COMMAND
-					: PacketImp.PACKET_TYPE_REQUEST,
-				PacketWork.PACKET_ID_CONFIGURATION_ALC_LEVEL,
+				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
+				PacketIDs.CONFIGURATION_ALC_LEVEL,
 				PacketImp.GROUP_ID_CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_BUC_APC_LEVEL,
-				value!=null ? PacketImp.toBytes(value) : null,
-				value!=null
-					? Priority.COMMAND
-					: Priority.REQUEST);
+				Optional.ofNullable(value).map(v->PacketImp.toBytes(value)).orElse(null),
+				Optional.ofNullable(value).map(v->Priority.COMMAND).orElse(Priority.REQUEST));
 	}
 }

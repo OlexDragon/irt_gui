@@ -473,10 +473,10 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 
 			final int id = e.getID();
 
-			if(id==ValueController.RANGE)
+			if(ValueController.RANGE.match((short) id))
 				setRange((Range)e.getSource());
 
-			else if(id==ValueController.VALUE && !slider.getValueIsAdjusting())
+			else if(ValueController.VALUE.match((short) id) && !slider.getValueIsAdjusting())
 				setValue((Value) e.getSource());
 		}
 

@@ -472,35 +472,39 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	@Override
 	public void onPacketRecived(Packet packet) {
-		Optional
-		.ofNullable(packet)
-		.filter(LinkedPacket.class::isInstance)//converters do not have a network
-		.map(LinkedPacket.class::cast)
-		.filter(p->p.getLinkHeader()!=null)
-		.filter(p->p.getLinkHeader().getAddr()==unitAddress)
-		.map(Packet::getHeader)
-		.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-		.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
-		.filter(h->h.getGroupId()==PacketImp.GROUP_ID_NETWORK)
-		.ifPresent(h->{
 
-			// show what the packet received
-			ipAddressTextField.setBorder(border2);
-			timer.restart();
+		new MyThreadFactory(()->{
 
-			networkAddress.set(packet);
+			Optional
+			.ofNullable(packet)
+			.filter(LinkedPacket.class::isInstance)//converters do not have a network
+			.map(LinkedPacket.class::cast)
+			.filter(p->p.getLinkHeader()!=null)
+			.filter(p->p.getLinkHeader().getAddr()==unitAddress)
+			.map(Packet::getHeader)
+			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+			.filter(h->h.getGroupId()==PacketImp.GROUP_ID_NETWORK)
+			.ifPresent(h->{
 
-			if (!networkAddress.equals(networkAddressTmp)) {
+				// show what the packet received
+				ipAddressTextField.setBorder(border2);
+				timer.restart();
 
-				final AddressType type = AddressType.values()[networkAddress.getType()];
-				comboBoxAddressType.setSelectedItem(type);
+				networkAddress.set(packet);
 
-				ipAddressTextField.setText(networkAddress.getAddressAsString());
-				ipMaskTextField.setText(networkAddress.getMaskAsString());
-				ipGatewayTextField.setText(networkAddress.getGatewayAsString());
+				if (!networkAddress.equals(networkAddressTmp)) {
 
-				networkAddressTmp = networkAddress.getCopy();
-			}
+					final AddressType type = AddressType.values()[networkAddress.getType()];
+					comboBoxAddressType.setSelectedItem(type);
+
+					ipAddressTextField.setText(networkAddress.getAddressAsString());
+					ipMaskTextField.setText(networkAddress.getMaskAsString());
+					ipGatewayTextField.setText(networkAddress.getGatewayAsString());
+
+					networkAddressTmp = networkAddress.getCopy();
+				}
+			});
 		});
 	}
 

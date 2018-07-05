@@ -1,19 +1,24 @@
 package irt.data.packet.network;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import irt.data.network.NetworkAddress;
-import irt.data.packet.PacketAbstract;
 import irt.data.packet.PacketImp;
-import irt.data.packet.interfaces.PacketWork;
+import irt.data.packet.PacketSuper;
+import irt.data.packet.interfaces.Packet;
 
-public class NetworkAddressPacket  extends PacketAbstract{
+public class NetworkAddressPacket  extends PacketSuper{
+
+	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
+																										.ofNullable(packet)
+																										.map(p->new NetworkAddress().set(p));
 
 	public NetworkAddressPacket(byte linkAddr, NetworkAddress networkAddress) {
 		super(
 				linkAddr,
 				networkAddress!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
-						PacketWork.PACKET_ID_NETWORK_ADDRESS,
+						PacketIDs.NETWORK_ADDRESS,
 						PacketImp.GROUP_ID_NETWORK,
 						PacketImp.PARAMETER_ID_NETWORK_ADDRESS,
 						networkAddress!=null ? networkAddress.toBytes() : null,

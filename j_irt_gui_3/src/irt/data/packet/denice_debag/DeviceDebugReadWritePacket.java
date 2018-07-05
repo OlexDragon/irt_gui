@@ -1,15 +1,14 @@
 package irt.data.packet.denice_debag;
 
-import irt.data.RegisterValue;
-import irt.data.packet.PacketImp;
+import irt.data.value.Value;
 
 public class DeviceDebugReadWritePacket extends DeviceDebugPacket {
 
-	public DeviceDebugReadWritePacket(byte linkAddr, RegisterValue registerValue, short packetId) {
-		super(linkAddr, registerValue, packetId, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE);
+	public DeviceDebugReadWritePacket(byte linkAddr, Value value, DeviceDebugPacketIds packetId) {
+		super(linkAddr, value, packetId);
 	}
 
 	public DeviceDebugReadWritePacket() {
-		this((byte)0, new RegisterValue(0, 0, null), (short)0);
+		this((byte)0, null, DeviceDebugPacketIds.INFO);
 	}
 }
