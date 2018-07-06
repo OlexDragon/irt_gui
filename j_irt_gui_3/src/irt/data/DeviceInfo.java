@@ -51,6 +51,7 @@ public class DeviceInfo implements PacketListener {
 		IR_PC			(310, Protocol.LINKED, "Redundancy protection controller"),
 
 		DLRS			(410, Protocol.LINKED, "DLRS"),
+		DLRS2			(411, Protocol.LINKED, "DLRS2"),
 
 		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.CONVERTER, "L to Ku Converter"),
 		CONVERTER_70_TO_L		(1001, Protocol.CONVERTER, "70 to L Converter"),

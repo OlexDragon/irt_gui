@@ -289,8 +289,11 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 				lblSn.setText(serialNumber);
 
 			final String unitName = deviceInfo.getUnitName().orElse("N/A");
-			if(!unitName.equals(lblUnitName.getText()))
-				lblUnitName.setText(unitName.toString());
+			if(!unitName.equals(lblUnitName.getText())) {
+				String string = unitName.toString();
+				lblUnitName.setText(string);
+				lblUnitName.setToolTipText(string);
+			}
 
 			final String unitPartNumber = deviceInfo.getUnitPartNumber().orElse("N/A");
 			if(!unitPartNumber.equals(lblUnitPartNumber.getText()))
