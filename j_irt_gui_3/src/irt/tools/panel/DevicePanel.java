@@ -204,6 +204,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 										case SSPA:
 											return new ControlPanelSSPA(deviceType, linkHeader, 0);
 										case DLRS:
+										case DLRS2:
 											return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
 										case IR_PC:
 											return new ControlPaneIrPc(deviceType, linkHeader);
