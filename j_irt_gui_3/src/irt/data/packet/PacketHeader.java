@@ -3,6 +3,7 @@ package irt.data.packet;
 import java.util.Arrays;
 import java.util.Optional;
 
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.PacketIDs;
 
 public class PacketHeader{
@@ -136,43 +137,7 @@ public class PacketHeader{
 	}
 
 	private String getGroupIdStr() {
-		String typeStr = null;
-		if(packetHeader!=null)
-		switch(getGroupId()){
-		case PacketImp.GROUP_ID_ALARM:
-			typeStr = "Alarm("+ PacketImp.GROUP_ID_ALARM+")";
-			break;
-		case PacketImp.GROUP_ID_CONFIGURATION:
-			typeStr = "Configuration("+ PacketImp.GROUP_ID_CONFIGURATION+")";
-			break;
-		case PacketImp.GROUP_ID_FILETRANSFER:
-			typeStr = "FileTranster("+ PacketImp.GROUP_ID_FILETRANSFER+")";
-			break;
-		case PacketImp.GROUP_ID_MEASUREMENT:
-			typeStr = "Measurement("+ PacketImp.GROUP_ID_MEASUREMENT+")";
-			break;
-		case PacketImp.GROUP_ID_RESET:
-			typeStr = "Reset("+ PacketImp.GROUP_ID_RESET+")";
-			break;
-		case PacketImp.GROUP_ID_DEVICE_INFO:
-			typeStr = "DeviceInfo("+ PacketImp.GROUP_ID_DEVICE_INFO+")";
-			break;
-		case PacketImp.GROUP_ID_CONTROL:
-			typeStr = "SaveConfigProfile("+ PacketImp.GROUP_ID_CONTROL+")";
-			break;
-		case PacketImp.GROUP_ID_PROTOCOL:
-			typeStr = "Protocol("+ PacketImp.GROUP_ID_PROTOCOL+")";
-			break;
-		case PacketImp.GROUP_ID_DEVELOPER_GENERIC_SET_1:
-			typeStr = "DeveloperGeneric("+ PacketImp.GROUP_ID_DEVELOPER_GENERIC_SET_1+")";
-			break;
-		case PacketImp.GROUP_ID_DEVICE_DEBAG:
-			typeStr = "Device Debug("+ PacketImp.GROUP_ID_DEVICE_DEBAG+")";
-			break;
-		default:
-			typeStr = ""+(getPacketType()&0xFF);
-		}
-		return typeStr;
+		return PacketGroupIDs.valueOf(getGroupId()).toString();
 	}
 
 	@Override

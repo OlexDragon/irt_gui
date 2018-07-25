@@ -35,7 +35,7 @@ public class FileScanner extends FutureTask<List<Path>>{
 
 		paths.clear();
 		busy = true;
-		new MyThreadFactory().newThread(this).start();
+		new MyThreadFactory(this, "FileScanner");
 	}
 
 	private static Callable<List<Path>> getPaths(Path defaultFolder, String fileToSearch) {

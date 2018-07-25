@@ -9,9 +9,9 @@ import javax.swing.JTextField;
 import javax.swing.Timer;
 
 import irt.controller.control.ControllerAbstract;
-import irt.data.RegisterValue;
-import irt.data.RundomNumber;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.MyThreadFactory;
+import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketWork;
@@ -41,12 +41,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		timer.setRepeats(false);
 		timer.start();
 
-		Thread t = new Thread(this, "DeviceDebagSaveController-"+new RundomNumber().toString());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+		new MyThreadFactory(this, "DeviceDebagSaveController");
 	}
 
 	@Override

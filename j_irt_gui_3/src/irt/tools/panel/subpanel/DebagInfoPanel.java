@@ -45,7 +45,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 	private JComboBox<Integer> cbParameter;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DebagInfoPanel"));
 	private DeviceDebugInfoPacket packetToSend;
 	private Timer timer;
 
@@ -143,7 +143,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
@@ -179,7 +179,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 				timer = new Timer(1000, e->{setBorder(null); timer.stop();});
 				timer.start();
 			});
-		});
+		}, "DebagInfoPanel.onPacketReceived()");
 	}
 
 	@Override

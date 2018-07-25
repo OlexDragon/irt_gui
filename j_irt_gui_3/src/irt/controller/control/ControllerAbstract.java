@@ -16,11 +16,11 @@ import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.FireValue;
 import irt.data.MyThreadFactory;
-import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.Packet;
+import irt.data.packet.interfaces.PacketThreadWorker;
 
 public abstract class ControllerAbstract implements UnitController{
 
@@ -119,7 +119,20 @@ public abstract class ControllerAbstract implements UnitController{
 	}
 
 	protected void sendPacketWorker() {
-		GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
+		Optional
+		.ofNullable(packetWork)
+		.map(PacketWork::getPacketThread)
+		.map(
+				pt->{
+					try {
+						pt.join();
+					} catch (InterruptedException e) {
+						logger.catching(e);
+					}
+					return pt; })
+		.map(PacketThreadWorker::getPacket)
+		.map(p->packetWork)
+		.ifPresent(GuiControllerAbstract.getComPortThreadQueue()::add);
 	}
 
 	protected void clear(){
@@ -158,7 +171,7 @@ public abstract class ControllerAbstract implements UnitController{
 
 		final ControllerAbstract controller = this;
 
-		new MyThreadFactory().newThread(()->{
+		new MyThreadFactory(()->{
 				try{
 					synchronized (controller) {
 						controller.notify();
@@ -166,7 +179,7 @@ public abstract class ControllerAbstract implements UnitController{
 				}catch (Exception e) {
 					logger.catching(e);
 				}
-			}).start();
+			}, getClass().getSimpleName() + ".stop()");
 	}
 
 	public synchronized boolean isSend() {
@@ -225,7 +238,7 @@ public abstract class ControllerAbstract implements UnitController{
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 		if (setPacketWork(packet) && getPacketWork() instanceof SetterAbstract && style == Style.CHECK_ONCE)
 			setSend(false);
 	}
@@ -242,13 +255,7 @@ public abstract class ControllerAbstract implements UnitController{
 	}
 
 	protected void fireStatusChangeListener(ValueChangeEvent valueChangeEvent) {
-
-		Thread t = new Thread(new FireValue(statusChangeListeners, valueChangeEvent), ControllerAbstract.this.getName()+".FireValue-"+new RundomNumber().toString());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+		new MyThreadFactory(()->new FireValue(statusChangeListeners, valueChangeEvent), "ControllerAbstract.fireStatusChangeListener()");
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

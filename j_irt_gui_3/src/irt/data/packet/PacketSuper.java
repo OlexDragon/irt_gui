@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.PacketThread;
 import irt.data.listener.ValueChangeListener;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
@@ -30,12 +32,12 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 	private List<Payload> payloads = new ArrayList<>();
 	private long timestamp;
 
-	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, byte groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
+	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, PacketGroupIDs groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
 		linkHeader = Optional.ofNullable(linkAddr).filter(la->la!=0).map(la-> new LinkHeader(linkAddr, (byte)0, (short)0)).orElse(null);
 		header = new PacketHeader();
 		header.setType(packetType);
-		header.setGroupId(groupId);
-		header.setPacketId(packetID.getId());
+		header.setGroupId(groupId.getId());
+		header.setPacketId(Optional.ofNullable(packetID).map(PacketIDs::getId).orElseGet(()->(short)(PacketIDs.values().length + new Random().nextInt(Short.MAX_VALUE - PacketIDs.values().length))));
 		payloads.add(new Payload( new ParameterHeader( parameterHeaderCode), payloadData));
 		this.priority = priority;
 		timestamp = System.currentTimeMillis();
@@ -46,7 +48,7 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 				configurationSetter.getLinkHeader().getAddr(),
 				configurationSetter.getPacketType(),
 				PacketIDs.valueOf(configurationSetter.getPacketId()).orElse(PacketIDs.UNNECESSARY),
-				configurationSetter.getGroupId(),
+				PacketGroupIDs.valueOf(configurationSetter.getGroupId()),
 				configurationSetter.getPacketParameterHeaderCode(),
 				null,
 				Priority.REQUEST);
@@ -310,10 +312,7 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 				.map(Packet.class::cast)
 				.map(Packet::getHeader)
 				.map(PacketHeader::getPacketId)
-				.filter(otherId->{
-					final Short id = Optional.ofNullable(header).map(PacketHeader::getPacketId).orElse((short) 0);
-					return id.equals(otherId);
-				})
+				.filter(otherId->Optional.ofNullable(header).map(PacketHeader::getPacketId).filter(id->id.equals(otherId)).isPresent())
 				.isPresent();
 	}
 

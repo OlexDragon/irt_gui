@@ -25,11 +25,13 @@ import irt.data.packet.configuration.LnbPowerPacket;
 import irt.data.packet.configuration.LnbReferencePacket;
 import irt.data.packet.configuration.LnbSwitchPacket;
 import irt.data.packet.configuration.MuteControlPacket;
+import irt.data.packet.configuration.Offset1to1toMultiPacket;
 import irt.data.packet.configuration.RedundancyEnablePacket;
 import irt.data.packet.configuration.RedundancyModePacket;
 import irt.data.packet.configuration.RedundancyNamePacket;
 import irt.data.packet.configuration.RedundancyStatusPacket;
 import irt.data.packet.configuration.SpectrumInversionPacket;
+import irt.data.packet.control.ActiveModulePacket;
 import irt.data.packet.control.ModuleListPacket;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
@@ -39,39 +41,66 @@ import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.packet.measurement.MeasurementPacket;
 import irt.data.packet.network.NetworkAddressPacket;
+import irt.data.packet.redundancy.RedundancyControllerStatusPacket;
+import irt.data.packet.redundancy.SwitchoverModePacket;
 
 public interface PacketWork extends Comparable<PacketWork>{
-
-//	TODO public enum PacketGroupIDs{	
-//		
-//		GROUP_ID_NONE			(PacketImp.IRT_SLCP_PACKET_ID_NONE),		/* Reserved for special use. */
-//		ALARM					(PacketImp.GROUP_ID_ALARM),		/* Alarm: message content is product specific. */
-//		CONFIGURATION			(PacketImp.GROUP_ID_CONFIGURATION),		/* Configuration: content is product specific. */
-//		FILETRANSFER			(GROUP_ID_FILETRANSFER),		/* File transfer: software upgrade command (optional). */
-//		MEASUREMENT				(GROUP_ID_MEASUREMENT),		/* Measurement: device status, content is product specific. */
-//		RESET					(GROUP_ID_RESET),		/* Device reset: generic command. */
-//		DEVICE_INFO				(GROUP_ID_DEVICE_INFO),		/* Device information: generic command. */
-//		CONTROL					(GROUP_ID_CONTROL),		/* Device control operations. Save configuration: generic command. */
-//		PROTO					(GROUP_ID_PROTO),
-//		REDUNDANCY_CONTROLLER	(GROUP_ID_REDUNDANCY_CONTROLLER),
-//		DEVICE_DEBAG			(GROUP_ID_DEVICE_DEBAG),		/* Device Debug. */
-//
-//	/* Protocol */
-//		PROTOCOL				(GROUP_ID_PROTOCOL), /* Packet protocol parameters configuration and monitoring. */
-//
-//	/* Network */
-//		NETWORK					(GROUP_ID_NETWORK), /* Network configuration. */
-//
-//	/* backwards compatibility - to be deleted */
-//		PRODUCTION_GENERIC_SET	(GROUP_ID_PRODUCTION_GENERIC_SET_1),
-//		_DEVELOPER_GENERIC_SET_1(GROUP_ID_DEVELOPER_GENERIC_SET_1);
-//	}
 
 	public enum PacketIDs{
 
 			UNNECESSARY	(null, null),
 
 			DEVICE_INFO	(null, DeviceInfoPacket.parseValueFunction),
+
+			ALARMS_IDs						(null, AlarmsIDsPacket.parseValueFunction),
+			ALARMS_SUMMARY					(null, AlarmsSummaryPacket.parseValueFunction),
+			ALARMS_OWER_CURRENT				(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_UNDER_CURRENT			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_OWER_TEMPERATURE			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_PLL_OUT_OF_LOCK			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_HARDWARE_FAULT			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_REDUNDANT_FAULT			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_test						(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_NO_INPUT_SIGNAL			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_RF_OVERDRIVEL			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_STATUS					(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_TEMPERATURE_ThRESHOLD_1	(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_TEMPERATURE_ThRESHOLD_2	(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_ALC_ERROR				(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_ALL_IDs					(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_BUC_B_COMMUNICATION_FAULT(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_BUC_B_SUMMARY			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_BUC_S_COMMUNICATION_FAULT(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_TODO4					(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_TODO5					(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_BUC_S_SUMMARY			(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_TODO7					(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_TODO8					(null, AlarmStatusPacket.parseValueFunction),
+			ALARMS_TODO9					(null, AlarmStatusPacket.parseValueFunction),
+
+			ALARMS_DESCRIPTION_OWER_CURRENT				(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_UNDER_CURRENT			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_OWER_TEMPERATURE			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_PLL_OUT_OF_LOCK			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_HARDWARE_FAULT			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_REDUNDANT_FAULT			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_test						(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_NO_INPUT_SIGNAL			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_RF_OVERDRIVEL			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_STATUS					(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_1	(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_2	(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_ALC_ERROR				(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_ALL_IDs					(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_BUC_B_COMMUNICATION_FAULT(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_BUC_B_SUMMARY			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_BUC_S_COMMUNICATION_FAULT(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_TODO4					(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_TODO5					(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_BUC_S_SUMMARY			(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_TODO7					(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_TODO8					(null, AlarmDescriptionPacket.parseValueFunction),
+			ALARMS_DESCRIPTION_TODO9					(null, AlarmDescriptionPacket.parseValueFunction),
 
 			MEASUREMENT_ALL						(null, MeasurementPacket.parseValueFunction),
 			MEASUREMENT_STATUS					(null, null),
@@ -101,24 +130,24 @@ public interface PacketWork extends Comparable<PacketWork>{
 			CONFIGURATION_FCM_LNB_POWER			(null, LnbPowerPacket.parseValueFunction),
 			CONFIGURATION_GAIN_OFFSET			(null, ConfifurationPacket.parseValueFunction),
 			CONFIGURATION_FCM_FLAGS				(null, null),
-			CONFIGURATION_REDUNDANCY_ENABLE		(null, RedundancyEnablePacket.parseValueFunction),
-			CONFIGURATION_REDUNDANCY_MODE		(null, RedundancyModePacket.parseValueFunction),
-			CONFIGURATION_REDUNDANCY_NAME		(null, RedundancyNamePacket.parseValueFunction),
-			CONFIGURATION_REDUNDANCY_STATUS		(null, RedundancyStatusPacket.parseValueFunction),
+			CONFIGURATION_REDUNDANCY_ENABLE		(null, RedundancyEnablePacket	.parseValueFunction),
+			CONFIGURATION_REDUNDANCY_MODE		(null, RedundancyModePacket		.parseValueFunction),
+			CONFIGURATION_REDUNDANCY_NAME		(null, RedundancyNamePacket		.parseValueFunction),
+			CONFIGURATION_REDUNDANCY_STATUS		(null, RedundancyStatusPacket	.parseValueFunction),
 			CONFIGURATION_REDUNDANCY_SET_ONLINE	(null, null),
-			CONFIGURATION_REDUNDANCY_SWITCHOVER	(null, null),
 			CONFIGURATION_MUTE_OUTDOOR			(null, null),
-			CONFIGURATION_ALC_ENABLE			(null, ALCEnablePacket.parseValueFunction),
+			CONFIGURATION_ALC_ENABLE			(null, ALCEnablePacket			.parseValueFunction),
 			CONFIGURATION_ALC_LEVEL				(null, null),
-			CONFIGURATION_ALC_RANGE				(null, AttenuationRangePacket.parseValueFunction),
-			CONFIGURATION_DLRS_WGS_SWITCHOVER	(null, LnbSwitchPacket.parseValueFunction),
+			CONFIGURATION_ALC_RANGE				(null, AttenuationRangePacket	.parseValueFunction),
+			CONFIGURATION_DLRS_WGS_SWITCHOVER	(null, LnbSwitchPacket			.parseValueFunction),
 			CONFIGURATION_SET_DLRS_WGS_SWITCHOVER(null, null),
-			CONFIGURATION_SPECTRUM_INVERSION	(null, SpectrumInversionPacket.parseValueFunction),
+			CONFIGURATION_SPECTRUM_INVERSION	(null, SpectrumInversionPacket	.parseValueFunction),
 			CONFIGURATION_REFERENCE_CONTROL		(null, null),
-			CONFIGURATION_FCM_LNB_REFERENCE		(null, LnbReferencePacket.parseValueFunction),
-			CONFIGURATION_OFFSET_RANGE			(null, AttenuationRangePacket.parseValueFunction),
+			CONFIGURATION_FCM_LNB_REFERENCE		(null, LnbReferencePacket		.parseValueFunction),
+			CONFIGURATION_OFFSET_RANGE			(null, AttenuationRangePacket	.parseValueFunction),
+			CONFIGURATION_OFFSET_1_TO_MULTI		(null, Offset1to1toMultiPacket	.parseValueFunction),
 
-			CONTROL_ACTIVE_MODULE	(null, null),
+			CONTROL_ACTIVE_MODULE	(null, ActiveModulePacket.parseValueFunction),
 			CONTRO_MODULE_LIST		(null, ModuleListPacket.parseValueFunction),
 
 			FCM_DEVICE_DEBUG_PLL_REG			(null, null),
@@ -138,37 +167,10 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 			NETWORK_ADDRESS		(null, NetworkAddressPacket.parseValueFunction),
 
-			ALARMS_IDs						(null, AlarmsIDsPacket.parseValueFunction),
-			ALARMS_SUMMARY					(null, AlarmsSummaryPacket.parseValueFunction),
-			ALARMS_OWER_CURRENT				(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_UNDER_CURRENT			(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_OWER_TEMPERATURE			(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_PLL_OUT_OF_LOCK			(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_HARDWARE_FAULT			(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_REDUNDANT_FAULT			(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_test						(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_NO_INPUT_SIGNAL			(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_RF_OVERDRIVEL			(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_STATUS					(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_TEMPERATURE_ThRESHOLD_1	(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_TEMPERATURE_ThRESHOLD_2	(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_ALC_ERROR				(null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_ALL_IDs					(null, AlarmStatusPacket.parseValueFunction),
-
-			ALARMS_DESCRIPTION_OWER_CURRENT				(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_UNDER_CURRENT			(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_OWER_TEMPERATURE			(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_PLL_OUT_OF_LOCK			(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_HARDWARE_FAULT			(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_REDUNDANT_FAULT			(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_test						(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_NO_INPUT_SIGNAL			(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_RF_OVERDRIVEL			(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_STATUS					(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_1	(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_2	(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_ALC_ERROR				(null, AlarmDescriptionPacket.parseValueFunction),
-			ALARMS_DESCRIPTION_ALL_IDs					(null, AlarmDescriptionPacket.parseValueFunction),
+			REDUNDANCY_STATUS			(null, RedundancyControllerStatusPacket.parseValueFunction),
+			REDUNDANCY_SWITCHOVER		(null, null),
+			REDUNDANCY_MODE				(null, RedundancyModePacket.parseValueFunction),
+			REDUNDANCY_SWITCHOVER_MODE	(null, SwitchoverModePacket.parseValueFunction),
 
 			DEVICES(null, null),
 			DEVICE_DEBUG_CALIBRATION_MODE	(null, CallibrationModePacket.parseValueFunction),
@@ -265,11 +267,6 @@ public interface PacketWork extends Comparable<PacketWork>{
 			DEVICE_CONVERTER_DAC3(null, RegisterPacket.parseValueFunction),
 			DEVICE_CONVERTER_DAC4(null, RegisterPacket.parseValueFunction),
 
-//			REDUNDANCY_CONTROLLER_STATUS	(null, null),
-//			REDUNDANCY_SWITCHOVER_MOD		(null, null),
-//			REDUNDANCY_STANDBY_MODE			(null, null),
-//			REDUNDANCY_SWITCHOVER_MODE		(null, null),
-
 			DUMPS(null, null),
 			DUMP_DEVICE_DEBUG_INFO_0(null, DeviceDebugInfoPacket.parseValueFunction),	//Index 0.  Board info, like: CPU frequency, CPU reset type, CPU clock source, Local temperature
 			DUMP_DEVICE_DEBUG_INFO_1(null, DeviceDebugInfoPacket.parseValueFunction),	//Index 1.  Board error info
@@ -315,8 +312,17 @@ public interface PacketWork extends Comparable<PacketWork>{
 			return ((short)ordinal())==id;
 		}
 
+		public  Optional<Object> valueOf(Packet packet) {
+			try {
+				return Optional.ofNullable(function).flatMap(f->f.apply(packet));
+			}catch (Exception e) {
+				logger.catching(e);
+			}
+			return Optional.empty();
+		}
+
 		public String toString(){
-			return Optional.ofNullable(text).map(t->name() + "-" + text ).orElse(name());
+			return Optional.ofNullable(text).map(t->name() + "-" + text ).orElse(name() + "(" + ordinal() + ")");
 		}
 
 		public static String toString(short id){
@@ -338,39 +344,50 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 			return optional;
 		}
-
-		public  Optional<Object> valueOf(Packet packet) {
-			logger.entry(packet);
-			return Optional.ofNullable(function).flatMap(f->f.apply(packet));
-		}
 	}
 
 	public enum AlarmsPacketIds{
 
-		STATUS					((byte) 0, PacketIDs.ALARMS_STATUS, false),
-		PLL_OUT_OF_LOCK			((byte) 1, PacketIDs.ALARMS_PLL_OUT_OF_LOCK, false),
-		TEMPERATURE_ThRESHOLD_1	((byte) 2, PacketIDs.ALARMS_TEMPERATURE_ThRESHOLD_1, false),
-		TEMPERATURE_ThRESHOLD_2	((byte) 3, PacketIDs.ALARMS_TEMPERATURE_ThRESHOLD_2, false),
-		OVER_CURRENT_ALARM		((byte) 4, PacketIDs.ALARMS_OWER_CURRENT, false),
-		UNDER_CURRENT_ALARM		((byte) 5, PacketIDs.ALARMS_UNDER_CURRENT, false),
-		ALC_ERROR				((byte) 6, PacketIDs.ALARMS_ALC_ERROR, false),
-		OVER_TEMPERATURE_ALARM	((byte) 7, PacketIDs.ALARMS_OWER_TEMPERATURE, false),
-		HW_FAULT				((byte)10, PacketIDs.ALARMS_HARDWARE_FAULT, false),
-		REDUNDANCY_FAULT		((byte)11, PacketIDs.ALARMS_REDUNDANT_FAULT, false),
-		RF_OVERDRIVE			((byte)12, PacketIDs.ALARMS_RF_OVERDRIVEL, false),
-		ALL_IDs					((byte)13, PacketIDs.ALARMS_ALL_IDs, false),
+		STATUS					((byte) 0, PacketIDs.ALARMS_STATUS					, false),
+		PLL_OUT_OF_LOCK			((byte) 1, PacketIDs.ALARMS_PLL_OUT_OF_LOCK			, false),
+		TEMPERATURE_ThRESHOLD_1	((byte) 2, PacketIDs.ALARMS_TEMPERATURE_ThRESHOLD_1	, false),
+		TEMPERATURE_ThRESHOLD_2	((byte) 3, PacketIDs.ALARMS_TEMPERATURE_ThRESHOLD_2	, false),
+		OVER_CURRENT_ALARM		((byte) 4, PacketIDs.ALARMS_OWER_CURRENT			, false),
+		UNDER_CURRENT_ALARM		((byte) 5, PacketIDs.ALARMS_UNDER_CURRENT			, false),
+		ALC_ERROR				((byte) 6, PacketIDs.ALARMS_ALC_ERROR				, false),
+		OVER_TEMPERATURE_ALARM	((byte) 7, PacketIDs.ALARMS_OWER_TEMPERATURE		, false),
+		TODO4					((byte) 8, PacketIDs.ALARMS_TODO4					, false),
+		TODO5					((byte) 9, PacketIDs.ALARMS_TODO5					, false),
+		HW_FAULT				((byte)10, PacketIDs.ALARMS_HARDWARE_FAULT			, false),
+		REDUNDANCY_FAULT		((byte)11, PacketIDs.ALARMS_REDUNDANT_FAULT			, false),
+		RF_OVERDRIVE			((byte)12, PacketIDs.ALARMS_RF_OVERDRIVEL			, false),
+		ALL_IDs					((byte)13, PacketIDs.ALARMS_ALL_IDs					, false),
+		BUC_B_COMMUNICATION_FAULT((byte)14, PacketIDs.ALARMS_BUC_B_COMMUNICATION_FAULT,false),
+		BUC_B_SUMMARY			((byte)15, PacketIDs.ALARMS_BUC_B_SUMMARY			, false),
+		BUC_S_COMMUNICATION_FAULT((byte)16, PacketIDs.ALARMS_BUC_S_COMMUNICATION_FAULT,false),
+		BUC_S_SUMMARY			((byte)17, PacketIDs.ALARMS_BUC_S_SUMMARY			, false),
+		TODO7					((byte)18, PacketIDs.ALARMS_TODO7					, false),
+		TODO8					((byte)19, PacketIDs.ALARMS_TODO8					, false),
+		TODO9					((byte)20, PacketIDs.ALARMS_TODO9					, false),
 
-		DESCRIPTION_PLL_OUT_OF_LOCK			((byte) 1, PacketIDs.ALARMS_DESCRIPTION_PLL_OUT_OF_LOCK, true),
-		DESCRIPTION_TEMPERATURE_ThRESHOLD_1	((byte) 2, PacketIDs.ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_1, true),
-		DESCRIPTION_TEMPERATURE_ThRESHOLD_2	((byte) 3, PacketIDs.ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_2, true),
-		DESCRIPTION_OVER_CURRENT_ALARM		((byte) 4, PacketIDs.ALARMS_DESCRIPTION_OWER_CURRENT, true),
-		DESCRIPTION_UNDER_CURRENT_ALARM		((byte) 5, PacketIDs.ALARMS_DESCRIPTION_UNDER_CURRENT, true),
-		DESCRIPTION_ALC_ERROR				((byte) 6, PacketIDs.ALARMS_DESCRIPTION_ALC_ERROR, true),
-		DESCRIPTION_OVER_TEMPERATURE_ALARM	((byte) 7, PacketIDs.ALARMS_DESCRIPTION_OWER_TEMPERATURE, true),
-		DESCRIPTION_HW_FAULT				((byte)10, PacketIDs.ALARMS_DESCRIPTION_HARDWARE_FAULT, true),
-		DESCRIPTION_REDUNDANCY_FAULT		((byte)11, PacketIDs.ALARMS_DESCRIPTION_REDUNDANT_FAULT, true),
-		DESCRIPTION_RF_OVERDRIVE			((byte)12, PacketIDs.ALARMS_DESCRIPTION_RF_OVERDRIVEL, true),
-		DESCRIPTION_ALL_IDs					((byte)13, PacketIDs.ALARMS_DESCRIPTION_ALL_IDs, true);//All possible data in one packet
+		DESCRIPTION_PLL_OUT_OF_LOCK			((byte) 1, PacketIDs.ALARMS_DESCRIPTION_PLL_OUT_OF_LOCK			, true),
+		DESCRIPTION_TEMPERATURE_ThRESHOLD_1	((byte) 2, PacketIDs.ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_1	, true),
+		DESCRIPTION_TEMPERATURE_ThRESHOLD_2	((byte) 3, PacketIDs.ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_2	, true),
+		DESCRIPTION_OVER_CURRENT_ALARM		((byte) 4, PacketIDs.ALARMS_DESCRIPTION_OWER_CURRENT			, true),
+		DESCRIPTION_UNDER_CURRENT_ALARM		((byte) 5, PacketIDs.ALARMS_DESCRIPTION_UNDER_CURRENT			, true),
+		DESCRIPTION_ALC_ERROR				((byte) 6, PacketIDs.ALARMS_DESCRIPTION_ALC_ERROR				, true),
+		DESCRIPTION_OVER_TEMPERATURE_ALARM	((byte) 7, PacketIDs.ALARMS_DESCRIPTION_OWER_TEMPERATURE		, true),
+		DESCRIPTION_HW_FAULT				((byte)10, PacketIDs.ALARMS_DESCRIPTION_HARDWARE_FAULT			, true),
+		DESCRIPTION_REDUNDANCY_FAULT		((byte)11, PacketIDs.ALARMS_DESCRIPTION_REDUNDANT_FAULT			, true),
+		DESCRIPTION_RF_OVERDRIVE			((byte)12, PacketIDs.ALARMS_DESCRIPTION_RF_OVERDRIVEL			, true),
+		DESCRIPTION_ALL_IDs					((byte)13, PacketIDs.ALARMS_DESCRIPTION_ALL_IDs					, true),
+		DESCRIPTION_BUC_B_COMMUNICATION_FAULT((byte)14, PacketIDs.ALARMS_DESCRIPTION_BUC_B_COMMUNICATION_FAULT,true),
+		DESCRIPTION_BUC_B_SUMMARY			((byte)15, PacketIDs.ALARMS_DESCRIPTION_BUC_B_SUMMARY			, true),
+		DESCRIPTION_BUC_S_COMMUNICATION_FAULT((byte)16, PacketIDs.ALARMS_DESCRIPTION_BUC_S_COMMUNICATION_FAULT,true),
+		DESCRIPTION_BUC_S_SUMMARY			((byte)17, PacketIDs.ALARMS_DESCRIPTION_BUC_S_SUMMARY			, true),
+		DESCRIPTION_TODO7					((byte)18, PacketIDs.ALARMS_DESCRIPTION_TODO7					, true),
+		DESCRIPTION_TODO8					((byte)19, PacketIDs.ALARMS_DESCRIPTION_TODO8					, true),
+		DESCRIPTION_TODO9					((byte)20, PacketIDs.ALARMS_DESCRIPTION_TODO9					, true);
 
 		private final static Logger logger = LogManager.getLogger();
 		private final short alarmId;
@@ -421,6 +438,14 @@ public interface PacketWork extends Comparable<PacketWork>{
 		MUTE_INFO					(null	, 4		, PacketIDs.DEVICE_DEBUG_MUTE_INFO				, "DEVICE_DEBUG_MUTE_INFO"				, PacketImp.PARAMETER_DEVICE_DEBUG_INFO),
 		SCP_DEVICE_INFO				(null	, 10	, PacketIDs.DEVICE_DEBUG_SCP_DEVICE_INFO		, "DEVICE_DEBUG_SCP_DEVICE_INFO"		, PacketImp.PARAMETER_DEVICE_DEBUG_INFO),
 
+//		INFO_0					(0, 0, PacketIDs.DUMP_DEVICE_DEBUG_INFO_0				, "DUMP_DEVICE_DEBUG_INFO_0"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
+//		INFO_1					(0, 1, PacketIDs.DUMP_DEVICE_DEBUG_INFO_1				, "DUMP_DEVICE_DEBUG_INFO_1"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
+//		INFO_2					(0, 2, PacketIDs.DUMP_DEVICE_DEBUG_INFO_2				, "DUMP_DEVICE_DEBUG_INFO_2"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
+//		INFO_3					(0, 3, PacketIDs.DUMP_DEVICE_DEBUG_INFO_3				, "DUMP_DEVICE_DEBUG_INFO_3"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
+//		INFO_4					(0, 4, PacketIDs.DUMP_DEVICE_DEBUG_INFO_4				, "DUMP_DEVICE_DEBUG_INFO_4"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
+//		INFO_10					(0, 10, PacketIDs.DUMP_DEVICE_DEBUG_INFO_10				, "DUMP_DEVICE_DEBUG_INFO_10"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
+//		INFO_11					(0, 11, PacketIDs.DUMP_DEVICE_DEBUG_INFO_11				, "DUMP_DEVICE_DEBUG_INFO_11"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
+
 		DEVICEs_DUMP				(null	, 100	, PacketIDs.DEVICE_DEBUG_DEVICEs_DUMP			, "DEVICE_DEBUG_DEVICEs_DUMP"			, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP),//TODO
 		DEVICE1_DUMP				(null	, 1		, PacketIDs.DEVICE_DEBUG_DEVICE1_DUMP			, "DEVICE_DEBUG_DEVICE1_DUMP"			, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP),
 		DEVICE2_DUMP				(null	, 2		, PacketIDs.DEVICE_DEBUG_DEVICE2_DUMP			, "DEVICE_DEBUG_DEVICE2_DUMP"			, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP),
@@ -433,14 +458,6 @@ public interface PacketWork extends Comparable<PacketWork>{
 		ADC_CHANNELS_mV_DUMP		(null	, 11	, PacketIDs.DEVICE_DEBUG_ADC_CHANNELS_mV_DUMP	, "DEVICE_DEBUG_ADC_CHANNELS_mV_DUMP"	, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP),
 		SIGNALS_CHANGE_COUNTERS_DUMP(null	, 20	, PacketIDs.DEVICE_DEBUG_CHANGE_COUNTERS_DUMP	, "DEVICE_DEBUG_CHANGE_COUNTERS_DUMP"	, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP),
 		DP1_DUMP					(null	, 30	, PacketIDs.DEVICE_DEBUG_DP1_DUMP				, "DEVICE_DEBUG_DP1_DUMP"				, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP),
-
-//		INFO_0					(0, 0, PacketIDs.DUMP_DEVICE_DEBUG_INFO_0				, "DUMP_DEVICE_DEBUG_INFO_0"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
-//		INFO_1					(0, 1, PacketIDs.DUMP_DEVICE_DEBUG_INFO_1				, "DUMP_DEVICE_DEBUG_INFO_1"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
-//		INFO_2					(0, 2, PacketIDs.DUMP_DEVICE_DEBUG_INFO_2				, "DUMP_DEVICE_DEBUG_INFO_2"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
-//		INFO_3					(0, 3, PacketIDs.DUMP_DEVICE_DEBUG_INFO_3				, "DUMP_DEVICE_DEBUG_INFO_3"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
-//		INFO_4					(0, 4, PacketIDs.DUMP_DEVICE_DEBUG_INFO_4				, "DUMP_DEVICE_DEBUG_INFO_4"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
-//		INFO_10					(0, 10, PacketIDs.DUMP_DEVICE_DEBUG_INFO_10				, "DUMP_DEVICE_DEBUG_INFO_10"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
-//		INFO_11					(0, 11, PacketIDs.DUMP_DEVICE_DEBUG_INFO_11				, "DUMP_DEVICE_DEBUG_INFO_11"			, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
 
 		HELP						(0		, 0		, PacketIDs.DEVICE_DEBUG_HELP					, "DEVICE_DEBUG_HELP"					, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE),
 

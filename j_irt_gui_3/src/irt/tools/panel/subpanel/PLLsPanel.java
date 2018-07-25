@@ -39,8 +39,8 @@ import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
+import irt.data.MyThreadFactory;
 import irt.data.PllRegisterTextFieldSlider;
-import irt.data.RundomNumber;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
@@ -373,12 +373,7 @@ public class PLLsPanel extends JPanel {
 							0,
 							Style.CHECK_ONCE);
 
-		Thread t = new Thread(registerController, "PLLsPanel.PLL reg.N9-"+new RundomNumber());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+		new MyThreadFactory(registerController, "PLLsPanel.startController()");
 	}
 
 	private class Parse extends Thread{

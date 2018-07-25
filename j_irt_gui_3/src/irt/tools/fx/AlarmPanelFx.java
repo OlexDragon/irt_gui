@@ -3,12 +3,12 @@ package irt.tools.fx;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -24,7 +24,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.AlarmsPacketIds;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Packets;
@@ -34,7 +34,6 @@ import irt.data.packet.alarm.AlarmStatusPacket;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmStatus;
 import irt.data.packet.alarm.AlarmsIDsPacket;
-import irt.data.packet.alarm.AlarmsSummaryPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import javafx.application.Platform;
@@ -60,10 +59,9 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	public static final byte CONVERTER = MonitorPanelFx.CONVERTER;
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private ScheduledExecutorService service;
 
 	private final AlarmsIDsPacket packetAlarmIDs;
-	private final AlarmsSummaryPacket packetSummary;
 
 	private Byte unitAddress = CONVERTER;
 												public byte getUnitAddress() {
@@ -73,7 +71,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 												public void setUnitAddress(byte unitAddress) {
 //													logger.error("unitAddress: {}", unitAddress);
 													this.unitAddress = unitAddress;
-													packetSummary.setAddr(unitAddress);
 													packetAlarmIDs.setAddr(unitAddress);
 													clear();
 												}
@@ -81,10 +78,11 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private GridPane 	gridPane;
 
 	public AlarmPanelFx() {
+		Thread currentThread = Thread.currentThread();
+		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 //		logger.error("AlarmPanelFx");
 
 		packetAlarmIDs = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketAbstract();
-		packetSummary = (AlarmsSummaryPacket) Packets.ALARMS_SUMMARY_STATUS.getPacketAbstract();//This packet is for DumpController
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("GridPanel.fxml"));
         fxmlLoader.setRoot(this);
@@ -93,8 +91,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
         try {
             fxmlLoader.load();
 
-    		scheduledFuture = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
-
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
@@ -102,7 +98,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 	@FXML protected void initialize() {
 		gridPane = (GridPane) getChildren().get(0);
-		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		gridPane.getStyleClass().add("alarms");
 
 	}
@@ -126,8 +121,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
  	private short[] availableAlarms;
 	private int index ;
-	private Object summaryAlarm;
-	private boolean run;
+//	private Object summaryAlarm;
 	private SerialPortInterface serialPort;
 
 	private int delay;
@@ -154,7 +148,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		try{
 
 			final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
-			queue.add(packetSummary);// used by DumpController.onPacketReceived
 
 			boolean haveToGetAlarmIDs = !Optional.ofNullable(availableAlarms).filter(a->a.length>0).isPresent();
 			if(haveToGetAlarmIDs && availableAlarmsSent){
@@ -171,11 +164,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 			final int size = queue.size();
 
-			if(!run && delay>0){
-				delay--;
-				return;
-			}
-
 			if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<0)
 				delay = ComPortThreadQueue.DELAY_TIMES;
 			else if(size==0)
@@ -185,13 +173,10 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 				index = 0;
 
 
-			if(run)
-				IntStream
+			IntStream
 				.range(0, availableAlarms.length)
 				.mapToObj(i->new AlarmStatusPacket( unitAddress, AlarmsPacketIds.valueOf(availableAlarms[i], false).orElse(AlarmsPacketIds.STATUS)))
 				.forEach(queue::add);
-			else	// If panel is not visible send only one packet 
-				queue.add(new AlarmStatusPacket( unitAddress, AlarmsPacketIds.valueOf(availableAlarms[index], false).orElse(AlarmsPacketIds.STATUS)));
 
 			final Stream<AlarmDescriptionPacket> descriptionPackets = gridPane
 
@@ -205,13 +190,8 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 					.map(Short.class::cast)
 					.map(alarmCode->new AlarmDescriptionPacket(unitAddress, AlarmsPacketIds.valueOf(alarmCode, true).orElse(AlarmsPacketIds.STATUS)));
 
-			if(run)
-				descriptionPackets
-				.forEach(queue::add);
-			else
-				descriptionPackets
-					.findAny()
-					.ifPresent(queue::add);
+			descriptionPackets
+			.forEach(queue::add);
 
 		}catch (Exception e) {
 			logger.catching(e);
@@ -219,11 +199,11 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	@Override
-	public void onPacketRecived(final Packet packet) {
+	public void onPacketReceived(final Packet packet) {
 		new MyThreadFactory(()->{
-			
 
-			final Optional<PacketHeader> alarmGroupId = filterByAddressAndGroup(packet);
+			Optional<Packet> oPacket = Optional.ofNullable(packet);
+			final Optional<PacketHeader> alarmGroupId = oPacket.flatMap(this::filterByAddressAndGroup);
 
 			if(!alarmGroupId.isPresent())
 				return;
@@ -237,8 +217,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			}
 
 			//no error
-			final Optional<PacketHeader> noError = hasResponse
-													.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+			final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
 
 			if(!noError.isPresent()){
 				logger.warn("Packet has error {}", packet);
@@ -246,56 +225,55 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			}
 
 			//Summary alarm
-			if(noError
-			.filter(h->PacketIDs.ALARMS_SUMMARY.match(h.getPacketId())).isPresent()){
+			Optional<Short> oPacketId = noError.map(PacketHeader::getPacketId);
+			if(	oPacketId.filter(PacketIDs.ALARMS_SUMMARY::match).isPresent()){
 
-				final Optional<? extends PacketSuper> p = Packets.cast(packet);
-				p.ifPresent(pa->{
-					Object sa = pa.getValue();
-					if(!sa.equals(summaryAlarm)){
-						summaryAlarm = sa;
-					};
-				});
+//				final Optional<? extends PacketSuper> p = Packets.cast(packet);
+//				p.ifPresent(pa->{
+//					Object sa = pa.getValue();
+//					if(!sa.equals(summaryAlarm)){
+//						summaryAlarm = sa;
+//					};
+//				});
 				return;
 			}
+			Optional<Payload> oPayload = oPacket
+											.map(Packet::getPayloads)
+											.map(List::stream)
+											.flatMap(Stream::findAny);
 
 			//Available alarms
-			final Optional<short[]> alarms = noError.filter(h->PacketIDs.ALARMS_IDs.match(h.getPacketId()))
-												.map(h->packet.getPayloads())
-												.filter(pls->!pls.isEmpty())
-												.map(pls->pls.get(0).getArrayShort());
+			if(oPacketId.filter(PacketIDs.ALARMS_IDs::match).isPresent()){
 
 			//Initialize available alarms
-			if(alarms.isPresent()){
+				final Optional<short[]> alarms = oPayload
+													.map(Payload::getArrayShort);
 
 				availableAlarms = alarms.get();
+				logger.debug("{}", availableAlarms);
 				createLabels();
 
 				return;
 			}
 
+
 			//set alarm status
-			noError
-			.map(h->packet.getPayloads())
-			.filter(pls->!pls.isEmpty())
-			.map(pls->pls.stream())
-			.map(stream->stream.collect(Collectors.partitioningBy(pl->pl.getParameterHeader().getCode()==PacketImp.ALARM_STATUS)))
-			.ifPresent(map->{
+			oPayload
+			.ifPresent(pl->{
 
+				byte[] buffer = pl.getBuffer();
+				if(pl.getParameterHeader().getCode()==PacketImp.ALARM_STATUS) 
 									//Alarm Status
-									map.get(true)
-									.parallelStream()
-									.map(Payload::getBuffer)
-									.forEach(bs->setAlarmStatus(bs));
+									setAlarmStatus(buffer);
 
+				else if(pl.getParameterHeader().getCode()==PacketImp.ALARM_DESCRIPTION)
 									//Alarm description
-									map.get(false)
-									.parallelStream()
-									.filter(pl->pl.getParameterHeader().getCode()==PacketImp.ALARM_DESCRIPTION)
-									.map(Payload::getBuffer)
-									.forEach(bs->setAlarmDescription(bs));
+									setAlarmDescription(buffer);
+
+				else
+					logger.warn(packet);
 			});
-		});
+		}, "AlarmPanelFx.onPacketReceived()");
 	}
 
 	private Optional<PacketHeader> filterByAddressAndGroup(final Packet packet) {
@@ -310,7 +288,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			return Optional.empty();
 
 		final Optional<PacketHeader> sameGroupId = o.map(p->p.getHeader())
-												.filter(h->h.getGroupId()==PacketImp.GROUP_ID_ALARM);
+												.filter(h->PacketGroupIDs.ALARM.match(h.getGroupId()));
 		return sameGroupId;
 	}
 
@@ -415,22 +393,22 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	public void start(){
-		run = true;
+
+		if(Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).isPresent())
+			return;
+
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AlarmPanelFx"));
+
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
+		scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 	}
 
 	public void stop(){
 
-		run = false;
-	}
-
-	public void shutdownNow() {
-
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
-
-		if(scheduledFuture!=null && !scheduledFuture.isDone())
-			scheduledFuture.cancel(true);
-
-		service.shutdownNow();
+		Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
 	public class AlarmDescription {
@@ -448,6 +426,9 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 			logger.trace("\nbytes={}\nalarmCode={}\nalarmDescription={}", bytes, alarmCode, alarmDescription);
 		}
+	}
 
+	@Override
+	public void shutdownNow() {
 	}
 }

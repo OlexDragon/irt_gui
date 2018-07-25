@@ -158,13 +158,13 @@ public class ProgressBar extends JPanel implements PacketListener{
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
 			setMinMaxValue(packet);
 			setValue(packet);
-		});
+		}, "ProgressBar.onPacketReceived()");
 	}
 
 	private void setValue(Packet packet) {

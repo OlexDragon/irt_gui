@@ -7,8 +7,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -24,7 +25,7 @@ public class DeviceDebugInfoPacket extends PacketSuper {
 																							.map(String::new);
 
 	public DeviceDebugInfoPacket(byte linkAddr, byte parameterHeaderCode) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_INFO, PacketImp.GROUP_ID_DEVICE_DEBAG, parameterHeaderCode, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_INFO, PacketGroupIDs.DEVICE_DEBAG, parameterHeaderCode, null, Priority.REQUEST);
 	}
 
 	public void setParameterCode(byte parameterHeaderCode) {

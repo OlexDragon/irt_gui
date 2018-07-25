@@ -144,7 +144,7 @@
                                     </BorderPane>
                                     <BorderPane styleClass="title" GridPane.rowIndex="2">
                                        <center>
-                                          <Text styleClass="text_white" text="Switchover">
+                                          <Text styleClass="text_white" text="Alarm">
                                              <font>
                                                 <Font name="System Bold" size="12.0" />
                                              </font>
@@ -223,7 +223,7 @@
                                           </Text>
                                        </center>
                                     </BorderPane>
-                                    <BorderPane fx:id="bpSwitchhowerUnit1" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <BorderPane fx:id="bpAlarmUnitA" GridPane.columnIndex="1" GridPane.rowIndex="2">
                                        <center>
                                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text=" Alarm ">
                                              <font>
@@ -232,7 +232,7 @@
                                           </Text>
                                        </center>
                                     </BorderPane>
-                                    <BorderPane fx:id="bpSwitchhowerUnit2" GridPane.columnIndex="2" GridPane.rowIndex="2">
+                                    <BorderPane fx:id="bpAlarmUnitB" GridPane.columnIndex="2" GridPane.rowIndex="2">
                                        <center>
                                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text=" Alarm ">
                                              <font>
@@ -241,7 +241,7 @@
                                           </Text>
                                        </center>
                                     </BorderPane>
-                                    <BorderPane fx:id="bpSwitchhowerUnit3" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                                    <BorderPane fx:id="bpAlarmUnitS" GridPane.columnIndex="3" GridPane.rowIndex="2">
                                        <center>
                                           <Text strokeType="OUTSIDE" strokeWidth="0.0" text=" Alarm ">
                                              <font>

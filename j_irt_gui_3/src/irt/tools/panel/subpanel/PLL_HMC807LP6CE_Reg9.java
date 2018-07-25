@@ -117,7 +117,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 						PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE), Style.CHECK_ONCE){
 
 							@Override
-							public void onPacketRecived(Packet packet) {
+							public void onPacketReceived(Packet packet) {
 
 								new MyThreadFactory(()->{
 									
@@ -142,7 +142,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 										}else
 											textField.setText("N/A");
 									}
-								});
+								}, "PLL_HMC807LP6CE_Reg9.onPacketReceived()");
 							}
 
 									private void parse(long value) {
@@ -200,12 +200,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 									}
 								};
 				controller.setWaitTime(10000);
-				Thread t = new Thread(controller);
-				int priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
+				new MyThreadFactory(controller, "PLL_HMC807LP6CE_Reg9.ancestorAdded()");
 			}
 			public void ancestorMoved(AncestorEvent event) {
 			}

@@ -11,8 +11,9 @@ import irt.controller.GuiControllerAbstract;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 
@@ -165,7 +166,7 @@ public class DeviceInfo implements PacketListener {
 
 	public boolean set(Packet packet) {
 		boolean isSet = false;
-		if(packet!=null && packet.getHeader()!=null && packet.getHeader().getGroupId()==PacketImp.GROUP_ID_DEVICE_INFO){
+		if(packet!=null && packet.getHeader()!=null && PacketGroupIDs.DEVICE_INFO.match(packet.getHeader().getGroupId())){
 
 			linkHeader = packet instanceof LinkedPacket ? ((LinkedPacket)packet).getLinkHeader() : null;
 			List<Payload> payloads = packet.getPayloads();
@@ -294,14 +295,20 @@ public class DeviceInfo implements PacketListener {
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 		new MyThreadFactory(()->{
 	
-			DeviceInfo
-			.parsePacket(packet)
-			.filter(di->di.serialNumber.equals(serialNumber))
-			.ifPresent(this::set);
-		});
+			try {
+
+				DeviceInfo
+				.parsePacket(packet)
+				.filter(di->di.serialNumber.equals(serialNumber))
+				.ifPresent(this::set);
+
+			}catch (Exception e) {
+				logger.catching(e);
+			}
+		}, "DeviceInfo.onPacketReceived()");
 	}
 
 	static public Optional<DeviceInfo> parsePacket(Packet packet){

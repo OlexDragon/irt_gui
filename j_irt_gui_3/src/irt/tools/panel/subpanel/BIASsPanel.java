@@ -59,6 +59,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
@@ -87,7 +88,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	private static final int P6 = 170;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("BIASsPanel"));
 	private final List<AdcWorker> adcWorkers = new ArrayList<>();
 
 	public enum CalibrationMode{
@@ -475,7 +476,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 							new SetterController(deviceType, "Initialize UnitController",
 									new Setter(linkHeader,
 										PacketImp.PACKET_TYPE_COMMAND,
-										PacketImp.GROUP_ID_PRODUCTION_GENERIC_SET_1,
+										PacketGroupIDs.PRODUCTION_GENERIC_SET_1.getId(),
 										PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
 										PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE
 									),
@@ -536,7 +537,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				return new DefaultController(deviceType, "Potenciometer index="+index+", address="+address, setter, Style.CHECK_ONCE){
 
 					@Override
-					public void onPacketRecived(Packet packet) {
+					public void onPacketReceived(Packet packet) {
 
 						new MyThreadFactory(()->{
 
@@ -552,7 +553,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 								} else
 									showMessage("Some Problem("+header.getOptionStr()+")");
 							}
-						});
+						}, "BIASsPanel.DefaultController.onPacketReceived()");
 					}
 				};
 			}
@@ -576,7 +577,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				Setter setter = new Setter(
 						linkHeader,
 						PacketImp.PACKET_TYPE_COMMAND,
-						PacketImp.GROUP_ID_DEVICE_DEBAG,
+						PacketGroupIDs.DEVICE_DEBAG.getId(),
 						PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE,
 						PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE,
 						(Integer)calibrationMode.ordinal()
@@ -584,7 +585,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				controller = new DefaultController(deviceType, "CalibrationMode", setter, Style.CHECK_ONCE){
 
 					@Override
-					public void onPacketRecived(Packet packet) {
+					public void onPacketReceived(Packet packet) {
 
 						new MyThreadFactory(()->{
 
@@ -604,7 +605,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 									showMessage("Some Problem("+optionStr+")");
 								}
 							}
-						});
+						}, "BIASsPanel.DefaultController-2.onPacketReceived()");
 					}
 				};
 				return runController(controller);
@@ -616,7 +617,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 				boolean don;
 				if(controller!=null){
-					ExecutorService executor = Executors.newFixedThreadPool(1, new MyThreadFactory());
+					ExecutorService executor = Executors.newFixedThreadPool(1, new MyThreadFactory("BIASsPanel.runController(DefaultController)"));
 					executor.execute(controller);
 					executor.shutdown();
 
@@ -707,9 +708,9 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
-		synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->adc.update(packet))); }
+		synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->adc.update(packet), "BIASsPanel.onPacketReceived()")); }
 	}
 
 	private int delay;
@@ -721,7 +722,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		if(delay<=0)
 			try{
-				synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->queue.add(adc.getPacketToSend())));}
+				synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->queue.add(adc.getPacketToSend()), "BIASsPanel.run()"));}
 			}catch (Exception e) {
 				logger.catching(e);
 			}

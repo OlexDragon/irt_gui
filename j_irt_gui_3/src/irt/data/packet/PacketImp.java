@@ -36,28 +36,51 @@ public class PacketImp implements Packet{
 	 *  Packet ID represents unique identifier of “command/request – response” transaction.
 	 *  Packet ID is generated on the client side and is copied to response message on the server side.
 	 *   Acknowledgement message always contains ID of the received packet acknowledgement was sent on. */
-	public static final byte
-		IRT_SLCP_PACKET_ID_NONE	= 0,		/* Reserved for special use. */
-		GROUP_ID_ALARM			= 1,		/* Alarm: message content is product specific. */
-		GROUP_ID_CONFIGURATION	= 2,		/* Configuration: content is product specific. */
-		GROUP_ID_FILETRANSFER	= 3,		/* File transfer: software upgrade command (optional). */
-		GROUP_ID_MEASUREMENT	= 4,		/* Measurement: device status, content is product specific. */
-		GROUP_ID_RESET			= 5,		/* Device reset: generic command. */
-		GROUP_ID_DEVICE_INFO	= 8,		/* Device information: generic command. */
-		GROUP_ID_CONTROL		= 9,		/* Device control operations. Save configuration: generic command. */
-		GROUP_ID_PROTO			= 10,
-		GROUP_ID_REDUNDANCY_CONTROLLER		= 12,
-		GROUP_ID_DEVICE_DEBAG	= 61,		/* Device Debug. */
+	public enum PacketGroupIDs{
+		NONE((byte)0),		/* Reserved for special use. */
+		ALARM			((byte)1),		/* Alarm: message content is product specific. */
+		CONFIGURATION	((byte)2),		/* Configuration: content is product specific. */
+		FILETRANSFER	((byte)3),		/* File transfer: software upgrade command (optional). */
+		MEASUREMENT		((byte)4),		/* Measurement: device status, content is product specific. */
+		RESET			((byte)5),		/* Device reset: generic command. */
+		DEVICE_INFO		((byte)8),		/* Device information: generic command. */
+		CONTROL			((byte)9),		/* Device control operations. Save configuration: generic command. */
+		PROTO			((byte)10),
+		REDUNDANCY		((byte)12),
+		DEVICE_DEBAG	((byte)61),		/* Device Debug. */
 
 	/* Protocol */
-		GROUP_ID_PROTOCOL = 10, /* Packet protocol parameters configuration and monitoring. */
+		PROTOCOL ((byte)10), /* Packet protocol parameters configuration and monitoring. */
 
 	/* Network */
-		GROUP_ID_NETWORK = 11, /* Network configuration. */
+		NETWORK ((byte)11), /* Network configuration. */
 
 	/* backwards compatibility - to be deleted */
-		GROUP_ID_PRODUCTION_GENERIC_SET_1 = 100,
-		GROUP_ID_DEVELOPER_GENERIC_SET_1 = 120;
+		PRODUCTION_GENERIC_SET_1 ((byte)100),
+		DEVELOPER_GENERIC_SET_1 ((byte)120);
+
+		private final byte id;
+
+		private PacketGroupIDs(byte id) {
+			this.id = id;
+		}
+
+		public byte getId() {
+			return id;
+		}
+
+		public boolean match(byte packetId) {
+			return packetId == id;
+		}
+
+		public String toString() {
+			return name() + "(" + id + ")";
+		}
+
+		public static PacketGroupIDs valueOf(byte packetId) {
+			return Arrays.stream(values()).filter(pId->pId.id==packetId).findAny().orElse(NONE);
+		}
+	}
 	/* Parameter general types definition. */
 	public static final byte
 		PARAMETER_NONE		= 0,
@@ -117,6 +140,8 @@ public class PacketImp implements Packet{
 		PARAMETER_CONFIG_FCM_ALC_OVERDRIVE_PROTECTION_THRESHOLD_RANGE	= 17,
 		PARAMETER_CONFIG_FCM_LNB_REFERENCE_CONTROL						= 21,
 		PARAMETER_CONFIG_BUC_APC_ENABLE                					= 110,     /* APC enable */
+		PARAMETER_CONFIG_BUC_OFFSET_RANGE	         					= 103,    
+		PARAMETER_CONFIG_BUC_OFFSET_1_TO_MULTI         					= 104,    
 		PARAMETER_CONFIG_BUC_APC_LEVEL		          					= 111,     /* APC target power level */
 		PARAMETER_CONFIG_BUC_APC_RANGE        		  					= 112,     /* APC target power range */
 
@@ -198,11 +223,11 @@ public class PacketImp implements Packet{
 
 	/* Redundancy Controller's commands. */
 	public static final byte
-		REDUNDANCY_CONTROLLER_NONE = 0,
-		REDUNDANCY_CONTROLLER_SWITCHOVER_MODE = 1,
-		REDUNDANCY_CONTROLLER_STANDBY_MODE = 2,
-		REDUNDANCY_CONTROLLER_STATUS = 3,
-		REDUNDANCY_CONTROLLER_SWITCHOVER = 4;
+		PARAMETER_ID_REDUNDANCY_CONTROLLER_NONE = 0,
+		PARAMETER_ID_REDUNDANCY_CONTROLLER_SWITCHOVER_MODE = 1,
+		PARAMETER_ID_REDUNDANCY_CONTROLLER_STANDBY_MODE = 2,
+		PARAMETER_ID_REDUNDANCY_CONTROLLER_STATUS = 3,
+		PARAMETER_ID_REDUNDANCY_CONTROLLER_SWITCHOVER = 4;
 
 	private PacketHeader header;	//irtslcp_packet_header
 	private List<Payload> payloads;	//irtslcp_payload

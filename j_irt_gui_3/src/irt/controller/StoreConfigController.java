@@ -37,7 +37,7 @@ public class StoreConfigController implements PacketListener{
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 			
@@ -63,7 +63,7 @@ public class StoreConfigController implements PacketListener{
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 				JOptionPane.showMessageDialog( owner, "The Configuration has been stored.");
 			});
-		});
+		}, "StoreConfigController.onPacketReceived()");
 	}
 
 	@Override

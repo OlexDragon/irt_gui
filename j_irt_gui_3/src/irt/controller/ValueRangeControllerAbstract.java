@@ -12,8 +12,8 @@ import javax.swing.JTextField;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.RundomNumber;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.MyThreadFactory;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketWork;
 import irt.data.packet.PacketWork.PacketIDs;
@@ -132,12 +132,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 
 		LinkHeader linkHeader = getPacketWork().getPacketThread().getLinkHeader();
 		textSliderController = new TextSliderController(deviceType, controllerName, new ConfigurationSetter(linkHeader, parameterId, packetID), value, txtField, slider, style);
-		Thread t = new Thread(textSliderController, ValueRangeControllerAbstract.class.getSimpleName()+".TextSliderController-"+new RundomNumber());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+		new MyThreadFactory(textSliderController, "ValueRangeControllerAbstract.startTextSliderController()");
 
 		setSend(false);
 		setWaitTime(Integer.MAX_VALUE);

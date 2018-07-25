@@ -10,8 +10,10 @@ import java.util.stream.Stream;
 
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.interfaces.Packet;
+import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.interfaces.Packet;
 
 public class AlarmStatusPacket extends PacketSuper{
 
@@ -35,10 +37,26 @@ public class AlarmStatusPacket extends PacketSuper{
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
 				alarmsPacketIds.getPacketId(),
-				PacketImp.GROUP_ID_ALARM,
+				PacketGroupIDs.ALARM,
 				alarmCommand,
 				PacketImp.toBytes(alarmsPacketIds.getAlarmId()),
 				Priority.REQUEST);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if (this == obj)
+			return true;
+
+		if(super.equals(obj)) 
+			return getCode(this).flatMap(code->getCode(obj).map(otherCode->code.equals(otherCode))).orElse(false);
+
+		return false;
+	}
+
+	private Optional<Byte> getCode(Object obj) {
+		return ((Packet)obj).getPayloads().stream().findAny().map(Payload::getParameterHeader).map(ParameterHeader::getCode);
 	}
 
 	@Override
@@ -103,8 +121,8 @@ public class AlarmStatusPacket extends PacketSuper{
 		@Override
 		public int hashCode() {
 			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((getAlarmCode() == null) ? 0 : getAlarmCode().hashCode());
+			int result;
+			result = prime + ((getAlarmCode() == null) ? 0 : getAlarmCode().hashCode());
 			result = prime * result + ((getAlarmSeverities() == null) ? 0 : getAlarmSeverities().hashCode());
 			return result;
 		}
@@ -129,13 +147,6 @@ public class AlarmStatusPacket extends PacketSuper{
 			return true;
 		}
 
-
-		@Override
-		public String toString() {
-			return "AlarmStatus [alarmCode=" + getAlarmCode() + ", alarmSeverities=" + getAlarmSeverities() + "]";
-		}
-
-
 		public AlarmSeverities getAlarmSeverities() {
 			return alarmSeverities;
 		}
@@ -143,6 +154,11 @@ public class AlarmStatusPacket extends PacketSuper{
 
 		public Short getAlarmCode() {
 			return alarmCode;
+		}
+
+		@Override
+		public String toString() {
+			return "AlarmStatus [alarmCode=" + getAlarmCode() + ", alarmSeverities=" + getAlarmSeverities() + "]";
 		}
 	}
 }

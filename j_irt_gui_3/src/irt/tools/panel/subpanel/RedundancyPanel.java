@@ -40,14 +40,15 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.configuration.RedundancyEnablePacket;
+import irt.data.packet.configuration.RedundancyEnablePacket.RedundancyEnable;
 import irt.data.packet.configuration.RedundancyModePacket;
+import irt.data.packet.configuration.RedundancyModePacket.RedundancyMode;
 import irt.data.packet.configuration.RedundancyNamePacket;
+import irt.data.packet.configuration.RedundancyNamePacket.RedundancyName;
 import irt.data.packet.configuration.RedundancySetOnlinePacket;
 import irt.data.packet.configuration.RedundancyStatusPacket;
-import irt.data.packet.configuration.RedundancyEnablePacket.RedundancyEnable;
-import irt.data.packet.configuration.RedundancyModePacket.RedundancyMode;
-import irt.data.packet.configuration.RedundancyNamePacket.RedundancyName;
 import irt.data.packet.configuration.RedundancyStatusPacket.RedundancyStatus;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
@@ -67,10 +68,8 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	private static final ImageIcon ICON_BUC_B = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_B.jpg"));
 	private static final ImageIcon ICON_BUC_A = new ImageIcon(IrtGui.class.getResource("/irt/irt_gui/images/BUC_A.jpg"));
 
-	private static final long DELEY_TIMES = 10;
-
 	private final 	ComPortThreadQueue 			cptq 		= GuiControllerAbstract.getComPortThreadQueue();
-	public  final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	public  	 	ScheduledExecutorService 	service;
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 
 	private final	RedundancyEnablePacket		redundancyEnablePacket;
@@ -107,10 +106,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(c->{
-					cptq.removePacketListener(RedundancyPanel.this);
-					service.shutdownNow();
-				}));
+				.ifPresent(c->stop()));
 
 		unitAddress = linkHeader.getAddr();
 		redundancyEnablePacket = new RedundancyEnablePacket(unitAddress, null);
@@ -145,7 +141,17 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
-				start();
+
+				if(Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).isPresent())
+					return;
+
+				cptq.addPacketListener(RedundancyPanel.this);
+
+
+				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+					service = Executors.newScheduledThreadPool(1, new MyThreadFactory("RedundancyPanel"));
+
+				scheduleAtFixedRate = service.scheduleAtFixedRate(RedundancyPanel.this, 0, 10, TimeUnit.SECONDS);
 			}
 
 			public void ancestorRemoved(AncestorEvent event) {
@@ -273,10 +279,6 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		);
 		panel.setLayout(gl_panel);
 		setLayout(groupLayout);
-
-		cptq.addPacketListener(this);
-		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
 	}
 
 	@Override
@@ -314,16 +316,8 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		cmbBxRedundancy.setFont(font);
 	}
 
-	private void start() {
-		run = true;
-	}
-
-	private void stop() {
-		run = false;
-	}
-
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
@@ -345,7 +339,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 														.filter(p->p.getLinkHeader()!=null)
 														.filter(p->p.getLinkHeader().getAddr()==unitAddress)
 														.map(Packet::getHeader)
-														.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION);
+														.filter(h->PacketGroupIDs.CONFIGURATION.match(h.getGroupId()));
 
 				if(!sameGroupId.isPresent())
 					return;
@@ -439,11 +433,9 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 			}catch (Exception e) {
 				logger.catching(e);
 			}
-		});
+		}, "RedundancyPanel.onPacketReceived()");
 	}
 
-	private long count;
-	private boolean run;
 	private SerialPortInterface serialPort;
 
 	@Override
@@ -459,11 +451,6 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 			return;
 		}
 
-		if(!run && --count>0)
-			return;
-
-		count = DELEY_TIMES;
-
 		try{
 
 			cptq.add(redundancyEnablePacket);
@@ -474,5 +461,11 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		}catch(Exception ex){
 			logger.catching(ex);
 		}
+	}
+
+	private void stop() {
+		cptq.removePacketListener(RedundancyPanel.this);
+		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 }

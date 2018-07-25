@@ -6,6 +6,6 @@ import irt.data.packet.interfaces.Packet;
 
 public interface PacketListener extends EventListener{
 
-	void onPacketRecived(Packet packet);
+	void onPacketReceived(Packet packet);
 
 }

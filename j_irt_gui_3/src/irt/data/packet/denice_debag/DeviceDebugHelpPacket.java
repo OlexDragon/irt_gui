@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 
 public class DeviceDebugHelpPacket extends PacketSuper {
@@ -22,7 +23,7 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 	public static final int DEVICES = 0, DUMP = 1;
 
 	public DeviceDebugHelpPacket(Byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, DeviceDebugPacketIds.HELP.getPacketId(), PacketImp.GROUP_ID_DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBAG_INDEX, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, DeviceDebugPacketIds.HELP.getPacketId(), PacketGroupIDs.DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBAG_INDEX, null, Priority.REQUEST);
 	}
 
 	public DeviceDebugHelpPacket() {

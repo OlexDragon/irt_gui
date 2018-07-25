@@ -36,7 +36,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 	private static final long serialVersionUID = 4101471002534919184L;
 
 	private ScheduledFuture<?> scheduledFuture;
-	private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton"));
 
 	private Byte linkAddr;
 											public byte getLinkAddr() {
@@ -81,6 +81,9 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
+
+				Optional.of(service).filter(s->s.isShutdown()).ifPresent(s->service =  Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton")));
+
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(MuteButton.this);
 
 				if(scheduledFuture==null || scheduledFuture.isDone())
@@ -93,6 +96,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 						scheduledFuture.cancel(true);
 
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(MuteButton.this);
+				Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 			}
 		});
 
@@ -110,7 +114,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
@@ -121,7 +125,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 			.map(Packet::getHeader)
 			.filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId()))
 			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
-			.filter(h->h.getGroupId()==MuteControlPacket.GROUP_ID)
+			.filter(h->MuteControlPacket.GROUP_ID.match(h.getGroupId()))
 			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 			.ifPresent(h->{
 
@@ -151,7 +155,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 					});
 				}
 			});
-		});
+		}, "MuteButton.onPacketReceived");
 	}
 
 	public void setMuteLabel(JLabel lblMute) {

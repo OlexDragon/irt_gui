@@ -6,7 +6,7 @@
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
     </Console>
 
-    <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.3.138.log"
+    <RollingFile name="DumpFile" fileName="${sys:user.home}/irt/${sys:serialNumber}/${sys:serialNumber}.3.168.log"
     						  filePattern="${sys:user.home}/irt/${sys:serialNumber}/$${date:yyyy-MM}/${sys:serialNumber}-%d{yyyy-MM-dd}-%i.log.gz"
     						  bufferedIO="false">
 		<PatternLayout pattern="=== %d %m%n%n" />
@@ -61,12 +61,11 @@
 <!--   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelHPB" level="all"/> -->
 <!--   	<Logger name="irt.tools.panel.subpanel.NetworkPanel" level="all"/> -->
 
-<!--  	<Logger name="irt.controller.DumpController" level="warn"/> -->
 <!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
-<!--  	<Logger name="irt.controller.DumpControllerFull" level="all"/> -->
-<!--  	<Logger name="irt.controller.DumpControllerFull" level="all"/> -->
+ 	<Logger name="irt.controller.DumpControllerFull" level="warn"/>
 <!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
-<!--  	<Logger name="irt.controller.GuiController" level="all"/> -->
+ 	<Logger name="irt.controller.GuiController" level="error" />
+<!-- 	<Logger name="irt.tools.panel.UserPicobucPanel" level="debug"/> -->
 
 <!--  	<Logger name="irt.controller.control.UnitControllerImp" level="all"/> -->
 
@@ -82,13 +81,7 @@
       <AppenderRef ref="DumpFile" />
     </Logger>
 
-     <Logger name="irt.controller.serial_port.JsscComPort" level="error">
-     	<AppenderRef ref="communication" />
-    </Logger>
-
-     <Logger name="irt.controller.serial_port.PureJavaComPort" level="error">
-     	<AppenderRef ref="communication" />
-    </Logger>
+	<Logger name="irt.controller.serial_port.SerialPortInterface" level="error" />
 
     <Root level="error">
       <AppenderRef ref="STDOUT"/>

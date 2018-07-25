@@ -18,6 +18,7 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
@@ -46,7 +47,7 @@ public class ConfigurationSetter extends SetterAbstract {
 	}
 
 	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, PacketIDs packetID) {
-		super(linkHeader, PacketImp.GROUP_ID_CONFIGURATION, packetParameterHeaderCode, packetID.getId());
+		super(linkHeader, PacketGroupIDs.CONFIGURATION.getId(), packetParameterHeaderCode, packetID.getId());
 	}
 
 	@Override
@@ -140,7 +141,7 @@ public class ConfigurationSetter extends SetterAbstract {
 			final PacketIDs[] values = PacketIDs.values();
 			PacketIDs packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
 			if(ph!=null &&
-					ph.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION &&
+					PacketGroupIDs.CONFIGURATION.match(ph.getGroupId()) &&
 							packetId.match(ph.getPacketId()) && packet.getPayloads()!=null){
 
 				long tmp = value;

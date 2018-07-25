@@ -20,9 +20,10 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.MyThreadFactory;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.Payload;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 
 @SuppressWarnings("serial")
 public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Monitor  {
@@ -67,14 +68,8 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 			}
 			private void startControllers( List<ControllerAbstract> controllers) {
 				if(controllers!=null)
-					for(ControllerAbstract ca:controllers){
-						Thread t = new Thread(ca);
-						int priority = t.getPriority();
-						if(priority>Thread.MIN_PRIORITY)
-							t.setPriority(priority-1);
-						t.setDaemon(true);
-						t.start();
-					}
+					for(ControllerAbstract ca:controllers)
+						new MyThreadFactory(ca, "MonitorPanelAbstract.startControllers");
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 			public void ancestorRemoved(AncestorEvent event) {

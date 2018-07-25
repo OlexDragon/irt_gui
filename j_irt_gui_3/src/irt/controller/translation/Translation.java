@@ -18,7 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiController;
-import irt.data.RundomNumber;
+import irt.data.MyThreadFactory;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.head.IrtPanel;
 
@@ -44,33 +44,24 @@ public class Translation {
 		logger.entry(localeStr);
 		font = null;
 
-		Thread t = new Thread(new Runnable() {
+		new MyThreadFactory(()->{
 
-			@Override
-			public void run() {
+			try{
+			logger.entry(localeStr);
 
-				try{
-				logger.entry(localeStr);
+			locale = new Locale(localeStr);
 
-				locale = new Locale(localeStr);
+			messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
+			map = getMap();
 
-				messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
-				map = getMap();
+			if(!PREFS.get("locale", DEFAULT_LANGUAGE).equals(localeStr))
+				PREFS.put("locale", localeStr);
 
-				if(!PREFS.get("locale", DEFAULT_LANGUAGE).equals(localeStr))
-					PREFS.put("locale", localeStr);
-
-				getFont(localeStr);
-				}catch (Exception e) {
-					logger.catching(e);
-				}
+			getFont(localeStr);
+			}catch (Exception e) {
+				logger.catching(e);
 			}
-		}, "Translation.setLocale-"+new RundomNumber().toString());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+		}, "Translation.setLocale()");
 	}
 
 	private static Map<String, String> getMap() {

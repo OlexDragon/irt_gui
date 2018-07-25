@@ -40,6 +40,7 @@ import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -76,10 +77,11 @@ public class Panel extends JPanel implements PacketListener {
 
 	private JButton btnRight;
 
-	private final byte addr;
+	protected final byte addr;
 
 	public Panel(byte addr, String verticalLabelText, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		this.addr = addr;
+
 		addHierarchyListener(
 				hierarchyEvent->
 				Optional
@@ -289,7 +291,20 @@ public class Panel extends JPanel implements PacketListener {
 		panel.setLayout(gl_panel);
 		setLayout(groupLayout);
 
-		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
+		addAncestorListener(new AncestorListener() {
+			
+			@Override
+			public void ancestorRemoved(AncestorEvent event) {
+				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(Panel.this);
+			}
+			
+			@Override public void ancestorMoved(AncestorEvent event) { }
+			
+			@Override
+			public void ancestorAdded(AncestorEvent event) {
+				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(Panel.this);
+			}
+		});
 	}
 
 	public void setVerticalLabelForeground(Color labelForeground) {
@@ -326,37 +341,6 @@ public class Panel extends JPanel implements PacketListener {
 			}
 	}
 
-//	public void setMute(boolean isMute) {
-//		this.isMute = isMute;
-//		if(isMute){
-//			if(alarm<AlarmsController.ALARMS_STATUS_WARNING)
-//				setVerticalLabelBackground(Color.YELLOW);
-//			if(led.getLedColor()!=Color.YELLOW)
-//				led.setLedColor(Color.YELLOW);
-//		}else
-//			if(led.getLedColor()!=Color.GREEN)
-//				led.setLedColor(Color.GREEN);
-//	}
-//	public void setAlarm(int alarm) {
-//		this.alarm = alarm;
-//
-//		switch(alarm){
-//		case AlarmsController.ALARMS_STATUS_INFO:
-//		case AlarmsController.ALARMS_STATUS_NO_ALARM:
-//			if(!isMute)
-//				setVerticalLabelBackground(Color.GREEN);
-//			break;
-//		case AlarmsController.ALARMS_STATUS_WARNING:
-//		case AlarmsController.ALARMS_STATUS_MINOR:
-//			setVerticalLabelBackground(WARNING_COLOR);
-//			break;
-//		case AlarmsController.ALARMS_STATUS_ALARM:
-//		case AlarmsController.ALARMS_STATUS_FAULT:
-//			setVerticalLabelBackground(Color.RED);
-//			break;
-//		}
-//	}
-
 	private void setAllPanelsVisible(boolean visible) {
 		userPanel.setVisible(visible);
 		extraPanel.setVisible(visible);
@@ -369,25 +353,32 @@ public class Panel extends JPanel implements PacketListener {
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
-		Optional<Packet> oPacket = Optional.of(packet);
-		byte a = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+		Optional<Packet> oPacket = Optional.ofNullable(packet);
+		Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
+
+		// packet does not have response
+		if(oHeader.map(PacketHeader::getPacketType).filter(pt->pt!=PacketImp.PACKET_TYPE_RESPONSE).isPresent()) 
+			return;
+
+		// not alarm summary packet
+		if(!oHeader.map(PacketHeader::getPacketId).filter(PacketIDs.ALARMS_SUMMARY::match).isPresent())
+			return;
+
+		// address not match
+		byte a = oPacket.map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
 		if(addr!=a)
 			return;
 
+		logger.trace("{}, {}", addr, packet);
 		new MyThreadFactory(
 				()->
-				oPacket
-				.map(Packet::getHeader)
-				.map(PacketHeader::getPacketId)
-				.filter(PacketIDs.ALARMS_SUMMARY::match)
-				.map(id->PacketIDs.ALARMS_SUMMARY)
-				.flatMap(pId->pId.valueOf(packet))
+				PacketIDs.ALARMS_SUMMARY.valueOf(packet)
 				.filter(AlarmSeverities.class::isInstance)
 				.map(AlarmSeverities.class::cast)
 				.map(AlarmSeverities::getBackground)
-				.ifPresent(bg->SwingUtilities.invokeLater(()->verticalLabel.setBackground(bg))));
+				.ifPresent(bg->SwingUtilities.invokeLater(()->verticalLabel.setBackground(bg))), "Panel.onPacketReceived()");
 	}
 }

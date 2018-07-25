@@ -21,8 +21,9 @@ import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.configuration.ALCEnablePacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
@@ -35,7 +36,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	protected final Logger logger = LogManager.getLogger();
 
 	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	private	final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private	final 	ScheduledExecutorService 	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory("ALCComboBox"));
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 
 	private final ALCEnablePacket packet;
@@ -94,7 +95,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
@@ -114,7 +115,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 				o.map(Packet::getHeader)
 				.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 				.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
-				.filter(h->h.getGroupId()==PacketImp.GROUP_ID_CONFIGURATION)
+				.filter(h->PacketGroupIDs.CONFIGURATION.match(h.getGroupId()))
 				.map(h->packet.getPayloads())
 				.map(pls->pls.parallelStream())
 				.ifPresent(
@@ -133,7 +134,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 			}catch(Exception e){
 				logger.catching(e);
 			}
-		});
+		}, "ALCComboBox.onPacketReceived()");
 	}
 
 	final ItemListener checkBoxItemListener = new ItemListener() {

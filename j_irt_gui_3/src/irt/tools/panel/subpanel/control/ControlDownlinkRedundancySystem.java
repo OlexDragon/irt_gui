@@ -26,8 +26,9 @@ import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 import irt.data.packet.configuration.LnbSwitchPacket;
 import irt.data.packet.configuration.LnbSwitchPacket.LnbPosition;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -136,44 +137,13 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 		final LnbSwitchPacket lnbSwitchPacket = new LnbSwitchPacket(addr, lnbPosition);
 		GuiControllerAbstract.getComPortThreadQueue().add(lnbSwitchPacket);
-
-		//		Setter setter = new Setter(
-//							linkHeader,
-//							PacketImp.PACKET_TYPE_COMMAND,
-//							PacketImp.GROUP_ID_CONFIGURATION,
-//							PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER,
-//							PacketWork.PACKET_ID_CONFIGURATION_DLRS_WGS_SWITCHOVER,
-//							switchBox.isSelected() ? (byte)1 : (byte)2
-//							);
-//		controller = new DefaultController(deviceType, "DLRS UnitController", setter, Style.CHECK_ALWAYS){
-//
-//			@Override
-//			protected ValueChangeListener addGetterValueChangeListener() {
-//				final DefaultController controller = this;
-//				return new ValueChangeListener() {
-//				
-//					@Override
-//					public void valueChanged(ValueChangeEvent valueChangeEvent) {
-//						logger.error(valueChangeEvent);
-//						controller.stop();
-//					}
-//				};
-//			}
-//		
-//		};
-//		Thread t = new Thread(controller);
-//		int priority = t.getPriority();
-//		if(priority>Thread.MIN_PRIORITY)
-//			t.setPriority(priority-1);
-//		t.setDaemon(true);
-//		t.start();
 	}
 
 	@Override
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> l = new ArrayList<>();
 
-		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_CONFIGURATION, PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketIDs.CONFIGURATION_DLRS_WGS_SWITCHOVER){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.CONFIGURATION.getId(), PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketIDs.CONFIGURATION_DLRS_WGS_SWITCHOVER){
 
 			@Override
 			public boolean set(Packet packet) {
@@ -231,7 +201,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 			
@@ -272,6 +242,6 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 					ldLnb2.setOn(false);
 				}
 			});
-		});
+		}, "ControlDownlinkRedundancySystem.onPacketReceived()");
 	}
 }

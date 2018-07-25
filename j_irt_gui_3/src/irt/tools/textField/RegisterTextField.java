@@ -3,6 +3,8 @@ package irt.tools.textField;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -31,17 +33,16 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork;
-import irt.data.packet.Payload;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.RegisterPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 
 public class RegisterTextField extends JTextField implements PacketListener, Runnable {
 	private static final long serialVersionUID = 517630309792962880L;
@@ -57,7 +58,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	private final RegisterValue valueSaveRegister;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final 	ScheduledExecutorService	service = Executors.newScheduledThreadPool(5, new MyThreadFactory());
+	private final 	ScheduledExecutorService	service = Executors.newScheduledThreadPool(5, new MyThreadFactory("RegisterTextField"));
 
 	private Byte unitAddress;
 	private short packetId;
@@ -170,7 +171,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
@@ -188,7 +189,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 				final Optional<PacketHeader> sameGroupId = o.map(Packet::getHeader)
 															.filter(h->h.getPacketId()==packetId)
-															.filter(h->h.getGroupId()==PacketImp.GROUP_ID_DEVICE_DEBAG);
+															.filter(h->PacketGroupIDs.DEVICE_DEBAG.match(h.getGroupId()));
 
 				if(!sameGroupId.isPresent())
 					return;
@@ -234,7 +235,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			}catch(Exception e){
 				logger.catching(e);
 			}
-		});
+		}, "RegisterTextField.onPacketReceived()");
 	}
 
 	public void showAction(Color bg) {

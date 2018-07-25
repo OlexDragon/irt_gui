@@ -29,7 +29,6 @@ import irt.controller.GuiController;
 import irt.controller.interfaces.ControlPanel;
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.tools.fx.MonitorPanelSwingWithFx;
 import irt.tools.fx.interfaces.StopInterface;
@@ -73,7 +72,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 
 	public DevicePanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
 		super(
-				deviceInfo!=null ? deviceInfo.getLinkHeader().getAddr() : (byte) 0,
+				Optional.ofNullable(deviceInfo).map(DeviceInfo::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0),
 				deviceInfo!=null ? deviceInfo.getSerialNumber().orElse("N/A") + " : " + deviceInfo.getUnitName().orElse("N/A") : "N/A",
 				minWidth,
 				midWidth,
@@ -233,10 +232,6 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 
 	public JLabel getSource() {
 		return clickedLabel;
-	}
-
-	public PacketListener getPacketListener() {
-		return null;
 	}
 
 	protected JTabbedPane getTabbedPane() {

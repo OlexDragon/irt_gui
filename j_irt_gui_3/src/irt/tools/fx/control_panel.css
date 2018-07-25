@@ -22,3 +22,11 @@ Line{
 .text_white{
 	-fx-fill: white;
 }
+.no_error{
+	-fx-text-fill: DARKBLUE;
+	-fx-background-color: LIMEGREEN;
+}
+.error{
+	-fx-text-fill: YELLOW;
+	-fx-background-color: RED;
+}

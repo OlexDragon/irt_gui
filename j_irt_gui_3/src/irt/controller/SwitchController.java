@@ -12,6 +12,7 @@ import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.MyThreadFactory;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
@@ -77,12 +78,7 @@ public class SwitchController extends ControllerAbstract {
 							};
 						}
 					};
-					Thread t = new Thread(controller);
-					int priority = t.getPriority();
-					if(priority>Thread.MIN_PRIORITY)
-						t.setPriority(priority-1);
-					t.setDaemon(true);
-					t.start();
+					new MyThreadFactory(controller, "SwitchController.doSwitch");
 				}
 			}
 		};

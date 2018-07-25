@@ -39,7 +39,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 	private static final String LOGGER_NAME = "comPort";
 
-	private final Logger logger = LogManager.getLogger();
+	private final Logger logger = LogManager.getLogger(SerialPortInterface.class);
 	private final Marker marker = MarkerManager.getMarker("FileWork");
 
 	public enum Baudrate{
@@ -84,7 +84,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 	private SerialPortEvent serialPortEvent = new SerialPortEvent();
 	private LinkHeader linkHeader;
 	private short packetId;
-	private boolean isSerialPortEven;
+//	private boolean isSerialPortEven;
 	private boolean isComfirm;
 
 	public JsscComPort(String portName) {
@@ -234,7 +234,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 				logger.warn("the condition data!=null && isOpened({}) does not hold", isOpened());
 			}
 
-			Optional.ofNullable(getAcknowledge()).ifPresent(acknowledge->{ try { writeBytes(acknowledge); } catch (SerialPortException e) { logger.catching(e); }});
+			Optional.ofNullable(getAcknowledge()).filter(a->isOpened()).ifPresent(acknowledge->{ try { writeBytes(acknowledge); } catch (SerialPortException e) { logger.catching(e); }});
 
 				if(readPacket.getHeader()==null || readPacket.getPayloads()==null)
 					readPacket = packet;
@@ -369,13 +369,15 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 		if (wait(1, 20)){
 			byte[] acknowledge = getAcknowledge();
 			writeBytes(acknowledge);
-			logger.info(marker, "acknowledge={}", ToHex.bytesToHex(acknowledge));
 
 			do {
-				readBytes = super.readBytes(getInputBufferBytesCount());
+				logger.info(marker, "?? Cleared {} bytes", ()->{ try { return getInputBufferBytesCount();} catch (SerialPortException e) {logger.catching(e); return e.getLocalizedMessage(); }});
+
+				purgePort(SerialPort.PURGE_TXABORT | SerialPort.PURGE_TXCLEAR | SerialPort.PURGE_RXABORT | SerialPort.PURGE_RXCLEAR);
+
+//				readBytes = super.readBytes(getInputBufferBytesCount());
 				String readBytesStr = ToHex.bytesToHex(readBytes);
 				Console.appendLn(readBytesStr, "Clear");
-				logger.warn(marker, "?? Clear: {}", readBytesStr);
 			} while (wait(1, 200));
 		}
 		return readBytes;
@@ -499,13 +501,13 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 		return readBytes==null ? null : index==readBytes.length ? readBytes : Arrays.copyOf(readBytes, index);
 	}
 
-	public boolean wait(int eventValue, int waitTime) throws SerialPortException {
+	public boolean wait(int waitFor, int waitTime) throws SerialPortException {
 		boolean isReady = false;
 		long start = System.currentTimeMillis();
-		long waitTimeL = waitTime*eventValue;
-		logger.entry(eventValue, waitTime);
+		long waitTimeL = waitTime*waitFor;
+		logger.entry(waitFor, waitTime);
 
-		while(isOpened() && !(isReady = getInputBufferBytesCount()>=eventValue) && (System.currentTimeMillis()-start)<waitTimeL){
+		while(isOpened() && !(isReady = getInputBufferBytesCount()>=waitFor) && (System.currentTimeMillis()-start) < waitTimeL){
 			synchronized (this) {
 
 				try {
@@ -514,12 +516,12 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 					logger.catching(e);
 				}
 
-				logger.trace("isSerialPortEven={}", isSerialPortEven);
-				isSerialPortEven = false;
+//				isSerialPortEven = false;
 			}
 		};
 
-		isSerialPortEven = false;
+		logger.info("waitFor: {} bytes; waitTimeL: {}; System.currentTimeMillis()-start: {};", ()->waitFor , ()->waitTimeL, ()->System.currentTimeMillis()-start);
+//		isSerialPortEven = false;
 
 		return isReady;
 	}
@@ -558,7 +560,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 		public void serialEvent(jssc.SerialPortEvent serialPortEvent) {
 
 			synchronized (JsscComPort.this) {
-				isSerialPortEven = true;
+//				isSerialPortEven = true;
 				JsscComPort.this.notify();
 //				Console.appendLn("", "notify");
 			}

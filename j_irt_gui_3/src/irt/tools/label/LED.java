@@ -35,7 +35,11 @@ public class LED extends JLabel{
 	}
 
 	public void setOn(boolean isOn){
-//		System.out.println("LED - "+getName()+" was "+(this.isOn ? "On" : "Off")+" seted to "+(isOn ? "On" : "Off"));
+
+		if(this.isOn==isOn)
+			return;
+
+		//		System.out.println("LED - "+getName()+" was "+(this.isOn ? "On" : "Off")+" seted to "+(isOn ? "On" : "Off"));
 		if(isOn)
 			setLedColor(new Color(color.getRed(), color.getGreen(), color.getBlue()));
 		else{

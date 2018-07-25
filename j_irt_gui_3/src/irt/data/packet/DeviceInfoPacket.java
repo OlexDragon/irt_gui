@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import irt.data.DeviceInfo;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 
 public class DeviceInfoPacket extends PacketSuper {
@@ -14,7 +15,7 @@ public class DeviceInfoPacket extends PacketSuper {
 																										.map(DeviceInfo::parsePacket);
 
 	public DeviceInfoPacket(byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_INFO, PacketImp.GROUP_ID_DEVICE_INFO, PacketImp.PARAMETER_ALL, null, Priority.IMPORTANT);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_INFO, PacketGroupIDs.DEVICE_INFO, PacketImp.PARAMETER_ALL, null, Priority.IMPORTANT);
 	}
 
 	public DeviceInfoPacket() {

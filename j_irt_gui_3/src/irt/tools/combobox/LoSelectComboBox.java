@@ -49,7 +49,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	private final Logger logger = LogManager.getLogger();
 
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
-	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory("LoSelectComboBox"));
 
 	private final 	DefaultComboBoxModel<IdValueFreq> model = new DefaultComboBoxModel<>();
 	private 		PacketSuper 					packetToSend;
@@ -60,6 +60,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(LoSelectComboBox.this);
 			Optional.ofNullable(scheduleAtFixedRate).filter(sch->!sch.isCancelled()).ifPresent(sch->sch.cancel(true));
+			Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 		}
 		@Override
 		public void ancestorAdded(AncestorEvent event) {
@@ -132,7 +133,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		Optional<Short> oId = Optional
 
@@ -174,7 +175,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 						packetToSend = new LOPacket(linkAddr, null);
 						LoSelectComboBox.this.run();
 					});
-				}));
+				}, "LoSelectComboBox: Fill JComboBox"));
 
 		// Select JComboBox item
 		oId
@@ -220,7 +221,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 											addItemListener(iListener);
 										}
 									}));
-				}));
+				}, "LoSelectComboBox: Select JComboBox item"));
 	}
 
 	private Optional<?> cast(Packet packet) {

@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -42,7 +43,7 @@ public class ModuleListPacket extends PacketSuper{
 																										});
 
 	public ModuleListPacket(Byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONTRO_MODULE_LIST, PacketImp.GROUP_ID_CONTROL, PacketImp.PACKET_ID_CONFIG_MODULE_LIST, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONTRO_MODULE_LIST, PacketGroupIDs.CONTROL, PacketImp.PACKET_ID_CONFIG_MODULE_LIST, null, Priority.REQUEST);
 	}
 
 }

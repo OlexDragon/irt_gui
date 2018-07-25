@@ -188,7 +188,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 			createProductionFields(grid);
 
 			// Search profile by the unit serial number on the drive Z:
-			new MyThreadFactory().newThread(()->{
+			new MyThreadFactory(()->{
 
 				deviceInfo.getSerialNumber().map(sn->sn + ".bin").ifPresent(f->{
 					
@@ -210,8 +210,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 						logger.catching(e);
 					}
 				});
-			})
-			.start();
+			}, "UpdateMessageFx");
 		}
 
 		getDialogPane().setContent(grid);

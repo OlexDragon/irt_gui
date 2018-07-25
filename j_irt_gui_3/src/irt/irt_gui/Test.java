@@ -19,11 +19,11 @@ import irt.controller.serial_port.SerialPortInterface;
 import irt.data.MyThreadFactory;
 import irt.data.ToHex;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketSuper;
+import irt.data.packet.DeviceInfoPacket;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork.DeviceDebugPacketIds;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
-import irt.data.packet.denice_debag.DeviceDebugPacket;
+import irt.data.packet.configuration.Offset1to1toMultiPacket;
 import irt.data.packet.interfaces.Packet;
 
 public class Test {
@@ -40,11 +40,11 @@ public class Test {
 			logger.error("\n\n************************   START   ***********************************\n\n");
 
 //			final byte linkAddr = (byte) 101;
-//			final byte linkAddr = (byte) 254;
-			final byte linkAddr = (byte) 0;
+			final byte linkAddr = (byte) 254;
+//			final byte linkAddr = (byte) 0;
 //			port = new PureJavaComPort("COM13");
-//			port = new JsscComPort("COM13");
-			port = new JsscComPort("COM14");
+			port = new JsscComPort("COM13");
+//			port = new JsscComPort("COM14");
 			port.openPort();
 			logger.error("Serial port {} is opend={}", port, port.isOpened());
 			final ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
@@ -54,7 +54,7 @@ public class Test {
 
 			PacketSuper[] packets = new PacketSuper[]{
 
-//					new DeviceInfoPacket(linkAddr),
+					new DeviceInfoPacket(linkAddr),
 //					new MeasurementPacket(linkAddr),
 //					new AlarmsSummaryPacket(linkAddr),
 //					new AlarmsIDsPacket(linkAddr),
@@ -62,10 +62,11 @@ public class Test {
 //					new ModuleListPacket(linkAddr),
 //					new ActiveModulePacket(linkAddr, null),
 //					new SwitchoverModePacket(linkAddr, null),
-					new DeviceDebugPacket(linkAddr, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER)
+//					new DeviceDebugPacket(linkAddr, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER),
+					new Offset1to1toMultiPacket(linkAddr, (byte) 1, null)
 				};
 
-			for(int i=0, x=0;i<=1; i++, x++){
+			for(int i=0, x=0;i<=1000; i++, x++){
 				if(x>=packets.length)
 					x=0;
 				final long start = System.currentTimeMillis();
@@ -82,6 +83,8 @@ public class Test {
 					Thread.sleep(2000);
 					return;
 				}
+
+				Offset1to1toMultiPacket.parseValueFunction.apply(packet).ifPresent(o->logger.error("{}" , o));
 
 				logger.error("{} : {}\n{}", Optional.of(packet).map(Packet::getPayloads).map(List::stream).orElse(Stream.empty()).map(Payload::getBuffer).map(String::new).toArray(), packet, Optional.ofNullable(packet).map(Packet::toBytes).map(ToHex::bytesToHex).orElse(null));
 			}
@@ -113,11 +116,11 @@ public class Test {
 			packet = null;
 			notified = false;
 			task = new FutureTask<>(this);
-			new MyThreadFactory().newThread(task).start();
+			new MyThreadFactory("Test").newThread(task).start();
 		}
 
 		@Override
-		public void onPacketRecived(Packet packet) {
+		public void onPacketReceived(Packet packet) {
 
 			new MyThreadFactory(()->{
 
@@ -127,7 +130,7 @@ public class Test {
 					notified = true;
 					notify();
 				}
-			});
+			}, "Test");
 		}
 
 		@Override

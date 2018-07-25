@@ -7,6 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -30,7 +31,7 @@ public class LnbReferencePacket  extends PacketSuper{
 																												});
 
 	private static final PacketIDs PACKET_ID 	= PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE;
-	private static final byte GROUP_ID 		= PacketImp.GROUP_ID_CONFIGURATION;
+	private static final PacketGroupIDs GROUP_ID 		= PacketGroupIDs.CONFIGURATION;
 	private static final byte PARAMETER 	= PacketImp.PARAMETER_CONFIG_FCM_LNB_REFERENCE_CONTROL;
 
 	public enum ReferenceStatus{

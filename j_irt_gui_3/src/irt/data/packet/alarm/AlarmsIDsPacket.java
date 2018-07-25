@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
@@ -33,7 +34,7 @@ public class AlarmsIDsPacket extends PacketSuper{
 	}
 
 	public AlarmsIDsPacket(byte linkAddr){
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PacketIDs.ALARMS_IDs, PacketImp.GROUP_ID_ALARM, PacketImp.ALARMS_IDs, null, Priority.ALARM);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PacketIDs.ALARMS_IDs, PacketGroupIDs.ALARM, PacketImp.ALARMS_IDs, null, Priority.RANGE);
 	}
 
 	@Override
