@@ -54,9 +54,10 @@ import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.DeviceInfoPacket;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.RetransmitPacket;
@@ -89,7 +90,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	protected static ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory(getClass().getSimpleName()));
 
 	private Console console;
 	protected JComboBox<String> serialPortSelection;
@@ -169,31 +170,22 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 								console.setVisible(!console.isVisible());
 						}
 
-						@Override
-						public void mousePressed(MouseEvent e) {
-						}
-
-						@Override
-						public void mouseExited(MouseEvent e) {
-						}
-
-						@Override
-						public void mouseEntered(MouseEvent e) {
-						}
-
-						@Override
-						public void mouseClicked(MouseEvent e) {
-						}
+						@Override public void mousePressed(MouseEvent e) { }
+						@Override public void mouseExited(MouseEvent e) { }
+						@Override public void mouseEntered(MouseEvent e) { }
+						@Override public void mouseClicked(MouseEvent e) { }
 					});
 				}
 			}
 			comPortThreadQueue.addPacketListener(guiController);
-			restart();
+//			restart(3);
 	}
 
-	private void restart() {
+	private void restart(long period) {
+		logger.info("restart({})", period);
 		Optional.ofNullable(scheduledFuture).filter(f->!f.isDone()).ifPresent(f->f.cancel(true));
-		scheduledFuture = service.scheduleAtFixedRate(guiController, 2, 5, TimeUnit.SECONDS);
+		comPortThreadQueue.clear();
+		scheduledFuture = service.scheduleAtFixedRate(guiController, period<0?0:period, period<=0?1:period, TimeUnit.SECONDS);
 	}
 
 	public static Optional<DeviceInfo> getDeviceInfo(LinkHeader linkHeader) {
@@ -213,8 +205,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 	private ActionListener toJsscListener;
 	private ActionListener toPureJavaListener;
-
-	private Optional<PacketSuper> oPacketToSend;
 
 	private boolean setRetransmit = true;
 	private Object moduleList;
@@ -342,7 +332,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		}else {
 
-			new MyThreadFactory().newThread(()->{
+			new MyThreadFactory(()->{
 				try {
 
 					final Constructor<? extends SerialPortInterface> constructor = serialPortClass.getConstructor(String.class);
@@ -370,14 +360,14 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 				reset();
 
-			}).start();
+			}, getClass().getSimpleName() + ".setSerialPort(String)" );
 		} 
 
 		synchronized (guiController) {
 			notify();
 		}
 
-		restart();
+		restart(1);
 	}
 //
 //	protected boolean removePanel(LinkHeader linkHeader) {
@@ -411,24 +401,26 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	protected void getConverterInfo() {
 //		logger.error("getConverterInfo");
 
-		if(!protocol.equals(Protocol.LINKED)){
-			logger.trace("protocol = {}", protocol);
+		if(protocol.equals(Protocol.LINKED))
+			return;
 
-			comPortThreadQueue.add(new DeviceInfoPacket(getAddress()));
-		}
+		logger.trace("protocol = {}", protocol);
+
+		new MyThreadFactory(()->comPortThreadQueue.add(new DeviceInfoPacket(getAddress())), getClass().getSimpleName() + ".getConverterInfo()");
 	}
 
 	protected void getUnitsInfo() {
 //		logger.error("getUnitsInfo; protocol: {};", protocol);
 
-		if (!protocol.equals(Protocol.CONVERTER)) {
+		if (protocol.equals(Protocol.CONVERTER))
+			return;
 
-			for(Byte addr:addresses){
-				comPortThreadQueue.add(new DeviceInfoPacket(addr));
+		new MyThreadFactory(()->{
 
-				Optional.ofNullable(oPacketToSend).filter(Optional::isPresent).map(Optional::get).map(p->p.setAddr(addr)).ifPresent(p->comPortThreadQueue.add(p));
-			}
-		}
+				for(Byte addr:addresses){
+					comPortThreadQueue.add(new DeviceInfoPacket(addr));
+				}
+		}, getClass().getSimpleName() + ".getUnitsInfo()");
 	}
 
 	private static byte[] addresses = UnitAddressField.DEFAULT_ADDRESS;
@@ -452,13 +444,10 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
+//		logger.error(packet);
 
 		final Optional<Packet> oPacket = Optional.of(packet);
-
-		if(!oPacket.isPresent())
-			return;
-
 		final Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
 
 		// Return if not response
@@ -470,6 +459,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
 		final Boolean isRetransmitPacket = oPacketId.filter(PacketIDs.PROTO_RETRANSNIT::match).isPresent();
 		if(isRetransmitPacket){
+			logger.debug("received Retransmit Packet {}", packet);
 			setRetransmit = false;
 			return;
 		}
@@ -477,17 +467,30 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		final Optional<Byte> oPacketGroup = oHeader.map(PacketHeader::getGroupId);
 
 		//Check Redundancy Controller buttons
-		if(oPacketGroup.filter(gid->gid == PacketImp.GROUP_ID_CONTROL).isPresent()){
+		if(oPacketGroup.filter(PacketGroupIDs.CONTROL::match).isPresent()){
 
-			final Optional<Payload> oPayload = oPacket.map(Packet::getPayloads).map(List::stream).flatMap(Stream::findAny);
-			byte linkAddr = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
-
-			oPacketId.filter(PacketIDs.CONTRO_MODULE_LIST::match).flatMap(pid->oPayload.map(Payload::getBuffer)).ifPresent(showModuleButtons(linkAddr));
+			oPacketId
+			.filter(PacketIDs.CONTRO_MODULE_LIST::match)
+			.flatMap(
+					pid->
+					oPacket.map(Packet::getPayloads)
+					.map(List::stream)
+					.flatMap(Stream::findAny)
+					.map(Payload::getBuffer))
+			.ifPresent(
+					showModuleButtons(
+							oPacket
+							.filter(LinkedPacket.class::isInstance)
+							.map(LinkedPacket.class::cast)
+							.map(LinkedPacket::getLinkHeader)
+							.map(LinkHeader::getAddr)
+							.orElse((byte) 0)));
 			return;
 		}
 
-		final boolean isDeviceInfo = oPacketGroup.filter(gid->gid == PacketImp.GROUP_ID_DEVICE_INFO).isPresent();
+		final boolean isDeviceInfo = oPacketGroup.filter( PacketGroupIDs.DEVICE_INFO::match).isPresent();
 
+		logger.info(packet);
 		//Return if not device info packet
 		if(!isDeviceInfo)
 			return;
@@ -497,7 +500,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			oPacket
 			.map(DeviceInfo::new)
 			.ifPresent(di->{
-				logger.debug(di);
+				logger.info(di);
 
 				Optional<DeviceType> oDeviceType = di.getDeviceType();
 				oDeviceType
@@ -507,6 +510,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 						logger.warn("Can not connect. {}", packet);
 
 					else{
+
 						protocol = dt.PROTOCOL;
 						logger.debug("protocol: {}", protocol);
 
@@ -520,9 +524,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 							.map(LinkHeader::getAddr)
 							.filter(addr->addr!=0)
 							.ifPresent(addr->comPortThreadQueue.add(new RetransmitPacket(addr, (byte) 0)));
-
-							if(moduleList==null)
-								oPacketToSend = Optional.of(new ModuleListPacket(address));
 						}
 					}
 
@@ -533,9 +534,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 					}
 				});
 				if(!oDeviceType.isPresent()){
-
-					if(moduleList==null)
-						oHeader.map(PacketHeader::getOption).filter(o->o.equals(PacketImp.ERROR_INFORMATION_CANNOT_BE_GENERATED)).ifPresent(o->oPacketToSend = Optional.of(new ModuleListPacket(address)));
 
 					new MyThreadFactory(()->Optional
 							.ofNullable(scheduledFuture)
@@ -548,28 +546,30 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 										JOptionPane.showMessageDialog(headPanel, "The Device is not Supported.(device Id=" + typeId + ")");
 										logger.warn("The Device is not Supported.(device Id={})", typeId);
 
-										scheduledFuture = service.scheduleAtFixedRate(guiController, 5, 5, TimeUnit.SECONDS);
-									}));
+										restart(5);
+									}), getClass().getSimpleName() + ".showMessageDialog");
+
 				}
 			});
-		});
+		}, getClass().getSimpleName() + ".onPacketReceived");
 	}
 
 	private Consumer<? super byte[]> showModuleButtons(byte linkAddr) {
 		return bytes->{
 
-			oPacketToSend = Optional.empty();
-			gui.getModuleSelectFxPanel().orElseGet(
-										()->{
-											ModuleSelectFxPanel msf = new ModuleSelectFxPanel(linkAddr, bytes, p->{ panelController.removeAll(); comPortThreadQueue.add(p);});
-											SwingUtilities.invokeLater(()->gui.setModuleSelectFxPanel(msf));
-											return msf;
-										});
-		};//TODO
+			if(!gui.getModuleSelectFxPanel().isPresent()){
+				ModuleSelectFxPanel msf = new ModuleSelectFxPanel(linkAddr, bytes,
+						p->{
+							panelController.removeAll();
+							synchronized (this) { try { wait(5); } catch (InterruptedException e) { }}
+							comPortThreadQueue.add(p);
+						});
+				SwingUtilities.invokeLater(()->gui.setModuleSelectFxPanel(msf));
+			}
+		};
 	}
 
 	public void run() {
-//		logger.error("RUN");
 		try {
 
 			final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
@@ -591,7 +591,12 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		}
 	}
 
-	//************************************ class PanelWorker **********************************************
+	// ***************************************************************************************************** //
+	// 																										 //
+	// 									 class PanelWorker 													 //
+	// 																										 //
+	// ***************************************************************************************************** //
+
 	// Add Panels to the 'unitsPanel'
 	private class PanelController{
 		private Map<DeviceInfo, Timer> timers = new HashMap<>();
@@ -602,25 +607,40 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 			if(timer!=null)
 				timer.restart();
-			else
+			else {
+				restart(8);
 				createPanel(di);
+
+				if(moduleList==null) {
+					ModuleListPacket modulListPacket = new ModuleListPacket(di.getLinkHeader().getAddr());
+					comPortThreadQueue.add(modulListPacket);
+				}
+			}
 		}
 
 		public void removeAll() {
 
-			if (unitsPanel != null) {
+			if (!(unitsPanel == null || timers.isEmpty())) {
 
 				timers.entrySet().parallelStream().map(ks->ks.getValue()).forEach(t->t.stop());
 				timers.clear();
 
-				unitsPanel.removeAll();
-				unitsPanel.revalidate();
-			}
+				logger.info("timers.isEmpty()-{}; Removed all panels from 'unitsPanel'. protocol: {}", timers.isEmpty(), protocol);
 
+
+//				Optional.ofNullable(scheduledFuture).filter(f->!f.isDone()).ifPresent(f->f.cancel(true));
+				SwingUtilities.invokeLater(
+						()->{
+							restart(1);
+							unitsPanel.removeAll();
+							unitsPanel.revalidate();
+							protocol =  getDefaultProtocol(); });
+			}
 		}
 
 		private boolean demoPanelRemoved;
 		private Timer createPanel(DeviceInfo deviceInfo) {
+			logger.info(deviceInfo);
 
 			setSysSerialNumber(deviceInfo);
 
@@ -628,7 +648,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 			//Remove Demo Panel
 			if(!demoPanelRemoved){
-				unitsPanel.remove("DemoPanel");
+				unitsPanel.remove("irt.tools.panel.DemoPanel");
 				demoPanelRemoved = true;
 			}
 
@@ -647,7 +667,8 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		}
 
 		private void setSysSerialNumber(DeviceInfo deviceInfo) {
-			deviceInfo.getSerialNumber()
+			deviceInfo
+			.getSerialNumber()
 			.ifPresent(sn->{
 				final String collect = timers.entrySet().stream().map(t->t.getKey()).map(di->di.getSerialNumber().get()).collect(Collectors.joining("_"));
 
@@ -659,22 +680,29 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		}
 
 		private void removePanel(DeviceInfo deviceInfo) {
+			logger.info("removePanel{})", deviceInfo);
 
-			unitsPanel.remove(deviceInfo.getLinkHeader());
-			unitsPanel.revalidate();
-			unitsPanel.getParent().getParent().repaint();
+			SwingUtilities.invokeLater(
+					()->{
+						unitsPanel.remove(deviceInfo.getLinkHeader());
+						unitsPanel.revalidate();});
+
+			//			unitsPanel.getParent().getParent().repaint();
 			Optional.ofNullable(timers.remove(deviceInfo)).ifPresent(t->t.stop());
 			comPortThreadQueue.clear();
 			setSysSerialNumber(deviceInfo);
-			if(timers.isEmpty())
-				gui.setModuleSelectFxPanel(null);
+			if(timers.isEmpty()) {
+				reset();
+				restart(1);
+			}
 		}
 	}
 
 	private void reset() {
+		logger.info("reset()");
 		panelController.removeAll();
 		protocol = getDefaultProtocol();
-		oPacketToSend = null;
+		moduleList = null;
 		setRetransmit = true;
 		gui.setModuleSelectFxPanel(null);
 	}

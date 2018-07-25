@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import irt.data.network.NetworkAddress;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.interfaces.Packet;
 
@@ -19,7 +20,7 @@ public class NetworkAddressPacket  extends PacketSuper{
 				linkAddr,
 				networkAddress!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
 						PacketIDs.NETWORK_ADDRESS,
-						PacketImp.GROUP_ID_NETWORK,
+						PacketGroupIDs.NETWORK,
 						PacketImp.PARAMETER_ID_NETWORK_ADDRESS,
 						networkAddress!=null ? networkAddress.toBytes() : null,
 						networkAddress!=null ? Priority.COMMAND : Priority.REQUEST);

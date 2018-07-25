@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 
 public class ALCEnablePacket extends PacketSuper {
@@ -26,7 +27,7 @@ public class ALCEnablePacket extends PacketSuper {
 				linkAddr,
 				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
 				PacketIDs.CONFIGURATION_ALC_ENABLE,
-				PacketImp.GROUP_ID_CONFIGURATION,
+				PacketGroupIDs.CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_BUC_APC_ENABLE,
 				Optional.ofNullable(value).map(v->PacketImp.toBytes(value)).orElse(null),
 				Optional.ofNullable(value).map(v->Priority.COMMAND).orElse(Priority.REQUEST));

@@ -10,10 +10,9 @@ import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.tools.fx.ControlPanelIrPcFx.AlarmSeverityNames;
-import irt.tools.fx.ControlPanelIrPcFx.Alarms;
-import irt.tools.fx.ControlPanelIrPcFx.UnitStatusNames;
-import irt.tools.fx.ControlPanelIrPcFx.YesNo;
+import irt.tools.fx.module.ControlPanelIrPcFx.AlarmSeverityNames;
+import irt.tools.fx.module.ControlPanelIrPcFx.UnitStatusNames;
+import irt.tools.fx.module.ControlPanelIrPcFx.YesNo;
 
 public class RedundancyControllerUnitStatus {
 
@@ -37,7 +36,7 @@ public class RedundancyControllerUnitStatus {
 	private int bucId;
 	private YesNo operational;
 	private YesNo connected;
-	private Alarms switchoverAlarm;
+	private YesNo unitAlarm;
 	private UnitStatusNames statusName;
 	private AlarmSeverityNames alarmName;
 
@@ -47,15 +46,15 @@ public class RedundancyControllerUnitStatus {
 	public int getBucId() { return bucId; }
 	public YesNo getOperational() { return operational; }
 	public YesNo getConnected() { return connected; }
-	public Alarms getSwitchoverAlarm() { return switchoverAlarm; }
+	public YesNo getUnitAlarm() { return unitAlarm; }
 	public UnitStatusNames getStatusName() { return statusName; }
 	public AlarmSeverityNames getAlarmName() { return alarmName; }
 
 	@Override
 	public String toString() {
 		return "RedundancyControllerUnitStatus [unitName=" + unitName + ", id=" + id + ", linkId=" + linkId + ", bucId="
-				+ bucId + ", operational=" + operational + ", connected=" + connected + ", switchoverAlarm="
-				+ switchoverAlarm + ", statusName=" + statusName + ", alarmNames=" + alarmName + "]";
+				+ bucId + ", operational=" + operational + ", connected=" + connected + ", unitAlarm="
+				+ unitAlarm + ", statusName=" + statusName + ", alarmNames=" + alarmName + "]";
 	}
 
 	public static List<RedundancyControllerUnitStatus> parse(ByteBuffer bb) {
@@ -93,7 +92,7 @@ public class RedundancyControllerUnitStatus {
 
 			unitStatus.operational 	= YesNo.parse(flags&BITS_MASK_OPERATIONAL);
 			unitStatus.connected 	= YesNo.parse(flags&BITS_MASK_CONNECTED);
-			unitStatus.switchoverAlarm = Alarms.parse(flags&BITS_MASK_SWITCHOVER_ALARM);
+			unitStatus.unitAlarm = YesNo.parse(flags&BITS_MASK_SWITCHOVER_ALARM);
 			unitStatus.statusName	= UnitStatusNames.parse((flags&BITS_MASK_STATUS)>>4);
 			unitStatus.alarmName	= AlarmSeverityNames.parse((flags&BITS_MASK_BUC_ALARM)>>8);
 

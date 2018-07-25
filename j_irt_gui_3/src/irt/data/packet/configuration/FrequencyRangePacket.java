@@ -2,6 +2,7 @@ package irt.data.packet.configuration;
 
 import irt.data.Range;
 import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.RangePacket;
 
@@ -11,7 +12,7 @@ public class FrequencyRangePacket extends PacketSuper implements RangePacket{
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
 				PacketIDs.CONFIGURATION_FREQUENCY_RANGE,
-				PacketImp.GROUP_ID_CONFIGURATION,
+				PacketGroupIDs.CONFIGURATION,
 				linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY_RANGE : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
 				null,
 				Priority.RANGE);

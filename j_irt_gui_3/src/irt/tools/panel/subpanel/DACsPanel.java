@@ -46,7 +46,6 @@ import irt.data.AdcWorker;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
-import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
@@ -99,7 +98,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	private JSlider sliderGainOffset;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DACsPanel"));
 	private final List<AdcWorker> adcWorkers = new ArrayList<>();
 
 	private final FocusListener dacfocusListener = new FocusListener() {
@@ -179,12 +178,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			public void startController(ControllerAbstract abstractController) {
 				threadList.add(abstractController);
 
-				Thread t = new Thread(abstractController, "DACsPanel."+abstractController.getName()+"-"+new RundomNumber());
-				int priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
+				new MyThreadFactory(abstractController, "DACsPanel.startController");
 			}
 			public void ancestorMoved(AncestorEvent arg0) {
 			}
@@ -571,13 +565,13 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	}
 
 	@Override
-	public synchronized void onPacketRecived(Packet packet) {
-		adcWorkers.stream().filter(adc->adc.getDeviceDebugPacketIds().getPacketId().match(packet.getHeader().getPacketId())).findAny().ifPresent(adc->new MyThreadFactory(()->adc.update(packet)));
+	public void onPacketReceived(Packet packet) {
+		adcWorkers.stream().filter(adc->adc.getDeviceDebugPacketIds().getPacketId().match(packet.getHeader().getPacketId())).findAny().ifPresent(adc->new MyThreadFactory(()->adc.update(packet), "DACsPanel.onPacketReceived()"));
 	}
 
 	private int delay;
 	@Override
-	public synchronized void run() {
+	public void run() {
 
 		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
 		final int size = queue.size();

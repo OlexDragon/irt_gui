@@ -28,7 +28,7 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 
 		SoftReleaseChecker.deviceInfo = deviceInfo;
 
-		new MyThreadFactory().newThread(this).start();
+		new MyThreadFactory(this, "SoftReleaseChecker.check(DeviceInfo)");
 
 		try {
 			return Optional.ofNullable(get(30, TimeUnit.SECONDS));

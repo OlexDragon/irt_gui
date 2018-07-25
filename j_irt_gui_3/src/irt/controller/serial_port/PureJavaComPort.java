@@ -38,14 +38,14 @@ import purejavacomm.UnsupportedCommOperationException;
 public class PureJavaComPort implements SerialPortInterface {
 
 	private static final int CLEAR_TIME_BUC = 100;
-	private static final int WAIT_TIME_BUC = 20;
+	private static final int WAIT_TIME_BUC = 40;
 
 	private static final int CLEAR_TIME_CONVERTER = 110;
 	private static final int WAIT_TIME_CONVERTER = 20;
 
 	public static final int MAX_WAIT_TIME = 1500;
 
-	private final static Logger logger = LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger(SerialPortInterface.class);
 
     public static final int BAUDRATE_115200 = 115200;
 
@@ -238,11 +238,11 @@ public class PureJavaComPort implements SerialPortInterface {
 				logger.warn("data!=null && isOpened() does not hold");
 
 		} catch (InterruptedException | PureJavaIllegalStateException e) {
-			new MyThreadFactory(()->closePort());
+			new MyThreadFactory(()->closePort(), "PureJavaComPort.send-1");
 		}catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "Error");
-			new MyThreadFactory(()->closePort());
+			new MyThreadFactory(()->closePort(), "PureJavaComPort.send-2");
 		}
 
 		if(readPacket.getHeader()==null || readPacket.getPayloads()==null)
@@ -263,7 +263,7 @@ public class PureJavaComPort implements SerialPortInterface {
 		position = 0;
 
 		do{
-			logger.debug("cleared {} bytes; {}", ()->Optional .ofNullable(buffer).map(b->b.length).orElse(0), ()->buffer);
+			logger.info("cleared {} bytes; {}", ()->Optional .ofNullable(buffer).map(b->b.length).orElse(0), ()->buffer);
 
 			buffer = null;
 

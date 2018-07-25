@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 
 public class ConfifurationPacket extends PacketSuper {
@@ -41,7 +42,7 @@ public class ConfifurationPacket extends PacketSuper {
 				linkAddr,
 				data!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
 						packetIdConfiguration,
-						PacketImp.GROUP_ID_CONFIGURATION,
+						PacketGroupIDs.CONFIGURATION,
 						parameterIdConfiguration,
 						data,
 						data!=null ? Priority.COMMAND : Priority.REQUEST);

@@ -41,7 +41,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	private final Logger logger = LogManager.getLogger();
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("Switch"));
 
 	private PacketSuper packetToGet;
 
@@ -112,7 +112,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	private static final long serialVersionUID = 8018058982771868859L;
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
@@ -159,7 +159,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 					addActionListener(actionListener);
 				}
 			});
-		});
+		}, "Switch.onPacketReceived()");
 	}
 
 	private int delay;

@@ -1,21 +1,27 @@
 package irt.tools.panel;
 
 import java.awt.Font;
-import java.awt.event.HierarchyEvent;
 import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DefaultController;
+import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.MyThreadFactory;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketHeader;
+import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.configuration.Offset1to1toMultiPacket;
+import irt.data.packet.interfaces.Packet;
 import irt.irt_gui.IrtGui;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.JavaFxWrapper;
@@ -31,20 +37,20 @@ public class UserPicobucPanel extends DevicePanel {
 	private final static Logger logger = LogManager.getLogger();
 
 	private JTabbedPane tabbedPane;
-	private DefaultController target;
+//	private DefaultController target;
 
 	public UserPicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		super( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 
-		addHierarchyListener(
-				hierarchyEvent->
-				Optional
-				.of(hierarchyEvent)
-				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
-				.map(HierarchyEvent::getChanged)
-				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
-				.filter(c->c.getParent()==null)
-				.ifPresent(c->Optional.ofNullable(target).ifPresent(DefaultController::stop)));
+//		addHierarchyListener(
+//				hierarchyEvent->
+//				Optional
+//				.of(hierarchyEvent)
+//				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+//				.map(HierarchyEvent::getChanged)
+//				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+//				.filter(c->c.getParent()==null)
+//				.ifPresent(c->Optional.ofNullable(target).ifPresent(DefaultController::stop)));
 
 		final LinkHeader linkHeader = deviceInfo.getLinkHeader();
 
@@ -90,13 +96,9 @@ public class UserPicobucPanel extends DevicePanel {
 					showRedundant();
 				});
 
-		deviceType
-		.filter(dt->dt.equals(DeviceType.IR_PC))
-		.ifPresent(
-				tId->{
-					AttenuationOffsetFxPanel offsetFxPanel = new AttenuationOffsetFxPanel(linkHeader.getAddr());
-					tabbedPane.addTab("Offsets", offsetFxPanel);
-				});
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
+		Offset1to1toMultiPacket packet = new Offset1to1toMultiPacket(addr, null, null);
+		GuiControllerAbstract.getComPortThreadQueue().add(packet);
 	}
 
 	@Override
@@ -132,5 +134,39 @@ public class UserPicobucPanel extends DevicePanel {
 			label.setFont(Translation.getFont().deriveFont(12f).deriveFont(Font.BOLD));
 			tabbedPane.setTabComponentAt(index, label);
 		}
+	}
+
+	private boolean offsetPanelAdded;
+
+	@Override
+	public void onPacketReceived(Packet packet) {
+		super.onPacketReceived(packet);
+
+		if(offsetPanelAdded)
+			return;
+
+		//Add Offset panel
+		Optional<Packet> oPacket = Optional.of(packet);
+		Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
+		Optional<Short> oOffsetMulti = oHeader.map(PacketHeader::getPacketId).filter(PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI::match);
+
+		if(!oOffsetMulti.isPresent())
+			return;
+
+		new MyThreadFactory(()->{
+			
+			oPacket
+			.flatMap(PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI::valueOf)
+			.map(short[].class::cast)
+			.map(array->new AttenuationOffsetFxPanel(addr, array))
+			.ifPresent(p->SwingUtilities.invokeLater(()->tabbedPane.addTab("Offsets", p)));
+
+			logger.debug(packet);
+
+			if(oHeader.map(PacketHeader::getPacketType).filter(pt->pt==PacketImp.PACKET_TYPE_RESPONSE).isPresent())
+				offsetPanelAdded = true;
+			else 
+				GuiControllerAbstract.getComPortThreadQueue().add( new Offset1to1toMultiPacket(addr, null, null));
+		}, "UserPicobucPanel.onPacketReceived");
 	}
 }

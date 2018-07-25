@@ -338,7 +338,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 			startNewController(UnitFrequencyController.class);
 			break;
 		case FLAG_ALC:
-			new MyThreadFactory().newThread(controller =  getNewAlcController()).start();
+			new MyThreadFactory(controller =  getNewAlcController(), "ControlPanelImpl.setController(int)");
 			break;
 		default:
 			startNewController(UnitAttenuationController.class);

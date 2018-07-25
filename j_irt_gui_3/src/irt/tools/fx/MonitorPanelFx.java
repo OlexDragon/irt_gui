@@ -5,14 +5,19 @@ import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,12 +29,11 @@ import irt.controller.translation.Translation;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Packets;
-import irt.data.packet.ParameterHeader;
-import irt.data.packet.Payload;
-import irt.data.packet.RetransmitPacket;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Packets;
+import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.measurement.MeasurementPacket;
@@ -37,16 +41,15 @@ import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.RowConstraints;
 import javafx.scene.layout.VBox;
 
 public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListener, JavaFxPanel{
@@ -55,15 +58,15 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	public static final byte CONVERTER = 0;
 
-	private static final String UNMUTED = "unmuted";
-	private static final String MUTED = "muted";
-	private static final String UNLOCKED = "unlocked";
-	private static final String LOCKED = "locked";
-	private static final String LOCK_ID = "lock_status";
-	private static final String MUTE_ID = "mute_status";
+//	private static final String UNMUTED = "unmuted";
+//	private static final String MUTED = "muted";
+//	private static final String UNLOCKED = "unlocked";
+//	private static final String LOCKED = "locked";
+//	private static final String LOCK_ID = "lock_status";
+//	private static final String MUTE_ID = "mute_status";
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MonitorPanelFx"));
 
 	private final MeasurementPacket packetToSend = (MeasurementPacket) Packets.MEASUREMENT_ALL.getPacketAbstract();
 
@@ -81,11 +84,13 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private GridPane 	gridPane;
 
 	public MonitorPanelFx() {
-		logger.traceEntry();
+		Thread currentThread = Thread.currentThread();
+		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MonitorPanel.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
+
 
         try {
             fxmlLoader.load();
@@ -112,16 +117,17 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	@Override
 	public void run() {
 
-		final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
-		if(this.serialPort==null)
-			this.serialPort = serialPort;
-
-		if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
-			shutdownNow();
-			return;
-		}
 
 		try{
+
+			final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
+			if(this.serialPort==null)
+				this.serialPort = serialPort;
+
+			if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
+				shutdownNow();
+				return;
+			}
 			logger.debug("Packet to send: {}", packetToSend);
 
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
@@ -139,297 +145,120 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	@Override
-	public void onPacketRecived(final Packet packet) {
+	public void onPacketReceived(final Packet packet) {
+
+		Optional<Packet> 		oPacket = Optional.ofNullable(packet);
+		Optional<PacketHeader> 	oHeader = oPacket.map(Packet::getHeader);
+
+		if(!oHeader.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(PacketHeader::getPacketId).filter(PacketIDs.MEASUREMENT_ALL::match).isPresent())
+			return;
+
+		Optional<LinkedPacket> oLinkedPacket = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast);
+		if( !oLinkedPacket.isPresent() || !oLinkedPacket.map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).filter(a->a==getUnitAddress()).isPresent() )
+			return;
 
 		new MyThreadFactory(()->{
 
-			logger.trace(packet);
+			oPacket
+			.flatMap(PacketIDs.MEASUREMENT_ALL::valueOf)
+			.map(v->(Map<?, ?>)v)
+			.ifPresent(
+					map->{
 
-			final Optional<Packet> ofNullable;
+						Optional
+						.ofNullable((List<?>)map.remove("STATUS"))
+						.ifPresent(this::setStatus);;
 
-			if(packet instanceof LinkedPacket)
-				ofNullable = Optional
-									.ofNullable((LinkedPacket)packet)
-									.filter(p->p.getLinkHeader()==null || p.getLinkHeader().getAddr()==packetToSend.getLinkHeader().getAddr())
-									.map(Packet.class::cast);
-			else
-				ofNullable= Optional.ofNullable(packet);
-
-			final boolean isConverter = packetToSend.getLinkHeader().getAddr() == CONVERTER;
-
-			final Optional<Packet> oResponse = ofNullable
-			.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-			.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR);
-
-			oResponse
-			.filter(p->p.getHeader().getPacketId()==packetToSend.getHeader().getPacketId())
-			.filter(p->p.getHeader().getGroupId()==packetToSend.getHeader().getGroupId())
-			.map(Packet::getPayloads)
-			.map(pls->pls.stream())
-			.ifPresent(stream->{
-				stream
-				.forEach(pl->{
-					logger.entry(pl);
-
-
-					final ParameterHeader 				parameterHeader 	= pl.getParameterHeader();
-					final byte 							code 				= parameterHeader.getCode();
-
-					Optional<? extends ParameterHeaderCode> parameterHeaderCode = (isConverter ? ParameterHeaderCodeFCM.valueOf(code) : ParameterHeaderCodeBUC.valueOf(code))
-																					.map(phc->checkOverlaps(parameterHeader, phc));
-
-					// Downlink status is deprecated
-					if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeBUC.DOWNLINK_STATUS).isPresent())
-						return;
-
-					logger.trace("code: {}; parameterHeaderCode: {}", code, parameterHeaderCode);
-
-					Platform.runLater(()->{
-
-						//Status bites
-						if(parameterHeaderCode.filter(phc->phc==ParameterHeaderCodeFCM.STATUS || phc==ParameterHeaderCodeBUC.STATUS).isPresent()){
-							
-							List<Label> statusLabels = statusPane
-														.getChildren()
-														.stream()
-														.filter(Label.class::isInstance)
-														.map(Label.class::cast)
-														.collect(Collectors.toList());
-
-							if(statusLabels.isEmpty())
-								createStatusLabels(pl);
-
-							else
-								setStatus(statusLabels, pl);
-
-							return;
-						}
-
-						//Values (Power, Temperature, Current ...)
-
-						final Optional<Label> l = gridPane
-														.getChildren()
-														.parallelStream()
-														.filter(Label.class::isInstance)
-														.filter(label->label.getUserData()!=null)
-														.filter(label->label.getUserData().equals(code))
-														.map(Label.class::cast)
-														.findAny();
-
-						if(l.isPresent())	//set label text
-
-							setText(l.get(), payloadToString(parameterHeaderCode, pl));
-
-						else{	//Create new labels
-
-							final int size = gridPane.getRowConstraints().size();
-							gridPane.getRowConstraints().add(new RowConstraints());
-
-							final Label descriptionLabel = createDescriptionLabel(parameterHeaderCode);
-							gridPane.add(descriptionLabel, 0, size);
-
-							String payloadToString;
-							try{
-
-								payloadToString = payloadToString(parameterHeaderCode, pl);
-
-							}catch(Exception e){
-								payloadToString = "error";
-								logger.catching(e);
-							}
-
-							final Label child = new Label(payloadToString);
-							child.getStyleClass().add("value");
-							child.setUserData(code);
-							child.setTooltip(new Tooltip(descriptionLabel.getText()));
-
-							gridPane.add(child, 1, size);
-							GridPane.setVgrow(child, Priority.ALWAYS);
-						}
+						setValues(map);
 					});
-				});
-			});
-
-			//Check retransmits number
-			ofNullable
-			.filter(p->PacketIDs.PROTO_RETRANSNIT.match(p.getHeader().getPacketId()))
-			.map(Packet::getPayloads)
-			.flatMap(pls->pls.stream().findAny())
-			.map(pl->pl.getByte())
-			.filter(b->b>0)
-			.ifPresent(b->{
-				final RetransmitPacket p = new RetransmitPacket(retransmitPacket.getLinkHeader().getAddr(), (byte) 0);
-				GuiControllerAbstract.getComPortThreadQueue().add(p);
-			});
-		});
+		}, "MonitorPanelFx.onPacketReceived()");
 	}
 
-	private void setStatus(List<Label> statusLabels, Payload pl) {
+	private Object setValues(Map<?, ?> map) {
+		ObservableList<Node> children = gridPane.getChildren();
 
-		final int statusBits = pl.getInt(0);
+		if(children.isEmpty()) {
+			Set<?> entrySet = map.entrySet();
+			Iterator<?> iterator = entrySet.iterator();
+			IntStream.range(0, entrySet.size()).forEach(
+					rowIndex->{
+						if(!iterator.hasNext())
+							return;
+						Entry<?, ?> next = (Entry<?, ?>) iterator.next();
+						String key = next.getKey().toString();
+						Label descriptionLabel = new Label(Translation.getValue(String.class, key, "* " + key) + ": ");
+						descriptionLabel.setPadding(new Insets(0, 5, 0, 0));
+						descriptionLabel.getStyleClass().add("description");
+						setLabelProperties(descriptionLabel, Pos.CENTER_RIGHT);
 
-		//Lock Label
-		statusLabels
-		.stream().filter(n->n.getId().equals(LOCK_ID))
-		.findAny()
-		.map(Label.class::cast)
-		.ifPresent(lbl->{
-
-			final boolean isLocked = Optional.ofNullable(isLocked(statusBits)).orElse(false);
-			final String lockKey = isLocked ? LOCKED : UNLOCKED;
-			final String lockText = Translation.getValueWithSuplier(String.class, lockKey, ()->"TRANSLATE: " + lockKey);
-
-			if(setText(lbl, lockText)){
-				final ObservableList<String> styleClass = lbl.getStyleClass();
-				styleClass.removeAll(LOCKED, UNLOCKED);
-				styleClass.add(lockKey);
-			}
-
-			final List<StatusBits> parse = StatusBitsFCM.parse(statusBits);
-			final String tooltipText = parse.toString();
-			if(lbl.getTooltip().getText().equals(tooltipText))
-				lbl.setTooltip(new Tooltip(tooltipText));
-		});
-
-		//Mute Label
-		statusLabels
-		.stream()
-		.filter(n->n.getId().equals(MUTE_ID))
-		.findAny()
-		.map(Label.class::cast)
-		.ifPresent(lbl->{
+						Label valueLabel = new Label(next.getValue().toString());
+						valueLabel.getStyleClass().add("value");
+						valueLabel.setUserData(key);
+						setLabelProperties(valueLabel, Pos.CENTER_LEFT);
+						Platform.runLater(
+								()->{
+									gridPane.add(descriptionLabel, 0, rowIndex);
+									gridPane.add(valueLabel, 1, rowIndex);
+								});
+					});
+		}else {
 			
-			final boolean isMuted = isMuted(statusBits);
-			final String muteKey = isMuted ? MUTED : UNMUTED;
-			final String muteText = Translation.getValueWithSuplier(String.class, muteKey, ()->"TRANSLATE: " + muteKey);
-
-			if(setText(lbl, muteText)){
-				final ObservableList<String> styleClass = lbl.getStyleClass();
-				styleClass.removeAll(MUTED, UNMUTED);
-				styleClass.add(muteKey);
-			}
-
-			final String tooltipText = parseTooltip(statusBits);
-			if(!lbl.getTooltip().getText().equals(tooltipText))
-				lbl.setTooltip(new Tooltip(tooltipText));
-		});
-	}
-
-	private boolean setText(Label label, final String text) {
-		if(!label.getText().equals(text)){
-			label.setText(text);
-			return true;
 		}
-		return false;
+
+		return null;
 	}
 
-	private void createStatusLabels(Payload pl) {
-		logger.entry(pl);
-		statusPane.getStyleClass().add("status");
-		final int statusBits = pl.getInt(0);
-		final String tooltipText = parseTooltip(statusBits);
-		final Tooltip tooltip = new Tooltip(tooltipText);
+	private void setStatus(final List<?> status) {
+		logger.entry(status);
 
-		//create Lock Label
-		Optional
-		.ofNullable(isLocked(statusBits))
-		.map(b->b ? LOCKED : UNLOCKED)
-		.ifPresent(lockKey->{
-			final String lockText = Translation.getValueWithSuplier(String.class, lockKey, ()->"TRANSLATE: " + lockKey);
+		ObservableList<Node> children = statusPane.getChildren();
+		int size = children.size();
+		int statusSize = status.size();
+		String toolTipText = status.toString().replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
+		Tooltip tooltip = new Tooltip(toolTipText);
 
-			final Label lblLock = new Label(lockText);
-			lblLock.setId(LOCK_ID);
-			setLabelProperties(lblLock, lockKey);
-			statusPane.add(lblLock, 0, 0);
+		if(size>statusSize)
+			IntStream.range(statusSize, size).forEach(children::remove);
 
-			lblLock.setTooltip(tooltip);
-		});
+		IntStream.range(0, statusSize).forEachOrdered(
 
-		//create Mute Label
-		final String muteKey = isMuted(statusBits) ? MUTED : UNMUTED;
-		final String muteText = Translation.getValueWithSuplier(String.class, muteKey, ()->"TRANSLATE: " + muteKey);
+				index->{
 
-		final Label lblMute =  new Label(muteText);
-		lblMute.setId(MUTE_ID);
-		setLabelProperties(lblMute, muteKey);
-		statusPane.add(lblMute, 1, 0);
+					String string = status.get(index).toString();
 
-		lblMute.setTooltip(tooltip);
+					if(size<=index) {
+
+						final Label label = new Label(string);
+						label.getStyleClass().add(string);
+						label.setTooltip(tooltip);
+						setLabelProperties(label, Pos.CENTER);
+						Platform.runLater(()->statusPane.add(label, index, 0));
+
+					}else {
+
+						Label label = (Label) children.get(index);
+						String text = label.getText();
+						if(!text.equals(string)) {
+							ObservableList<String> styleClass = label.getStyleClass();
+							styleClass.remove(label.getText());
+							styleClass.add(string);
+							Platform.runLater(()->label.setText(string));
+						}
+
+						Tooltip t = label.getTooltip();
+						if(!t.getText().equals(toolTipText))
+							Platform.runLater(()->t.setText(toolTipText));
+					}
+				});		
 	}
 
-	private void setLabelProperties(final Label lblLock, String lockKey) {
-		lblLock.getStyleClass().add(lockKey);
-		lblLock.setPadding(new Insets(0, 5, 0, 5));
-		lblLock.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		lblLock.setAlignment(Pos.CENTER);
-		GridPane.setHgrow(lblLock, Priority.ALWAYS);
-		GridPane.setVgrow(lblLock, Priority.ALWAYS);
-	}
-
-	private boolean isMuted(final int statusBits) {
-
-		if(packetToSend.getLinkHeader().getAddr()==CONVERTER)
-			return StatusBitsFCM.MUTE.isOn(statusBits) || StatusBitsFCM.MUTE_TTL.isOn(statusBits);
-
-		return StatusBitsBUC.MUTE.isOn(statusBits);
-	}
-
-	private Boolean isLocked(final int statusBits) {
-
-		if(packetToSend.getLinkHeader().getAddr()==CONVERTER)
-			return StatusBitsFCM.LOCK_SUMMARY.isOn(statusBits);
-
-		return  StatusBitsBUC.PLL_UNKNOWN.isOn(statusBits) ? /*does not have PLL*/null : StatusBitsBUC.LOCKED.isOn(statusBits);
-	}
-
-	private String parseTooltip(final int statusBits) {
-		final List<StatusBits> sb = packetToSend.getLinkHeader().getAddr()==CONVERTER ? StatusBitsFCM.parse(statusBits) : StatusBitsBUC.parse(statusBits);
-		return sb.toString().replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
-	}
-
-	private String payloadToString(final Optional<? extends ParameterHeaderCode> parameterHeaderCode, Payload pl) {
-		
-		if(!parameterHeaderCode.isPresent())
-			return Arrays.toString(pl.getBuffer());
-
-		ParameterHeaderCode c = parameterHeaderCode.get();
-
-		return  c.toString(pl.getBuffer()); 
-	}
-
-	private Label createDescriptionLabel(Optional<? extends ParameterHeaderCode> parameterHeaderCode) {
-
-		String text;
-		if(parameterHeaderCode.isPresent()) {
-
-			ParameterHeaderCode c = parameterHeaderCode.get();
-
-			text = Translation.getValue(String.class, c.name(), "* " + parameterHeaderCode.get().name());
-
-		} else
-			text = "* " + parameterHeaderCode;
-
-		final Label label = new Label(text + ":");
-		label.getStyleClass().add("description");
-		label.setPadding(new Insets(0, 5, 0, 0));
-
-		GridPane.setHalignment(label, HPos.RIGHT);
-
-		return label;
-	}
-
-	private ParameterHeaderCode checkOverlaps(final ParameterHeader parameterHeader, ParameterHeaderCode c) {
-
-		if(c==ParameterHeaderCodeBUC.INPUT_POWER && parameterHeader.getSize()==4)
-			return ParameterHeaderCodeBUC.DOWNLINK_STATUS;
-
-		if(c==ParameterHeaderCodeBUC.STATUS && parameterHeader.getSize()==1)
-			return ParameterHeaderCodeBUC.DOWNLINK_WAVEGUIDE_SWITCH;
-
-		if(c==ParameterHeaderCodeBUC.LNB1_STATUS && parameterHeader.getSize()>2)
-			return ParameterHeaderCodeBUC.REFLECTED_POWER;
-
-		return c;
+	private void setLabelProperties(final Label label, Pos alignment) {
+		label.setAlignment(alignment);
+		label.setMaxWidth(Double.MAX_VALUE);
+		label.setMaxHeight(Double.MAX_VALUE);
+		GridPane.setHgrow(label, Priority.ALWAYS);
+		GridPane.setVgrow(label, Priority.ALWAYS);
+		GridPane.setFillWidth(label, true);
 	}
 
 	public void start(){
@@ -449,7 +278,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		logger.traceEntry();
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
-		Optional.ofNullable(scheduleAtFixedRate).filter(sfr->sfr.isDone()).ifPresent(sfr->sfr.cancel(true));
+		Optional.ofNullable(scheduleAtFixedRate).filter(sfr->!sfr.isDone()).ifPresent(sfr->sfr.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
 	private static NumberFormat nFormate1 = new DecimalFormat("#0.0");
@@ -656,7 +486,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		MUTE		(1, 1),
 		PLL_UNKNOWN	(0, 6),
 		LOCKED		(2, 6),
-		UNLOCKED	(3, 6); 
+		UNLOCKED	(4, 6); 
 
 		private int value;
 		private int bitMask;

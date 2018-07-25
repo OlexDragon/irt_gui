@@ -16,21 +16,23 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 import irt.data.packet.control.ActiveModulePacket;
 import irt.data.packet.interfaces.Packet;
-import irt.tools.fx.ControlPanelIrPcFx;
+import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.interfaces.StopInterface;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -45,19 +47,46 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 	private static final long serialVersionUID = -7284252793969855433L;
 	private final static Logger logger = LogManager.getLogger();
 
-	private final ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private ScheduledFuture<?> scheduledFuture;
+	private ScheduledExecutorService service;
 
 	private Scene scene;
 	private final Byte linkAddr;
 	private Consumer<PacketSuper> consumer;
 	private List<Button> buttons;
 
-	private final ComPortThreadQueue comPortThreadQueue;
 	private final  ActiveModulePacket packet;
 
 	public ModuleSelectFxPanel(Byte linkAddr, byte[] bytes, Consumer<PacketSuper> consumer) throws HeadlessException {
+		Thread currentThread = Thread.currentThread();
+		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 
+		addAncestorListener(new AncestorListener() {
+
+			@Override
+			public void ancestorRemoved(AncestorEvent event) {
+
+				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(ModuleSelectFxPanel.this);
+				Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+				Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+			}
+
+			@Override public void ancestorMoved(AncestorEvent event) { }
+
+			@Override
+			public void ancestorAdded(AncestorEvent event) {
+
+				if(service==null)
+					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ModuleSelectFxPanel"));
+				else
+					Optional.of(service).filter(ScheduledExecutorService::isShutdown).ifPresent(s->service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ModuleSelectFxPanel")));
+
+				if(!Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).isPresent()) {
+					GuiControllerAbstract.getComPortThreadQueue().addPacketListener(ModuleSelectFxPanel.this);
+					scheduledFuture = service.scheduleAtFixedRate(ModuleSelectFxPanel.this, 1, 10, TimeUnit.SECONDS);
+				}
+			}
+		});
 		this.consumer = consumer;
 		this.linkAddr = linkAddr;
 		packet = new ActiveModulePacket(linkAddr, null);
@@ -78,7 +107,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 				AnchorPane.setBottomAnchor(hBox, 0.0);
 
 				scene = new Scene(root);
-				final String externalForm = ControlPanelIrPcFx.class.getResource("fx.css").toExternalForm();
+				final String externalForm = AlarmPanelFx.class.getResource("fx.css").toExternalForm();
 				scene.getStylesheets().add(externalForm);
 				setScene(scene);
 			}catch (Exception e) {
@@ -86,10 +115,6 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 			}
 		});
 
-		comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
-		comPortThreadQueue.addPacketListener(this);
-
-		scheduledFuture = service.scheduleAtFixedRate(this, 1, 10, TimeUnit.SECONDS);
 	}
 
 	private void addButtons(HBox hBox, byte[] bytes) {
@@ -121,8 +146,9 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 											HBox.setHgrow(b, Priority.ALWAYS);
 
 											b.setText(es.getValue());
-											final PacketSuper p = new ActiveModulePacket(linkAddr, es.getKey());
-											b.setOnAction(e->consumer.accept(p));
+											b.setUserData(es.getKey());
+
+											b.setOnAction(e->consumer.accept(new ActiveModulePacket(linkAddr, (Byte) b.getUserData())));
 											return b;
 										})
 								.collect(Collectors.toList());
@@ -144,23 +170,28 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
+
+		final Optional<Packet> oPacket = Optional.of(packet);
+		final Optional<PacketHeader> oPacketHeader = oPacket.map(Packet::getHeader);
+
+		if(!oPacketHeader.map(PacketHeader::getPacketId).filter(PacketIDs.CONTROL_ACTIVE_MODULE::match).isPresent())
+			return;
+
+//		logger.error(packet);
+
+		if(!oPacketHeader.map(PacketHeader::getPacketType).filter(pId->pId==PacketImp.PACKET_TYPE_RESPONSE).isPresent())
+			return;
+		if(!oPacketHeader.map(PacketHeader::getOption).filter(pId->pId==PacketImp.ERROR_NO_ERROR).isPresent()) {
+			logger.warn(packet);
+			return;
+		}
 
 		new MyThreadFactory(()->{
 
-			final Optional<Packet> oPacket = Optional.of(packet);
-			final Optional<PacketHeader> oPacketHeader = oPacket.map(Packet::getHeader);
-
-			final boolean packetIdMach = oPacketHeader.map(PacketHeader::getPacketId).filter(pId->PacketIDs.CONTROL_ACTIVE_MODULE.match(pId)).isPresent();
-			final boolean isResponse = oPacketHeader.map(PacketHeader::getPacketType).filter(pId->pId==PacketImp.PACKET_TYPE_RESPONSE).isPresent();
-			final boolean noError = oPacketHeader.map(PacketHeader::getOption).filter(pId->pId==PacketImp.ERROR_NO_ERROR).isPresent();
-
-			if(!(packetIdMach && isResponse && noError))
-				return;
-
 			getButtons().forEach(b->b.getStyleClass().remove("activeButton"));
-			oPacket.map(Packet::getPayloads).filter(pl->!pl.isEmpty()).map(List::stream).flatMap(Stream::findAny).map(Payload::getByte).map(b->--b).map(buttons::get).ifPresent(b->b.getStyleClass().add("activeButton"));
-		});
+			oPacket.map(Packet::getPayloads).map(List::stream).flatMap(Stream::findAny).map(Payload::getByte).map(b->--b).filter(b->b<buttons.size()).map(buttons::get).ifPresent(b->b.getStyleClass().add("activeButton"));
+		}, "ModuleSelectFxPanel.onPacketReceived()");
 	}
 
 	public int countButtons(){
@@ -169,13 +200,13 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 
 	@Override
 	public void run() {
-		comPortThreadQueue.add(packet);
+		GuiControllerAbstract.getComPortThreadQueue().add(packet);
 	}
 
 	@Override
 	public void stop() {
-		comPortThreadQueue.removePacketListener(this);
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		Optional.ofNullable(scheduledFuture).filter(ft->!ft.isDone()).ifPresent(ft->ft.cancel(true));
-		Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 }

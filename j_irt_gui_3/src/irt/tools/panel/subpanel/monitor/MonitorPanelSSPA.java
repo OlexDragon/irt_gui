@@ -16,9 +16,10 @@ import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
-import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 
@@ -26,7 +27,7 @@ import irt.tools.label.LED;
 public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 
 	public static final byte
-			IRT_SLCP_PACKET_ID_MEASUREMENT = PacketImp.GROUP_ID_MEASUREMENT;
+			IRT_SLCP_PACKET_ID_MEASUREMENT = PacketGroupIDs.MEASUREMENT.getId();
 
 	public static final int
 			MUTE = 1,

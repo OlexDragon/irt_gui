@@ -26,7 +26,8 @@ public class RedundancyStatusPacket extends ConfifurationPacket {
 																													final int index = bb.get()&3;
 																													return Optional
 																															.of( RedundancyStatus.values())
-																															.map(v->v[index]);
+																															.filter(vs->index<vs.length)
+																															.map(vs->vs[index]);
 																												});
 
 	public RedundancyStatusPacket(byte linkAddr, RedundancyStatus redundancyStatus) {

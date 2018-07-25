@@ -31,13 +31,13 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	protected final 	ComPortThreadQueue 			cptq 				= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory("SwitchBoxImpl"));
 	private final	PacketSuper 					packetToSend;
 	private 	 	ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	Updater			 			updater = new Updater();
 	private final PacketListener packetListener = new PacketListener() {
 		@Override
-		public void onPacketRecived(Packet packet) {
+		public void onPacketReceived(Packet packet) {
 			updater.setPacket(packet);
 			if(!service.isShutdown())
 				service.execute(updater);

@@ -60,7 +60,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 	private DeviceInfo deviceInfo;
 	private final byte addr;
 
-	private final 	ScheduledExecutorService service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	private final 	ScheduledExecutorService service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory("DumpControllerFull"));
 	private 	 	ScheduledFuture<?> 		scheduleAtFixedRate;
 	private final 	DeviceDebugHelpPacket helpPacket;
 
@@ -121,19 +121,24 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
 	@Override
 	public void stop(){
+
+		if(!Optional.ofNullable(scheduleAtFixedRate).map(sch->!sch.isDone()).isPresent())
+			return;
+
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
-		scheduleAtFixedRate.cancel(true);
+		Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+
 		synchronized (dumper) {
 			dumper.info(marker, "\n^^^^^^^^^^^^^^^^^^^ Stop DeviceDebugType Block for ^^^^^^^^^^^^^^^^^{}\n", deviceInfo);
 		}
 	}
 
 	@Override
-	public void onPacketRecived(final Packet packet) {
+	public void onPacketReceived(final Packet packet) {
 
 		final PacketHeader header = packet.getHeader();
 
-			if(header.getOption()!=PacketImp.ERROR_NO_ERROR){
+			if(header.getOption()!=PacketImp.ERROR_NO_ERROR || header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 				return;
 			}
 
@@ -146,7 +151,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 				final Optional<Object> valueOf = pId.valueOf(packet);
 
 				if(!valueOf.isPresent()){
-					logger.warn("{} - have to add parseValueFunction", pId);
+					logger.warn("{} - have to add parseValueFunction. {}", pId, packet);
 					return;
 				}
 
@@ -168,49 +173,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 							}
 						});
 			});
-
-//			Optional
-//			.of(packet)
-//			.flatMap(p->Packets.cast(p))
-//			.ifPresent(p->{
-//
-//				Object value = p.getValue();
-//
-//				// parse indexes from DeviceDebugHelpPacket and return
-//				if(deviceIndexes==null && p.getClass() == DeviceDebugHelpPacket.class){
-//					if(p instanceof DeviceDebugHelpPacket)
-//						getIndexxes(value);
-//
-//					return;
-//				}
-//
-//				// Remove unused indexes
-//				if(p.getClass() == DeviceDebugPacket.class) {
-//
-//					if(Optional.ofNullable(value).filter(v->v.toString().trim().equals("Invalid index value")).map(v->true).orElse(false)) {
-//						value = ((DeviceDebugPacket)p).getParsePacketId() + ": " + value;
-//						removeUnusedIndexes(packetId);
-//						return;
-//					}
-//
-//					if(header.getOption()!=PacketImp.ERROR_NO_ERROR) {
-//						value = ((DeviceDebugPacket)p).getParsePacketId() + " - " + header.getOptionStr();	//DeviceDebugType error message
-//						removeUnusedIndexes(packetId);
-//						return;
-//					}else
-//						value = ((DeviceDebugPacket)p).getParsePacketId() + ": " + value;
-//				}
-//
-//				if(header.getOption()!=PacketImp.ERROR_NO_ERROR)
-//					value = header.getOptionStr();	//DeviceDebugType error message
-//
-//				if(value instanceof Optional)
-//					value = ((Optional<?>)value).map(Object::toString).orElse("N/A");
-//
-////				dumper.error(c);
-//				doDump(PacketIDs.valueOf(p.getHeader().getPacketId()) + " - " + value);
-//			});
-		});
+		}, "DumpControllerFull.onPacketReceived()");
 	}
 
 //	private void removeUnusedIndexes(final short packetId) {

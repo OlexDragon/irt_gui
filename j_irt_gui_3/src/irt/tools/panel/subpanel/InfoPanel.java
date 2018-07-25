@@ -33,7 +33,6 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
-import irt.data.RundomNumber;
 import irt.data.listener.PacketListener;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.Transformer;
@@ -227,12 +226,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 					else
 						transformer.setHeight(WINDOW_MAX_HEIGHT);
 
-					Thread t = new Thread(transformer, "InfoPanel.Transformer-" + new RundomNumber());
-					int priority = t.getPriority();
-					if (priority > Thread.MIN_PRIORITY)
-						t.setPriority(priority - 1);
-					t.setDaemon(true);
-					t.start();
+					new MyThreadFactory(transformer, "InfoPanel.actionPerformed()");
 				} catch (Exception ex) {
 					logger.catching(ex);
 				}
@@ -320,7 +314,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		private volatile int uptimeCounter;
 
 		private ScheduledFuture<?> scheduledFuture;
-		private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+		private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("InfoPanel.SecondsCount"));
 
 		public SecondsCount(){
 			scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
@@ -369,7 +363,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 	private int softCheckerDeley;
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 		if(deviceInfo == null)
 			return;
 
@@ -393,6 +387,6 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 					lblError.setVisible(instance.check(di).orElse(false));
 				}
 			});
-		});
+		}, "InfoPanel.onPacketReceived()");
 	}
 }

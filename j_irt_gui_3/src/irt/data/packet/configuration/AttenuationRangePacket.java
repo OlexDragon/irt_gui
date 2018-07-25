@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import irt.data.Range;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.RangePacket;
 
@@ -24,7 +25,7 @@ public class AttenuationRangePacket extends PacketSuper implements RangePacket{
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
 				PacketIDs.CONFIGURATION_ATTENUATION_RANGE,
-				PacketImp.GROUP_ID_CONFIGURATION,
+				PacketGroupIDs.CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_ATTENUATION_RANGE,
 				null,
 				Priority.RANGE);

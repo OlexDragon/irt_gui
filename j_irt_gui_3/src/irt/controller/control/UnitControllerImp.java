@@ -43,7 +43,7 @@ public class UnitControllerImp implements UnitController{
 	protected final Logger logger = LogManager.getLogger();
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("UnitControllerImp"));
 
 	protected JTextField txtGain;
 	protected JSlider slider;
@@ -265,8 +265,11 @@ public class UnitControllerImp implements UnitController{
 	public void stop() {
 		logger.traceEntry("{}", ()->getClass().getSimpleName());
 
-		if(!Optional.ofNullable(scheduledFuture).map(sch->!sch.isCancelled()).isPresent())
+		if(!Optional.ofNullable(scheduledFuture).map(sch->!sch.isDone()).isPresent())
 			return;
+
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+		Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 
 		focusListenerTimer.stop();
 
@@ -280,11 +283,10 @@ public class UnitControllerImp implements UnitController{
 		txtStep.removeFocusListener(txtStepFocusListener);
 
 		scheduledFuture.cancel(true);
-		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 	}
 
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 			
@@ -293,7 +295,7 @@ public class UnitControllerImp implements UnitController{
 
 			else if(isRangePacket(packet))
 				setRange(Packets.cast(packet));
-		});
+		}, "UnitControllerImp.onPacketReceived(Packet)");
 	}
 
 	private boolean isValuePacket(Packet packet) {

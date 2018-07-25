@@ -25,13 +25,15 @@ import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValueForComboBox;
+import irt.data.MyThreadFactory;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.ValueDouble;
 import irt.tools.CheckBox.SwitchBox;
@@ -169,7 +171,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 				"ALC",
 				new Getter(
 						linkHeader,
-						PacketImp.GROUP_ID_CONFIGURATION,
+						PacketGroupIDs.CONFIGURATION.getId(),
 						PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED,
 						PacketIDs.CONFIGURATION_ALC_ENABLE){
 
@@ -196,12 +198,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 	}
 
 	private void startThread(DefaultController controller) {
-		Thread t = new Thread(controller);
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(--priority);
-		t.setDaemon(true);
-		t.start();
+		new MyThreadFactory(controller, "ControlPanelPicobuc.startThread");
 	}
 
 	@Override
@@ -210,7 +207,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 
 		Getter alcRangeGetter = new Getter(
 				linkHeader,
-				PacketImp.GROUP_ID_CONFIGURATION,
+				PacketGroupIDs.CONFIGURATION.getId(),
 				PacketImp.PARAMETER_CONFIG_FCM_ALC_RANGE,
 				PacketIDs.CONFIGURATION_ALC_RANGE, logger){
 

@@ -20,11 +20,12 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiController;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.Packet;
+import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
 import purejavacomm.PortInUseException;
@@ -40,7 +41,7 @@ public class ComPortThreadQueue implements Runnable {
 	
 
 	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300, Collections.reverseOrder());
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory());
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ComPortThreadQueue"));
 	private ScheduledFuture<?> scheduledFuture;
 
 	private static SerialPortInterface serialPort;
@@ -48,11 +49,12 @@ public class ComPortThreadQueue implements Runnable {
 	private final static Preferences prefs = GuiController.getPrefs();
 
 	public ComPortThreadQueue(){
-		scheduledFuture = service.scheduleAtFixedRate(this, 10, 10, TimeUnit.MILLISECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
 	public void run() {
+//		logger.error("{} : {}", getClass().getSimpleName(), Thread.currentThread().getName());
 
 		try {
 			PacketWork packetWork = comPortQueue.take();
@@ -66,11 +68,7 @@ public class ComPortThreadQueue implements Runnable {
 				Optional
 				.ofNullable(packetWork)
 				.map(sp::send)
-				.ifPresent(
-						p->{
-							logger.trace(p);
-							firePacketListener(p);
-						});
+				.ifPresent(this::firePacketListener);
 			});
 
 		} catch (InterruptedException e) {
@@ -82,15 +80,22 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketWork packetWork){
-//		logger.error(packetWork);
-//		if(packetWork instanceof DeviceDebugInfoPacket)
-//			logger.debug(packetWork.getClass().getSimpleName());//catching(new Throwable());
+//		Optional.of(packetWork).map(PacketWork::getPacketThread).map(PacketThreadWorker::getPacket).filter(p->PacketIDs.CONTRO_MODULE_LIST.match(p.getHeader().getPacketId())).ifPresent(logger::error);
+
+		if(packetWork==null)
+			return;
 
 		try {
 
-			final Optional<PacketSuper> oPacket = Optional.of(packetWork).filter(PacketSuper.class::isInstance).map(PacketSuper.class::cast);
-
-			if(oPacket.map(PacketSuper::getHeader).map(PacketHeader::getPacketType).filter(pt->pt==PacketImp.PACKET_TYPE_COMMAND).isPresent()){
+			if(
+					Optional
+					.of(packetWork)
+					.map(PacketWork::getPacketThread)
+					.map(PacketThreadWorker::getPacket)
+					.map(Packet::getHeader)
+					.map(PacketHeader::getPacketType)
+					.filter(t->t==PacketImp.PACKET_TYPE_COMMAND)
+					.isPresent()){
 
 				comPortQueue.add(packetWork);
 				return;
@@ -101,7 +106,8 @@ public class ComPortThreadQueue implements Runnable {
 
 					packetWork.getPacketThread().start();
 
-					oPacket.ifPresent(p->p.setTimestamp(System.nanoTime()));
+					// set packet time stamp
+					Optional.of(packetWork).filter(PacketSuper.class::isInstance).map(PacketSuper.class::cast).ifPresent(p->p.setTimestamp(System.nanoTime()));
 
 					comPortQueue.add(packetWork);
 
@@ -175,8 +181,10 @@ public class ComPortThreadQueue implements Runnable {
 	public void addPacketListener(PacketListener packetListener) {
 
 		// Add if not exists
-		if(Arrays.stream(packetListeners.getListenerList()).parallel().filter(l->l.equals(packetListener)).map(l->false).findAny().orElse(true))
-			packetListeners.add(PacketListener.class, packetListener);
+		if(Arrays.stream(packetListeners.getListenerList()).parallel().filter(l->l.equals(packetListener)).findAny().isPresent())
+			return;
+
+		packetListeners.add(PacketListener.class, packetListener);
 	}
 
 	public void removePacketListener(PacketListener packetListener) {
@@ -193,7 +201,7 @@ public class ComPortThreadQueue implements Runnable {
 		.forEach(l->{
 			try{
 
-				l.onPacketRecived(packet);
+				l.onPacketReceived(packet);
 
 			}catch (Exception e) {
 				logger.catching(e);
@@ -202,9 +210,9 @@ public class ComPortThreadQueue implements Runnable {
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-	public void close() {
+	public synchronized void close() {
 
-		new Thread(()->Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort())).start();
+		new MyThreadFactory(()->Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort()), "ComPortThreadQueue.close()");
 		comPortQueue.clear();
 	}
 

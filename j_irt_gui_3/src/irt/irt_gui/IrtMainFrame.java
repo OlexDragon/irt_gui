@@ -59,15 +59,14 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
 
 
-		Runtime.getRuntime().addShutdownHook(new Thread()
-		{
-		    @Override
-		    public void run(){
-//		    	logger.error("addShutdownHook");
-		    	guiController.stop();
-		    	LogManager.shutdown();
-		    }
-		});
+		Thread t = new MyThreadFactory("IrtMainFrame.addShutdownHook()")
+
+				.newThread(
+						()->{
+							guiController.stop();
+							LogManager.shutdown();
+						});
+		Runtime.getRuntime().addShutdownHook(t);
 
 		setSize(width, hight);
 
@@ -152,7 +151,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 
 	private Color iconBackground;
 	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		
 		final Optional<Short> oPacket = Optional
@@ -198,7 +197,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 							SwingUtilities.invokeLater(()->{
 								setIconImage(createdImage);
 							});
-						})));
+						})), "IrtMainFrame.onPacketReceived()");
 	}
 
 	public Optional<ModuleSelectFxPanel> getModuleSelectFxPanel() {

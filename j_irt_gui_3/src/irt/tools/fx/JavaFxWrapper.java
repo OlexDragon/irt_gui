@@ -48,6 +48,7 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 				Platform.runLater(()->{
 //					logger.error("Start {}", root.getClass().getSimpleName());
 					root.start();
+//					root.shutdownNow();
 				});
 			}
 			public void ancestorRemoved(AncestorEvent event) {

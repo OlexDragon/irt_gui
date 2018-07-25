@@ -6,7 +6,7 @@ import java.util.Optional;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.ToDo;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.RundomNumber;
+import irt.data.MyThreadFactory;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketWork;
@@ -23,12 +23,7 @@ public class SetterController extends ControllerAbstract {
 		super(deviceType, controllerName, packetWork, null, style);
 		this.toDo = toDo;
 
-		Thread t = new Thread(this, "SetterController-"+new RundomNumber().toString());
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(priority-1);
-		t.setDaemon(true);
-		t.start();
+		new MyThreadFactory(this, "SetterController");
 	}
 
 	@Override

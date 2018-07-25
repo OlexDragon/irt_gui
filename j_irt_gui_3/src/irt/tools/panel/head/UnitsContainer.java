@@ -4,24 +4,40 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import javax.swing.JPanel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.GuiControllerAbstract;
+import irt.data.MyThreadFactory;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketWork;
+import irt.data.packet.alarm.AlarmsSummaryPacket;
+import irt.data.packet.interfaces.LinkedPacket;
 import irt.tools.panel.DevicePanel;
 
 @SuppressWarnings("serial")
-public class UnitsContainer extends JPanel{
+public class UnitsContainer extends JPanel implements Runnable{
 
 	private final Logger logger = LogManager.getLogger();
 
 	private final int SPACE = 5;
 
 	private static ComponentListener componentListener;
+
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("UnitsContainer"));
+	private final List<PacketWork> packets = new ArrayList<>();
+	private int index;
 
 	public UnitsContainer(){
 		setBorder(null);
@@ -36,31 +52,36 @@ public class UnitsContainer extends JPanel{
 				setLocations();
 			}
 		};
+
+		service.scheduleAtFixedRate(this, 3, 3, TimeUnit.SECONDS);
 	}
 
-	public boolean contains(LinkHeader linkHeader){
-		logger.entry(linkHeader);
-
-		boolean result = false;
-
-		synchronized (UnitsContainer.class) {
-			for (Component c : getComponents()) {
-				if (c instanceof DevicePanel) {
-					LinkHeader lh = ((DevicePanel) c).getLinkHeader();
-					if (linkHeader == null) {
-						if (lh == null) {
-							result = true;
-							break;
-						}
-					} else if (linkHeader.equals(lh)) {
-						result = true;
-						break;
-					}
-				}
-			}
-		}
-		return logger.traceExit(result);
-	}
+//	public boolean contains(LinkHeader linkHeader){
+//		logger.entry(linkHeader);
+//
+//		Stream<LinkHeader> map = Optional.ofNullable(getComponents()).map(Arrays::stream).orElse(Stream.empty()).filter(DevicePanel.class::isInstance).map(DevicePanel.class::cast).map(DevicePanel::getLinkHeader);
+//		logger.error(map);
+//
+//		boolean result = false;
+//
+//		synchronized (UnitsContainer.class) {
+//			for (Component c : getComponents()) {
+//				if (c instanceof DevicePanel) {
+//					LinkHeader lh = ((DevicePanel) c).getLinkHeader();
+//					if (linkHeader == null) {
+//						if (lh == null) {
+//							result = true;
+//							break;
+//						}
+//					} else if (linkHeader.equals(lh)) {
+//						result = true;
+//						break;
+//					}
+//				}
+//			}
+//		}
+//		return logger.traceExit(result);
+//	}
 
 	public boolean contains(Component component) {
 		return Arrays.asList(getComponents()).contains(component);
@@ -68,8 +89,8 @@ public class UnitsContainer extends JPanel{
 
 	@Override
 	public Component add(Component unitPanel) {
+		logger.trace(unitPanel);
 
-		synchronized (UnitsContainer.class) {
 			if(contains(unitPanel)){
 				DevicePanel dp = (DevicePanel)getComponent(unitPanel.getClass());
 				if(dp!=null)
@@ -79,25 +100,28 @@ public class UnitsContainer extends JPanel{
 						remove(unitPanel);
 						add((Panel)unitPanel);
 					}
-			}else if(unitPanel instanceof Panel)
-					add((Panel)unitPanel);
-		}
+			}else if(unitPanel instanceof Panel) {
+				add((Panel)unitPanel);
+				Optional.of(unitPanel).filter(DevicePanel.class::isInstance).map(DevicePanel.class::cast).map(DevicePanel::getLinkHeader).map(LinkHeader::getAddr).ifPresent(
+						linkAddr->{
+							if(packets.stream().map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).filter(addr->addr==linkAddr).findAny().isPresent())
+								return;
+							packets.add(new AlarmsSummaryPacket(linkAddr));
+						});
+			}
 
 		return unitPanel;
 	}
 
-	private void add(Panel panel) {
+	private synchronized void add(Panel panel) {
 
-		synchronized (UnitsContainer.class) {
 			super.add(panel);
 			setLocations();
 			panel.addComponentListener(componentListener);
-		}
 	}
 
 	private void setLocations() {
 
-		synchronized (UnitsContainer.class) {
 			int x = 0,  height = 0;
 			Dimension containerPreferredSize = getPreferredSize();
 
@@ -116,65 +140,34 @@ public class UnitsContainer extends JPanel{
 				containerPreferredSize.width = x;
 				setPreferredSize(containerPreferredSize);
 				setSize(containerPreferredSize);
-		}
 	}
 
 	public <T> Component getComponent(Class<T> instance) {
-
-		Component[] cs = getComponents();
-		Component component = null;
-
-		if(cs!=null)
-			for(Component c:cs)
-				if(instance.isInstance(c)){
-					component = c;
-					break;
-				}
-
-		return component;
+		return Optional.ofNullable(getComponents()).map(Arrays::stream).orElse(Stream.empty()).filter(instance::isInstance).findAny().orElse(null);
 	}
 
-	public boolean remove(LinkHeader linkHeader) {
-		logger.entry(linkHeader);
+	public synchronized boolean remove(LinkHeader linkHeader) {
+		logger.trace(linkHeader);
 
-		boolean removed = false;
+		Optional<Component> oComponent = Optional.ofNullable(getComponents()).map(Arrays::stream).orElse(Stream.empty()).filter(c->isDevicePanel(linkHeader, c)).findAny();
+		oComponent.ifPresent(super::remove);
+		packets.stream().map(LinkedPacket.class::cast).filter(lp->lp.getLinkHeader().equals(linkHeader)).findAny().map(Object.class::cast).ifPresent(packets::remove);
 
-		synchronized (UnitsContainer.class) {
-			Component[] components = getComponents();
-
-			if(components!=null)
-				for(Component c:components){
-					if(isDevicePanel(linkHeader, c)){
-						super.remove(c);
-						removed = true;
-						break;
-					}
-				}
-		}
-
-		return removed;
+		// true if removed
+		return oComponent.isPresent();
 	}
 
-	public <T> void remove(Class<T> classToRemove) {
-		Component[] cs = getComponents();
-		for(Component c:cs){
-			if(classToRemove.isInstance(c)){
-				super.remove(c);
-				break;
-			}
-		}
+	public synchronized <T> void remove(Class<T> classToRemove) {
+		Optional.ofNullable(getComponents()).map(Arrays::stream).orElse(Stream.empty()).filter(classToRemove::isInstance).forEach(super::remove);
 	}
 
 	public void remove(String className) {
-		synchronized (UnitsContainer.class) {
-			Component[] cs = getComponents();
-			for(Component c:cs){ //TODO stack trace
-				if(c.getClass().getSimpleName().equals(className)){
-					super.remove(c);
-					break;
-				}
-			}
-		}
+		try { remove(Class.forName(className)); } catch (ClassNotFoundException e) { logger.catching(e); }
+	}
+
+	@Override
+	public void removeAll() {
+		super.removeAll();
 	}
 
 	public void refresh() {
@@ -216,5 +209,18 @@ public class UnitsContainer extends JPanel{
 		}
 
 		return isDevicePanel;
+	}
+
+	@Override
+	public void run() {
+
+		if(packets.isEmpty())
+			return;
+
+		if(index>=packets.size())
+			index = 0;
+
+//		logger.error(packets);
+		GuiControllerAbstract.getComPortThreadQueue().add(packets.get(index));
 	}
 }

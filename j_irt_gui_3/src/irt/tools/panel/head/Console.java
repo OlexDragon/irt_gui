@@ -11,7 +11,7 @@ import javax.swing.JTextArea;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.RundomNumber;
+import irt.data.MyThreadFactory;
 
 @SuppressWarnings("serial")
 public class Console extends JDialog {
@@ -60,19 +60,14 @@ public class Console extends JDialog {
 	}
 
 	//*************************** class ThreadsWorker *************************************************
-	private static class ThreadsWorker extends Thread{
+	private static class ThreadsWorker implements Runnable{
 
 		private BlockingQueue<String> stringQueue = new ArrayBlockingQueue<>(MAX_QUEUE_SIZE);
 		private Console console;
 		private boolean queueIsFull;
 
 		public ThreadsWorker() {
-			super("Console.ThreadsWorker-"+new RundomNumber().toString()+"-"+new RundomNumber());
-			int priority = getPriority();
-			if(priority>Thread.MIN_PRIORITY)
-				setPriority(priority-1);
-			setDaemon(true);
-			start();
+			new MyThreadFactory(this, "ThreadsWorker");
 		}
 
 		@Override

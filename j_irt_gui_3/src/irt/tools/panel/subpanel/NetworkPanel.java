@@ -43,7 +43,6 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
-import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
@@ -52,6 +51,7 @@ import irt.data.network.NetworkAddress;
 import irt.data.network.NetworkAddress.AddressType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.network.NetworkAddressPacket;
@@ -67,8 +67,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	private final Logger logger = LogManager.getLogger();
 
-	private final 	ComPortThreadQueue 			cptq 					= GuiControllerAbstract.getComPortThreadQueue();
-	public  final 	ScheduledExecutorService 	service = Executors.newScheduledThreadPool(1, new MyThreadFactory());
+	public  	 	ScheduledExecutorService 	service;
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	NetworkAddressPacket 		packet;
 	private final 	NetworkAddress				networkAddress = new NetworkAddress();
@@ -154,10 +153,15 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	private UpdateButtonJFXPanel updateButton;
 
 
-	private Timer timer;
+	private Timer activitiesTimer;
 	private final LineBorder border2 = new LineBorder(Color.YELLOW);
 
-	// ******************************* constructor NetworkPanel   ***************************************************
+	// ************************************************************************************************************** //
+	// 																												  //
+	// 									constructor NetworkPanel													  //
+	// 																												  //
+	// ************************************************************************************************************** //
+
 	public NetworkPanel(final DeviceInfo deviceInfo) {
 
 		addHierarchyListener(
@@ -168,16 +172,14 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(
-						c->{
-							cptq.removePacketListener(NetworkPanel.this);
-							service.shutdownNow();
-						}));
+				.ifPresent(c->stop()));
 
 		unitAddress = Optional.ofNullable(deviceInfo).map(DeviceInfo::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+		
 
 //		//converters do not have a network connection
 		packet = Optional.of(unitAddress).filter(ua->ua!=0).map(ua->new NetworkAddressPacket(ua, null)).orElse(null);
+		GuiControllerAbstract.getComPortThreadQueue().add(packet); // for dump
 
 		addAncestorListener(new AncestorListener() {
 
@@ -307,8 +309,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		ipAddressTextField.addKeyListener(keyListener);
 		ipAddressTextField.addFocusListener(focusListener);
 		final Border border = ipAddressTextField.getBorder();
-		timer = new Timer((int) TimeUnit.SECONDS.toMillis(1), e->ipAddressTextField.setBorder(border));
-		timer.setRepeats(false);
+
+		activitiesTimer = new Timer((int) TimeUnit.SECONDS.toMillis(1), e->ipAddressTextField.setBorder(border));
+		activitiesTimer.setRepeats(false);
 
 		GridBagLayout gridBagLayout = (GridBagLayout) ipAddressTextField.getLayout();
 		gridBagLayout.rowWeights = new double[]{0.0};
@@ -391,7 +394,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 						networkAddressTmp.setType(at);
 						setButtonEnabled();
 
-						startStop();
+						restart();
 					}
 				}
 			}
@@ -411,10 +414,6 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		btnCansel.setBounds(77, 140, 73, 23);
 		panel_1.add(btnCansel);
 		setLayout(groupLayout);
-
-		cptq.addPacketListener(this);
-		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5, TimeUnit.SECONDS);
 	}
 
 	private DefaultComboBoxModel<AddressType> getComboboxModel() {
@@ -456,22 +455,11 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 //		logger.debug("comboBoxAddressType.getSelectedItem()={}", comboBoxAddressType.getSelectedItem());
 	}
 
-	private boolean run;
-	private int count;
+	@Override
+	public void run() { GuiControllerAbstract.getComPortThreadQueue().add(packet); }
 
 	@Override
-	public void run() {
-		if(unitAddress!=0 && (run || --count<0)) {
-
-			logger.entry(run, count, packet);
-
-			cptq.add(packet);
-			count = 360; //Once in 30 minutes
-		}
-	}
-
-	@Override
-	public void onPacketRecived(Packet packet) {
+	public void onPacketReceived(Packet packet) {
 
 		new MyThreadFactory(()->{
 
@@ -484,12 +472,12 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			.map(Packet::getHeader)
 			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
-			.filter(h->h.getGroupId()==PacketImp.GROUP_ID_NETWORK)
+			.filter(h->PacketGroupIDs.NETWORK.match(h.getGroupId()))
 			.ifPresent(h->{
 
 				// show what the packet received
 				ipAddressTextField.setBorder(border2);
-				timer.restart();
+				activitiesTimer.restart();
 
 				networkAddress.set(packet);
 
@@ -505,7 +493,8 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 					networkAddressTmp = networkAddress.getCopy();
 				}
 			});
-		});
+
+		}, "NetworkPanel.onPacketReceived()");
 	}
 
 	private void setButtonEnabled() {
@@ -518,7 +507,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			btnCansel.setEnabled(true);
 			btnOk.setEnabled(true);
 		}
-		startStop();
+		restart();
 	}
 
 	private void cansel() {
@@ -543,18 +532,29 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		start();
 	}
 
-	private void startStop() {
-		if(!networkAddress.equals(networkAddressTmp))
-			stop();
-		else
+	private void restart() {
+		if(networkAddress.equals(networkAddressTmp))
 			start();
+		else
+			stop();
 	}
 
 	private void start() {
-		run = true;
+
+		if(Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).isPresent()) 
+			return;
+
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+			service = Executors.newScheduledThreadPool(1, new MyThreadFactory("NetworkPanel"));
+
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5, TimeUnit.SECONDS);
 	}
 
 	private void stop() {
-		run = false;
+
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 }

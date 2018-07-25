@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -23,7 +24,7 @@ public class MuteControlPacket extends PacketSuper {
 																										.map(Payload::getByte)
 																										.map(b->MuteStatus.values()[b]);
 
-	public static final byte GROUP_ID = PacketImp.GROUP_ID_CONFIGURATION;
+	public static final PacketGroupIDs GROUP_ID = PacketGroupIDs.CONFIGURATION;
 
 	public MuteControlPacket(Byte linkAddr, MuteCommands value) {
 		super(
@@ -45,7 +46,7 @@ public class MuteControlPacket extends PacketSuper {
 				packet.getPayload(0).getBuffer(),
 				packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND ? Priority.COMMAND : Priority.REQUEST);
 
-		Optional.of(packet).map(Packet::getHeader).filter(h->h.getGroupId()==GROUP_ID).filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId())).orElseThrow(()->new IllegalArgumentException(packet.toString()));
+		Optional.of(packet).map(Packet::getHeader).filter(h->GROUP_ID.match(h.getGroupId())).filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId())).orElseThrow(()->new IllegalArgumentException(packet.toString()));
 	}
 
 	public MuteControlPacket() {

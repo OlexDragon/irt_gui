@@ -36,16 +36,6 @@ public class ControlController extends ControllerAbstract {
 		super(deviceType, controllerName, new ConfigurationSetter(linkHeader), panel, Style.CHECK_ALWAYS);
 		run = false;
 		linkAddr = linkHeader.getAddr();
-//		if(comboBoxfreqSet==null)
-//			setSend(false);
-
-//		muteController = new MuteController(deviceType, linkHeader, btnMute, lblMute, Style.CHECK_ALWAYS);
-//		Thread t = new Thread(muteController, "ControlController.MuteController-"+new RundomNumber().toString());
-//		int priority = t.getPriority();
-//		if(priority>Thread.MIN_PRIORITY)
-//			t.setPriority(priority-1);
-//		t.setDaemon(true);
-//		t.start();
 	}
 
 	@Override

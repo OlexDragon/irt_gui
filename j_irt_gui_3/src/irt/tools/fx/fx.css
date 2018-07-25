@@ -10,6 +10,9 @@
 .monitor .label.value{
 	-fx-text-fill: WHITE;
 }
+.monitor .label.value{
+	-fx-text-fill: WHITE;
+}
 .monitor .label, .alarms .label{
 	-fx-font-weight: BOLD;
 	-fx-font-size: 12px;
@@ -49,5 +52,17 @@
 	 -fx-border-color: yellow;
 }
 .transparent{
-	"-fx-background-color: rgba(0, 0, 0, 0);"
+	-fx-background-color: rgba(0, 0, 0, 0);
+}
+.MUTE{
+	-fx-text-fill: BLACK;
+	-fx-background-color: YELLOW;
+}
+.UNLOCKED{
+	-fx-text-fill: YELLOW;
+	-fx-background-color: RED;
+}
+.LOCKED, .PLL1, .PLL2, .PLL3{
+	-fx-text-fill: YELLOW;
+	-fx-background-color: GREEN;
 }

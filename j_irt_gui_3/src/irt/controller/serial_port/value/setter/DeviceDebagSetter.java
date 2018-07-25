@@ -7,6 +7,7 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
@@ -21,11 +22,11 @@ public class DeviceDebagSetter extends SetterAbstract {
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader, int index, int addr, PacketIDs packetID, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), PacketImp.GROUP_ID_DEVICE_DEBAG, parameterId, packetID.getId());
+		super(linkHeader, new RegisterValue(index, addr, null), PacketGroupIDs.DEVICE_DEBAG.getId(), parameterId, packetID.getId());
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader,int index, int addr, PacketIDs packetID, byte parameterId, int value) {
-		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), PacketImp.PACKET_TYPE_COMMAND, PacketImp.GROUP_ID_DEVICE_DEBAG, parameterId, packetID.getId());
+		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), PacketImp.PACKET_TYPE_COMMAND, PacketGroupIDs.DEVICE_DEBAG.getId(), parameterId, packetID.getId());
 	}
 
 	@Override

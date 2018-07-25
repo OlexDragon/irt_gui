@@ -64,6 +64,10 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 //				logger.error("*** Yee ***");
 				root = new MonitorPanelFx();
 				Scene scene = new Scene(root);
+
+//				final String externalForm = getClass().getResource("monitor_panel.css").toExternalForm();
+//				scene.getStylesheets().add(externalForm);
+
 				setScene(scene);
 
 			}catch (Exception e) {

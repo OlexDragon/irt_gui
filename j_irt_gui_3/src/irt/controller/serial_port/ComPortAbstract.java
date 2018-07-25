@@ -199,11 +199,11 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 	sendAcknowledge(packet);
 
 		} catch (InterruptedException | PureJavaIllegalStateException e) {
-			new MyThreadFactory(()->closePort());
+			new MyThreadFactory(()->closePort(), "ComPortAbstract-send-1");
 		}catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "Error");
-			new MyThreadFactory(()->closePort());
+			new MyThreadFactory(()->closePort(), "ComPortAbstract-send-2");
 		}
 
 		buffer = null;

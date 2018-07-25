@@ -87,7 +87,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 	}
 
 	@Override
-	public void onPacketRecived(final Packet packet) {
+	public void onPacketReceived(final Packet packet) {
 
 		new MyThreadFactory(()->{
 			
@@ -115,7 +115,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 				.filter(h->h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
 				.ifPresent(h->logger.error("the unit does not respond: {}", packet));
 			}
-		});
+		}, "ValueController.onPacketReceived()");
 	}
 
 	private void value(final Payload payload) {

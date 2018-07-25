@@ -26,7 +26,6 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
-import irt.data.RundomNumber;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork.PacketIDs;
@@ -65,7 +64,7 @@ public class DebugPanel extends JPanel{
 								Style.CHECK_ALWAYS){
 
 									@Override
-									public void onPacketRecived(Packet packet) {
+									public void onPacketReceived(Packet packet) {
 
 										new MyThreadFactory(()->{
 
@@ -84,7 +83,7 @@ public class DebugPanel extends JPanel{
 													}
 												}
 									}
-										});
+										}, "DebugPanel.onPacketReceived()");
 									}					
 						}
 				);
@@ -94,12 +93,7 @@ public class DebugPanel extends JPanel{
 			}
 
 			private void startThread(Runnable runnable) {
-				Thread t = new Thread(runnable, "DebugPanel.Clear Statistics-"+new RundomNumber());
-				int priority = t.getPriority();
-				if(priority>Thread.MIN_PRIORITY)
-					t.setPriority(priority-1);
-				t.setDaemon(true);
-				t.start();
+				new MyThreadFactory(runnable, "DebugPanel.startThread");
 			}
 		});
 		

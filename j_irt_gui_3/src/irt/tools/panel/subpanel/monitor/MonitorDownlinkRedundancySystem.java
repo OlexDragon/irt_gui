@@ -16,8 +16,9 @@ import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
+import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
 import irt.data.value.ValueBoolean;
@@ -123,7 +124,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	private ControllerAbstract getLNBStatusController(final JLabel lblLNBStatus, byte parameterMeasurement, final PacketIDs packetIDs) {
 
-		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_MEASUREMENT, parameterMeasurement, packetIDs, logger){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), parameterMeasurement, packetIDs, logger){
 
 			private final Value value = new ValueBoolean(Translation.getValue(String.class, "ready.not", "Not Ready"), Translation.getValue(String.class, "ready", "Ready"));
 
@@ -155,7 +156,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	private ControllerAbstract getWGSController() {
 
-		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_MEASUREMENT, PacketImp.PARAMETER_MEASUREMENT_WGS_POSITION, PacketIDs.MEASUREMENT_WGS_POSITION, logger){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), PacketImp.PARAMETER_MEASUREMENT_WGS_POSITION, PacketIDs.MEASUREMENT_WGS_POSITION, logger){
 
 			private final ValueThreeState value = new ValueThreeState("Unknown", "LNB1", "LNB2");
 
@@ -187,7 +188,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	private ControllerAbstract getTemperaturController() {
 
-		Getter getter = new Getter(linkHeader, PacketImp.GROUP_ID_MEASUREMENT, PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE, PacketIDs.MEASUREMENT_TEMPERATURE, logger){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE, PacketIDs.MEASUREMENT_TEMPERATURE, logger){
 
 			@Override
 			public boolean set(Packet packet) {
