@@ -62,8 +62,9 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 													.orElse(Stream.empty())
 													.map(String::trim)
 													.filter(s->!s.isEmpty())
-													.collect(Collectors.partitioningBy(s->s.startsWith("devices")));
+													.collect(Collectors.partitioningBy(s->!s.startsWith("devices")));
 
+			logger.error(collect);
 			//Devices
 			List<String> list = collect.get(true);
 			indexes[DEVICES] = getIndexes(list);

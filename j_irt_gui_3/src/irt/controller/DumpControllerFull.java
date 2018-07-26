@@ -138,7 +138,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
 		final PacketHeader header = packet.getHeader();
 
-			if(header.getOption()!=PacketImp.ERROR_NO_ERROR || header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
+			if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 				return;
 			}
 
@@ -147,6 +147,11 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 			final short packetId = header.getPacketId();
 			PacketIDs.valueOf(packetId)
 			.ifPresent(pId->{
+
+				if(header.getOption()!=PacketImp.ERROR_NO_ERROR) {
+					dump(pId, header.getOptionStr());
+					return;
+				}
 
 				final Optional<Object> valueOf = pId.valueOf(packet);
 
@@ -162,18 +167,25 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 							// parse indexes from DeviceDebugHelpPacket and return
 							if(pId.equals(PacketIDs.DEVICE_DEBUG_HELP)){
 								getIndexes((String) value);
+								logger.error(value);
+								Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));;
+								scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
 								return;
 							}
 
-							final Object oldValue = oldValues.get(pId);
-							if(oldValue==null || !oldValue.equals(value)){
-
-								oldValues.put(pId, value);
-								doDump(pId + ": " + value);
-							}
+							dump(pId, value);
 						});
 			});
 		}, "DumpControllerFull.onPacketReceived()");
+	}
+
+	private void dump(PacketIDs pId, Object value) {
+		final Object oldValue = oldValues.get(pId);
+		if(oldValue==null || !oldValue.equals(value)){
+
+			oldValues.put(pId, value);
+			doDump(pId + ": " + value);
+		}
 	}
 
 //	private void removeUnusedIndexes(final short packetId) {
