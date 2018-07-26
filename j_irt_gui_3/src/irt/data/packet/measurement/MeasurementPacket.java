@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
@@ -28,7 +29,7 @@ public class MeasurementPacket extends PacketSuper{
 
 	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
 																										.ofNullable(packet)
-																										.map(p->p instanceof LinkedPacket && ((LinkedPacket)p).getLinkHeader().getAddr()!=0)	//is not a converter
+																										.map(p->Optional.of(p).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte)0)!=0)	//is not a converter
 																										.map(b-> b ? ParameterHeaderCodeBUC.class : ParameterHeaderCodeFCM.class)
 																										.map(parameterHCodeClass->{
 																											try {
@@ -48,9 +49,9 @@ public class MeasurementPacket extends PacketSuper{
 																																try {
 
 																																	byte code = pl.getParameterHeader().getCode();
-																																	final Optional<?> optional = (Optional<?>) method.invoke(null, code);
 
-																																	return optional
+																																	return ((Optional<?>) method.invoke(null, code))
+
 																																			.map(ParameterHeaderCode.class::cast)
 																																			.map(
 																																					pc->{

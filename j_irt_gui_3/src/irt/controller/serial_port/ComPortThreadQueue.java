@@ -64,7 +64,7 @@ public class ComPortThreadQueue implements Runnable {
 			.ofNullable(serialPort)
 			.filter(SerialPortInterface::isOpened)
 			.ifPresent(sp->{
-				
+
 				Optional
 				.ofNullable(packetWork)
 				.map(sp::send)

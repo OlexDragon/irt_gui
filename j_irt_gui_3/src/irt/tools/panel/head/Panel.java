@@ -367,7 +367,7 @@ public class Panel extends JPanel implements PacketListener {
 			return;
 
 		// address not match
-		byte a = oPacket.map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+		byte a = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 
 		if(addr!=a)
 			return;

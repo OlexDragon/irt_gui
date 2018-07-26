@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,6 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Packets;
 import irt.data.packet.RetransmitPacket;
-import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.measurement.MeasurementPacket;
 import javafx.application.Platform;
@@ -153,9 +153,13 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		if(!oHeader.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(PacketHeader::getPacketId).filter(PacketIDs.MEASUREMENT_ALL::match).isPresent())
 			return;
 
-		Optional<LinkedPacket> oLinkedPacket = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast);
-		if( !oLinkedPacket.isPresent() || !oLinkedPacket.map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).filter(a->a==getUnitAddress()).isPresent() )
+		if(oHeader.map(PacketHeader::getPacketType).filter(t->t!=PacketImp.PACKET_TYPE_RESPONSE).isPresent())
 			return;
+
+		if(oHeader.map(PacketHeader::getOption).filter(t->t!=PacketImp.ERROR_NO_ERROR).isPresent()) {
+			logger.warn(packet);
+			return;
+		}
 
 		new MyThreadFactory(()->{
 
@@ -167,7 +171,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 						Optional
 						.ofNullable((List<?>)map.remove("STATUS"))
-						.ifPresent(this::setStatus);;
+						.ifPresent(this::setStatus);
 
 						setValues(map);
 					});
@@ -209,22 +213,38 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	private void setStatus(final List<?> status) {
-		logger.entry(status);
+
+		if(status==null || status.isEmpty())
+			return;
+
+		List<?> collect;
+		Stream<?> stream = status.stream();
+
+		if(status.get(0) instanceof StatusBitsBUC) 
+			collect = stream.filter(phc->phc==StatusBitsBUC.UNLOCKED || phc==StatusBitsBUC.LOCKED || phc==StatusBitsBUC.MUTE).collect(Collectors.toList());
+
+		//StatusBitsFCM
+		else
+			collect = stream.filter(phc->phc==StatusBitsFCM.LOCK  || phc==StatusBitsFCM.MUTE || phc==StatusBitsFCM.MUTE_TTL).collect(Collectors.toList());
 
 		ObservableList<Node> children = statusPane.getChildren();
 		int size = children.size();
-		int statusSize = status.size();
+
 		String toolTipText = status.toString().replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
 		Tooltip tooltip = new Tooltip(toolTipText);
+
+		int statusSize = collect.size();
 
 		if(size>statusSize)
 			IntStream.range(statusSize, size).forEach(children::remove);
 
-		IntStream.range(0, statusSize).forEachOrdered(
+		IntStream.range(0, statusSize).forEach(
 
 				index->{
 
-					String string = status.get(index).toString();
+					// Show only UNLOCKED, LOCKED, MUTE statuses
+					Object statusBit = collect.get(index);
+					String string = statusBit.toString();
 
 					if(size<=index) {
 
@@ -450,7 +470,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		MUTE			(2),
 		MUTE_TTL		(3),
 		PLL3			(4),
-		LOCK_SUMMARY	(5),
+		LOCK			(5),	// LOCK_SUMMARY
 		INPUT_OVERDRIVE	(6),
 		INPUT_LOW		(7),
 		AOPC_0			(8),

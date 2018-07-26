@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.event.AncestorEvent;
@@ -59,11 +60,14 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			}
 		});
 
-		ledControlTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), e->{
-			ledPowerOn.setOn(false);
-			ledMute.setOn(false);
-			ledAlarm.setOn(false);
-		});
+		ledControlTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10),
+
+				e->SwingUtilities.invokeLater(
+						()->{		
+							ledPowerOn.setOn(false);
+							ledMute.setOn(false);
+							ledAlarm.setOn(false);
+						}));
 		ledControlTimer.setRepeats(false);
 		ledControlTimer.start();
 
