@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -62,7 +63,7 @@ public class MeasurementPacket extends PacketSuper{
 																																							return new AbstractMap.SimpleEntry<>(pc.name(), pc.parseStatusBits(statusBits));
 																																						}
 
-																																						return new AbstractMap.SimpleEntry<>(pc, pc.toString(pl.getBuffer()));
+																																						return new AbstractMap.SimpleEntry<>(pc.name(), pc.toString(pl.getBuffer()));
 																																					})
 																																			.orElse(null);
 
@@ -71,7 +72,7 @@ public class MeasurementPacket extends PacketSuper{
 																																}
 																																return null;
 																															})
-																													.collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue));
+																													.collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue,  (a,b)->{throw new IllegalStateException();},  TreeMap::new));
 																										});
 
 	/**

@@ -54,7 +54,7 @@
 .transparent{
 	-fx-background-color: rgba(0, 0, 0, 0);
 }
-.MUTE{
+.MUTE, .MUTE_TTL{
 	-fx-text-fill: BLACK;
 	-fx-background-color: YELLOW;
 }
@@ -62,7 +62,7 @@
 	-fx-text-fill: YELLOW;
 	-fx-background-color: RED;
 }
-.LOCKED, .PLL1, .PLL2, .PLL3{
+.LOCK, .LOCKED, .PLL1, .PLL2, .PLL3{
 	-fx-text-fill: YELLOW;
 	-fx-background-color: GREEN;
 }

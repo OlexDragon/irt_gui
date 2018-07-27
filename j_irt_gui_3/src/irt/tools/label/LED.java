@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.Optional;
 
 import javax.swing.JLabel;
 import javax.swing.Timer;
@@ -36,7 +37,7 @@ public class LED extends JLabel{
 
 	public void setOn(boolean isOn){
 
-		if(this.isOn==isOn)
+		if(Optional.of(this).filter(th->th.isOn==isOn).filter(th->th.isOn==true || th.color.getTransparency()==off).isPresent())
 			return;
 
 		//		System.out.println("LED - "+getName()+" was "+(this.isOn ? "On" : "Off")+" seted to "+(isOn ? "On" : "Off"));

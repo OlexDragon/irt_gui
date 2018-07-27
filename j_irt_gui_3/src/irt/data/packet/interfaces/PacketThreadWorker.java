@@ -1,6 +1,7 @@
 package irt.data.packet.interfaces;
 
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketSuper.Priority;
 
 public interface PacketThreadWorker extends ValuePacket{
 
@@ -16,7 +17,7 @@ public interface PacketThreadWorker extends ValuePacket{
 	void 	preparePacket(byte packetParameterHeaderCode, Object value);
 	void 	setDataPacketTypeCommand();
 	void 	setValue(Object source);
-	void 	setPriority(int priority);		//function of java.lang.Thread
+	void 	setPriority(Priority priority);		//function of java.lang.Thread
 	void 	preparePacket(byte value);
 
 }

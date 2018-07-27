@@ -86,8 +86,8 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 	}
 
 	@Override	// function of java.lang.Thread
-	public void setPriority(int priority) {
-		throw new UnsupportedOperationException("Auto-generated method stub");
+	public void setPriority(Priority priority) {
+		this.priority = priority;
 	}
 
 	@Override
