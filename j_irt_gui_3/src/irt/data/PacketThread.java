@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper.Priority;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
@@ -231,5 +232,11 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 	@Override
 	public String toString() {
 		return "PacketThread [data=" + ToHex.bytesToHex(data) + ", packet=" + packet + "]";
+	}
+
+	@Override
+	public void setPriority(Priority priority) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -3,6 +3,7 @@ package irt.tools.panel.head;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Rectangle;
+import java.awt.event.ActionListener;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -60,14 +61,13 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			}
 		});
 
-		ledControlTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10),
-
-				e->SwingUtilities.invokeLater(
-						()->{		
-							ledPowerOn.setOn(false);
-							ledMute.setOn(false);
-							ledAlarm.setOn(false);
-						}));
+		ActionListener listener = e->SwingUtilities.invokeLater(
+				()->{		
+					ledPowerOn.setOn(false);
+					ledMute.setOn(false);
+					ledAlarm.setOn(false);
+				});
+		ledControlTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10),listener);
 		ledControlTimer.setRepeats(false);
 		ledControlTimer.start();
 
@@ -94,6 +94,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 		add(ledRx);
 
 		swingWorkers();
+		listener.actionPerformed(null);
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	}
 
@@ -288,7 +289,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 						.findAny()
 						.isPresent();
 
-				ledMute.setOn(isMuted);
+				SwingUtilities.invokeLater(()->ledMute.setOn(isMuted));
 			});
 
 			//Alarm Status
@@ -307,8 +308,11 @@ public class HeadPanel extends MainPanel implements PacketListener {
 						Color background = as.getBackground();
 						if(!ledAlarm.isOn() || !ledAlarm.getLedColor().equals(background)){
 
-							ledAlarm.setLedColor(background);
-							ledAlarm.setOn(true);
+							SwingUtilities.invokeLater(
+									()->{
+										ledAlarm.setLedColor(background);
+										ledAlarm.setOn(true);
+									});
 						}
 					});
 		}, "HeadPanel.onPacketReceived()");

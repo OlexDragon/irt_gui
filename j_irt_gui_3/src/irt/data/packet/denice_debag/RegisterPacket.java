@@ -40,7 +40,7 @@ public class RegisterPacket extends PacketSuper {
 
 		if(source instanceof RegisterValue){
 			getPayload(0).setBuffer(((RegisterValue)source).toBytes());
-			setPriority(PacketImp.PACKET_TYPE_COMMAND);
+			setPriority(Priority.COMMAND);
 		}
 	}
 

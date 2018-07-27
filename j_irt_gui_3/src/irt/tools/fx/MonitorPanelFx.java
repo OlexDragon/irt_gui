@@ -178,11 +178,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}, "MonitorPanelFx.onPacketReceived()");
 	}
 
-	private Object setValues(Map<?, ?> map) {
+	private void setValues(Map<?, ?> map) {
+
 		ObservableList<Node> children = gridPane.getChildren();
+		Set<? extends Entry<?,?>> entrySet = map.entrySet();
 
 		if(children.isEmpty()) {
-			Set<?> entrySet = map.entrySet();
 			Iterator<?> iterator = entrySet.iterator();
 			IntStream.range(0, entrySet.size()).forEach(
 					rowIndex->{
@@ -206,16 +207,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 								});
 					});
 		}else {
-			
+			Map<Object, Node> collect = children.stream().filter(node->node.getUserData()!=null).collect(Collectors.toMap(Node::getUserData, node->node));
+			entrySet.forEach(s->Optional.ofNullable((Label) collect.get(s.getKey().toString())).ifPresent(label->Platform.runLater(()->label.setText(s.getValue().toString()))));
 		}
-
-		return null;
 	}
 
 	private void setStatus(final List<?> status) {
 
 		if(status==null || status.isEmpty())
 			return;
+
 
 		List<?> collect;
 		Stream<?> stream = status.stream();
@@ -236,7 +237,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		int statusSize = collect.size();
 
 		if(size>statusSize)
-			IntStream.range(statusSize, size).forEach(children::remove);
+			IntStream.range(statusSize, size).forEach(index->Platform.runLater(()->children.remove(index)));
 
 		IntStream.range(0, statusSize).forEach(
 
@@ -246,29 +247,33 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 					Object statusBit = collect.get(index);
 					String string = statusBit.toString();
 
-					if(size<=index) {
+					Platform.runLater(
+							()->{
+								
+								if(children.size()<=index) {
 
-						final Label label = new Label(string);
-						label.getStyleClass().add(string);
-						label.setTooltip(tooltip);
-						setLabelProperties(label, Pos.CENTER);
-						Platform.runLater(()->statusPane.add(label, index, 0));
+									final Label label = new Label(string);
+									label.getStyleClass().add(string);
+									label.setTooltip(tooltip);
+									setLabelProperties(label, Pos.CENTER);
+									statusPane.add(label, index, 0);
 
-					}else {
+								}else {
 
-						Label label = (Label) children.get(index);
-						String text = label.getText();
-						if(!text.equals(string)) {
-							ObservableList<String> styleClass = label.getStyleClass();
-							styleClass.remove(label.getText());
-							styleClass.add(string);
-							Platform.runLater(()->label.setText(string));
-						}
+									Label label = (Label) children.get(index);
+									String text = label.getText();
+									if(!text.equals(string)) {
+										ObservableList<String> styleClass = label.getStyleClass();
+										styleClass.remove(label.getText());
+										styleClass.add(string);
+										label.setText(string);
+									}
 
-						Tooltip t = label.getTooltip();
-						if(!t.getText().equals(toolTipText))
-							Platform.runLater(()->t.setText(toolTipText));
-					}
+									Tooltip t = label.getTooltip();
+									if(!t.getText().equals(toolTipText))
+										t.setText(toolTipText);
+								}
+							});
 				});		
 	}
 
