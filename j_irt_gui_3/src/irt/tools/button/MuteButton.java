@@ -36,7 +36,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 	private static final long serialVersionUID = 4101471002534919184L;
 
 	private ScheduledFuture<?> scheduledFuture;
-	private ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton"));
+	private ScheduledExecutorService service;
 
 	private Byte linkAddr;
 											public byte getLinkAddr() {
@@ -73,16 +73,13 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(
-						c->{
-							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(MuteButton.this);
-							service.shutdownNow();
-						}));
+				.ifPresent(c->stop()));
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
 
-				Optional.of(service).filter(s->s.isShutdown()).ifPresent(s->service =  Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton")));
+				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+					service =  Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton"));
 
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(MuteButton.this);
 
@@ -91,16 +88,17 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 			public void ancestorRemoved(AncestorEvent event) {
-
-				if(scheduledFuture!=null && !scheduledFuture.isCancelled())
-						scheduledFuture.cancel(true);
-
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(MuteButton.this);
-				Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+				stop();
 			}
 		});
 
 		addActionListener(actionListener);
+	}
+
+	private void stop() {
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(MuteButton.this);
+		Optional.of(scheduledFuture).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
 	@Override

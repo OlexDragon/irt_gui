@@ -98,8 +98,9 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	private JSlider sliderGainOffset;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DACsPanel"));
+	private ScheduledExecutorService service;
 	private final List<AdcWorker> adcWorkers = new ArrayList<>();
+	private final List<ControllerAbstract> threadList = new ArrayList<>();
 
 	private final FocusListener dacfocusListener = new FocusListener() {
 		@Override public void focusGained(FocusEvent e) {
@@ -139,27 +140,27 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(
-						c->{
-							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DACsPanel.this);
-							service.shutdownNow();
-						}));
+				.ifPresent(c->stop()));
 
 		setLayout(null);
 		final byte unitAddr = linkHeader==null ? 0 :  linkHeader.getAddr();
 		addAncestorListener(new AncestorListener() {
-			private List<ControllerAbstract> threadList = new ArrayList<>();
 
 			public void ancestorAdded(AncestorEvent arg0) {
 
+				if(Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).isPresent())
+					return;
+
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DACsPanel.this);
 
-				if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-					scheduleAtFixedRate = service.scheduleAtFixedRate(DACsPanel.this, 0, 1, TimeUnit.SECONDS);
+				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DACsPanel"));
+
+				scheduleAtFixedRate = service.scheduleAtFixedRate(DACsPanel.this, 0, 3, TimeUnit.SECONDS);
 
 
 				if(unitAddr==0){
-					synchronized (DACsPanel.this) {
+					synchronized (adcWorkers) {
 						adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER, 1, "#.###"));
 						adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_OUTPUT_POWER, 1, "#.###"));
 						adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_TEMPERATURE, 1, "#.###"));
@@ -183,21 +184,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			public void ancestorMoved(AncestorEvent arg0) {
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-
-				for(ControllerAbstract t:threadList){
-					t.stop();
-				}
-				threadList.clear();
-
-				//---------------------------------------------------------------------------------
-				synchronized (DACsPanel.this) {
-					adcWorkers.clear();
-				}
-
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DACsPanel.this);
-
-				if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
-					scheduleAtFixedRate.cancel(true);
+				stop();
 			}
 		});
 		componentAdapter = new ComponentAdapter() {
@@ -548,6 +535,23 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		}
 	}
 
+	private void stop() {
+
+		for(ControllerAbstract t:threadList){
+			t.stop();
+		}
+		threadList.clear();
+
+		//---------------------------------------------------------------------------------
+		synchronized (adcWorkers) {
+			adcWorkers.clear();
+		}
+
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DACsPanel.this);
+		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+	}
+
 	private int getStep() {
 		String s = txtStep.getText().replaceAll("\\D", "");
 		int step = 1;
@@ -566,7 +570,11 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 	@Override
 	public void onPacketReceived(Packet packet) {
-		adcWorkers.stream().filter(adc->adc.getDeviceDebugPacketIds().getPacketId().match(packet.getHeader().getPacketId())).findAny().ifPresent(adc->new MyThreadFactory(()->adc.update(packet), "DACsPanel.onPacketReceived()"));
+		new MyThreadFactory(()->{
+			synchronized (adcWorkers) {
+				adcWorkers.stream().filter(adc->adc.getDeviceDebugPacketIds().getPacketId().match(packet.getHeader().getPacketId())).findAny().ifPresent(adc->new MyThreadFactory(()->adc.update(packet), "DACsPanel.onPacketReceived()"));
+			}
+		}, "DACsPanel.onPacketReceived");
 	}
 
 	private int delay;
@@ -578,9 +586,11 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		if(delay<=0)
 			try{
-				adcWorkers
-				.stream()
-				.forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
+				synchronized (adcWorkers) {
+					adcWorkers
+					.stream()
+					.forEach(adc->GuiControllerAbstract.getComPortThreadQueue().add(adc.getPacketToSend()));
+				}
 			}catch (Exception e) {
 				logger.catching(e);
 			}

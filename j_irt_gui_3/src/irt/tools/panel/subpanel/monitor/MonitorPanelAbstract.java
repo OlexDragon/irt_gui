@@ -41,7 +41,6 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 //	}
 
 	protected MonitorPanelAbstract(final Optional<DeviceType> deviceType, LinkHeader linkHeader, String title, int width, int height) {
-		setName("MonitorPanelFx");
 		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short)0);
 		this.deviceType = deviceType;
 

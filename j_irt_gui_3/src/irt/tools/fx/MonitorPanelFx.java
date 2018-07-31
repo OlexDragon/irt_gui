@@ -66,7 +66,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 //	private static final String MUTE_ID = "mute_status";
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MonitorPanelFx"));
+	private ScheduledExecutorService service;
 
 	private final MeasurementPacket packetToSend = (MeasurementPacket) Packets.MEASUREMENT_ALL.getPacketAbstract();
 
@@ -287,20 +287,19 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public void start(){
-		logger.traceEntry();
 
-		if(service.isShutdown())
+		if(Optional.ofNullable(scheduleAtFixedRate).filter(sfr->!sfr.isDone()).isPresent())
 			return;
 
-		if(!Optional.ofNullable(scheduleAtFixedRate).filter(sfr->!sfr.isDone()).isPresent()){
+		if(!Optional.ofNullable(service).filter(sfr->!sfr.isShutdown()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MonitorPanelFx.service"));
+
 			
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
-		}
 	}
 
 	public void stop(){
-		logger.traceEntry();
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		Optional.ofNullable(scheduleAtFixedRate).filter(sfr->!sfr.isDone()).ifPresent(sfr->sfr.cancel(true));

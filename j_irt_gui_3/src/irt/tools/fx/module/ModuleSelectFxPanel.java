@@ -33,7 +33,6 @@ import irt.data.packet.Payload;
 import irt.data.packet.control.ActiveModulePacket;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.AlarmPanelFx;
-import irt.tools.fx.interfaces.StopInterface;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
@@ -43,7 +42,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.text.Font;
 
-public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketListener, StopInterface{
+public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketListener{
 	private static final long serialVersionUID = -7284252793969855433L;
 	private final static Logger logger = LogManager.getLogger();
 
@@ -65,10 +64,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 
 			@Override
 			public void ancestorRemoved(AncestorEvent event) {
-
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(ModuleSelectFxPanel.this);
-				Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
-				Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+				stop();
 			}
 
 			@Override public void ancestorMoved(AncestorEvent event) { }
@@ -76,15 +72,14 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 			@Override
 			public void ancestorAdded(AncestorEvent event) {
 
-				if(service==null)
-					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ModuleSelectFxPanel"));
-				else
-					Optional.of(service).filter(ScheduledExecutorService::isShutdown).ifPresent(s->service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ModuleSelectFxPanel")));
+				if(Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).isPresent())
+					return;
 
-				if(!Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).isPresent()) {
-					GuiControllerAbstract.getComPortThreadQueue().addPacketListener(ModuleSelectFxPanel.this);
-					scheduledFuture = service.scheduleAtFixedRate(ModuleSelectFxPanel.this, 1, 10, TimeUnit.SECONDS);
-				}
+				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ModuleSelectFxPanel.service"));
+
+				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(ModuleSelectFxPanel.this);
+				scheduledFuture = service.scheduleAtFixedRate(ModuleSelectFxPanel.this, 1, 10, TimeUnit.SECONDS);
 			}
 		});
 		this.consumer = consumer;
@@ -203,8 +198,8 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 		GuiControllerAbstract.getComPortThreadQueue().add(packet);
 	}
 
-	@Override
-	public void stop() {
+	private void stop() {
+
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		Optional.ofNullable(scheduledFuture).filter(ft->!ft.isDone()).ifPresent(ft->ft.cancel(true));
 		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);

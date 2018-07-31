@@ -111,15 +111,13 @@ public class AttenuationOffsetFxPanel extends JFXPanel{
 					return;
 
 				if(!Optional.ofNullable(service).filter(s->!isShowing()).isPresent())
-					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AttenuationOffsetFxPanel"));
+					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AttenuationOffsetFxPanel.service"));
 				
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(root);
 				scheduleAtFixedRate = service.scheduleAtFixedRate(root, 1, 10, TimeUnit.SECONDS);
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(root);
-				Optional.ofNullable(scheduleAtFixedRate).filter(shr->!shr.isDone()).ifPresent(shr->shr.cancel(true));
-				Optional.ofNullable(service).filter(s->!isShowing()).ifPresent(ScheduledExecutorService::shutdownNow);
+				stop();
 			}
 		});
 
@@ -131,11 +129,7 @@ public class AttenuationOffsetFxPanel extends JFXPanel{
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(
-						c->{
-							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(root);
-							service.shutdownNow();
-						}));
+				.ifPresent(c->stop()));
 	}
 
 	//	********************************************************************************************** 	//
@@ -263,5 +257,11 @@ public class AttenuationOffsetFxPanel extends JFXPanel{
 								if(!t.equals(text))
 									Platform.runLater(()->tf.setText(text));}));
 		}
+	}
+
+	private void stop() {
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(root);
+		Optional.ofNullable(scheduleAtFixedRate).filter(shr->!shr.isDone()).ifPresent(shr->shr.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 }

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -33,7 +34,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 import javax.swing.Timer;
 
 import org.apache.logging.log4j.LogManager;
@@ -306,17 +306,12 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 	private void swapListeners(final JMenuItem menuItem, String text, ActionListener toRemove, ActionListener toAdd) {
 
-		new SwingWorker<Object, Object>() {
+		SwingUtilities.invokeLater(()->{
 
-			@Override
-			protected Object doInBackground() throws Exception {
-
-				menuItem.setText(text);
-				menuItem.removeActionListener(toRemove);
-				menuItem.addActionListener(toAdd);
-				return null;
-			}
-		}.execute();
+			menuItem.setText(text);
+			menuItem.removeActionListener(toRemove);
+			menuItem.addActionListener(toAdd);
+		});
 	}
 
 	protected void setSerialPort() {
@@ -345,17 +340,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
 //					logger.catching(e1);
 					comPortThreadQueue.setSerialPort(null);
-					Optional.ofNullable(serialPortSelection).ifPresent(sps->{
-						final SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
-
-							@Override
-							protected Void doInBackground() throws Exception {
-								sps.setSelectedItem(0);
-								return null;
-							}
-						};
-						swingWorker.execute();
-					});
+					Optional.ofNullable(serialPortSelection).ifPresent(sps->SwingUtilities.invokeLater(()->sps.setSelectedItem(0)));
 				}
 
 				reset();
@@ -455,6 +440,10 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		if(noAnswer)
 			return;
 
+		// Reset timer
+		LinkHeader linkHeader = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).orElse(new LinkHeader((byte)0, (byte)0, (byte)0));
+		panelController.resetTimer(linkHeader);
+
 		//check retransmit packet
 		final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
 		final Boolean isRetransmitPacket = oPacketId.filter(PacketIDs.PROTO_RETRANSNIT::match).isPresent();
@@ -495,12 +484,17 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		if(!isDeviceInfo)
 			return;
 
-		new MyThreadFactory(()->{
+		new MyThreadFactory(()->{			
 
 			oPacket
 			.map(DeviceInfo::new)
 			.ifPresent(di->{
 				logger.info(di);
+
+				if(moduleList==null) {
+					ModuleListPacket modulListPacket = new ModuleListPacket(di.getLinkHeader().getAddr());
+					comPortThreadQueue.add(modulListPacket);
+				}
 
 				Optional<DeviceType> oDeviceType = di.getDeviceType();
 				oDeviceType
@@ -610,12 +604,11 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			else {
 				restart(8);
 				createPanel(di);
-
-				if(moduleList==null) {
-					ModuleListPacket modulListPacket = new ModuleListPacket(di.getLinkHeader().getAddr());
-					comPortThreadQueue.add(modulListPacket);
-				}
 			}
+		}
+
+		public void resetTimer(LinkHeader linkHeader) {
+			timers.entrySet().stream().filter(e->e.getKey().getLinkHeader().equals(linkHeader)).findAny().map(Entry::getValue).ifPresent(Timer::restart);
 		}
 
 		public void removeAll() {
@@ -660,7 +653,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 			unitsPanel.add(unitPanel);
 
-			final Timer t = new Timer((int) TimeUnit.SECONDS.toMillis(11), e->removePanel(deviceInfo));
+			final Timer t = new Timer((int) TimeUnit.SECONDS.toMillis(4), e->removePanel(deviceInfo));
 			t.setRepeats(false);
 			t.start();
 			return timers.put(deviceInfo, t);

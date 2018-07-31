@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
 import org.apache.logging.log4j.LogManager;
@@ -159,15 +159,7 @@ public class ComPortThreadQueue implements Runnable {
 				logger.catching(e);
 
 				final String errorMessage = String.format("Serial port %s is in use.", sp);
-
-				new SwingWorker<Object, Object>() {
-
-					@Override
-					protected Object doInBackground() throws Exception {
-						JOptionPane.showMessageDialog(null, errorMessage);
-						return null;
-					}
-				}.execute();
+				SwingUtilities.invokeLater(()->JOptionPane.showMessageDialog(null, errorMessage));
 
 			} catch (Exception e) {
 				logger.catching(e);

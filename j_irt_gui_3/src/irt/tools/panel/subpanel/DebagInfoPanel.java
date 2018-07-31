@@ -31,8 +31,8 @@ import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.Payload;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.panel.ConverterPanel;
@@ -45,7 +45,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 	private JComboBox<Integer> cbParameter;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DebagInfoPanel"));
+	private ScheduledExecutorService service;
 	private DeviceDebugInfoPacket packetToSend;
 	private Timer timer;
 
@@ -59,25 +59,16 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(
-						c->{
-							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DebagInfoPanel.this);
-							service.shutdownNow();
-						}));
+				.ifPresent(c->stop()));
 
 		addAncestorListener(new AncestorListener() {
+
 			public void ancestorAdded(AncestorEvent arg0) {
-				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DebagInfoPanel.this);
-
-				if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-					scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 1, 10, TimeUnit.SECONDS);
-
+				start();
 			}
-			public void ancestorRemoved(AncestorEvent arg0) {
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DebagInfoPanel.this);
 
-				if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
-					scheduleAtFixedRate.cancel(true);
+			public void ancestorRemoved(AncestorEvent arg0) {
+				stop();
 			}
 			public void ancestorMoved(AncestorEvent arg0) { }
 		});
@@ -89,7 +80,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		textArea.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount()==2)
+				if(e.getClickCount()==3)
 					restart();
 			}
 		});
@@ -101,6 +92,9 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		panel.setLayout(new BorderLayout(0, 0));
 		
 		cbParameterCode = new JComboBox<String>();
+		cbParameterCode.addItem("device information: parts, firmware and etc.");
+		cbParameterCode.addItem("dump of registers for specified device index ");
+		panel.add(cbParameterCode, BorderLayout.CENTER);
 		cbParameterCode.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent itemEvent) {
 				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
@@ -110,9 +104,6 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 				}
 			}
 		});
-		cbParameterCode.addItem("device information: parts, firmware and etc.");
-		cbParameterCode.addItem("dump of registers for specified device index ");
-		panel.add(cbParameterCode, BorderLayout.CENTER);
 
 		cbParameter = new JComboBox<Integer>();
 		cbParameter.setMaximumRowCount(9);
@@ -133,12 +124,27 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		});
 	}
 
-	public void restart() {
+	private synchronized void start() {
 
-		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate.cancel(true);
+		if(Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).isPresent())
+			return;
 
-		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 0, 10, TimeUnit.SECONDS);
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DebagInfoPanel.service"));
+
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DebagInfoPanel.this);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 1, 3, TimeUnit.SECONDS);
+	}
+
+	private synchronized void stop() {
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(DebagInfoPanel.this);
+		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+	}
+
+	private void restart() {
+		stop();
+		start();
 	}
 
 

@@ -32,7 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
@@ -88,7 +88,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	private static final int P6 = 170;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("BIASsPanel"));
+	private ScheduledExecutorService service;
 	private final List<AdcWorker> adcWorkers = new ArrayList<>();
 
 	public enum CalibrationMode{
@@ -163,11 +163,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(
-						c->{
-							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(BIASsPanel.this);
-							service.shutdownNow();
-						}));
+				.ifPresent(c->stop()));
 
 		setLayout(null);
 
@@ -467,53 +463,48 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				new SwingWorker<Void, Void>() {
+				SwingUtilities.invokeLater(()->{
 
-					@Override
-					protected Void doInBackground() throws Exception {
+					if(isMainBoard)
+						new SetterController(deviceType, "Initialize UnitController",
+								new Setter(linkHeader,
+									PacketImp.PACKET_TYPE_COMMAND,
+									PacketGroupIDs.PRODUCTION_GENERIC_SET_1.getId(),
+									PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
+									PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE
+								),
+								new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
+						);
+					else{
+						logger.trace("\n\t{}", controller);
+						if(controller==null || !controller.isRun()){
+							if(setCalibrationMode(CalibrationMode.ON)){
 
-						if(isMainBoard)
-							new SetterController(deviceType, "Initialize UnitController",
-									new Setter(linkHeader,
-										PacketImp.PACKET_TYPE_COMMAND,
-										PacketGroupIDs.PRODUCTION_GENERIC_SET_1.getId(),
-										PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
-										PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE
-									),
-									new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
-							);
-						else{
-							logger.trace("\n\t{}", controller);
-							if(controller==null || !controller.isRun()){
-								if(setCalibrationMode(CalibrationMode.ON)){
+								if(	initialisePotenciometr(1,0x10, MAX_POTENTIOMETER_VALUE) &&
+									initialisePotenciometr(1,0x11, MAX_POTENTIOMETER_VALUE) &&
+									initialisePotenciometr(1,0x12, 0xFFFF) &&
+									initialisePotenciometr(1,0x13, 0xFFFF)
+								);
 
-									if(	initialisePotenciometr(1,0x10, MAX_POTENTIOMETER_VALUE) &&
-										initialisePotenciometr(1,0x11, MAX_POTENTIOMETER_VALUE) &&
-										initialisePotenciometr(1,0x12, 0xFFFF) &&
-										initialisePotenciometr(1,0x13, 0xFFFF)
-									);
+								if(	initialisePotenciometr(2,0x10, MAX_POTENTIOMETER_VALUE) &&
+									initialisePotenciometr(2,0x11, MAX_POTENTIOMETER_VALUE) &&
+									initialisePotenciometr(2,0x12, 0xFFFF) &&
+									initialisePotenciometr(2,0x13, 0xFFFF)
+								);
 
-									if(	initialisePotenciometr(2,0x10, MAX_POTENTIOMETER_VALUE) &&
-										initialisePotenciometr(2,0x11, MAX_POTENTIOMETER_VALUE) &&
-										initialisePotenciometr(2,0x12, 0xFFFF) &&
-										initialisePotenciometr(2,0x13, 0xFFFF)
-									);
+								if(	initialisePotenciometr(7,0x10, MAX_POTENTIOMETER_VALUE) &&
+									initialisePotenciometr(7,0x11, MAX_POTENTIOMETER_VALUE) &&
+									initialisePotenciometr(7,0x12, 0xFFFF) &&
+									initialisePotenciometr(7,0x13, 0xFFFF)
+								);
 
-									if(	initialisePotenciometr(7,0x10, MAX_POTENTIOMETER_VALUE) &&
-										initialisePotenciometr(7,0x11, MAX_POTENTIOMETER_VALUE) &&
-										initialisePotenciometr(7,0x12, 0xFFFF) &&
-										initialisePotenciometr(7,0x13, 0xFFFF)
-									);
-
-									setCalibrationMode(CalibrationMode.OFF);
-								}else
-									showMessage("Set Calibration Mode 'ON' error.");
+								setCalibrationMode(CalibrationMode.OFF);
 							}else
-								showMessage("Operation is not completed");
-						}
-						return null;
+								showMessage("Set Calibration Mode 'ON' error.");
+						}else
+							showMessage("Operation is not completed");
 					}
-				}.execute();
+				});
 			}
 
 			private boolean initialisePotenciometr(int index, int addr, int potentiometerValue) {
@@ -722,7 +713,14 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		if(delay<=0)
 			try{
-				synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->queue.add(adc.getPacketToSend()), "BIASsPanel.run()"));}
+				new MyThreadFactory(
+						()->{
+							synchronized(adcWorkers) { 
+								adcWorkers
+								.stream()
+								.forEach(adc->queue.add(adc.getPacketToSend()));
+							}
+						}, "BIASsPanel.run()");
 			}catch (Exception e) {
 				logger.catching(e);
 			}
@@ -739,8 +737,12 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 
-		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 1, TimeUnit.SECONDS);
+
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("BIASsPanel"));
+
+		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(BIASsPanel.this);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(BIASsPanel.this, 1, 3, TimeUnit.SECONDS);
 	}
 
 	private void stop() {
@@ -752,8 +754,8 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			adcWorkers.clear();
 		}
 
-		if(scheduleAtFixedRate!=null && !scheduleAtFixedRate.isCancelled())
-			scheduleAtFixedRate.cancel(true);
+		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
 	public static class FixedSizeBuffer<T> extends ArrayList<T> {
