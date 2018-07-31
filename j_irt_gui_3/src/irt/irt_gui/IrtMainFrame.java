@@ -208,10 +208,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 
 		final Container contentPane = getContentPane();
 		if(moduleSelectFxPanel==null){
-			getModuleSelectFxPanel().ifPresent(panel->{
-				contentPane.remove(panel);
-				panel.stop();
-			});
+			getModuleSelectFxPanel().ifPresent(contentPane::remove);
 			IrtMainFrame.moduleSelectFxPanel = null;
 			return;
 		}

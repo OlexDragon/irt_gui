@@ -36,6 +36,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -70,7 +71,7 @@ public class IrtGui extends IrtMainFrame {
 	private static LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.171"; //fixed freezing on port selection
+	public static final String VERTION = "- 3.172"; //fixed freezing on port selection
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -162,6 +163,7 @@ public class IrtGui extends IrtMainFrame {
 		});
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {
 		
 		JPopupMenu popupMenu = new JPopupMenu();
@@ -227,78 +229,48 @@ public class IrtGui extends IrtMainFrame {
 		lblIrtTechnologies.setForeground(Color.WHITE);
 		lblIrtTechnologies.setBounds(531, 10, 107, 14);
 		headPanel.add(lblIrtTechnologies);
-		new SwingWorker<Font, Void>() {
-			@Override
-			protected Font doInBackground() throws Exception {
-				try {
-					return new Font(IrtPanel.PROPERTIES.getProperty("font_name"), IrtPanel.parseFontStyle(IrtPanel.PROPERTIES.getProperty("font_style")), 12);
-				} catch (Exception e) {
-					logger.catching(e);
-					return null;
-				}
-			}
 
-			@Override
-			protected void done() {
-				try {
-					lblIrtTechnologies.setFont(get());
-				} catch (Exception e) {
-					logger.catching(e);
-				}
-			}
-		}.execute();
+		Font font = new Font(IrtPanel.PROPERTIES.getProperty("font_name"), IrtPanel.parseFontStyle(IrtPanel.PROPERTIES.getProperty("font_style")), 12);
+		SwingUtilities.invokeLater(()->lblIrtTechnologies.setFont(font));
 
 //Language ComboBox
 
 		final JComboBox<KeyValue<String, String>> comboBoxLanguage = new JComboBox<>();
 		comboBoxLanguage.setName("Language");
 		headPanel.add(comboBoxLanguage);
-		comboBoxLanguage.addActionListener(e->new SwingWorker<Void, Void>(){
 
-			@Override
-			protected Void doInBackground() throws Exception {
-				baudrateMenuItem.setText(Translation.getValue(String.class, "baudrates", "Baud Rates"));
-				monitortMenuItem.setText(Translation.getValue(String.class, "monitor", "Monitor"));
-				return null;
-			}
-			
-		}.execute());
+		comboBoxLanguage.addActionListener(
+				e->SwingUtilities.invokeLater(
+						()->{
+							baudrateMenuItem.setText(Translation.getValue(String.class, "baudrates", "Baud Rates"));
+							monitortMenuItem.setText(Translation.getValue(String.class, "monitor", "Monitor"));
+						}));
 
-		new SwingWorker<DefaultComboBoxModel<KeyValue<String, String>>, Void>() {
-			@SuppressWarnings("unchecked")
-			@Override
-			protected DefaultComboBoxModel<KeyValue<String, String>> doInBackground() throws Exception {
+		SwingUtilities.invokeLater(()->{
 
-				Optional<Stream<String>> o = Optional
-											.ofNullable(Translation.getTranslationProperties("languages"))
-											.map(s->s.split(","))
-											.map(a->Arrays.stream(a));
-				if(o.isPresent()){
-					final KeyValue<?, ?>[] languages = o.get()
-															.map(s->s.split(":"))
-															.filter(arr->arr.length>1)
-															.map(arr->new KeyValue<String, String>(arr[0], arr[1]))
-															.toArray(size->new KeyValue<?, ?>[size]);
+			Optional<Stream<String>> o = Optional
+										.ofNullable(Translation.getTranslationProperties("languages"))
+										.map(s->s.split(","))
+										.map(a->Arrays.stream(a));
 
-					return new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages);
-				};
-				return new DefaultComboBoxModel<KeyValue<String, String>>();
-			}
+			DefaultComboBoxModel<KeyValue<String, String>> defaultComboBoxModel;
+			if(o.isPresent()){
+				final KeyValue<?, ?>[] languages = o.get()
+														.map(s->s.split(":"))
+														.filter(arr->arr.length>1)
+														.map(arr->new KeyValue<String, String>(arr[0], arr[1]))
+														.toArray(size->new KeyValue<?, ?>[size]);
 
-			@Override
-			protected void done() {
-				try {
-					final DefaultComboBoxModel<KeyValue<String, String>> aModel = get();
-					comboBoxLanguage.setModel(aModel);
-				} catch (Exception e) {
-					logger.catching(e);
-				}
+				defaultComboBoxModel = new DefaultComboBoxModel<KeyValue<String, String>>((KeyValue<String, String>[]) languages);
+			}else
+				defaultComboBoxModel = new DefaultComboBoxModel<KeyValue<String, String>>();
 
-				final String key = Optional.ofNullable(GuiController.getPrefs().get("locale", "en_US")).orElse("en_US");
-				KeyValue<String, String> keyValue = new KeyValue<>(key, null);
-				comboBoxLanguage.setSelectedItem(keyValue);
-			}
-		}.execute();
+			comboBoxLanguage.setModel(defaultComboBoxModel);
+
+			final String key = Optional.ofNullable(GuiController.getPrefs().get("locale", "en_US")).orElse("en_US");
+			KeyValue<String, String> keyValue = new KeyValue<>(key, null);
+			comboBoxLanguage.setSelectedItem(keyValue);
+		});
 
 		comboBoxLanguage.addPopupMenuListener(Listeners.popupMenuListener);
 		comboBoxLanguage.setUI(

@@ -167,7 +167,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 							// parse indexes from DeviceDebugHelpPacket and return
 							if(pId.equals(PacketIDs.DEVICE_DEBUG_HELP)){
 								getIndexes((String) value);
-								logger.error(value);
+//								logger.error(value);
 								Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));;
 								scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
 								return;

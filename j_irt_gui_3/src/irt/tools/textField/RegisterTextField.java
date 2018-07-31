@@ -58,7 +58,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	private final RegisterValue valueSaveRegister;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
-	private final 	ScheduledExecutorService	service = Executors.newScheduledThreadPool(5, new MyThreadFactory("RegisterTextField"));
+	private ScheduledExecutorService	service;
 
 	private Byte unitAddress;
 	private short packetId;
@@ -95,11 +95,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(
-						c->{
-							GuiControllerAbstract.getComPortThreadQueue().removePacketListener(RegisterTextField.this);
-							service.shutdownNow();
-						}));
+				.ifPresent(c->stop()));
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
@@ -113,6 +109,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 		registerValue.setValue(null); // if value is null packet type is REQIEST
 		getPacket = new RegisterPacket(linkAddr, registerValue, packetID);
+		GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
 
 		valueToSend = new RegisterValue(registerValue);
 		valueToSend.setValue( new Value(MAX, MIN, MAX, 0)); // if value not null packet type is COMMAND
@@ -252,18 +249,21 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	}
 
 	public void start(){
+		if(Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).isPresent())
+			return;
+
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("RegisterTextField"));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(RegisterTextField.this);
 
-		if(!service.isShutdown() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled()))
-			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(RegisterTextField.this, 1, 3, TimeUnit.SECONDS);
 	}
 
 	public void stop(){
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(RegisterTextField.this);
-
-		if(scheduleAtFixedRate!=null)
-			scheduleAtFixedRate.cancel(true);
+		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
 	public void saveRegister(){
@@ -322,13 +322,6 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 	@Override
 	public void run() {
-
-		try{
-
 			GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
-
-		}catch (Exception e) {
-			logger.catching(e);
-		}
 	}
 }

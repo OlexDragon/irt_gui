@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
@@ -161,21 +161,15 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 			@Override
 			public void componentAdded(ContainerEvent e) {
 
-				new SwingWorker<Void, Void>() {
+				SwingUtilities.invokeLater(()->{
+					int select = pref.getInt(selectedTab, 0);
+					int tabCount = tabbedPane.getTabCount();
 
-					@Override
-					protected Void doInBackground() throws Exception {
-						int select = pref.getInt(selectedTab, 0);
-						int tabCount = tabbedPane.getTabCount();
-
-						if (tabbedPane.getSelectedIndex() != select && tabCount != 0 && tabCount > select) {
-							tabbedPane.setSelectedIndex(select);
-							logger.trace("selectedTab={}, select={}, tabCount={}", selectedTab, select, tabCount);
-						}
-						return null;
+					if (tabbedPane.getSelectedIndex() != select && tabCount != 0 && tabCount > select) {
+						tabbedPane.setSelectedIndex(select);
+						logger.trace("selectedTab={}, select={}, tabCount={}", selectedTab, select, tabCount);
 					}
-
-				}.execute();
+				});
 			}
 		});
 		tabbedPane.addMouseListener(new MouseAdapter() {

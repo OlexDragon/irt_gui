@@ -1,18 +1,19 @@
 package irt.tools.panel.subpanel.progressBar;
 
-import irt.data.value.Value;
-import irt.data.value.Value.Status;
-import irt.data.value.ValueDouble;
-import irt.tools.panel.head.IrtStylePanel;
-
 import java.awt.Color;
 import java.util.Observable;
 import java.util.Observer;
 
-import javax.swing.SwingWorker;
+import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import irt.data.MyThreadFactory;
+import irt.data.value.Value;
+import irt.data.value.Value.Status;
+import irt.data.value.ValueDouble;
+import irt.tools.panel.head.IrtStylePanel;
 
 public class Section extends IrtStylePanel implements Observer{
 	private static final long serialVersionUID = -3714457770555564111L;
@@ -61,38 +62,29 @@ public class Section extends IrtStylePanel implements Observer{
 		}
 
 		logger.debug("setBackground({})", backgroundColor);
-		new SwingWorker<Void, Void>() {
+		SwingUtilities.invokeLater(
+				()->{
+					if(getBackground().equals(backgroundColor))
+						return;
 
-			@Override
-			protected Void doInBackground() throws Exception {
-				if(getBackground().equals(backgroundColor))
-					return null;
-
-				setBackground(backgroundColor);
-				invalidate();
-				return null;
-			}
-		}.execute();
+					setBackground(backgroundColor);
+					invalidate();
+				});
 	}
 
 	@Override
 	public void update(Observable o, Object obj) {
-		new SwingWorker<Void, Void>(){
+		new MyThreadFactory(()->{
+			Value v = (Value) o;
+			Status s = (Status) obj;
 
-			@Override
-			protected Void doInBackground() throws Exception {
-				Value v = (Value) o;
-				Status s = (Status) obj;
-
-				if(s==Status.MORE_THEN_RANGE)
-					setValue(v.getValue()+1);
-				else if(s==Status.UNDER_RANGE)
-					setValue(v.getValue()-1);
-				else
-					setValue(v.getValue());
-				return null;
-			}
-		}.execute();;
+			if(s==Status.MORE_THEN_RANGE)
+				setValue(v.getValue()+1);
+			else if(s==Status.UNDER_RANGE)
+				setValue(v.getValue()-1);
+			else
+				setValue(v.getValue());
+		}, "Section");
 	}
 
 	public Color getUnderRangeColor() {

@@ -24,8 +24,8 @@ import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.denice_debag.CallibrationModePacket;
@@ -41,7 +41,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	private final Logger logger = LogManager.getLogger();
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("Switch"));
+	private ScheduledExecutorService service;
 
 	private PacketSuper packetToGet;
 
@@ -87,26 +87,32 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(c->{
-					GuiControllerAbstract.getComPortThreadQueue().removePacketListener(Switch.this);
-					service.shutdownNow();
-				}));
+				.ifPresent(c->stop()));
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
-				if(scheduledFuture==null || scheduledFuture.isCancelled())
-					scheduledFuture = service.scheduleAtFixedRate(Switch.this, 1, 3, TimeUnit.SECONDS);
+				if(Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).isPresent())
+					return;
+
+				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("Switch"));
+
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(Switch.this);
+				scheduledFuture = service.scheduleAtFixedRate(Switch.this, 1, 3, TimeUnit.SECONDS);
 			}
 			public void ancestorRemoved(AncestorEvent event) {
-				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(Switch.this);
-				if(scheduledFuture!=null && !scheduledFuture.isCancelled())
-					scheduledFuture.cancel(true);
+				stop();
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 		});
 
 		addActionListener(actionListener);
+	}
+
+	private void stop() {
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(Switch.this);
+		Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
 	private static final long serialVersionUID = 8018058982771868859L;

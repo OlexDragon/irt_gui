@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
-import javax.swing.SwingWorker;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -353,26 +352,20 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 	}
 
 	protected void calculate() {
-		new SwingWorker<Void, Void>() {
+		new MyThreadFactory(()->{
+			int shift = shift(((IdValue)cp_UPoffset_sel	.getSelectedItem()).getID(), 2);
+			shift += 	shift(((IdValue)cp_DNoffset_sel	.getSelectedItem()).getID(), 7);
+			shift += 	shift(((IdValue)cfg_cp_UPtrim_sel.getSelectedItem()).getID(),10);
+			shift += 	shift(((IdValue)cp_DNtrim_sel	.getSelectedItem()).getID(), 14);
+			shift += 	shift(((IdValue)cp_UPcurrent_sel.getSelectedItem()).getID(), 18);
+			shift += 	shift(((IdValue)cp_DNcurrent_sel.getSelectedItem()).getID(), 21);
+			textField.setText("0x"+Integer.toHexString(shift).toUpperCase());
+			send();
+		}, "PLL_HMC807LP6CE_Reg9");
+	}
 
-			@Override
-			protected Void doInBackground() throws Exception {
-				int shift = shift(((IdValue)cp_UPoffset_sel	.getSelectedItem()).getID(), 2);
-				shift += 	shift(((IdValue)cp_DNoffset_sel	.getSelectedItem()).getID(), 7);
-				shift += 	shift(((IdValue)cfg_cp_UPtrim_sel.getSelectedItem()).getID(),10);
-				shift += 	shift(((IdValue)cp_DNtrim_sel	.getSelectedItem()).getID(), 14);
-				shift += 	shift(((IdValue)cp_UPcurrent_sel.getSelectedItem()).getID(), 18);
-				shift += 	shift(((IdValue)cp_DNcurrent_sel.getSelectedItem()).getID(), 21);
-				textField.setText("0x"+Integer.toHexString(shift).toUpperCase());
-				send();
-				return null;
-			}
-
-			private int shift(int id, int shiftBy) {
-				logger.entry(id, shiftBy);
-				return logger.traceExit(id<<shiftBy);
-			}
-		}.execute();
+	private int shift(int id, int shiftBy) {
+		return id<<shiftBy;
 	}
 
 	public void send() {

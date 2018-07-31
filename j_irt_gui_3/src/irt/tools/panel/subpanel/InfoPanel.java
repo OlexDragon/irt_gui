@@ -94,6 +94,8 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 			public void ancestorAdded(AncestorEvent arg0) {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(InfoPanel.this);
+				if(secondsCount!=null)
+					secondsCount.start();
 			}
 			public void ancestorRemoved(AncestorEvent arg0) {
 				GuiControllerAbstract.getComPortThreadQueue().removePacketListener(InfoPanel.this);
@@ -314,17 +316,25 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		private volatile int uptimeCounter;
 
 		private ScheduledFuture<?> scheduledFuture;
-		private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("InfoPanel.SecondsCount"));
+		private ScheduledExecutorService service;
 
-		public SecondsCount(){
-			scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.SECONDS);
+		public void start() {
+
+			if(Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).isPresent())
+				return;
+
+			if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+				service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("InfoPanel"));
+
+			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(InfoPanel.this);
+
+			scheduledFuture = service.scheduleAtFixedRate(this, 1, 10, TimeUnit.SECONDS);
 		}
 
 		public void stop() {
 			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(InfoPanel.this);
 			Optional.ofNullable(scheduledFuture).filter(sf->!sf.isCancelled()).ifPresent(sf->sf.cancel(true));
-			if(!service.isShutdown())
-				service.shutdownNow();
+			Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 		}
 
 		@Override
