@@ -24,8 +24,6 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
-import org.apache.logging.log4j.LogManager;
-
 import irt.controller.GuiControllerAbstract;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;

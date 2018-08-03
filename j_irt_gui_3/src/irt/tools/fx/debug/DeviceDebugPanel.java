@@ -53,6 +53,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 
 public class DeviceDebugPanel extends JFXPanel {
@@ -173,11 +175,13 @@ public class DeviceDebugPanel extends JFXPanel {
 		}
 
 		@FXML void onGet(ActionEvent e) {
-			createGetPacket((Node) e.getSource()).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));			
+			Node source = (Node) e.getSource();
+			get(source);			
 		}
 
 		@FXML void onSet(ActionEvent e) {
-			createSetPacket((Node) e.getSource()).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
+			Node source = (Node) e.getSource();
+			set(source);
 		}
 
 	    @FXML  void onMenuSelect(ActionEvent e) {
@@ -222,6 +226,73 @@ public class DeviceDebugPanel extends JFXPanel {
 	    					})));
 	    }
 
+	    private String idIndex;
+	    @FXML void onKeyPressed(KeyEvent e) {
+	    	if(idIndex!=null || e.getCode()!=KeyCode.SHIFT)
+	    		return;
+
+	    	TextField source = (TextField) e.getSource();
+	    	idIndex = source.getId().replaceAll("\\D", "");
+	    	Platform.runLater(()->source.setText("" + step));
+	    }
+
+	    private int step = 10;
+	    @FXML void onKeyReleased(KeyEvent e) {
+
+    		TextField textField = (TextField)e.getSource();
+
+	    	if(e.getCode().equals(KeyCode.SHIFT)) {
+
+	    		idIndex = null;
+	    		get(textField);
+	    		return;
+	    	}
+
+	    	if(!(e.getCode().equals(KeyCode.UP) || e.getCode().equals(KeyCode.DOWN)))
+	    		return;
+
+	    	if(idIndex==null) {
+
+	    		Optional<Integer> oValue = Optional
+
+	    				.of(textField.getText())
+	    				.filter(t->!t.isEmpty())
+	    				.map(Integer::parseInt);
+
+	    		Optional<Integer> oNewValue;
+				if(e.getCode().equals(KeyCode.UP))
+
+					oNewValue = oValue
+	    			.map(v->v + step);
+	    		else
+					oNewValue = oValue
+	    			.map(v->v - step)
+	    			.map(v->v<0 ? 0 : v);
+					
+				oNewValue
+				.ifPresent(
+						newValue->
+						Platform.runLater(
+								()->{
+									textField.setText("" + newValue);
+									set(textField);
+								}));
+	    	}else {
+	    		step = e.getCode().equals(KeyCode.UP) ? step*10 : step/10;
+	    		if(step<1) step = 100;
+	    		if(step>100) step = 1;
+				Platform.runLater(()->textField.setText("" + step));
+	    	}
+	    }
+
+		private void get(Node source) {
+			createGetPacket(source).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
+		}
+
+		private void set(Node node) {
+			createSetPacket(node).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
+		}
+
 		@Override
 		public void onPacketReceived(Packet packet) {
 			Optional<Packet> oPacket = Optional.ofNullable(packet);
@@ -262,6 +333,10 @@ public class DeviceDebugPanel extends JFXPanel {
 		}
 
 		private void setValue(RegisterValue registerValue, TextField tfIndex, TextField tfAddr, TextField tfValue) {
+
+			if(Optional.ofNullable(idIndex).filter(index->index.equals(tfIndex.getId().replaceAll("\\D", ""))).isPresent())
+				return;
+
 			getValue(tfIndex).filter(v->v==registerValue.getIndex())
 			.flatMap(v->getValue(tfAddr)).filter(v->v==registerValue.getAddr())
 			.map(v->registerValue.getValue())
@@ -331,39 +406,11 @@ public class DeviceDebugPanel extends JFXPanel {
 		private ChangeListener<Boolean> cbChangeListener = (o,oV,nV)->{
 
 			CheckBox checkBox = (CheckBox)((BooleanProperty)o).getBean();
-			Optional.ofNullable(mapScheduledFuture.get(checkBox)).filter(futur->!futur.isDone()).ifPresent(future->future.cancel(true));
+			stopFuture(checkBox);
 			if(nV) {
-				createGetPacket(checkBox)
-				.ifPresent(p->mapScheduledFuture.put(checkBox, screateFuture(p)));
+				startFuture(checkBox);
 			}
 		};
-
-		public void start(){
-
-			if(!Optional.ofNullable(service).filter(sfr->!sfr.isShutdown()).isPresent()) {
-				service = Executors.newScheduledThreadPool(4, new MyThreadFactory("DebugPanelFx.service"));
-				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
-			}
-
-			mapScheduledFuture
-			.entrySet()
-			.stream()
-			.filter(
-
-					entry->!
-					Optional
-					.ofNullable(entry.getValue())
-					.filter(v->!v.isDone())
-					.isPresent())
-
-			.forEach(
-
-					entry->{
-						createGetPacket(entry.getKey())
-						.ifPresent(p->entry.setValue(screateFuture(p)));
-					});
-					
-		}
 
 		private ScheduledFuture<?> screateFuture(DeviceDebugPacket p) {
 			logger.trace(p);
@@ -432,6 +479,42 @@ public class DeviceDebugPanel extends JFXPanel {
 					.map(t->t.replaceAll("\\D", ""))
 					.filter(t->!t.isEmpty())
 					.map(Integer::parseInt);
+		}
+
+		private void startFuture(CheckBox checkBox) {
+			createGetPacket(checkBox)
+			.ifPresent(p->mapScheduledFuture.put(checkBox, screateFuture(p)));
+		}
+
+		private void stopFuture(CheckBox checkBox) {
+			Optional.ofNullable(mapScheduledFuture.get(checkBox)).filter(futur->!futur.isDone()).ifPresent(future->future.cancel(true));
+		}
+
+		public void start(){
+
+			if(!Optional.ofNullable(service).filter(sfr->!sfr.isShutdown()).isPresent()) {
+				service = Executors.newScheduledThreadPool(4, new MyThreadFactory("DebugPanelFx.service"));
+				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
+			}
+
+			mapScheduledFuture
+			.entrySet()
+			.stream()
+			.filter(
+
+					entry->!
+					Optional
+					.ofNullable(entry.getValue())
+					.filter(v->!v.isDone())
+					.isPresent())
+
+			.forEach(
+
+					entry->{
+						createGetPacket(entry.getKey())
+						.ifPresent(p->entry.setValue(screateFuture(p)));
+					});
+					
 		}
 
 		public void stop(){
