@@ -22,11 +22,11 @@ public class CallibrationModePacket extends PacketSuper {
 																										.map(i->i==1);
 
 	public CallibrationModePacket(byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.REQUEST);
 	}
 
 	public CallibrationModePacket(byte linkAddr, int value) {
-		super(linkAddr, PacketImp.PACKET_TYPE_COMMAND, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.COMMAND);
+		super(linkAddr, PacketImp.PACKET_TYPE_COMMAND, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.COMMAND);
 		setValue(value);
 	}
 }

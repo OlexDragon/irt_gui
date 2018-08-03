@@ -24,6 +24,8 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+
 import irt.controller.GuiControllerAbstract;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
@@ -73,7 +75,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 			public void ancestorMoved(AncestorEvent arg0) { }
 		});
 
-		packetToSend = new DeviceDebugInfoPacket(Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte)0), (byte) 0);
+		packetToSend = new DeviceDebugInfoPacket(Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte)0), (byte) 1);
 		setLayout(new BorderLayout(0, 0));
 
 		textArea = new JTextArea();

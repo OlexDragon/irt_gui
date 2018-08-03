@@ -27,7 +27,7 @@ public class RegisterPacket extends PacketSuper {
 				linkAddr,
 				Optional.of(value).filter(v->v.getValue()!=null).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
 				packetID,
-				PacketGroupIDs.DEVICE_DEBAG,
+				PacketGroupIDs.DEVICE_DEBUG,
 				PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE,
 				value.toBytes(),
 				value.getValue()!=null

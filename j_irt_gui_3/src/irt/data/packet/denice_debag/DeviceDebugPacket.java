@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
@@ -18,9 +17,16 @@ public class DeviceDebugPacket extends PacketSuper{
 				linkAddr,
 				value ==null ? PacketImp.PACKET_TYPE_REQUEST : PacketImp.PACKET_TYPE_COMMAND,
 				deviceDebugPacketId.getPacketId(),
-				PacketGroupIDs.DEVICE_DEBAG,
-				deviceDebugPacketId.getParameterCode(),
-				Optional.ofNullable(value).map(v->ByteBuffer.allocate(12).put(deviceDebugPacketId.getPayloadData()).put(v.toBytes()).array()).orElse(deviceDebugPacketId.getPayloadData()),
+				Optional.ofNullable(value).map(v->ByteBuffer.allocate(12).put(deviceDebugPacketId.getPayloadData()).putInt((int)v.getValue()).array()).orElse(deviceDebugPacketId.getPayloadData()),
+				Priority.REQUEST);
+	}
+
+	public DeviceDebugPacket(byte linkAddr, int index, int addr, Integer value, PacketIDs çacketId) {
+		super(
+				linkAddr,
+				value ==null ? PacketImp.PACKET_TYPE_REQUEST : PacketImp.PACKET_TYPE_COMMAND,
+				çacketId,
+				Optional.ofNullable(value).map(v->ByteBuffer.allocate(12).putInt(index).putInt(addr).putInt(v).array()).orElse(ByteBuffer.allocate(8).putInt(index).putInt(addr).array()),
 				Priority.REQUEST);
 	}
 
@@ -33,8 +39,6 @@ public class DeviceDebugPacket extends PacketSuper{
 					linkAddr,
 					PacketImp.PACKET_TYPE_REQUEST,
 					deviceDebugPacketId.getPacketId(),
-					PacketGroupIDs.DEVICE_DEBAG,
-					deviceDebugPacketId.getParameterCode(),
 					deviceDebugPacketId.getPayloadData(),
 					Priority.REQUEST);
 	}

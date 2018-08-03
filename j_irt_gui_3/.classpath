@@ -15,29 +15,19 @@
 		</accessrules>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
-	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.8/log4j-api-2.8.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.8/log4j-api-2.8-sources.jar">
+	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.11.1/log4j-api-2.11.1.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.8/log4j-api-2.8-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-api/2.8/log4j-api-2.8-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8-sources.jar">
+	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.11.1/log4j-core-2.11.1.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/.m2/repository/org/apache/logging/log4j/log4j-core/2.8/log4j-core-2.8-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.16.1/commons-compress-1.16.1.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.15/commons-compress-1.15-sources.jar">
+	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.17/commons-compress-1.17.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.15/commons-compress-1.15-sources.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/C:/Users/Oleksandr/.m2/repository/org/apache/commons/commons-compress/1.15/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/net/java/dev/jna/jna/4.5.1/jna-4.5.1.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/net/java/dev/jna/jna/4.5.1/jna-4.5.1-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Oleksandr/.m2/repository/net/java/dev/jna/jna/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/net/java/dev/jna/jna-platform/4.5.1/jna-platform-4.5.1.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/net/java/dev/jna/jna-platform/4.5.1/jna-platform-4.5.1-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/Oleksandr/.m2/repository/net/java/dev/jna/jna-platform/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Oleksandr/.m2/repository/com/github/purejavacomm/purejavacomm/1.0.2.RELEASE/purejavacomm-1.0.2.RELEASE.jar" sourcepath="C:/Users/Oleksandr/.m2/repository/com/github/purejavacomm/purejavacomm/1.0.2.RELEASE/purejavacomm-1.0.2.RELEASE-sources.jar">
@@ -50,5 +40,7 @@
 			<attribute name="javadoc_location" value="jar:file:/C:/Users/Oleksandr/.m2/repository/org/scream3r/jssc/2.8.0/jssc-2.8.0-javadoc.jar!/javadoc"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="jna-4.5.2.jar"/>
+	<classpathentry kind="lib" path="jna-platform-4.5.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

@@ -653,7 +653,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 			unitsPanel.add(unitPanel);
 
-			final Timer t = new Timer((int) TimeUnit.SECONDS.toMillis(4), e->removePanel(deviceInfo));
+			final Timer t = new Timer((int) TimeUnit.SECONDS.toMillis(5), e->removePanel(deviceInfo));
 			t.setRepeats(false);
 			t.start();
 			return timers.put(deviceInfo, t);

@@ -10,6 +10,7 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.DeviceInfo.Protocol;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.JavaFxWrapper;
+import irt.tools.fx.debug.DeviceDebugPanel;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.DebagInfoPanel;
 import irt.tools.panel.subpanel.PLL_HMC807LP6CE_Reg9;
@@ -61,8 +62,8 @@ public class ConverterPanel extends DevicePanel {
 		JPanel registersPanel = deviceInfo.getDeviceType().filter(dt->dt==DeviceType.CONVERTER_L_TO_KU).map(dt->new PLL_HMC807LP6CE_Reg9(deviceType)).map(JPanel.class::cast).orElse(new PLLsPanel(deviceType));
 		tabbedPane.addTab("PLLs", null, registersPanel, null);
 
-//		JPanel registerPanel = new RegistersPanel();
-//		getTabbedPane().addTab("Registers", null, registerPanel, null);
+		DeviceDebugPanel debugPanel = new DeviceDebugPanel((byte) 0);
+		getTabbedPane().addTab("Debug", null, debugPanel, null);
 
 		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceInfo.getDeviceType(), null, this);
 		tabbedPane.addTab("Info", null, infoPanel, null);

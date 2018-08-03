@@ -167,7 +167,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		setLayout(null);
 
-		final byte addr = linkHeader.getAddr();
+		final byte addr = Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 		addAncestorListener(new AncestorListener() {
 
 			private List<ControllerAbstract> threadList = new ArrayList<>();
@@ -568,7 +568,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				Setter setter = new Setter(
 						linkHeader,
 						PacketImp.PACKET_TYPE_COMMAND,
-						PacketGroupIDs.DEVICE_DEBAG.getId(),
+						PacketGroupIDs.DEVICE_DEBUG.getId(),
 						PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE,
 						PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE,
 						(Integer)calibrationMode.ordinal()
