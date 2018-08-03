@@ -78,7 +78,10 @@
                   <HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <Text text="=&gt;" />
-                        <TextField fx:id="tfValue1" onAction="#onSet" prefColumnCount="5" />
+                        <TextField fx:id="tfValue1" onAction="#onSet" onKeyPressed="#onKeyPressed" onKeyReleased="#onKeyReleased" prefColumnCount="5">
+                           <tooltip>
+                              <Tooltip text="Press SHIFT and UP/DOWN button to change the Step" />
+                           </tooltip></TextField>
                      </children>
                   </HBox>
                </children>
@@ -138,7 +141,10 @@
 						<HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<children>
 								<Text strokeType="OUTSIDE" strokeWidth="0.0" text="=&gt;" />
-								<TextField fx:id="tfValue2" onAction="#onSet" prefColumnCount="5" />
+								<TextField fx:id="tfValue2" onAction="#onSet" onKeyPressed="#onKeyPressed" onKeyReleased="#onKeyReleased" prefColumnCount="5">
+                           <tooltip>
+                              <Tooltip text="Press SHIFT and UP/DOWN button to change the Step" />
+                           </tooltip></TextField>
 							</children>
 						</HBox>
 					</children>
@@ -198,7 +204,10 @@
 						<HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<children>
 								<Text strokeType="OUTSIDE" strokeWidth="0.0" text="=&gt;" />
-								<TextField fx:id="tfValue3" onAction="#onSet" prefColumnCount="5" />
+								<TextField fx:id="tfValue3" onAction="#onSet" onKeyPressed="#onKeyPressed" onKeyReleased="#onKeyReleased" prefColumnCount="5">
+                           <tooltip>
+                              <Tooltip text="Press SHIFT and UP/DOWN button to change the Step" />
+                           </tooltip></TextField>
 							</children>
 						</HBox>
 					</children>
@@ -258,7 +267,10 @@
 						<HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 							<children>
 								<Text strokeType="OUTSIDE" strokeWidth="0.0" text="=&gt;" />
-								<TextField fx:id="tfValue4" onAction="#onSet" prefColumnCount="5" />
+								<TextField fx:id="tfValue4" onAction="#onSet" onKeyPressed="#onKeyPressed" onKeyReleased="#onKeyReleased" prefColumnCount="5">
+                           <tooltip>
+                              <Tooltip text="Press SHIFT and UP/DOWN button to change the Step" />
+                           </tooltip></TextField>
 							</children>
 						</HBox>
 					</children>
