@@ -95,6 +95,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 	// ******************************* constructor UpdateMessageFx   ***************************************************
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
+		Thread currentThread = Thread.currentThread();
+		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 
 		setTitle("IP Address");
 		setHeaderText("Type a valid IP address.");

@@ -7,9 +7,6 @@ import java.util.Optional;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.subpanel.monitor.Monitor;
@@ -18,13 +15,11 @@ import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 
 public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
-	private static final long serialVersionUID = 1157429339979438261L;
-	private final Logger logger = LogManager.getLogger();
+	private final static long serialVersionUID = 1157429339979438261L;
 
 	private MonitorPanelFx root;
 
 	public MonitorPanelSwingWithFx() {
-		logger.traceEntry();
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -40,51 +35,30 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 							root.shutdownNow();
 						}));
 
-//		logger.error("--- 1 ---");
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
-				Platform.runLater(()->{
-//					logger.error("Start {}", root.getClass().getSimpleName());
-					root.start();
-				});
+				Platform.runLater(()->root.start());
 			}
 			public void ancestorRemoved(AncestorEvent event) {
-				Platform.runLater(()->{
-//					logger.error("stop {}", root.getClass().getSimpleName());
-					root.stop();
-				});
+				Platform.runLater(()->root.stop());
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 		});
 
-//		logger.error("--- 2 --- keep javafx alive: {}");
 		Platform.runLater(()->{
-			try{
 
-//				logger.error("*** Yee ***");
 				root = new MonitorPanelFx();
 				Scene scene = new Scene(root);
-
-//				final String externalForm = getClass().getResource("monitor_panel.css").toExternalForm();
-//				scene.getStylesheets().add(externalForm);
-
 				setScene(scene);
-
-			}catch (Exception e) {
-		        logger.catching(e);
-			}
 		});
-//		logger.error("--- 3 ---");
 	}
 
 	@Override
 	public void refresh() {
-		logger.traceEntry();
 		//TODO
 	}
 
 	public void setUnitAddress(byte unitAddress) {
-		logger.entry(unitAddress);
 		Platform.runLater(()->root.setUnitAddress(unitAddress));
 	}
 

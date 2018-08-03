@@ -47,7 +47,7 @@ public class PacketImp implements Packet{
 		CONTROL			((byte)9),		/* Device control operations. Save configuration: generic command. */
 		PROTO			((byte)10),
 		REDUNDANCY		((byte)12),
-		DEVICE_DEBAG	((byte)61),		/* Device Debug. */
+		DEVICE_DEBUG	((byte)61),		/* Device Debug. */
 
 	/* Protocol */
 		PROTOCOL ((byte)10), /* Packet protocol parameters configuration and monitoring. */
@@ -110,14 +110,15 @@ public class PacketImp implements Packet{
 		PARAMETER_MEASUREMENT_FCM_TEMPERATURE_CPU	= 10,
 		PARAMETER_MEASUREMENT_FCM_ALL = PARAMETER_ALL;	/* Read all available measurements. */
 
-	/*Device Debug - IRT_SLCP_PACKET_ID_DEVICE_DEBAG*/
+	/*Device Debug - IRT_SLCP_PACKET_ID_DEVICE_DEBUG*/
 	public static final byte
 	PARAMETER_DEVICE_DEBUG_INFO 		= 1,		/* device information: parts, firmware and etc. */
 	PARAMETER_DEVICE_DEBUG_DUMP 		= 2,		/* dump of registers for specified device index */
 	PARAMETER_DEVICE_DEBUG_READ_WRITE 	= 3,		/* registers read/write operations */
-	PARAMETER_DEVICE_DEBAG_INDEX 		= 4,		/* device index information print */
+	PARAMETER_DEVICE_DEBUG_INDEX 		= 4,		/* device index information print */
 	PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE = 5,	/* calibration mode */
-	PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10;		/* operations with environment variables */
+	PARAMETER_DEVICE_DEBUG_ENVIRONMENT_IO = 10,	/* operations with environment variables */
+	PARAMETER_DEVICE_DEBUG_DEVICES		= 30;		
 
 	/* Configuration codes. */
 	public static final byte

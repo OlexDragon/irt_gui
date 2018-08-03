@@ -186,7 +186,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 				final Optional<PacketHeader> sameGroupId = o.map(Packet::getHeader)
 															.filter(h->h.getPacketId()==packetId)
-															.filter(h->PacketGroupIDs.DEVICE_DEBAG.match(h.getGroupId()));
+															.filter(h->PacketGroupIDs.DEVICE_DEBUG.match(h.getGroupId()));
 
 				if(!sameGroupId.isPresent())
 					return;

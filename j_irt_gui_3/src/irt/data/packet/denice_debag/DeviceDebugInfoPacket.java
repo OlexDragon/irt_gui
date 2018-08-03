@@ -25,7 +25,7 @@ public class DeviceDebugInfoPacket extends PacketSuper {
 																							.map(String::new);
 
 	public DeviceDebugInfoPacket(byte linkAddr, byte parameterHeaderCode) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_INFO, PacketGroupIDs.DEVICE_DEBAG, parameterHeaderCode, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_INFO, PacketGroupIDs.DEVICE_DEBUG, parameterHeaderCode, new byte[]{0,0,0,0}, Priority.REQUEST);
 	}
 
 	public void setParameterCode(byte parameterHeaderCode) {

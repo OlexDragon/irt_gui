@@ -43,6 +43,10 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 		timestamp = System.currentTimeMillis();
 	}
 
+	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, byte[] payloadData, Priority priority){
+		this(linkAddr, packetType, packetID, packetID.getPacketGroupIDs(), packetID.getParameterCode(), payloadData, priority);
+	}
+
 	public PacketSuper(ConfigurationSetter configurationSetter) {
 		this(
 				configurationSetter.getLinkHeader().getAddr(),

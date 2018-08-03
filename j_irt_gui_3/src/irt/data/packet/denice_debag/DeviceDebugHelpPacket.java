@@ -23,7 +23,7 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 	public static final int DEVICES = 0, DUMP = 1;
 
 	public DeviceDebugHelpPacket(Byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, DeviceDebugPacketIds.HELP.getPacketId(), PacketGroupIDs.DEVICE_DEBAG, PacketImp.PARAMETER_DEVICE_DEBAG_INDEX, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, DeviceDebugPacketIds.HELP.getPacketId(), PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INDEX, null, Priority.REQUEST);
 	}
 
 	public DeviceDebugHelpPacket() {

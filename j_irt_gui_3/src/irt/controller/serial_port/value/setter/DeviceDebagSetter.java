@@ -22,11 +22,11 @@ public class DeviceDebagSetter extends SetterAbstract {
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader, int index, int addr, PacketIDs packetID, byte parameterId) {
-		super(linkHeader, new RegisterValue(index, addr, null), PacketGroupIDs.DEVICE_DEBAG.getId(), parameterId, packetID.getId());
+		super(linkHeader, new RegisterValue(index, addr, null), PacketGroupIDs.DEVICE_DEBUG.getId(), parameterId, packetID.getId());
 	}
 
 	public DeviceDebagSetter(LinkHeader linkHeader,int index, int addr, PacketIDs packetID, byte parameterId, int value) {
-		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), PacketImp.PACKET_TYPE_COMMAND, PacketGroupIDs.DEVICE_DEBAG.getId(), parameterId, packetID.getId());
+		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), PacketImp.PACKET_TYPE_COMMAND, PacketGroupIDs.DEVICE_DEBUG.getId(), parameterId, packetID.getId());
 	}
 
 	@Override
