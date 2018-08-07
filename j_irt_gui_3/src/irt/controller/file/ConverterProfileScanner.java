@@ -9,9 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import irt.controller.GuiControllerAbstract;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
@@ -32,8 +29,6 @@ public class ConverterProfileScanner extends FutureTask<Optional<Path>> implemen
 		super(CALLABLE);
 		packetWork = new DeviceDebugPacket(linkAddr, DeviceDebugPacketIds.DUMP_CONVERTER_INFO);
 	}
-
-	private static final Logger logger = LogManager.getLogger();
 
 	@Override
 	public void stop() {
