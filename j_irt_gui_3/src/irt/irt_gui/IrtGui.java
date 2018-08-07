@@ -63,15 +63,14 @@ import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
 
 public class IrtGui extends IrtMainFrame {
-	private static final String PREF_KEY_ADDRESS = "address";
-
 	private static final long serialVersionUID = 1611718189640547787L;
 
+	private static final String PREF_KEY_ADDRESS = "address";
 	public static final int DEFAULT_ADDRESS = 254;
-	private static LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
+	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.174"; //fixed freezing on port selection
+	public static final String VERTION = "- 3.174";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;

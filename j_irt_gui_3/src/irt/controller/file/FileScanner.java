@@ -20,18 +20,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.MyThreadFactory;
+import irt.tools.fx.interfaces.StopInterface;
 
-public class FileScanner extends FutureTask<List<Path>>{
+public class FileScanner extends FutureTask<List<Path>> implements StopInterface{
 	private final static Logger logger = LogManager.getLogger();
 
 	private static boolean busy;
 	private static final List<Path> paths = new ArrayList<>();
+	private static FileScanner fileScanner;
 
 	public FileScanner(Path defaultFolder, String fileToSearch) throws IOException {
 		super(getPaths( Optional.ofNullable(defaultFolder).orElse(Paths.get("\\")), fileToSearch));
 
-		if(busy)
-			throw new IOException("Class FileScanner is busy.");
+		Optional
+		.ofNullable(fileScanner)
+		.filter(fs->busy)
+		.ifPresent(FileScanner::stop);
+
+		fileScanner = this;
 
 		paths.clear();
 		busy = true;
@@ -72,6 +78,11 @@ public class FileScanner extends FutureTask<List<Path>>{
 
 	@Override
 	protected void done() {
+		busy = false;
+	}
+
+	@Override
+	public void stop() {
 		busy = false;
 	}
 }

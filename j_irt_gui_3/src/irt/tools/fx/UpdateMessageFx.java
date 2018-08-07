@@ -10,14 +10,17 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.TimeUnit;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -26,13 +29,15 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.file.BucProfileScanner;
+import irt.controller.file.ConverterProfileScanner;
 import irt.controller.file.FileScanner;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
 import irt.data.profile.Profile;
 import irt.irt_gui.IrtGui;
 import irt.tools.fx.UpdateMessageFx.Message;
-import irt.tools.panel.head.IrtPanel;
+import irt.tools.fx.interfaces.StopInterface;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.StringProperty;
@@ -80,21 +85,55 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private Label lblProfile;
 	private Label lblProgram;
 
-	private ChangeListener<? super String> textListener;
-	private ChangeListener<? super Boolean> cbListener;
+	private BucProfileScanner findBucProfile;
+	private ConverterProfileScanner findConvProfile;
+
+	private final ChangeListener<? super String> textListener = (o, oV, nV)->enableUpdateButton(o);
+	private final ChangeListener<? super Boolean> cbListener = (o, oV, nV)->enableUpdateButton(o);
+	private final ChangeListener<? super Boolean> cbUnitTypeSelectListener = (o,oV,nV)->Optional.of(nV)
+			
+			.filter(v->v)
+			.ifPresent(
+					v->{	
+						findBucProfile.stop();
+						findConvProfile.stop();
+
+						final Node node = (Node)((BooleanProperty )o).getBean();
+						FutureTask<?> userData = (FutureTask<?>) node.getUserData();
+
+						new MyThreadFactory(userData, "Utin Type Select Listener");
+						new MyThreadFactory(
+								()->{
+
+									try {
+
+										((Optional<?>) userData.get(10, TimeUnit.SECONDS))
+										.ifPresent(path->setLabelText(lblProfile, cbProfile, (Path) path));
+
+									} catch (InterruptedException | ExecutionException | TimeoutException e) {
+										logger.catching(e);
+									}
+								}, "Set Label Text");
+
+						Platform.runLater(()->lblProfile.setText(""));
+					});
 	
 	private FileScanner fileScanner;
 
 	private Button updateButton;
 
 	private RadioButton cbBUC;
-
 	private RadioButton cbConv;
 
 	private String system = SYSTEM;
 
-	// ******************************* constructor UpdateMessageFx   ***************************************************
+	// ***************************************************************************************************************** //
+	// 																													 //
+	// 									 constructor UpdateMessageFx													 //
+	// 																													 //
+	// ***************************************************************************************************************** //
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
+
 		Thread currentThread = Thread.currentThread();
 		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 
@@ -116,22 +155,13 @@ public class UpdateMessageFx extends Dialog<Message>{
 		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
 
 		GridPane grid = new GridPane();
-//		grid.setMinWidth(400);
-//		ColumnConstraints col1 = new ColumnConstraints();
-//		col1.setPercentWidth(20);
-//		ColumnConstraints col2 = new ColumnConstraints();
-//		col2.setPercentWidth(40);
-//		ColumnConstraints col3 = new ColumnConstraints();
-//		col3.setPercentWidth(40);
-//		grid.getColumnConstraints().addAll(col1,col2,col3);
 		grid.setHgap(10);
 		grid.setVgap(10);
 
 		//IP Address row #0
 
 		tfAddress = new TextField();
-		cbListener = (o, oV, nV)->enableUpdateButton(o);
-		tfAddress.textProperty().addListener( textListener = (o, oV, nV)->enableUpdateButton(o) );
+		tfAddress.textProperty().addListener( textListener );
 		grid.addRow(0, new Label("IP Address:"), tfAddress);
 
 		tfAddress.setPromptText("192.168.0.1");
@@ -187,32 +217,11 @@ public class UpdateMessageFx extends Dialog<Message>{
 		}
 
 		if(isProduction){
-			createProductionFields(grid);
 
 			// Search profile by the unit serial number on the drive Z:
-			new MyThreadFactory(()->{
-
-				deviceInfo.getSerialNumber().map(sn->sn + ".bin").ifPresent(f->{
-					
-					try {
-
-						fileScanner = new FileScanner( Paths.get(IrtPanel.PROPERTIES.getProperty("path_to_profiles")), f);
-						final List<Path> paths = fileScanner.get(10, TimeUnit.SECONDS);
-
-						if(paths.size()!=1)
-							return;
-
-						final Path path = paths.get(0);
-						setLabelText(lblProfile, cbProfile, path);
-
-					} catch (CancellationException e) {
-						logger.info("fileScaner has been canceled.");
-
-					} catch (Exception e) {
-						logger.catching(e);
-					}
-				});
-			}, "UpdateMessageFx");
+			findBucProfile = new BucProfileScanner(deviceInfo);			
+			findConvProfile = new ConverterProfileScanner(deviceInfo.getLinkHeader().getAddr());
+			createProductionFields(grid);
 		}
 
 		getDialogPane().setContent(grid);
@@ -245,7 +254,12 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 	private ChangeListener<? super String> enableCheckBox(CheckBox checkBox) {
 
-		return (o, oV, nV)->checkBox.setDisable(!Optional.ofNullable(nV).filter(str->!str.isEmpty()).isPresent());
+		return (o, oV, nV)->{
+			boolean value = !Optional.ofNullable(nV).filter(str->!str.isEmpty()).isPresent();
+			checkBox.setDisable(value);
+			if(value)
+				checkBox.setSelected(false);
+		};
 	}
 
 	private void createProductionFields(GridPane grid) {
@@ -332,13 +346,17 @@ public class UpdateMessageFx extends Dialog<Message>{
 		};
 
 		cbBUC = new RadioButton("BUC");
-		cbBUC.setSelected(true);
 		cbBUC.setToggleGroup(group);
 		cbBUC.setOnAction(onAction);
+		cbBUC.setUserData(findBucProfile);
+		cbBUC.selectedProperty().addListener(cbUnitTypeSelectListener);
+		cbBUC.setSelected(true);
 
 		cbConv = new RadioButton("Converter");
 		cbConv.setToggleGroup(group);
 		cbConv.setOnAction(onAction);
+		cbConv.setUserData(findConvProfile);
+		cbConv.selectedProperty().addListener(cbUnitTypeSelectListener);
 
 		vBox.getChildren().add(cbBUC);
 		vBox.getChildren().add(cbConv);
@@ -371,7 +389,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 			final File result = fileChooser.showOpenDialog(getOwner());
 			if(result!=null){
 				setLabelText(lblProgram, cbProgram, result.toPath());
-//				getDialogPane().getScene().getWindow().sizeToScene();
 			}
 		};
 	}
@@ -477,15 +494,15 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private ChangeListener<? super String> getListener(final Node button) {
 		return (o, oV, nV)->{
 
-			final List<String> addr = Optional.ofNullable(nV).filter(a->!a.isEmpty()).map(a->a.split("\\D")).map(Arrays::stream).orElse(Stream.empty()).filter(s->!s.isEmpty()).collect(Collectors.toList());
+			final List<String> ipAddr = Optional.ofNullable(nV).filter(a->!a.isEmpty()).map(a->a.split("\\D")).map(Arrays::stream).orElse(Stream.empty()).filter(s->!s.isEmpty()).collect(Collectors.toList());
 
-			if(addr.size()!=4){
+			if(ipAddr.size()!=4){
 				final boolean disable = !validateNodes();
 				button.setDisable(disable);
 				return;
 			}
 
-			ipAddressStr = addr.stream().collect(Collectors.joining("."));
+			ipAddressStr = ipAddr.stream().collect(Collectors.joining("."));
 			button.setDisable(false);
 		};
 	}
