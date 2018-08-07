@@ -185,6 +185,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 			DEVICE_DEBUG_I2C1_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction),
 			DEVICE_DEBUG_MUTE_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction),
 			DEVICE_DEBUG_SCP_DEVICE_INFO		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction),
+			DEVICE_DEBUG_CONVERTER_INFO_DUMP	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction),
 
 			DEVICE_DEBUG_PLL2_DUMP				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction),
 			DEVICE_DEBUG_DEVICEs_DUMP			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction),
@@ -446,6 +447,8 @@ public interface PacketWork extends Comparable<PacketWork>{
 		CALIBRATION_MODE			(0		, 0		, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE		, "DEVICE_DEBUG_CALIBRATION_MODE"	),
 
 		INFO						(null	, null	, PacketIDs.DEVICE_DEBUG_INFO					, "DEVICE_DEBUG_DEVICE_INFO"		),
+		DUMP_CONVERTER_INFO			(null	, 10	, PacketIDs.DEVICE_DEBUG_CONVERTER_INFO_DUMP	, "DUMP_CONVERTER_INFO"				),
+
 		CPU_INFO					(null	, 0		, PacketIDs.DEVICE_DEBUG_CPU_INFO				, "DEVICE_DEBUG_CPU_INFO"			),
 		HARDWARE_FAULTS_INFO		(null	, 1		, PacketIDs.DEVICE_DEBUG_HARDWARE_FAULTS_INFO	, "DEVICE_DEBUG_HARDWARE_FAULTS_INFO"),
 		THRESHOLDS_INFO				(null	, 2		, PacketIDs.DEVICE_DEBUG_THRESHOLDS_INFO		, "DEVICE_DEBUG_THRESHOLDS_INFO"	),
@@ -473,6 +476,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 		ADC_CHANNELS_mV_DUMP		(null	, 11	, PacketIDs.DEVICE_DEBUG_ADC_CHANNELS_mV_DUMP	, "DEVICE_DEBUG_ADC_CHANNELS_mV_DUMP"),
 		SIGNALS_CHANGE_COUNTERS_DUMP(null	, 20	, PacketIDs.DEVICE_DEBUG_CHANGE_COUNTERS_DUMP	, "DEVICE_DEBUG_CHANGE_COUNTERS_DUMP"),
 		DP1_DUMP					(null	, 30	, PacketIDs.DEVICE_DEBUG_DP1_DUMP				, "DEVICE_DEBUG_DP1_DUMP"			),
+
 
 		HELP						(0		, 0		, PacketIDs.DEVICE_DEBUG_HELP					, "DEVICE_DEBUG_HELP"				),
 
