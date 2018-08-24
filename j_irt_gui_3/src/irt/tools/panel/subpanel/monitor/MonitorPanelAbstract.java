@@ -28,7 +28,7 @@ import irt.data.packet.Payload;
 @SuppressWarnings("serial")
 public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Monitor  {
 
-	protected final Logger logger = LogManager.getLogger(getClass());
+	protected static final Logger logger = LogManager.getLogger();
 
 	protected LinkHeader linkHeader;
 	protected TitledBorder titledBorder;

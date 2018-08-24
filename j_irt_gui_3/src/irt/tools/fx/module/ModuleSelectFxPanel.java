@@ -184,8 +184,19 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 
 		new MyThreadFactory(()->{
 
-			getButtons().forEach(b->b.getStyleClass().remove("activeButton"));
-			oPacket.map(Packet::getPayloads).map(List::stream).flatMap(Stream::findAny).map(Payload::getByte).map(b->--b).filter(b->b<buttons.size()).map(buttons::get).ifPresent(b->b.getStyleClass().add("activeButton"));
+			getButtons()
+			.forEach(b->Platform.runLater(()->b.getStyleClass().remove("activeButton")));
+
+			oPacket
+			.map(Packet::getPayloads)
+			.map(List::stream)
+			.flatMap(Stream::findAny)
+			.map(Payload::getByte)
+			.map(b->--b)
+			.filter(b->b<buttons.size())
+			.map(buttons::get)
+			.ifPresent(b->Platform.runLater(()->b.getStyleClass().add("activeButton")));
+
 		}, "ModuleSelectFxPanel.onPacketReceived()");
 	}
 

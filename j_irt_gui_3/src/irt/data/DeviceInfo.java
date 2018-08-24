@@ -45,13 +45,14 @@ public class DeviceInfo implements PacketListener {
 		KA_BAND			(210, Protocol.LINKED, "KA_BAND"),
 		KA_SSPA			(211, Protocol.LINKED, "KA_SSPA"),
 
-		KU_RACK_MOUNT			(250, Protocol.LINKED, "KU rack mount"),
-		C_RACK_MOUNT			(251, Protocol.LINKED, "C rack mount"),
-		SSPA_RACK_MOUNT			(252, Protocol.LINKED, "SSPA rack mount"),
+		KU_RACK_MOUNT	(250, Protocol.LINKED, "KU rack mount"),
+		C_RACK_MOUNT	(251, Protocol.LINKED, "C rack mount"),
+
+		TRANSCEIVER		(260, Protocol.LINKED, "Transceiver"),
 
 		IR_PC			(310, Protocol.LINKED, "Redundancy protection controller"),
 
-		DLRS			(410, Protocol.LINKED, "DLRS"),
+		DLRS			(410, Protocol.LINKED, "DLRS"),	//Down link Redundancy System
 		DLRS2			(411, Protocol.LINKED, "DLRS2"),
 
 		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.CONVERTER, "L to Ku Converter"),

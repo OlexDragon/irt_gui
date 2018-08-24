@@ -18,7 +18,7 @@ import irt.data.packet.alarm.AlarmsSummaryPacket;
 import irt.data.packet.configuration.ALCEnablePacket;
 import irt.data.packet.configuration.AttenuationPacket;
 import irt.data.packet.configuration.AttenuationRangePacket;
-import irt.data.packet.configuration.ConfifurationPacket;
+import irt.data.packet.configuration.ConfigurationPacket;
 import irt.data.packet.configuration.FrequencyPacket;
 import irt.data.packet.configuration.LOFrequenciesPacket;
 import irt.data.packet.configuration.LOPacket;
@@ -129,7 +129,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 			CONFIGURATION_FREQUENCY_RANGE		( null, null, null, AttenuationRangePacket.parseValueFunction),
 			STORE_CONFIG						( null, null, null, null),
 			CONFIGURATION_FCM_LNB_POWER			( null, null, null, LnbPowerPacket.parseValueFunction),
-			CONFIGURATION_GAIN_OFFSET			( null, null, null, ConfifurationPacket.parseValueFunction),
+			CONFIGURATION_GAIN_OFFSET			( null, null, null, ConfigurationPacket.parseValueFunction),
 			CONFIGURATION_FCM_FLAGS				( null, null, null, null),
 			CONFIGURATION_REDUNDANCY_ENABLE		( null, null, null, RedundancyEnablePacket	.parseValueFunction),
 			CONFIGURATION_REDUNDANCY_MODE		( null, null, null, RedundancyModePacket		.parseValueFunction),
@@ -147,6 +147,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 			CONFIGURATION_FCM_LNB_REFERENCE		( null, null, null, LnbReferencePacket		.parseValueFunction),
 			CONFIGURATION_OFFSET_RANGE			( null, null, null, AttenuationRangePacket	.parseValueFunction),
 			CONFIGURATION_OFFSET_1_TO_MULTI		( null, null, null, Offset1to1toMultiPacket	.parseValueFunction),
+			CONFIGURATION_LNB_LO_SELECT			( PacketGroupIDs.CONFIGURATION, PacketImp.PARAMETER_CONFIG_LNB_LO_SELECT, null, ConfigurationPacket	.parseValueFunction),
 
 			CONTROL_ACTIVE_MODULE	( null, null, null, ActiveModulePacket.parseValueFunction),
 			CONTRO_MODULE_LIST		( null, null, null, ModuleListPacket.parseValueFunction),
