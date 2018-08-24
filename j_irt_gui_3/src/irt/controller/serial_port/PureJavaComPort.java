@@ -607,7 +607,6 @@ public class PureJavaComPort implements SerialPortInterface {
 
 		if(serialPort!=null){
 			serialPort.removeEventListener();
-			serialPort.disableReceiveTimeout();
 			serialPort.close();
 		}
 

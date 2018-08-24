@@ -22,11 +22,11 @@ import irt.tools.fx.interfaces.StopInterface;
 
 public class ConverterProfileScanner extends FutureTask<Optional<Path>> implements StopInterface {
 
-	private static final ConverterWorker CALLABLE = new ConverterWorker();
+	private static ConverterWorker CALLABLE;
 	private static PacketWork packetWork;
 
 	public ConverterProfileScanner(byte linkAddr) {
-		super(CALLABLE);
+		super(CALLABLE = new ConverterWorker());
 		packetWork = new DeviceDebugPacket(linkAddr, DeviceDebugPacketIds.DUMP_CONVERTER_INFO);
 	}
 

@@ -13,7 +13,7 @@ import irt.data.packet.Payload;
 import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 
-public class ConfifurationPacket extends PacketSuper {
+public class ConfigurationPacket extends PacketSuper {
 
 	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
 																										.ofNullable(packet)
@@ -37,7 +37,7 @@ public class ConfifurationPacket extends PacketSuper {
 																											}
 																										});
 
-	public ConfifurationPacket(byte linkAddr, PacketIDs packetIdConfiguration, byte parameterIdConfiguration, byte[] data) {
+	public ConfigurationPacket(byte linkAddr, PacketIDs packetIdConfiguration, byte parameterIdConfiguration, byte[] data) {
 		super(
 				linkAddr,
 				data!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
@@ -48,7 +48,18 @@ public class ConfifurationPacket extends PacketSuper {
 						data!=null ? Priority.COMMAND : Priority.REQUEST);
 	}
 
-	public ConfifurationPacket() {
+	public ConfigurationPacket() {
 		this((byte) 0, PacketIDs.UNNECESSARY, (byte) 0, null);
+	}
+
+	public ConfigurationPacket(byte linkAddr, PacketIDs configurationPacketId, byte... data) {
+		super(
+				linkAddr,
+				data!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
+						configurationPacketId,
+						PacketGroupIDs.CONFIGURATION,
+						configurationPacketId.getParameterCode(),
+						data,
+						data!=null ? Priority.COMMAND : Priority.REQUEST);
 	}
 }

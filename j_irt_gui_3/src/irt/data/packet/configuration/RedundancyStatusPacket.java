@@ -11,7 +11,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 
-public class RedundancyStatusPacket extends ConfifurationPacket {
+public class RedundancyStatusPacket extends ConfigurationPacket {
 
 	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
 																										.ofNullable(packet)

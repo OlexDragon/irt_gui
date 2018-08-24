@@ -37,6 +37,7 @@ import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.ValueDouble;
 import irt.tools.CheckBox.SwitchBox;
+import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 @SuppressWarnings("serial")
 public class ControlPanelPicobuc extends ControlPanelSSPA{
@@ -86,7 +87,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 						return new ValueChangeListener() {
 							@Override
 							public void valueChanged(ValueChangeEvent valueChangeEvent) {
-								ControlPanelPicobuc.this.logger.trace(valueChangeEvent);									
+								MonitorPanelAbstract.logger.trace(valueChangeEvent);									
 								stop();
 							}
 
@@ -187,7 +188,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 								switchBox.removeItemListener(alcItemListener);
 								switchBox.setSelected(isOn);
 								switchBox.addItemListener(alcItemListener);
-								ControlPanelPicobuc.this.logger.entry(packet);
+								MonitorPanelAbstract.logger.entry(packet);
 							}
 						default:
 						}

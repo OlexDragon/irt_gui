@@ -6,14 +6,28 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.SwingUtilities;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
 
 import irt.controller.DefaultController;
 import irt.controller.GuiControllerAbstract;
@@ -25,20 +39,27 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
+import irt.data.packet.configuration.ConfigurationPacket;
 import irt.data.packet.configuration.LnbSwitchPacket;
 import irt.data.packet.configuration.LnbSwitchPacket.LnbPosition;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.label.LED;
+import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
-public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implements PacketListener {
+public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implements Runnable, PacketListener {
 	private static final long serialVersionUID = 1L;
+
+	private ScheduledFuture<?> scheduledFuture;
+	private ScheduledExecutorService service;
 
 	private DefaultController controller;
 
@@ -52,6 +73,10 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 	private byte addr;
 
 	private ActionListener switchBoxListener;
+
+	private JComboBox<LnbLoSet> jComboBox;
+
+	private ItemListener aListener;
 
 	public ControlDownlinkRedundancySystem(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
 		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 250, 180);
@@ -129,7 +154,36 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 		lblSwitch.setBounds(101, 84, 118, 20);
 		add(lblSwitch);
 
+		addHierarchyListener(
+				hierarchyEvent->
+				Optional
+				.of(hierarchyEvent)
+				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
+				.map(HierarchyEvent::getChanged)
+				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
+				.filter(c->c.getParent()==null)
+				.ifPresent(c->stop()));
+
+		addAncestorListener(new AncestorListener() {
+			public void ancestorAdded(AncestorEvent event) {
+
+				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+					service =  Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton"));
+
+				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(ControlDownlinkRedundancySystem.this);
+
+				if(scheduledFuture==null || scheduledFuture.isDone())
+					scheduledFuture = service.scheduleAtFixedRate(ControlDownlinkRedundancySystem.this, 1, 5, TimeUnit.SECONDS);
+			}
+			public void ancestorMoved(AncestorEvent event) { }
+			public void ancestorRemoved(AncestorEvent event) {
+				stop();
+			}
+		});
+
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
+
+		GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketIDs.CONFIGURATION_LNB_LO_SELECT, null));
 	}
 
 //	private void switchLNB(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
@@ -205,43 +259,152 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 		new MyThreadFactory(()->{
 			
-			Optional
-			.of(packet)
-			.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-			.filter(p->PacketIDs.MEASUREMENT_ALL.match(p.getHeader().getPacketId()))
-			.filter(p->p.getHeader().getOption()==PacketImp.ERROR_NO_ERROR)
-			.filter(LinkedPacket.class::isInstance)
-			.map(LinkedPacket.class::cast)
-			.filter(p->p.getLinkHeader().getAddr()==addr)
-			.map(Packet::getPayloads)
-			.orElseGet(ArrayList<Payload>::new)
-			.stream()
-			.filter(pl->pl.getParameterHeader().getCode()==4)	// Monitor packet
-			.findAny()
-			.map(Payload::getBuffer)
-			.filter(b->b.length==1)
-			.map(b->b[0])
-			.ifPresent(b->{
-				switch(b){
-				case 1:
-					ldLnb1.setOn(true);
-					ldLnb2.setOn(false);
-					switchBox.removeActionListener(switchBoxListener);
-					switchBox.setSelected(true);
-					switchBox.addActionListener(switchBoxListener);
-					break;
-				case 2:
-					ldLnb1.setOn(false);
-					ldLnb2.setOn(true);
-					switchBox.removeActionListener(switchBoxListener);
-					switchBox.setSelected(false);
-					switchBox.addActionListener(switchBoxListener);
-					break;
-				default:
-					ldLnb1.setOn(false);
-					ldLnb2.setOn(false);
+			Optional<Packet> oPacket = Optional.of(packet);
+			Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
+			Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
+
+			if(oHeader.map(PacketHeader::getPacketType).filter(pt->pt!=PacketImp.PACKET_TYPE_RESPONSE).isPresent()) 
+				return;
+
+			if(oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0)!=addr)
+				return;
+
+			if(oPacketId.filter(PacketIDs.MEASUREMENT_ALL::match).isPresent()) {
+
+				if(hasError(oHeader)) {
+					logger.warn(packet);
+					return;
 				}
-			});
+
+				oPacket
+				.map(Packet::getPayloads)
+				.map(List::stream)
+				.orElse(Stream.empty())
+				.filter(pl->pl.getParameterHeader().getCode()==4)	// Monitor packet
+				.findAny()
+				.map(Payload::getBuffer)
+				.filter(b->b.length==1)
+				.map(b->b[0])
+				.ifPresent(b->{
+					switch(b){
+					case 1:
+						ldLnb1.setOn(true);
+						ldLnb2.setOn(false);
+						switchBox.removeActionListener(switchBoxListener);
+						switchBox.setSelected(true);
+						switchBox.addActionListener(switchBoxListener);
+						break;
+					case 2:
+						ldLnb1.setOn(false);
+						ldLnb2.setOn(true);
+						switchBox.removeActionListener(switchBoxListener);
+						switchBox.setSelected(false);
+						switchBox.addActionListener(switchBoxListener);
+						break;
+					default:
+						ldLnb1.setOn(false);
+						ldLnb2.setOn(false);
+					}
+				});
+				return;
+			}
+
+			if(oPacketId.filter(PacketIDs.CONFIGURATION_LNB_LO_SELECT::match).isPresent()) {
+
+				if(hasError(oHeader)) {
+					logger.warn(packet);
+					return;
+				}
+
+				oPacket
+				.flatMap(PacketIDs.CONFIGURATION_LNB_LO_SELECT::valueOf)
+				.flatMap(LnbLoSet::valueOf)
+				.filter(lnbLoSet->lnbLoSet!=LnbLoSet.UNDEFINED)
+				.ifPresent(
+						lnbLoSet->{
+							SwingUtilities.invokeLater(
+									()->{
+
+										if(!Optional.ofNullable(jComboBox).isPresent()) 
+											addComboBox();
+
+										Optional
+										.ofNullable(jComboBox)
+										.ifPresent(cb->{
+											cb.removeItemListener(aListener);
+											cb.setSelectedItem(lnbLoSet);
+											cb.addItemListener(aListener);
+										});
+									});
+						});
+			}
+
 		}, "ControlDownlinkRedundancySystem.onPacketReceived()");
+	}
+
+	private void addComboBox() {
+
+		ComboBoxModel<LnbLoSet> aModel = new DefaultComboBoxModel<>(LnbLoSet.values());
+		jComboBox = new JComboBox<>(aModel);
+		jComboBox.removeItem(LnbLoSet.UNDEFINED);
+		jComboBox.setBounds(163, 37, 65, 24);
+		add(jComboBox);
+
+		service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AlarmPanelFx"));
+
+		scheduledFuture = service.scheduleAtFixedRate(this, 3, 3, TimeUnit.SECONDS);
+
+		aListener = new ItemListener() {
+		
+			@Override
+			public void itemStateChanged(ItemEvent itemEvent) {
+				if(itemEvent.getStateChange()==ItemEvent.SELECTED)
+					return;
+
+				Optional
+				.of(itemEvent.getSource())
+				.map(JComboBox.class::cast)
+				.map(cb->cb.getSelectedItem())
+				.map(LnbLoSet.class::cast)
+				.map(LnbLoSet::ordinal)
+				.map(Integer::byteValue)
+				.ifPresent(
+						v->GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketIDs.CONFIGURATION_LNB_LO_SELECT, v)));
+			}
+		};
+		jComboBox.addItemListener(aListener);
+	}
+
+	private boolean hasError(Optional<PacketHeader> oHeader) {
+		return !oHeader.map(PacketHeader::getOption).filter(err->err==PacketImp.ERROR_NO_ERROR).isPresent();
+	}
+
+	private void stop() {
+		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
+		Optional.of(scheduledFuture).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		Optional.of(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
+	}
+
+	@Override
+	public void run() {
+		GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketIDs.CONFIGURATION_LNB_LO_SELECT, null));
+	}
+
+	public enum LnbLoSet{
+
+		UNDEFINED,
+		LOW,
+		HIGH;
+
+		public static Optional<LnbLoSet> valueOf(Object value) {
+
+			return Optional
+					.ofNullable(value)
+					.filter(Number.class::isInstance)
+					.map(Number.class::cast)
+					.map(Number::intValue)
+					.filter(index->index<values().length)
+					.map(index->values()[index]);
+		}
 	}
 }
