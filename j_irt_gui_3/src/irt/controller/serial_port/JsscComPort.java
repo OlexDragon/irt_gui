@@ -209,7 +209,13 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 								logger.trace("parameterHeader.getSize()={}", ev);
 								if(parameterHeader.getCode()>300 || ev>3000){
 									Console.appendLn("ParameterHeader Sizes", "Break ");
-									logger.error("parameterHeader.getCode()>300({}) || ev>3000({}) \n{} \n{}", parameterHeader.getCode(), ev, packetHeader, parameterHeader);
+									logger.error(
+											"parameterHeader.getCode()>300({}) || ev>3000({}) \n{} \n{} \n readData: {}",
+											parameterHeader.getCode(),
+											ev,
+											packetHeader,
+											parameterHeader,
+											readData);
 									break;
 								}
 								Console.appendLn("", "Payload ");
@@ -512,9 +518,11 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 				try {
 					wait(waitTimeL);
+				} catch (InterruptedException e) {
+					logger.catching(Level.DEBUG, e);
 				} catch (Exception e) {
 					logger.catching(e);
-				}
+				 }
 
 //				isSerialPortEven = false;
 			}
