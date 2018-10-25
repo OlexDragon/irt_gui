@@ -35,6 +35,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Packets;
 import irt.data.packet.RetransmitPacket;
+import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.measurement.MeasurementPacket;
 import javafx.application.Platform;
@@ -68,13 +69,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private ScheduledFuture<?> scheduleAtFixedRate;
 	private ScheduledExecutorService service;
 
+	private byte unitAddress;
+
 	private final MeasurementPacket packetToSend = (MeasurementPacket) Packets.MEASUREMENT_ALL.getPacketAbstract();
 
 												public byte getUnitAddress() {
-													return Optional.ofNullable(packetToSend.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte)0);
+													return Optional.ofNullable(unitAddress).orElse((byte)0);
 												}
 
 												public void setUnitAddress(byte unitAddress) {
+													this.unitAddress = unitAddress;
 													packetToSend.setAddr(unitAddress);
 													retransmitPacket.setAddr(unitAddress);
 												}
@@ -150,6 +154,10 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		Optional<Packet> 		oPacket = Optional.ofNullable(packet);
 		Optional<PacketHeader> 	oHeader = oPacket.map(Packet::getHeader);
 
+		Byte addr = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+		if(addr!=unitAddress)
+			return;
+		
 		if(!oHeader.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(PacketHeader::getPacketId).filter(PacketIDs.MEASUREMENT_ALL::match).isPresent())
 			return;
 

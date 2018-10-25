@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -156,7 +157,7 @@ public class ComPortThreadQueue implements Runnable {
 
 			} catch (PortInUseException | SerialPortException e) {
 
-				logger.catching(e);
+				logger.catching(Level.DEBUG, e);
 
 				final String errorMessage = String.format("Serial port %s is in use.", sp);
 				SwingUtilities.invokeLater(()->JOptionPane.showMessageDialog(null, errorMessage));

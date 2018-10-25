@@ -30,7 +30,6 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.file.BucProfileScanner;
 import irt.controller.file.ConverterProfileScanner;
-import irt.controller.file.FileScanner;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
 import irt.data.profile.Profile;
@@ -116,7 +115,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 						Platform.runLater(()->lblProfile.setText(""));
 					});
 	
-	private FileScanner fileScanner;
+//	private FileScanner fileScanner;
 
 	private Button updateButton;
 
@@ -149,8 +148,10 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		// Cancel button
 
-		final Button cancelButton = (Button) getDialogPane().lookupButton(ButtonType.CANCEL);
-		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
+//		final Button cancelButton = (Button)
+				getDialogPane().lookupButton(ButtonType.CANCEL);
+//		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
+//		logger.error(fileScanner);
 
 		GridPane grid = new GridPane();
 		grid.setHgap(10);
@@ -368,7 +369,9 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 			final File result = fileChooser.showOpenDialog(getOwner());
 			if(result!=null){
-				fileScanner.cancel(true);	// Cancel fileScaneron before the new path setting
+//				if(fileScanner!=null)
+//					fileScanner.cancel(true);	// Cancel fileScaneron before the new path setting
+//				logger.error(fileScanner);
 				setLabelText(lblProfile, cbProfile, result.toPath());
 //				getDialogPane().getScene().getWindow().sizeToScene();
 			}
@@ -415,16 +418,18 @@ public class UpdateMessageFx extends Dialog<Message>{
 														.map(CheckBox.class::cast)
 														.filter(CheckBox::isSelected);
 
-		Optional.ofNullable(fileScanner)
-		.ifPresent(fs->{
+//		Optional.ofNullable(fileScanner)
+//		.ifPresent(
+//				fs->{
 
 			if(oIsSelected.map(cb->cb==cbPackage).orElse(false)){
 
-				fs.cancel(true);
+//				fs.cancel(true);
 				cbProfile.setSelected(false);
 				cbProgram.setSelected(false);
 			}
-		});
+//		});
+//		logger.error(fileScanner);
 
 
 		if(oIsSelected.map(cb->cb!=cbPackage).orElse(false)){

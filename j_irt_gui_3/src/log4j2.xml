@@ -62,7 +62,7 @@
 <!--   	<Logger name="irt.tools.panel.subpanel.NetworkPanel" level="all"/> -->
 
 <!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
- 	<Logger name="irt.controller.DumpControllerFull" level="warn"/>
+<!--  	<Logger name="irt.controller.DumpControllerFull" level="warn"/> -->
 <!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
  	<Logger name="irt.controller.GuiController" level="error" />
 <!-- 	<Logger name="irt.tools.panel.UserPicobucPanel" level="debug"/> -->
