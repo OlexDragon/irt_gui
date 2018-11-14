@@ -555,7 +555,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 		if (!isOpened()) return true;
 
-		try { removeEventListener(); } catch (SerialPortException e) { logger.catching(e); }
+		try { removeEventListener(); } catch (SerialPortException e) { logger.catching(Level.DEBUG, e); }
 		try { return super.closePort(); } catch (Exception e) { logger.catching(e); }
 
 		return !isOpened();

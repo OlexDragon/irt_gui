@@ -70,7 +70,7 @@ public class IrtGui extends IrtMainFrame {
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.177";
+	public static final String VERTION = "- 3.178";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -180,7 +180,7 @@ public class IrtGui extends IrtMainFrame {
 				}
 
 				MonitorPanelFx monitorPanel = new MonitorPanelFx();
-				final JavaFxFrame javaFxFrame = new JavaFxFrame(monitorPanel);
+				final JavaFxFrame javaFxFrame = new JavaFxFrame(monitorPanel, new JMenu("Menu"));
 				javaFxFrame.setSize(200, 200);
 
 				JMenu menu = javaFxFrame.getMenu();
@@ -197,7 +197,7 @@ public class IrtGui extends IrtMainFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				if(baudRateFrame==null){
-					baudRateFrame = new JavaFxFrame(new BaudRateSelectorFx());
+					baudRateFrame = new JavaFxFrame(new BaudRateSelectorFx(), new JMenu("Menu"));
 					baudRateFrame.setSize(200, 200);
 				}else
 					baudRateFrame.setVisible(true);
@@ -214,7 +214,7 @@ public class IrtGui extends IrtMainFrame {
 
 				if(alarmsFrame==null){
 					alarmPanelFx = new AlarmPanelFx();
-					alarmsFrame = new JavaFxFrame(alarmPanelFx);
+					alarmsFrame = new JavaFxFrame(alarmPanelFx, new JMenu("Menu"));
 					alarmsFrame.setSize(200, 200);
 					fillMenu(alarmPanelFx, alarmsFrame.getMenu());
 				}else
