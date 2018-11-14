@@ -37,10 +37,9 @@ public class HelpPaneFx extends AnchorPane implements PacketListener, JavaFxPane
 		AnchorPane.setRightAnchor(textArea, 0.0);
 	}
 
-	private byte linkAddr;
-
 	private ScheduledFuture<?> scheduledFuture;
 	private ScheduledExecutorService service;
+	private byte linkAddr;
 
 	@Override
 	public void shutdownNow() {
@@ -105,11 +104,18 @@ public class HelpPaneFx extends AnchorPane implements PacketListener, JavaFxPane
 	//	^																						^
 	//	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-	private static HelpPaneFx helpPanel;
+	private static JavaFxFrame helpFrame;
+	private static HelpPaneFx root;
 
-	public static HelpPaneFx getHelpPane(byte linkAddr) {
-		HelpPaneFx hp = Optional.ofNullable(helpPanel).orElseGet(()->helpPanel = new HelpPaneFx());
-		hp.setUnitAddress(linkAddr);
-		return hp;
+	public static JavaFxFrame getHelpFrame(byte linkAddr) {
+		JavaFxFrame frame = Optional.ofNullable(helpFrame).orElseGet(
+				()->{
+					root = new HelpPaneFx();
+					helpFrame = new JavaFxFrame(root, null);
+					helpFrame.setSize(300, 500);
+					return helpFrame;
+				});
+		root.setUnitAddress(linkAddr);
+		return frame;
 	}
 }

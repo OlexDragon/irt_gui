@@ -16,9 +16,11 @@ import javafx.scene.Scene;
 public class JavaFxFrame extends JFrame {
 	private static final long serialVersionUID = 8449021038878505206L;
 	private JMenu menu;
+	final private JFXPanel fxPanel;
+	private Scene scene;
 
 	public JavaFxFrame(Parent root, JMenu menu) throws HeadlessException {
-		final JFXPanel fxPanel = new JFXPanel();
+		fxPanel = new JFXPanel();
 		getContentPane().add(fxPanel);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setVisible(true);
@@ -32,7 +34,7 @@ public class JavaFxFrame extends JFrame {
 		});
 
 		Platform.runLater(()->{
-	        Scene scene = new Scene(root);
+	        scene = new Scene(root);
 	        fxPanel.setScene(scene);
 		});
 
@@ -42,5 +44,4 @@ public class JavaFxFrame extends JFrame {
 	public JMenu getMenu() {
 		return menu;
 	}
-
 }
