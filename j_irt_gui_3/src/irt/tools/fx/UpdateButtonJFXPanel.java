@@ -22,6 +22,8 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.sun.javafx.tk.TKStage;
+
 import irt.data.DeviceInfo;
 import irt.data.network.HttpUploader;
 import irt.data.network.NetworkAddress;
@@ -92,8 +94,10 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 			setOnAction(e->{
 
 				// Return if message already showing
-				if(updateMessage!=null && updateMessage.isShowing())
+				if(updateMessage!=null) {
+					((TKStage)updateMessage.getDialogPane().getScene().getWindow()).setVisible(true);
 					return;
+				}
 
 				final byte[] address = networkAddress.getAddress();
 				final String addrStr = Optional.ofNullable(address)

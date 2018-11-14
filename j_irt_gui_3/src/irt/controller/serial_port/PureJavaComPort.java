@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +39,7 @@ import purejavacomm.UnsupportedCommOperationException;
 public class PureJavaComPort implements SerialPortInterface {
 
 	private static final int CLEAR_TIME_BUC = 100;
-	private static final int WAIT_TIME_BUC = 40;
+	private static final int WAIT_TIME_BUC = 45;
 
 	private static final int CLEAR_TIME_CONVERTER = 110;
 	private static final int WAIT_TIME_CONVERTER = 20;
@@ -238,8 +239,10 @@ public class PureJavaComPort implements SerialPortInterface {
 				logger.warn("data!=null && isOpened() does not hold");
 
 		} catch (InterruptedException | PureJavaIllegalStateException e) {
+			logger.catching(Level.DEBUG, e);
 			new MyThreadFactory(()->closePort(), "PureJavaComPort.send-1");
 		}catch (Exception e) {
+			logger.error("Error to send Packet: {}", packet);
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "Error");
 			new MyThreadFactory(()->closePort(), "PureJavaComPort.send-2");
@@ -501,7 +504,7 @@ public class PureJavaComPort implements SerialPortInterface {
 	public boolean isFlagSequence() throws Exception {
 		logger.traceEntry();
 
-		waitComPort(10);//TODO - test with smaller value
+		waitComPort(10);
 		final byte[] readBytes = readBytes(1);
 		if(readBytes==null)
 			return false;

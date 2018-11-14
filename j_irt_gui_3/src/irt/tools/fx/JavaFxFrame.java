@@ -2,6 +2,7 @@
 package irt.tools.fx;
 
 import java.awt.HeadlessException;
+import java.util.Optional;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -16,25 +17,26 @@ public class JavaFxFrame extends JFrame {
 	private static final long serialVersionUID = 8449021038878505206L;
 	private JMenu menu;
 
-	public JavaFxFrame(Parent root) throws HeadlessException {
+	public JavaFxFrame(Parent root, JMenu menu) throws HeadlessException {
 		final JFXPanel fxPanel = new JFXPanel();
 		getContentPane().add(fxPanel);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setVisible(true);
 		
-		JMenuBar menuBar = new JMenuBar();
-		setJMenuBar(menuBar);
+		Optional.ofNullable(menu).ifPresent(m->{
+			JMenuBar menuBar = new JMenuBar();
+			setJMenuBar(menuBar);
 		
-		menu = new JMenu("Menu");
-		menuBar.add(menu);
+			this.menu = menu;
+			menuBar.add(menu);
+		});
 
 		Platform.runLater(()->{
 	        Scene scene = new Scene(root);
 	        fxPanel.setScene(scene);
 		});
 
-		if(root instanceof JavaFxPanel)
-			((JavaFxPanel)root).start();
+		Optional.ofNullable(root).filter(JavaFxPanel.class::isInstance).map(JavaFxPanel.class::cast).ifPresent(JavaFxPanel::start);
 	}
 
 	public JMenu getMenu() {

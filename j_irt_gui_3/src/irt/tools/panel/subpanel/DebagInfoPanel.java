@@ -35,8 +35,11 @@ import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.tools.fx.HelpPaneFx;
+import irt.tools.fx.JavaFxFrame;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
+import javafx.scene.Parent;
 
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
@@ -73,15 +76,35 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 			public void ancestorMoved(AncestorEvent arg0) { }
 		});
 
-		packetToSend = new DeviceDebugInfoPacket(Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte)0), (byte) 1);
+		byte linkAddr = Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte)0);
+		packetToSend = new DeviceDebugInfoPacket(linkAddr, (byte) 1);
 		setLayout(new BorderLayout(0, 0));
 
 		textArea = new JTextArea();
+		textArea.setToolTipText("<html>CTRL & click - send request packet<br>SHIFT & click - Help Panel</html>");
 		textArea.addMouseListener(new MouseAdapter() {
+			private JavaFxFrame helpFrame;
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount()==3)
-					restart();
+
+				if(e.isShiftDown()) {
+
+						Parent root = HelpPaneFx.getHelpPane(linkAddr);
+						JavaFxFrame frame = Optional.ofNullable(helpFrame).orElseGet(
+								()->{
+									helpFrame = new JavaFxFrame(root, null);
+									helpFrame.setSize(300, 500);
+									return helpFrame;
+								});
+						if(frame.isShowing()) {
+							frame.toFront();
+							return;
+						}
+						frame.setVisible(true);
+
+					}else if(e.isControlDown())
+						reset();
 			}
 		});
 		JScrollPane scrollPane = new JScrollPane(textArea);
@@ -100,7 +123,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
 					cbParameterCode.setToolTipText(cbParameterCode.getSelectedItem().toString());
 					packetToSend.setParameterCode((byte)(cbParameterCode.getSelectedIndex()+1));
-					restart();
+					reset();
 				}
 			}
 		});
@@ -119,7 +142,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 
 			if(itemEvent.getStateChange()==ItemEvent.SELECTED){
 				packetToSend.setValue(cbParameter.getSelectedItem());
-				restart();
+				reset();
 			}
 		});
 	}
@@ -129,11 +152,10 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		if(Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).isPresent())
 			return;
 
-		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DebagInfoPanel.service"));
+		startService();
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DebagInfoPanel.this);
-		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 1, 3, TimeUnit.SECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 0, 10, TimeUnit.SECONDS);
 	}
 
 	private synchronized void stop() {
@@ -142,9 +164,17 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
-	private void restart() {
-		stop();
-		start();
+	private void reset() {
+
+		startService();
+
+		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
+		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 1, 10, TimeUnit.SECONDS);
+	}
+
+	private void startService() {
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DebagInfoPanel.service"));
 	}
 
 

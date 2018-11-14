@@ -430,5 +430,6 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 	@Override
 	public void shutdownNow() {
+		stop();
 	}
 }
