@@ -39,7 +39,6 @@ import irt.tools.fx.HelpPaneFx;
 import irt.tools.fx.JavaFxFrame;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
-import javafx.scene.Parent;
 
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
@@ -83,28 +82,19 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		textArea = new JTextArea();
 		textArea.setToolTipText("<html>CTRL & click - send request packet<br>SHIFT & click - Help Panel</html>");
 		textArea.addMouseListener(new MouseAdapter() {
-			private JavaFxFrame helpFrame;
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
 
 				if(e.isShiftDown()) {
 
-						Parent root = HelpPaneFx.getHelpPane(linkAddr);
-						JavaFxFrame frame = Optional.ofNullable(helpFrame).orElseGet(
-								()->{
-									helpFrame = new JavaFxFrame(root, null);
-									helpFrame.setSize(300, 500);
-									return helpFrame;
-								});
-						if(frame.isShowing()) {
-							frame.toFront();
-							return;
-						}
-						frame.setVisible(true);
+					JavaFxFrame frame = HelpPaneFx.getHelpFrame(linkAddr);
+					frame.setVisible(true);
+					return;
+				}
 
-					}else if(e.isControlDown())
-						reset();
+				if(e.isControlDown())
+					reset();
 			}
 		});
 		JScrollPane scrollPane = new JScrollPane(textArea);
