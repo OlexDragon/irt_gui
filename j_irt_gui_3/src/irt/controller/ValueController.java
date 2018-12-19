@@ -86,6 +86,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 		}
 	}
 
+	private boolean errorWasRecorded;
 	@Override
 	public void onPacketReceived(final Packet packet) {
 
@@ -101,19 +102,26 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 
 				p
 				.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-				.ifPresent(h->{
-						final Payload pl = packet.getPayload(0);
+				.ifPresent(
+						h->{
+							errorWasRecorded = false;
+							final Payload pl = packet.getPayload(0);
 
-						if(packetToSend instanceof RangePacket)
-							range(pl);
+							if(packetToSend instanceof RangePacket)
+								range(pl);
 
-						else
-							value(pl);
-				});
+							else
+								value(pl);
+						});
 
 				p
 				.filter(h->h.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
-				.ifPresent(h->logger.error("the unit does not respond: {}", packet));
+				.filter(h->!errorWasRecorded)
+				.ifPresent(
+						h->{
+							logger.error("the unit does not respond: {}", packet);
+							errorWasRecorded = true;
+						});
 			}
 		}, "ValueController.onPacketReceived()");
 	}
