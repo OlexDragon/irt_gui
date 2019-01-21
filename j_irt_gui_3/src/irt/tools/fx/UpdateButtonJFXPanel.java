@@ -36,6 +36,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.DialogPane;
 import javafx.scene.text.Font;
 
 public class UpdateButtonJFXPanel extends JFXPanel {
@@ -94,8 +95,15 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 			setOnAction(e->{
 
 				// Return if message already showing
-				if(updateMessage!=null) {
-					((TKStage)updateMessage.getDialogPane().getScene().getWindow()).setVisible(true);
+				Optional<TKStage> oStage = Optional.ofNullable(updateMessage)
+
+						.map(UpdateMessageFx::getDialogPane)
+						.map(DialogPane::getScene)
+						.map(Scene::getWindow)
+						.map(TKStage.class::cast);
+
+				if(oStage.isPresent()) {
+					oStage.get().setVisible(true);
 					return;
 				}
 
