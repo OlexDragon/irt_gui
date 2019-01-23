@@ -4,11 +4,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
@@ -94,8 +97,11 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		}
 
 		if(count>=Math.max(deviceIndexes.length, dumpIndexes.length)){
+
+			synchronized (oldValues) { oldValues.clear(); }
+
 			count = 0;
-			Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));;
+			Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));
 			scheduleAtFixedRate = service.scheduleAtFixedRate(this, 60*60, 10, TimeUnit.SECONDS);
 			return;
 		}
@@ -138,9 +144,8 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
 		final PacketHeader header = packet.getHeader();
 
-			if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
-				return;
-			}
+		if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
+			return;
 
 		new MyThreadFactory(()->{
 
@@ -166,11 +171,51 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
 							// parse indexes from DeviceDebugHelpPacket and return
 							if(pId.equals(PacketIDs.DEVICE_DEBUG_HELP)){
+
 								getIndexes((String) value);
-//								logger.error(value);
-								Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));;
+
+								logger.trace(value);
+
+								Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));
 								scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
 								return;
+							}
+
+							final Optional<Map<PacketIDs, Object>> oOldValues = Optional.ofNullable(oldValues);
+
+							if(pId.equals(PacketIDs.MEASUREMENT_ALL)) {
+
+								boolean noDump = oOldValues
+										.map(ovs->ovs.get(PacketIDs.MEASUREMENT_ALL))
+										.flatMap(this::castToMap)
+										.map(m->m.entrySet())
+										.map(Set::stream)
+										.map(
+												stream->
+												stream
+												.map(compareValues(castToMap(value)))
+												.filter(bool->bool==false)// check if need dump
+												.findAny()
+												.orElse(true))
+										.orElse(false);
+
+								if(noDump) return;
+							}
+
+							if(pId.equals(PacketIDs.DEVICE_INFO)) {
+
+								boolean noDump = oOldValues
+										.map(ovs->ovs.get(PacketIDs.DEVICE_INFO))
+										.flatMap(this::castToOptional)
+										.flatMap(
+												oldDeviveInfo->
+												Optional
+												.ofNullable(value)
+												.flatMap(this::castToOptional)
+												.map(newDeviceInfo->oldDeviveInfo.equals(newDeviceInfo)))
+										.orElse(false);
+
+								if(noDump) return;
 							}
 
 							dump(pId, value);
@@ -179,11 +224,58 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		}, "DumpControllerFull.onPacketReceived()");
 	}
 
+	/**
+	 * @return True if don't need dump
+	 */
+	private Function<Entry<?,?>, Boolean> compareValues(Optional<Map<?, ?>> oMap) {
+		return entry->{
+			final Optional<?> oValue = oMap.map(m->m.get(entry.getKey()));
+			return oValue
+					.filter(String.class::isInstance)
+					.map(String.class::cast)
+					.flatMap(this::getDouble)
+					.flatMap(
+							newValue->
+							Optional
+							.ofNullable(entry.getValue())
+							.filter(String.class::isInstance)
+							.map(String.class::cast)
+							.flatMap(oldValue->getDouble(oldValue))
+							.map(oldValue->newValue-oldValue))
+					.map(Math::abs)
+					.map(abs->abs<1)	//no dump if less then one.
+					.orElseGet(()->oValue.filter(newValue->entry.getValue().equals(newValue)).isPresent());
+		};
+	}
+
+	private Optional<Map<?,?>> castToMap(Object values) {
+		return Optional
+				.of(values)
+				.filter(Map.class::isInstance)
+				.map(Map.class::cast);
+	}
+
+	private Optional<?> castToOptional(Object values) {
+		return Optional
+				.of(values)
+				.filter(Optional.class::isInstance)
+				.flatMap(Optional.class::cast);
+	}
+
+	public Optional<Double> getDouble(String value) {
+		return Optional.ofNullable(value).map(v->v.replaceAll("[^\\d-.]", "")).map(Double::parseDouble);
+	}
+
 	private void dump(PacketIDs pId, Object value) {
+
 		final Object oldValue = oldValues.get(pId);
+
 		if(oldValue==null || !oldValue.equals(value)){
 
-			oldValues.put(pId, value);
+			logger.trace(value);
+
+			synchronized (oldValues) { oldValues.put(pId, value); }
+
 			doDump(pId + ": " + value);
 		}
 	}
