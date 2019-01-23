@@ -25,8 +25,8 @@
 		<DefaultRolloverStrategy max="10" />
     </RollingRandomAccessFile>
 
-    <RollingRandomAccessFile name="log" fileName="${sys:user.home}/irt//gui3log.log"
-    					filePattern="${sys:user.home}/irt//$${date:yyyy-MM}/gui3log-%d{MM-dd-yyyy}-%i.log.gz">
+    <RollingRandomAccessFile name="log" fileName="${sys:user.home}/irt/gui3log.log"
+    					filePattern="${sys:user.home}/irt/gui3log-%d{MM-dd-yyyy}-%i.log.gz">
 		<PatternLayout pattern="%-5p %d %M (%F:%L) %m%n"/>
    		<MarkerFilter marker="FileWork" onMatch="DENY" onMismatch="ACCEPT"/>
 		<Policies>
@@ -62,7 +62,7 @@
 <!--   	<Logger name="irt.tools.panel.subpanel.NetworkPanel" level="all"/> -->
 
 <!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
-<!--  	<Logger name="irt.controller.DumpControllerFull" level="warn"/> -->
+<!--  	<Logger name="irt.controller.DumpControllerFull" level="all"/> -->
 <!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
  	<Logger name="irt.controller.GuiController" level="error" />
 <!-- 	<Logger name="irt.tools.panel.UserPicobucPanel" level="debug"/> -->
