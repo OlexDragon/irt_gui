@@ -19,7 +19,7 @@ import irt.controller.serial_port.SerialPortInterface;
 import irt.data.MyThreadFactory;
 import irt.data.ToHex;
 import irt.data.listener.PacketListener;
-import irt.data.packet.DeviceInfoPacket;
+import irt.data.packet.InitializePacket;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
@@ -54,7 +54,7 @@ public class Test {
 
 			PacketSuper[] packets = new PacketSuper[]{
 
-					new DeviceInfoPacket(linkAddr),
+//					new DeviceInfoPacket(linkAddr),
 //					new MeasurementPacket(linkAddr),
 //					new AlarmsSummaryPacket(linkAddr),
 //					new AlarmsIDsPacket(linkAddr),
@@ -63,7 +63,8 @@ public class Test {
 //					new ActiveModulePacket(linkAddr, null),
 //					new SwitchoverModePacket(linkAddr, null),
 //					new DeviceDebugPacket(linkAddr, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER),
-					new Offset1to1toMultiPacket(linkAddr, (byte) 1, null)
+//					new Offset1to1toMultiPacket(linkAddr, (byte) 1, null),
+					new InitializePacket(linkAddr)
 				};
 
 			for(int i=0, x=0;i<=1000; i++, x++){
