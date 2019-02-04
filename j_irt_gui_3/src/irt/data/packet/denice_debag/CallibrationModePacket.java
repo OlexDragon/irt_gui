@@ -25,8 +25,8 @@ public class CallibrationModePacket extends PacketSuper {
 		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.REQUEST);
 	}
 
-	public CallibrationModePacket(byte linkAddr, int value) {
+	public CallibrationModePacket(byte linkAddr, Boolean value) {
 		super(linkAddr, PacketImp.PACKET_TYPE_COMMAND, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.COMMAND);
-		setValue(value);
+		Optional.ofNullable(value).ifPresent(this::setValue);
 	}
 }

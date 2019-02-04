@@ -130,6 +130,10 @@ public class Payload {
 			case "String":
 				setBuffer(((String)value).getBytes());
 				break;
+			case "Boolean":
+				boolean b = (Boolean) value;
+				setBuffer(b ? 1 : 0);
+				break;
 			default:
 				logger.warn("*TODO Payload setBuffer({} = {})", value.getClass().getSimpleName(), value);
 			}

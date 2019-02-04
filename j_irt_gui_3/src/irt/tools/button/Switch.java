@@ -51,7 +51,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	final ActionListener actionListener = e->{
 
 		if(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.equals(packetId)){
-			final CallibrationModePacket packet = new CallibrationModePacket(linkAddr, isSelected() ? 1 : 0);
+			final CallibrationModePacket packet = new CallibrationModePacket(linkAddr, isSelected());
 			GuiControllerAbstract.getComPortThreadQueue().add(packet);
 			return;
 		}

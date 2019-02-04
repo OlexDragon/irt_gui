@@ -17,11 +17,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -44,24 +49,25 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.DefaultController;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
-import irt.controller.SetterController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.controller.serial_port.value.setter.Setter;
-import irt.controller.to_do.InitializePicoBuc;
 import irt.data.AdcWorker;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.MyThreadFactory;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
+import irt.data.packet.InitializePacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketWork;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
@@ -465,17 +471,30 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			public void mouseClicked(MouseEvent arg0) {
 				SwingUtilities.invokeLater(()->{
 
-					if(isMainBoard)
-						new SetterController(deviceType, "Initialize UnitController",
-								new Setter(linkHeader,
-									PacketImp.PACKET_TYPE_COMMAND,
-									PacketGroupIDs.PRODUCTION_GENERIC_SET_1.getId(),
-									PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
-									PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE
-								),
-								new InitializePicoBuc(BIASsPanel.this), Style.CHECK_ONCE
-						);
-					else{
+					if(isMainBoard) {
+
+						final Optional<Boolean> oCallMode = checkCallibrationMode(addr);
+						if(!oCallMode.isPresent()) {
+							showMessage("Packet does not have value.");
+							return;
+						}
+
+						final Boolean callMode = oCallMode.get();
+						if(!callMode) {
+							if(!setCallibrationModeOn(addr).filter(b->b).orElse(false)) {
+								showMessage("Unable to set calibration mode on.");
+								return;
+							}
+						}
+
+						final boolean initialize = initialize(addr).orElse(false);
+
+						if(initialize)
+							showMessage("Initialization complete.\nReboot the unit.");
+						else
+							showMessage("Unable to initialize.");
+
+					}else{
 						logger.trace("\n\t{}", controller);
 						if(controller==null || !controller.isRun()){
 							if(setCalibrationMode(CalibrationMode.ON)){
@@ -505,6 +524,66 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 							showMessage("Operation is not completed");
 					}
 				});
+			}
+
+			private Optional<Boolean> initialize(byte addr) {
+				final PacketWork initializePacket = new InitializePacket(addr);
+				return sendPacket(initializePacket, InitializePacket.parseValueFunction).filter(Boolean.class::isInstance).map(Boolean.class::cast);
+			}
+
+			private Optional<Boolean> checkCallibrationMode(byte addr) {
+				final PacketWork callibrationModePacket = new CallibrationModePacket(addr);
+				return sendPacket(callibrationModePacket, CallibrationModePacket.parseValueFunction).filter(Boolean.class::isInstance).map(Boolean.class::cast);
+			}
+
+			private Optional<Boolean> setCallibrationModeOn(byte addr) {
+				final PacketWork callibrationModePacket = new CallibrationModePacket(addr, true);
+				return sendPacket(callibrationModePacket, CallibrationModePacket.parseValueFunction).filter(Boolean.class::isInstance).map(Boolean.class::cast);
+			}
+
+			private Optional<?> sendPacket(PacketWork packetToSend, Function<Packet, Optional<Object>> function) {
+
+				final ParsePacket parsePacket = new ParsePacket(function);
+				FutureTask<Optional<?>> ft = new FutureTask<>(parsePacket);
+
+				final PacketListener packetListener = new PacketListener() {
+					
+					@Override
+					public void onPacketReceived(Packet packet) {
+
+						if(packet==null)
+							return;
+
+						final Optional<PacketIDs> oPacketId = PacketIDs.valueOf(packet.getHeader().getPacketId());
+						if(!oPacketId.isPresent())
+							return;
+
+						final PacketIDs packetID = oPacketId.get();
+						if(!packetID.match(packet))
+							return;
+
+						parsePacket.setPacket(packet);
+						new MyThreadFactory(ft, "Get Callibration Mode");
+					}
+				};
+
+				final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
+
+				comPortThreadQueue.addPacketListener(packetListener);
+
+				comPortThreadQueue.add(packetToSend);
+				Optional<?> result;
+				try {
+
+					result = ft.get(3, TimeUnit.SECONDS);
+
+				} catch (InterruptedException | ExecutionException | TimeoutException e) {
+					logger.catching(e);
+					result = Optional.empty();
+				}
+				comPortThreadQueue.removePacketListener(packetListener);
+
+				return result;
 			}
 
 			private boolean initialisePotenciometr(int index, int addr, int potentiometerValue) {
@@ -789,6 +868,29 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		@Override
 		public boolean addAll(int index, Collection<? extends T> c) {
 			throw new UnsupportedOperationException("This function can not be used");
+		}
+	}
+
+	public class ParsePacket implements Callable<Optional<?>>{
+
+		private Function<Packet, Optional<Object>> function;
+		private Packet packet;
+
+		public ParsePacket(Function<Packet, Optional<Object>> function) {
+			this.function = function;
+		}
+		public Packet getPacket() {
+			return packet;
+		}
+		public void setPacket(Packet packet) {
+			this.packet = packet;
+		}
+
+		@Override
+		public Optional<?> call() throws Exception {
+			if(function==null || packet==null)
+				return Optional.empty();
+			return function.apply(packet);
 		}
 	}
 }

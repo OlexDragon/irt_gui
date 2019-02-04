@@ -165,7 +165,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 			FCM_ADC_13v2			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction),
 			FCM_ADC_13V2_NEG		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction),
 
-			PRODUCTION_GENERIC_SET_1_INITIALIZE( null, null, null, null),
+			PRODUCTION_GENERIC_SET_1_INITIALIZE( PacketGroupIDs.PRODUCTION_GENERIC_SET_1, PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT, null, null),
 
 			NETWORK_ADDRESS		( null, null, null, NetworkAddressPacket.parseValueFunction),
 
@@ -318,6 +318,20 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 		public boolean match(short id){
 			return ((short)ordinal())==id;
+		}
+
+		public boolean match(Packet packet){
+			short id = Optional.ofNullable(packet).map(Packet::getHeader).map(PacketHeader::getPacketId).orElse((short) -1);
+			return match(id);
+		}
+
+		public boolean match(PacketWork packetWork) {
+			final Packet packet = Optional
+					.of(packetWork)
+					.map(PacketWork::getPacketThread)
+					.map(PacketThreadWorker::getPacket)
+					.orElse(null);
+			return match(packet);
 		}
 
 		public PacketGroupIDs getPacketGroupIDs() {
