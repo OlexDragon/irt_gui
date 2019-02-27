@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import irt.gui.data.packet.observable.InfoPacket;
 import irt.gui.errors.PacketParsingException;
+import jssc.SerialPortException;
 
 public class ComPortTest implements Observer {
 
@@ -23,16 +24,19 @@ public class ComPortTest implements Observer {
 
 	@Test
 	public void test() throws PacketParsingException {
-		LinkedPacketSender comPort = new LinkedPacketSender(COM_PORT);
-		try {
 
+		LinkedPacketSender comPort = new LinkedPacketSender(COM_PORT);
+
+		try {
 			comPort.openPort();
 
 			InfoPacket packet = new InfoPacket();
+			packet.setLinkHeaderAddr((byte) 254);
 			packet.addObserver(this);
 
 			task = new FutureTask<>(()->true);
 
+			logger.info("{}", packet.toBytes());
 			comPort.send(packet);
 
 			task.get(1, TimeUnit.SECONDS);
@@ -44,6 +48,11 @@ public class ComPortTest implements Observer {
 
 		} catch (Exception e) {
 			logger.catching(e);
+		}finally{
+			try {
+				comPort.closePort();
+			} catch (SerialPortException e) {
+			}
 		}
 	}
 

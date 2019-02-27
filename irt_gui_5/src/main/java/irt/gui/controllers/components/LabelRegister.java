@@ -153,25 +153,31 @@ public class LabelRegister extends ScheduledNodeAbstract {
 
 		LinkedPacketsQueue.SERVICES.execute(()->{
 			LinkedPacket packet = (LinkedPacket)observable;
-			byte[] answer = packet.getAnswer();
-			if(answer!=null){
-				Optional.ofNullable(createPacket(answer))
-				.ifPresent(p->{
-					final PacketHeader packetHeader = p.getPacketHeader();
-					final PacketErrors packetErrors = packetHeader.getPacketError();
-					if(packetErrors!=PacketErrors.NO_ERROR){
-						tooltipWorker.setMessage(packetErrors.toString());
-						LinkedPacketsQueue.SERVICES.execute(tooltipWorker);
-						return;
-					}
+			final Optional<RegisterPacket> oAnswer = Optional
+														.ofNullable(packet.getAnswer())
+														.map(this::createPacket)
+														.filter(p->p!=null);
 
-					Payload payload = p.getPayloads().get(0);
+			if(oAnswer.isPresent()){
+
+				final RegisterPacket p = oAnswer.get();
+				final PacketHeader packetHeader = p.getPacketHeader();
+				final PacketErrors packetErrors = packetHeader.getPacketError();
+
+				if(packetErrors!=PacketErrors.NO_ERROR){
+
+					tooltipWorker.setMessage(packetErrors.toString());
+					LinkedPacketsQueue.SERVICES.execute(tooltipWorker);
+					return;
+				}
+
+				Payload payload = p.getPayloads().get(0);
 //					RegisterValue rv = new RegisterValue(payload.getInt(0), payload.getInt(1), payload.getInt(2));
-					value.setValue(payload.getInt(2));
+				value.setValue(payload.getInt(2)&Long.MAX_VALUE);
 
-					Platform
-					.runLater(()->registerLabel.setText(value.toString()));
-				});
+				Platform
+				.runLater(()->registerLabel.setText(value.toString()));
+
 			}else{
 				tooltipWorker.setMessage("No answer.");
 				LinkedPacketsQueue.SERVICES.execute(tooltipWorker);

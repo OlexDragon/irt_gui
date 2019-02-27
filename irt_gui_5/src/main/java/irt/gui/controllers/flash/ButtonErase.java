@@ -1,6 +1,9 @@
 package irt.gui.controllers.flash;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.ResourceBundle;
@@ -10,13 +13,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.flash.enums.UnitAddress;
 import irt.gui.controllers.flash.service.EraseObject;
-import irt.gui.controllers.flash.service.PagesCount;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.flash.EmptyPacket;
@@ -34,7 +38,7 @@ import javafx.scene.control.Tooltip;
 public class ButtonErase extends Observable implements Observer, Initializable, EraseObject {
 	private static final int WAIT_TIME = 1000;
 
-	private Logger logger = LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	@FXML private Button button;
 
@@ -46,7 +50,7 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 	private UnitAddress unitAddress;
 	private byte[] pagesToErase;
 	private int count;
-	private long fileSize;
+	private int fileSize;
 	private boolean error;
 
 	private final ExecutorService executor = Executors.newFixedThreadPool(5, new MyThreadFactory());
@@ -55,7 +59,7 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 
 		try{
 
-			TimeUnit.SECONDS.sleep(10);
+			TimeUnit.SECONDS.sleep(30);
 
 		}catch(Exception ex){
 			return error;
@@ -129,13 +133,14 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 		.showAndWait()
 		.ifPresent((b)->{
 			if(b == ButtonType.OK){
-				fileSize = 0;
-				erase();
+				erase(0);
 			}
 		});
 	}
 
-	public boolean erase(long fileSize) {
+	public boolean erase(int fileSize) {
+		logger.entry(fileSize);
+
 		this.fileSize = fileSize;
 		update(null, unitAddress);
 		erase();
@@ -162,43 +167,60 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 			unitAddress = (UnitAddress)arg;
 			button.setTooltip(new Tooltip(unitAddress.toString()));
 
-			switch(unitAddress){
-			case CONVERTER:
-				pagesToErase = new byte[] { 0, 0,		// N + 1 pages are erased
-											0, 10 };	// pages are erased
-				break;
-			case BIAS:
-				pagesToErase = new byte[] { 0, 0,
-											0, 11 };
-				break;
-			case HP_BIAS:
-				pagesToErase = new byte[] { 0, 0,
-											0, 23 };
-				break;
-			case PROGRAM:
-				pagesToErase =
-						fileSize>0
-							? new PagesCount(fileSize).getPages()
-							: new byte[] { 0, 9,	// N + 1 pages are erased
-											0, 0,	// pages are erased
-											0, 1,
-											0, 2,
-											0, 3,
-											0, 4,
-											0, 5,
-											0, 6,
-											0, 7,
-											0, 8,
-											0, 9 };
-				break;
-			default:
-				pagesToErase = new byte[] { 0, 0,
-											0, 11 };
-				break;
-			}
-			pagesToErase = PanelFlash.addCheckSum(pagesToErase);
+			pagesToErase = PanelFlash
+					.addCheckSum(
+							getPagesToExtendedErase(unitAddress.getAddr(), fileSize));
+			logger.debug("pagesToErase: {}", pagesToErase);
 		}
 
+	}
+
+	public static final int KB = 1024;
+	public static byte[] getPagesToExtendedErase(int startAddress, int length) {
+		int[] allPages = new int[] { 	16 * KB, 16 * KB, 16 * KB, 16 * KB, 64 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB,
+										16 * KB, 16 * KB, 16 * KB, 16 * KB, 64 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB};
+
+
+		int sum = UnitAddress.PROGRAM.getAddr();	//Start address
+		int stopAddress = startAddress + (length>0 ? length : 1);
+
+		try(ByteArrayOutputStream outputStream = new ByteArrayOutputStream()){
+			outputStream.write(0);	// The bootloader receives one half-word (two bytes) that contain N, the number of pages to be erased
+			outputStream.write(0);
+
+
+			for(int page = 0; page<allPages.length && sum<stopAddress; page++) {
+
+//				logger.error("startAddress: 0x{}; stopAddress: {}; page: {}; sum: {}", startAddress, stopAddress, page, sum);
+
+				if(sum>=startAddress){
+					final byte[] bytes = toBytes((short) page);
+					outputStream.write(bytes); // The bootloader receives one half-word (two bytes) that contain N, the number of pages to be erased
+												//  each half-word containing a page number (coded on two bytes, MSB first).
+				}
+
+				sum += allPages[page];
+			}
+
+			final byte[] result = outputStream.toByteArray();
+			final int pages = result.length/2 - 2;
+			final byte[] arrayPages = toBytes((short) pages);
+			result[0] = arrayPages[0]; // the number of pages to be erased –1.
+			result[1] = arrayPages[1]; 
+
+			logger.debug("startAddress: 0x{}; stopAddress: 0x{}; sum: 0x{}; length: {}; pages: {}; result.length: {}; result: 0x{}", Integer.toHexString(startAddress), Integer.toHexString(stopAddress), Integer.toHexString(sum), length, pages, result.length, DatatypeConverter.printHexBinary(result));
+
+			return result;
+
+		} catch (IOException e) {
+			logger.catching(e);
+		}
+
+		return null;
+	}
+
+	private static byte[] toBytes(final short pages) {
+		return ByteBuffer.allocate(2).putShort(pages).array();
 	}
 
 	private void addWarningClass() {
