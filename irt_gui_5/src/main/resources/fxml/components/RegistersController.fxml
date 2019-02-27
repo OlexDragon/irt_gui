@@ -50,12 +50,12 @@
                         <Tooltip text="Reset" />
                      </tooltip>
                   </Button>
-                  <CheckBox fx:id="stepCheckBox" mnemonicParsing="false" onAction="#stepCheckBoxAction" text="Use Step">
+                  <CheckBox fx:id="stepCheckBox" mnemonicParsing="false" onAction="#onStepCheckBoxAction" text="Use Step">
                      <tooltip>
                         <Tooltip text="Step" />
                      </tooltip>
                   </CheckBox>
-                  <TextField fx:id="stepTextField" onAction="#steponActionTextField" prefColumnCount="3">
+                  <TextField fx:id="stepTextField" onAction="#onStepAction" prefColumnCount="3">
                      <tooltip>
                         <Tooltip text="Step By" />
                      </tooltip>

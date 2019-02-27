@@ -21,7 +21,6 @@ import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.errors.PacketParsingException;
-import jssc.SerialPortException;
 
 public class InfoPacketTest {
 
@@ -50,7 +49,7 @@ public class InfoPacketTest {
 	}
 
 	@Test
-	public void testObserver() throws PacketParsingException {
+	public void testObserver() throws Exception {
 		InfoPacket packet = new InfoPacket();
 		packet.addObserver(( o,  arg)-> {
 				logger.trace(o);
@@ -76,7 +75,6 @@ public class InfoPacketTest {
 		});
 
 		LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
-		try {
 
 			port.openPort();
 
@@ -84,9 +82,5 @@ public class InfoPacketTest {
 			assertNotNull(packet.getAnswer());
 
 			port.closePort();
-
-		} catch (SerialPortException e) {
-			logger.catching(e);
-		}
 	}
 }

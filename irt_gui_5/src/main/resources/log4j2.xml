@@ -4,7 +4,7 @@
 	<Appenders>
 
 		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="%-5p %d [%t] %C{2} %M (%F:%L) - %m%xEx%n" />
+			<PatternLayout pattern="%-5p %d [%t] %-40.40c{1.} %M (%F:%L) - %m%xEx%n" />
 		</Console>
 
 		<RollingRandomAccessFile name="LogFile"
@@ -75,7 +75,7 @@
 <!-- 		<logger name="irt.gui.controllers.components.ComboBoxUnitAddress" level="all"/> -->
 
 <!-- 		<logger name="irt.gui.controllers.components.TextFieldConfiguration$Updater" level="all"/> -->
-		<logger name="irt.gui.controllers.components.ComboBox10MHzReferenceSource" level="debug"/>
+<!-- 		<logger name="irt.gui.controllers.components.ComboBox10MHzReferenceSource" level="debug"/> -->
 
 <!-- 		<logger name="irt.gui.controllers.socket.SocketWorker" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.socket.ServerHandler" level="all"/> -->
@@ -84,7 +84,7 @@
 
 <!-- 		<logger name="irt.gui.controllers.flash.ButtonFCM" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.flash.service.FileFinder" level="all"/> -->
-		<logger name="irt.gui.controllers.flash.ButtonErase" level="all"/>
+<!-- 		<logger name="irt.gui.controllers.flash.ButtonErase" level="all"/> -->
 
 <!-- 		<logger name="irt.gui.controllers.calibration.PanelPrologix" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.calibration.PanelSignalGenerator" level="all"/> -->
@@ -95,7 +95,7 @@
 <!-- 		<logger name="irt.gui.controllers.components.ComboBoxLoSelect" level="debug"/> -->
 <!-- 		<logger name="irt.gui.data.packet.observable.configuration.LoFrequenciesPacket" level="all"/> -->
 
-		<Root level="warn">
+		<Root level="error">
 			<AppenderRef ref="LogFile" />
 			<AppenderRef ref="STDOUT" />
 		</Root>

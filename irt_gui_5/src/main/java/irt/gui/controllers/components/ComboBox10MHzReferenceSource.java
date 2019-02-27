@@ -31,7 +31,6 @@ public class ComboBox10MHzReferenceSource extends StartStopAbstract implements O
 	private boolean error;
 
 	public ComboBox10MHzReferenceSource() {
-		logger.error(logger.getName());
 		try {
 
 			packet = new Ref10MHzSourcePacket();
@@ -54,7 +53,6 @@ public class ComboBox10MHzReferenceSource extends StartStopAbstract implements O
 		final ObservableList<Ref10MHzStatusBits> items = sourceSelectComboBox.getItems();
 		final Ref10MHzStatusBits[] values = Ref10MHzStatusBits.values();
 
-		logger.error(Arrays.toString(values));
 		Arrays.stream(values).filter(status->status!=Ref10MHzStatusBits.LOCK_SUMMARY).forEach(status->Platform.runLater(()->items.add(status)));
 	}
 

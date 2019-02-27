@@ -11,6 +11,9 @@ import java.util.Observer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.flash.enums.UnitAddress;
 import irt.gui.data.MyThreadFactory;
@@ -27,6 +30,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.stage.Window;
 
 public class PanelWriteFlash extends Observable{
+
+	private final static Logger logger = LogManager.getLogger();
 
 	private final WritePacket writePacket = new WritePacket();
 	private final LinkedPacket dataPacket = new EmptyPacket(){ @Override public byte[] toBytes() { return dataToSend; }};
@@ -146,6 +151,8 @@ public class PanelWriteFlash extends Observable{
 	}
 
 	public void write(UnitAddress unitAddress, File file) throws FileNotFoundException, IOException {
+		logger.entry(unitAddress, file);
+
 		fileAsBytes = fileToBytes(file);
 		writeToAddress = unitAddress.getAddr();
 		filePosition = 0;

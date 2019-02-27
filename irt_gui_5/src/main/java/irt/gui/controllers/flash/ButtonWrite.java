@@ -84,6 +84,7 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 				toWrite = null;	// if selected ButtonType.CANSEL
 		}
 
+
 		Optional
 		.ofNullable(toWrite)
 		.ifPresent(f->{
@@ -91,7 +92,9 @@ public class ButtonWrite extends Observable implements Observer, Initializable {
 			button.setTooltip(new Tooltip(f.getName()));
 
 			executor.execute(()->{
-				if(setEraseObject.erase(f.length()))
+				final boolean erase = setEraseObject.erase((int) f.length());
+				logger.debug("Erasing done - {}", erase);
+				if(erase)
 					Platform.runLater(() -> {
 								try {
 									FXMLLoader loader = new FXMLLoader(

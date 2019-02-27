@@ -1,6 +1,9 @@
 
 package irt.gui.controllers.components;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.interfaces.SliderListener;
 import irt.gui.data.listeners.TextFieldFocusListener;
@@ -52,6 +55,13 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 	protected abstract void sendValue(Value value) 																	throws PacketParsingException;
 	protected abstract void setPacket(String keyStartWith) 															throws PacketParsingException ;
 	public 	  abstract void save() 																					throws PacketParsingException;
+
+	private String step = "1";
+	public String getStep() { return step; }
+	public String setStep(String step){
+		this.step = step;
+		return this.step;
+	};
 
 	@FXML protected TextField textField; 		public TextField getTextField() { return textField; }
 
@@ -121,7 +131,17 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 		}
 	}
 
-	@FXML private void onKeyPressed(KeyEvent event) {
+	private Consumer<KeyEvent> onKeyPressed;
+										public Consumer<KeyEvent> getOnKeyPressed() {
+											return onKeyPressed;
+										}
+										public void setOnKeyPressed(Consumer<KeyEvent> onKeyPressed) {
+											this.onKeyPressed = onKeyPressed;
+										}
+
+	@FXML protected void onKeyPressed(KeyEvent event) {
+
+		Optional.ofNullable(onKeyPressed).ifPresent(onKey->onKey.accept(event));
 
 		if(value!=null && event.getCode()==KeyCode.ESCAPE)
 			start();

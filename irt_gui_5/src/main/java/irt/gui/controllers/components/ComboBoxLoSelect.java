@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -83,38 +84,76 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 		try {
 			if(o instanceof LoFrequenciesPacket){
 
-				LoFrequenciesPacket p = new LoFrequenciesPacket(((LinkedPacket)o).getAnswer(), true);
-				logger.debug(p);
-				error = false;
-				final PacketHeader ph = p.getPacketHeader();
+				Optional
+				.ofNullable(((LinkedPacket)o).getAnswer())
+				.filter(p->p!=null)
+				.map(answer->{
+					try {
 
-				if(ph.getPacketType()==PacketType.RESPONSE && ph.getPacketError()==PacketErrors.NO_ERROR){
+						return new LoFrequenciesPacket(answer, true);
 
-					stop(true);
+					} catch (PacketParsingException e) {
+						logger.catching(e);
+						return null;
+					}
+				})
+				.filter(packet->packet!=null)
+				.ifPresent(p->{
+					
+					logger.debug(p);
+					error = false;
+					final PacketHeader ph = p.getPacketHeader();
 
-					if(p.getLinkHeader().getAddr()==-1)
-						fillComboBoxConverter(p.getPayloads().get(0));
-					else
-						fillComboBoxbBUC(p.getPayloads().get(0));
+					if(ph.getPacketType()==PacketType.RESPONSE && ph.getPacketError()==PacketErrors.NO_ERROR){
 
-					removeAllPackets();
-					packet = new LoPacket();
-					addPacket(packet);
-					start();
-				}else
-					logger.warn("Packet has an error: {}", p);
+						stop(true);
+
+						if(p.getLinkHeader().getAddr()==-1)
+							fillComboBoxConverter(p.getPayloads().get(0));
+						else
+							fillComboBoxbBUC(p.getPayloads().get(0));
+
+						removeAllPackets();
+						try {
+
+							packet = new LoPacket();
+							addPacket(packet);
+							start();
+
+						} catch (PacketParsingException e) {
+							logger.catching(e);
+						}
+					}else
+						logger.warn("Packet has an error: {}", p);
+				});
 
 			}else if(o instanceof LoPacket){
 
-				LoFrequenciesPacket p = new LoFrequenciesPacket(((LinkedPacket)o).getAnswer(), true);
-				logger.debug(p);
-				final PacketHeader ph = p.getPacketHeader();
+				Optional
+				.ofNullable(((LinkedPacket)o).getAnswer())
+				.filter(p->p!=null)
+				.map(answer->{
+					try {
 
-				if(ph.getPacketType()==PacketType.RESPONSE && ph.getPacketError()==PacketErrors.NO_ERROR)
-					if(p.getLinkHeader().getAddr()==-1)
-						selectLOConverter(p);
-					else
-						selectLOBuc(p);
+						return new LoFrequenciesPacket(answer, true);
+
+					} catch (PacketParsingException e) {
+						logger.catching(e);
+						return null;
+					}
+				})
+				.ifPresent(p->{
+
+					logger.debug(p);
+					final PacketHeader ph = p.getPacketHeader();
+
+					if(ph.getPacketType()==PacketType.RESPONSE && ph.getPacketError()==PacketErrors.NO_ERROR)
+						if(p.getLinkHeader().getAddr()==-1)
+							selectLOConverter(p);
+						else
+							selectLOBuc(p);
+					
+				});
 			}
 
 		} catch (Exception e) {

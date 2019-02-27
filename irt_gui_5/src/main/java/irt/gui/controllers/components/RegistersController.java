@@ -53,6 +53,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 
@@ -100,7 +101,7 @@ public class RegistersController implements Observer, FieldController {
 	private ToggleGroup 		profilesToggleGroup = new ToggleGroup();
 
 	private int 	profileId;
-	private Boolean editable;
+	private Boolean editable = false;
 
 	private TextFieldValueChangeObserver textFieldValueChangeObserver;
 
@@ -121,7 +122,7 @@ public class RegistersController implements Observer, FieldController {
 		.ofNullable(selectedTextField)
 		.ifPresent(textField->{
 
-			SliderListener textFieldRegister = (SliderListener) selectedTextField.getUserData();
+			SliderListener textFieldRegister = (SliderListener) textField.getUserData();
 			Value registerValue = textFieldRegister.getValue();
 			registerValue.deleteObserver(textFieldValueChangeObserver);
 
@@ -153,10 +154,7 @@ public class RegistersController implements Observer, FieldController {
 	}
 
     private final ChangeListener<Boolean> stepTextFieldFocusListener = (observable, oldValue, newValue)->{
-		if(newValue){
-			stepCheckBox.setSelected(true);
-			stepCheckBoxAction();
-		}
+		onStepAction();
 	};
 
 	private final ChangeListener<Number> sliderValueChangeListener = (observable, oldValue, newValue)->{
@@ -192,6 +190,21 @@ public class RegistersController implements Observer, FieldController {
 
 				if(slider.isDisable())
 					Platform.runLater(()->slider.setDisable(false));
+
+				Optional.of(selectedTextField.getUserData()).filter(TextFieldAbstract.class::isInstance).map(TextFieldAbstract.class::cast).ifPresent(tfa->{
+					tfa.setOnKeyPressed(e->{
+						final KeyCode code = e.getCode();
+
+						if(code==KeyCode.UP || code==KeyCode.DOWN)
+							slider.requestFocus();
+					});
+
+					Platform.runLater(()->{
+						final String step = tfa.getStep();
+						logger.error(step);
+						stepTextField.setText(step);
+					});
+				});
 			}
 		}
 	};
@@ -293,11 +306,20 @@ public class RegistersController implements Observer, FieldController {
     	});
     }
 
-    @FXML private void stepCheckBoxAction() {
-    	slider.setSnapToTicks(stepCheckBox.isSelected());
+    @FXML private void onStepCheckBoxAction() {
+    	onStepAction();
     }
 
-    @FXML private void steponActionTextField(ActionEvent event) {
+    @FXML private void onStepAction() {
+
+    	if(!stepCheckBox.isSelected()){
+			try {
+				slider.setBlockIncrement(1);
+			} catch (NumberFormatException e) {
+				logger.catching(e);
+			}
+			return;
+    	}
 
     	Optional
     	.ofNullable(selectedTextField)
@@ -306,7 +328,13 @@ public class RegistersController implements Observer, FieldController {
     	Optional
     	.ofNullable(stepTextField.getText())
     	.filter(text->!text.isEmpty())
-    	.ifPresent(text->slider.setMinorTickCount(Integer.parseInt(text)));
+    	.ifPresent(text->{
+			try {
+				slider.setBlockIncrement(Integer.parseInt(text));
+			} catch (NumberFormatException e) {
+				logger.catching(e);
+			}
+		});
     }
 
     @FXML private void onActionMenuItemsSaveAs(){
@@ -473,8 +501,11 @@ public class RegistersController implements Observer, FieldController {
 			Field field = nodeClass.getField("FIELD_KEY");
 			final String key = (String)field.get(null);
 
+
 			final String format = String.format(key, profileId, tfp.get("column"), tfp.get("row"));
-			propertiesFromFile.put( format, tfp.get("name"));
+			Optional
+			.ofNullable(tfp.get("name"))
+			.ifPresent(name->propertiesFromFile.put( format, name));
 
 		} catch (Exception e) {
 			logger.catching(e);
