@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.file.BucProfileScanner;
+import irt.controller.file.ProfileScanner;
 import irt.controller.file.ConverterProfileScanner;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
@@ -82,7 +82,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private Label lblProfile;
 	private Label lblProgram;
 
-	private BucProfileScanner findBucProfile;
+	private ProfileScanner findBucProfile;
 	private ConverterProfileScanner findConvProfile;
 
 	private final ChangeListener<? super String> textListener = (o, oV, nV)->enableUpdateButton(o);
@@ -218,7 +218,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		if(isProduction){
 
 			// Search profile by the unit serial number on the drive Z:
-			findBucProfile = new BucProfileScanner(deviceInfo);			
+			findBucProfile = new ProfileScanner(deviceInfo);			
 			findConvProfile = new ConverterProfileScanner(deviceInfo.getLinkHeader().getAddr());
 			createProductionFields(grid);
 		}

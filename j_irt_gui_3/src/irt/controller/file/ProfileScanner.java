@@ -7,11 +7,11 @@ import java.util.concurrent.FutureTask;
 import irt.data.DeviceInfo;
 import irt.tools.fx.interfaces.StopInterface;
 
-public class BucProfileScanner extends FutureTask<Optional<Path>> implements StopInterface {
+public class ProfileScanner extends FutureTask<Optional<Path>> implements StopInterface {
 
 	private static ProfileScaner CALLABLE;
 
-	public BucProfileScanner(DeviceInfo deviceInfo) {
+	public ProfileScanner(DeviceInfo deviceInfo) {
 		super(CALLABLE = new ProfileScaner(deviceInfo.getSerialNumber().map(sn->sn + ".bin")));
 	}
 
