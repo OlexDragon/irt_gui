@@ -263,7 +263,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 	}
 
 	public Optional<Double> getDouble(String value) {
-		return Optional.ofNullable(value).map(v->v.replaceAll("[^\\d-.]", "")).map(Double::parseDouble);
+		return Optional.ofNullable(value).filter(v->!v.replaceAll("\\D", "").isEmpty()).map(v->v.replaceAll("[^\\d-.]", "")).map(Double::parseDouble);
 	}
 
 	private void dump(PacketIDs pId, Object value) {
