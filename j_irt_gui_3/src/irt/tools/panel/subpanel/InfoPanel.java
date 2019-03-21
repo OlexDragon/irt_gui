@@ -2,14 +2,17 @@ package irt.tools.panel.subpanel;
 
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Timer;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -17,7 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
@@ -25,10 +30,12 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.SoftReleaseChecker;
+import irt.controller.file.ProfileScanner;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -42,7 +49,7 @@ import irt.tools.panel.PicobucPanel;
 @SuppressWarnings("serial")
 public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
-	private final static Logger logger = LogManager.getLogger();
+	private final static Logger logger = (Logger) LogManager.getLogger();
 
 	private static final int WINDOW_MIN_HEIGHT = 105;
 	private static final int WINDOW_MAX_HEIGHT = 135;
@@ -68,11 +75,63 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 	private final Timer timer = new Timer(true);
 
+	private ProfileScanner profileScanner;
+
 	public InfoPanel(DeviceInfo deviceInfo) {
 
 		setForeground(Color.WHITE);
 		setBackground(new Color(0,0x33,0x33));
 		setSize(286, WINDOW_MIN_HEIGHT);
+
+		if(	// If main class is irtGui add pop up menu with 'Open' and 'Open file location'
+				((LoggerContext) LogManager.getContext(false)).getLoggers().stream()
+			.map(Logger::getName)
+			.filter(n->n.equals("irt.irt_gui.UserIrtGui")).findAny()
+			.map(n->false)
+			.orElse(true)){
+
+			JPopupMenu popup = new JPopupMenu();
+			setComponentPopupMenu(popup);
+			JMenuItem openMenuItem = new JMenuItem("Open");
+			openMenuItem.setEnabled(false);
+			popup.add(openMenuItem);
+
+			JMenuItem locationMenuItem = new JMenuItem("Open file location");
+			locationMenuItem.setEnabled(false);
+			popup.add(locationMenuItem);
+
+			new MyThreadFactory("Popup Menu Worker").newThread(()->{
+
+				profileScanner = new ProfileScanner(deviceInfo);
+				new MyThreadFactory("Profile Scaner").newThread(profileScanner).start();
+				try {
+
+					profileScanner.get().ifPresent(path->{
+						openMenuItem.setEnabled(true);
+						locationMenuItem.setEnabled(true);
+						openMenuItem.addActionListener(
+								e->{
+									try {
+										Desktop.getDesktop().open(path.toFile());
+									} catch (IOException e1) {
+										logger.catching(e1);
+									}
+								});
+						locationMenuItem.addActionListener(
+								e->{
+									try {
+										Runtime.getRuntime().exec("explorer.exe /select," + path);
+									} catch (IOException e1) {
+										logger.catching(e1);
+									}
+								});
+					});
+
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(e);
+				}
+			}).start();
+		}
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -88,6 +147,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 							if(secondsCount!=null)
 								secondsCount.stop();
 							timer.cancel();
+							profileScanner.cancel(true);
 						}));
 
 		addAncestorListener(new AncestorListener() {
