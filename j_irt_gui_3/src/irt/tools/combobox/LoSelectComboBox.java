@@ -211,15 +211,16 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 					.filter(Byte.class::isInstance)
 					.map(Byte.class::cast)
 					.ifPresent(
-							b->
+							idToSet->
 							SwingUtilities.invokeLater(
 									()->{
-										final IdValueFreq anObject = new IdValueFreq(b, null);
-										if(!model.getSelectedItem().equals(anObject)) {
-											removeItemListener(iListener);
-											model.setSelectedItem(anObject);
-											addItemListener(iListener);
-										}
+										IntStream.range(0, model.getSize()).mapToObj(model::getElementAt).filter(s->s.getId()==idToSet).findAny()
+										.ifPresent(
+												o->{
+													removeItemListener(iListener);
+													model.setSelectedItem(o);
+													addItemListener(iListener);
+												});
 									}));
 				}, "LoSelectComboBox: Select JComboBox item"));
 	}

@@ -46,7 +46,7 @@ public class PureJavaComPort implements SerialPortInterface {
 
 	public static final int MAX_WAIT_TIME = 1500;
 
-	private final static Logger logger = LogManager.getLogger(SerialPortInterface.class);
+	private final static Logger logger = LogManager.getLogger();
 
     public static final int BAUDRATE_115200 = 115200;
 

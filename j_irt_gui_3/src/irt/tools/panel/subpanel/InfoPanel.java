@@ -12,7 +12,6 @@ import java.awt.event.HierarchyEvent;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Timer;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -85,10 +84,10 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 		if(	// If main class is irtGui add pop up menu with 'Open' and 'Open file location'
 				((LoggerContext) LogManager.getContext(false)).getLoggers().stream()
-			.map(Logger::getName)
-			.filter(n->n.equals("irt.irt_gui.UserIrtGui")).findAny()
-			.map(n->false)
-			.orElse(true)){
+				.map(Logger::getName)
+				.filter(n->n.equals("irt.irt_gui.UserIrtGui")).findAny()
+				.map(n->false)
+				.orElse(true)){
 
 			JPopupMenu popup = new JPopupMenu();
 			setComponentPopupMenu(popup);
@@ -127,7 +126,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 								});
 					});
 
-				} catch (InterruptedException | ExecutionException e) {
+				} catch (Exception e) {
 					logger.catching(e);
 				}
 			}).start();
