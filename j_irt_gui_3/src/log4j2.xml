@@ -73,6 +73,7 @@
 
 <!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="warn"/> -->
 <!--  	<Logger name="irt.controller.serial_port.PureJavaComPort" level="all"/> -->
+<!--  	<Logger name="irt.controller.serial_port.JsscComPort" level="debug"/> -->
 
 <!--  	<Logger name="irt.data.profile.ProfileValidator" level="debug"/> -->
 <!--  	<Logger name="irt.tools.fx.ControlPanelIrPcFx" level="all"/> -->

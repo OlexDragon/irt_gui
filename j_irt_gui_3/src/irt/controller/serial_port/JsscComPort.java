@@ -39,7 +39,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 	private static final String LOGGER_NAME = "comPort";
 
-	private final Logger logger = LogManager.getLogger(SerialPortInterface.class);
+	private final Logger logger = LogManager.getLogger();
 	private final Marker marker = MarkerManager.getMarker("FileWork");
 
 	public enum Baudrate{
@@ -402,7 +402,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 	}
 
 	public byte[] readBytes(int byteCount, int waitTime) {
-		logger.debug("ENTRY byteCount: {}; waitTime: {}", byteCount, waitTime);
+		logger.trace("ENTRY byteCount: {}; waitTime: {}", byteCount, waitTime);
 
 		byte[] readBytes;
 		try {
