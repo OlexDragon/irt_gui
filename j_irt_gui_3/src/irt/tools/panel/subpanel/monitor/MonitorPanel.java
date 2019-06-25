@@ -8,6 +8,9 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
@@ -18,6 +21,8 @@ import irt.tools.label.LED;
 
 @SuppressWarnings("serial")
 public class MonitorPanel extends MonitorPanelSSPA implements Monitor {
+
+	protected static final Logger logger = LogManager.getLogger();
 
 	protected JLabel lblInputPowerTxt;
 	protected JLabel lblInputPower;

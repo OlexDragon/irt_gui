@@ -9,6 +9,9 @@ import java.util.Optional;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
@@ -22,6 +25,8 @@ import irt.tools.label.LED;
 
 @SuppressWarnings("serial")
 public class MonitorPanelConverter extends MonitorPanelAbstract {
+
+	protected static final Logger logger = LogManager.getLogger();
 
 	public static final int
 			LOCK1			= 1,	//FCM_STATUS_LOCK_DETECT_PLL1

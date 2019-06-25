@@ -8,6 +8,9 @@ import java.util.Optional;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
@@ -28,6 +31,9 @@ import irt.data.value.ValueThreeState;
 
 public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implements Monitor {
 	private static final long serialVersionUID = 1L;
+
+	protected static final Logger logger = LogManager.getLogger();
+
 	private JLabel lblTemperature;
 	private JLabel lblWGSPosition;
 	private JLabel lblLNB1Status;

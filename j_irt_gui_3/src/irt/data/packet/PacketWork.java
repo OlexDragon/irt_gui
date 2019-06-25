@@ -53,7 +53,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 			DEVICE_INFO	( null, null, null, DeviceInfoPacket.parseValueFunction),
 
-			ALARMS_IDs						( null, null,  null, AlarmsIDsPacket.parseValueFunction),
+			ALARMS_ALL_IDs					( null, null,  null, AlarmsIDsPacket.parseValueFunction),
 			ALARMS_SUMMARY					( null, null, null, AlarmsSummaryPacket.parseValueFunction),
 			ALARMS_OWER_CURRENT				( null, null, null, AlarmStatusPacket.parseValueFunction),
 			ALARMS_UNDER_CURRENT			( null, null, null, AlarmStatusPacket.parseValueFunction),
@@ -68,7 +68,6 @@ public interface PacketWork extends Comparable<PacketWork>{
 			ALARMS_TEMPERATURE_ThRESHOLD_1	( null, null, null, AlarmStatusPacket.parseValueFunction),
 			ALARMS_TEMPERATURE_ThRESHOLD_2	( null, null, null, AlarmStatusPacket.parseValueFunction),
 			ALARMS_ALC_ERROR				( null, null, null, AlarmStatusPacket.parseValueFunction),
-			ALARMS_ALL_IDs					( null, null, null, AlarmStatusPacket.parseValueFunction),
 			ALARMS_BUC_B_COMMUNICATION_FAULT( null, null, null, AlarmStatusPacket.parseValueFunction),
 			ALARMS_BUC_B_SUMMARY			( null, null, null, AlarmStatusPacket.parseValueFunction),
 			ALARMS_BUC_S_COMMUNICATION_FAULT( null, null, null, AlarmStatusPacket.parseValueFunction),

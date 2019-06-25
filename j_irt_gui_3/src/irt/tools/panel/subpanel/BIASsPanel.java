@@ -234,10 +234,12 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		});
 
 		switch_1 = new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.SWITCH_N1 : DeviceDebugPacketIds.SWITCH_N1_REMOTE_BIAS));
+		switch_1.setName("Switch #1");
 		switch_1.setBounds(61, 2, 55, 25);
 		add(switch_1);
 
 		switch_2= new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.SWITCH_N2 : DeviceDebugPacketIds.SWITCH_N2_REMOTE_BIAS));
+		switch_2.setName("Switch #2");
 		switch_2.setBounds(61, 30, 55, 25);
 		add(switch_2);
 
@@ -383,6 +385,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		add(lblLineUp);
 
 		switchNGlobal = new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.NGLOBAL : DeviceDebugPacketIds.NGLOBAL_REMOTE_BIAS));
+		switchNGlobal.setName("Global");
 		switchNGlobal.setEnabled(false);
 		switchNGlobal.setBounds(61, 58, 55, 25);
 		add(switchNGlobal);
