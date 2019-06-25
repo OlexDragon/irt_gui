@@ -100,7 +100,7 @@ public class Getter extends GetterAbstract {
 										tmp = value + 1;// I need all dumps. So
 														// tmp!=value
 										break;
-									case ALARMS_IDs:
+									case ALARMS_ALL_IDs:
 									case ALARMS_OWER_CURRENT:
 									case ALARMS_OWER_TEMPERATURE:
 									case ALARMS_PLL_OUT_OF_LOCK:

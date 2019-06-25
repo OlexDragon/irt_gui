@@ -153,7 +153,6 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		
 		final Optional<Short> oPacket = Optional
 		.ofNullable(packet)
 		.map(Packet::getHeader)

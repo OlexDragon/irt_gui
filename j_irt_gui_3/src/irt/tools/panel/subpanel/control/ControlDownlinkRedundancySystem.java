@@ -29,6 +29,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.DefaultController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract;
@@ -57,6 +60,8 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implements Runnable, PacketListener {
 	private static final long serialVersionUID = 1L;
+
+	protected static final Logger logger = LogManager.getLogger();
 
 	private ScheduledFuture<?> scheduledFuture;
 	private ScheduledExecutorService service;

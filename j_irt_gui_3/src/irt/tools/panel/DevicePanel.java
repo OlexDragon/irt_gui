@@ -72,7 +72,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 
 	public DevicePanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) throws HeadlessException {
 		super(
-				Optional.ofNullable(deviceInfo).map(DeviceInfo::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0),
+				deviceInfo!=null ? deviceInfo.getLinkHeader().getAddr() : (byte) 0,
 				deviceInfo!=null ? deviceInfo.getSerialNumber().orElse("N/A") + " : " + deviceInfo.getUnitName().orElse("N/A") : "N/A",
 				minWidth,
 				midWidth,
@@ -245,11 +245,11 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 	public int compareTo(Component o) {
 		return Optional.of(o).filter(DevicePanel.class::isInstance).map(DevicePanel.class::cast).map(DevicePanel::getLinkHeader).map(linkHeader::compareTo).orElse(1);
 	}
-
-	public void showDebugPanel(boolean show) {
-		if(show)
-			tabbedPane.add("Debug", DEBUG_PANEL);
-		else
-			tabbedPane.remove(DEBUG_PANEL);
-	}
+//
+//	public void showDebugPanel(boolean show) {
+//		if(show)
+//			tabbedPane.add("Debug", DEBUG_PANEL);
+//		else
+//			tabbedPane.remove(DEBUG_PANEL);
+//	}
 }

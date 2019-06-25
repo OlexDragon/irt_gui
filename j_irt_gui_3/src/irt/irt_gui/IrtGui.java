@@ -63,6 +63,7 @@ import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
 
 public class IrtGui extends IrtMainFrame {
+
 	private static final long serialVersionUID = 1611718189640547787L;
 
 	private static final String PREF_KEY_ADDRESS = "address";
@@ -70,7 +71,7 @@ public class IrtGui extends IrtMainFrame {
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.184";
+	public static final String VERTION = "- 3.186";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -454,4 +455,26 @@ public class IrtGui extends IrtMainFrame {
 			}
 		});
 	}
+//
+//	@Override
+//	public void onPacketReceived(Packet packet) {
+//		super.onPacketReceived(packet);
+//
+//		final Optional<Packet> oPacket = Optional.ofNullable(packet);
+//		final Optional<Byte> oHeader = oPacket
+//
+//				.map(Packet::getHeader)
+//				.map(PacketHeader::getPacketId)
+//				.filter(PacketIDs.ALARMS_ALL_IDs::match)
+//				.flatMap(h->oPacket)
+//				.map(p->p.getPayloads())
+//				.filter(pls->pls.size()>0)
+//				.map(pls->pls.get(0).getParameterHeader().getCode())
+//				.filter(code->code==2);
+//
+//		if(!oHeader.isPresent())
+//			return;
+//
+//		logger.error(packet);
+//	}
 }

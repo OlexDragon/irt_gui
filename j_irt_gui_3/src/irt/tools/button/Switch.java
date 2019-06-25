@@ -38,6 +38,7 @@ import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 
 public class Switch extends SwitchBox implements Runnable, PacketListener {
+	private static final long serialVersionUID = 8018058982771868859L;
 	private final Logger logger = LogManager.getLogger();
 
 	private ScheduledFuture<?> scheduledFuture;
@@ -60,7 +61,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 		.valueOf(packetId)
 		.ifPresent(deviceDebugPacketId->{
 			
-			DeviceDebugPacket packetToSet = new DeviceDebugPacket(linkAddr, new Value(isSelected() ? 3 : 2, 0, 3, 0), deviceDebugPacketId);
+			DeviceDebugPacket packetToSet = new DeviceDebugPacket(linkAddr, new Value(isSelected() ? 1 : 0, 0, 3, 0), deviceDebugPacketId);
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToSet);
 		});
 	};
@@ -98,7 +99,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("Switch"));
 
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(Switch.this);
-				scheduledFuture = service.scheduleAtFixedRate(Switch.this, 1, 3, TimeUnit.SECONDS);
+				scheduledFuture = service.scheduleAtFixedRate(Switch.this, 1, 10, TimeUnit.SECONDS);
 			}
 			public void ancestorRemoved(AncestorEvent event) {
 				stop();
@@ -115,8 +116,6 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
-	private static final long serialVersionUID = 8018058982771868859L;
-
 	@Override
 	public void onPacketReceived(Packet packet) {
 
@@ -130,7 +129,11 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 			.ifPresent(h->{
 
 				if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
-					logger.warn("packet has error: {}", packet);
+					if(h.getOption()==PacketImp.ERROR_FUNCTION_NOT_IMPLEMENTED) {
+						stop();
+						setEnabled(false);
+					}
+					logger.error("packet has error: {}", packet);
 					return;
 				}
 
@@ -164,6 +167,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 					setSelected(isSelected);
 					addActionListener(actionListener);
 				}
+//				logger.error("{} : {} : {}", isSelected, Switch.this.getName(), packet);
 			});
 		}, "Switch.onPacketReceived()");
 	}
@@ -172,6 +176,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	@Override
 	public void run() {
 
+//		logger.error("{} : {}", getName(), packetToGet);
 		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
 		final int size = queue.size();
 

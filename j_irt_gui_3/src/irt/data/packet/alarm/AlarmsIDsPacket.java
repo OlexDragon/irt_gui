@@ -34,7 +34,7 @@ public class AlarmsIDsPacket extends PacketSuper{
 	}
 
 	public AlarmsIDsPacket(byte linkAddr){
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PacketIDs.ALARMS_IDs, PacketGroupIDs.ALARM, PacketImp.ALARMS_IDs, null, Priority.RANGE);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketWork.PacketIDs.ALARMS_ALL_IDs, PacketGroupIDs.ALARM, PacketImp.ALARMS_IDs, null, Priority.RANGE);
 	}
 
 	@Override

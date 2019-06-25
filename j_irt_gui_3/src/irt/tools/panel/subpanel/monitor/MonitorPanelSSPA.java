@@ -11,6 +11,9 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
@@ -25,6 +28,8 @@ import irt.tools.label.LED;
 
 @SuppressWarnings("serial")
 public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
+
+	protected static final Logger logger = LogManager.getLogger();
 
 	public static final byte
 			IRT_SLCP_PACKET_ID_MEASUREMENT = PacketGroupIDs.MEASUREMENT.getId();

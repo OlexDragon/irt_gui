@@ -41,13 +41,11 @@ public class Translation {
 	private static ResourceBundle messages;
 
 	public static void setLocale(final String localeStr){
-		logger.entry(localeStr);
 		font = null;
 
 		new MyThreadFactory(()->{
 
 			try{
-			logger.entry(localeStr);
 
 			locale = new Locale(localeStr);
 
@@ -82,7 +80,6 @@ public class Translation {
 
 	@SuppressWarnings("unchecked")
 	public static <T> T getValueWithSuplier(Class<T> clazz, String key, Supplier<T> defaultValue){
-		logger.entry(clazz, key, defaultValue);
 		T returnValue = null;
 
 		int times = 0;
@@ -138,7 +135,6 @@ public class Translation {
 	}
 
 	private static Font getFont(String selectedLanguage) {
-		logger.entry(selectedLanguage);
 		try {
 			String fontURL = getValue(String.class, "font_path", "fonts/TAHOMA.TTF");
 
@@ -164,7 +160,6 @@ public class Translation {
 	}
 
 	public static Font getSystemFont(String fontURL, int fontStyle, int fontSize) {
-		logger.entry( fontURL, fontStyle, fontSize);
 
 		Font font = null;
 		String[] split = fontURL.split("/");
@@ -198,7 +193,6 @@ public class Translation {
 	}
 
 	public static void setFont(Font font) {
-		logger.entry(font);
 		Translation.font = font;
 	}
 
@@ -220,7 +214,6 @@ public class Translation {
 	}
 
 	public static String getTranslationProperties(String key) {
-		logger.entry(key);
 		return getTranslationProperties().getProperty(key);
 	}
 }

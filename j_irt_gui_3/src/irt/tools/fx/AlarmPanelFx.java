@@ -243,7 +243,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 											.flatMap(Stream::findAny);
 
 			//Available alarms
-			if(oPacketId.filter(PacketIDs.ALARMS_IDs::match).isPresent()){
+			if(oPacketId.filter(PacketIDs.ALARMS_ALL_IDs::match).isPresent() && oPayload.filter(pl->pl.getParameterHeader().getCode()==2).isPresent()){
 
 			//Initialize available alarms
 				final Optional<short[]> alarms = oPayload

@@ -30,6 +30,9 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.controller.GuiController;
 import irt.controller.control.ControlController;
 import irt.controller.control.ControllerAbstract;
@@ -56,6 +59,8 @@ import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 @SuppressWarnings("serial")
 public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPanel {
+
+	protected static final Logger logger = LogManager.getLogger();
 
 	public enum ActionFlags{
 		FLAG_ATTENUATION,

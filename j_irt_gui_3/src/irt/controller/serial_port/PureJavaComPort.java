@@ -76,7 +76,7 @@ public class PureJavaComPort implements SerialPortInterface {
 	}
 
 	@Override
-	public Packet send(PacketWork packetWork){
+	public synchronized Packet send(PacketWork packetWork){
 		Packet packet = packetWork.getPacketThread().getPacket();
 		logger.debug("ENTRY {}", packet);
 
