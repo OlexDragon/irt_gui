@@ -58,7 +58,6 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 
 	public SwitchBoxImpl(Image offImage, Image onImage, PacketSuper packetToSEnd) {
 		super(offImage, onImage);
-		logger.entry(packetToSEnd);
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -97,7 +96,7 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 	protected abstract void update(Packet packet);
 
 	@Override public void run() {
-		logger.entry(packetToSend);
+
 		try{
 
 			cptq.add(packetToSend);

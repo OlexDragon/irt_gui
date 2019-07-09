@@ -156,7 +156,6 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 	}
 
 	public void duUpdate(boolean doUpdate) {
-		logger.entry(doUpdate);
 
 		if(doUpdate){
 			if(scheduleAtFixedRate.isCancelled())

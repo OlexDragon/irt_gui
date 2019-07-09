@@ -309,11 +309,21 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 		if (this == obj)
 			return true;
 
-		return Optional
+		final Optional<Packet> oPacket = Optional
 
 				.ofNullable(obj)
 				.filter(Packet.class::isInstance)
-				.map(Packet.class::cast)
+				.map(Packet.class::cast);
+
+		if(linkHeader!=null && oPacket.filter(LinkedPacket.class::isInstance)
+				.map(LinkedPacket.class::cast)
+				.map(LinkedPacket::getLinkHeader)
+				.map(LinkHeader::getAddr)
+				.filter(a->a!=linkHeader.getAddr())
+				.isPresent())
+			return false;
+
+		return oPacket
 				.map(Packet::getHeader)
 				.map(PacketHeader::getPacketId)
 				.filter(otherId->Optional.ofNullable(header).map(PacketHeader::getPacketId).filter(id->id.equals(otherId)).isPresent())

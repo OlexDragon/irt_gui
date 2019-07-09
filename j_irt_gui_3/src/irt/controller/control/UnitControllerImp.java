@@ -313,7 +313,6 @@ public class UnitControllerImp implements UnitController{
 	}
 
 	private void setValue(Optional<? extends PacketSuper> optional) {
-		logger.entry(optional);
 
 		optional
 		.flatMap(p->(Optional<?>)p.getValue())

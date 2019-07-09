@@ -198,7 +198,6 @@ public class UnitsContainer extends JPanel implements Runnable{
 	}
 
 	private boolean isDevicePanel(LinkHeader linkHeader, Component component){
-		logger.entry(linkHeader, component);
 		boolean isDevicePanel = false;
 
 		if(component instanceof DevicePanel){

@@ -71,7 +71,7 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 	}
 
 	private byte[] preparePacket(Packet packet) {
-		logger.entry(packet);
+
 		byte[]data = packet.toBytes();
 		logger.debug("\n\t{}", data);
 		return preparePacket(data);
@@ -109,7 +109,7 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 	}
 
 	public void preparePacket(byte value) {
-		logger.entry(value);
+
 		setPacketHeaderType(PacketImp.PACKET_TYPE_COMMAND);
 		Payload payload = packet.getPayload(0);
 		payload.setBuffer(value);
@@ -153,7 +153,7 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 	}
 
 	public void preparePacket(byte irtSlcpParameter, Object value) {
-		logger.entry(irtSlcpParameter, value);
+
 		Payload pl = packet.getPayload(irtSlcpParameter);
 
 		if(pl!=null){

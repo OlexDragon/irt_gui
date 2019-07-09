@@ -52,7 +52,6 @@ public class ConfigurationSetter extends SetterAbstract {
 
 	@Override
 	public void preparePacketToSend(Object value) {
-		logger.entry(value);
 
 		if (value instanceof IdValue) {
 			int id = ((IdValue) value).getID()&0xFF;

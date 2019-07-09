@@ -8,6 +8,7 @@ import javax.swing.JTabbedPane;
 
 import irt.data.DeviceInfo;
 import irt.data.packet.LinkHeader;
+import irt.tools.fx.debug.DeviceDebugPanel;
 import irt.tools.panel.subpanel.BIASsPanel;
 import irt.tools.panel.subpanel.DACsPanel;
 import irt.tools.panel.subpanel.DebagInfoPanel;
@@ -20,7 +21,8 @@ public class PicobucPanel extends UserPicobucPanel {
 	public PicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight){
 		super(deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 
-		tabbedPane = getTabbedPane();
+		final JTabbedPane tabbedPane2 = getTabbedPane();
+		tabbedPane = tabbedPane2;
 
 		final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 
@@ -39,6 +41,9 @@ public class PicobucPanel extends UserPicobucPanel {
 		tabbedPane.addTab("Converter", converterPanel);
 		
 		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceType, linkHeader, this);
-		getTabbedPane().addTab("Info", infoPanel);
+		tabbedPane2.addTab("Info", infoPanel);
+
+		DeviceDebugPanel debugPanel = new DeviceDebugPanel((byte) 0);
+		tabbedPane2.addTab("Debug", null, debugPanel, null);
 	}
 }

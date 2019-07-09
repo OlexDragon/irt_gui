@@ -178,7 +178,6 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 									}
 
 									private short parse(long value, int shift, int width) {
-										PLL_HMC807LP6CE_Reg9.this.logger.entry(value, shift, width);
 
 										long filter = getFilter(shift, width); PLL_HMC807LP6CE_Reg9.this.logger.trace("Filter={}", filter);
 

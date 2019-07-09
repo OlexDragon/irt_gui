@@ -354,7 +354,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 
 		public static Optional<? extends ParameterHeaderCode> valueOf(Byte code){
-			logger.entry(code);
 			return Arrays.stream(values()).parallel().filter(v->v.code==code).findAny();
 		}
 
@@ -402,7 +401,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 
 		public static Optional<? extends ParameterHeaderCode> valueOf(Byte code){
-			logger.entry(code);
 			return Arrays.stream(values()).parallel().filter(v->v.code==code).findAny();
 		}
 
@@ -467,7 +465,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 
 		public static String toString(byte index) {
-			logger.entry(index);
 			return values()[index&3].operator;
 		}
 	}

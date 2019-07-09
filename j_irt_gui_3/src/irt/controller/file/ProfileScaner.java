@@ -58,7 +58,7 @@ public class ProfileScaner implements Callable<Optional<Path>> {
 
 								return fs.get(10, TimeUnit.SECONDS);
 
-							} catch (CancellationException e) {
+							} catch (CancellationException | InterruptedException e) {
 								logger.info("fileScaner has been canceled.");
 
 							} catch (Exception e) {
