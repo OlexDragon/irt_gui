@@ -44,7 +44,7 @@ public class ControlController extends ControllerAbstract {
 
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				logger.entry("\n\t{}", valueChangeEvent);
+				logger.traceEntry("\n\t{}", valueChangeEvent);
 			}
 		};
 	}

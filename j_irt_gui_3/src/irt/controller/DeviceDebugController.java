@@ -65,7 +65,6 @@ public class DeviceDebugController extends ControllerAbstract {
  */
 	public DeviceDebugController(Optional<DeviceType> deviceType, String controllerName, JTextField txtField, JSlider slider, Value value, PacketWork packetWork, int addrToSave, Style style) {
 		super(deviceType, controllerName, packetWork, null, style);
-		logger.entry(controllerName);
 
 		this.addrToSave = addrToSave;
 //		setWaitTime(1000);
@@ -405,7 +404,6 @@ public class DeviceDebugController extends ControllerAbstract {
 
 		public ControllerWorker(String threadName, ValueChangeEvent valueChangeEvent){
 			super(threadName);
-			logger.entry(threadName, valueChangeEvent);
 			this.valueChangeEvent = valueChangeEvent;
 			int priority = getPriority();
 			if(priority>Thread.MIN_PRIORITY)

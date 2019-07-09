@@ -199,7 +199,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 
 	@Override
 	protected void packetRecived(List<Payload> payloads) {
-		logger.entry(payloads);
+
 		if(payloads!=null){
 			byte flags = 1;
 			int value = 0;
@@ -315,7 +315,6 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 	}
 
 	private void setStatus(int status) {
-		logger.entry(status);
 
 		boolean isNotLock = (status&LOCK)==0;
 		boolean isMute = (status&(MUTE|MUTE_TTL)) > 0;

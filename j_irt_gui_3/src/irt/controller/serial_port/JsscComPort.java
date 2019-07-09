@@ -511,7 +511,6 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 		boolean isReady = false;
 		long start = System.currentTimeMillis();
 		long waitTimeL = waitTime*waitFor;
-		logger.entry(waitFor, waitTime);
 
 		while(isOpened() && !(isReady = getInputBufferBytesCount()>=waitFor) && (System.currentTimeMillis()-start) < waitTimeL){
 			synchronized (this) {

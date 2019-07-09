@@ -296,7 +296,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 					.map(RedundancyControllerUnitStatus.class::cast)
 					.forEach(
 							unitStatus->{
-								logger.entry(unitStatus);
+
 								int unitId = unitStatus.getId();
 								unitsFiesdsMap
 								.get(unitId)

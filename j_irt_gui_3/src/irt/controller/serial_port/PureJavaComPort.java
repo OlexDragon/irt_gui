@@ -24,6 +24,7 @@ import irt.data.packet.LinkedPacketImp;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -50,7 +51,9 @@ public class PureJavaComPort implements SerialPortInterface {
 
     public static final int BAUDRATE_115200 = 115200;
 
-	private final CommPortIdentifier portIdentifier;
+	private final CommPortIdentifier PORT_IDENTIFIER;
+	private Level LOGGER_LEVEL;
+
 	private boolean opened ;
 	private PureJavaSerialPort serialPort;
 
@@ -65,9 +68,11 @@ public class PureJavaComPort implements SerialPortInterface {
 	private long clearTimeout;
 	private int waitTime;
 	private LinkHeader linkHeader;
+	private Optional<Short> oLogger;
 
 	public PureJavaComPort(String portName) throws NoSuchPortException {
-		portIdentifier = CommPortIdentifier.getPortIdentifier(portName);
+		PORT_IDENTIFIER = CommPortIdentifier.getPortIdentifier(portName);
+		LOGGER_LEVEL = logger.getLevel();
 	}
 
 	@Override
@@ -78,15 +83,13 @@ public class PureJavaComPort implements SerialPortInterface {
 	@Override
 	public synchronized Packet send(PacketWork packetWork){
 		Packet packet = packetWork.getPacketThread().getPacket();
-		logger.debug("ENTRY {}", packet);
 
 		long start = System.currentTimeMillis();
 
 		if(packet==null)
 			return null;
 
-		PacketHeader ph = packet.getHeader();
-		byte groupId = ph.getGroupId();
+		final PacketIDs packetIDToTest = PacketIDs.CONFIGURATION_MUTE;
 
 		Packet readPacket = Optional
 
@@ -110,7 +113,6 @@ public class PureJavaComPort implements SerialPortInterface {
 					return new PacketImp();
 				});
 
-		int runTimes = 0;
 		byte[] readData;
 		byte[] cs;
 		PacketHeader packetHeader;
@@ -122,18 +124,28 @@ public class PureJavaComPort implements SerialPortInterface {
 
 	clear();
 
-	byte[] data = packet.toBytes();
-	String hexStr = ToHex.bytesToHex(data);
+	PacketHeader ph = packet.getHeader();
+	byte groupId = ph.getGroupId();
+	oLogger = Optional.of(LOGGER_LEVEL).filter(ll->ll.compareTo(Level.DEBUG)>=0).map(ll->ph.getPacketId()).filter(packetIDToTest::match);
+	oLogger.ifPresent(pId->logger.debug("send(PacketWork) ENTRY {}", packet));
+//	logger.error("{}; {}", oLogger, ph); 
 
-	String prefix = (runTimes+1)+") send";
-	Console.appendLn(packet, prefix);
-	Console.appendLn(hexStr, prefix);
+	byte[] data = packet.toBytes();
+
+	new MyThreadFactory(()->{
+		
+		final String hexStr = ToHex.bytesToHex(data);
+
+		String prefix = "send";
+		Console.appendLn(packet, prefix);
+		Console.appendLn(hexStr, prefix);
+		oLogger.ifPresent(pId->logger.debug("writeBytes({})", hexStr));
+	}, "Send to Console");
 
 	if(data!=null && opened){
 
 		outputStream.write(data);
 
-		logger.debug("writeBytes({})", hexStr);
 
 		if (isConfirmBytes()){
 
@@ -141,7 +153,7 @@ public class PureJavaComPort implements SerialPortInterface {
 
 				if (readPacket instanceof LinkedPacket){
 					if ((readData = readLinkHeader()) != null)
-						checksum = new Checksum(byteStuffing(readData));
+						checksum = new Checksum(readData);
 					else {
 						logger.info("\n\tlinkHeader==null\n\tSent packet {}", packet);
 						Console.appendLn("LinkHeader", "Break");
@@ -150,15 +162,14 @@ public class PureJavaComPort implements SerialPortInterface {
 
 				if ((readData = readHeader()) != null) {
 
-					final byte[] headerByteStuffing = byteStuffing(readData);
 
 					if (checksum != null)
-						checksum.add(headerByteStuffing);
+						checksum.add(readData);
 					else
-						checksum = new Checksum(headerByteStuffing);
+						checksum = new Checksum(readData);
 
-					packetHeader = new PacketHeader(headerByteStuffing);
-					logger.trace(packetHeader);
+					packetHeader = new PacketHeader(readData);
+					oLogger.ifPresent(pId->logger.debug(packetHeader));
 
 					final byte newGroupId = packetHeader.getGroupId();
 					if (newGroupId == groupId) {
@@ -170,23 +181,20 @@ public class PureJavaComPort implements SerialPortInterface {
 							if (containsFlagSequence(readData)) {
 								cs = checksum.getChecksumAsBytes();
 
-								final byte[] rd = byteStuffing(readData);
+								final byte[] rd = readData;
 
 								if (cs[0] == rd[0] && cs[1] == rd[1]) {
 									readPacket.setPayloads(payloadsList);
 								}else
 									logger.warn("checksum error: {} : {}", ()->ToHex.bytesToHex(cs), ()->ToHex.bytesToHex(rd));
 
-								logger.trace("END {}", readPacket);
+								final Packet rp = readPacket;
+								oLogger.ifPresent(pId->logger.debug("END {}", rp));
 								break;
 							}
 
-							final byte[] byteStuffing = byteStuffing(readData);
-							checksum.add(byteStuffing);
-							parameterHeader = new ParameterHeader(byteStuffing);
-
-							final ParameterHeader pHeader = parameterHeader;
-							logger.trace("{}; readData: {}; byteStuffing: {}\n\t buffer: {}", pHeader, readData, byteStuffing, buffer);
+							checksum.add(readData);
+							parameterHeader = new ParameterHeader(readData);
 
 							int payloadSize = parameterHeader.getSize();
 
@@ -206,20 +214,19 @@ public class PureJavaComPort implements SerialPortInterface {
 										if(waitComPort(payloadSize)){
 
 											readData = readBytes(payloadSize);
-											final byte[] payloadByteStuffing = byteStuffing(readData);
 
 											final byte[] rd = readData;
-											logger.trace("payload size: {}; parameter data: {}", ()->payloadSize, ()->ToHex.bytesToHex(rd));
+											oLogger.ifPresent(pId->logger.debug("payload size: {}; parameter data: {}", ()->payloadSize, ()->ToHex.bytesToHex(rd)));
 
-											if (Optional.ofNullable(payloadByteStuffing).map(bs->bs.length).orElse(0)>=payloadSize) {
+											if (Optional.ofNullable(readData).map(bs->bs.length).orElse(0)>=payloadSize) {
 
-												checksum.add(payloadByteStuffing);
-												Payload payload = new Payload(parameterHeader, payloadByteStuffing);
+												checksum.add(readData);
+												Payload payload = new Payload(parameterHeader, readData);
 												payloadsList.add(payload);
-												logger.trace("{}\n\t buffer: {}", payload, buffer);
+												oLogger.ifPresent(pId->logger.debug("{}\n\t buffer: {}", payload, buffer));
 
 											}else{
-												logger.warn("readData.length>={}; payloadByteStuffing: {}", payloadSize, payloadByteStuffing);
+												logger.warn("readData.length>={}; payloadByteStuffing: {}", payloadSize, readData);
 												break;
 											}
 										}else{
@@ -254,19 +261,19 @@ public class PureJavaComPort implements SerialPortInterface {
 		Console.appendLn(readPacket, "Get");
 		final long workTime = System.currentTimeMillis()-start;
 		Console.appendLn(""+workTime, "Time");
-		logger.trace("Time taken to send the packet: {}; read packet: {}", workTime, readPacket);
+		final Packet rp = readPacket;
+		oLogger.ifPresent(pId->logger.debug("EXIT send(PacketWork packetWork) - Time taken to send the packet: {}; read packet: {}", workTime, rp));
 
-//		logger.traceExit(packet);
 		return readPacket;
 	}
 
 	public void clear() throws Exception {
-		logger.traceEntry();
 
 		position = 0;
 
 		do{
-			logger.info("cleared {} bytes; {}", ()->Optional .ofNullable(buffer).map(b->b.length).orElse(0), ()->buffer);
+			if(oLogger!=null)
+				oLogger.ifPresent(pId->logger.debug("cleared {} bytes; {}", ()->Optional .ofNullable(buffer).map(b->b.length).orElse(0), ()->buffer));
 
 			buffer = null;
 
@@ -274,11 +281,10 @@ public class PureJavaComPort implements SerialPortInterface {
 
 		 }while (readToTheBuffer || isBuffer());
 
-		logger.traceExit();
 	}
 
 	public boolean waitComPort(int watedBytes){
-		logger.trace("ENTRY: waitComPort({}); WAIT_TIME: {}; buffer.length: {}", ()->watedBytes,  ()->waitTime, ()->Optional.ofNullable(buffer).map(b->b.length).orElse(null));
+		oLogger.ifPresent(pId->logger.debug("ENTRY: waitComPort(int watedBytes: {}); WAIT_TIME: {}; buffer.length: {}", ()->watedBytes,  ()->waitTime, ()->Optional.ofNullable(buffer).map(b->b.length).orElse(null)));
 		long start = System.currentTimeMillis();
 
 		// control maximum timeout
@@ -310,18 +316,18 @@ public class PureJavaComPort implements SerialPortInterface {
 								waitingTime = System.currentTimeMillis()-start;
 							}while(bufferLength<newSize && waitingTime < wait);
 
-							logger.trace("waitComPort({}) should be {} bytes:  wait time: {}", watedBytes, newSize, waitingTime);
 							final int ns = newSize;
+							final long wt = waitingTime;
+							oLogger.ifPresent(pId->logger.debug("waitComPort({}) should be {} bytes:  wait time: {}", watedBytes, ns, wt));
 
 							return Optional.ofNullable(buffer).filter(b->b.length>=ns).isPresent();
 						});
 
-		logger.trace("waitComPort({}) RETURN:  {}\n\t buffer: {}", watedBytes, result, buffer);
+		oLogger.ifPresent(pId->logger.debug("waitComPort({}) RETURN:  {}\n\t buffer: {}", watedBytes, result, buffer));
 		return result;
 	}
 
 	private boolean isConfirmBytes() throws Exception {
-		logger.traceEntry();
 
 		byte[] confirmBytes;
 		final Optional<LinkHeader> oLinkHeader = Optional.ofNullable(linkHeader);
@@ -330,57 +336,42 @@ public class PureJavaComPort implements SerialPortInterface {
 		if(waitComPort(size))
 			confirmBytes = readBytes(size);
 		else
-			confirmBytes = null;
+			return false;
 
-		logger.debug("confirmBytes : {}", confirmBytes);
-
-		final boolean isFlagSequence = Optional	
-
-				.ofNullable(confirmBytes)
-				.filter(b->b[0]==PacketImp.FLAG_SEQUENCE)
-				.filter(b->b[b.length-1]==PacketImp.FLAG_SEQUENCE)
-				.isPresent();
+		oLogger.ifPresent(pId->logger.debug("isConfirmBytes(): {}", confirmBytes));
 
 
-		if(isFlagSequence){
+		// No LinkHeader(converter) or Link addresses equal
+		boolean linkHeadersEqual = !oLinkHeader
 
-			final byte[] byteStuffing = byteStuffing(confirmBytes);
-
-			// No LinkHeader(converter) or Link addresses equal
-			boolean linkHeadersEqual = !oLinkHeader
-
-					.filter(lh->!lh.equals(new LinkHeader(Arrays.copyOfRange(byteStuffing, 1, byteStuffing.length-1))))
+					.filter(lh->!lh.equals(new LinkHeader(Arrays.copyOfRange(confirmBytes, 1, confirmBytes.length-1))))
 					.isPresent();
 
-			if(linkHeadersEqual){
+		if(linkHeadersEqual){
 
-				logger.debug("byteStuffing : {}", byteStuffing);
-				int checksumIndex = byteStuffing.length - 3;	// 2 bytes checksum and 1 byte PacketImp.FLAG_SEQUENCE
-				byte[] data = Arrays.copyOfRange(byteStuffing, 1, checksumIndex);
+				oLogger.ifPresent(pId->logger.debug("isConfirmBytes() - byteStuffing : {}", confirmBytes));
+				int checksumIndex = confirmBytes.length - 3;	// 2 bytes checksum and 1 byte PacketImp.FLAG_SEQUENCE
+				byte[] data = Arrays.copyOfRange(confirmBytes, 1, checksumIndex);
 
 				byte[] b = new Checksum(data).getChecksumAsBytes();
 
-				if(b[0]==byteStuffing[checksumIndex] && b[1]==byteStuffing[++checksumIndex])
+				if(b[0]==confirmBytes[checksumIndex] && b[1]==confirmBytes[++checksumIndex])
 					return true;
 				else
-					logger.warn("Checksum ERROR ({})", ()->ToHex.bytesToHex(byteStuffing));
+					logger.warn("Checksum ERROR ({})", ()->ToHex.bytesToHex(confirmBytes));
 			}else
 				oLinkHeader
 				.ifPresent(linkHeader->logger.warn("LinckHeaders are not equal (sent linkHeader={}, received={}", linkHeader.toBytes(), confirmBytes));
-		}else{
-			logger.warn("\n\t need {} bytes\n\t readBytes= {}\n\t ConfirmBytes contain flag sequence: {}\n\t position: {}\n\t buffer: {}", size, confirmBytes, isFlagSequence, position, buffer);
-		}
 
 		return false;
 	}
 
 	@Override
 	public synchronized byte[] readBytes(final int size) throws Exception {
-		logger.debug("ENTRY size: {}; position: {}", size, position);
+		oLogger.ifPresent(pId->logger.debug("ENTRY readBytes(final int size: {}); position: {}", size, position));
 
 		return Optional.ofNullable(buffer)
 				.map(bf->bf.length)
-				.filter(length->length >= size)
 				.filter(length->length >= size + (int) IntStream.range(0, size).filter(index->buffer[index]==PacketImp.CONTROL_ESCAPE).count())
 				.map(bLength->{
 					try {
@@ -394,7 +385,7 @@ public class PureJavaComPort implements SerialPortInterface {
 					try {
 
 						if(waitComPort(size))
-							return getAPartOfTheBuffer(size);
+							return readBytes(size);
 
 					} catch (Exception e) {
 						logger.catching(e);
@@ -417,7 +408,7 @@ public class PureJavaComPort implements SerialPortInterface {
 
 			inputStream.read(bytes);
 
-			logger.debug("\n\t read bytes: {};\n\t bytes: {}\n\t buffer: {}", bytes.length, bytes, buffer);
+			oLogger.ifPresent(pId->logger.debug("writeToBuffer():\n\t read bytes: {};\n\t bytes: {}\n\t buffer: {}", bytes.length, bytes, buffer));
 
 			buffer =Optional
 				.ofNullable(buffer)
@@ -445,10 +436,10 @@ public class PureJavaComPort implements SerialPortInterface {
 					try {
 						int acknowledgeSize = 0;
 						Integer size = Optional.ofNullable(linkHeader).map(l->11).orElse(7);
-						for(int i=0; i<2; i++){
+						for(int i=0; i<buffer.length; i++){
 							int index = size + i;
 							if(buffer[index]==PacketImp.FLAG_SEQUENCE){
-								acknowledgeSize = index;
+								acknowledgeSize = index + 1;
 								break;
 							}
 						}
@@ -456,7 +447,7 @@ public class PureJavaComPort implements SerialPortInterface {
 						if(acknowledgeSize>0){
 							byte[] acknowledge = Arrays.copyOf(buffer, acknowledgeSize);
 							outputStream.write(acknowledge);
-							logger.info("sendAcknowledge(): {}", acknowledge);
+							oLogger.ifPresent(pId->logger.debug("sendAcknowledge(): {}", acknowledge));
 						}
 					} catch (IOException e) {
 						logger.catching(e);
@@ -468,7 +459,7 @@ public class PureJavaComPort implements SerialPortInterface {
 	}
 
 	private synchronized byte[] getAPartOfTheBuffer(final int size) throws IOException {
-		logger.trace("ENTRY positiob: {} size: {};\n buffer: {}", position, size, buffer);
+		oLogger.ifPresent(pId->logger.debug("ENTRY positiob: {}; getAPartOfTheBuffer(final int size: {});\n buffer: {}", position, size, buffer));
 
 		final int end = position + size;
 		return getBuffer()
@@ -488,23 +479,29 @@ public class PureJavaComPort implements SerialPortInterface {
 
 								result = b;
 								position = b.length;
-								return result;
-							}
-								
-							final int newPosition = position + newSize;
-							result = Arrays.copyOfRange(b, position, newPosition);
-							position = newPosition;
+							}else {
 
-							logger.debug("getAPartOfTheBuffer({}); newSize: {}, position: {}", size, newSize, position);
+								final int newPosition = position + newSize;
+								result = Arrays.copyOfRange(b, position, newPosition);
+								position = newPosition;
+							}
+
+							if(newSize>size)
+								result = byteStuffing(result);
+
+							final byte[] r = result;
+							oLogger.ifPresent(pId->logger.debug("getAPartOfTheBuffer({}); newSize: {}, position: {}; result: {}", size, newSize, position, r));
 							return result;
 						})
 				.orElse(null);
 	}
 
 	public boolean isFlagSequence() throws Exception {
-		logger.traceEntry();
+		oLogger.ifPresent(pId->logger.debug("isFlagSequence() - buffer: {}; position: {}", buffer, position));
 
-		waitComPort(10);
+		if(!waitComPort(10))
+			return false;
+
 		final byte[] readBytes = readBytes(1);
 		if(readBytes==null)
 			return false;
@@ -519,7 +516,7 @@ public class PureJavaComPort implements SerialPortInterface {
 
 		final byte[] readBytes = readBytes(LinkHeader.SIZE);
 
-		logger.trace("Exit readBytes={}", ()->ToHex.bytesToHex(readBytes));
+		oLogger.ifPresent(pId->logger.debug("Exit readBytes={}", ()->ToHex.bytesToHex(readBytes)));
 
 		return readBytes;
 	}
@@ -531,26 +528,25 @@ public class PureJavaComPort implements SerialPortInterface {
 
 		final byte[] readBytes = readBytes(PacketHeader.SIZE);
 
-		logger.trace("EXIT readBytes: {}", ()->ToHex.bytesToHex(readBytes));
+		oLogger.ifPresent(pId->logger.debug("EXIT readBytes: {}", ()->ToHex.bytesToHex(readBytes)));
 
 		return readBytes;
 	}
 
 	private byte[] readParameterHeader() throws Exception {
-		logger.traceEntry();
 
 		if(!waitComPort(ParameterHeader.SIZE))
 			return null;
 
 		byte[] readBytes = readBytes(ParameterHeader.SIZE);
 
-		logger.trace("EXIT size: {}; readBytes: {};", ()->ParameterHeader.SIZE, ()->ToHex.bytesToHex(readBytes));
+		oLogger.ifPresent(pId->logger.debug("EXIT size: {}; readBytes: {};", ()->ParameterHeader.SIZE, ()->ToHex.bytesToHex(readBytes)));
 
 		return readBytes;
 	}
 
 	private boolean containsFlagSequence(byte[] readBytes) {
-		logger.traceEntry(()->ToHex.bytesToHex(readBytes));
+		oLogger.ifPresent(pId->logger.debug(()->ToHex.bytesToHex(readBytes)));
 
 		boolean isFlagSequence = false;
 		for(byte b:readBytes)
@@ -559,13 +555,14 @@ public class PureJavaComPort implements SerialPortInterface {
 				break;
 			}
 
-		logger.traceExit(isFlagSequence);
+		final boolean is = isFlagSequence;
+		oLogger.ifPresent(pId->logger.debug(is));
 		return isFlagSequence;
 	}
 
 	@Override
 	public String getPortName() {
-		return portIdentifier.getName();
+		return PORT_IDENTIFIER.getName();
 	}
 
 	@Override
@@ -574,7 +571,7 @@ public class PureJavaComPort implements SerialPortInterface {
 		if(opened)
 			return true;
 
-		serialPort = (PureJavaSerialPort) portIdentifier.open(PureJavaComPort.class.getName(), PureJavaComPort.MAX_WAIT_TIME);
+		serialPort = (PureJavaSerialPort) PORT_IDENTIFIER.open(PureJavaComPort.class.getName(), PureJavaComPort.MAX_WAIT_TIME);
 		setBaudrate(BAUDRATE_115200);
 		serialPort.enableReceiveThreshold(PureJavaComPort.MAX_WAIT_TIME);
 		inputStream = serialPort.getInputStream();
@@ -620,7 +617,7 @@ public class PureJavaComPort implements SerialPortInterface {
 
 	@Override
 	public void setBaudrate(int baudrate) {
-		logger.entry(baudrate);
+
 		try {
 			serialPort.setSerialPortParams(baudrate, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 		} catch (UnsupportedCommOperationException e) {
@@ -709,6 +706,6 @@ public class PureJavaComPort implements SerialPortInterface {
 
 	@Override
 	public String toString() {
-		return getClass().getSimpleName() + " - " + Optional.ofNullable(portIdentifier).map(CommPortIdentifier::getName).orElse(null);
+		return getClass().getSimpleName() + " - " + Optional.ofNullable(PORT_IDENTIFIER).map(CommPortIdentifier::getName).orElse(null);
 	}
 }

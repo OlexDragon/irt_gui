@@ -590,7 +590,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 
 			private boolean initialisePotenciometr(int index, int addr, int potentiometerValue) {
-				logger.entry( index, addr, potentiometerValue);
 				Value value = new Value( potentiometerValue, 0, MAX_POTENTIOMETER_VALUE, 0);
 				RegisterValue registerValue = new RegisterValue(index, addr, value);
 				DeviceDebagSetter setter = new DeviceDebagSetter(linkHeader,
@@ -606,7 +605,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 
 			private DefaultController createController(DeviceDebagSetter setter, int index, int address) {
-				logger.entry(setter, index, address);
 				return new DefaultController(deviceType, "Potenciometer index="+index+", address="+address, setter, Style.CHECK_ONCE){
 
 					@Override
@@ -645,7 +643,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 
 			private synchronized boolean setCalibrationMode(final CalibrationMode calibrationMode) {
-				BIASsPanel.this.logger.entry(calibrationMode);
 
 				Setter setter = new Setter(
 						linkHeader,
@@ -686,7 +683,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 			private static final long TIMEOUT = 1000;
 			private boolean runController(DefaultController controller) {
-				BIASsPanel.this.logger.entry(controller);
 
 				boolean don;
 				if(controller!=null){

@@ -12,6 +12,7 @@ import java.awt.event.HierarchyEvent;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Timer;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,6 +29,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -126,6 +128,8 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 								});
 					});
 
+				} catch (CancellationException | InterruptedException e) {
+					logger.catching(Level.INFO, e);
 				} catch (Exception e) {
 					logger.catching(e);
 				}

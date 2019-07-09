@@ -481,7 +481,6 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		}
 
 		private void setValue(final Value value) {
-			logger.entry(value);
 
 			setSliderValue(value);
 			setValueTextField(value);
@@ -501,7 +500,6 @@ public class ControlPanelHPB extends JPanel implements Refresh, ControlPanel, Ob
 		}
 
 		private void setRange(Range range) {
-			logger.entry(range);
 
 			final long minimum = range.getMinimum();
 			final long maximum = range.getMaximum();

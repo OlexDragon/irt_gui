@@ -279,7 +279,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 	}
 
 	protected void setStatus(int status) {
-		logger.entry(status);
+
 		if(this.status!=status){
 			this.status = status;
 			ledMute.setOn((status & MUTE) > 0);
@@ -288,7 +288,7 @@ public class MonitorPanelSSPA extends MonitorPanelAbstract implements Monitor {
 	}
 
 	protected void setConverterStatus(int status) {
-		logger.entry(status);
+
 		if(this.status!=status){
 			this.status = status;
 			ledMute.setOn((status & MonitorPanelConverter.MUTE) > 0);

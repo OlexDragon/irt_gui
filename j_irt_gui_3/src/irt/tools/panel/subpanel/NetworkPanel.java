@@ -52,6 +52,7 @@ import irt.data.network.NetworkAddress.AddressType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.network.NetworkAddressPacket;
@@ -389,7 +390,6 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 						at = NetworkAddress.AddressType.DYNAMIC;
 					}
 
-					logger.trace("itemStateChanged() AddressType={}", at);
 					if(networkAddressTmp!=null){
 						networkAddressTmp.setType(at);
 						setButtonEnabled();
@@ -456,10 +456,16 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	}
 
 	@Override
-	public void run() { GuiControllerAbstract.getComPortThreadQueue().add(packet); }
+	public void run() {
+		logger.traceEntry("{}", packet);
+		GuiControllerAbstract.getComPortThreadQueue().add(packet);
+	}
 
 	@Override
 	public void onPacketReceived(Packet packet) {
+
+		if(PacketIDs.NETWORK_ADDRESS.match(packet))
+			logger.trace(packet);
 
 		new MyThreadFactory(()->{
 

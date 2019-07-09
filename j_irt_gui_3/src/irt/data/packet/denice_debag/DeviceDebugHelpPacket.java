@@ -10,15 +10,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 
 public class DeviceDebugHelpPacket extends PacketSuper {
-	private final static Logger logger = LogManager.getLogger();
+//	private final static Logger logger = LogManager.getLogger();
 
 	public static final int DEVICES = 0, DUMP = 1;
 
@@ -54,7 +51,6 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 		}
 
 		public IntStream[] parse(){
-			logger.entry(text);
 
 			Map<Boolean, List<String>> collect = Optional
 													.ofNullable(text)
