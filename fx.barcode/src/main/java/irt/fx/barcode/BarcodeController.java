@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,6 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.Writer;
 import com.google.zxing.WriterException;
@@ -144,14 +147,14 @@ public class BarcodeController extends AnchorPane{
 			getBitMatrix()
 			.ifPresent(
 					bitMatrix->{
-						final int width = bitMatrix.getWidth();
+						final int column = bitMatrix.getWidth();
 						final int rows = bitMatrix.getHeight();
 
 						final String csv = IntStream.range(0, rows)
 
 								.mapToObj(
 										roeIndex->
-										IntStream.range(0, width)
+										IntStream.range(0, column)
 										.filter(columnIndex->bitMatrix.get(columnIndex, roeIndex))
 										.mapToObj(Integer::toString)
 										.collect(Collectors.joining(",")))
@@ -194,7 +197,7 @@ public class BarcodeController extends AnchorPane{
 		Optional.ofNullable(timer).ifPresent(t->t.cancel());
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
-			
+
 			@Override
 			public void run() {
 
@@ -267,9 +270,12 @@ public class BarcodeController extends AnchorPane{
 		if(width.isEmpty() || height.isEmpty() || selectedIndex<0 || tfToConvert.getText().trim().isEmpty())
 			return Optional.empty();
 
+		final Map<EncodeHintType, String> hints = new HashMap<>();
+		hints.put(EncodeHintType.MARGIN, "0");
+
 		final BarcodeFormat barcodeFormat = selectionModel.getSelectedItem();
-		Writer codeWriter = new MultiFormatWriter();
-		final BitMatrix bitMatrix = codeWriter.encode(text, barcodeFormat, Integer.parseInt(width), Integer.parseInt(height));
+		final Writer codeWriter = new MultiFormatWriter();
+		final BitMatrix bitMatrix = codeWriter.encode(text, barcodeFormat, Integer.parseInt(width), Integer.parseInt(height), hints);
 		return Optional.of(bitMatrix);
 	}
 }
