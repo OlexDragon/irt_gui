@@ -564,7 +564,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		}
 
 		public final static String setupInfoPathern = "%s any.any.any { %s }";
-		public final static String pathPathern = "%s { path {%s} %s }";
+		public final static String pathPathern = "%s { path {\"%s\"} %s }";
 		public String getSetupInfo() {
 
 			return String.format(

@@ -166,7 +166,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 			if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<0)
 				delay = ComPortThreadQueue.DELAY_TIMES;
-			else if(size==0)
+			else if(size<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
 				delay = 0;
 
 			if(++index>=availableAlarms.length)

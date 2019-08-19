@@ -599,7 +599,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
 			delay = ComPortThreadQueue.DELAY_TIMES;
-		else if(size==0)
+		else if(size<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
 			delay = 0;
 	}
 }
