@@ -183,7 +183,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
 			delay = ComPortThreadQueue.DELAY_TIMES;
 
-		if(delay<=0)
+		if(delay<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToGet);
 		else
 			delay--;

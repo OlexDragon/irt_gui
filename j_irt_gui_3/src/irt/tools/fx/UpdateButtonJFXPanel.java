@@ -196,7 +196,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 								try {
 
 									addToTar(tarArchiveOutputStream, fileName, bytes);
-									setuoMD5.append(DatatypeConverter.printHexBinary(md5.digest(bytes))).append(" *" + fileName).append("\n") ;
+									setuoMD5.append(DatatypeConverter.printHexBinary(md5.digest(bytes))).append(" *" + fileName).append("\n");
 
 								} catch (IOException e1) {
 									logger.catching(e1);
@@ -208,20 +208,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 						ByteArrayInputStream is = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 						uploader.upload(is);
-//						logger.error(new String(byteArrayOutputStream.toByteArray()));
 
-						//TODO - this is the test code. Have to remove it.
-//						{
-//							File testF = new File("C:\\Users\\Oleksandr\\Desktop\\test.tar");
-//							if(testF.exists())
-//								testF.delete();
-//
-//							testF.createNewFile();
-//							try(FileOutputStream fos = new FileOutputStream(testF);){
-//								byteArrayOutputStream.writeTo(fos);
-//							}
-//
-//						}
 					} catch (NoSuchAlgorithmException | IOException e1) {
 						logger.catching(e1);
 					}

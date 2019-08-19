@@ -69,8 +69,8 @@ public class PacketImp implements Packet{
 			return id;
 		}
 
-		public boolean match(byte packetId) {
-			return packetId == id;
+		public boolean match(byte groupId) {
+			return groupId == id;
 		}
 
 		public String toString() {

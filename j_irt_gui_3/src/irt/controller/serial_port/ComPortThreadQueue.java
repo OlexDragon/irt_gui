@@ -37,8 +37,9 @@ public class ComPortThreadQueue implements Runnable {
 
 	private final static Logger logger = LogManager.getLogger();
 
-	public final static int QUEUE_SIZE_TO_DELAY = 5;
-	public final static int DELAY_TIMES = 10;
+	public final static int QUEUE_SIZE_TO_DELAY = 20;
+	public final static int QUEUE_SIZE_TO_RESUME = 5;
+	public final static int DELAY_TIMES = 5;
 	
 
 	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300, Collections.reverseOrder());

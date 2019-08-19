@@ -779,7 +779,11 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->new MyThreadFactory(()->adc.update(packet), "BIASsPanel.onPacketReceived()")); }
+		final byte groupId = packet.getHeader().getGroupId();
+		if(!PacketGroupIDs.DEVICE_DEBUG.match(groupId))
+			return;
+
+		synchronized(adcWorkers) { adcWorkers.stream().forEach(adc->adc.update(packet)); }
 	}
 
 	private int delay;
@@ -788,6 +792,8 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
 		final int size = queue.size();
+
+//		logger.error("delay: {}; size: {}", delay, size);
 
 		if(delay<=0)
 			try{
@@ -807,7 +813,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
 			delay = ComPortThreadQueue.DELAY_TIMES;
-		else if(size==0)
+		else if(size<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
 			delay = 0;
 	}
 
@@ -828,7 +834,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 
 		synchronized(adcWorkers) {
-			adcWorkers.parallelStream().forEach(AdcWorker::clear);
 			adcWorkers.clear();
 		}
 
