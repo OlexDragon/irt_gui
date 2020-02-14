@@ -55,7 +55,7 @@ public class DeviceInfo implements PacketListener {
 		DLRS			(410, Protocol.LINKED, "DLRS"),	//Down link Redundancy System
 		DLRS2			(411, Protocol.LINKED, "DLRS2"),
 
-		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.CONVERTER, "L to Ku Converter"),
+		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.LINKED, "L to Ku Converter"),
 		CONVERTER_70_TO_L		(1001, Protocol.CONVERTER, "70 to L Converter"),
 		CONVERTER_L_TO_70		(1002, Protocol.CONVERTER, "L to 70 Converter"),
 		CONVERTER_140_TO_L		(1003, Protocol.CONVERTER, "140 to L Converter"),

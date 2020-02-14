@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -24,6 +25,7 @@ import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCode;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
+import irt.tools.fx.MonitorPanelFx.StatusBits;
 
 public class MeasurementPacket extends PacketSuper{
 	private final static Logger logger = LogManager.getLogger();
@@ -40,9 +42,8 @@ public class MeasurementPacket extends PacketSuper{
 																											}
 																											return null;
 																										})
-																										.map(method->{
-
-																											return packet
+																										.map(
+																												method->packet
 																													.getPayloads()
 																													.stream()
 																													.map(
@@ -60,7 +61,8 @@ public class MeasurementPacket extends PacketSuper{
 																																					// status flags
 																																						if(pc.getStatus().getCode()==code){
 																																							int statusBits = pl.getInt(0);
-																																							return new AbstractMap.SimpleEntry<>(pc.name(), pc.parseStatusBits(statusBits));
+																																							List<StatusBits> parseStatusBits = pc.parseStatusBits(statusBits);
+																																							return new AbstractMap.SimpleEntry<>(pc.name(), parseStatusBits);
 																																						}
 
 																																						return new AbstractMap.SimpleEntry<>(pc.name(), pc.toString(pl.getBuffer()));
@@ -72,8 +74,7 @@ public class MeasurementPacket extends PacketSuper{
 																																}
 																																return null;
 																															})
-																													.collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue,  (a,b)->{throw new IllegalStateException();},  TreeMap::new));
-																										});
+																													.collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue,  (a,b)->{throw new IllegalStateException();},  TreeMap::new)));
 
 	/**
 	 *  Converter request packet

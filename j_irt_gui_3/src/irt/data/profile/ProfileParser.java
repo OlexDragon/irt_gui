@@ -91,7 +91,7 @@ public class ProfileParser{
 
 			final SequenceChecker seq1 = new SequenceChecker();
 			final SequenceChecker seq2 = new SequenceChecker();
-			final boolean ignoreValues = tableName.equals("frequency") || tableName.equals("rf-gain");
+			final boolean ignoreValues = tableName.equals("frequency") || tableName.equals("rf-gain") || tableName.equals("frequency-low");
 
 			List<SimpleEntry<Double, Double>> sequence = tableContent.stream()
 																	.filter(e->seq1.add(e.getKey()) && (ignoreValues || seq2.add(e.getValue())))
