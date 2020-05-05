@@ -31,11 +31,14 @@ import irt.data.profile.Profile;
 import irt.data.profile.ProfileValidator.ProfileErrors;
 import irt.tools.fx.UpdateMessageFx.PacketFormats;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
 import javafx.scene.text.Font;
 
@@ -224,8 +227,21 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 			// If profile has error return
 			if(profileErrors!=ProfileErrors.NO_ERROR){
-				showAlert("Profile error: " + profileErrors);
-				return;
+
+				Alert alert = new Alert(AlertType.WARNING);
+				alert.setTitle("Profile error: " + profileErrors);
+				alert.setHeaderText("The profile contains errors.\nYou must decide to stop or continue the upload.");
+				alert.setContentText("Press 'Continue' or 'Stop' buton.");
+
+				ButtonType btContinue = new ButtonType("Continue", ButtonData.OK_DONE);
+				ButtonType btStop = new ButtonType("Stop", ButtonData.CANCEL_CLOSE);
+				final ObservableList<ButtonType> buttonTypes = alert.getButtonTypes();
+				buttonTypes.addAll(btContinue, btStop);
+				buttonTypes.remove(ButtonType.OK);
+
+				final Optional<ButtonType> oButtonType = alert.showAndWait();
+				if(oButtonType.get()==btStop)
+					return;
 			}
 
 			// if profile does not have errors prepare a profile for uploading
