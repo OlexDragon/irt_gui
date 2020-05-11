@@ -25,7 +25,7 @@ import irt.tools.fx.interfaces.StopInterface;
 public class FileScanner extends FutureTask<List<Path>> implements StopInterface{
 	private final static Logger logger = LogManager.getLogger();
 
-	private static boolean busy;
+	private static volatile boolean busy;
 	private static final List<Path> paths = new ArrayList<>();
 	private static FileScanner fileScanner;
 

@@ -68,7 +68,7 @@ public class HttpUploader {
 
 		String boundary =  "*****"+Long.toHexString(System.currentTimeMillis())+"*****";
 
-		URL url = new URL("http://" + ipAddress + "/upgrade.cgi");
+		URL url = new URL("http", ipAddress, "/upgrade.cgi");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();	
 
 		connection.setDoOutput(true);
