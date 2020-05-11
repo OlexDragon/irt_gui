@@ -36,7 +36,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.SoftReleaseChecker;
-import irt.controller.file.ProfileScanner;
+import irt.controller.file.ProfileScannerFT;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -44,6 +44,7 @@ import irt.data.MyThreadFactory;
 import irt.data.listener.PacketListener;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.Transformer;
+import irt.tools.fx.UpdateMessageFx;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 
@@ -76,7 +77,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 	private final Timer timer = new Timer(true);
 
-	private ProfileScanner profileScanner;
+	private ProfileScannerFT profileScannerFT;
 
 	public InfoPanel(DeviceInfo deviceInfo) {
 
@@ -101,13 +102,17 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 			locationMenuItem.setEnabled(false);
 			popup.add(locationMenuItem);
 
+			JMenuItem updateMenuItem = new JMenuItem("Update");
+			popup.add(updateMenuItem);
+			updateMenuItem.addActionListener(e->NetworkPanel.updateButton.fire());
+
 			new MyThreadFactory("Popup Menu Worker").newThread(()->{
 
-				profileScanner = new ProfileScanner(deviceInfo);
-				new MyThreadFactory("Profile Scaner").newThread(profileScanner).start();
+				profileScannerFT = new ProfileScannerFT(deviceInfo);
+				new MyThreadFactory("Profile Scaner").newThread(profileScannerFT).start();
 				try {
 
-					profileScanner.get().ifPresent(path->{
+					profileScannerFT.get().ifPresent(path->{
 						openMenuItem.setEnabled(true);
 						locationMenuItem.setEnabled(true);
 						openMenuItem.addActionListener(
@@ -126,6 +131,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 										logger.catching(e1);
 									}
 								});
+						UpdateMessageFx.setProfilePath(path);
 					});
 
 				} catch (CancellationException | InterruptedException e) {
@@ -150,7 +156,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 							if(secondsCount!=null)
 								secondsCount.stop();
 							timer.cancel();
-							profileScanner.cancel(true);
+							profileScannerFT.cancel(true);
 						}));
 
 		addAncestorListener(new AncestorListener() {

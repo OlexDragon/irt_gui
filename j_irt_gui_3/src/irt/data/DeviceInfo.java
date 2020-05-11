@@ -286,7 +286,7 @@ public class DeviceInfo implements PacketListener {
 
 		deviceInfo
 		.getSerialNumber()
-		.filter(sn->!sn.equals(serialNumber))
+		.filter(sn->serialNumber.filter(s->sn.equals(s)).isPresent())
 		.orElseThrow(()->new IllegalArgumentException(this +  deviceInfo.toString()));
 
 		setDeviceType(deviceInfo.typeId);

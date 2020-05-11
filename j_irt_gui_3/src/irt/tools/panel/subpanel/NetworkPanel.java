@@ -151,7 +151,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 
 	private byte unitAddress;
 
-	private UpdateButtonJFXPanel updateButton;
+	public static UpdateButtonJFXPanel updateButton;
 
 
 	private Timer activitiesTimer;

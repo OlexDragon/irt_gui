@@ -43,13 +43,13 @@ public class ConverterProfileScanner extends FutureTask<Optional<Path>> implemen
 	private static class ConverterWorker extends FutureTask<Optional<Path>>  implements Callable<Optional<Path>>, PacketListener{
 
 		private static Optional<String> oFileName;
-		private static ProfileScaner profileScaner;
+		private static ProfileScanner profileScanner;
 
 		public ConverterWorker() {
 			super(
 					()->{
-						profileScaner = new ProfileScaner(oFileName);
-						FutureTask<Optional<Path>> ft = new FutureTask<>(profileScaner);
+						profileScanner = new ProfileScanner(oFileName);
+						FutureTask<Optional<Path>> ft = new FutureTask<>(profileScanner);
 						new MyThreadFactory(ft, "ConverterProfileScanner.ConverterWorker.Callable");
 						return ft.get(10, TimeUnit.SECONDS);
 					});
@@ -112,7 +112,7 @@ public class ConverterProfileScanner extends FutureTask<Optional<Path>> implemen
 
 		public void stop() {
 			GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
-			Optional.ofNullable(profileScaner).ifPresent(ProfileScaner::stop);
+			Optional.ofNullable(profileScanner).ifPresent(ProfileScanner::stop);
 		}
 	}
 }

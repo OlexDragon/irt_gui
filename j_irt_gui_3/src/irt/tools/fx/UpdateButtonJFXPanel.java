@@ -65,12 +65,13 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 		});
 	}
 
-	// ******************************* constructor UpdateButtonFx   ***************************************************
+	// ******************************* class UpdateButtonFx   ***************************************************
 	public class UpdateButtonFx extends Button{
 
 		private UpdateMessageFx updateMessage;
 		private boolean timerDone;
 
+		// ******************************* constructor UpdateButtonFx   ***************************************************
 		public UpdateButtonFx() {
 			setText("Update");
 
@@ -111,13 +112,16 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 				}
 
 				final byte[] address = networkAddress.getAddress();
-				final String addrStr = Optional.ofNullable(address)
-												.filter(a->a.length==4)
-												.map(a->IntStream.range(0, a.length))
-												.orElse(IntStream.empty())
-												.map(index->address[index]&0xFF)
-												.mapToObj(Integer::toString)
-												.collect(Collectors.joining("."));
+				final String addrStr = Optional.of(
+											Optional.ofNullable(address)
+											.filter(a->a.length==4)
+											.map(a->IntStream.range(0, a.length))
+											.orElse(IntStream.empty())
+											.map(index->address[index]&0xFF)
+											.mapToObj(Integer::toString)
+											.collect(Collectors.joining(".")))
+								.filter(a->!a.isEmpty())
+								.orElseGet(()->deviceInfo.getSerialNumber().orElse(""));
 
 				updateMessage = new UpdateMessageFx(deviceInfo, timerDone);
 
@@ -172,6 +176,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 						{
 
 							final String setupInfo = message.getSetupInfo();
+
 							final byte[] setupInfoBytes = setupInfo.getBytes(Profile.charEncoding);
 
 							addToTar(tarArchiveOutputStream, "setup.info", setupInfo.getBytes(Profile.charEncoding));
@@ -300,5 +305,9 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 				alert.show();
 			});
 		}
+	}
+
+	public void fire() {
+		Platform.runLater(()->root.fire());
 	}
 }

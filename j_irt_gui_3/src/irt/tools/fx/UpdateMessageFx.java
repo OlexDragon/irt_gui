@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.file.ProfileScanner;
+import irt.controller.file.ProfileScannerFT;
 import irt.controller.file.ConverterProfileScanner;
 import irt.data.DeviceInfo;
 import irt.data.MyThreadFactory;
@@ -50,6 +50,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
@@ -68,6 +69,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 	private static final String SYSTEM = "system";
 
+	private static Path profilePath;
+
 	private final Logger logger = LogManager.getLogger();
 
 	private final TextField tfAddress;
@@ -82,7 +85,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private Label lblProfile;
 	private Label lblProgram;
 
-	private ProfileScanner findBucProfile;
+	private ProfileScannerFT findBucProfile;
 	private ConverterProfileScanner findConvProfile;
 
 	private final ChangeListener<? super String> textListener = (o, oV, nV)->enableUpdateButton(o);
@@ -97,22 +100,26 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 						final Node node = (Node)((BooleanProperty )o).getBean();
 						FutureTask<?> userData = (FutureTask<?>) node.getUserData();
+						if(userData==findBucProfile && profilePath!=null) {
+							setLabelText(lblProfile, cbProfile, profilePath);
+							return;
+						}
 
+						Platform.runLater(()->lblProfile.setText(""));
 						new MyThreadFactory(userData, "Utin Type Select Listener");
 						new MyThreadFactory(
 								()->{
 
 									try {
 
-										((Optional<?>) userData.get(10, TimeUnit.SECONDS))
-										.ifPresent(path->setLabelText(lblProfile, cbProfile, (Path) path));
+										final Optional<?> get = (Optional<?>) userData.get(500, TimeUnit.SECONDS);
+										get.ifPresent(path->setLabelText(lblProfile, cbProfile, (Path) path));
 
 									} catch (InterruptedException | ExecutionException | TimeoutException e) {
 										logger.catching(e);
 									}
 								}, "Set Label Text");
 
-						Platform.runLater(()->lblProfile.setText(""));
 					});
 	
 //	private FileScanner fileScanner;
@@ -136,20 +143,21 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		setTitle("IP Address");
 		setHeaderText("Type a valid IP address.");
-		getDialogPane().getStylesheets().add(getClass().getResource("fx.css").toExternalForm());
+		final DialogPane dialogPane = getDialogPane();
+		dialogPane.getStylesheets().add(getClass().getResource("fx.css").toExternalForm());
 
 		final ButtonType updateButtonType = new ButtonType("Update", ButtonData.OK_DONE);
-		getDialogPane().getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
+		dialogPane.getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
 
 		// Update button
 
-		updateButton = (Button) getDialogPane().lookupButton(updateButtonType);
+		updateButton = (Button) dialogPane.lookupButton(updateButtonType);
 		updateButton.setDisable(true);
 
 		// Cancel button
 
 //		final Button cancelButton = (Button)
-				getDialogPane().lookupButton(ButtonType.CANCEL);
+		dialogPane.lookupButton(ButtonType.CANCEL);
 //		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
 //		logger.error(fileScanner);
 
@@ -160,6 +168,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		//IP Address row #0
 
 		tfAddress = new TextField();
+		deviceInfo.getSerialNumber().ifPresent(tfAddress::setText);;
 		tfAddress.textProperty().addListener( textListener );
 		grid.addRow(0, new Label("IP Address:"), tfAddress);
 
@@ -218,12 +227,12 @@ public class UpdateMessageFx extends Dialog<Message>{
 		if(isProduction){
 
 			// Search profile by the unit serial number on the drive Z:
-			findBucProfile = new ProfileScanner(deviceInfo);			
+			findBucProfile = new ProfileScannerFT(deviceInfo);			
 			findConvProfile = new ConverterProfileScanner(deviceInfo.getLinkHeader().getAddr());
 			createProductionFields(grid);
 		}
 
-		getDialogPane().setContent(grid);
+		dialogPane.setContent(grid);
 
 		setResultConverter(button->{
 
@@ -511,7 +520,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 	}
 
 	public void setIpAddress(String addrStr) {
-		tfAddress.setText(addrStr);
+		Optional.ofNullable(addrStr).map(String::trim).filter(a->!a.isEmpty()).ifPresent(tfAddress::setText);
 	}
 
 	public String getIpAddress() {
@@ -584,7 +593,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 				return "";
 
 			// Firmware address
-			if(PacketFormats.BINARY.equals(es.getValue()))
+			final String value = es.getValue();
+			if(PacketFormats.BINARY.toString().equals(value))
 				return "address {0x08000000}";
 
 			// Converter profile address
@@ -637,5 +647,9 @@ public class UpdateMessageFx extends Dialog<Message>{
 		OEM,
 		IMAGE,
 		PACKAGE
+	}
+
+	public static void setProfilePath(Path path) {
+		profilePath = path;
 	}
 }
