@@ -169,7 +169,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 					try(	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 							TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(byteArrayOutputStream);){
 								
-						StringBuffer setuoMD5 = new StringBuffer();
+						StringBuffer setupMD5 = new StringBuffer();
 						MessageDigest md5 = MessageDigest.getInstance("MD5");
 
 						//SETUP.INFO file
@@ -181,10 +181,10 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 							addToTar(tarArchiveOutputStream, "setup.info", setupInfo.getBytes(Profile.charEncoding));
 
-							setuoMD5.append(DatatypeConverter.printHexBinary(md5.digest(setupInfoBytes))).append(" *setup.info").append("\n") ;
+							setupMD5.append(DatatypeConverter.printHexBinary(md5.digest(setupInfoBytes))).append(" *setup.info").append("\n") ;
 						}
 
-						addProfileToTheTar(message.getProfile(), setuoMD5, tarArchiveOutputStream);
+						addProfileToTheTar(message.getProfile(), setupMD5, tarArchiveOutputStream);
 
 						// PROGRAM
 						message
@@ -204,7 +204,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 								try {
 
 									addToTar(tarArchiveOutputStream, fileName, bytes);
-									setuoMD5.append(DatatypeConverter.printHexBinary(md5.digest(bytes))).append(" *" + fileName).append("\n");
+									setupMD5.append(DatatypeConverter.printHexBinary(md5.digest(bytes))).append(" *" + fileName).append("\n");
 
 								} catch (IOException e1) {
 									logger.catching(e1);
@@ -212,7 +212,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 							});
 						});
 
-						addToTar(tarArchiveOutputStream, "setup.md5", setuoMD5.toString().getBytes());
+						addToTar(tarArchiveOutputStream, "setup.md5", setupMD5.toString().getBytes());
 
 						ByteArrayInputStream is = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 						uploader.upload(is);

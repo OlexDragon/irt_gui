@@ -12,6 +12,7 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.prefs.Preferences;
@@ -57,8 +58,8 @@ import irt.tools.combobox.LoSelectComboBox;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 
 
-@SuppressWarnings("serial")
 public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPanel {
+	private static final long serialVersionUID = -5180860865922707259L;
 
 	protected static final Logger logger = LogManager.getLogger();
 
@@ -67,7 +68,15 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		FLAG_GAIN,
 		FLAG_FREQUENCY,
 		FLAG_FREQUENCY_SET,
-		FLAG_ALC
+		FLAG_ALC;
+
+		public boolean match(int flags) {
+			return (flags&ordinal())>0;
+		}
+
+		public static int toFlags(ActionFlags...actionFlags) {
+			return Arrays.stream(actionFlags).mapToInt(Enum::ordinal).reduce((a,b)->a|b).getAsInt();
+		}
 	}
 
 	private static final Preferences prefs = GuiController.getPrefs();
@@ -84,7 +93,6 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 	protected Color color;
 	private IdValue selection;
 	private JComboBox<IdValueFreq> cbLoSelect;
-//	private boolean hasFreqSet;
 	private JLabel lblMute; 							protected JLabel getLblMute() { return lblMute; }
 	private MuteButton btnMute; 						protected ImageButton getBtnMute() { return btnMute; }
 	protected ImageButton btnStoreConfig;
@@ -98,7 +106,6 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		Font font = Translation.getFont();
 
 		this.flags = flags;
-//		hasFreqSet = (flags & (short)ActionFlags.FLAG_FREQUENCY_SET.ordinal())>0;
 
 		color = new Color(0x0B,0x17,0x3B);
 		cursor = new Cursor(Cursor.HAND_CURSOR);
@@ -185,12 +192,15 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		IdValueForComboBox item = new IdValueForComboBox((short) ActionFlags.FLAG_ATTENUATION.ordinal(), Translation.getValue(String.class, "attenuation", "ATTENUATION"));
 		if(item!=null)//for WindowBuilder Editor
 			cbActionSelector.addItem(item);
-		if((flags&(short) ActionFlags.FLAG_GAIN.ordinal())>0)
+		if(ActionFlags.FLAG_GAIN.match(flags))
 			cbActionSelector.addItem(new IdValueForComboBox((short) ActionFlags.FLAG_GAIN.ordinal(), Translation.getValue(String.class, "gain", "GAIN")));
-		if((flags&(short) ActionFlags.FLAG_FREQUENCY.ordinal())>0)
+		if(ActionFlags.FLAG_FREQUENCY.match(flags))
 			cbActionSelector.addItem(new IdValueForComboBox((short) ActionFlags.FLAG_FREQUENCY.ordinal(), Translation.getValue(String.class, "frequency", "FREQUENCY")));
 		cbActionSelector.setBounds(14, 19, 98, 20);
-		cbActionSelector.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ @Override public int getWidth() { return 0;}};}});
+		cbActionSelector.setUI(new BasicComboBoxUI(){ @Override protected JButton createArrowButton() { return new JButton(){ 
+			private static final long serialVersionUID = 3858621158763120291L;
+
+		@Override public int getWidth() { return 0;}};}});
 		cbActionSelector.setBackground(color);
 		cbActionSelector.setForeground(Color.YELLOW);
 		cbActionSelector.setFont(font.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 14f))

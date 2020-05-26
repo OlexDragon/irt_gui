@@ -100,7 +100,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 	private JLabel lblSave;
 
 	public ControlPanelPicobuc(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
-		super(deviceType, linkHeader, deviceType !=null ? deviceType.filter(dt->dt!=DeviceType.CONVERTER_L_TO_KU_OUTDOOR).map(dt->(short)ActionFlags.FLAG_FREQUENCY.ordinal()).orElse((short)ActionFlags.FLAG_ATTENUATION.ordinal()) : (short)ActionFlags.FLAG_ATTENUATION.ordinal());
+		super( deviceType, linkHeader, 0);
 		
 		Font font = Translation.getFont()
 				.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))

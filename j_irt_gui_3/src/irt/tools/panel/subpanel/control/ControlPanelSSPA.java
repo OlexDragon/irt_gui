@@ -15,7 +15,7 @@ import irt.data.packet.LinkHeader;
 public class ControlPanelSSPA extends ControlPanelImpl {
 
 	public ControlPanelSSPA(Optional<DeviceType> deviceType, LinkHeader linkHeader, int flags) {
-		super(deviceType, linkHeader, (short)ActionFlags.FLAG_GAIN.ordinal()|(short)ActionFlags.FLAG_ATTENUATION.ordinal()|flags);
+		super(deviceType, linkHeader, ActionFlags.toFlags(ActionFlags.FLAG_GAIN, ActionFlags.FLAG_ATTENUATION, ActionFlags.FLAG_FREQUENCY) | flags);
 	}
 
 	@Override
