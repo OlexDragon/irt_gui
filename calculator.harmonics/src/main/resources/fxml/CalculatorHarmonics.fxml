@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.calculator.harmonics.CalculatorHarmonicsController">
+   <top>
+      <ButtonBar BorderPane.alignment="CENTER">
+        <buttons>
+          <Button mnemonicParsing="false" onAction="#onCalculate" text="Calculate" />
+        </buttons>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </ButtonBar>
+   </top>
+   <center>
+      <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <content>
+            <TextArea fx:id="taResult" />
+         </content>
+      </ScrollPane>
+   </center>
+   <left>
+      <ScrollPane fitToHeight="true" fitToWidth="true" BorderPane.alignment="CENTER">
+         <content>
+            <VBox fx:id="vBox">
+               <children>
+                  <TitledPane text="input Frequencies (MHz)">
+                     <content>
+                        <VBox spacing="10.0">
+                           <children>
+                              <TextField fx:id="tfInputStart" promptText="Start Frequency" />
+                              <TextField fx:id="tfInputStop" promptText="Stop Frequency" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </TitledPane>
+                  <TitledPane text="Output Frequencies (MHz)">
+                     <content>
+                        <VBox spacing="10.0">
+                           <children>
+                              <TextField fx:id="tfOutputStart" promptText="Start Frequency" />
+                              <TextField fx:id="tfOutputStop" promptText="Stop Frequency" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </TitledPane>
+                  <TitledPane text="LO #1 Frequencies (MHz)">
+                     <content>
+                        <VBox spacing="10.0">
+                           <children>
+                              <TextField fx:id="tfLo1Start" promptText="Start Frequency" />
+                              <TextField fx:id="tfLo1Stop" promptText="Stop Frequency" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </TitledPane>
+                  <TitledPane text="LO #2 Frequencies (MHz)">
+                     <content>
+                        <VBox spacing="10.0">
+                           <children>
+                              <TextField fx:id="tfLo2Start" promptText="Start Frequency" />
+                              <TextField fx:id="tfLo2Stop" promptText="Stop Frequency" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </TitledPane>
+                  <TitledPane text="Spurious Frequencies (MHz)">
+                     <content>
+                        <VBox spacing="10.0">
+                           <children>
+                              <TextField fx:id="tfSpuriousFrequency" promptText="Spurious Frequency" />
+                           </children>
+                        </VBox>
+                     </content>
+                  </TitledPane>
+               </children>
+            </VBox>
+         </content>
+      </ScrollPane>
+   </left>
+   <padding>
+      <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+   </padding>
+</BorderPane>
