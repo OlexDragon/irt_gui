@@ -75,13 +75,9 @@ public class CalculatorHarmonicsController {
     							()->{
     								referenceToWaitAlert.get().hide();
 
-    								final String message = e.getMessage();
-    								final int start = message.indexOf("'");
-    								final int end = message.indexOf("'", start);
-
     								Alert alert = new Alert(AlertType.ERROR);
     								alert.setTitle("Error Dialog");
-    								alert.setHeaderText("The test field " + message.substring(start, end) + " has an error");
+    								alert.setHeaderText("One of the text fields contains an error.");
     								alert.setContentText("Correct the error and try again.");
 
     								alert.showAndWait();
