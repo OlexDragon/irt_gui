@@ -74,6 +74,6 @@ public class HarmonicsTest {
 		allHarmonics = harmonics.getAllHarmonics(2);
 		logger.error(allHarmonics);
 
-		assertEquals(61, allHarmonics.size());
+		assertEquals(62, allHarmonics.size());
 	}
 }

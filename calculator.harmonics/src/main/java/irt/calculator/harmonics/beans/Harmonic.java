@@ -51,7 +51,7 @@ public class Harmonic implements Comparable<Harmonic>{
 
 		if(Double.compare(sum, 0)<0) {
 			sb.setLength(0);
-			sum = getSum(sb, frequencies.stream().map(fr->new Frequency(fr.getInitialName(), fr.getFirstHarmonic().multiply(BigDecimal.valueOf(-1))).getHarmonic(fr.getHarmonic())));
+			sum = getSum(sb, frequencies.stream().map(fr->new Frequency(fr.getInitialName(), fr.getFirstHarmonic().multiply(Frequency.toBigDecimal(-1))).getHarmonic(fr.getHarmonic())));
 		}
 
 		return new Frequency(sb.toString(), sum);
@@ -107,14 +107,14 @@ public class Harmonic implements Comparable<Harmonic>{
 
 		if (this == obj)
 			return true;
+
 		if (obj == null)
 			return false;
+
 		if (getClass() != obj.getClass())
 			return false;
 
-		Harmonic other = (Harmonic) obj;
-
-		return other.hashCode() == hashCode();
+		return obj.hashCode() == hashCode();
 	}
 
 	@Override
