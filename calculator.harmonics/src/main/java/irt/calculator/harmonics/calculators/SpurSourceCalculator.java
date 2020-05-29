@@ -49,7 +49,7 @@ public class SpurSourceCalculator implements Calculator {
 		final Set<Harmonic> allHarmonics = harmonics.getAllHarmonics(Calculator.HUMBER_OF_HARMONICS);
 		final BigDecimal lookFor = Frequency.toBigDecimal(spur);
 
-		final String result = allHarmonics.parallelStream().map(fr->fr.getFrequency()).filter(fr->fr.getFrequency().equals(lookFor)).map(Object::toString).collect(Collectors.joining("\n"));
+		final String result = allHarmonics.parallelStream().map(fr->fr.getFrequency()).filter(fr->fr.getFrequency().equals(lookFor)).sorted().map(Object::toString).collect(Collectors.joining("\n"));
 
 		return String.format(TEMPLATE, Calculator.format(spur), Calculator.format(input), Calculator.format(lo1), Calculator.format(lo2), result);
 	}

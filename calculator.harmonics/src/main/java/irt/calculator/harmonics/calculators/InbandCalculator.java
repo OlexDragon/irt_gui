@@ -57,7 +57,7 @@ public class InbandCalculator implements Calculator {
 			else {
 				final BigDecimal lookFrom = Frequency.toBigDecimal(outStart);
 				final BigDecimal lookTo = Frequency.toBigDecimal(outStop);
-				result = allHarmonics.parallelStream().map(fr->fr.getFrequency()).filter(fr->fr.getFrequency().compareTo(lookFrom)>=0 && fr.getFrequency().compareTo(lookTo)<=0).map(Object::toString).collect(Collectors.joining("\n"));
+				result = allHarmonics.parallelStream().map(fr->fr.getFrequency()).filter(fr->fr.getFrequency().compareTo(lookFrom)>=0 && fr.getFrequency().compareTo(lookTo)<=0).sorted().map(Object::toString).collect(Collectors.joining("\n"));
 			}
 
 		return String.format(TEMPLATE, Calculator.format(input), Calculator.format(lo1), Calculator.format(lo2), Calculator.format(outStart), Calculator.format(outStop), result);

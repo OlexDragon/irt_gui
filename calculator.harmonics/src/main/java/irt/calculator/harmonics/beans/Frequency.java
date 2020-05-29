@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -48,7 +49,8 @@ public class Frequency implements Comparable<Frequency>{
 	}
 
 	public BigDecimal getFrequency() {
-		return frequency.multiply(BigDecimal.valueOf(harmonic));
+
+		return frequency.multiply(toBigDecimal(harmonic));
 	}
 
 	public String getInitialName() {
@@ -57,25 +59,21 @@ public class Frequency implements Comparable<Frequency>{
 
 	public String getName() {
 
-		String result;
-
-		if(harmonic>1) 
-			result = String.format("(%s x %d)", name, harmonic);
-		else
-			result = name;
-
-		return result;
+		return Optional.of(harmonic).filter(h->h>1).map(h->String.format("(%s x %d)", name, h)).orElse(name);
 	}
 
 	@Override
 	public int compareTo(Frequency frequency) {
 
-		int compareTo = name.compareTo(frequency.name);
+		final BigDecimal frThis = this.getFrequency();
+		final BigDecimal frOther = frequency.getFrequency();
 
-		if(compareTo==0) 
-			compareTo = this.getFrequency().compareTo(frequency.getFrequency());
+		int compareTo = frThis.compareTo(frOther);
 
-		return compareTo;
+		if(compareTo!=0) 
+			return compareTo;
+
+		return name.compareTo(frequency.name);
 	}
 
 	@Override

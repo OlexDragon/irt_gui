@@ -3,7 +3,6 @@ package irt.calculator.harmonics.beans;
 import static org.junit.Assert.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +36,7 @@ public class HarmonicTest {
 
 		final double d = (frequency+(frequency2*h));
 		assertEquals(new Frequency("+first+(second x 4)", d), fr);
-		assertEquals(BigDecimal.valueOf(d).setScale(6, RoundingMode.HALF_UP), fr.getFrequency());
+		assertEquals(Frequency.toBigDecimal(d), fr.getFrequency());
 	}
 
 	@Test
@@ -57,7 +56,7 @@ public class HarmonicTest {
 		// positive frequency test
 		final double d = (frequency+(frequency2*h)) *-1;
 		assertEquals(new Frequency("-first+(second x 4)", d), fr);
-		assertEquals(BigDecimal.valueOf(d).setScale(6, RoundingMode.HALF_UP), fr.getFrequency());
+		assertEquals(Frequency.toBigDecimal(d), fr.getFrequency());
 	}
 
 	@Test
@@ -105,6 +104,6 @@ public class HarmonicTest {
 		assertEquals("+input+second: 17.0 MHz(17.0)", frequency.toString());
 
 		final double sum = harmonic.getFrequencies().parallelStream().map(Frequency::getFrequency).mapToDouble(BigDecimal::doubleValue).sum();
-		assertEquals(BigDecimal.valueOf(sum).setScale(6, RoundingMode.HALF_UP), frequency.getFrequency());
+		assertEquals(Frequency.toBigDecimal(sum), frequency.getFrequency());
 	}
 }
