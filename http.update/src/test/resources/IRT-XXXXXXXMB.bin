@@ -1,0 +1,29 @@
+# IRT Technologies board environment config
+# First two lines must start from this text - do not modify
+# MD5 checksum will be placed here
+
+# Device information
+device-type 2001
+device-revision 2
+device-subtype 2
+
+system-name BUCmodule
+product-description 'Module BIAS for BUC-RM system'
+device-serial-number IRT-XXXXXXXMB
+
+# Thresholds of current protection
+device-threshold-current 0 140    	# Zero current
+#device-threshold-current 1 XXXX   	# SW Output over current (mA)
+#device-threshold-current 2 XXXX   	# SW Driver over current (mA)
+device-threshold-current 3 15     	# HW output over current (X(s) must be one of 15,20,25,30,35,40,45,50 Amps)
+device-threshold-current 4 15     	# HW driver over current (X(s) must be one of 15,20,25,30,35,40,45,50 Amps)
+
+# Step and threshold for RF max power overdrive
+#rf-overdrive-threshold 1 1000 		# 0: Output power, 0.1 dBm; 1: HSS1 current, mA
+
+# UC checking disable
+hss-uc-disable  1 1
+hss-uc-disable  2 1
+
+unit-operating-mode  multimodules       #singlemodule
+# Uploaded by network. MD5:81fd2ae24a489f1b9c570c3fd2c6a563 

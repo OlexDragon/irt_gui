@@ -1,0 +1,8 @@
+system any.any.any {
+	profile {
+		path    {IRT-XXXXXXXMB.bin}
+	}
+	image {
+		path    {image.bin}
+	}
+}
