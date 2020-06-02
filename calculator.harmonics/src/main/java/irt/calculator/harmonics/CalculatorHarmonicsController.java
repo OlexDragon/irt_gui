@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +28,6 @@ public class CalculatorHarmonicsController {
 	private final Logger logger = LogManager.getLogger();
 
 	private final static Preferences prefs = Preferences.userNodeForPackage(CalculatorHarmonicsApp.class);
-
     @FXML private VBox vBox;
 	@FXML private TextArea taResult;
 
@@ -50,10 +50,7 @@ public class CalculatorHarmonicsController {
     		    	try {
 
     		    		// get values of text fields
-    		    		final Map<String, String> map = vBox.lookupAll(".titled-pane").stream()	// Find all panels
-    		    				.map(n->(VBox)((TitledPane)n).getContent())
-    		    				.flatMap(box->box.lookupAll(".text-field").stream())			// Find all text fields
-    		    				.map(TextField.class::cast)
+    		    		final Map<String, String> map = getAllTextFields()
     		    				.filter(tf->!tf.getText().trim().isEmpty())						// Filter empty text fields
     		    				.map(
     		    						tf->new SimpleEntry<>(tf.getId(), tf.getText()))
@@ -86,11 +83,15 @@ public class CalculatorHarmonicsController {
     			});
     }
 
+    @FXML
+    void onClear() {
+    	getAllTextFields().forEach(textField->textField.setText(""));
+    }
+
     @FXML public void initialize() {
 
     	// Find all TextFields
-    	vBox.lookupAll(".titled-pane").stream().map(n->(VBox)((TitledPane)n).getContent()).flatMap(box->box.lookupAll(".text-field").stream()).map(TextField.class::cast)
-    	.forEach(textField->Platform.runLater(
+    	getAllTextFields().forEach(textField->Platform.runLater(
 
     			()->{
 
@@ -119,4 +120,8 @@ public class CalculatorHarmonicsController {
     						});
     			}));
     }
+
+	private Stream<TextField> getAllTextFields() {
+		return vBox.lookupAll(".titled-pane").stream().map(n->(VBox)((TitledPane)n).getContent()).flatMap(box->box.lookupAll(".text-field").stream()).map(TextField.class::cast);
+	}
 }
