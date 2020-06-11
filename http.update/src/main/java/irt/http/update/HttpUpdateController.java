@@ -1,13 +1,16 @@
 package irt.http.update;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +23,7 @@ import java.util.stream.IntStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.http.update.HttpUploader.Message;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.fxml.FXML;
@@ -42,6 +46,7 @@ public class HttpUpdateController{
 
 	@FXML private TextField tfHttpAddress;
     @FXML private Button btnUpdate;
+    @FXML private Button btnOpenHttp;
     @FXML private VBox vBox;
 
     @FXML void onGetInfo() {
@@ -72,7 +77,7 @@ public class HttpUpdateController{
 						index->{Platform.runLater(
 								()->{
 
-									DeviceInfoController deviceInfoController = new DeviceInfoController(deviceID.get(index), serialNumber.get(index), description.get(index), partNumber.get(index));
+									DeviceInfoController deviceInfoController = new DeviceInfoController(index, deviceID.get(index), serialNumber.get(index), description.get(index), partNumber.get(index));
 							    	vBox.getChildren().add(deviceInfoController);
 							    	listener.addController(deviceInfoController);
 								});
@@ -89,41 +94,88 @@ public class HttpUpdateController{
 			logger.catching(e);
 
     	} catch (IOException e) {
+    		showAlert(new Message(AlertType.ERROR, e.getMessage()));
 			logger.catching(e);
 		}
     }
 
     @FXML void onUpdate() {
 
-    	try {
+    	final Optional<File> oFile = controllers.parallelStream().filter(DeviceInfoController::isSelected).findAny()
 
-    		controllers.parallelStream().filter(DeviceInfoController::isSelected).findAny()
-    		.map(
-    				t -> {
-    					try {
-    						return t.getPackage();
-    					} catch (IOException e) {
-    						logger.catching(e);
-    					}
-    					return null;
-    				});
+				.map(
+						controller -> {
+							try {
 
-    		PackageBuilder.createPackage();
+								return controller.getPackage();
 
-    	} catch (NoSuchAlgorithmException | IOException e) {
-			logger.catching(e);
-		}
-    	File file = null;//TODO
-    	try(final HttpUploader httpUploader = new HttpUploader(tfHttpAddress.getText());){
+							} catch (IOException e) {
+								logger.catching(e);
+							}
+							return null;
+						});
 
-    		httpUploader.upload(file);
+		oFile.ifPresent( file -> ThreadBuilder.startThread(
 
-    	} catch (IOException e) {
-			logger.catching(e);
-		}
+				()->{
+
+					final String ipAddress = tfHttpAddress.getText();
+					try(final HttpUploader httpUploader = new HttpUploader(ipAddress);){
+
+						// If IP address is not reachable show error message
+						if(!isIpReachable(ipAddress)){
+
+							final Message message = new Message(AlertType.ERROR, "The IP Address '" + ipAddress + "' is not Reachable.");
+							showAlert(message);
+
+							return;
+						}
+
+						httpUploader.upload(file);
+
+		        	} catch (Exception e) {
+		    			logger.catching(e);
+		    		}
+				}));
     }
 
-    @FXML void onAddressRefresh(KeyEvent e) {
+	private void showAlert(Message message) {
+		Platform.runLater(
+
+				()->{
+
+					final Alert alert = new Alert(message.getType());
+					alert.setContentText(message.getMessage());
+					alert.showAndWait();
+				});
+	}
+
+    @FXML void onOpenHttp() {
+
+		if (Desktop.isDesktopSupported()) {
+			try {
+
+				Desktop.getDesktop().browse(new URI("http://" + tfHttpAddress.getText()));
+
+			} catch (IOException | URISyntaxException e) {
+				LogManager.getLogger().catching(e);
+			}
+
+		}else {
+
+			btnOpenHttp.setText("Not Supported.");
+			btnOpenHttp.setDisable(true);
+		}
+	}
+
+
+    private boolean isIpReachable(String targetIp) throws IOException {
+
+    	InetAddress target = InetAddress.getByName(targetIp);
+        return target.isReachable(5000);  //timeout 5 sec.
+	}
+
+	@FXML void onAddressRefresh(KeyEvent e) {
 
 		if(e.getCode()==KeyCode.ESCAPE)
 			Optional.ofNullable(prefs.get(UNIT_ADDRESS, null)).ifPresent(tfHttpAddress::setText);

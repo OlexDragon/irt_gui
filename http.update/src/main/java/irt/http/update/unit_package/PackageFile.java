@@ -10,7 +10,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class PackageFile implements PackageContent{
 
-	private final static String FORMAT = "%s{path{%s}}";
+	private final static String FORMAT = "%s { path { %s } }";
 
 	private final FileType fileType;
 	private final File file;
@@ -37,6 +37,7 @@ public class PackageFile implements PackageContent{
 
 	public enum FileType{
 
+		FILE,
 		PROFILE,
 		IMAGE;
 

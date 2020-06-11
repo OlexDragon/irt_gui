@@ -14,7 +14,7 @@ public class ProfilePathTest {
 	@Test
 	public void test() {
 		final PackageFile packageFile = new PackageFile(FileType.PROFILE, new File("IRT-XXXXXXXMB.bin"));
-		assertEquals("profile{path{IRT-XXXXXXXMB.bin}}", packageFile.toString());
+		assertEquals("profile { path { IRT-XXXXXXXMB.bin } }", packageFile.toString());
 	}
 
 }

@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.DatatypeConverter;
@@ -26,6 +27,10 @@ public class SetupMd5 implements PackageContent{
 
 	public SetupMd5(PackageContent... files) {
 		this.files = files;
+	}
+
+	public SetupMd5(List<PackageContent> files) {
+		this(files.toArray(new PackageContent[files.size()]));
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import static irt.http.update.HttpUpdateApp.PROPERTIES;
 import static irt.http.update.HttpUpdateApp.UNIT_TYPE_START_WITH;
 
 import java.awt.Desktop;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,14 +15,11 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.prefs.Preferences;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.http.update.HttpUpdateController.DeviceInfoControllerListener;
-import irt.http.update.unit_package.PackageFile;
-import irt.http.update.unit_package.PackageFile.FileType;
+import irt.http.update.unit_package.PackageCreater;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -60,10 +56,13 @@ public class DeviceInfoController extends VBox{
 	private ChangeListener<? super Boolean> listener = new CheckboxListener();
 	private Optional<DeviceInfoControllerListener> oControllerListener = Optional.empty();
 
-	public DeviceInfoController(String deviceID, String serialNumber, String description, String partNumber) {
+	private int index;
+
+	public DeviceInfoController(int index, String deviceID, String serialNumber, String description, String partNumber) {
 
 		UNIT_TYPE_KEY = UNIT_TYPE_START_WITH + deviceID;
 
+		this.index = index;
 		this.deviceID = deviceID;
 		this.serialNumber = serialNumber;
 		this.description = description;
@@ -170,7 +169,8 @@ public class DeviceInfoController extends VBox{
     				cbFirmware.selectedProperty().addListener(listener);
     			});
     }
-	private void onSelect(String name, Label label, CheckBox checkBox, MenuItem... menuItems) {
+
+    private void onSelect(String name, Label label, CheckBox checkBox, MenuItem... menuItems) {
 
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle("Select " + name + " File.");
@@ -301,7 +301,30 @@ public class DeviceInfoController extends VBox{
 		Arrays.stream(menuItem).forEach(mi->Platform.runLater(()->mi.setDisable(path==null)));
 	}
 
+	public void setListener(DeviceInfoControllerListener listener) {
+		oControllerListener = Optional.ofNullable(listener);
+	}
+
+	public boolean isSelected() {
+		return cbProfile.isSelected() || cbFirmware.isSelected();
+	}
+
+	public File getPackage() throws IOException {
+
+		try(final PackageCreater packageCreater = new PackageCreater();){
+			
+			if(cbProfile.isSelected())
+				packageCreater.setProfile((Path) lblProfile.getUserData());
+
+			if(cbFirmware.isSelected())
+				packageCreater.setImage((Path) lblFirmware.getUserData());
+
+			return packageCreater.getPackage(index==0 ? "system" : "256");
+		}
+	}
+
 	private void searchForFirmware() {
+
 		setLabel(lblFirmware, null, miFirnwareLocation);
 		
 		final String key = FIRMWARE_FILE_PATH_START_WITH + unitTtype;
@@ -320,39 +343,34 @@ public class DeviceInfoController extends VBox{
 				});
 	}
 
-	public void setListener(DeviceInfoControllerListener listener) {
-		oControllerListener = Optional.ofNullable(listener);
-	}
+		private void searchForProfile() {
 
-	public boolean isSelected() {
-		return cbProfile.isSelected() || cbFirmware.isSelected();
-	}
+			setLabel(lblProfile, null, miOpenProfile, miProfileLocation);
 
-	public File getPackage() throws IOException {
+			ThreadBuilder.startThread(
+					()->{
+						final String key = PROFILE_SEARCH_FILE_START_WITH + unitTtype;
+						final String profileFolder = PROPERTIES.getProperty(key);
 
-		try(	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-				TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(byteArrayOutputStream);){
-			
-//			PackageFile packageFile = null;
-			if(cbProfile.isSelected())
-				extracted(FileType.PROFILE, (Path) lblProfile.getUserData(), tarArchiveOutputStream);
+						try {
 
+							final Optional<Path> findAny = Files.find(Paths.get(profileFolder), 5, (filePath, fileAttr)->fileAttr.isRegularFile()).filter(p->p.getFileName().toString().equals(serialNumber + ".bin")).findAny();
+
+							if(findAny.isPresent()) {
+								if(lblProfile.getUserData()==null) 
+									setLabel(lblProfile, findAny.get(), miOpenProfile, miProfileLocation);
+							}else {
+								// if the profile is not found
+								setDefault(lblProfile);
+								cbProfile.setSelected(false);
+							}
+
+						} catch (IOException e) {
+							logger.catching(e);
+						}
+					});
 		}
-		return null;
-	}
 
-	private void extracted(final FileType type, final Path p, TarArchiveOutputStream tarArchiveOutputStream)
-			throws IOException {
-		PackageFile packageFile;
-		packageFile = new PackageFile(type, p.toFile());
-		TarArchiveEntry infoEntry = new TarArchiveEntry(packageFile.getFileName());
-		byte[] bytes = packageFile.toBytes();
-		infoEntry.setSize(bytes.length);
-
-		tarArchiveOutputStream.putArchiveEntry(infoEntry);
-		tarArchiveOutputStream.write(bytes);
-		tarArchiveOutputStream.closeArchiveEntry();
-	}
 	// ******************** class CheckboxListener ***************************
 
 	public class CheckboxListener implements ChangeListener<Boolean>{
@@ -385,33 +403,6 @@ public class DeviceInfoController extends VBox{
 					});
 
 			oControllerListener.ifPresent(l->l.accept(DeviceInfoController.this));
-		}
-
-		private void searchForProfile() {
-
-			setLabel(lblProfile, null, miOpenProfile, miProfileLocation);
-			ThreadBuilder.startThread(
-					()->{
-						final String key = PROFILE_SEARCH_FILE_START_WITH + unitTtype;
-						final String profileFolder = PROPERTIES.getProperty(key);
-
-						try {
-
-							final Optional<Path> findAny = Files.find(Paths.get(profileFolder), 5, (filePath, fileAttr)->fileAttr.isRegularFile()).filter(p->p.getFileName().toString().equals(serialNumber + ".bin")).findAny();
-
-							if(findAny.isPresent()) {
-								if(lblProfile.getUserData()==null) 
-									setLabel(lblProfile, findAny.get(), miOpenProfile, miProfileLocation);
-							}else {
-								// if the profile is not found
-								setDefault(lblProfile);
-								cbProfile.setSelected(false);
-							}
-
-						} catch (IOException e) {
-							logger.catching(e);
-						}
-					});
 		}
 	}
 }
