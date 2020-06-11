@@ -5,16 +5,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import irt.gui.controllers.FieldsControllerAbstract;
 import irt.gui.data.StringData;
@@ -130,7 +129,6 @@ public class DebugInfoController extends FieldsControllerAbstract {
 			return;
 		}
 
-		logger.error(p);
 		final Payload payload = p.getPayloads().get(0);
 		final StringData stringData = payload.getStringData();
 		logger.trace(stringData);
@@ -190,35 +188,17 @@ public class DebugInfoController extends FieldsControllerAbstract {
 
 	private Collection<? extends Integer> parseSubstring(String substring) {
 
-		final String[] separators = new String[]{", ", " - "};
-		int separatorIndex = separators.length;
+		return Arrays.stream(substring.split(",")).map(ss->ss.split("-"))
+				.flatMapToInt(
+						array->{
 
-		List<Integer> p = new ArrayList<>();
+							if(array.length==1)
+								return IntStream.of(Integer.parseInt(array[0].trim()));
 
-		for(int i=0; i<separators.length; i++)
-			if(substring.contains(separators[i])){
-				separatorIndex = i;
-				break;
-			}
-
-		if(separatorIndex == separators.length)
-			p.add(Integer.parseInt(substring.trim()));
-		else{
-
-			final Stream<Integer> splitAsStream = Pattern.compile(separators[separatorIndex]).splitAsStream(substring).map(s->Integer.parseInt(s.trim()));
-
-			switch(separatorIndex){
-			case 1:
-				final List<Integer> collect = splitAsStream.collect(Collectors.toList());
-				p.addAll(IntStream.range(collect.get(0), collect.get(1)+1).boxed().collect(Collectors.toList()));
-				break;
-			default:
-				p.addAll(splitAsStream.collect(Collectors.toList()));
-			}
-
-		}
-
-		return p;
+							return IntStream.range(Integer.parseInt(array[0].trim()), Integer.parseInt(array[1].trim()));
+						})
+				.boxed()
+				.collect(Collectors.toList());
 	}
 
 	private void addPacket() {
