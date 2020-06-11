@@ -118,8 +118,6 @@ public class HttpUploader implements Closeable{
 			String line;
 
 			final String lineSeparator = System.getProperty("line.separator");
-			AlertType t = null;;
-			String em = null;
 
 			// When the unit accepts the update it return page with the title 'End of session'
 			while ((line = bufferedReader.readLine())!=null) {
