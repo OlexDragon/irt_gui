@@ -35,7 +35,7 @@ public class IrtGuiController{
 
 	@FXML public void initialize() {
 
-		TabPaneDetacher.create().makeTabsDetachable(tabPane);
+//		TabPaneDetacher.create().makeTabsDetachable(tabPane);
 		ObservableList<Tab> tabs = tabPane.getTabs();
 		tabCount = tabs.size();
 
