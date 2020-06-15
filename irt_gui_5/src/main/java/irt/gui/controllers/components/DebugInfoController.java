@@ -142,15 +142,13 @@ public class DebugInfoController extends FieldsControllerAbstract {
 			setParameters(stringData);
 
 		}else{
-			Platform.runLater(new Runnable() {
-				
-				@Override
-				public void run() {
-					final double vvalue = scrollPane.getVvalue();//TODO It does not work WHY?
-					textArea.setText(stringData.toString());
-					scrollPane.setVvalue(vvalue);
-				}
-			});
+
+			Platform.runLater(
+					()->{
+						final double vvalue = scrollPane.getVvalue();//TODO It does not work WHY?
+						textArea.setText(stringData.toString());
+						scrollPane.setVvalue(vvalue);
+					});
 		}
 	}
 

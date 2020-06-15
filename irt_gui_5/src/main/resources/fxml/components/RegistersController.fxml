@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 
-<BorderPane fx:id="registersPane" prefHeight="290.0" prefWidth="435.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.RegistersController">
+<BorderPane fx:id="registersPane" prefHeight="290.0" prefWidth="435.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.RegistersController">
    <right>
       <AnchorPane>
          <children>
@@ -50,12 +50,12 @@
                         <Tooltip text="Reset" />
                      </tooltip>
                   </Button>
-                  <CheckBox fx:id="stepCheckBox" mnemonicParsing="false" onAction="#onStepCheckBoxAction" text="Use Step">
+                  <CheckBox fx:id="stepCheckBox" mnemonicParsing="false" onAction="#onStep" text="Use Step">
                      <tooltip>
                         <Tooltip text="Step" />
                      </tooltip>
                   </CheckBox>
-                  <TextField fx:id="stepTextField" onAction="#onStepAction" prefColumnCount="3">
+                  <TextField fx:id="stepTextField" onAction="#onStep" prefColumnCount="3" text="1">
                      <tooltip>
                         <Tooltip text="Step By" />
                      </tooltip>

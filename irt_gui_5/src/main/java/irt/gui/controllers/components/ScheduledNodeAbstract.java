@@ -20,7 +20,6 @@ public abstract class ScheduledNodeAbstract extends StartStopAbstract implements
 		private volatile boolean isRunning;
 
 		public TooltipWorker(Control node) {
-			super();
 			this.node = node;
 		}
 

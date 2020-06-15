@@ -14,10 +14,13 @@ import org.apache.logging.log4j.Logger;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter @Setter
 public abstract class StartStopAbstract implements Runnable, Observer, FieldController{
-
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
+
 	protected final			Set<LinkedPacket>	packets					= new HashSet<>();	public Set<LinkedPacket> getPackets() { return packets; }
 
 	protected 				ScheduledFuture<?> 	scheduleAtFixedRate;

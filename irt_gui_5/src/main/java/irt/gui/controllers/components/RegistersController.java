@@ -35,8 +35,10 @@ import irt.gui.data.listeners.TextFieldFocusListener;
 import irt.gui.data.packet.observable.device_debug.CallibrationModePacket.CalibrationMode;
 import irt.gui.data.value.Value;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -154,16 +156,11 @@ public class RegistersController implements Observer, FieldController {
 	}
 
     private final ChangeListener<Boolean> stepTextFieldFocusListener = (observable, oldValue, newValue)->{
-		onStepAction();
+    	if(!newValue)
+    		onStep( new ActionEvent(((ReadOnlyBooleanProperty)observable).getBean(), tail->null));
 	};
 
-	private final ChangeListener<Number> sliderValueChangeListener = (observable, oldValue, newValue)->{
-		Platform.runLater(
-				()->Optional
-				.ofNullable(selectedTextField)
-				.map(stf->(SliderListener)stf.getUserData())
-				.ifPresent(controller->controller.setText(slider.getValue())));
-	};
+	private final ChangeListener<Number> sliderValueChangeListener = new SliderValueChangeListener();
 
 	private final ChangeListener<Boolean> textFieldFocusListenerRegisterPanel = (observable, oldValue, newValue)->{
 
@@ -226,6 +223,18 @@ public class RegistersController implements Observer, FieldController {
     	stepTextField.focusedProperty().addListener(stepTextFieldFocusListener);
 
 		panelRegistersController.setFocusListener(textFieldFocusListenerRegisterPanel);
+
+		// Initialize step size
+		final int step = prefs.getInt( stepTextField.getId(), 1);
+		if(step>1)
+			stepTextField.setText(Integer.toString(step));
+
+		// Initialize step check box
+		final boolean doStep = prefs.getBoolean( stepCheckBox.getId(), false);
+		if(doStep)
+			stepCheckBox.setSelected(true);
+
+		onStep(new ActionEvent());
 
 		slider.valueProperty().addListener(sliderValueChangeListener);
 
@@ -306,35 +315,52 @@ public class RegistersController implements Observer, FieldController {
     	});
     }
 
-    @FXML private void onStepCheckBoxAction() {
-    	onStepAction();
-    }
+    @FXML private void onStep(ActionEvent event) {
 
-    @FXML private void onStepAction() {
+    	final Object source = event.getSource();
 
-    	if(!stepCheckBox.isSelected()){
+    	int step = Integer.parseInt(stepTextField.getText());
+ 
+    	if(step<2){
+
+    		if(step<1) {
+    			stepTextField.setText("1");
+    			step = 1;
+    		}
+
+    	   	prefs.remove(stepTextField.getId());
+			stepCheckBox.setDisable(true);
+			stepCheckBox.setSelected(false);
+
+    	}else if(source==stepTextField) {
+
+    		prefs.putInt(stepTextField.getId(), step);
+
+			// Select stepCheckBox if stepTextField lose the focus and text field has value
+			stepCheckBox.setDisable(false);
+			stepCheckBox.setSelected(true);
+		   	prefs.putBoolean(stepCheckBox.getId(), true);
+    	}
+
+		if(!stepCheckBox.isSelected()){
+  
+			prefs.remove(stepCheckBox.getId());
+
 			try {
 				slider.setBlockIncrement(1);
 			} catch (NumberFormatException e) {
 				logger.catching(e);
 			}
-			return;
-    	}
+
+		}else {
+
+			prefs.putBoolean(stepCheckBox.getId(), true);
+			slider.setBlockIncrement(step);
+		}
 
     	Optional
     	.ofNullable(selectedTextField)
     	.ifPresent(TextField::requestFocus);
-
-    	Optional
-    	.ofNullable(stepTextField.getText())
-    	.filter(text->!text.isEmpty())
-    	.ifPresent(text->{
-			try {
-				slider.setBlockIncrement(Integer.parseInt(text));
-			} catch (NumberFormatException e) {
-				logger.catching(e);
-			}
-		});
     }
 
     @FXML private void onActionMenuItemsSaveAs(){
@@ -734,5 +760,34 @@ public class RegistersController implements Observer, FieldController {
 	public void setTab(Tab biasTab) {
 		tab = biasTab;
 		setTabName();
+	}
+
+	public class SliderValueChangeListener implements ChangeListener<Number>{
+
+		@Override
+		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+
+			final double blockIncrement = slider.getBlockIncrement();
+			final DoubleProperty valueProperty = slider.valueProperty();
+
+			if(newValue.intValue()-oldValue.intValue() > 0) {
+
+				valueProperty.removeListener(this);
+				slider.setValue(oldValue.doubleValue() + blockIncrement);
+				valueProperty.addListener(this);
+
+			} else {
+				valueProperty.removeListener(this);
+				slider.setValue(oldValue.doubleValue() - blockIncrement);
+				valueProperty.addListener(this);
+			}
+
+			Platform.runLater(
+					()->Optional
+					.ofNullable(selectedTextField)
+					.map(stf->(SliderListener)stf.getUserData())
+					.ifPresent(controller->controller.setText(slider.getValue())));
+		}
+		
 	}
 }
