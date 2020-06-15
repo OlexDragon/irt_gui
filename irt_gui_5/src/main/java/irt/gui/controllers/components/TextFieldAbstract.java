@@ -189,7 +189,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 		return value;
 	}
 
-	@Override public boolean start(){
+	@Override public void start(){
 //		logger.error(this.getClass().getSimpleName());
 
 		Platform.runLater(()->{
@@ -207,7 +207,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 			}
 		});
 
-		return super.start();
+		start();
 	}
 
 	public void stop(boolean leaveEditable){

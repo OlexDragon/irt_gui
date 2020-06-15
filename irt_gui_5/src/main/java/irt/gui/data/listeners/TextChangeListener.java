@@ -52,12 +52,10 @@ public class TextChangeListener implements ChangeListener<String> {
 
 	private void start() {
 
-		if(startStop.start()){
+		startStop.start();
+		final ObservableList<String> styleClass = textField.getStyleClass();
 
-			final ObservableList<String> styleClass = textField.getStyleClass();
-
-			if (styleClass.size() > 0) 							// if size = 0 throw java.lang.ArrayIndexOutOfBoundsException
-				Platform.runLater(()->styleClass.remove(TextFieldAbstract.CLASS_HAS_CHANGED));
-		}
+		if (styleClass.size() > 0) 							// if size = 0 throw java.lang.ArrayIndexOutOfBoundsException
+			Platform.runLater(()->styleClass.remove(TextFieldAbstract.CLASS_HAS_CHANGED));
 	}
 }

@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.interfaces.FieldController;
 import irt.gui.data.packet.interfaces.LinkedPacket;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,11 +22,13 @@ import lombok.Setter;
 public abstract class StartStopAbstract implements Runnable, Observer, FieldController{
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
-	protected final			Set<LinkedPacket>	packets					= new HashSet<>();	public Set<LinkedPacket> getPackets() { return packets; }
-
+	@Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
 	protected 				ScheduledFuture<?> 	scheduleAtFixedRate;
+
+	protected final			Set<LinkedPacket>	packets	= new HashSet<>();
+
 	//time between requests
-	private long period = 10000;			public long getPeriod(){ return period; }	public void setPeriod(long period){ this.period = period; }	
+	private long period = 10000;
 
 	public StartStopAbstract() {
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> stop(true)));
@@ -42,14 +45,11 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 		}
 	}
 
-	/**  @return true if status have been changed  */
-	public synchronized boolean start() {
-		boolean start = false;
+	/***/
+	public synchronized void start() {
 		if(!packets.isEmpty() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())){
 			scheduleAtFixedRate = LinkedPacketsQueue.SERVICES.scheduleAtFixedRate(this, 1, period, TimeUnit.MILLISECONDS);
-			start = true;
 		}
-		return start;
 	}
 
 	public synchronized void stop(boolean mayInterruptIfRunning) {
@@ -85,7 +85,7 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 	}
 
 	public void send() {
-		logger.traceEntry();
+		logger.trace(packets);
 
 		packets
 		.stream()
