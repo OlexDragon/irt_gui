@@ -41,7 +41,7 @@ public abstract class FieldsControllerAbstract extends Observable implements Obs
 
 	@Override
 	public void update(Observable observable, Object object) {
-		logger.entry(observable, object);
+		logger.traceEntry("{}; {}", observable, object);
 		startThread(new Thread(new Runnable() {
 
 			@Override

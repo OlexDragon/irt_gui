@@ -65,7 +65,7 @@ public class PanelSignalGenerator implements Tool{
 		
 		@Override
 		public void update(Observable o, Object arg) {
-			logger.entry(o);
+			logger.traceEntry("{}", o);
 
 			final PacketToSend tp = (PacketToSend) o;
 
@@ -85,7 +85,7 @@ public class PanelSignalGenerator implements Tool{
 		
 		@Override
 		public void update(Observable o, Object arg) {
-			logger.entry(o);
+			logger.traceEntry("{}", o);
 
 			final PacketToSend tp = (PacketToSend) o;
 			tp.deleteObserver(observerFrequency);
@@ -108,7 +108,7 @@ public class PanelSignalGenerator implements Tool{
 		
 		@Override
 		public void update(Observable o, Object arg) {
-			logger.entry(o);
+			logger.traceEntry("{}", o);
 
 			final PacketToSend tp = (PacketToSend) o;
 			tp.deleteObserver(observerPower);
@@ -131,7 +131,7 @@ public class PanelSignalGenerator implements Tool{
 		
 		@Override
 		public void update(Observable o, Object arg) {
-			logger.entry(o);
+			logger.traceEntry("{}", o);
 			o.deleteObserver(observerOutput);
 
 			final PacketToSend tp = (PacketToSend) o;
@@ -238,7 +238,7 @@ public class PanelSignalGenerator implements Tool{
 	}
 
 	private void sendCommand(final ToolsPacket packet, Observer... observers) {
-		logger.entry(packet, observers);
+		logger.traceEntry("{}; {}", packet, observers);
 		Optional
 		.ofNullable(observers)
 		.ifPresent(os->{
@@ -282,7 +282,7 @@ public class PanelSignalGenerator implements Tool{
 	}
 
 	@Override public void set(Commands command, Object valueToSend, Observer observer) {
-		logger.entry(command, valueToSend, observer);
+		logger.traceEntry("{}; {}; {}", command, valueToSend, observer);
 
 		ToolsPacket packet;
 		switch(command){

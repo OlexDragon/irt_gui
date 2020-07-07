@@ -113,7 +113,7 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 	}
 
 	private void setDescription(Payload pl) {
-		logger.entry(pl);
+		logger.traceEntry("{}", pl);
 
 		removePacketToSend(alarmDescription);
 

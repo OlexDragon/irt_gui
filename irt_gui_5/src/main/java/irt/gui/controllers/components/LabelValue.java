@@ -80,7 +80,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 
 	@Override
 	public void setKeyStartWith(String propertiesKeyStartWith)  throws PacketParsingException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-		logger.entry(propertiesKeyStartWith);
+		logger.traceEntry("{}", propertiesKeyStartWith);
 
 		final Optional<String> className = Optional.ofNullable(IrtGuiProperties.getProperty(propertiesKeyStartWith + "class"));
 		if(className.isPresent()){
@@ -101,7 +101,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 	}
 
 	private LinkedPacket createPacket(final String className) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-		logger.entry(className);
+		logger.traceEntry("{}", className);
 
 		clazz = Class.forName(className);
 		LinkedPacket packet = (LinkedPacket) clazz.newInstance();
@@ -133,7 +133,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 	}
 
 	@Override public void update(Observable observable, Object arg) {
-		logger.entry(observable, arg);
+		logger.traceEntry("{}; {}", observable, arg);
 
 		updater.setPacket((LinkedPacket)observable);
 		LinkedPacketsQueue.SERVICES.execute(updater);

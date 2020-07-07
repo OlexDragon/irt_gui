@@ -47,13 +47,14 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 
 	/***/
 	public synchronized void start() {
+		logger.traceEntry("{}", ()->packets);
 		if(!packets.isEmpty() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())){
 			scheduleAtFixedRate = LinkedPacketsQueue.SERVICES.scheduleAtFixedRate(this, 1, period, TimeUnit.MILLISECONDS);
 		}
 	}
 
 	public synchronized void stop(boolean mayInterruptIfRunning) {
-//			logger.error(this.getPackets());
+		logger.trace("{}", ()->packets);
 		Optional
 		.ofNullable(scheduleAtFixedRate)
 		.filter(sh->!sh.isCancelled())
@@ -61,6 +62,7 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 	}
 
 	protected void addPacket(LinkedPacket packet){
+		logger.trace("{}", ()->packet);
 
 		packets.add(Objects.requireNonNull(packet));
 		packet.addObserver(this);
@@ -85,7 +87,7 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 	}
 
 	public void send() {
-		logger.trace(packets);
+		logger.trace("{}", ()->packets);
 
 		packets
 		.stream()

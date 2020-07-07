@@ -16,7 +16,7 @@ public class DAC2Packet extends RegisterPacket{
 	}
 
 	public DAC2Packet(Integer value) throws PacketParsingException {
-		super(new RegisterValue(BUC_INDEX, BUC_ADDR, value));
+		super("DAC2Packet", new RegisterValue(BUC_INDEX, BUC_ADDR, value));
 	}
 
 	@Override

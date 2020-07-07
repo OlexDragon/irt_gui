@@ -56,7 +56,7 @@ public class TextFieldValueChangeObserver implements Observer {
 	}
 
 	public void setSliderValue(double rv) {
-		logger.entry(rv);
+		logger.traceEntry("{}", rv);
 		Platform.runLater(()->{
 
 			final DoubleProperty valueProperty = slider.valueProperty();

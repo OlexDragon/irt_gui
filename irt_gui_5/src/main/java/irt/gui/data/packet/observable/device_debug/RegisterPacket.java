@@ -31,11 +31,11 @@ public class RegisterPacket extends RegirterAbstractPacket {
 
 	public static final PacketId PACKET_ID = PacketId.DEVICE_DEBAG_REGISTER;
 
-	public RegisterPacket( RegisterValue registerValue) throws PacketParsingException {
+	public RegisterPacket(String details, RegisterValue registerValue) throws PacketParsingException {
 		super(
 				new PacketHeader(
 						registerValue.getValue()==null ? PacketType.REQUEST : PacketType.COMMAND,
-						new PacketIdDetails(PACKET_ID, "; register:" +  registerValue),
+						new PacketIdDetails(PACKET_ID, details),
 						PacketErrors.NO_ERROR),
 				new Payload(
 						new ParameterHeader(PACKET_ID),

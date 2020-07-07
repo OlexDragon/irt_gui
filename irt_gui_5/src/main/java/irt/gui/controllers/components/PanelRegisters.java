@@ -458,8 +458,10 @@ public class PanelRegisters implements Initializable, FieldController {
 		Stream<TextFieldRegister> controllers = getAllTextFieldControllers();
 		controllers.forEach(controller->save(controller));
 
-		final Stream<TextFieldConfiguration> tfControllers = (Stream<TextFieldConfiguration>) getAllControllersOf(TextFieldConfiguration.class);
-		tfControllers.forEach(controller->{
+		final Stream<?> tfControllers = (Stream<?>) getAllControllersOf(TextFieldConfiguration.class);
+		tfControllers
+		.map(TextFieldConfiguration.class::cast)
+		.forEach(controller->{
 			try {
 				controller.save();
 			} catch (PacketParsingException e) {

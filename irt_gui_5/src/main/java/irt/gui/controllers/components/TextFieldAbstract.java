@@ -207,7 +207,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 			}
 		});
 
-		start();
+		super.start();
 	}
 
 	public void stop(boolean leaveEditable){

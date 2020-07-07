@@ -87,7 +87,7 @@ public class AverageDoubleTest {
 
 	//Method copied from PanelPrologix
 	public void send(String addr, PacketToSend packet) {
-		logger.entry(addr, packet);
+		logger.traceEntry("{}; {}", addr, packet);
 
 		List<PacketToSend> ps = new ArrayList<>();
 

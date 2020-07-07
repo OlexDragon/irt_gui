@@ -186,7 +186,8 @@ public class SequentialProcess extends Observable implements Runnable {
 	}
 
 	private void prepareTools() {
-		logger.entry(sgOutputState);
+		logger.traceEntry("{}", sgOutputState);
+
 		if(sgOutputState==ToolsState.OFF)
 			signalGenerator.set(Commands.OUTPUT, ToolsState.ON, null);
 

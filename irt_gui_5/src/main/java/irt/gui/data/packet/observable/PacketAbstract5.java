@@ -46,14 +46,14 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	protected byte[] answer;
 
 	public PacketAbstract5(PacketHeader packetHeader, Payload payload) {
-		logger.entry(packetHeader, payload);
+		logger.traceEntry("{}; {}", packetHeader, payload);
 
 		this.packetHeader = packetHeader;
 		payloads.add(payload);
 	}
 
 	public PacketAbstract5(PacketProperties packetProperties, byte[] answer) throws PacketParsingException {
-		logger.entry(packetHeader, answer);
+		logger.traceEntry("{}; {}", packetHeader, answer);
 
 		answer = Optional
 				.ofNullable(answer)
@@ -68,7 +68,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	private byte[] removeAcknowledgmentAndChecksum(byte[] answer, PacketProperties packetProperties) throws PacketParsingException {
-		logger.entry(answer, packetProperties);
+		logger.traceEntry("{}; {}", answer, packetProperties);
 
 		//Acknowledgement
 		int beginning = indexOf(answer, Packet.FLAG_SEQUENCE);
@@ -106,7 +106,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	protected boolean checkAcknowledgement(byte[] acknowledgement, PacketProperties packetProperties) {
-		logger.entry(acknowledgement, packetProperties);
+		logger.traceEntry("{}; {}", acknowledgement, packetProperties);
 		final int length = acknowledgement.length;
 		final boolean isConverter = length==5;
 		packetProperties.setConverter(isConverter);
@@ -114,7 +114,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	private byte[] getPacketAsArray(byte[] answer, int beginning, PacketProperties packetProperties) throws PacketParsingException {
-		logger.entry(answer, beginning, packetProperties);
+		logger.traceEntry("{}; {}", answer, beginning, packetProperties);
 		//Packet
 		beginning = indexOf(answer, beginning, Packet.FLAG_SEQUENCE);
 		if(beginning<0)
@@ -168,7 +168,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	protected synchronized void setPacketHeader(PacketHeader packetHeader) {
-		logger.entry(packetHeader);
+		logger.traceEntry("{}", packetHeader);
 		 this.packetHeader = packetHeader;
 	}
 
@@ -201,7 +201,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 
 	/** set answer and notify observers */
 	@Override public void setAnswer(byte[] answer) {
-		logger.entry(answer);
+		logger.traceEntry("{}", answer);
 		this.answer = answer;
 
 		setChanged();
@@ -269,7 +269,7 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	}
 
 	@Override public synchronized void setLinkHeaderAddr(byte addr) {
-		logger.entry(addr);
+		logger.traceEntry("{}", addr);
 
 		if(addr==linkHeader.getAddr())
 			return;

@@ -46,7 +46,7 @@ public class DACPacket extends RegisterPacket{
 	}
 
 	public DACPacket(DACs dac, Integer value) throws PacketParsingException {
-		super(new RegisterValue(dac.getIndex(UnitType.BUC), dac.getAddress(UnitType.BUC), value));
+		super("DACPacket", new RegisterValue(dac.getIndex(UnitType.BUC), dac.getAddress(UnitType.BUC), value));
 		this.dac = dac;
 	}
 

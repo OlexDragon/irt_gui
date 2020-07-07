@@ -16,8 +16,12 @@ import irt.gui.data.packet.enums.PacketErrors;
 import irt.gui.data.packet.enums.PacketGroupId;
 import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
-import irt.gui.errors.PacketParsingException;;
+import irt.gui.errors.PacketParsingException;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class PacketHeader{
 
 	@JsonIgnore
@@ -32,21 +36,18 @@ public class PacketHeader{
 		private short 	reserved;	4,5
 		private byte 	code; 		6
 	 */
-	@JsonProperty("type")
-	private PacketType		packetType;						public PacketType 		getPacketType() 	{ return packetType; 		}
-	@JsonIgnore
-	private PacketIdDetails packetIdDetails; 				public PacketIdDetails 	getPacketIdDetails(){ return packetIdDetails; 	}
-	/*private PacketGroupId 	packetGroupId;*/			@JsonIgnore public PacketGroupId 	getPacketGroupId() 	{ return packetIdDetails.getPacketId().getPacketGroupId(); 	}
-	@JsonIgnore
-	private byte[]			reserved = new byte[]{0, 0}; 	public short			getReserved()		{ return (short) Packet.shiftAndAdd(reserved);	}
-	@JsonProperty("error")
-	private PacketErrors 	packetError;					public PacketErrors		getPacketError() 	{ return packetError;		}
+	@JsonProperty("type") @Getter @NonNull
+	private PacketType		packetType;
 
-	public PacketHeader(PacketType packetType, PacketIdDetails packetIdDetails, PacketErrors packetError) {
-		this.packetType = packetType;
-		this.packetIdDetails = packetIdDetails;
-		this.packetError = packetError;
-	}
+	@JsonIgnore @Getter @NonNull
+	private PacketIdDetails packetIdDetails;
+	/*private PacketGroupId 	packetGroupId;*/			@JsonIgnore public PacketGroupId 	getPacketGroupId() 	{ return packetIdDetails.getPacketId().getPacketGroupId(); 	}
+
+	@JsonIgnore @Getter
+	private byte[]			reserved = new byte[]{0, 0};
+
+	@JsonProperty("error") @Getter @NonNull
+	private PacketErrors 	packetError;
 
 	public PacketHeader(byte[] packetInBytes, PacketProperties packetProperties) throws PacketParsingException {
 
@@ -74,15 +75,15 @@ public class PacketHeader{
 		}
 	}
 
-	private void setPacketIdDetails(short PacketIdDetailsAsShort) throws PacketParsingException {
-		logger.entry(PacketIdDetailsAsShort);
+	private void setPacketIdDetails(short packetIdDetailsAsShort) throws PacketParsingException {
+		logger.traceEntry("packetIdDetailsAsShort: {}", packetIdDetailsAsShort);
 
 		for(PacketId id:PacketId.values())
-			if(id.getValue()==PacketIdDetailsAsShort)
+			if(id.getValue()==packetIdDetailsAsShort)
 				packetIdDetails = new PacketIdDetails(id, null);
 
 		if(packetIdDetails==null)
-			throw new PacketParsingException("\n\tParsing 'Packet ID' ERROR.("+ PacketIdDetailsAsShort +")");
+			throw new PacketParsingException("\n\tParsing 'Packet ID' ERROR.("+ packetIdDetailsAsShort +")");
 	}
 
 	private void setPacketType(byte packetTypeAsByte) throws PacketParsingException {

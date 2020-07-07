@@ -139,7 +139,7 @@ public class ButtonErase extends Observable implements Observer, Initializable, 
 	}
 
 	public boolean erase(int fileSize) {
-		logger.entry(fileSize);
+		logger.traceEntry("{}", fileSize);
 
 		this.fileSize = fileSize;
 		update(null, unitAddress);

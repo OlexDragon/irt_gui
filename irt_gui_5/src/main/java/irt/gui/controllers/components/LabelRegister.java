@@ -146,7 +146,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 		int index = Integer.parseInt(addr);	//TODO  Have to check why addr<->index
 		int address = Integer.parseInt(IrtGuiProperties.getProperty(keyStartWith + "index"));//TODO
 
-		addPacket(new RegisterPacket(new RegisterValue(index, address)));
+		addPacket(new RegisterPacket(keyStartWith, new RegisterValue(index, address)));
 	}
 
 	@Override public void update(Observable observable, Object arg) {

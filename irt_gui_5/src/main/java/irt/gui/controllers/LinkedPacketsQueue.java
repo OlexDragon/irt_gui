@@ -80,7 +80,7 @@ public class LinkedPacketsQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketToSend packet, boolean checkUnitAddress){
-		logger.entry(packet);
+		logger.traceEntry("{}", packet);
 
 		if(packet==null){
 			logger.warn("packetWork!=null");

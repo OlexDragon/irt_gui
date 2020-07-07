@@ -6,7 +6,6 @@ import java.util.prefs.Preferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.jensd.shichimifx.utils.TabPaneDetacher;
 import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.components.RegistersController;
 import irt.gui.controllers.components.SerialPortController;

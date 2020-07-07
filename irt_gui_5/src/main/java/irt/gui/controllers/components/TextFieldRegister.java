@@ -88,7 +88,7 @@ public class TextFieldRegister extends TextFieldAbstract implements Register{
 	public void save() throws PacketParsingException {
 
 		final RegisterValue registerValue = new RegisterValue(registerValueToSet.getIndex(), registerValueToSet.getAddr()+3, 0);
-		RegisterPacket packet = new RegisterPacket(registerValue);
+		RegisterPacket packet = new RegisterPacket("TextFieldRegister.save()", registerValue);
 		packet.addObserver(new Observer() {
 
 			private int times = 3;
@@ -155,7 +155,7 @@ public class TextFieldRegister extends TextFieldAbstract implements Register{
 	}
 
 	@Override protected void setPacket(String propertiesKeyStartWith) throws PacketParsingException {
-		logger.entry(propertiesKeyStartWith);
+		logger.traceEntry(propertiesKeyStartWith);
 
 		removeAllPackets();
 
@@ -164,11 +164,11 @@ public class TextFieldRegister extends TextFieldAbstract implements Register{
 		int address = Integer.parseInt(IrtGuiProperties.getProperty(propertiesKeyStartWith + ADDRESS));
 
 		registerValueToSet = new RegisterValue(index, address);
-		valuePacket = new RegisterPacket(registerValueToSet);
+		valuePacket = new RegisterPacket(propertiesKeyStartWith, registerValueToSet);
 		addPacket(valuePacket);
 
 		RegisterValue rv = new RegisterValue(index, address==0 ? 0x10+2 : 0x10+3); //0x10+2 --> RDAC:MEM2; 0x10+3 --> RDAC:MEM3
-		isSetValuePacket = new RegisterPacket(rv);
+		isSetValuePacket = new RegisterPacket(propertiesKeyStartWith, rv);
 		addPacket(isSetValuePacket);
 	}
 
@@ -220,7 +220,7 @@ public class TextFieldRegister extends TextFieldAbstract implements Register{
 					.orElse(-1);
 			if(v>=0){
 				RegisterValue rValue = new RegisterValue(i, a, v);
-				RegisterPacket packet  = new RegisterPacket(rValue);
+				RegisterPacket packet  = new RegisterPacket("TextFieldRegister.sendValue(value); value = " + value, rValue);
 				packet.addObserver(this);
 				SerialPortController.getQueue().add(packet, true);
 			}

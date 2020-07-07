@@ -62,7 +62,7 @@ public class ButtonFCM implements Observer, Initializable {
 	}
 
 	@Override public void update(Observable o, Object arg) {
-		logger.entry( ToHex.bytesToHex(((ConnectFCMPacket)o).toBytes()), o);
+		logger.traceEntry("{}; {}", ()->ToHex.bytesToHex(((ConnectFCMPacket)o).toBytes()), ()->o);
 
 		final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
 		serialPort.setParity(parity);

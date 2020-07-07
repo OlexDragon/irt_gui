@@ -147,7 +147,7 @@ public class LinkedPacketSender extends SerialPort {
 
 	@Override
 	public byte[] readBytes( int waitTime) throws SerialPortException{
-		logger.entry(waitTime);
+		logger.traceEntry("{}", waitTime);
 		if(waitTime<=0) waitTime = 1;
 
 		byte[] readBytes = null;
@@ -199,7 +199,7 @@ public class LinkedPacketSender extends SerialPort {
 	}
 
 	public synchronized boolean wait(int eventValue, int waitTime) throws SerialPortException {
-		logger.entry(eventValue, waitTime);
+		logger.traceEntry("{}; {}", eventValue, waitTime);
 		boolean isReady = false;
 		long start = System.currentTimeMillis();
 		long waitTimeL = waitTime*eventValue;

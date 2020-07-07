@@ -151,7 +151,7 @@ public class PanelWriteFlash extends Observable{
 	}
 
 	public void write(UnitAddress unitAddress, File file) throws FileNotFoundException, IOException {
-		logger.entry(unitAddress, file);
+		logger.traceEntry("{}; {}", unitAddress, file);
 
 		fileAsBytes = fileToBytes(file);
 		writeToAddress = unitAddress.getAddr();

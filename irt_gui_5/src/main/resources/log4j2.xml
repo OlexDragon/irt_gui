@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
 <Configuration>
 
 	<Appenders>
@@ -66,7 +67,7 @@
 <!-- 		<logger name="irt.gui.controllers.components.BiasController" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ConverterController" level="all"/> -->
 
-<!-- 		<logger name="irt.gui.controllers.components.TextFieldRegister" level="all"/> -->
+		<logger name="irt.gui.controllers.components.TextFieldRegister" level="all"/>
 <!-- 		<logger name="irt.gui.controllers.components.PanelRegisters" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.RegistersController" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ButtonCalibrationMode" level="all"/> -->

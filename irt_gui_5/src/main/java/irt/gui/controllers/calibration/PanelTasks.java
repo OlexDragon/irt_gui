@@ -200,7 +200,7 @@ public class PanelTasks {
 
 		@Override
 		public void update(Observable o, Object arg) {
-			logger.entry(o);
+			logger.traceEntry("{}", o);
 			o.deleteObserver(this);
 
 			String text = null;

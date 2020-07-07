@@ -15,9 +15,9 @@ import javafx.scene.input.KeyCode;
 
 public class TextChangeListener implements ChangeListener<String> {
 
-	private Value value;
-	private StartStopAbstract startStop;
-	private TextField textField;
+	private final Value value;
+	private final StartStopAbstract startStop;
+	private final TextField textField;
 
 	public TextChangeListener(StartStopAbstract startStop, TextField textField, Value value) {
 		this.startStop = Objects.requireNonNull(startStop);
@@ -36,10 +36,10 @@ public class TextChangeListener implements ChangeListener<String> {
 			if(value.equals(copy))
 				start();
 			else
-				stot();
+				stop();
 	}
 
-	private void stot() {
+	private void stop() {
 		final ObservableList<String> styleClass = textField.getStyleClass();
 		Platform.runLater(() -> {
 			if (!styleClass.contains(TextFieldAbstract.CLASS_HAS_CHANGED)) {

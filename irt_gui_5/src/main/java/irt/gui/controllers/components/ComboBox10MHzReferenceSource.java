@@ -70,7 +70,7 @@ public class ComboBox10MHzReferenceSource extends StartStopAbstract implements O
 	}
 
 	@Override public void update(Observable o, Object arg) {
-		logger.entry(o, arg);
+		logger.traceEntry("{}; {}", o, arg);
 		try {
 			if(o instanceof Ref10MHzSourcePacket){
 

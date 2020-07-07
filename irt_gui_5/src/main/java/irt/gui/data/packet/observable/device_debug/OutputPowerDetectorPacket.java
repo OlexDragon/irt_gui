@@ -15,7 +15,7 @@ public class OutputPowerDetectorPacket extends RegisterPacket{
 	private static final int addrFCM = IrtGuiProperties.getLong("gui.label.register.fcm.p_det.output.addr").byteValue();
 
 	public OutputPowerDetectorPacket() throws PacketParsingException {
-		super(new RegisterValue(index, addr));
+		super("OutputPowerDetectorPacket", new RegisterValue(index, addr));
 	}
 
 	public OutputPowerDetectorPacket(byte[] answer, Boolean hasAcknowledgment) throws PacketParsingException {

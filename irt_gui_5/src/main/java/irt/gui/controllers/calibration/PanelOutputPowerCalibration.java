@@ -180,7 +180,7 @@ public class PanelOutputPowerCalibration implements CalibrationWindow{
     }
 
     @Override public void update(Observable o, Object arg) {
-    	logger.entry(arg);
+    	logger.traceEntry("{}", arg);
 
 		if(arg instanceof ValueOutputPower){
 			try{

@@ -80,7 +80,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 	}
 
 	@Override public void update(Observable o, Object arg) {
-		logger.entry(o, arg);
+		logger.traceEntry("{}", o, arg);
 		try {
 			if(o instanceof LoFrequenciesPacket){
 
@@ -165,7 +165,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 	}
 
 	private void selectLOConverter(LoFrequenciesPacket packet) {
-		logger.entry(packet);
+		logger.traceEntry("{}", packet);
 
 		final Payload pl = packet.getPayloads().get(0);
 		final long loID = pl.getLong();
@@ -174,7 +174,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 	}
 
 	private void selectLOBuc(LoFrequenciesPacket packet) {
-		logger.entry(packet);
+		logger.traceEntry("{}", packet);
 
 		final Payload pl = packet.getPayloads().get(0);
 		final byte loID = pl.getByte();
@@ -200,7 +200,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 	}
 
 	private void fillComboBoxConverter(Payload payload) {
-		logger.entry(payload);
+		logger.traceEntry("{}", payload);
 
 		final byte[] frs = payload.getBuffer();
 		ByteBuffer bb = ByteBuffer.wrap(frs);
@@ -212,7 +212,7 @@ public class ComboBoxLoSelect extends StartStopAbstract implements OtherFields{
 	}
 
 	public void fillComboBoxbBUC(Payload payload) {
-		logger.entry(payload);
+		logger.traceEntry("{}", payload);
 
 		final byte[] frs = payload.getBuffer();
 		for(int i=0; i< frs.length; i+=8){

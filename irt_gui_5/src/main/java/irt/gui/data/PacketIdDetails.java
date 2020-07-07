@@ -4,18 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.enums.PacketId;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter @Setter
 public class PacketIdDetails {
 
 	@JsonIgnore
 	private PacketId packetId;
-								public PacketId	getPacketId()		{ return packetId; }
-								public void setPacketId(PacketId packetId) {
-									this.packetId = packetId;
-								}
 
-	@JsonIgnore
-	private String packetDetails;	public String	getPacketDetails()	{ return packetDetails; }
+	@JsonIgnore @Setter(AccessLevel.NONE)
+	private String packetDetails;
 
 	public PacketIdDetails(PacketId packetId, String packetDetails) {
 

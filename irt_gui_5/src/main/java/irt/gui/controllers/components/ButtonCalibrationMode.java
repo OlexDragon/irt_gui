@@ -68,7 +68,7 @@ public class ButtonCalibrationMode extends FieldsControllerAbstract {
 	}
 
 	@Override protected void updateFields(LinkedPacket packet) throws Exception {
-		logger.entry(packet);
+		logger.traceEntry("{}", packet);
 
 		final byte[] answer = packet.getAnswer();
 		if(answer==null)

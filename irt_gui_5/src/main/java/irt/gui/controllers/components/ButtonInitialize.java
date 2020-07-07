@@ -51,7 +51,7 @@ public class ButtonInitialize extends FieldsControllerAbstract{
 
 	@Override
 	protected void updateFields(LinkedPacket packet) throws Exception {
-		logger.entry(packet);
+		logger.traceEntry("{}", packet);
 		if(packet instanceof CallibrationModePacket){
 			CallibrationModePacket p  = new CallibrationModePacket(packet.getAnswer(), true);
 			if(p.getPacketHeader().getPacketError()==PacketErrors.NO_ERROR){

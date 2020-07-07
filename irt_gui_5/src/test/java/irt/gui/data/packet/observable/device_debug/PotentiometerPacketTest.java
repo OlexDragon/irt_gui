@@ -4,7 +4,7 @@ package irt.gui.data.packet.observable.device_debug;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class PotentiometerPacketTest {
 		logger.traceEntry();
 
 		RegisterValue registerValue = new RegisterValue(1, 0);
-		RegisterPacket packet = new RegisterPacket(registerValue);
+		RegisterPacket packet = new RegisterPacket("testRequest()", registerValue);
 		logger.trace(packet);
 
 		byte[] bytes = packet.toBytes();
@@ -65,7 +65,7 @@ public class PotentiometerPacketTest {
 	public void testCommand() throws PacketParsingException {
 		logger.traceEntry();
 		RegisterValue registerValue = new RegisterValue(1, 0, 777);
-		RegisterPacket packet = new RegisterPacket(registerValue);
+		RegisterPacket packet = new RegisterPacket("testCommand()", registerValue);
 		logger.trace(packet);
 		byte[] bytes = packet.toBytes();
 		logger.trace("\n\t{}", ToHex.bytesToHex(bytes));
@@ -90,7 +90,7 @@ public class PotentiometerPacketTest {
 	public void testObserver() throws PacketParsingException {
 		logger.traceEntry();
 
-		RegisterPacket packet = new RegisterPacket(new RegisterValue(1, 0));
+		RegisterPacket packet = new RegisterPacket("testObserver()", new RegisterValue(1, 0));
 		packet.addObserver(new Observer() {
 
 			@Override
@@ -133,10 +133,10 @@ public class PotentiometerPacketTest {
 
 	@Test
 	public void equalsTest() throws PacketParsingException{
-		assertThat(new RegisterPacket(new RegisterValue(1, 5)), is(new RegisterPacket(new RegisterValue(1, 5))));
+		assertThat(new RegisterPacket("equalsTest()", new RegisterValue(1, 5)), is(new RegisterPacket("equalsTest()", new RegisterValue(1, 5))));
 
-		assertThat(new RegisterPacket(new RegisterValue(1, 5)), is(new RegisterPacket(new RegisterValue(1, 5, 0))));
-		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(1, 7))));
-		assertThat(new RegisterPacket(new RegisterValue(1, 5)), not(new RegisterPacket(new RegisterValue(2, 5))));
+		assertThat(new RegisterPacket("equalsTest()", new RegisterValue(1, 5)), is(new RegisterPacket("equalsTest()", new RegisterValue(1, 5, 0))));
+		assertThat(new RegisterPacket("equalsTest()", new RegisterValue(1, 5)), not(new RegisterPacket("equalsTest()", new RegisterValue(1, 7))));
+		assertThat(new RegisterPacket("equalsTest()", new RegisterValue(1, 5)), not(new RegisterPacket("equalsTest()", new RegisterValue(2, 5))));
 	}
 }
