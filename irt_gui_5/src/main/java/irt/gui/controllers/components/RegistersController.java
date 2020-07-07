@@ -188,25 +188,24 @@ public class RegistersController implements Observer, FieldController {
 				if(slider.isDisable())
 					Platform.runLater(()->slider.setDisable(false));
 
-				Optional.of(selectedTextField.getUserData()).filter(TextFieldAbstract.class::isInstance).map(TextFieldAbstract.class::cast).ifPresent(tfa->{
-					tfa.setOnKeyPressed(e->{
-						final KeyCode code = e.getCode();
+				Optional.of(selectedTextField.getUserData()).filter(TextFieldAbstract.class::isInstance).map(TextFieldAbstract.class::cast)
+				.ifPresent(
+						tfa->{
+							tfa.setOnKeyPressed(
+									e->{
+										final KeyCode code = e.getCode();
 
-						if(code==KeyCode.UP || code==KeyCode.DOWN)
-							slider.requestFocus();
-					});
-
-					Platform.runLater(()->{
-						final String step = tfa.getStep();
-						logger.error(step);
-						stepTextField.setText(step);
-					});
-				});
+										if(code==KeyCode.UP || code==KeyCode.DOWN)
+											slider.requestFocus();
+									});
+						});
 			}
 		}
 	};
 
 	private Tab tab;
+
+	private boolean mousePressed;
 
     @FXML private void initialize(){
 
@@ -237,6 +236,8 @@ public class RegistersController implements Observer, FieldController {
 		onStep(new ActionEvent());
 
 		slider.valueProperty().addListener(sliderValueChangeListener);
+		slider.setOnMousePressed(e->mousePressed=true);
+		slider.setOnMouseReleased(e->mousePressed=false);
 
 		createProfileMenuItems();
 
@@ -766,19 +767,21 @@ public class RegistersController implements Observer, FieldController {
 
 		@Override
 		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			logger.traceEntry("mousePressed: {}; newValue: {}", mousePressed, newValue);
 
-			final double blockIncrement = slider.getBlockIncrement();
-			final DoubleProperty valueProperty = slider.valueProperty();
+			if(!mousePressed) {
 
-			if(newValue.intValue()-oldValue.intValue() > 0) {
+				final double blockIncrement = slider.getBlockIncrement();
+				final DoubleProperty valueProperty = slider.valueProperty();
 
 				valueProperty.removeListener(this);
-				slider.setValue(oldValue.doubleValue() + blockIncrement);
-				valueProperty.addListener(this);
 
-			} else {
-				valueProperty.removeListener(this);
-				slider.setValue(oldValue.doubleValue() - blockIncrement);
+				if(newValue.intValue()-oldValue.intValue() > 0)
+					slider.setValue(oldValue.doubleValue() + blockIncrement);
+
+				else 
+					slider.setValue(oldValue.doubleValue() - blockIncrement);
+
 				valueProperty.addListener(this);
 			}
 

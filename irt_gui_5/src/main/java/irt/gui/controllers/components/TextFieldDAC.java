@@ -130,17 +130,16 @@ public class TextFieldDAC extends ScheduledNodeAbstract implements SliderListene
 
 		final ObservableList<String> styleClass = textField.getStyleClass();
 
-		if(styleClass.size()>0)
-			styleClass.remove(cssClass);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
-		styleClass.add(cssClass);
+		if(!styleClass.contains(cssClass))
+			styleClass.add(cssClass);
 
 		Platform.runLater(()->{
 			slider.setMinorTickCount(0);
 			slider.setMajorTickUnit(MAX_VALUE/100);
 		});
+
 		//set slider values
 		final DoubleProperty valueProperty = slider.valueProperty();
-		valueProperty.removeListener(sliderChangeListener);
 		{
 			//set slider min value
 			final Optional<Value> ofNullable = Optional.ofNullable(value);
@@ -161,14 +160,19 @@ public class TextFieldDAC extends ScheduledNodeAbstract implements SliderListene
 				Platform.runLater(()->slider.setMax(max));
 			});
 
-
 			//set slider value
 			ofNullable
 			.map(Value::getRelativeValue)
 			.filter(v->Double.compare(slider.getValue(), v)!=0)
-			.ifPresent(v->Platform.runLater(()->slider.setValue(v)));
+			.ifPresent(
+					v->
+					Platform.runLater(
+							()->{
+								valueProperty.removeListener(sliderChangeListener);
+								slider.setValue(v);
+								valueProperty.addListener(sliderChangeListener);
+							}));
 		}
-		valueProperty.addListener(sliderChangeListener);
 
 		value.addObserver(valueObserver);
 	}

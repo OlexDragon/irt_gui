@@ -56,13 +56,6 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 	protected abstract void setPacket(String keyStartWith) 															throws PacketParsingException ;
 	public 	  abstract void save() 																					throws PacketParsingException;
 
-	private String step = "1";
-	public String getStep() { return step; }
-	public String setStep(String step){
-		this.step = step;
-		return this.step;
-	};
-
 	@FXML protected TextField textField; 		public TextField getTextField() { return textField; }
 
 	@FXML protected MenuItem	menuItemStartStop;
