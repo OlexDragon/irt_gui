@@ -3,6 +3,8 @@ package irt.gui.data.packet.observable.calibration;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import irt.gui.data.MyObservable;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
@@ -60,7 +62,7 @@ public class ToolsComandsPacket extends MyObservable implements PacketToSend{
 		return answer;
 	}
 
-	@Override
+	@Override @JsonIgnore
 	public LinkHeader getLinkHeader() {
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
@@ -76,7 +78,7 @@ public class ToolsComandsPacket extends MyObservable implements PacketToSend{
 	}
 
 	@Override
-	public void setLinkHeaderAddr(byte addr) {
+	public boolean setLinkHeaderAddr(byte addr) {
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 }

@@ -46,12 +46,10 @@ public class Dac10MHzPacket extends PacketAbstract5 implements ConfigurationGrou
 		return PACKET_ID;
 	}
 
-	@Override synchronized public void setLinkHeaderAddr(byte addr) {
+	@Override synchronized public boolean setLinkHeaderAddr(byte addr) {
 
-		if(addr == getLinkHeader().getAddr())
-			return;
-
-		super.setLinkHeaderAddr(addr);
+		if(!super.setLinkHeaderAddr(addr))
+			return false;
 
 		final PacketHeader 	packetHeader	 = getPacketHeader();
 		final PacketType 	packetType		 = packetHeader.getPacketType();
@@ -70,7 +68,9 @@ public class Dac10MHzPacket extends PacketAbstract5 implements ConfigurationGrou
 
 		} catch (PacketParsingException e) {
 			logger.catching(e);
+			return false;
 		}
+		return true;
 	}
 
 	@Override

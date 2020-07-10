@@ -1,13 +1,8 @@
 package irt.gui.data;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import irt.gui.data.packet.Packet;
 
 public class ChecksumLinkedPacket {
-
-	private final Logger logger = LogManager.getLogger();
 
 	private static final int  fcstab[] = {
 		0x0000, 0x1189, 0x2312, 0x329b, 0x4624, 0x57ad, 0x6536, 0x74bf,
@@ -48,7 +43,6 @@ public class ChecksumLinkedPacket {
 	private byte[]	checksumOf;
 
 	public ChecksumLinkedPacket(byte... checksumOf) {
-		logger.trace("\n\t ENTRY: {}", checksumOf);
 
 		this.checksumOf = checksumOf;
 		fcs = 0xFFFF;

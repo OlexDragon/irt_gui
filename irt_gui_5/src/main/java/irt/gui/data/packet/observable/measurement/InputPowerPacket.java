@@ -58,12 +58,10 @@ public class InputPowerPacket extends PacketAbstract5 implements ValuePacket{
 		return " dBm";
 	}
 
-	@Override synchronized public void setLinkHeaderAddr(byte addr) {
+	@Override synchronized public boolean setLinkHeaderAddr(byte addr) {
 
-		if(addr == getLinkHeader().getAddr())
-			return;
-
-		super.setLinkHeaderAddr(addr);
+		if(!super.setLinkHeaderAddr(addr))
+			return false;
 
 		final PacketHeader 	packetHeader	 = getPacketHeader();
 		final PacketType 	packetType		 = packetHeader.getPacketType();
@@ -83,6 +81,8 @@ public class InputPowerPacket extends PacketAbstract5 implements ValuePacket{
 
 		} catch (PacketParsingException e) {
 			logger.catching(e);
+			return false;
 		}
+		return true;
 	}
 }

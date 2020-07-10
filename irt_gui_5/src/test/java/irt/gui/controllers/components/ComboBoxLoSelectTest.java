@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.testfx.framework.junit.ApplicationTest;
@@ -17,6 +18,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import jssc.SerialPortException;
 
 public class ComboBoxLoSelectTest extends ApplicationTest {
 	private Logger logger = LogManager.getLogger();
@@ -57,5 +59,11 @@ public class ComboBoxLoSelectTest extends ApplicationTest {
 	public void test() {
 		logger.traceEntry();
 		sleep(10, TimeUnit.SECONDS);
+	}
+
+	@After
+	public void stop() throws SerialPortException {
+		comboBoxLoSelect.stop(true);
+		SerialPortController.getSerialPort().closePort();
 	}
 }

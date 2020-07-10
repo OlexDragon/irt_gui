@@ -2,11 +2,12 @@ package irt.gui.controllers.flash.service;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.ObjIntConsumer;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-public class PagesCount implements Supplier<PagesCount>, ObjIntConsumer<PagesCount> {
+public class PagesCount implements Supplier<PagesCount>, ObjIntConsumer<PagesCount>, BiConsumer<PagesCount, PagesCount> {
 
 	public static final int KB = 1024;
 	public static final int[] ALL_PAGES = new int[] { 	16 * KB, 16 * KB, 16 * KB, 16 * KB, 64 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB, 128 * KB , 128 * KB, 128 * KB,
@@ -31,7 +32,7 @@ public class PagesCount implements Supplier<PagesCount>, ObjIntConsumer<PagesCou
 
 		Arrays
 		.stream(ALL_PAGES)
-		.collect(this, this, null);
+		.collect(this, this, this);
 
 		final int[] array = IntStream
 				.range(-1, pagesCount + 1)
@@ -60,6 +61,10 @@ public class PagesCount implements Supplier<PagesCount>, ObjIntConsumer<PagesCou
 			pagesCount++;
 			pagesSize += value;
 		}
+	}
+
+	@Override
+	public void accept(PagesCount t, PagesCount u) {
 	}
 
 	@Override

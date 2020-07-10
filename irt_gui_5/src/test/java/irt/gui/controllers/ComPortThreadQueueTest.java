@@ -6,28 +6,32 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.data.packet.observable.InfoPacket;
 import irt.gui.errors.PacketParsingException;
+import jssc.SerialPort;
 import jssc.SerialPortException;
 
 public class ComPortThreadQueueTest {
 
 	Logger logger = LogManager.getLogger();
+	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
 
 	@Test
 	public void test() throws InterruptedException, PacketParsingException {
 		LinkedPacketsQueue queue = new LinkedPacketsQueue();
-		LinkedPacketSender serialPort = new LinkedPacketSender(ComPortTest.COM_PORT);
+
 		try {
 
-			serialPort.openPort();
+			port.openPort();
 
-			queue.setComPort(serialPort);
+			queue.setComPort(port);
 			InfoPacket packet = new InfoPacket();
 			packet.addObserver(new Observer() {
 				
@@ -41,7 +45,7 @@ public class ComPortThreadQueueTest {
 			queue.add(packet, true);
 			Thread.sleep(100);
 
-			serialPort.closePort();
+			port.closePort();
 
 			logger.trace(packet);
 			assertNotNull(packet.getAnswer());
@@ -51,4 +55,14 @@ public class ComPortThreadQueueTest {
 		}
 	}
 
+	@After
+	public void exit() {
+		Optional.ofNullable(port).filter(SerialPort::isOpened).ifPresent(p -> {
+			try {
+				p.closePort();
+			} catch (SerialPortException e) {
+				logger.catching(e);
+			}
+		});
+	}
 }

@@ -48,12 +48,10 @@ public class AttenuationPacket extends PacketAbstract5 implements ConfigurationG
 		return addr==-1 ? FCM_PACKET_ID : PACKET_ID;
 	}
 
-	@Override synchronized public void setLinkHeaderAddr(byte addr) {
+	@Override synchronized public boolean setLinkHeaderAddr(byte addr) {
 
-		if(addr == getLinkHeader().getAddr())
-			return;
-
-		super.setLinkHeaderAddr(addr);
+		if(!super.setLinkHeaderAddr(addr))
+			return false;
 
 		final PacketHeader 	packetHeader	 = getPacketHeader();
 		final PacketType 	packetType		 = packetHeader.getPacketType();
@@ -73,6 +71,8 @@ public class AttenuationPacket extends PacketAbstract5 implements ConfigurationG
 
 		} catch (PacketParsingException e) {
 			logger.catching(e);
+			return false;
 		}
+		return true;
 	}
 }

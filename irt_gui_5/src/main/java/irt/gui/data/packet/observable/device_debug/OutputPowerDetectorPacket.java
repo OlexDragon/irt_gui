@@ -23,16 +23,15 @@ public class OutputPowerDetectorPacket extends RegisterPacket{
 	}
 
 	@Override
-	public synchronized void setLinkHeaderAddr(byte addr) {
+	public synchronized boolean setLinkHeaderAddr(byte addr) {
 
-		if(addr==linkHeader.getAddr())
-			return;
-
-		super.setLinkHeaderAddr(addr);
+		if(!super.setLinkHeaderAddr(addr))
+			return false;
 
 		if(addr == -1)	// -1 -> converter
 			payloads.get(0).setBuffer(addrFCM, indexFCM);
 		else
 			payloads.get(0).setBuffer(index, OutputPowerDetectorPacket.addr);
+		return true;
 	}
 }

@@ -8,9 +8,11 @@ import static org.junit.Assert.assertTrue;
 import java.util.Arrays;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
@@ -28,11 +30,13 @@ import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.PacketAbstract5;
 import irt.gui.data.packet.observable.alarms.AlarmIDsPacket;
 import irt.gui.errors.PacketParsingException;
+import jssc.SerialPort;
 import jssc.SerialPortException;
 
 public class TemperaturePacketTest {
 
 	Logger logger = LogManager.getLogger();
+	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
 
 	@Test
 	public void test() throws PacketParsingException {
@@ -96,7 +100,6 @@ public class TemperaturePacketTest {
 			}
 		});
 
-		LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
 		try {
 
 			port.openPort();
@@ -111,5 +114,16 @@ public class TemperaturePacketTest {
 		}
 
 		logger.traceExit();
+	}
+
+	@After
+	public void exit() {
+		Optional.ofNullable(port).filter(SerialPort::isOpened).ifPresent(p -> {
+			try {
+				p.closePort();
+			} catch (SerialPortException e) {
+				logger.catching(e);
+			}
+		});
 	}
 }

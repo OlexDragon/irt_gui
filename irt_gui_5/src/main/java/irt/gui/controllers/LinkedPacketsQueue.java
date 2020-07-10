@@ -1,5 +1,6 @@
 package irt.gui.controllers;
 
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -14,6 +15,8 @@ import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.interfaces.PacketToSend;
 import javafx.util.Pair;
+import jssc.SerialPort;
+import jssc.SerialPortException;
 
 public class LinkedPacketsQueue implements Runnable {
 
@@ -106,6 +109,15 @@ public class LinkedPacketsQueue implements Runnable {
 
 	public void setComPort(LinkedPacketSender serialPort) {
 
+		Optional.ofNullable(comPort).filter(SerialPort::isOpened)
+		.ifPresent(
+				p -> {
+					try {
+						p.closePort();
+					} catch (SerialPortException e) {
+						logger.catching(e);
+					}
+				});
 		this.comPort = serialPort;
 		host = null;
 

@@ -51,12 +51,10 @@ public class DACPacket extends RegisterPacket{
 	}
 
 	@Override
-	public synchronized void setLinkHeaderAddr(byte addr) {
+	public synchronized boolean setLinkHeaderAddr(byte addr) {
 
-		if(addr == getLinkHeader().getAddr())
-			return;
-
-		super.setLinkHeaderAddr(addr);
+		if(!super.setLinkHeaderAddr(addr))
+			return false;
 
 		final Payload payload = payloads.get(0);
 		final int length = payload.getBuffer().length;
@@ -68,6 +66,7 @@ public class DACPacket extends RegisterPacket{
 		else
 			payload.setBuffer(dac.getIndex(ut), dac.getAddress(ut));
 
+		return true;
 	}
 
 	public void setValue(int intValue) {

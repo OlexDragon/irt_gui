@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+import irt.gui.controllers.ComPortTest;
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.packet.observable.InfoPacket;
@@ -20,23 +21,21 @@ import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;
 
 public class SocketWorkerTest {
-	public static final String COM_PORT = "COM13";
 
 	private final Logger logger = LogManager.getLogger();
 	private SocketWorker socketWorker;
-	private LinkedPacketSender serialPort;
+	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
 	private LinkedPacketsQueue queue;
 
 	@Before
 	public void setup(){
 		logger.traceEntry();
 		socketWorker = new SocketWorker();
-		socketWorker.startServer(COM_PORT);
-		serialPort = new LinkedPacketSender(COM_PORT);
+		socketWorker.startServer(ComPortTest.COM_PORT);
 		queue = new LinkedPacketsQueue();
-		queue.setComPort(serialPort);
+		queue.setComPort(port);
 		try {
-			serialPort.openPort();
+			port.openPort();
 		} catch (SerialPortException e) {
 			logger.catching(e);
 		}
@@ -50,7 +49,7 @@ public class SocketWorkerTest {
 	}
 
 	public Integer getSocketPort() {
-		final int port = 10000 + Integer.parseInt(COM_PORT.replaceAll("\\D", ""));
+		final int port = 10000 + Integer.parseInt(ComPortTest.COM_PORT.replaceAll("\\D", ""));
 		return new Integer(port);
 	}
 
@@ -68,6 +67,6 @@ public class SocketWorkerTest {
 
 	@After
 	public void end() throws SerialPortException{
-		serialPort.closePort();
+		port.closePort();
 	}
 }

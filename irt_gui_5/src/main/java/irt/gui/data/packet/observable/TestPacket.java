@@ -99,7 +99,7 @@ public class TestPacket  extends Observable implements LinkedPacket {
 	}
 
 	@Override
-	public void setLinkHeaderAddr(byte addr) {
+	public boolean setLinkHeaderAddr(byte addr) {
 		throw new UnsupportedOperationException("Auto-generated method stub");
 	}
 

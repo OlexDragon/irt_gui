@@ -111,7 +111,7 @@ public abstract class AbstractFlashPacket extends Observable implements LinkedPa
 	}
 
 	@Override
-	public void setLinkHeaderAddr(byte addr) {
+	public boolean setLinkHeaderAddr(byte addr) {
 		throw new UnsupportedOperationException("This function should not be used");
 	}
 

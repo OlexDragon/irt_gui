@@ -3,8 +3,15 @@ package irt.gui.data.packet.observable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,6 +30,7 @@ import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.PacketProperties;
 import irt.gui.data.packet.Payload;
+import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.AlarmPacket;
 import irt.gui.data.packet.interfaces.LinkedPacket;
@@ -183,20 +191,11 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 	@Override @JsonProperty(value="asBytes")
 	public synchronized byte[] toBytes() {
 
-		byte[] b = null;
-		if(linkHeader!=null){
-			b = linkHeader.toBytes();
+		final byte[] lh = Optional.ofNullable(linkHeader).map(LinkHeader::toBytes).orElse(null);
+		final byte[] ph = Optional.ofNullable(packetHeader).map(PacketHeader::toBytes).map(bytes->Packet.concat(lh, bytes)).orElse(null);
+		final byte[] packet = Optional.ofNullable(payloads).map(pls->pls.stream().map(Payload::toBytes).collect(new BytesCollector())).map(pl->Packet.concat(ph, pl)).orElse(null);
 
-			if(packetHeader!=null){
-				b = Packet.concat(b, packetHeader.toBytes());
-
-				if(payloads!=null)
-					for(Payload d:payloads)
-						b = Packet.concat(b, d.toBytes());
-			}
-		}
-
-		return preparePacket(b);
+		return preparePacket(packet);
 	}
 
 	/** set answer and notify observers */
@@ -244,7 +243,6 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 		return preparePacket(b);
 	}
 
-	private static final Logger l = LogManager.getLogger();
 	public static byte[] preparePacket(byte[] data) {
 
 		if(data!=null){
@@ -256,7 +254,6 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 			}
 
 			final ChecksumLinkedPacket checksum = new ChecksumLinkedPacket(data);
-			l.trace(checksum);
 			byte[] csTmp = Packet.toBytes((short)checksum.getChecksum());
 			for(int i=1; i>=0; i--, index ++)
 				index = checkControlEscape(csTmp, i, p, index);
@@ -268,19 +265,18 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 		return data;
 	}
 
-	@Override public synchronized void setLinkHeaderAddr(byte addr) {
+	@Override public synchronized boolean setLinkHeaderAddr(byte addr) {
 		logger.traceEntry("{}", addr);
 
 		if(addr==linkHeader.getAddr())
-			return;
+			return false;
 
 		linkHeader.setAddr(addr);
-		packetHeader.getPacketIdDetails().setPacketId(getPacketId());
-		payloads
-		.parallelStream()
-		.forEach(pl->{
-			pl.getParameterHeader().setParameterHeaderCode(getPacketId().getParameterHeaderCode());
-		});
+		final PacketId packetId = getPacketId();
+		packetHeader.getPacketIdDetails().setPacketId(packetId);
+		payloads.get(0).getParameterHeader().setParameterHeaderCode(packetId.getParameterHeaderCode());
+
+		return true;
 	}
 
 	@Override public int hashCode() {
@@ -327,7 +323,8 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 
 	@Override
 	public String toString() {
-		return "\n\t" + getClass().getSimpleName()+ " [linkHeader=" + linkHeader + ", packetHeader=" + packetHeader + ", payloads=" + payloads + ", \n\t answer=" + ToHex.bytesToHex(answer) +
+		return "\n\t" + getClass().getSimpleName()+ " [linkHeader=" + linkHeader + ", packetHeader=" + packetHeader + ", payloads=" + payloads + "," +
+				"\n\t answer=" + ToHex.bytesToHex(answer) +
 				"\n\t toBytes()=" + ToHex.bytesToHex(toBytes()) + "]";
 	}
 
@@ -362,5 +359,53 @@ public abstract class PacketAbstract5 extends MyObservable implements LinkedPack
 		}
 
 		return result;
+	}
+
+	private class BytesCollector implements Collector<byte[], BytesCollector, byte[]> {
+
+		private byte[] bytes;
+
+		public BytesCollector(byte[] bytes) {
+			this.bytes = bytes;
+		}
+
+		public BytesCollector() {
+		}
+
+		@Override
+		public Supplier<BytesCollector> supplier() {
+			return ()->new BytesCollector();
+		}
+
+		@Override
+		public BiConsumer<BytesCollector, byte[]> accumulator() {
+			return (collector, bytes)->{
+				collector.bytes = bytes;
+			};
+		}
+
+		@Override
+		public BinaryOperator<BytesCollector> combiner() {
+			return (a,b)->{
+				return new BytesCollector(Packet.concat(a.bytes, b.bytes));
+			};
+		}
+
+		@Override
+		public Function<BytesCollector, byte[]> finisher() {
+			return (collector)->{
+				return collector.bytes;
+			};
+		}
+
+		@Override
+		public Set<Characteristics> characteristics() {
+			return new HashSet<>();
+		}
+
+		@Override
+		public String toString() {
+			return "BytesCollector [bytes=" + ToHex.bytesToHex(bytes) + "]";
+		}
 	}
 }

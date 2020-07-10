@@ -15,5 +15,5 @@ public interface PacketToSend extends Comparable<PacketToSend> {
 	void deleteObserver(Observer observerFrequency);
 	LinkHeader getLinkHeader();
 	void addObserver(Observer o);
-	void setLinkHeaderAddr(byte addr);
+	boolean setLinkHeaderAddr(byte addr);
 }

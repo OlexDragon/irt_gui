@@ -10,6 +10,7 @@ import java.util.Observer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
@@ -29,6 +30,7 @@ import jssc.SerialPortException;
 public class TestPacketTest {
 
 	Logger logger = LogManager.getLogger();
+	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
 
 	@Test
 	public void AlarmIDsPacketTest() throws PacketParsingException, InterruptedException {
@@ -103,7 +105,6 @@ public class TestPacketTest {
 			}
 		});
 
-		LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
 		try {
 
 			port.openPort();
@@ -116,5 +117,10 @@ public class TestPacketTest {
 		} catch (SerialPortException e) {
 			logger.catching(e);
 		}
+	}
+
+	@After
+	public void exit() throws SerialPortException {
+		port.closePort();
 	}
 }

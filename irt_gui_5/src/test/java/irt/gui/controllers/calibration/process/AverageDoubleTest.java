@@ -11,8 +11,10 @@ import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Test;
 
+import irt.gui.controllers.ComPortTest;
 import irt.gui.controllers.LinkedPacketSender;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.calibration.tools.Tool;
@@ -25,6 +27,7 @@ import irt.gui.data.packet.observable.calibration.ToolsPacket;
 import irt.gui.data.packet.observable.calibration.prologix.PAddrPacket;
 import irt.gui.data.packet.observable.calibration.prologix.PReadPacket;
 import irt.gui.data.packet.observable.calibration.prologix.PrologixPacket;
+import jssc.SerialPortException;
 
 public class AverageDoubleTest {
 
@@ -35,7 +38,7 @@ public class AverageDoubleTest {
 	private final PrologixPacket packetAddr = new PAddrPacket();
 	private final PrologixPacket packetRead = new PReadPacket();
 	private final LinkedPacketsQueue queue = new LinkedPacketsQueue();
-	private final LinkedPacketSender serialPort = new LinkedPacketSender("COM7");
+	private final LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
 //	private final Observer observer = (o,arg)->{
 //												ToolsPacket tp = (ToolsPacket)o;
 //												String answer = new String(tp.getAnswer());
@@ -45,7 +48,7 @@ public class AverageDoubleTest {
 //	private Future<Double> future;
 
 	public AverageDoubleTest() {
-		queue.setComPort(serialPort);
+		queue.setComPort(port);
 	}
 
 
@@ -75,9 +78,10 @@ public class AverageDoubleTest {
 		};
 
 		try {
-			serialPort.openPort();
+			if(!port.isOpened())port.openPort();
 //			future =
 					EXECUTOR.submit(new AverageDouble(tools, Commands.GET));
+			port.closePort();
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -114,5 +118,10 @@ public class AverageDoubleTest {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+	}
+
+	@After
+	public void end() throws SerialPortException{
+		port.closePort();
 	}
 }

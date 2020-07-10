@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.data.packet.observable.InfoPacket;
@@ -18,17 +19,16 @@ import jssc.SerialPortException;
 
 public class ComPortTest implements Observer {
 
-	public static final String COM_PORT = "COM13";
+	public static final String COM_PORT = "COM3";
 	Logger logger = LogManager.getLogger();
 	private FutureTask<Boolean> task;
+	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
 
 	@Test
 	public void test() throws PacketParsingException {
 
-		LinkedPacketSender comPort = new LinkedPacketSender(COM_PORT);
-
 		try {
-			comPort.openPort();
+			port.openPort();
 
 			InfoPacket packet = new InfoPacket();
 			packet.setLinkHeaderAddr((byte) 254);
@@ -37,20 +37,20 @@ public class ComPortTest implements Observer {
 			task = new FutureTask<>(()->true);
 
 			logger.info("{}", packet.toBytes());
-			comPort.send(packet);
+			port.send(packet);
 
 			task.get(1, TimeUnit.SECONDS);
 
 			logger.trace(packet);
 			assertNotNull(packet.getAnswer());
 
-			comPort.closePort();
+			port.closePort();
 
 		} catch (Exception e) {
 			logger.catching(e);
 		}finally{
 			try {
-				comPort.closePort();
+				port.closePort();
 			} catch (SerialPortException e) {
 			}
 		}
@@ -61,4 +61,8 @@ public class ComPortTest implements Observer {
 		task.run();
 	}
 
+	@After
+	public void end() throws SerialPortException{
+		port.closePort();
+	}
 }

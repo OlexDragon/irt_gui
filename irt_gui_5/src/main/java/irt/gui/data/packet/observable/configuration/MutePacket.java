@@ -21,14 +21,13 @@ public class MutePacket extends PacketAbstract5 implements ConfigurationGroup{
 
 //	private static final Logger l = LogManager.getLogger();
 
-	public static final PacketId BUC_PACKET_ID = PacketId.CONFIGURATION_MUTE;
-	public static final PacketId FCM_PACKET_ID = PacketId.CONFIGURATION_FCM_MUTE;
-
 	public enum MuteStatus{
 		UNMUTED,
 		MUTED,
 		UNKNOWN	
 	}
+
+	private PacketId packetId;
 
 	public MutePacket() throws PacketParsingException {
 		this((MuteStatus)null);
@@ -37,36 +36,33 @@ public class MutePacket extends PacketAbstract5 implements ConfigurationGroup{
 	public MutePacket(MuteStatus muteStatus) throws PacketParsingException {
 		super(
 				new PacketHeader(
-						muteStatus==null ? PacketType.REQUEST : PacketType.COMMAND,
-						new PacketIdDetails(BUC_PACKET_ID, muteStatus==null ? "Get Mute status" : "Set Mute status to "+ muteStatus),
+						Optional.ofNullable(muteStatus).map(ms->PacketType.COMMAND).orElse(PacketType.REQUEST),
+						new PacketIdDetails(PacketId.CONFIGURATION_MUTE, Optional.ofNullable(muteStatus).map(ms->"Set Mute status to " + ms).orElse("Get Mute status")),
 						PacketErrors.NO_ERROR),
 				new Payload(
 						new ParameterHeader(
-								BUC_PACKET_ID),
+								PacketId.CONFIGURATION_MUTE),
 						null));
+		packetId = PacketId.CONFIGURATION_MUTE;
 	}
 
 	public MutePacket(@JsonProperty("asBytes") byte[] answer, @JsonProperty(defaultValue="false", value="v") Boolean hasAcknowledgment) throws PacketParsingException {
-		super(new PacketProperties(BUC_PACKET_ID).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
+		super(new PacketProperties(PacketId.CONFIGURATION_FCM_MUTE).setHasAcknowledgment(Optional.ofNullable(hasAcknowledgment).orElse(false)), answer);
 	}
 
 	@Override @JsonIgnore
 	public PacketId getPacketId() {
-		return linkHeader.getAddr()==CONVERTER_ADDR ? FCM_PACKET_ID : BUC_PACKET_ID;
+		return packetId;
 	}
 
-	@Override public synchronized void setLinkHeaderAddr(byte addr) {
+	@Override public synchronized boolean setLinkHeaderAddr(byte addr) {
 
-		if(addr == linkHeader.getAddr())
-			return;
+		if(addr==0)
+			packetId = PacketId.CONFIGURATION_FCM_MUTE;
+		else
+			packetId = PacketId.CONFIGURATION_MUTE;
 
-		super.setLinkHeaderAddr(addr);
-
-		try {
-			getPayloads().get(0).setParameterHeader(new ParameterHeader(addr==CONVERTER_ADDR ? FCM_PACKET_ID : BUC_PACKET_ID));
-		} catch (PacketParsingException e) {
-			logger.catching(e);
-		}
+		return super.setLinkHeaderAddr(addr);
 	}
 
 	public void setCommand(MuteStatus muteStatus) {

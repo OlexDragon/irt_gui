@@ -6,9 +6,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
@@ -21,10 +23,13 @@ import irt.gui.data.packet.enums.PacketId;
 import irt.gui.data.packet.enums.PacketType;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.errors.PacketParsingException;
+import jssc.SerialPort;
+import jssc.SerialPortException;
 
 public class InfoPacketTest {
 
 	Logger logger = LogManager.getLogger();
+	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
 
 	@Test
 	public void testToBytes() throws PacketParsingException {
@@ -74,13 +79,22 @@ public class InfoPacketTest {
 				}
 		});
 
-		LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
-
 			port.openPort();
 
 			port.send(packet);
 			assertNotNull(packet.getAnswer());
 
 			port.closePort();
+	}
+
+	@After
+	public void exit() {
+		Optional.ofNullable(port).filter(SerialPort::isOpened).ifPresent(p -> {
+			try {
+				p.closePort();
+			} catch (SerialPortException e) {
+				logger.catching(e);
+			}
+		});
 	}
 }

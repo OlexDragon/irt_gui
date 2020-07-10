@@ -44,17 +44,17 @@ public class StatusPacket extends PacketAbstract5{
 		return linkHeader.getAddr()==-1 ? FCM_PACKET_ID : BUC_PACKET_ID;
 	}
 
-	@Override public synchronized void setLinkHeaderAddr(byte addr) {
+	@Override public synchronized boolean setLinkHeaderAddr(byte addr) {
 
-		if(addr == linkHeader.getAddr())
-			return;
-
-		super.setLinkHeaderAddr(addr);
+		if(!super.setLinkHeaderAddr(addr))
+			return false;
 
 		try {
 			getPayloads().get(0).setParameterHeader(new ParameterHeader(addr==-1 ? FCM_PACKET_ID : BUC_PACKET_ID));
 		} catch (PacketParsingException e) {
 			logger.catching(e);
+			return false;
 		}
+		return true;
 	}
 }
