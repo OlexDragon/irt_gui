@@ -185,6 +185,10 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 	@Override public void setSliderValue(Slider slider, ChangeListener<Number> sliderChangeListener, String cssClass, Observer valueObserver, NumericChecker stepNumericChecker) {
 
+		if(value==null) {
+			return;
+		}
+
 		addCssClass(cssClass);
 
 		int factor = value.getFactor();
@@ -208,9 +212,8 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 	public void addCssClass(String cssClass) {
 		final ObservableList<String> styleClass = textField.getStyleClass();
-		if(styleClass.size()>0)
-			styleClass.remove(cssClass);	// if size = 0 throw  java.lang.ArrayIndexOutOfBoundsException
-		styleClass.add(cssClass);
+		if(!styleClass.contains(cssClass))
+			styleClass.add(cssClass);
 	}
 
 	@Override protected void setPacket(String keyStartWith) throws PacketParsingException { }
@@ -261,6 +264,9 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	}
 
 	@Override public void setText(double value) {
+
+		if(this.value==null)
+			return;
 
 		Value v = this.value.getCopy();
 		if(v instanceof ValueFrequency){

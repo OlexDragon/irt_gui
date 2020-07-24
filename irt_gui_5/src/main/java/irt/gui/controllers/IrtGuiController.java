@@ -66,7 +66,7 @@ public class IrtGuiController{
 				final Node content = tab.getContent();
 				final FieldController userData = (FieldController)content .getUserData();
 //				logger.error("{}: {}", tab.getText(), userData);
-				userData .doUpdate(selected);
+				userData.doUpdate(selected);
 			}
 
 			tabCount = size;

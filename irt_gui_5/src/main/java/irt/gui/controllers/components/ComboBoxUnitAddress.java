@@ -23,11 +23,13 @@ public class ComboBoxUnitAddress extends Observable {
 	private static final String 		KEY_SELECTED_ADDR 	= "selected_addr";
 
 	private final static Preferences 	prefs 	= Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
+	private static ComboBoxUnitAddress thisComboBox;
 
 	@FXML private ComboBox<Integer> addressComboBox;
 
 	@FXML private void initialize() {
 
+		thisComboBox = this;
 		setupComboBox();
 		fillComboBox();
 		setSelectedAddress();
@@ -105,5 +107,9 @@ public class ComboBoxUnitAddress extends Observable {
 			addressComboBox.getSelectionModel().select(a);
 			onActionAddressComboBox();
 		}
+	}
+
+	public static void setAddress(Integer address) {
+		thisComboBox.addressComboBox.setValue(address);
 	}
 }

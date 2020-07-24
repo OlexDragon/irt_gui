@@ -31,10 +31,12 @@ public class InfoController extends FieldsControllerAbstract {
 
 	@FXML public void initialize() {
 		try {
+
 			addPacketToSend(new InfoPacket());
 			doUpdate(true);
 
 			UpdateController.addController(this);
+
 		} catch (Exception e) {
 			logger.catching(e);
 		}

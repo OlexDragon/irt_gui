@@ -1,6 +1,7 @@
 package irt.gui.controllers.components;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import irt.gui.data.RegisterValue;
 import irt.gui.data.listeners.NumericChecker;
 import irt.gui.data.listeners.TextChangeListener;
 import irt.gui.data.listeners.TextFieldFocusListener;
+import irt.gui.data.packet.Payload;
 import irt.gui.data.packet.interfaces.LinkedPacket;
 import irt.gui.data.packet.observable.device_debug.DACPacket;
 import irt.gui.data.packet.observable.device_debug.DACPacket.DACs;
@@ -96,7 +98,12 @@ public class TextFieldDAC extends ScheduledNodeAbstract implements SliderListene
 				try {
 
 					final DACPacket packet = new DACPacket(answer, true);
-					final RegisterValue rv = packet.getPayloads().get(0).getRegisterValue();
+					final List<Payload> payloads = packet.getPayloads();
+					if(payloads.size()==0) {
+						logger.warn("Packet does not have payload. " + packet);
+						return;
+					}
+					final RegisterValue rv = payloads.get(0).getRegisterValue();
 					setValue(value, rv.getValue());
 
 					final String text = value.toString();
