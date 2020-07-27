@@ -41,6 +41,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -767,8 +769,8 @@ public class RegistersController implements Observer, FieldController {
 
 		@Override
 		public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-			logger.traceEntry("mousePressed: {}; newValue: {}", mousePressed, newValue);
 
+			double value = 0;
 			if(!mousePressed) {
 
 				final double blockIncrement = slider.getBlockIncrement();
@@ -776,20 +778,36 @@ public class RegistersController implements Observer, FieldController {
 
 				valueProperty.removeListener(this);
 
-				if(newValue.intValue()-oldValue.intValue() > 0)
-					slider.setValue(oldValue.doubleValue() + blockIncrement);
-
-				else 
-					slider.setValue(oldValue.doubleValue() - blockIncrement);
+				if(newValue.intValue()-oldValue.intValue() > 0) {
+					value = oldValue.doubleValue() + blockIncrement;
+					slider.setValue(value);
+				} else {
+					value = oldValue.doubleValue() - blockIncrement;
+					slider.setValue(value);
+				}
 
 				valueProperty.addListener(this);
 			}
 
+			logger.debug("mousePressed: {}; oldValue: {}; newValue: {}; set value: {}", mousePressed, oldValue, newValue, value);
+
 			Platform.runLater(
-					()->Optional
-					.ofNullable(selectedTextField)
-					.map(stf->(SliderListener)stf.getUserData())
-					.ifPresent(controller->controller.setText(slider.getValue())));
+					()->{
+						Optional
+						.ofNullable(selectedTextField)
+						.map(stf->(SliderListener)stf.getUserData())
+						.ifPresent(
+								controller->{
+									controller.setText(slider.getValue());
+
+									Platform.runLater(
+											()->{
+												Optional.of(controller).filter(TextFieldAbstract.class::isInstance).map(TextFieldAbstract.class::cast).ifPresent(TextFieldAbstract::onActionTextField);
+											});
+
+									logger.error(selectedTextField);
+								});
+					});
 		}
 		
 	}

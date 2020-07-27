@@ -82,12 +82,11 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		nodes.remove(borderPane);
 	}
 
-	protected void setup() {
-	}
+	protected void setup() { }
 
 	@Override public void setKeyStartWith(String propertiesKeyStartWith) {
 
-		this.propertyName = propertiesKeyStartWith;
+		setPropertyName(propertiesKeyStartWith);
 
 		//set title
 		 Optional
@@ -99,7 +98,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 		 //Period
 		 Optional
-		 .ofNullable(IrtGuiProperties.getProperty(propertyName + PERIOD))
+		 .ofNullable(IrtGuiProperties.getProperty(getPropertyName() + PERIOD))
 		 .ifPresent(p->setPeriod(Long.parseLong(p)));
 
 		 // Packet class
@@ -152,6 +151,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 	}
 
 	@Override protected void sendValue(Value value) throws PacketParsingException {
+		logger.traceEntry("{}", value);
 
 		final Optional<Value> val = Optional
 				.ofNullable(value)
@@ -356,7 +356,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 		private void setValue(LinkedPacket packet) {
 
 			int precision = Optional
-					.ofNullable(IrtGuiProperties.getLong(propertyName + PRECISION))
+					.ofNullable(IrtGuiProperties.getLong(getPropertyName() + PRECISION))
 					.orElse(0l)
 					.intValue();
 
@@ -388,7 +388,7 @@ public class TextFieldConfiguration extends TextFieldAbstract {
 
 			 //Prefix
 			 Optional
-			 .ofNullable(IrtGuiProperties.getProperty(propertyName + PREFIX))
+			 .ofNullable(IrtGuiProperties.getProperty(getPropertyName() + PREFIX))
 			 .ifPresent(p->value.setPrefix(p));
 
 			logger.debug("\n\t"

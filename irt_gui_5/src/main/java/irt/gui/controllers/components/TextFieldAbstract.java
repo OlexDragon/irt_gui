@@ -1,4 +1,3 @@
-
 package irt.gui.controllers.components;
 
 import java.util.Optional;
@@ -26,6 +25,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import lombok.Getter;
+import lombok.Setter;
 
 public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements SliderListener {
 
@@ -43,7 +44,8 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 	public static final String CLASS_NOT_SAVED 		= "notSaved";
 	public static final String CLASS_HAS_CHANGED 	= "hasChanged";
 
-	protected volatile Value	value;		/* Actual value	*/							public Value getValue() { return value; }
+	@Getter
+	protected volatile Value	value;		/* Actual value	*/
 	private final ChangeListener<String> 	numericChecker 	= getNumericChecker();		public abstract ChangeListener<String> 	getNumericChecker();
 	private Menu menu;
 	private TextFieldErrorController errorController;
@@ -64,6 +66,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 	@FXML protected MenuItem	menuItemSet;
 
 	@FXML protected void initialize(){
+		logger.trace("initialize {} class.", getClass().getSimpleName());
 
 		menu = getMenu();
 
@@ -82,11 +85,16 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 
 	@FXML public void onActionTextField() {
 
-		if(value!=null)
+		if(value==null)
+			return;
+
 		try {
 
 			final Value v = value.getCopy();
-			v.setValue(textField.getText());
+			final String text = textField.getText();
+			v.setValue(text);
+
+			logger.traceEntry("new value(); {}", v, value);
 
 			if(!value.equals(v)){
 				sendValue(v);
@@ -124,13 +132,8 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 		}
 	}
 
+	@Getter @Setter
 	private Consumer<KeyEvent> onKeyPressed;
-										public Consumer<KeyEvent> getOnKeyPressed() {
-											return onKeyPressed;
-										}
-										public void setOnKeyPressed(Consumer<KeyEvent> onKeyPressed) {
-											this.onKeyPressed = onKeyPressed;
-										}
 
 	@FXML protected void onKeyPressed(KeyEvent event) {
 
@@ -147,7 +150,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 
 		try {
 
-			this.propertyName = propertiesKeyStartWith;
+			setPropertyName(propertiesKeyStartWith);
 
 
 			setPacket(propertiesKeyStartWith);
@@ -216,6 +219,7 @@ public abstract class TextFieldAbstract extends ScheduledNodeAbstract implements
 	}
 
 	private void checkForValueChange(String newValue) {
+
 		if(value==null)
 			return;
 

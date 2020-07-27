@@ -87,7 +87,7 @@ public class LabelRegister extends ScheduledNodeAbstract {
 		if(keyStartWith==null || keyStartWith.isEmpty())
 			return;
 
-		this.propertyName = keyStartWith;
+		setPropertyName(keyStartWith);
 
 		setValue(keyStartWith);
 

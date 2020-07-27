@@ -22,6 +22,9 @@ import lombok.Setter;
 public abstract class StartStopAbstract implements Runnable, Observer, FieldController{
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
+	@Getter @Setter
+	private String propertyName;
+
 	@Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
 	protected 				ScheduledFuture<?> 	scheduleAtFixedRate;
 
@@ -47,14 +50,14 @@ public abstract class StartStopAbstract implements Runnable, Observer, FieldCont
 
 	/***/
 	public synchronized void start() {
-		logger.traceEntry("{}", ()->packets);
+		logger.traceEntry(propertyName);
 		if(!packets.isEmpty() && (scheduleAtFixedRate==null || scheduleAtFixedRate.isCancelled())){
 			scheduleAtFixedRate = LinkedPacketsQueue.SERVICES.scheduleAtFixedRate(this, 1, period, TimeUnit.MILLISECONDS);
 		}
 	}
 
 	public synchronized void stop(boolean mayInterruptIfRunning) {
-		logger.trace("{}", ()->packets);
+		logger.traceEntry(propertyName);
 		Optional
 		.ofNullable(scheduleAtFixedRate)
 		.filter(sh->!sh.isCancelled())

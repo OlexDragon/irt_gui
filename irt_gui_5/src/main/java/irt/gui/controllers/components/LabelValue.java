@@ -96,7 +96,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 			.filter(mi->mi.getId().equals(propertiesKeyStartWith))
 			.forEach(mi->Platform.runLater(()->((RadioMenuItem)mi).setSelected(true)));
 
-			this.propertyName = propertiesKeyStartWith;
+			setPropertyName(propertiesKeyStartWith);
 		}
 	}
 
@@ -117,7 +117,7 @@ public class LabelValue extends ScheduledNodeAbstract {
 
 		//Period
 		Optional
-		.ofNullable(IrtGuiProperties.getProperty(propertyName + PERIOD))
+		.ofNullable(IrtGuiProperties.getProperty(getPropertyName() + PERIOD))
 		.ifPresent(p->setPeriod(Long.parseLong(p)));
 
 		addPacket(packet);

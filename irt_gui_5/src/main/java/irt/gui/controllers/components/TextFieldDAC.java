@@ -56,7 +56,8 @@ public class TextFieldDAC extends ScheduledNodeAbstract implements SliderListene
 
 
 	@FXML protected void initialize() {
-		propertyName = String.format(FXML_PROPERTIES, dac.ordinal()+1);
+
+		setPropertyName(String.format(FXML_PROPERTIES, dac.ordinal()+1));
 
 		textField.setTooltip(new Tooltip(IrtGuiProperties.getProperty(String.format(NAME_PROPERTIES, dac.ordinal()+1))));
 		textField.setUserData(this);

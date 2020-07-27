@@ -31,9 +31,8 @@
 	</Appenders>
 
 	<Loggers>
-		<logger name="irt.gui.controllers.components.RegisterController" level="error"/>
-		<logger name="irt.gui.controllers.components.RegisterController$ValueChangeAnalyzer" level="error"/>
-		<logger name="irt.gui.controllers.components.RegisterView" level="error"/>
+		<logger name="irt.gui.controllers.components.RegistersController" level="error"/>
+		<logger name="irt.gui.controllers.components.RegistersController$ValueChangeAnalyzer" level="error"/>
 
 		<!-- <logger name="irt.gui.data.DeviceInfo" level="ALL"/> -->
 		<!-- <logger name="irt.gui.data.LinkedPacketChecksum" level="ALL"/> -->
@@ -76,7 +75,8 @@
 <!-- 		<logger name="irt.gui.controllers.components.ScheduledNodeAbstract" level="all"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ComboBoxUnitAddress" level="all"/> -->
 
-<!-- 		<logger name="irt.gui.controllers.components.TextFieldConfiguration$Updater" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.TextFieldConfiguration" level="all"/> -->
+<!-- 		<logger name="irt.gui.controllers.components.TextFieldConfiguration$Updater" level="debug"/> -->
 <!-- 		<logger name="irt.gui.controllers.components.ComboBox10MHzReferenceSource" level="debug"/> -->
 
 <!-- 		<logger name="irt.gui.controllers.socket.SocketWorker" level="all"/> -->
