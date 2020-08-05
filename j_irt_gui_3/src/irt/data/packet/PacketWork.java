@@ -344,11 +344,14 @@ public interface PacketWork extends Comparable<PacketWork>{
 		public  Optional<Object> valueOf(Packet packet) {
 			logger.trace(packet);
 			try {
+
 				return Optional.ofNullable(function).flatMap(f->f.apply(packet));
+
 			}catch (Exception e) {
+
 				logger.catching(e);
+				return Optional.empty();
 			}
-			return Optional.empty();
 		}
 
 		public String toString(){

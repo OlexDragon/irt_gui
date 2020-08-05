@@ -43,7 +43,7 @@ public class PicobucPanel extends UserPicobucPanel {
 		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceType, linkHeader, this);
 		tabbedPane2.addTab("Info", infoPanel);
 
-		DeviceDebugPanel debugPanel = new DeviceDebugPanel((byte) 0);
+		DeviceDebugPanel debugPanel = new DeviceDebugPanel(linkHeader.getAddr());
 		tabbedPane2.addTab("Debug", null, debugPanel, null);
 	}
 }

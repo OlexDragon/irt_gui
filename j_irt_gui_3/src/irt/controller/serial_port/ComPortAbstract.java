@@ -35,7 +35,7 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 	private final int WAIT_TIME;
 	private final int MAX_WAIT_TIME;
 
-    public static final int BAUDRATE_115200 = 115200;
+//    public static final int BAUDRATE_115200 = 115200;
 //	private volatile int available;//The use to reduce the time ( inputStream.available() - takes a lot of time )
 	private byte[] buffer;//The use to read all available bytes ( inputStream.read(byte[]) - takes a lot of time )
 

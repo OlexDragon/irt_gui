@@ -48,6 +48,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
@@ -56,6 +58,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Modality;
 
 public class DeviceDebugPanel extends JFXPanel {
 	private final static long serialVersionUID = -5736281933687114379L;
@@ -104,6 +107,7 @@ public class DeviceDebugPanel extends JFXPanel {
 	public class DebugPanelFx extends AnchorPane implements PacketListener{
 
 		public DebugPanelFx() {
+
 			Thread currentThread = Thread.currentThread();
 			currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 
@@ -143,6 +147,9 @@ public class DeviceDebugPanel extends JFXPanel {
 		@FXML private Button btnSet3;
 		@FXML private Button btnSet4;
 
+
+	    @FXML private CheckBox inHex;
+
 		@FXML protected void initialize() {
 
 			tfIndex1.textProperty().addListener(textListener);
@@ -163,15 +170,17 @@ public class DeviceDebugPanel extends JFXPanel {
 			Optional.ofNullable(pref.get("tfAddr3", null)).ifPresent(text->Platform.runLater(()->tfAddr3.setText(text)));
 			Optional.ofNullable(pref.get("tfAddr4", null)).ifPresent(text->Platform.runLater(()->tfAddr4.setText(text)));
 
-			tfValue1.textProperty().addListener(textListener);
-			tfValue2.textProperty().addListener(textListener);
-			tfValue3.textProperty().addListener(textListener);
-			tfValue4.textProperty().addListener(textListener);
+//			tfValue1.textProperty().addListener(textListener);
+//			tfValue2.textProperty().addListener(textListener);
+//			tfValue3.textProperty().addListener(textListener);
+//			tfValue4.textProperty().addListener(textListener);
 
 			cb1.selectedProperty().addListener(cbChangeListener);
 			cb2.selectedProperty().addListener(cbChangeListener);
 			cb3.selectedProperty().addListener(cbChangeListener);
 			cb4.selectedProperty().addListener(cbChangeListener);
+
+			inHex.setSelected(pref.getBoolean(inHex.getId(), false));
 		}
 
 		@FXML void onGet(ActionEvent e) {
@@ -179,9 +188,24 @@ public class DeviceDebugPanel extends JFXPanel {
 			get(source);			
 		}
 
-		@FXML void onSet(ActionEvent e) {
-			Node source = (Node) e.getSource();
-			set(source);
+		@FXML void onSet(ActionEvent ae) {
+
+			Node source = (Node) ae.getSource();
+
+			try {
+
+				set(source);
+
+			}catch(NumberFormatException e) {
+
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.initModality(Modality.APPLICATION_MODAL);
+				alert.setTitle("Number Format Exception");
+				alert.setHeaderText("The entered value contains one error.");
+				alert.setContentText("Try entering a new value.");
+
+				alert.showAndWait();
+			}
 		}
 
 	    @FXML  void onMenuSelect(ActionEvent e) {
@@ -285,6 +309,27 @@ public class DeviceDebugPanel extends JFXPanel {
 	    	}
 	    }
 
+	    @FXML void onHex(ActionEvent event) {
+
+	    	final boolean selected = inHex.isSelected();
+			pref.putBoolean(inHex.getId(), selected);
+
+			try {
+
+				lookupAll("TextField").parallelStream().filter(tf->tf.getId().startsWith("tfValue")).map(TextField.class::cast).filter(tf->!tf.getText().isEmpty()).forEach(tf->setText(tf, Integer.parseInt(tf.getText(), selected ? 10 : 16)));
+
+			}catch(NumberFormatException e) {
+
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.initModality(Modality.APPLICATION_MODAL);
+				alert.setTitle("Number Format Exception");
+				alert.setHeaderText("The entered value contains one error.");
+				alert.setContentText(e.getCause().getMessage());
+
+				alert.showAndWait();
+			}
+	    }
+
 		private void get(Node source) {
 			createGetPacket(source).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
 		}
@@ -295,6 +340,7 @@ public class DeviceDebugPanel extends JFXPanel {
 
 		@Override
 		public void onPacketReceived(Packet packet) {
+
 			Optional<Packet> oPacket = Optional.ofNullable(packet);
 			Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
 
@@ -308,6 +354,8 @@ public class DeviceDebugPanel extends JFXPanel {
 					.map(LinkHeader::getAddr)
 					.orElse((byte)0) != linkAddr)
 				return;
+
+			logger.traceEntry("{}", packet);
 
 			if(oHeader
 					.map(PacketHeader::getOption)
@@ -337,14 +385,18 @@ public class DeviceDebugPanel extends JFXPanel {
 			if(Optional.ofNullable(idIndex).filter(index->index.equals(tfIndex.getId().replaceAll("\\D", ""))).isPresent())
 				return;
 
-			getValue(tfIndex).filter(v->v==registerValue.getIndex())
-			.flatMap(v->getValue(tfAddr)).filter(v->v==registerValue.getAddr())
+			getValue(tfIndex, 10).filter(v->v==registerValue.getIndex())
+			.flatMap(v->getValue(tfAddr, 10)).filter(v->v==registerValue.getAddr())
 			.map(v->registerValue.getValue())
 			.map(Value::getValue)
 			.map(Long::intValue)
-			.map(v->"" + v)
-			.filter(v->!v.equals(tfValue.getText()))
-			.ifPresent(v->Platform.runLater(()->tfValue.setText(v)));
+			.ifPresent(v->setText(tfValue, v));
+		}
+
+		private void setText(TextField tfValue, int value) {
+
+			final String text = Integer.toString(value, inHex.isSelected() ? 16 : 10);
+			Platform.runLater(()->tfValue.setText(text));
 		}
 
 		// ************************************************************************ //
@@ -370,9 +422,9 @@ public class DeviceDebugPanel extends JFXPanel {
 
 			// Enable buttons
 			String idIndex = id.replaceAll("\\D", "");
-			boolean indexPresent = getValue(lookup("#tfIndex" + idIndex)).isPresent();
-			boolean addrPresent = getValue(lookup("#tfAddr" + idIndex)).isPresent();
-			boolean valuePresent = getValue(lookup("#tfValue" + idIndex)).isPresent();
+			boolean indexPresent = getValue(lookup("#tfIndex" + idIndex), 10).isPresent();
+			boolean addrPresent = getValue(lookup("#tfAddr" + idIndex), 10).isPresent();
+			boolean valuePresent = getValue(lookup("#tfValue" + idIndex), inHex.isSelected() ? 16 : 10).isPresent();
 
 			final boolean disableCheckBox = !(indexPresent && addrPresent);
 
@@ -436,10 +488,10 @@ public class DeviceDebugPanel extends JFXPanel {
 
 			String idIndex = node.getId().replaceAll("\\D", "");
 
-			return getValue(lookup("#tfIndex" + idIndex))
+			return getValue(lookup("#tfIndex" + idIndex), 10)
 					.flatMap(
 							index->
-							getValue(lookup("#tfAddr" + idIndex))
+							getValue(lookup("#tfAddr" + idIndex), 10)
 							.map(addr->(IntBuffer)IntBuffer
 									.allocate(2)
 									.put(index)
@@ -455,30 +507,30 @@ public class DeviceDebugPanel extends JFXPanel {
 
 			String idIndex = node.getId().replaceAll("\\D", "");
 
-			return getValue(lookup("#tfIndex" + idIndex))
+			return getValue(lookup("#tfIndex" + idIndex), 10)
 					.flatMap(
 							index->
-							getValue(lookup("#tfAddr" + idIndex))
+							getValue(lookup("#tfAddr" + idIndex), 10)
 							.flatMap(
 									addr->
-									getValue(lookup("#tfValue" + idIndex))
-									.map(val->(IntBuffer)IntBuffer
-									.allocate(3)
-									.put(index)
-									.put(addr)
-									.put(val)
-									.position(0))))
+									getValue(lookup("#tfValue" + idIndex), inHex.isSelected() ? 16 : 10)
+									.map(
+											val->(IntBuffer)IntBuffer
+											.allocate(3)
+											.put(index)
+											.put(addr)
+											.put(val)
+											.position(0))))
 							;
 		}
 
-		private Optional<Integer> getValue(Node node){
+		private Optional<Integer> getValue(Node node, int radix){
 			return Optional
 					.ofNullable(node)
 					.map(TextField.class::cast)
 					.map(TextField::getText)
-					.map(t->t.replaceAll("\\D", ""))
 					.filter(t->!t.isEmpty())
-					.map(Integer::parseInt);
+					.map(text->Integer.parseInt(text, radix));
 		}
 
 		private void startFuture(CheckBox checkBox) {

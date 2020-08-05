@@ -88,7 +88,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private GridPane 	gridPane;
 
 	public MonitorPanelFx() {
+
+		Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.catching(e));
+
 		Thread currentThread = Thread.currentThread();
+		currentThread.setUncaughtExceptionHandler((t, e) -> logger.catching(e));
+
 		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MonitorPanel.fxml"));
@@ -188,12 +193,13 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	private void setValues(Map<?, ?> map) {
 
-		ObservableList<Node> children = gridPane.getChildren();
-		Set<? extends Entry<?,?>> entrySet = map.entrySet();
+		final ObservableList<Node> children = gridPane.getChildren();
+		final Set<? extends Entry<?,?>> entrySet = map.entrySet();
 
 		if(children.isEmpty()) {
 			Iterator<?> iterator = entrySet.iterator();
-			IntStream.range(0, entrySet.size()).forEach(
+			final int size = entrySet.size();
+			IntStream.range(0, size).forEach(
 					rowIndex->{
 						if(!iterator.hasNext())
 							return;
@@ -215,7 +221,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 								});
 					});
 		}else {
-			Map<Object, Node> collect = children.stream().filter(node->node.getUserData()!=null).collect(Collectors.toMap(Node::getUserData, node->node));
+			final Map<Object, Node> collect = children.stream().filter(node->node.getUserData()!=null).collect(Collectors.toMap(Node::getUserData, node->node));
 			entrySet.forEach(s->Optional.ofNullable((Label) collect.get(s.getKey().toString())).ifPresent(label->Platform.runLater(()->label.setText(s.getValue().toString()))));
 		}
 	}
@@ -250,6 +256,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		IntStream.range(0, statusSize).forEach(
 
 				index->{
+
+					if(collect.isEmpty() || children.isEmpty())
+						return;
 
 					// Show only UNLOCKED, LOCKED, MUTE statuses
 					Object statusBit = collect.get(index);
