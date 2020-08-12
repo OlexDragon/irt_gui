@@ -185,6 +185,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 						Optional
 						.ofNullable((List<?>)map.remove("STATUS"))
 						.ifPresent(this::setStatus);
+						final List<Map.Entry<?, ?>> listToRemove = map.entrySet().parallelStream().filter(entry->entry.getValue().equals("N/A")).collect(Collectors.toList());
+						listToRemove.forEach(entry->map.remove(entry.getKey()));
 
 						setValues(map);
 					});

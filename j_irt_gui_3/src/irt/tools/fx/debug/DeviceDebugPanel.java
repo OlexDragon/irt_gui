@@ -55,6 +55,7 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
@@ -146,6 +147,8 @@ public class DeviceDebugPanel extends JFXPanel {
 		@FXML private Button btnSet2;
 		@FXML private Button btnSet3;
 		@FXML private Button btnSet4;
+
+	    @FXML private ToggleButton btnCalMode;
 
 
 	    @FXML private CheckBox inHex;
@@ -328,6 +331,14 @@ public class DeviceDebugPanel extends JFXPanel {
 
 				alert.showAndWait();
 			}
+	    }
+
+	    @FXML void onCalOn() {
+
+	    }
+
+	    @FXML void onInitialize() {
+
 	    }
 
 		private void get(Node source) {

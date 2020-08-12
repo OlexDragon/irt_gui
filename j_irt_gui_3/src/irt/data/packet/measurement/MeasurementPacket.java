@@ -30,9 +30,10 @@ import irt.tools.fx.MonitorPanelFx.StatusBits;
 public class MeasurementPacket extends PacketSuper{
 	private final static Logger logger = LogManager.getLogger();
 
-	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
-																										.ofNullable(packet)
-																										.map(p->Optional.of(p).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte)0)!=0)	//is not a converter
+	public final static Function<Packet, Optional<Object>> parseValueFunction =
+
+			packet-> Optional.ofNullable(packet)
+			.map(p->Optional.of(p).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte)0)!=0)	//is not a converter
 																										.map(b-> b ? ParameterHeaderCodeBUC.class : ParameterHeaderCodeFCM.class)
 																										.map(parameterHCodeClass->{
 																											try {

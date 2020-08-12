@@ -5,6 +5,7 @@
 <?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -286,6 +287,8 @@
 					</children>
 				</AnchorPane>
             <CheckBox fx:id="inHex" mnemonicParsing="false" onAction="#onHex" text="In HEX" GridPane.columnIndex="1" />
+            <ToggleButton fx:id="btnCalMode" mnemonicParsing="false" onAction="#onCalOn" text="Cal. OFF" GridPane.columnIndex="2" />
+            <Button disable="true" mnemonicParsing="false" onAction="#onInitialize" text="Initialize" GridPane.columnIndex="3" />
 			</children>
 		</GridPane>
 	</children>
