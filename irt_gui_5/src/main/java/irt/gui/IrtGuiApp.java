@@ -6,6 +6,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import com.sun.javafx.application.LauncherImpl;
 
+import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.calibration.PanelTools;
 import irt.gui.controllers.components.SerialPortController;
 import javafx.application.Application;
@@ -26,13 +28,15 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import jssc.SerialPort;
 
 @SuppressWarnings("restriction")
 public class IrtGuiApp extends Application {
-
-	public static final String BUNDLE = "bundles/bundle";
 	private final Logger logger = LogManager.getLogger();
+
+	public static final String GUI_IS_CLOSED_PROPERLY = "gui is closed";
+	public static final String BUNDLE = "bundles/bundle";
+	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
+
 	private Scene scene;
 	private Properties properties;
 	private Image logo;
@@ -74,29 +78,32 @@ public class IrtGuiApp extends Application {
 	}
 
 	@Override public void start(Stage primaryStage) {
-       try {
+		try {
 			primaryStage.setScene(scene);
 			primaryStage.getIcons().add(logo);
-         	primaryStage.setTitle("IRT Gui v." + properties.getProperty("version"));
-        	primaryStage.show();
+			primaryStage.setTitle("IRT Gui v." + properties.getProperty("version"));
+			primaryStage.show();
 
-        }catch(Exception e){
-        	logger.catching(e);
-        }
+		} catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	@Override public void stop() throws Exception {
+
 		stopLoggers();
 
 		//BUC 
-		SerialPort serialPort = SerialPortController.getSerialPort();
+		IrtSerialPort serialPort = SerialPortController.getSerialPort();
 		if(serialPort!=null)
-			serialPort.closePort();
+			serialPort.closeSerialPort();
 
 		//Calibration tool
 		serialPort = PanelTools.getSerialPort();
 		if(serialPort!=null)
-			serialPort.closePort();
+			serialPort.closeSerialPort();
+
+		prefs.putBoolean(GUI_IS_CLOSED_PROPERLY, true);
 	}
 
 	private void stopLoggers() {

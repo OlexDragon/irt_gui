@@ -1,49 +1,87 @@
 package irt.gui.controllers.components;
 
+import java.lang.reflect.Constructor;
 import java.util.Observable;
 import java.util.Optional;
 import java.util.prefs.Preferences;
+import java.util.stream.Stream;
+
+import javax.xml.soap.Node;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.gui.IrtGuiApp;
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.LinkedPacketsQueue;
+import irt.gui.controllers.PacketSenderJSerialComm;
+import irt.gui.controllers.PacketSenderJssc;
+import irt.gui.controllers.SerialPortParams;
 import irt.gui.controllers.enums.SerialPortStatus;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.util.Pair;
-import jssc.SerialPortException;
 import jssc.SerialPortList;
+import lombok.Getter;
 
 public class ComboBoxSerialPort extends Observable {
+	private static final String SELECTED_DRIVER = "selected driver";
+
 	private final Logger logger = LogManager.getLogger();
 
 	private static final String NETWORK_SELECTION = "Network";
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
-	private String prefsName;
 
+	public final static SerialPortParams SERIAL_PORT_PARAMS = new SerialPortParams();
 	public final LinkedPacketsQueue queue =  new LinkedPacketsQueue();
-
-	private LinkedPacketSender	serialPort;				public LinkedPacketSender 	getSerialPort() { return serialPort; }
 
 	private SerialPortStatus portStatus; public SerialPortStatus getSerialPortStatus() { return portStatus; }
 
 	@FXML private ComboBox<String> serialPortComboBox;
+    @FXML private RadioMenuItem menuJssc;
+    @FXML private RadioMenuItem menyJSerialComm;
 
-	public void initialize(String prefsName) {
+	private static boolean initialized;
+
+	private String prefsName;
+	@Getter private IrtSerialPort	serialPort;
+	private Class<?> selectedDriver = PacketSenderJssc.class;
+
+    @FXML public void initialize() {
+
+    	ToggleGroup group = new ToggleGroup();
+
+    	menuJssc.setUserData(PacketSenderJssc.class);
+    	menuJssc.setToggleGroup(group);
+
+    	menyJSerialComm.setUserData(PacketSenderJSerialComm.class);
+    	menyJSerialComm.setToggleGroup(group);
+
+    	Stream.of(menuJssc, menyJSerialComm).filter(mi->mi.getId().equals(prefs.get(SELECTED_DRIVER, null))).findAny()
+    	.ifPresent(
+    			mi->{
+    				mi.setSelected(true);
+    				selectedDriver = (Class<?>) mi.getUserData();
+    			});
+    }
+
+    public void initialize(String prefsName) {
 
 		try{
 			ObservableList<String> items = serialPortComboBox.getItems();
@@ -56,11 +94,32 @@ public class ComboBoxSerialPort extends Observable {
 			this.prefsName = prefsName;
 
 			String serialPortName = prefs.get(prefsName, null);
-			if(serialPortName!=null && !serialPortName.contains("Select") && serialPortComboBox.getItems().contains(serialPortName)){
+			boolean guiBeenClosedProperly = initialized || prefs.getBoolean(IrtGuiApp.GUI_IS_CLOSED_PROPERLY, true);
+			initialized = true;
+
+			if(!guiBeenClosedProperly) {
+
+				ChoiceDialog<Class<?>> alert = new ChoiceDialog<>(selectedDriver, PacketSenderJSerialComm.class, PacketSenderJssc.class) ;
+				alert.setTitle("The GUI was not closed properly.");
+				alert.setHeaderText("Try to select a different serial port driver.");
+				Node comboBox = (Node) alert.getDialogPane().lookup(".combo-box");
+				logger.er
+				Optional<Class<?>> oClass = alert.showAndWait();
+
+				if(!oClass.isPresent())
+					return;
+
+				selectedDriver = oClass.get();
+				Stream.of(menuJssc, menyJSerialComm).filter(mi->mi.getUserData().equals(selectedDriver)).findAny().ifPresent(mi->mi.setSelected(true));
+			}
+
+			if( serialPortName!=null && !serialPortName.contains("Select") && serialPortComboBox.getItems().contains(serialPortName)){
+
+				prefs.putBoolean(IrtGuiApp.GUI_IS_CLOSED_PROPERLY, false);
 
 				final SingleSelectionModel<String> selectionModel = serialPortComboBox.getSelectionModel();
 				selectionModel.select(serialPortName);
-				onActionSelectSerialPort();
+				Platform.runLater(()->onActionSelectSerialPort());
 			}
 		}catch(Exception ex){
 			logger.catching(ex);
@@ -76,11 +135,15 @@ public class ComboBoxSerialPort extends Observable {
 			if(serialPortName!=null){
 
 				if(serialPortName.equals(NETWORK_SELECTION)){
+
 					closePort();
 					Optional<Pair<String, String>> result = showDialog();
 					result.ifPresent(r->queue.setNetwork(r));
+
 				}else{
-					serialPort = new LinkedPacketSender(serialPortName);
+
+					Constructor<?> constructor = selectedDriver.getConstructor(String.class);
+					serialPort = (IrtSerialPort) constructor.newInstance(serialPortName);
 					openPort();
 				}
 
@@ -114,19 +177,26 @@ public class ComboBoxSerialPort extends Observable {
 
 			try {
 
-				if(serialPort.openPort())
+				if(serialPort.openSerialPort())
 					logger.info("Serial Port {} is opened", serialPort);
 				else
 					logger.error("It is not posible to open {} port", serialPort);
 
 				notifyObservers();
 
-			} catch (SerialPortException e) {
+			} catch (Exception e) {
 				catchError(e);
 			}
 
 		}
 	}
+
+    @FXML
+    void onDriverSelect(ActionEvent event) {
+    	RadioMenuItem source = (RadioMenuItem) event.getSource();
+    	prefs.put(SELECTED_DRIVER, source.getId());
+    	selectedDriver = (Class<?>)source.getUserData();
+    }
 
 	public void closePort(){
 
@@ -134,13 +204,13 @@ public class ComboBoxSerialPort extends Observable {
 
 			try {
 
-				if(serialPort.closePort()){
+				if(serialPort.closeSerialPort()){
 					portStatus = SerialPortStatus.CLOSED;
 					logger.info("Serial Port {} is closed", serialPort.getPortName());
 				}else
 					logger.error("It is not posible to close {} port", serialPort);
 
-			} catch (SerialPortException e) {
+			} catch (Exception e) {
 				catchError(e);
 			}
 
@@ -163,7 +233,7 @@ public class ComboBoxSerialPort extends Observable {
 		if(serialPort!=null)
 			synchronized (serialPort) {
 				if(serialPort.isOpened())
-					serialPort.closePort();
+					serialPort.closeSerialPort();
 			}
 	}
 

@@ -15,8 +15,6 @@ import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.interfaces.PacketToSend;
 import javafx.util.Pair;
-import jssc.SerialPort;
-import jssc.SerialPortException;
 
 public class LinkedPacketsQueue implements Runnable {
 
@@ -27,7 +25,7 @@ public class LinkedPacketsQueue implements Runnable {
 	private final static SocketWorker SOCKET = new SocketWorker();
 
 	private LinkedPacketPriorityBlockingQueue blockingQueue = new LinkedPacketPriorityBlockingQueue();
-	private volatile LinkedPacketSender comPort;
+	private volatile IrtSerialPort comPort;
 
 	private byte unitAddress = (byte) 254;
 	private boolean runServer = true; public boolean isRunServer() { return runServer; } public void setRunServer(boolean runServer) { this.runServer = runServer; }
@@ -107,14 +105,14 @@ public class LinkedPacketsQueue implements Runnable {
 		return blockingQueue.size();
 	}
 
-	public void setComPort(LinkedPacketSender serialPort) {
+	public void setComPort(IrtSerialPort serialPort) {
 
-		Optional.ofNullable(comPort).filter(SerialPort::isOpened)
+		Optional.ofNullable(comPort).filter(IrtSerialPort::isOpened)
 		.ifPresent(
 				p -> {
 					try {
-						p.closePort();
-					} catch (SerialPortException e) {
+						p.closeSerialPort();
+					} catch (Exception e) {
 						logger.catching(e);
 					}
 				});
@@ -148,7 +146,7 @@ public class LinkedPacketsQueue implements Runnable {
 
 		if(comPort!=null){
 			try {
-				comPort.closePort();
+				comPort.closeSerialPort();
 			} catch (Exception e) {
 				logger.catching(e);
 			}

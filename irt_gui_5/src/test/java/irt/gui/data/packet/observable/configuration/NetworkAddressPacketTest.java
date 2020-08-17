@@ -19,7 +19,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.data.NetworkAddress;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
@@ -37,7 +37,7 @@ import jssc.SerialPortException;
 public class NetworkAddressPacketTest {
 
 	Logger logger = LogManager.getLogger();
-	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
+	private PacketSenderJssc port  = new PacketSenderJssc(ComPortTest.COM_PORT);
 
 	@Test
 	public void testRequest() throws PacketParsingException {

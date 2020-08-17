@@ -21,7 +21,7 @@ import jssc.SerialPortException;
 public class ComPortThreadQueueTest {
 
 	Logger logger = LogManager.getLogger();
-	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
+	private PacketSenderJssc port  = new PacketSenderJssc(ComPortTest.COM_PORT);
 
 	@Test
 	public void test() throws InterruptedException, PacketParsingException {

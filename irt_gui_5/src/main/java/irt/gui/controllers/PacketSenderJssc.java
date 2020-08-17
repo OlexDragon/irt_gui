@@ -11,6 +11,7 @@ import javax.swing.Timer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.gui.controllers.components.ComboBoxSerialPort;
 import irt.gui.controllers.enums.Baudrate;
 import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.ToHex;
@@ -20,7 +21,7 @@ import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
-public class LinkedPacketSender extends SerialPort {
+public class PacketSenderJssc extends SerialPort implements IrtSerialPort {
 
 	public static final int STANDARD_WAIT_TIME 		= 5;
 	public static final int FLASH_MEMORY_WAIT_TIME 	= 5;
@@ -29,8 +30,6 @@ public class LinkedPacketSender extends SerialPort {
 
 	private final Logger logger = LogManager.getLogger();
 
-	private static Baudrate baudrate = Baudrate.BAUDRATE_115200;
-
 	volatile private boolean run = true;
 	private int timeout = 1000;
 	private SerialPortEvent serialPortEvent = new SerialPortEvent();
@@ -38,7 +37,7 @@ public class LinkedPacketSender extends SerialPort {
 	private int waitTime = STANDARD_WAIT_TIME;
 
 
-	public LinkedPacketSender(String portName) {
+	public PacketSenderJssc(String portName) {
 		super(portName);
 	}
 
@@ -216,7 +215,7 @@ public class LinkedPacketSender extends SerialPort {
 		return logger.traceExit(isReady);
 	}
 
-	@Override public synchronized boolean openPort() throws SerialPortException {
+	@Override public synchronized boolean openSerialPort() throws Exception {
 
 		boolean isOpened;
 
@@ -231,28 +230,26 @@ public class LinkedPacketSender extends SerialPort {
 					addEventListener(serialPortEvent);
 				}
 			} else
-				throw new SerialPortException(getPortName(), "openPort()",
-						"Property LinkedPacketSender.run set to " + run);
+				throw new SerialPortException(getPortName(), "openPort()", "Property LinkedPacketSender.run set to " + run);
 		return isOpened;
 	}
 
-	@Override public boolean closePort() throws SerialPortException{
+	@Override public boolean closeSerialPort() throws Exception{
 
 		boolean isClosed = true;
 
-		if (isOpened()) {
+		if (isOpened())
 			isClosed = super.closePort();
-		}
 
 		return isClosed;
 	}
 
 	public static Baudrate getBaudrate() {
-		return baudrate;
+		return ComboBoxSerialPort.SERIAL_PORT_PARAMS.getBaudrate();
 	}
 
 	public void setBaudrate(Baudrate baudrate){
-		LinkedPacketSender.baudrate = baudrate;
+		ComboBoxSerialPort.SERIAL_PORT_PARAMS.setBaudrate(baudrate);
 		try {
 			setParams();
 		} catch (Exception e) {
@@ -260,8 +257,9 @@ public class LinkedPacketSender extends SerialPort {
 		}
 	}
 
-	public void setParams() throws SerialPortException {
-		setParams(baudrate.getBaudrate(), DATABITS_8, STOPBITS_1, parity);
+	public void setParams() throws Exception {
+		SerialPortParams params = ComboBoxSerialPort.SERIAL_PORT_PARAMS;
+		setParams(params.getBaudrate().getValue(), params.getDataBits(), params.getStopBits(), params.getParity());
 	}
 
 	@Override public String toString() {
@@ -274,9 +272,14 @@ public class LinkedPacketSender extends SerialPort {
 		@Override
 		public void serialEvent(jssc.SerialPortEvent serialPortEvent) {
 
-			synchronized (LinkedPacketSender.this) {
-				LinkedPacketSender.this.notify();
+			synchronized (PacketSenderJssc.this) {
+				PacketSenderJssc.this.notify();
 			}
 		}
+	}
+
+	@Override
+	public int getAvailableBytes() throws SerialPortException {
+		return getInputBufferBytesCount();
 	}
 }

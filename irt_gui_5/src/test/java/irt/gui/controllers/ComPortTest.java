@@ -22,7 +22,7 @@ public class ComPortTest implements Observer {
 	public static final String COM_PORT = "COM3";
 	Logger logger = LogManager.getLogger();
 	private FutureTask<Boolean> task;
-	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
+	private PacketSenderJssc port  = new PacketSenderJssc(ComPortTest.COM_PORT);
 
 	@Test
 	public void test() throws PacketParsingException {

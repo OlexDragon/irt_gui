@@ -1,7 +1,9 @@
 package irt.gui.controllers.enums;
 
 import jssc.SerialPort;
+import lombok.Getter;
 
+@Getter
 public enum Baudrate {
 
 	BAUDRATE_9600	(SerialPort.BAUDRATE_9600),
@@ -10,27 +12,22 @@ public enum Baudrate {
 	BAUDRATE_57600	(SerialPort.BAUDRATE_57600),
 	BAUDRATE_115200	(SerialPort.BAUDRATE_115200);
 
-	private int baudrate;
-	private static Baudrate defaultBaudrate = BAUDRATE_115200;
+	 private int value;
 
 	private Baudrate(int baudrate){
-		this.baudrate = baudrate;
-	}
-
-	public int getBaudrate() {
-		return baudrate;
+		this.value = baudrate;
 	}
 
 	@Override
 	public String toString(){
-		return ""+baudrate;
+		return Integer.toString(value);
 	}
 
 	public static Baudrate valueOf(int baudrate) {
-		Baudrate result = defaultBaudrate;
+		Baudrate result = BAUDRATE_115200;
 
 		for(Baudrate b:values())
-			if(b.getBaudrate()==baudrate){
+			if(b.value==baudrate){
 				result = b;
 				break;
 			}

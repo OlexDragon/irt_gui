@@ -5,7 +5,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
@@ -46,6 +46,6 @@ public class InfoPacket extends PacketAbstract5 implements WaitTime{
 
 	@Override
 	public int getWaitTime() {
-		return LinkedPacketSender.STANDARD_WAIT_TIME;
+		return PacketSenderJssc.STANDARD_WAIT_TIME;
 	}
 }

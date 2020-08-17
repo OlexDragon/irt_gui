@@ -18,7 +18,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import jssc.SerialPortException;
 
 public class ComboBoxLoSelectTest extends ApplicationTest {
 	private Logger logger = LogManager.getLogger();
@@ -62,8 +61,8 @@ public class ComboBoxLoSelectTest extends ApplicationTest {
 	}
 
 	@After
-	public void stop() throws SerialPortException {
+	public void stop() throws Exception {
 		comboBoxLoSelect.stop(true);
-		SerialPortController.getSerialPort().closePort();
+		SerialPortController.getSerialPort().closeSerialPort();
 	}
 }

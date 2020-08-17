@@ -17,7 +17,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import jssc.SerialPort;
-import jssc.SerialPortException;
 
 public class IrtGuiController{
 	private final Logger logger = LogManager.getLogger();
@@ -85,7 +84,7 @@ public class IrtGuiController{
 			SerialPortController.getQueue().clear();
 			prefs.put("selected_tab_id", tab.getId());
 
-			final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
+			final IrtSerialPort serialPort = SerialPortController.getSerialPort();
 			if(serialPort==null)
 				return;
 
@@ -93,15 +92,15 @@ public class IrtGuiController{
 			serialPort.setParity(SerialPort.PARITY_EVEN);
 			try {
 				serialPort.setParams();
-			} catch (SerialPortException e1) {
+			} catch (Exception e1) {
 				logger.catching(e1);
 			}
 		}else{
-			final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
+			final IrtSerialPort serialPort = SerialPortController.getSerialPort();
 			serialPort.setParity(parity);
 			try {
 				serialPort.setParams();
-			} catch (SerialPortException e1) {
+			} catch (Exception e1) {
 				logger.catching(e1);
 			}
 			UpdateController.start(tab.getId());

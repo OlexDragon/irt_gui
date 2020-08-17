@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.components.SerialPortController;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.observable.production.ConnectFCMPacket;
@@ -18,7 +18,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import jssc.SerialPort;
-import jssc.SerialPortException;
 
 public class ButtonFCM implements Observer, Initializable {
 	private final Logger logger = LogManager.getLogger();
@@ -48,12 +47,12 @@ public class ButtonFCM implements Observer, Initializable {
 	}
 
 	@FXML private void onAction() {
-		final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
+		final IrtSerialPort serialPort = SerialPortController.getSerialPort();
 		parity = serialPort.getParity();
 		serialPort.setParity(SerialPort.PARITY_NONE);
 		try {
 			serialPort.setParams();
-		} catch (SerialPortException e1) {
+		} catch (Exception e1) {
 			logger.catching(e1);
 		}
 
@@ -64,7 +63,7 @@ public class ButtonFCM implements Observer, Initializable {
 	@Override public void update(Observable o, Object arg) {
 		logger.traceEntry("{}; {}", ()->ToHex.bytesToHex(((ConnectFCMPacket)o).toBytes()), ()->o);
 
-		final LinkedPacketSender serialPort = SerialPortController.getSerialPort();
+		final IrtSerialPort serialPort = SerialPortController.getSerialPort();
 		serialPort.setParity(parity);
 		try {
 

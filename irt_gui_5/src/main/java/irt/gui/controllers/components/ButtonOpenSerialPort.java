@@ -1,6 +1,6 @@
 package irt.gui.controllers.components;
 
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.enums.SerialPortStatus;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -23,7 +23,7 @@ public class ButtonOpenSerialPort {
 			setText(serialPortStatus);
 		}else{
 
-			final LinkedPacketSender serialPort = comboBoxSerialPort.getSerialPort();
+			final IrtSerialPort serialPort = comboBoxSerialPort.getSerialPort();
 			setSerialPortStatus(serialPort);
 		}
 
@@ -32,13 +32,13 @@ public class ButtonOpenSerialPort {
 				addStyleClass("error", "warning", "connected");
 				setText((SerialPortStatus) arg);
 			}else{
-				final LinkedPacketSender sp = ((ComboBoxSerialPort)o).getSerialPort();
+				final IrtSerialPort sp = ((ComboBoxSerialPort)o).getSerialPort();
 				setSerialPortStatus(sp);
 			}
 		});
 	}
 
-	private void setSerialPortStatus(LinkedPacketSender serialPort) {
+	private void setSerialPortStatus(IrtSerialPort serialPort) {
 
 		SerialPortStatus portStatus;
 		if(serialPort==null){
@@ -71,7 +71,7 @@ public class ButtonOpenSerialPort {
 
 	@FXML private void onOpenClosePortButtonClicked(){
 
-		final LinkedPacketSender serialPort = comboBoxSerialPort.getSerialPort();
+		final IrtSerialPort serialPort = comboBoxSerialPort.getSerialPort();
 		if(serialPort.isOpened())
 			comboBoxSerialPort.closePort();
 		else

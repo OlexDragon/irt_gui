@@ -1,17 +1,18 @@
 package irt.gui.controllers.calibration;
 
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.components.ButtonOpenSerialPort;
 import irt.gui.controllers.components.ComboBoxSerialPort;
 import javafx.fxml.FXML;
+import lombok.Getter;
 
 public class PanelTools {
 
 	private static final String SERIAL_PORT_PREF = "tools_serialPort";
 
-	private static LinkedPacketsQueue queue; public static LinkedPacketsQueue getQueue() { return queue; }
-	private static LinkedPacketSender serialPort; public static LinkedPacketSender getSerialPort() { return serialPort; }
+	@Getter private static LinkedPacketsQueue queue;
+	@Getter private static IrtSerialPort serialPort;
 
 	@FXML private ComboBoxSerialPort	toolsSerialPortComboBoxController;
 	@FXML private ButtonOpenSerialPort  toolsOpenClosePortButtonController;

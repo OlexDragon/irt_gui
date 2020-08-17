@@ -18,7 +18,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.IrtSerialPort;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.enums.Baudrate;
 import irt.gui.controllers.socket.SocketWorker;
@@ -39,6 +40,7 @@ import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.AnchorPane;
+import lombok.Getter;
 
 public class SerialPortController implements Initializable{
 	private final Logger logger = LogManager.getLogger();
@@ -52,7 +54,7 @@ public class SerialPortController implements Initializable{
 
 	private static final Preferences prefs = Preferences.userRoot().node(IrtGuiProperties.PREFS_NAME);
 
-	private static LinkedPacketSender	serialPort;				public static LinkedPacketSender 	getSerialPort() { return serialPort; }
+	@Getter private static IrtSerialPort	serialPort;
 
 	private static final ScheduledExecutorService SERVICES = LinkedPacketsQueue.SERVICES;
 
@@ -72,9 +74,10 @@ public class SerialPortController implements Initializable{
 
 		serialPortComboBoxController.initialize(SERIAL_PORT_PREF);
 		queue = serialPortComboBoxController.getQueue();
-        comboBoxUnitAddressController.addObserver((o, address)->{
-        	queue.setUnitAddress(((Integer)address).byteValue());
-        });
+        comboBoxUnitAddressController.addObserver(
+        		(o, address)->{
+        			queue.setUnitAddress(((Integer)address).byteValue());
+        		});
 	}
 
 	@Override public void initialize(URL location, ResourceBundle resources) {
@@ -152,7 +155,7 @@ public class SerialPortController implements Initializable{
 		if(serialPort==null)
 			return;
 
-		final int b = prefs.getInt("baudrate", LinkedPacketSender.getBaudrate().getBaudrate());
+		final int b = prefs.getInt("baudrate", PacketSenderJssc.getBaudrate().getValue());
 		final Baudrate valueOf = Baudrate.valueOf(b);
 		serialPort.setBaudrate(valueOf);
 		items
@@ -172,7 +175,7 @@ public class SerialPortController implements Initializable{
 				final Baudrate userData = (Baudrate)source.getUserData();
 				serialPort.setBaudrate(userData);
 
-				final int baudrate = userData.getBaudrate();
+				final int baudrate = userData.getValue();
 				prefs.putInt("baudrate", baudrate);
 		});
 		return menuItem;

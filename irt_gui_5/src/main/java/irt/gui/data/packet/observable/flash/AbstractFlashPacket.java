@@ -7,7 +7,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.flash.enums.Command;
 import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.ToHex;
@@ -117,6 +117,6 @@ public abstract class AbstractFlashPacket extends Observable implements LinkedPa
 
 	@Override
 	public int getWaitTime() {
-		return LinkedPacketSender.FLASH_MEMORY_WAIT_TIME;
+		return PacketSenderJssc.FLASH_MEMORY_WAIT_TIME;
 	}
 }

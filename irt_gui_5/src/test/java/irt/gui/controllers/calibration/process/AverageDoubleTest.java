@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.calibration.tools.Tool;
 import irt.gui.controllers.calibration.tools.Tool.Commands;
@@ -38,7 +38,7 @@ public class AverageDoubleTest {
 	private final PrologixPacket packetAddr = new PAddrPacket();
 	private final PrologixPacket packetRead = new PReadPacket();
 	private final LinkedPacketsQueue queue = new LinkedPacketsQueue();
-	private final LinkedPacketSender port = new LinkedPacketSender(ComPortTest.COM_PORT);
+	private final PacketSenderJssc port = new PacketSenderJssc(ComPortTest.COM_PORT);
 //	private final Observer observer = (o,arg)->{
 //												ToolsPacket tp = (ToolsPacket)o;
 //												String answer = new String(tp.getAnswer());

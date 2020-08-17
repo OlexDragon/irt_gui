@@ -1,17 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.RadioMenuItem?>
 
+<ComboBox fx:id="serialPortComboBox" onAction="#onActionSelectSerialPort" promptText="Select The Serial Port" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.171" fx:controller="irt.gui.controllers.components.ComboBoxSerialPort">
 
-<ComboBox fx:id="serialPortComboBox" onAction="#onActionSelectSerialPort" promptText="Select The Serial Port" xmlns="http://javafx.com/javafx/8.0.40" xmlns:fx="http://javafx.com/fxml/1" fx:controller="irt.gui.controllers.components.ComboBoxSerialPort">
-   <contextMenu>
-      <ContextMenu>
-        <items>
-          <MenuItem mnemonicParsing="false" onAction="#onActionMenuRefresg" text="Refresh" />
-        </items>
-      </ContextMenu>
-   </contextMenu>
+	<contextMenu>
+		<ContextMenu>
+			<items>
+				<MenuItem mnemonicParsing="false" onAction="#onActionMenuRefresg" text="Refresh" />
+				<Menu text="Serial Port Drivers">
+					<items>
+                  <RadioMenuItem fx:id="menuJssc" mnemonicParsing="false" onAction="#onDriverSelect" selected="true" text="JSSC" />
+                  <RadioMenuItem fx:id="menyJSerialComm" mnemonicParsing="false" onAction="#onDriverSelect" text="JSerialComm" />
+					</items>
+				</Menu>
+			</items>
+		</ContextMenu>
+	</contextMenu>
 </ComboBox>

@@ -16,7 +16,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketProperties;
@@ -36,7 +36,7 @@ import jssc.SerialPortException;
 public class AlarmStatusTest {
 
 	Logger logger = LogManager.getLogger();
-	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
+	private PacketSenderJssc port  = new PacketSenderJssc(ComPortTest.COM_PORT);
 
 	@Test
 	public void test() throws PacketParsingException {

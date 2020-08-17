@@ -35,6 +35,12 @@
 			<artifactId>jssc</artifactId>
 			<version>2.8.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.fazecast/jSerialComm -->
+		<dependency>
+			<groupId>com.fazecast</groupId>
+			<artifactId>jSerialComm</artifactId>
+			<version>2.6.2</version>
+		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>shichimifx</artifactId>
@@ -43,7 +49,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.11.1</version>
+			<version>2.11.2</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -96,9 +102,9 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>com.zenjava</groupId>
-				<artifactId>javafx-maven-plugin</artifactId>
-				<version>8.8.3</version>
+	    <groupId>com.zenjava</groupId>
+	    <artifactId>javafx-maven-plugin</artifactId>
+	    <version>8.8.3</version>
 				<configuration>
 					<vendor>IRT Technologies</vendor>
 					<mainClass>${mainClass}</mainClass>

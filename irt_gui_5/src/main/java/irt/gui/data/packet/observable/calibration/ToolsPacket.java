@@ -2,7 +2,7 @@ package irt.gui.data.packet.observable.calibration;
 
 import java.util.Arrays;
 
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.calibration.tools.enums.ToolCommands;
 import irt.gui.controllers.interfaces.WaitTime;
 import irt.gui.data.MyObservable;
@@ -63,7 +63,7 @@ public class ToolsPacket extends MyObservable implements PacketToSend, WaitTime 
 
 	@Override
 	public int getWaitTime() {
-		return LinkedPacketSender.TOOLS_WAIT_TIME;
+		return PacketSenderJssc.TOOLS_WAIT_TIME;
 	}
 
 	@Override

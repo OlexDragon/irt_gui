@@ -14,7 +14,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.LinkedPacketSender;
+import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.data.packet.observable.InfoPacket;
 import irt.gui.errors.PacketParsingException;
@@ -24,7 +24,7 @@ public class SocketWorkerTest {
 
 	private final Logger logger = LogManager.getLogger();
 	private SocketWorker socketWorker;
-	private LinkedPacketSender port  = new LinkedPacketSender(ComPortTest.COM_PORT);
+	private PacketSenderJssc port  = new PacketSenderJssc(ComPortTest.COM_PORT);
 	private LinkedPacketsQueue queue;
 
 	@Before
