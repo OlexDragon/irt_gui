@@ -3,15 +3,15 @@ package irt.data;
 
 import java.util.concurrent.ThreadFactory;
 
-public class MyThreadFactory implements ThreadFactory {
+public class ThreadWorker implements ThreadFactory {
 
 	private final String name;
 
-	public MyThreadFactory(String name) {
+	public ThreadWorker(String name) {
 		this.name = name;
 	}
 
-	public MyThreadFactory(Runnable runnable, String name) {
+	public ThreadWorker(Runnable runnable, String name) {
 		this(name);
 		 newThread(runnable).start();
 	}
@@ -25,6 +25,12 @@ public class MyThreadFactory implements ThreadFactory {
 		if(priority>Thread.MIN_PRIORITY)
 			t.setPriority(--priority);
 		t.setDaemon(true);
+		return t;
+	}
+
+	public static Thread runThread(Runnable r, String threadName) {
+		final Thread t = new ThreadWorker(threadName).newThread(r);
+		t.start();
 		return t;
 	}
 

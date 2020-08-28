@@ -15,7 +15,7 @@ import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
@@ -154,7 +154,7 @@ public class UserPicobucPanel extends DevicePanel {
 		if(!oOffsetMulti.isPresent())
 			return;
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			
 			oPacket
 			.flatMap(PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI::valueOf)

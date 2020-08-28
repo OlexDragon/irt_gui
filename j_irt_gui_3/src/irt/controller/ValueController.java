@@ -18,7 +18,7 @@ import javax.swing.event.AncestorListener;
 import irt.controller.interfaces.DescriptionPacketValue;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
@@ -90,7 +90,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 	@Override
 	public void onPacketReceived(final Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			
 			synchronized (logger) {
 				final short id = ((PacketSuper)packetToSend).getHeader().getPacketId();

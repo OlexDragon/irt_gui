@@ -78,6 +78,7 @@ public class IrtGui extends IrtMainFrame {
 
 	public IrtGui() {
 		super(700, 571);
+
 		setMinimumSize(new Dimension(700, 572));
 		DumpControllerFull.setSysSerialNumber(null);
 		logger.trace(ctx);

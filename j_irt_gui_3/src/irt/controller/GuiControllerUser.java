@@ -1,5 +1,8 @@
 package irt.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.Protocol;
 import irt.irt_gui.IrtGui;
@@ -8,6 +11,7 @@ import irt.tools.panel.DevicePanel;
 import irt.tools.panel.UserPicobucPanel;
 
 public class GuiControllerUser extends GuiControllerAbstract {
+	private final Logger logger = LogManager.getLogger();
 
 	public GuiControllerUser(IrtGui gui) {
 		super("Gui UnitController", gui);

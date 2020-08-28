@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.data.IdValueFreq;
 import irt.data.Listeners;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
@@ -49,7 +49,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	private final Logger logger = LogManager.getLogger();
 
 	private 		ScheduledFuture<?> 			scheduleAtFixedRate;
-	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory("LoSelectComboBox"));
+	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new ThreadWorker("LoSelectComboBox"));
 
 	private final 	DefaultComboBoxModel<IdValueFreq> model = new DefaultComboBoxModel<>();
 	private 		PacketSuper 					packetToSend;
@@ -147,7 +147,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		.filter(PacketIDs.CONFIGURATION_LO_FREQUENCIES::match)
 		.ifPresent(
 				id->
-				new MyThreadFactory(()->{
+				new ThreadWorker(()->{
 
 					final Optional<List<?>> oValue = cast(packet).map(v->(List<?>)v);
 
@@ -182,7 +182,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		.filter(PacketIDs.CONFIGURATION_LO::match)
 		.ifPresent(
 				id->
-				new MyThreadFactory(()->{
+				new ThreadWorker(()->{
 
 					Optional<?> oValue = cast(packet);
 

@@ -70,7 +70,7 @@ public class AdcWorker {
 		logger.traceEntry("{}{}", packet, packetToSend);
 
 		final Thread currentThread = Thread.currentThread();
-		new MyThreadFactory(
+		new ThreadWorker(
 				()->{
 
 					final Optional<PacketHeader> oNoError = oMatch

@@ -12,7 +12,7 @@ import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
@@ -78,7 +78,7 @@ public class SwitchController extends ControllerAbstract {
 							};
 						}
 					};
-					new MyThreadFactory(controller, "SwitchController.doSwitch");
+					new ThreadWorker(controller, "SwitchController.doSwitch");
 				}
 			}
 		};

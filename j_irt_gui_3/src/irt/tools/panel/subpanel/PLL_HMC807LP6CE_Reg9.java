@@ -35,7 +35,7 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
@@ -118,7 +118,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 							@Override
 							public void onPacketReceived(Packet packet) {
 
-								new MyThreadFactory(()->{
+								new ThreadWorker(()->{
 									
 									PacketHeader header = packet.getHeader();
 									if(PacketIDs.FCM_DEVICE_DEBUG_PLL_REG.match(header.getPacketId())){
@@ -198,7 +198,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 									}
 								};
 				controller.setWaitTime(10000);
-				new MyThreadFactory(controller, "PLL_HMC807LP6CE_Reg9.ancestorAdded()");
+				new ThreadWorker(controller, "PLL_HMC807LP6CE_Reg9.ancestorAdded()");
 			}
 			public void ancestorMoved(AncestorEvent event) {
 			}
@@ -351,7 +351,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 	}
 
 	protected void calculate() {
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			int shift = shift(((IdValue)cp_UPoffset_sel	.getSelectedItem()).getID(), 2);
 			shift += 	shift(((IdValue)cp_DNoffset_sel	.getSelectedItem()).getID(), 7);
 			shift += 	shift(((IdValue)cfg_cp_UPtrim_sel.getSelectedItem()).getID(),10);

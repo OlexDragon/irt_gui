@@ -18,7 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiController;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.head.IrtPanel;
 
@@ -43,7 +43,7 @@ public class Translation {
 	public static void setLocale(final String localeStr){
 		font = null;
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			try{
 

@@ -37,40 +37,42 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 				.map(HierarchyEvent::getChanged)
 				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
 				.filter(c->c.getParent()==null)
-				.ifPresent(c->{
-//					System.out.println("addHierarchyListener");
-					Platform.runLater(()->setVisible(false));
-					root.shutdownNow();
+				.ifPresent(
+						c->{
+							Platform.runLater(
+								()->{
+									setVisible(false);
+									root.shutdownNow();
+								});
 				}));
 
 		addAncestorListener(new AncestorListener() {
 			public void ancestorAdded(AncestorEvent event) {
-				Platform.runLater(()->{
-//					logger.error("Start {}", root.getClass().getSimpleName());
-					root.start();
-//					root.shutdownNow();
-				});
+					Platform.runLater(
+							()->{
+								root.start();
+							});
 			}
 			public void ancestorRemoved(AncestorEvent event) {
-				Platform.runLater(()->{
-//					logger.error("stop {}", javaFxPanel.getClass().getSimpleName());
-					root.stop();
-				});
+					Platform.runLater(
+							()->{
+								root.stop();
+							});
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 		});
 
-		Platform.runLater(()->{
-			try{
+			Platform.runLater(
+					()->{
+						try{
 
-//				logger.error("Create {}", root.getClass().getSimpleName());
-				Scene scene = new Scene((Parent) root);
-				setScene(scene);
+							Scene scene = new Scene((Parent) root);
+							setScene(scene);
 
-			}catch (Exception e) {
-		        logger.catching(e);
-			}
-		});
+						}catch (Exception e) {
+							logger.catching(e);
+						}
+					});
 	}
 
 	@Override
@@ -79,6 +81,7 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 	}
 
 	public void setUnitAddress(byte unitAddress) {
-		Platform.runLater(()->root.setUnitAddress(unitAddress));
+		if(Platform.isAccessibilityActive())
+			Platform.runLater(()->root.setUnitAddress(unitAddress));
 	}
 }

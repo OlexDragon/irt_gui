@@ -39,7 +39,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
@@ -173,7 +173,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 			public void ancestorAdded(AncestorEvent event) {
 
 				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-					service =  Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton"));
+					service =  Executors.newSingleThreadScheduledExecutor(new ThreadWorker("MuteButton"));
 
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(ControlDownlinkRedundancySystem.this);
 
@@ -262,7 +262,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			
 			Optional<Packet> oPacket = Optional.of(packet);
 			Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
@@ -355,7 +355,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 		jComboBox.setBounds(163, 37, 65, 24);
 		add(jComboBox);
 
-		service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AlarmPanelFx"));
+		service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("AlarmPanelFx"));
 
 		scheduledFuture = service.scheduleAtFixedRate(this, 3, 3, TimeUnit.SECONDS);
 

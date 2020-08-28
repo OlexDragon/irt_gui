@@ -27,7 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -170,7 +170,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			try{
 
@@ -253,7 +253,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			return;
 
 		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("RegisterTextField"));
+			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("RegisterTextField"));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(RegisterTextField.this);
 

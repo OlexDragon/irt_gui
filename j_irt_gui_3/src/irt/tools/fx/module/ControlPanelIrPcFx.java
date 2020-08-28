@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.RedundancyControllerUnitStatus;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
@@ -227,7 +227,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 		if(!oHeader.map(PacketHeader::getGroupId).filter(PacketGroupIDs.REDUNDANCY::match).isPresent())
 			return;
 
-		new MyThreadFactory(
+		new ThreadWorker(
 				()->{
 
 					Optional<Map<?, ?>> oValue = oHeader
@@ -567,7 +567,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 		if(Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
 			return;
 
-		service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ControlPanelIrPcFx"));
+		service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("ControlPanelIrPcFx"));
 		scheduledFuture = service.scheduleAtFixedRate(this, 1, 10, TimeUnit.SECONDS);
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 	};

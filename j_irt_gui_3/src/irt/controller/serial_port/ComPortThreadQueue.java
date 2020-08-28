@@ -8,7 +8,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.prefs.Preferences;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -18,8 +17,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.GuiController;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
@@ -33,7 +31,7 @@ import purejavacomm.PortInUseException;
 
 public class ComPortThreadQueue implements Runnable {
 
-	public static final String GUI_IS_CLOSED_CORRECTLY = "gui is closed correctly";
+	public static final String GUI_CLOSED_CORRECTLY = "gui is closed correctly";
 
 	private final static Logger logger = LogManager.getLogger();
 
@@ -43,15 +41,40 @@ public class ComPortThreadQueue implements Runnable {
 	
 
 	private PriorityBlockingQueue<PacketWork> comPortQueue = new PriorityBlockingQueue<>(300, Collections.reverseOrder());
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ComPortThreadQueue"));
+	private ScheduledExecutorService service;
 	private ScheduledFuture<?> scheduledFuture;
 
 	private static SerialPortInterface serialPort;
 
-	private final static Preferences prefs = GuiController.getPrefs();
-
 	public ComPortThreadQueue(){
-		scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.MILLISECONDS);
+		start();
+	}
+
+	public void start() {
+
+		//Show Stack Trace
+		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
+
+		comPortQueue.clear();
+
+		// do nothing if the job is not finished.
+
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown() && !s.isTerminated()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("ComPortThreadQueue"));
+
+		if(!Optional.ofNullable(scheduledFuture).filter(s->!s.isCancelled() && !s.isDone()).isPresent())
+			scheduledFuture = service.scheduleAtFixedRate(this, 1, 1, TimeUnit.MILLISECONDS);
+
+		Optional.ofNullable(serialPort).filter(sp->!sp.isOpened())
+		.ifPresent(
+				sp -> {
+					try {
+						final boolean openPort = sp.openPort();
+						logger.error("isOpened: {}; openPort: {}; {}", sp.isOpened(), openPort, sp);
+					} catch (Exception e) {
+						logger.catching(e);
+					}
+				});
 	}
 
 	@Override
@@ -74,6 +97,7 @@ public class ComPortThreadQueue implements Runnable {
 			});
 
 		} catch (InterruptedException e) {
+			logger.catching(Level.TRACE, e);
 			Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort());
 		} catch (Exception e) {
 			logger.catching(e);
@@ -138,11 +162,11 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void setSerialPort(SerialPortInterface serialPort) {
+		logger.traceEntry("{}", serialPort);
+		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
 
-		// Close old serial p[ort
-		Optional.ofNullable(ComPortThreadQueue.serialPort).ifPresent(sp->{
-			sp.closePort();
-		});
+		// Close old serial port
+		Optional.ofNullable(ComPortThreadQueue.serialPort).ifPresent(SerialPortInterface::closePort);
 		clear();
 
 		ComPortThreadQueue.serialPort = serialPort;
@@ -206,12 +230,14 @@ public class ComPortThreadQueue implements Runnable {
 
 	public synchronized void close() {
 
-		new MyThreadFactory(()->Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort()), "ComPortThreadQueue.close()");
+		new ThreadWorker(()->Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort()), "ComPortThreadQueue.close()");
 		comPortQueue.clear();
+
+		// Show stack trace
+//		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
 	}
 
 	public void stop() {
-		prefs.putBoolean(GUI_IS_CLOSED_CORRECTLY, true);
 
 		close();
 		Optional.of(scheduledFuture).filter(shf->!shf.isCancelled()).ifPresent(serv->serv.cancel(true));

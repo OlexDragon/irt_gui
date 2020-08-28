@@ -27,7 +27,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
@@ -88,6 +88,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private GridPane 	gridPane;
 
 	public MonitorPanelFx() {
+		logger.traceEntry();
 
 		Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.catching(e));
 
@@ -99,7 +100,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MonitorPanel.fxml"));
         fxmlLoader.setRoot(this);
         fxmlLoader.setController(this);
-
 
         try {
             fxmlLoader.load();
@@ -125,7 +125,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private int retransmitDelay;
 	@Override
 	public void run() {
-
+		logger.traceEntry();
 
 		try{
 
@@ -133,6 +133,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			if(this.serialPort==null)
 				this.serialPort = serialPort;
 
+			logger.error("this.serialPort: {}; serialPort: {}; isOpened: {};", this.serialPort, serialPort, serialPort.isOpened());
 			if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
 				shutdownNow();
 				return;
@@ -174,7 +175,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			return;
 		}
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			oPacket
 			.flatMap(PacketIDs.MEASUREMENT_ALL::valueOf)
@@ -311,7 +312,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			return;
 
 		if(!Optional.ofNullable(service).filter(sfr->!sfr.isShutdown()).isPresent())
-			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MonitorPanelFx.service"));
+			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("MonitorPanelFx.service"));
 
 			
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);

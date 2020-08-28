@@ -8,6 +8,7 @@ import java.util.Optional;
 import javax.swing.JPanel;
 import javax.swing.event.EventListenerList;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,7 +16,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.value.setter.SetterAbstract;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.FireValue;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketWork;
@@ -90,7 +91,6 @@ public abstract class ControllerAbstract implements UnitController{
 			while(run){
 				synchronized (this) {
 					try {
-
 
 						if(send){
 							sendPacketWorker();
@@ -169,24 +169,18 @@ public abstract class ControllerAbstract implements UnitController{
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 
-		final ControllerAbstract controller = this;
-
-		new MyThreadFactory(()->{
-				try{
-					synchronized (controller) {
-						controller.notify();
-					}
-				}catch (Exception e) {
-					logger.catching(e);
-				}
-			}, getClass().getSimpleName() + ".stop()");
+		ThreadWorker.runThread(
+				()->{
+					try{ synchronized (ControllerAbstract.this) { ControllerAbstract.this.notify(); } }catch (Exception e) { logger.catching(Level.DEBUG, e); }
+				},
+				getClass().getSimpleName() + ".stop()");
 	}
 
 	public synchronized boolean isSend() {
 		return send;
 	}
 
-	public synchronized void setSend(boolean send) {
+	public void setSend(boolean send) {
 		setSend(send, send);
 	}
 
@@ -198,7 +192,7 @@ public abstract class ControllerAbstract implements UnitController{
 			notify();
 	}
 
-	public synchronized boolean isRun() {
+	public boolean isRun() {
 		return run;
 	}
 
@@ -211,9 +205,7 @@ public abstract class ControllerAbstract implements UnitController{
 		if(waitTime>0)
 			this.waitTime = waitTime;
 
-		synchronized (this) {
-			notify();
-		}
+		synchronized (this) { notify(); }
 	}
 
 	public void setObservable(Observable observable) {
@@ -255,7 +247,7 @@ public abstract class ControllerAbstract implements UnitController{
 	}
 
 	protected void fireStatusChangeListener(ValueChangeEvent valueChangeEvent) {
-		new MyThreadFactory(()->new FireValue(statusChangeListeners, valueChangeEvent), "ControllerAbstract.fireStatusChangeListener()");
+		new ThreadWorker(()->new FireValue(statusChangeListeners, valueChangeEvent), "ControllerAbstract.fireStatusChangeListener()");
 	}
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

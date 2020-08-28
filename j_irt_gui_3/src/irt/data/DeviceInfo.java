@@ -297,7 +297,7 @@ public class DeviceInfo implements PacketListener {
 
 	@Override
 	public void onPacketReceived(Packet packet) {
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 	
 			try {
 

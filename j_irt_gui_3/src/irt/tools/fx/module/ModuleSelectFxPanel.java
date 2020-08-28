@@ -23,7 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
@@ -76,7 +76,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 					return;
 
 				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("ModuleSelectFxPanel.service"));
+					service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("ModuleSelectFxPanel.service"));
 
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(ModuleSelectFxPanel.this);
 				scheduledFuture = service.scheduleAtFixedRate(ModuleSelectFxPanel.this, 1, 10, TimeUnit.SECONDS);
@@ -182,7 +182,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 			return;
 		}
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			getButtons()
 			.forEach(b->Platform.runLater(()->b.getStyleClass().remove("activeButton")));

@@ -36,7 +36,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
@@ -373,7 +373,7 @@ public class Panel extends JPanel implements PacketListener {
 			return;
 
 		logger.trace("{}, {}", addr, packet);
-		new MyThreadFactory(
+		new ThreadWorker(
 				()->
 				PacketIDs.ALARMS_SUMMARY.valueOf(packet)
 				.filter(AlarmSeverities.class::isInstance)

@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -556,7 +556,7 @@ public class DeviceDebugPanel extends JFXPanel {
 		public void start(){
 
 			if(!Optional.ofNullable(service).filter(sfr->!sfr.isShutdown()).isPresent()) {
-				service = Executors.newScheduledThreadPool(4, new MyThreadFactory("DebugPanelFx.service"));
+				service = Executors.newScheduledThreadPool(4, new ThreadWorker("DebugPanelFx.service"));
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 			}
 

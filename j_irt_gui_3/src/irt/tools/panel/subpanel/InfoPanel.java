@@ -40,7 +40,7 @@ import irt.controller.file.ProfileScannerFT;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.Transformer;
@@ -106,10 +106,10 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 			popup.add(updateMenuItem);
 			updateMenuItem.addActionListener(e->NetworkPanel.updateButton.fire());
 
-			new MyThreadFactory("Popup Menu Worker").newThread(()->{
+			new ThreadWorker("Popup Menu Worker").newThread(()->{
 
 				profileScannerFT = new ProfileScannerFT(deviceInfo);
-				new MyThreadFactory("Profile Scaner").newThread(profileScannerFT).start();
+				new ThreadWorker("Profile Scaner").newThread(profileScannerFT).start();
 				try {
 
 					profileScannerFT.get().ifPresent(path->{
@@ -297,7 +297,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 					else
 						transformer.setHeight(WINDOW_MAX_HEIGHT);
 
-					new MyThreadFactory(transformer, "InfoPanel.actionPerformed()");
+					new ThreadWorker(transformer, "InfoPanel.actionPerformed()");
 				} catch (Exception ex) {
 					logger.catching(ex);
 				}
@@ -393,7 +393,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 				return;
 
 			if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-				service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("InfoPanel"));
+				service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("InfoPanel"));
 
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(InfoPanel.this);
 
@@ -446,7 +446,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		if(deviceInfo == null)
 			return;
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			
 			DeviceInfo
 			.parsePacket(packet)

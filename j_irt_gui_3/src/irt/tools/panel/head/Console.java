@@ -11,7 +11,7 @@ import javax.swing.JTextArea;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 
 @SuppressWarnings("serial")
 public class Console extends JDialog {
@@ -67,7 +67,7 @@ public class Console extends JDialog {
 		private boolean queueIsFull;
 
 		public ThreadsWorker() {
-			new MyThreadFactory(this, "ThreadsWorker");
+			new ThreadWorker(this, "ThreadsWorker");
 		}
 
 		@Override

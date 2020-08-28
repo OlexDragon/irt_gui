@@ -48,7 +48,7 @@
 
 <!--  	<Logger name="irt.tools.combobox.LoSelectComboBox" level="all"/> -->
 
-<!--  	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/> -->
+ 	<Logger name="irt.tools.fx.MonitorPanelFx" level="all"/>
 <!--  	<Logger name="irt.tools.fx.MonitorPanelSwingWithFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.JavaFxWrapper" level="all"/> -->
 
@@ -63,7 +63,7 @@
 
 <!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
 <!--  	<Logger name="irt.controller.DumpControllerFull" level="all"/> -->
-<!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
+ 	<Logger name="irt.controller.GuiControllerAbstract" level="all"/>
  	<Logger name="irt.controller.GuiController" level="error" />
 <!-- 	<Logger name="irt.tools.panel.UserPicobucPanel" level="debug"/> -->
 
@@ -71,9 +71,10 @@
 
 <!--  	<Logger name="irt.controller.translation.Translation" level="debug"/> -->
 
-<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="warn"/> -->
+<!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.PureJavaComPort" level="debug"/> -->
-<!--  	<Logger name="irt.controller.serial_port.JsscComPort" level="debug"/> -->
+<!--  	<Logger name="irt.controller.serial_port.ComPortJssc" level="all"/> -->
+<!--  	<Logger name="irt.controller.serial_port.ComPortJSerialComm" level="all"/> -->
 
 <!--  	<Logger name="irt.data.AdcWorker" level="all"/> -->
 <!--  	<Logger name="irt.data.profile.ProfileValidator" level="debug"/> -->

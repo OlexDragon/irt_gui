@@ -8,9 +8,11 @@ import java.util.Optional;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
+import org.apache.logging.log4j.Level;
+
 import irt.controller.control.ControllerAbstract;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -41,7 +43,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 		timer.setRepeats(false);
 		timer.start();
 
-		new MyThreadFactory(this, "DeviceDebagSaveController");
+		new ThreadWorker(this, "DeviceDebagSaveController");
 	}
 
 	@Override
@@ -60,7 +62,7 @@ public class DeviceDebagSaveController extends ControllerAbstract {
 					txtField.setText("Error");
 				}
 
-				synchronized (this) { try { wait(500); } catch (InterruptedException e) { logger.catching(e); } }
+				synchronized (this) { try { wait(500); } catch (InterruptedException e) { logger.catching(Level.DEBUG, e); } }
 				txtField.setText(str);
 
 				stop();

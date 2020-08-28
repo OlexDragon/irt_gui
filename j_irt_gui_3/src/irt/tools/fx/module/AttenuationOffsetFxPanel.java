@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.Range;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
@@ -111,7 +111,7 @@ public class AttenuationOffsetFxPanel extends JFXPanel{
 					return;
 
 				if(!Optional.ofNullable(service).filter(s->!isShowing()).isPresent())
-					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AttenuationOffsetFxPanel.service"));
+					service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("AttenuationOffsetFxPanel.service"));
 				
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(root);
 				scheduleAtFixedRate = service.scheduleAtFixedRate(root, 1, 10, TimeUnit.SECONDS);

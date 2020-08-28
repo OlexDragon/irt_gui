@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 import javax.swing.Timer;
 
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
@@ -39,7 +39,7 @@ public class StoreConfigController implements PacketListener{
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			
 			if(!PacketIDs.STORE_CONFIG.match(packet.getHeader().getPacketId()))
 				return;

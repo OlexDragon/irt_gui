@@ -12,6 +12,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
@@ -26,8 +27,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.Listeners;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketWork.PacketIDs;
@@ -37,9 +39,13 @@ import irt.tools.fx.module.ModuleSelectFxPanel;
 import irt.tools.panel.head.ClosePanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.wizards.serial_port.SerialPortWizard;
+import javafx.embed.swing.JFXPanel;
 
 @SuppressWarnings("serial")
 public abstract class IrtMainFrame extends JFrame implements PacketListener {
+
+	protected static Preferences prefs = Preferences.userRoot().node(GuiControllerAbstract.IRT_TECHNOLOGIES_INC);
+
 	static{
 		System.setProperty("serialNumber", "UnknownSerialNumber");
 	}
@@ -57,14 +63,16 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
+		new JFXPanel(); // this will prepare JavaFX toolkit and environment
 
 
-		Thread t = new MyThreadFactory("IrtMainFrame.addShutdownHook()")
+		Thread t = new ThreadWorker("IrtMainFrame.addShutdownHook()")
 
 				.newThread(
 						()->{
 							guiController.stop();
 							LogManager.shutdown();
+							prefs.putBoolean(ComPortThreadQueue.GUI_CLOSED_CORRECTLY, true);
 						});
 		Runtime.getRuntime().addShutdownHook(t);
 
@@ -162,7 +170,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		if(!oPacket.isPresent())
 			return;
 
-		new MyThreadFactory(
+		new ThreadWorker(
 				()->
 				oPacket
 				.map(id->PacketIDs.ALARMS_SUMMARY)

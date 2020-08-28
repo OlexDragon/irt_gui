@@ -17,7 +17,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketWork.PacketIDs;
 import irt.data.packet.Payload;
@@ -63,7 +63,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 			private void startControllers( List<ControllerAbstract> controllers) {
 				if(controllers!=null)
 					for(ControllerAbstract ca:controllers)
-						new MyThreadFactory(ca, "MonitorPanelAbstract.startControllers");
+						new ThreadWorker(ca, "MonitorPanelAbstract.startControllers");
 			}
 			public void ancestorMoved(AncestorEvent event) { }
 			public void ancestorRemoved(AncestorEvent event) {

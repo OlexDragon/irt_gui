@@ -17,7 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.Checksum;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacketImp;
@@ -37,7 +37,7 @@ import purejavacomm.PureJavaSerialPort;
 import purejavacomm.SerialPort;
 import purejavacomm.UnsupportedCommOperationException;
 
-public class PureJavaComPort implements SerialPortInterface {
+public class ComPortPureJava implements SerialPortInterface {
 
 	private static final int CLEAR_TIME_BUC = 100;
 	private static final int WAIT_TIME_BUC = 45;
@@ -70,7 +70,7 @@ public class PureJavaComPort implements SerialPortInterface {
 	private LinkHeader linkHeader;
 	private Optional<Short> oLogger;
 
-	public PureJavaComPort(String portName) throws NoSuchPortException {
+	public ComPortPureJava(String portName) throws NoSuchPortException {
 		PORT_IDENTIFIER = CommPortIdentifier.getPortIdentifier(portName);
 		LOGGER_LEVEL = logger.getLevel();
 	}
@@ -101,14 +101,14 @@ public class PureJavaComPort implements SerialPortInterface {
 				.map(LinkedPacketImp::new)
 				.map(
 						p->{
-							waitTime = PureJavaComPort.WAIT_TIME_BUC;
-							clearTimeout = PureJavaComPort.CLEAR_TIME_BUC;
+							waitTime = ComPortPureJava.WAIT_TIME_BUC;
+							clearTimeout = ComPortPureJava.CLEAR_TIME_BUC;
 							linkHeader = p.getLinkHeader();
 							return (Packet)p;
 						})
 				.orElseGet(()->{
-					waitTime = PureJavaComPort.WAIT_TIME_CONVERTER;
-					clearTimeout = PureJavaComPort.CLEAR_TIME_CONVERTER;
+					waitTime = ComPortPureJava.WAIT_TIME_CONVERTER;
+					clearTimeout = ComPortPureJava.CLEAR_TIME_CONVERTER;
 					linkHeader = null;
 					return new PacketImp();
 				});
@@ -132,7 +132,7 @@ public class PureJavaComPort implements SerialPortInterface {
 
 	byte[] data = packet.toBytes();
 
-	new MyThreadFactory(()->{
+	new ThreadWorker(()->{
 		
 		final String hexStr = ToHex.bytesToHex(data);
 
@@ -247,12 +247,12 @@ public class PureJavaComPort implements SerialPortInterface {
 
 		} catch (InterruptedException | PureJavaIllegalStateException e) {
 			logger.catching(Level.DEBUG, e);
-			new MyThreadFactory(()->closePort(), "PureJavaComPort.send-1");
+			new ThreadWorker(()->closePort(), "PureJavaComPort.send-1");
 		}catch (Exception e) {
 			logger.error("Error to send Packet: {}", packet);
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "Error");
-			new MyThreadFactory(()->closePort(), "PureJavaComPort.send-2");
+			new ThreadWorker(()->closePort(), "PureJavaComPort.send-2");
 		}
 
 		if(readPacket.getHeader()==null || readPacket.getPayloads()==null)
@@ -267,7 +267,7 @@ public class PureJavaComPort implements SerialPortInterface {
 		return readPacket;
 	}
 
-	public void clear() throws Exception {
+	public void clear(){
 
 		position = 0;
 
@@ -277,7 +277,7 @@ public class PureJavaComPort implements SerialPortInterface {
 
 			buffer = null;
 
-			synchronized (this) { wait(clearTimeout); }
+			synchronized (this) { try { wait(clearTimeout); } catch (InterruptedException e) { logger.catching(Level.DEBUG, e); } }
 
 		 }while (readToTheBuffer || isBuffer());
 
@@ -306,7 +306,7 @@ public class PureJavaComPort implements SerialPortInterface {
 							long waitingTime;
 							do{
 
-								synchronized (PureJavaComPort.this) { try { PureJavaComPort.this.wait(wait); } catch (InterruptedException e) {} }
+								synchronized (ComPortPureJava.this) { try { ComPortPureJava.this.wait(wait); } catch (InterruptedException e) { logger.catching(Level.DEBUG, e); } }
 
 								final Optional<byte[]> oBuffer = Optional.ofNullable(buffer);
 
@@ -367,7 +367,7 @@ public class PureJavaComPort implements SerialPortInterface {
 	}
 
 	@Override
-	public synchronized byte[] readBytes(final int size) throws Exception {
+	public byte[] readBytes(final int size) throws Exception {
 		oLogger.ifPresent(pId->logger.debug("ENTRY readBytes(final int size: {}); position: {}", size, position));
 
 		return Optional.ofNullable(buffer)
@@ -455,7 +455,7 @@ public class PureJavaComPort implements SerialPortInterface {
 				});
 
 		readToTheBuffer = false;
-		PureJavaComPort.this.notifyAll();
+		ComPortPureJava.this.notifyAll();
 	}
 
 	private synchronized byte[] getAPartOfTheBuffer(final int size) throws IOException {
@@ -571,9 +571,9 @@ public class PureJavaComPort implements SerialPortInterface {
 		if(opened)
 			return true;
 
-		serialPort = (PureJavaSerialPort) PORT_IDENTIFIER.open(PureJavaComPort.class.getName(), PureJavaComPort.MAX_WAIT_TIME);
+		serialPort = (PureJavaSerialPort) PORT_IDENTIFIER.open(ComPortPureJava.class.getName(), ComPortPureJava.MAX_WAIT_TIME);
 		setBaudrate(BAUDRATE_115200);
-		serialPort.enableReceiveThreshold(PureJavaComPort.MAX_WAIT_TIME);
+		serialPort.enableReceiveThreshold(ComPortPureJava.MAX_WAIT_TIME);
 		inputStream = serialPort.getInputStream();
 		outputStream = serialPort.getOutputStream();
 

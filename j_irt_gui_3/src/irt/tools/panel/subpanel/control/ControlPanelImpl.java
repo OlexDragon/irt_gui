@@ -48,7 +48,7 @@ import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.IdValueFreq;
 import irt.data.Listeners;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.Payload;
 import irt.irt_gui.IrtGui;
@@ -353,7 +353,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 			startNewController(UnitFrequencyController.class);
 			break;
 		case FLAG_ALC:
-			new MyThreadFactory(controller =  getNewAlcController(), "ControlPanelImpl.setController(int)");
+			new ThreadWorker(controller =  getNewAlcController(), "ControlPanelImpl.setController(int)");
 			break;
 		default:
 			startNewController(UnitAttenuationController.class);

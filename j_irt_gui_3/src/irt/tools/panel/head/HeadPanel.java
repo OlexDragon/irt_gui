@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
@@ -259,7 +259,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			 return;
 		 }
 
-		 new MyThreadFactory(()->{
+		 new ThreadWorker(()->{
 
 			 Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
 

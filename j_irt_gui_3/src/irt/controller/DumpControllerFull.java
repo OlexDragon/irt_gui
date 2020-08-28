@@ -22,7 +22,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.DeviceInfo;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
@@ -63,7 +63,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 	private DeviceInfo deviceInfo;
 	private final byte addr;
 
-	private final 	ScheduledExecutorService service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory("DumpControllerFull"));
+	private final 	ScheduledExecutorService service 	= Executors.newScheduledThreadPool(1, new ThreadWorker("DumpControllerFull"));
 	private 	 	ScheduledFuture<?> 		scheduleAtFixedRate;
 	private final 	DeviceDebugHelpPacket helpPacket;
 
@@ -147,7 +147,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
 			return;
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			final short packetId = header.getPacketId();
 			PacketIDs.valueOf(packetId)

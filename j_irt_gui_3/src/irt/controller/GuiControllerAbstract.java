@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,28 +28,32 @@ import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JMenuItem;
+import javax.swing.JMenu;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.serial_port.ComPortJSerialComm;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.JsscComPort;
-import irt.controller.serial_port.PureJavaComPort;
+import irt.controller.serial_port.ComPortJssc;
+import irt.controller.serial_port.ComPortPureJava;
 import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.DeviceInfo.Protocol;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.PacketListener;
 import irt.data.listener.ValueChangeListener;
@@ -72,12 +77,18 @@ import irt.tools.panel.head.Console;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.textField.UnitAddressField;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ComboBox;
+import javafx.util.StringConverter;
 
 public abstract class GuiControllerAbstract implements Runnable, PacketListener{
+	private final static Logger logger = LogManager.getLogger();
+
+	public static final String IRT_TECHNOLOGIES_INC = "IRT Technologies inc.";
 
 	public static final String SERIAL_PORT_CLASS = "Serial Port CLASS";
-
-	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	public static final int CONNECTION	= 1;
 	public static final int ALARM		= 2;
@@ -85,12 +96,12 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 	protected static final String SERIAL_PORT = "serialPort";
 
-	protected static Preferences prefs = Preferences.userRoot().node("IRT Technologies inc.");
+	protected static Preferences prefs = Preferences.userRoot().node(IRT_TECHNOLOGIES_INC);
 
 	protected static ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory(getClass().getSimpleName()));
+	private ScheduledExecutorService service;
 
 	private Console console;
 	protected JComboBox<String> serialPortSelection;
@@ -107,35 +118,17 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	private byte address;
 
 	private Class<? extends SerialPortInterface> serialPortClass;
+	private final Map<JRadioButtonMenuItem, Class<? extends SerialPortInterface>> serialPortClasses = new HashMap<>();
 
 	private IrtGui gui;
 	protected volatile UnitsContainer unitsPanel;
 
 	@SuppressWarnings("unchecked")
 	public GuiControllerAbstract(String threadName, IrtGui gui) {
+		logger.traceEntry(threadName);
 
 		this.gui = gui;
 		guiController = this;
-
-		final boolean useDefaultComPort = Optional.ofNullable(prefs.get(ComPortThreadQueue.GUI_IS_CLOSED_CORRECTLY, null)).map(Boolean::parseBoolean).orElse(true);
-
-		try {
-
-			if(useDefaultComPort){
-				String portClassName = prefs.get(SERIAL_PORT_CLASS, "irt.controller.serial_port.JsscComPort");
-				serialPortClass = (Class<JsscComPort>) Class.forName(portClassName);
-			}else{
-				serialPortClass = PureJavaComPort.class;
-				 prefs.put(SERIAL_PORT_CLASS, serialPortClass.getName());
-			}
-
-		} catch (ClassNotFoundException e2) {
-			logger.catching(e2);
-			serialPortClass = JsscComPort.class;
-		}
-
-
-		prefs.putBoolean(ComPortThreadQueue.GUI_IS_CLOSED_CORRECTLY, false);
 
 		console = new Console(gui, "Console");
 
@@ -165,30 +158,76 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 						@Override
 						public void mouseReleased(MouseEvent e) {
-							int modifiers = e.getModifiers();
-							if ((modifiers & InputEvent.CTRL_MASK) > 0)
+							if ((e.getModifiers() & InputEvent.CTRL_MASK) > 0)
 								console.setVisible(!console.isVisible());
 						}
-
-						@Override public void mousePressed(MouseEvent e) { }
-						@Override public void mouseExited(MouseEvent e) { }
-						@Override public void mouseEntered(MouseEvent e) { }
-						@Override public void mouseClicked(MouseEvent e) { }
+						@Override public void mousePressed	(MouseEvent e) { }
+						@Override public void mouseExited	(MouseEvent e) { }
+						@Override public void mouseEntered	(MouseEvent e) { }
+						@Override public void mouseClicked	(MouseEvent e) { }
 					});
 				}
 			}
 			comPortThreadQueue.addPacketListener(guiController);
-//			restart(3);
+
+			closedCorrectly(ComPortThreadQueue.GUI_CLOSED_CORRECTLY);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void closedCorrectly(String properyKey) {
+		logger.traceEntry(properyKey);
+
+		Platform.runLater(
+				()->{
+					// Check if this application close properly
+					boolean guiBeenClosedProperly = prefs.getBoolean(properyKey, true);
+					prefs.putBoolean(properyKey, false);
+
+					String className = prefs.get(SERIAL_PORT_CLASS, ComPortJSerialComm.class.getSimpleName());
+
+					logger.debug("guiBeenClosedProperly: {}; className: {}", guiBeenClosedProperly, className);
+					if(!guiBeenClosedProperly) {
+						stop();
+
+						ChoiceDialog<Class<? extends SerialPortInterface>> alert = new ChoiceDialog<>(serialPortClass, ComPortJssc.class, ComPortJSerialComm.class, ComPortPureJava.class);
+						alert.setTitle("The GUI was not closed properly.");
+						alert.setHeaderText("Try to select a different serial port driver.");
+						ComboBox<Class<?>> comboBox = (ComboBox<Class<?>>) alert.getDialogPane().lookup(".combo-box");
+
+						comboBox.setConverter(
+								new StringConverter<Class<?>>() {
+						
+									@Override public String toString(Class<?> clazz) { return clazz.getSimpleName(); }
+									@Override public Class<?> fromString(String string) { return null; }
+								});
+
+						try {
+							Optional<Class<? extends SerialPortInterface>> oClass = alert.showAndWait();
+
+							start(1);
+
+							if(oClass.isPresent()) {
+
+								className = oClass.get().getSimpleName();
+								prefs.put(SERIAL_PORT_CLASS, className);
+							}
+						}catch (IllegalStateException e) {
+							logger.catching(Level.DEBUG, e);
+						}
+					}
+
+					addMenuSelectPortDriver(className);
+				});
 	}
 
 	private void restart(long period) {
 		logger.info("restart({})", period);
-		Optional.ofNullable(scheduledFuture).filter(f->!f.isDone()).ifPresent(f->f.cancel(true));
-		comPortThreadQueue.clear();
-		scheduledFuture = service.scheduleAtFixedRate(guiController, period<0?0:period, period<=0?1:period, TimeUnit.SECONDS);
+		stop();
+		start(period);
 	}
 
 	public static Optional<DeviceInfo> getDeviceInfo(LinkHeader linkHeader) {
+		logger.traceEntry("{}", linkHeader);
 		return deviceInfos.parallelStream().filter(di->di.getLinkHeader().equals(linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short) 0))).findAny();
 	}
 
@@ -203,35 +242,36 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		return prefs;
 	}
 
-	private ActionListener toJsscListener;
-	private ActionListener toPureJavaListener;
-
 	private boolean setRetransmit = true;
 	private Object moduleList;
 
 	@SuppressWarnings("unchecked")
 	private void setComboBox(Component c) {
+
 		String name = c.getName();
 		if(name==null)
 			return;
 
 		if(name.equals("Unit's Serial Port")){
 
-			logger.trace("set serialPortSelection ={}", c);
 			serialPortSelection = (JComboBox<String>) c;
 
-			addMenuSelectPortDriver();
 			DefaultComboBoxModel<String> defaultComboBoxModel = initSerialPortSelection();
 
 				String portName = prefs.get(SERIAL_PORT, serialPortSelection.getItemAt(0));
 				Optional.of(defaultComboBoxModel.getIndexOf(portName)).filter(i->i>0).ifPresent(i->serialPortSelection.setSelectedIndex(i));
-				setSerialPort();
 
 				serialPortSelection.addItemListener(new ItemListener() {
 					@Override
 					public void itemStateChanged(ItemEvent itemEvent) {
-						if(itemEvent.getStateChange()==ItemEvent.SELECTED)
-							setSerialPort();
+						logger.error(itemEvent);
+
+						if(itemEvent.getStateChange()==ItemEvent.DESELECTED)
+							setSerialPort(null);
+						else if(itemEvent.getStateChange()==ItemEvent.SELECTED) {
+							final JComboBox<?> source = (JComboBox<?>) itemEvent.getSource();
+							setSerialPort((String) source.getSelectedItem());
+						}
 					}
 				});
 			}else if(name.equals("Language")){
@@ -264,7 +304,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	private DefaultComboBoxModel<String> initSerialPortSelection() {
 		float fontSize = Translation.getValue(Float.class, "serialPortSelection.font.size", 16f);
 		serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
-		DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(PureJavaComPort.getPortNames().toArray(new String[0]));
+		DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(ComPortPureJava.getPortNames().toArray(new String[0]));
 		defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
 		serialPortSelection.setModel(defaultComboBoxModel);
 		Dimension size = serialPortSelection.getSize();
@@ -273,7 +313,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		return defaultComboBoxModel;
 	}
 
-	private void addMenuSelectPortDriver() {
+	private void addMenuSelectPortDriver(String className) {
 		final JPopupMenu popup = Optional
 								.ofNullable(serialPortSelection.getComponentPopupMenu())
 								.orElseGet(
@@ -282,77 +322,96 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 											serialPortSelection.setComponentPopupMenu(jPopupMenu);
 											return jPopupMenu;
 										});
-			final JMenuItem menuItem = new JMenuItem();
-			popup.add(menuItem);
 
-			toJsscListener = e->{
-				serialPortClass = JsscComPort.class;
-				 prefs.put(SERIAL_PORT_CLASS, serialPortClass.getName());
-				setSerialPort();
-				swapListeners(menuItem, "Set PureJava serial port driver", toJsscListener, toPureJavaListener);
-			};
-			toPureJavaListener = e->{
-				serialPortClass = PureJavaComPort.class;
-				 prefs.put(SERIAL_PORT_CLASS, serialPortClass.getName());
-				setSerialPort();
-				swapListeners(menuItem, "Set JSSC serial port driver", toPureJavaListener, toJsscListener);
-			};
+		final JMenu menu = new JMenu("Serial Port Drivers");
+		popup.add(menu);
 
-			if(Optional.ofNullable(serialPortClass).filter(PureJavaComPort.class::equals).isPresent())
-				swapListeners(menuItem, "Set JSSC serial port driver", toPureJavaListener, toJsscListener);
-			else
-				swapListeners(menuItem, "Set PureJava serial port driver", toJsscListener, toPureJavaListener);
-	}
+		ActionListener miListener =
+				e->{
+					final Object source = e.getSource();
+					serialPortClass = serialPortClasses.get(source);
+					setSerialPort();
+					prefs.put(SERIAL_PORT_CLASS, serialPortClass.getSimpleName());
+				};
 
-	private void swapListeners(final JMenuItem menuItem, String text, ActionListener toRemove, ActionListener toAdd) {
+		final ButtonGroup buttonGroup = new ButtonGroup();
 
-		SwingUtilities.invokeLater(()->{
+		JRadioButtonMenuItem mi = new JRadioButtonMenuItem();
+		mi.setText("JSSC");
+		mi.addActionListener(miListener);
+		menu.add(mi);
+		buttonGroup.add(mi);
+		serialPortClasses.put(mi, ComPortJssc.class);
 
-			menuItem.setText(text);
-			menuItem.removeActionListener(toRemove);
-			menuItem.addActionListener(toAdd);
-		});
+		mi = new JRadioButtonMenuItem();
+		mi.setText("PureJava");
+		mi.addActionListener(miListener);
+		menu.add(mi);
+		buttonGroup.add(mi);
+		serialPortClasses.put(mi, ComPortPureJava.class);
+
+		mi = new JRadioButtonMenuItem();
+		mi.setText("JSerialComm");
+		mi.addActionListener(miListener);
+		menu.add(mi);
+		buttonGroup.add(mi);
+		serialPortClasses.put(mi, ComPortJSerialComm.class);
+
+		//set selected JRadioButtonMenuItem
+		serialPortClasses.entrySet().parallelStream().filter(entry->entry.getValue().getSimpleName().equals(className)).findAny()
+		.ifPresent(
+				entry->{
+					entry.getKey().setSelected(true);
+					serialPortClass = entry.getValue();
+				});
+
+		setSerialPort();
 	}
 
 	protected void setSerialPort() {
+		logger.traceEntry();
+
 		final String portName = serialPortSelection.getSelectedItem().toString();
 		setSerialPort(portName);
 	}
 
-	protected void setSerialPort(String serialPortName) {
+	protected synchronized void setSerialPort(String serialPortName) {
+		logger.traceEntry(serialPortName);
+		serialPortClass.getClass();
 
 		if (serialPortName == null || serialPortName.replaceAll("\\D", "").isEmpty()){
-			comPortThreadQueue.close();
+			stop();
 			reset();
 
 		}else {
 
-			new MyThreadFactory(()->{
-				try {
+			final Optional<SerialPortInterface> oSerialPort = Optional.ofNullable(ComPortThreadQueue.getSerialPort()).filter(sp->sp.getPortName().equals(serialPortName));
 
-					final Constructor<? extends SerialPortInterface> constructor = serialPortClass.getConstructor(String.class);
+			if(!oSerialPort.isPresent())
 
-					SerialPortInterface serialPort = constructor.newInstance(serialPortName);
-					comPortThreadQueue.setSerialPort(serialPort);
+				new ThreadWorker(()->{
+					try {
 
-					prefs.put(SERIAL_PORT, serialPortName);
+						final Constructor<? extends SerialPortInterface> constructor = serialPortClass.getConstructor(String.class);
+						SerialPortInterface serialPort = constructor.newInstance(serialPortName);
 
-				} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
+						comPortThreadQueue.setSerialPort(serialPort);
+
+						prefs.put(SERIAL_PORT, serialPortName);
+
+					} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
 //					logger.catching(e1);
-					comPortThreadQueue.setSerialPort(null);
-					Optional.ofNullable(serialPortSelection).ifPresent(sps->SwingUtilities.invokeLater(()->sps.setSelectedItem(0)));
-				}
+						comPortThreadQueue.setSerialPort(null);
+						Optional.ofNullable(serialPortSelection).ifPresent(sps->SwingUtilities.invokeLater(()->sps.setSelectedItem(0)));
+					}
 
-				reset();
+					reset();
+					start(1);
 
-			}, getClass().getSimpleName() + ".setSerialPort(String)" );
+				}, getClass().getSimpleName() + ".setSerialPort(String)" );
 		} 
 
-		synchronized (guiController) {
-			notify();
-		}
-
-		restart(1);
+		notify();
 	}
 //
 //	protected boolean removePanel(LinkHeader linkHeader) {
@@ -384,23 +443,21 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getConverterInfo() {
-//		logger.error("getConverterInfo");
+		logger.traceEntry();
 
 		if(protocol.equals(Protocol.LINKED))
 			return;
 
-		logger.trace("protocol = {}", protocol);
-
-		new MyThreadFactory(()->comPortThreadQueue.add(new DeviceInfoPacket(getAddress())), getClass().getSimpleName() + ".getConverterInfo()");
+		new ThreadWorker(()->comPortThreadQueue.add(new DeviceInfoPacket(getAddress())), getClass().getSimpleName() + ".getConverterInfo()");
 	}
 
 	protected void getUnitsInfo() {
-//		logger.error("getUnitsInfo; protocol: {};", protocol);
+		logger.traceEntry();
 
 		if (protocol.equals(Protocol.CONVERTER))
 			return;
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 				for(Byte addr:addresses){
 					comPortThreadQueue.add(new DeviceInfoPacket(addr));
@@ -484,7 +541,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		if(!isDeviceInfo)
 			return;
 
-		new MyThreadFactory(()->{			
+		new ThreadWorker(()->{			
 
 			oPacket
 			.map(DeviceInfo::new)
@@ -529,7 +586,8 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				});
 				if(!oDeviceType.isPresent()){
 
-					new MyThreadFactory(()->Optional
+					new ThreadWorker(
+							()->Optional
 							.ofNullable(scheduledFuture)
 							.filter(f->!f.isDone())
 							.ifPresent(
@@ -567,7 +625,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		try {
 
 			final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
-			Optional.ofNullable(serialPort).map(SerialPortInterface::isOpened).ifPresent(sp->getInfo());
+			Optional.ofNullable(serialPort).filter(SerialPortInterface::isOpened).ifPresent(sp->getInfo());
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -635,6 +693,9 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		private Timer createPanel(DeviceInfo deviceInfo) {
 			logger.info(deviceInfo);
 
+			//Show Stack Trace
+			logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
+
 			setSysSerialNumber(deviceInfo);
 
 			deviceInfos.add(deviceInfo); //TODO check where used and remove this line of code
@@ -686,7 +747,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			setSysSerialNumber(deviceInfo);
 			if(timers.isEmpty()) {
 				reset();
-				restart(1);
 			}
 		}
 	}
@@ -700,11 +760,26 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		gui.setModuleSelectFxPanel(null);
 	}
 
+	public void start(long period) {
+		logger.traceEntry("period: {}", period);
+
+		// do nothing if the job is not finished.
+
+		if(!Optional.ofNullable(service).filter(s->!s.isShutdown() && !s.isTerminated()).isPresent())
+			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker(getClass().getSimpleName()));
+
+		if(!Optional.ofNullable(scheduledFuture).filter(s->!s.isCancelled() && !s.isDone()).isPresent())
+			scheduledFuture = service.scheduleAtFixedRate(guiController, period<0 ? 0 : period, period<1 ? 1 : period, TimeUnit.SECONDS);
+
+		comPortThreadQueue.start();
+	}
+
 	public void stop() {
+		logger.traceEntry();
 
 		comPortThreadQueue.stop();
 		Optional.ofNullable(scheduledFuture).filter(shf->!shf.isDone()).ifPresent(shf->shf.cancel(true));
-		Optional.of(service).filter(serv->!serv.isShutdown()).ifPresent(serv->serv.shutdownNow());
+		Optional.ofNullable(service).filter(serv->!serv.isShutdown()).ifPresent(serv->serv.shutdownNow());
 		gui.setModuleSelectFxPanel(null);
 	}
 }

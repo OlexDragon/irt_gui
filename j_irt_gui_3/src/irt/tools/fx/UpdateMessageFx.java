@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.file.ProfileScannerFT;
 import irt.controller.file.ConverterProfileScanner;
 import irt.data.DeviceInfo;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.profile.Profile;
 import irt.irt_gui.IrtGui;
 import irt.tools.fx.UpdateMessageFx.Message;
@@ -106,8 +106,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 						}
 
 						Platform.runLater(()->lblProfile.setText(""));
-						new MyThreadFactory(userData, "Utin Type Select Listener");
-						new MyThreadFactory(
+						new ThreadWorker(userData, "Utin Type Select Listener");
+						new ThreadWorker(
 								()->{
 
 									try {

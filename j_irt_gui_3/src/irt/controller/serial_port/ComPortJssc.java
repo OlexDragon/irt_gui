@@ -35,47 +35,12 @@ import jssc.SerialPort;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 
-public class JsscComPort extends SerialPort implements SerialPortInterface {
+public class ComPortJssc extends SerialPort implements SerialPortInterface {
 
 	private static final String LOGGER_NAME = "comPort";
 
 	private final Logger logger = LogManager.getLogger();
 	private final Marker marker = MarkerManager.getMarker("FileWork");
-
-	public enum Baudrate{
-		BAUDRATE_9600	(SerialPort.BAUDRATE_9600),
-		BAUDRATE_19200	(SerialPort.BAUDRATE_19200),
-		BAUDRATE_38400	(SerialPort.BAUDRATE_38400),
-		BAUDRATE_57600	(SerialPort.BAUDRATE_57600),
-		BAUDRATE_115200	(SerialPort.BAUDRATE_115200);
-
-		private int baudrate;
-
-		private Baudrate(int baudrate){
-			this.baudrate = baudrate;
-		}
-
-		public int getBaudrate() {
-			return baudrate;
-		}
-
-		@Override
-		public String toString(){
-			return Integer.toString(baudrate);
-		}
-
-		public static Baudrate valueOf(int baudrate) {
-			Baudrate result = null;
-
-			for(Baudrate b:values())
-				if(b.getBaudrate()==baudrate){
-					result = b;
-					break;
-				}
-
-			return result;
-		}
-	}
 
 	private static int baudrate = BAUDRATE_115200;
 
@@ -87,7 +52,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 //	private boolean isSerialPortEven;
 	private boolean isComfirm;
 
-	public JsscComPort(String portName) {
+	public ComPortJssc(String portName) {
 		super(portName);
 
 		LoggerWorker.setLoggerLevel(LOGGER_NAME, Level.toLevel(IrtPanel.PROPERTIES.getProperty("dump_serialport"), Level.ERROR));
@@ -98,10 +63,11 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 			public void actionPerformed(ActionEvent arg0) {
 
 				try{
+
 					Console.appendLn("Timeout", "Timer");
-					synchronized (JsscComPort.this) {
-						closePort();
-					}
+					logger.debug("Timer timeout(timeout) - close port", timeout);
+					closePort();
+
 				}catch(Exception ex){
 					logger.catching(ex);
 				}
@@ -449,6 +415,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 		do{
 			try {
+				logger.error("synchronized");
 				synchronized (this) {
 					wait(waitTime);
 				}
@@ -513,18 +480,8 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 		long waitTimeL = waitTime*waitFor;
 
 		while(isOpened() && !(isReady = getInputBufferBytesCount()>=waitFor) && (System.currentTimeMillis()-start) < waitTimeL){
-			synchronized (this) {
 
-				try {
-					wait(waitTimeL);
-				} catch (InterruptedException e) {
-					logger.catching(Level.DEBUG, e);
-				} catch (Exception e) {
-					logger.catching(e);
-				 }
-
-//				isSerialPortEven = false;
-			}
+			synchronized (this) { try { wait(waitTimeL); } catch (InterruptedException e) { logger.catching(Level.TRACE, e); } }
 		};
 
 		logger.info("waitFor: {} bytes; waitTimeL: {}; System.currentTimeMillis()-start: {};", ()->waitFor , ()->waitTimeL, ()->System.currentTimeMillis()-start);
@@ -535,6 +492,10 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 	@Override
 	public synchronized boolean openPort() throws SerialPortException {
+		logger.traceEntry("{}", this);
+
+		//Show Stack Trace
+		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
 
 		if (isOpened()) return true;
 		
@@ -550,7 +511,10 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 
 	@Override
 	public synchronized boolean closePort(){
-		logger.debug(this);
+		logger.traceEntry("{}", this);
+
+		//Show stack trace
+//		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
 
 		if (!isOpened()) return true;
 
@@ -566,11 +530,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 		@Override
 		public void serialEvent(jssc.SerialPortEvent serialPortEvent) {
 
-			synchronized (JsscComPort.this) {
-//				isSerialPortEven = true;
-				JsscComPort.this.notify();
-//				Console.appendLn("", "notify");
-			}
+			synchronized (ComPortJssc.this) { ComPortJssc.this.notify(); }
 		}
 		
 	}
@@ -581,7 +541,7 @@ public class JsscComPort extends SerialPort implements SerialPortInterface {
 	}
 
 	public void setBaudrate(int baudrate){
-		JsscComPort.baudrate = baudrate;
+		ComPortJssc.baudrate = baudrate;
 		try {
 			setBaudrate();
 		} catch (Exception e) {

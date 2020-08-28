@@ -8,11 +8,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.Checksum;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.PacketThread;
 import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
@@ -199,14 +200,14 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 	sendAcknowledge(packet);
 
 		} catch (InterruptedException | PureJavaIllegalStateException e) {
-			new MyThreadFactory(()->closePort(), "ComPortAbstract-send-1");
+			new ThreadWorker(()->closePort(), "ComPortAbstract-send-1");
 		}catch (Exception e) {
 			logger.catching(e);
 			Console.appendLn(e.getLocalizedMessage(), "Error");
-			new MyThreadFactory(()->closePort(), "ComPortAbstract-send-2");
+			new ThreadWorker(()->closePort(), "ComPortAbstract-send-2");
 		}
 
-		buffer = null;
+		synchronized (this) { buffer = null; }
 
 		if(readPacket.getHeader()==null || readPacket.getPayloads()==null)
 			readPacket = packet;
@@ -227,17 +228,16 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 		logger.trace(()->ToHex.bytesToHex(acknowledge));
 	}
 
-	public void clear() throws Exception {
+	public void clear() {
 
 		confirmBytes = null;
 
-
 		 do{
 
-			buffer = null;
+			 synchronized (this) { buffer = null; }
 
 			if(!reading)
-				synchronized (this) { wait(100); }
+				synchronized (this) { try { wait(100); } catch (InterruptedException e) { logger.catching(Level.DEBUG, e); } }
 
 		 }while (reading || isBuffer());
 	}
@@ -261,7 +261,7 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 
 							do{
 
-								synchronized (ComPortAbstract.this) { try { ComPortAbstract.this.wait(wait); } catch (InterruptedException e) {} }
+								synchronized (ComPortAbstract.this) { try { ComPortAbstract.this.wait(wait); } catch (InterruptedException e) { logger.catching(Level.DEBUG, e); } }
 
 								final Optional<byte[]> oBuffer = getBuffer();
 
@@ -359,7 +359,7 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 		return isFlafDequence;
 	}
 
-	private synchronized byte[] readFromBuffer(final int size) {
+	private byte[] readFromBuffer(final int size) {
 
 		return Optional.ofNullable(buffer)
 				.map(bf->bf.length)
@@ -383,11 +383,12 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 	}
 
 	protected synchronized void writeToTheBuffer() throws IOException, SerialPortException {
-		 reading = true;
 		logger.traceEntry();
 
+		reading = true;
 
-//			final int inputBufferBytesCount = getInputBufferBytesCount();
+
+//TODO			final int inputBufferBytesCount = getInputBufferBytesCount();
 
 //			if(inputBufferBytesCount==0){
 //				reading = false;
@@ -544,11 +545,11 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 		}
 	}
 
-	public Optional<byte[]> getBuffer() {
+	public synchronized Optional<byte[]> getBuffer() {
 		return Optional.ofNullable(buffer);
 	}
 
-	private boolean isBuffer() {
+	private synchronized boolean isBuffer() {
 		return buffer!=null && buffer.length!=0;
 	}
 

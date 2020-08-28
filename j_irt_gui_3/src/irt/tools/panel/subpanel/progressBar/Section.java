@@ -9,7 +9,7 @@ import javax.swing.SwingUtilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.value.Value;
 import irt.data.value.Value.Status;
 import irt.data.value.ValueDouble;
@@ -74,7 +74,7 @@ public class Section extends IrtStylePanel implements Observer{
 
 	@Override
 	public void update(Observable o, Object obj) {
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			Value v = (Value) o;
 			Status s = (Status) obj;
 

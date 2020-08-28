@@ -44,7 +44,7 @@ import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.AdcWorker;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -154,7 +154,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DACsPanel.this);
 
 				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DACsPanel"));
+					service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("DACsPanel"));
 
 				scheduleAtFixedRate = service.scheduleAtFixedRate(DACsPanel.this, 0, 3, TimeUnit.SECONDS);
 
@@ -179,7 +179,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			public void startController(ControllerAbstract abstractController) {
 				threadList.add(abstractController);
 
-				new MyThreadFactory(abstractController, "DACsPanel.startController");
+				new ThreadWorker(abstractController, "DACsPanel.startController");
 			}
 			public void ancestorMoved(AncestorEvent arg0) {
 			}
@@ -570,9 +570,9 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 	@Override
 	public void onPacketReceived(Packet packet) {
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			synchronized (adcWorkers) {
-				adcWorkers.stream().filter(adc->adc.getDeviceDebugPacketIds().getPacketId().match(packet.getHeader().getPacketId())).findAny().ifPresent(adc->new MyThreadFactory(()->adc.update(packet), "DACsPanel.onPacketReceived()"));
+				adcWorkers.stream().filter(adc->adc.getDeviceDebugPacketIds().getPacketId().match(packet.getHeader().getPacketId())).findAny().ifPresent(adc->new ThreadWorker(()->adc.update(packet), "DACsPanel.onPacketReceived()"));
 			}
 		}, "DACsPanel.onPacketReceived");
 	}

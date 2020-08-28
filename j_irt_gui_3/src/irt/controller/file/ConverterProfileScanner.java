@@ -10,7 +10,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
 import irt.controller.GuiControllerAbstract;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketWork;
@@ -50,7 +50,7 @@ public class ConverterProfileScanner extends FutureTask<Optional<Path>> implemen
 					()->{
 						profileScanner = new ProfileScanner(oFileName);
 						FutureTask<Optional<Path>> ft = new FutureTask<>(profileScanner);
-						new MyThreadFactory(ft, "ConverterProfileScanner.ConverterWorker.Callable");
+						new ThreadWorker(ft, "ConverterProfileScanner.ConverterWorker.Callable");
 						return ft.get(10, TimeUnit.SECONDS);
 					});
 		}
@@ -86,9 +86,9 @@ public class ConverterProfileScanner extends FutureTask<Optional<Path>> implemen
 			.map(sn->sn+".bin"));
 		}
 
-		private synchronized void setFileName(Optional<String> oFileName) {
+		private void setFileName(Optional<String> oFileName) {
 			ConverterWorker.oFileName = oFileName;
-			new MyThreadFactory(this, "ConverterProfileScanner.ConverterWorker");
+			ThreadWorker.runThread(this, "ConverterProfileScanner.ConverterWorker");
 		}
 
 		private Function<String, String> getConverterSerialNumber() {

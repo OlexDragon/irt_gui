@@ -18,7 +18,7 @@ import javax.swing.event.AncestorListener;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
@@ -79,7 +79,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 			public void ancestorAdded(AncestorEvent event) {
 
 				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-					service =  Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("MuteButton"));
+					service =  Executors.newSingleThreadScheduledExecutor(new ThreadWorker("MuteButton"));
 
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(MuteButton.this);
 
@@ -114,7 +114,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			final Optional<Packet> oPacket = Optional
 			.ofNullable(packet);

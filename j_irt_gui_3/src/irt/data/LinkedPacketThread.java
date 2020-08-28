@@ -46,7 +46,9 @@ public class LinkedPacketThread extends PacketThread {
 
 	@Override
 	public void setDataPacketTypeCommand() {
-		if(data!=null)
-			data[4] = PacketImp.PACKET_TYPE_COMMAND;
+		synchronized (data) {
+			if(data!=null)
+				data[4] = PacketImp.PACKET_TYPE_COMMAND;
+		}
 	}
 }

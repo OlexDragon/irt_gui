@@ -23,7 +23,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.Range;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketSuper;
@@ -43,7 +43,7 @@ public class UnitControllerImp implements UnitController{
 	protected final Logger logger = LogManager.getLogger();
 
 	private ScheduledFuture<?> scheduledFuture;
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("UnitControllerImp"));
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("UnitControllerImp"));
 
 	protected JTextField txtGain;
 	protected JSlider slider;
@@ -288,7 +288,7 @@ public class UnitControllerImp implements UnitController{
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 			
 			if(isValuePacket(packet))
 				setValue(Packets.cast(packet));

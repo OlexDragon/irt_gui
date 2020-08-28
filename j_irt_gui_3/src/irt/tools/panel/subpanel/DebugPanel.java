@@ -25,7 +25,7 @@ import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork.PacketIDs;
@@ -66,7 +66,7 @@ public class DebugPanel extends JPanel{
 									@Override
 									public void onPacketReceived(Packet packet) {
 
-										new MyThreadFactory(()->{
+										new ThreadWorker(()->{
 
 											if(getPacketWork().isAddressEquals(packet) &&
 													PacketIDs.CLEAR_STATISTICS.match(packet.getHeader().getPacketId())){
@@ -93,7 +93,7 @@ public class DebugPanel extends JPanel{
 			}
 
 			private void startThread(Runnable runnable) {
-				new MyThreadFactory(runnable, "DebugPanel.startThread");
+				new ThreadWorker(runnable, "DebugPanel.startThread");
 			}
 		});
 		

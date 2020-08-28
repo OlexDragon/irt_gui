@@ -13,10 +13,10 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.serial_port.ComPortAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.JsscComPort;
-import irt.controller.serial_port.PureJavaComPort;
+import irt.controller.serial_port.ComPortJssc;
+import irt.controller.serial_port.ComPortPureJava;
 import irt.controller.serial_port.SerialPortInterface;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.ToHex;
 import irt.data.listener.PacketListener;
 import irt.data.packet.InitializePacket;
@@ -43,7 +43,7 @@ public class Test {
 			final byte linkAddr = (byte) 254;
 //			final byte linkAddr = (byte) 0;
 //			port = new PureJavaComPort("COM13");
-			port = new JsscComPort("COM13");
+			port = new ComPortJssc("COM3");
 //			port = new JsscComPort("COM14");
 			port.openPort();
 			logger.error("Serial port {} is opend={}", port, port.isOpened());
@@ -117,13 +117,13 @@ public class Test {
 			packet = null;
 			notified = false;
 			task = new FutureTask<>(this);
-			new MyThreadFactory("Test").newThread(task).start();
+			new ThreadWorker("Test").newThread(task).start();
 		}
 
 		@Override
 		public void onPacketReceived(Packet packet) {
 
-			new MyThreadFactory(()->{
+			new ThreadWorker(()->{
 
 				logger.error(packet);
 				this.packet = packet;
@@ -140,9 +140,9 @@ public class Test {
 
 				final long start = System.currentTimeMillis();
 
-				while(!notified && System.currentTimeMillis()-start<PureJavaComPort.MAX_WAIT_TIME)
+				while(!notified && System.currentTimeMillis()-start<ComPortPureJava.MAX_WAIT_TIME)
 					try{
-						wait(PureJavaComPort.MAX_WAIT_TIME);
+						wait(ComPortPureJava.MAX_WAIT_TIME);
 					}catch (Exception e) {
 						logger.catching(e);
 					}

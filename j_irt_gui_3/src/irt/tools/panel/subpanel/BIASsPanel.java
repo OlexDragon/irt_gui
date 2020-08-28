@@ -56,7 +56,7 @@ import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.data.AdcWorker;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.listener.PacketListener;
 import irt.data.packet.InitializePacket;
@@ -566,7 +566,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 							return;
 
 						parsePacket.setPacket(packet);
-						new MyThreadFactory(ft, "Get Callibration Mode");
+						new ThreadWorker(ft, "Get Callibration Mode");
 					}
 				};
 
@@ -610,7 +610,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					@Override
 					public void onPacketReceived(Packet packet) {
 
-						new MyThreadFactory(()->{
+						new ThreadWorker(()->{
 
 							if(		getPacketWork().isAddressEquals(packet) &&
 									packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
@@ -657,7 +657,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					@Override
 					public void onPacketReceived(Packet packet) {
 
-						new MyThreadFactory(()->{
+						new ThreadWorker(()->{
 
 							if(		getPacketWork().isAddressEquals(packet) &&
 									packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
@@ -686,7 +686,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 				boolean don;
 				if(controller!=null){
-					ExecutorService executor = Executors.newFixedThreadPool(1, new MyThreadFactory("BIASsPanel.runController(DefaultController)"));
+					ExecutorService executor = Executors.newFixedThreadPool(1, new ThreadWorker("BIASsPanel.runController(DefaultController)"));
 					executor.execute(controller);
 					executor.shutdown();
 
@@ -797,7 +797,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		if(delay<=0)
 			try{
-				new MyThreadFactory(
+				new ThreadWorker(
 						()->{
 							synchronized(adcWorkers) { 
 								adcWorkers
@@ -823,7 +823,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 
 		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("BIASsPanel"));
+			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("BIASsPanel"));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(BIASsPanel.this);
 		scheduleAtFixedRate = service.scheduleAtFixedRate(BIASsPanel.this, 1, 3, TimeUnit.SECONDS);

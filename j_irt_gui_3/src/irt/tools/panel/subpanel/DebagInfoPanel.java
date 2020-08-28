@@ -26,7 +26,7 @@ import javax.swing.event.AncestorListener;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
@@ -164,14 +164,14 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 
 	private void startService() {
 		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("DebagInfoPanel.service"));
+			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("DebagInfoPanel.service"));
 	}
 
 
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			Optional
 			.ofNullable(packet)

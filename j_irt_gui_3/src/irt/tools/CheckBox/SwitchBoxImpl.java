@@ -18,7 +18,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.interfaces.Packet;
@@ -31,7 +31,7 @@ public abstract class SwitchBoxImpl extends SwitchBox implements Runnable {
 	protected final Logger logger = LogManager.getLogger(getClass().getName());
 
 	protected final 	ComPortThreadQueue 			cptq 				= GuiControllerAbstract.getComPortThreadQueue();
-	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new MyThreadFactory("SwitchBoxImpl"));
+	private final 	ScheduledExecutorService	service 	= Executors.newScheduledThreadPool(1, new ThreadWorker("SwitchBoxImpl"));
 	private final	PacketSuper 					packetToSend;
 	private 	 	ScheduledFuture<?> 			scheduleAtFixedRate;
 	private final 	Updater			 			updater = new Updater();

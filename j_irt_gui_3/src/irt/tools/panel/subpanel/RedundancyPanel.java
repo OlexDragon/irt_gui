@@ -35,7 +35,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
@@ -149,7 +149,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 
 				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-					service = Executors.newScheduledThreadPool(1, new MyThreadFactory("RedundancyPanel"));
+					service = Executors.newScheduledThreadPool(1, new ThreadWorker("RedundancyPanel"));
 
 				scheduleAtFixedRate = service.scheduleAtFixedRate(RedundancyPanel.this, 0, 10, TimeUnit.SECONDS);
 			}
@@ -319,7 +319,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			try{
 

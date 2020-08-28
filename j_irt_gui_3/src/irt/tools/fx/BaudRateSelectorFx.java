@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.PureJavaComPort.Baudrate;
+import irt.controller.serial_port.ComPortPureJava.Baudrate;
 import irt.controller.translation.Translation;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

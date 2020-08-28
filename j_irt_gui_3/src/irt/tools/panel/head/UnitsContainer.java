@@ -19,7 +19,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
-import irt.data.MyThreadFactory;
+import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.SerialPortInterface;
+import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketWork;
 import irt.data.packet.alarm.AlarmsSummaryPacket;
@@ -35,7 +37,7 @@ public class UnitsContainer extends JPanel implements Runnable{
 
 	private static ComponentListener componentListener;
 
-	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("UnitsContainer"));
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("UnitsContainer"));
 	private final List<PacketWork> packets = new ArrayList<>();
 	private int index;
 
@@ -220,6 +222,6 @@ public class UnitsContainer extends JPanel implements Runnable{
 			index = 0;
 
 //		logger.error(packets);
-		GuiControllerAbstract.getComPortThreadQueue().add(packets.get(index));
+		Optional.ofNullable(ComPortThreadQueue.getSerialPort()).filter(SerialPortInterface::isOpened).ifPresent(sp->GuiControllerAbstract.getComPortThreadQueue().add(packets.get(index++)));
 	}
 }

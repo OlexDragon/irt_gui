@@ -6,7 +6,7 @@ import java.util.Optional;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.ToDo;
 import irt.data.DeviceInfo.DeviceType;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketWork;
@@ -23,7 +23,7 @@ public class SetterController extends ControllerAbstract {
 		super(deviceType, controllerName, packetWork, null, style);
 		this.toDo = toDo;
 
-		new MyThreadFactory(this, "SetterController");
+		new ThreadWorker(this, "SetterController");
 	}
 
 	@Override

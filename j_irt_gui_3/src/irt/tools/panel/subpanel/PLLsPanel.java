@@ -39,7 +39,7 @@ import irt.controller.serial_port.value.setter.DeviceDebagSetter;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.PllRegisterTextFieldSlider;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -373,7 +373,7 @@ public class PLLsPanel extends JPanel {
 							0,
 							Style.CHECK_ONCE);
 
-		new MyThreadFactory(registerController, "PLLsPanel.startController()");
+		new ThreadWorker(registerController, "PLLsPanel.startController()");
 	}
 
 	private class Parse extends Thread{

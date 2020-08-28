@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.data.DeviceInfo;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork.PacketIDs;
@@ -160,7 +160,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			setMinMaxValue(packet);
 			setValue(packet);

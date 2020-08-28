@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
@@ -96,7 +96,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 					return;
 
 				if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-					service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("Switch"));
+					service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("Switch"));
 
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(Switch.this);
 				scheduledFuture = service.scheduleAtFixedRate(Switch.this, 1, 10, TimeUnit.SECONDS);
@@ -119,7 +119,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			Optional
 			.ofNullable(packet)

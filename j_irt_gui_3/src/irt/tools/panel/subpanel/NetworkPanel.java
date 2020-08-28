@@ -45,7 +45,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.network.NetworkAddress;
 import irt.data.network.NetworkAddress.AddressType;
@@ -467,7 +467,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		if(PacketIDs.NETWORK_ADDRESS.match(packet))
 			logger.trace(packet);
 
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			Optional
 			.ofNullable(packet)
@@ -551,7 +551,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			return;
 
 		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-			service = Executors.newScheduledThreadPool(1, new MyThreadFactory("NetworkPanel"));
+			service = Executors.newScheduledThreadPool(1, new ThreadWorker("NetworkPanel"));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		scheduleAtFixedRate = service.scheduleAtFixedRate(this, 1, 5, TimeUnit.SECONDS);

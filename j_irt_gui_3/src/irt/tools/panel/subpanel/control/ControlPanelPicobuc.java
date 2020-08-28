@@ -25,7 +25,7 @@ import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.IdValueForComboBox;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
@@ -196,7 +196,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 	}
 
 	private void startThread(DefaultController controller) {
-		new MyThreadFactory(controller, "ControlPanelPicobuc.startThread");
+		new ThreadWorker(controller, "ControlPanelPicobuc.startThread");
 	}
 
 	@Override

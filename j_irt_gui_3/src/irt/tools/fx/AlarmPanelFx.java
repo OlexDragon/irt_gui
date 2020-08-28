@@ -19,7 +19,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
@@ -200,7 +200,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 	@Override
 	public void onPacketReceived(final Packet packet) {
-		new MyThreadFactory(()->{
+		new ThreadWorker(()->{
 
 			Optional<Packet> oPacket = Optional.ofNullable(packet);
 			final Optional<PacketHeader> alarmGroupId = oPacket.flatMap(this::filterByAddressAndGroup);
@@ -398,7 +398,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			return;
 
 		if(!Optional.ofNullable(service).filter(s->!s.isShutdown()).isPresent())
-			service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AlarmPanelFx"));
+			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("AlarmPanelFx"));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);

@@ -11,7 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceInfo;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 
 public class SoftReleaseChecker extends FutureTask<Boolean>{
 
@@ -28,7 +28,7 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 
 		SoftReleaseChecker.deviceInfo = deviceInfo;
 
-		new MyThreadFactory(this, "SoftReleaseChecker.check(DeviceInfo)");
+		new ThreadWorker(this, "SoftReleaseChecker.check(DeviceInfo)");
 
 		try {
 			return Optional.ofNullable(get(30, TimeUnit.SECONDS));

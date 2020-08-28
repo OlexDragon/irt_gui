@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.data.MyThreadFactory;
+import irt.data.ThreadWorker;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
@@ -54,7 +54,7 @@ public class HelpPaneFx extends AnchorPane implements PacketListener, JavaFxPane
 
 		Optional.ofNullable(service)
 		.filter(s->!s.isShutdown())
-		.orElseGet(()->service = Executors.newSingleThreadScheduledExecutor(new MyThreadFactory("AlarmPanelFx")));
+		.orElseGet(()->service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("AlarmPanelFx")));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 		scheduledFuture = service.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
