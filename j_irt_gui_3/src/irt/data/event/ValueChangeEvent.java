@@ -2,7 +2,7 @@ package irt.data.event;
 
 import java.awt.AWTEvent;
 
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 
 @SuppressWarnings("serial")
 public class ValueChangeEvent  extends AWTEvent {

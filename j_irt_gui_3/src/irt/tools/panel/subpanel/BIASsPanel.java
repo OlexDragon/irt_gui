@@ -63,10 +63,10 @@ import irt.data.packet.InitializePacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketWork;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
@@ -779,7 +779,11 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		final byte groupId = packet.getHeader().getGroupId();
+		final PacketHeader header = packet.getHeader();
+		if(header==null)
+			return;
+
+		final byte groupId = header.getGroupId();
 		if(!PacketGroupIDs.DEVICE_DEBUG.match(groupId))
 			return;
 

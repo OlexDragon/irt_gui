@@ -15,7 +15,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketWork;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.interfaces.StopInterface;

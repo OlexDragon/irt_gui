@@ -62,16 +62,20 @@ public class Checksum {
 		return new byte[]{ PacketImp.getByte(fcs, 0), PacketImp.getByte(fcs, 1)};
 	}
 
-	public int getChecksum() {
+	public int get() {
 		return fcs;
 	}
 
-	public void setChecksum(int fcs) {
+	public void set(int fcs) {
 		this.fcs = fcs;
 	}
 
 	public void add(byte[] data) {
 		fcs = fcs^0xFFFF;
 		checksum(data);
+	}
+
+	public byte[] toBytes() {
+		return PacketImp.toBytes((short)fcs);
 	}
 }

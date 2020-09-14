@@ -44,7 +44,7 @@ import irt.data.PllRegisterTextFieldSlider;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
 import irt.tools.button.ImageButton;

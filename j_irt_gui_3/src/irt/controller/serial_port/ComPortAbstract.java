@@ -510,41 +510,6 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 		return isFlagSequence;
 	}
 
-	public enum Baudrate{
-		BAUDRATE_9600	(9600),
-		BAUDRATE_19200	(19200),
-		BAUDRATE_38400	(38400),
-		BAUDRATE_57600	(57600),
-		BAUDRATE_115200	(115200);
-
-		private int baudrate;
-
-		private Baudrate(int baudrate){
-			this.baudrate = baudrate;
-		}
-
-		public int getBaudrate() {
-			return baudrate;
-		}
-
-		@Override
-		public String toString(){
-			return Integer.toString(baudrate);
-		}
-
-		public static Baudrate valueOf(int baudrate) {
-			Baudrate result = null;
-
-			for(Baudrate b:values())
-				if(b.getBaudrate()==baudrate){
-					result = b;
-					break;
-				}
-
-			return result;
-		}
-	}
-
 	public synchronized Optional<byte[]> getBuffer() {
 		return Optional.ofNullable(buffer);
 	}

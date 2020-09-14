@@ -30,9 +30,10 @@ import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.ValueDouble;
@@ -176,7 +177,13 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 
 					@Override
 					public boolean set(Packet packet) {
-						final int intId = packet.getHeader().getPacketId()&0xFF;
+
+						final PacketHeader header = packet.getHeader();
+
+						if(header==null)
+							return false;
+
+						final int intId = header.getPacketId()&0xFF;
 						PacketIDs[] values = PacketIDs.values();
 						if(intId<values.length)
 						switch(values[intId]){

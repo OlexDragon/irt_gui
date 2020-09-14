@@ -7,6 +7,9 @@ import java.util.Optional;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.subpanel.monitor.Monitor;
@@ -16,6 +19,7 @@ import javafx.scene.Scene;
 
 public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 	private final static long serialVersionUID = 1157429339979438261L;
+	private final static Logger logger = LogManager.getLogger();
 
 	private MonitorPanelFx root;
 
@@ -47,14 +51,21 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 
 		Platform.runLater(()->{
 
+			try {
+
 				root = new MonitorPanelFx();
 				Scene scene = new Scene(root);
 				setScene(scene);
+
+			}catch(Exception e) {
+				logger.catching(e);
+			}
 		});
 	}
 
 	@Override
 	public void refresh() {
+		LogManager.getLogger().error("refresh()");
 		//TODO
 	}
 

@@ -18,8 +18,8 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.border.TitledBorder;
 
 import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.Baudrate;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.ComPortPureJava.Baudrate;
 import irt.data.listener.DragWorker;
 
 public class SerialPortWizard extends JDialog {
@@ -39,14 +39,14 @@ public class SerialPortWizard extends JDialog {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange()==ItemEvent.SELECTED){
 					GuiControllerAbstract.getComPortThreadQueue();
-					ComPortThreadQueue.getSerialPort().setBaudrate(((Baudrate)comboBox.getSelectedItem()).getBaudrate());
+					ComPortThreadQueue.getSerialPort().setBaudrate(((Baudrate)comboBox.getSelectedItem()));
 				}
 			}
 		});
 		comboBox.setModel(new DefaultComboBoxModel<>(Baudrate.values()));
 		GuiControllerAbstract.getComPortThreadQueue();
 		ComPortThreadQueue.getSerialPort();
-		comboBox.setSelectedItem(Baudrate.valueOf(ComPortThreadQueue.getSerialPort().getBaudrate()));
+		comboBox.setSelectedItem(Baudrate.getDefaultBaudrate());
 
 		JLabel label = new JLabel("Baudrate(bps):");
 		

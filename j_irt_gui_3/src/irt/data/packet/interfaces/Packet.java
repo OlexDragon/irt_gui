@@ -17,4 +17,6 @@ public interface Packet {
 	void setPayloads(List<Payload> payloadsList);
 	void set		(byte[] data);
 	byte[] 			getAcknowledg();
+	long getTimeout();
+	int getMaxSize();
 }

@@ -4,7 +4,6 @@ package irt.data.packet;
 import java.util.Optional;
 import java.util.function.Function;
 
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 
 public class InitializePacket extends PacketSuper {

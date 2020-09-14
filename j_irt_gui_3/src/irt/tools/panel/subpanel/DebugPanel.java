@@ -28,7 +28,7 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.interfaces.Packet;
 
 public class DebugPanel extends JPanel{

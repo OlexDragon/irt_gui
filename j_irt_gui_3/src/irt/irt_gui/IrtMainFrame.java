@@ -32,7 +32,7 @@ import irt.data.Listeners;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.module.ModuleSelectFxPanel;
@@ -70,7 +70,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 
 				.newThread(
 						()->{
-							guiController.stop();
+							Optional.ofNullable(guiController).ifPresent(GuiControllerAbstract::stop);
 							LogManager.shutdown();
 							prefs.putBoolean(ComPortThreadQueue.GUI_CLOSED_CORRECTLY, true);
 						});

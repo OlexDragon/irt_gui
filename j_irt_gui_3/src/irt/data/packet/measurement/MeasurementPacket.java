@@ -17,8 +17,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;

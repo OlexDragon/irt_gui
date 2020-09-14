@@ -3,7 +3,8 @@ package irt.data.packet.configuration;
 
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 
 public class OffsetRange extends PacketSuper {
 

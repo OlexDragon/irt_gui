@@ -12,7 +12,8 @@ import java.util.stream.Stream;
 import irt.controller.translation.Translation;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.ValueToString;
 

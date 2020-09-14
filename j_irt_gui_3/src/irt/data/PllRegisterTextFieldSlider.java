@@ -14,7 +14,7 @@ import javax.swing.event.ChangeListener;
 
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.data.event.ValueChangeEvent;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.value.Value;
 
 public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{

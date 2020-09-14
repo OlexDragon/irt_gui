@@ -40,7 +40,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.configuration.RedundancyEnablePacket;
 import irt.data.packet.configuration.RedundancyEnablePacket.RedundancyEnable;
 import irt.data.packet.configuration.RedundancyModePacket;

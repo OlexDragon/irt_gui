@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.PacketThread;
 import irt.data.listener.ValueChangeListener;
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
@@ -32,6 +31,10 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 	private List<Payload> payloads = new ArrayList<>();
 	private long timestamp;
 
+	private final long timeout;
+
+	private int maxSize;
+
 	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, PacketGroupIDs groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
 		linkHeader = Optional.ofNullable(linkAddr).filter(la->la!=0).map(la-> new LinkHeader(linkAddr, (byte)0, (short)0)).orElse(null);
 		header = new PacketHeader();
@@ -41,6 +44,8 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 		payloads.add(new Payload( new ParameterHeader( parameterHeaderCode), payloadData));
 		this.priority = priority;
 		timestamp = System.currentTimeMillis();
+		timeout = packetID.getTimeout();
+		maxSize = packetID.getMaxSize();
 	}
 
 	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, byte[] payloadData, Priority priority){
@@ -328,6 +333,16 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 				.map(PacketHeader::getPacketId)
 				.filter(otherId->Optional.ofNullable(header).map(PacketHeader::getPacketId).filter(id->id.equals(otherId)).isPresent())
 				.isPresent();
+	}
+
+	@Override
+	public long getTimeout() {
+		return timeout;
+	}
+
+	@Override
+	public int getMaxSize() {
+		return maxSize;
 	}
 
 	@Override

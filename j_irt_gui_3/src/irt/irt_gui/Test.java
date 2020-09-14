@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.serial_port.ComPortAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.ComPortJssc;
-import irt.controller.serial_port.ComPortPureJava;
+import irt.controller.serial_port.ComPortPureJavaComm;
 import irt.controller.serial_port.SerialPortInterface;
 import irt.data.ThreadWorker;
 import irt.data.ToHex;
@@ -140,9 +140,9 @@ public class Test {
 
 				final long start = System.currentTimeMillis();
 
-				while(!notified && System.currentTimeMillis()-start<ComPortPureJava.MAX_WAIT_TIME)
+				while(!notified && System.currentTimeMillis()-start<ComPortPureJavaComm.MAX_WAIT_TIME)
 					try{
-						wait(ComPortPureJava.MAX_WAIT_TIME);
+						wait(ComPortPureJavaComm.MAX_WAIT_TIME);
 					}catch (Exception e) {
 						logger.catching(e);
 					}

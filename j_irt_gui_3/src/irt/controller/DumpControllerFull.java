@@ -29,7 +29,7 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.configuration.AttenuationPacket;
 import irt.data.packet.configuration.FrequencyPacket;
 import irt.data.packet.configuration.GainPacket;
@@ -144,7 +144,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
 		final PacketHeader header = packet.getHeader();
 
-		if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
+		if(header==null || header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
 			return;
 
 		new ThreadWorker(()->{

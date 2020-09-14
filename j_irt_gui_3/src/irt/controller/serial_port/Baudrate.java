@@ -9,30 +9,41 @@ public enum Baudrate {
 	BAUDRATE_57600	(SerialPort.BAUDRATE_57600),
 	BAUDRATE_115200	(SerialPort.BAUDRATE_115200);
 
-	private int baudrate;
+	private static Baudrate DEFAULT_BAUDRATE = BAUDRATE_115200;
+	private int value;
 
 	private Baudrate(int baudrate){
-		this.baudrate = baudrate;
+		value = baudrate;
 	}
 
-	public int getBaudrate() {
-		return baudrate;
+	public int getValue() {
+		return value;
 	}
 
 	@Override
 	public String toString(){
-		return Integer.toString(baudrate);
+		return Integer.toString(value);
 	}
 
 	public static Baudrate valueOf(int baudrate) {
 		Baudrate result = null;
 
 		for(Baudrate b:values())
-			if(b.getBaudrate()==baudrate){
+			if(b.getValue()==baudrate){
 				result = b;
 				break;
 			}
 
 		return result;
 	}
+
+	public static Baudrate getDefaultBaudrate() {
+		return DEFAULT_BAUDRATE;
+	}
+
+	public static void setDefaultBaudrate(Baudrate baudrate) {
+		DEFAULT_BAUDRATE = baudrate;
+	}
+
+	
 }

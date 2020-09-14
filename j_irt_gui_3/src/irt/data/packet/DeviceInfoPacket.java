@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import irt.data.DeviceInfo;
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 
 public class DeviceInfoPacket extends PacketSuper {

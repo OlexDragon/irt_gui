@@ -18,10 +18,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.RedundancyControllerUnitStatus;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.module.ControlPanelIrPcFx.Ready;
 import irt.tools.fx.module.ControlPanelIrPcFx.StandbyModes;

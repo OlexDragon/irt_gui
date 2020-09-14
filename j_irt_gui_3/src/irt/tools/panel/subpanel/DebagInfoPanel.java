@@ -31,7 +31,7 @@ import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.interfaces.Packet;

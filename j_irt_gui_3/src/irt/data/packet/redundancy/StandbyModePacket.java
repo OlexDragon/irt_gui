@@ -2,9 +2,10 @@ package irt.data.packet.redundancy;
 
 import java.util.Optional;
 
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.tools.fx.module.ControlPanelIrPcFx.StandbyModes;
 
 public class StandbyModePacket extends PacketSuper{

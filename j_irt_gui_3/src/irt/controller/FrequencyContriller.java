@@ -13,7 +13,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.value.ValueFrequency;
 
 public class FrequencyContriller extends ValueRangeControllerAbstract {

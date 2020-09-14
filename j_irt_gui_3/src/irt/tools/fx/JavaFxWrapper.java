@@ -81,7 +81,6 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 	}
 
 	public void setUnitAddress(byte unitAddress) {
-		if(Platform.isAccessibilityActive())
 			Platform.runLater(()->root.setUnitAddress(unitAddress));
 	}
 }

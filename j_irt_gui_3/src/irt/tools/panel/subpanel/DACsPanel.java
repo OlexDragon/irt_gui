@@ -50,7 +50,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;

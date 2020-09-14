@@ -2,10 +2,8 @@ package irt.tools.fx;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Optional;
 
-import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.ComPortPureJava.Baudrate;
+import irt.controller.serial_port.Baudrate;
 import irt.controller.translation.Translation;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -40,20 +38,18 @@ public class BaudRateSelectorFx extends AnchorPane{
 		titledPane.setText(Translation.getValue(String.class, "baudrates", "Baudrates"));
 
 		final ToggleGroup group = new ToggleGroup();
-		group.selectedToggleProperty().addListener((t,o,n)->{
-			Optional.ofNullable(ComPortThreadQueue.getSerialPort()).ifPresent(sp->{
-				sp.setBaudrate(((Baudrate)n.getUserData()).getBaudrate());
-			});
-		});
+		group.selectedToggleProperty().addListener((t,o,n)->Baudrate.setDefaultBaudrate((Baudrate)n.getUserData()));
 
-		final int baudrate = ComPortThreadQueue.getSerialPort().getBaudrate();
+		Arrays.stream(Baudrate.values())
+		.forEach(
+				baudrate->{
 
-		Arrays.stream(Baudrate.values()).forEach(v->{
-			final RadioButton rb = new RadioButton(v.toString());
-			rb.setUserData(v);
-			rb.setToggleGroup(group);
-			rb.setSelected(baudrate==v.getBaudrate());
-			vBox.getChildren().add(rb);
-		});
+					final RadioButton rb = new RadioButton(baudrate.toString());
+					rb.setUserData(baudrate);
+					rb.setToggleGroup(group);
+					rb.setSelected(baudrate==Baudrate.getDefaultBaudrate());
+
+					vBox.getChildren().add(rb);
+				});
 	}
 }

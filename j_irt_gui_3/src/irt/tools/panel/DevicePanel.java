@@ -80,6 +80,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 				minHeight,
 				maxHeight);
 
+
 		setBorder(null);
 		setName("DevicePanel");
 		this.deviceInfo = deviceInfo;

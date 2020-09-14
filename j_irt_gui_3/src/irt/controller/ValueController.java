@@ -27,7 +27,7 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.RangePacket;
 import irt.data.value.Value;

@@ -19,7 +19,7 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 

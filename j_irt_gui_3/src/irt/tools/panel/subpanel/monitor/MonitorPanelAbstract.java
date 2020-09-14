@@ -19,7 +19,7 @@ import irt.controller.translation.Translation;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.Payload;
 
 @SuppressWarnings("serial")

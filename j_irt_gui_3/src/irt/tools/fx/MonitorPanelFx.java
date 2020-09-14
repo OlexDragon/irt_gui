@@ -32,7 +32,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.Packets;
 import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -130,10 +130,10 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		try{
 
 			final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
-			if(this.serialPort==null)
+			if(this.serialPort==null || this.serialPort!=serialPort)
 				this.serialPort = serialPort;
 
-			logger.error("this.serialPort: {}; serialPort: {}; isOpened: {};", this.serialPort, serialPort, serialPort.isOpened());
+//			logger.error("this.serialPort: {}; serialPort: {}; isOpened: {}; equals: {}", this.serialPort, serialPort, serialPort.isOpened(), this.serialPort==serialPort);
 			if(Optional.ofNullable(this.serialPort).filter(sp->sp==serialPort).map(sp->!sp.isOpened()).orElse(true)){
 				shutdownNow();
 				return;
@@ -307,6 +307,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public void start(){
+//		logger.error("");
 
 		if(Optional.ofNullable(scheduleAtFixedRate).filter(sfr->!sfr.isDone()).isPresent())
 			return;
@@ -320,6 +321,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	public void stop(){
+		//Show Stack Trace
+//		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		Optional.ofNullable(scheduleAtFixedRate).filter(sfr->!sfr.isDone()).ifPresent(sfr->sfr.cancel(true));

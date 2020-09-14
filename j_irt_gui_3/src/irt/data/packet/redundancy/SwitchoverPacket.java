@@ -3,9 +3,10 @@ package irt.data.packet.redundancy;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 
-import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
+import irt.data.packet.PacketSuper;
 
 public class SwitchoverPacket extends PacketSuper{
 

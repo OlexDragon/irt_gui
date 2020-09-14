@@ -30,7 +30,7 @@ import irt.data.Range;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.configuration.Offset1to1toMultiPacket;
 import irt.data.packet.configuration.OffsetRange;
 import irt.data.packet.interfaces.Packet;

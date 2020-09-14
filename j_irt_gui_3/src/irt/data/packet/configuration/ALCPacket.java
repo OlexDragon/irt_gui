@@ -4,7 +4,8 @@ package irt.data.packet.configuration;
 import java.util.Optional;
 
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
 
 public class ALCPacket extends PacketSuper {

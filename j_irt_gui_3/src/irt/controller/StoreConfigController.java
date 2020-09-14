@@ -10,7 +10,7 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.control.SaveConfigPacket;
 import irt.data.packet.interfaces.Packet;
 

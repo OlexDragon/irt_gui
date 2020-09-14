@@ -4,7 +4,7 @@ import java.awt.Image;
 
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.LnbPowerPacket;
 import irt.data.packet.configuration.LnbPowerPacket.PowerStatus;

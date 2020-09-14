@@ -102,6 +102,7 @@ public class UnitsContainer extends JPanel implements Runnable{
 						remove(unitPanel);
 						add((Panel)unitPanel);
 					}
+
 			}else if(unitPanel instanceof Panel) {
 				add((Panel)unitPanel);
 				Optional.of(unitPanel).filter(DevicePanel.class::isInstance).map(DevicePanel.class::cast).map(DevicePanel::getLinkHeader).map(LinkHeader::getAddr).ifPresent(

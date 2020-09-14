@@ -10,9 +10,9 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.GuiControllerAbstract;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
+import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
@@ -320,5 +320,9 @@ public class DeviceInfo implements PacketListener {
 		.filter(p->PacketIDs.DEVICE_INFO.match(p.getHeader().getPacketId()))
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.map(DeviceInfo::new);		
+	}
+
+	public Byte getAddr() {
+		return Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
 	}
 }

@@ -24,9 +24,9 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketWork.AlarmsPacketIds;
-import irt.data.packet.PacketWork.PacketIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.Packets;
 import irt.data.packet.Payload;
 import irt.data.packet.alarm.AlarmDescriptionPacket;
@@ -78,6 +78,10 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private GridPane 	gridPane;
 
 	public AlarmPanelFx() {
+
+		//Show Stack Trace
+//		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
+
 		Thread currentThread = Thread.currentThread();
 		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 //		logger.error("AlarmPanelFx");
@@ -128,6 +132,8 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	private boolean availableAlarmsSent;
 	@Override
 	public void run() {
+//		logger.error("{}", unitAddress);
+
 		if(unitAddress==null)
 			return;
 
@@ -393,6 +399,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	public void start(){
+//		logger.error("");
 
 		if(Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).isPresent())
 			return;
@@ -405,6 +412,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	public void stop(){
+//		logger.error("");
 
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(this);
 		Optional.ofNullable(scheduledFuture).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));

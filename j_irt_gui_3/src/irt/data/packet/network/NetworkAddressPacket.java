@@ -4,8 +4,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import irt.data.network.NetworkAddress;
+import irt.data.packet.PacketGroupIDs;
+import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.interfaces.Packet;
 

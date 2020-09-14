@@ -22,7 +22,7 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketImp.PacketGroupIDs;
+import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.configuration.ALCEnablePacket;
 import irt.data.packet.interfaces.LinkedPacket;

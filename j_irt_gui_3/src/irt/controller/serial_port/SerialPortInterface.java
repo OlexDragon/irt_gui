@@ -10,7 +10,10 @@ public interface SerialPortInterface {
 	String getPortName();
 	boolean openPort() throws Exception;
 	boolean closePort();
-	void setBaudrate(int baudrate);
-	int getBaudrate();
+	byte[] getFromBuffer(int size) throws Exception;
 	byte[] readBytes(int size) throws Exception;
+	void setBaudrate(Baudrate baudrate);
+	void clear() throws Exception;
+	boolean writeBytes(byte[] data) throws Exception;
+	int bytesAvailable() throws Exception;
 }
