@@ -11,11 +11,11 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.serial_port.ComPortAbstract;
-import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.ComPortJssc;
 import irt.controller.serial_port.ComPortPureJavaComm;
+import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
+import irt.controller.serial_port.SerialPortWorker;
 import irt.data.ThreadWorker;
 import irt.data.ToHex;
 import irt.data.listener.PacketListener;
@@ -104,7 +104,7 @@ public class Test {
 	private static void byteStuffingTest() {
 		byte[] bytes = new byte[]{0, 00, 00, 01, 0x5C, (byte) 0xAF, (byte) 0xEA, (byte) 0x80, 00, 00, 00, 01, 0x7D, 0x5D, 0x78, 0x40, 00};
 		logger.error("*** Start byteStuffingTest - {}" + ToHex.bytesToHex(bytes));
-		logger.error("*** End byteStuffingTest - {}" + ToHex.bytesToHex(ComPortAbstract.byteStuffing(bytes)));
+		logger.error("*** End byteStuffingTest - {}" + ToHex.bytesToHex(SerialPortWorker.byteStuffing(bytes)));
 	}
 
 	public static class PacketListenerTest implements PacketListener, Callable<Packet>{
