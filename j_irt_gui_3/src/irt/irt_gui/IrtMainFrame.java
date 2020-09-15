@@ -65,6 +65,8 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
 		new JFXPanel(); // this will prepare JavaFX toolkit and environment
 
+		Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.catching(e));
+
 
 		Thread t = new ThreadWorker("IrtMainFrame.addShutdownHook()")
 

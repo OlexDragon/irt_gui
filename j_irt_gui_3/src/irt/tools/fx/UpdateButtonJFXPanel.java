@@ -188,7 +188,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 						// PROGRAM
 						message
-						.getByteBuffer(PacketFormats.BINARY)
+						.getByteBuffer(PacketFormats.IMAGE)
 						.map(bb->{
 							byte[] dst = new byte[bb.capacity()];
 							bb.get(dst);
@@ -196,7 +196,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 						})
 						.ifPresent(bytes->{
 							message
-							.getPath(PacketFormats.BINARY)
+							.getPath(PacketFormats.IMAGE)
 							.map(Path::getFileName)
 							.map(Path::toString)
 							.ifPresent(fileName->{

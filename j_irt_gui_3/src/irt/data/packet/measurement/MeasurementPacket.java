@@ -76,7 +76,7 @@ public class MeasurementPacket extends PacketSuper{
 																																}
 																																return null;
 																															})
-																													.collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue,  (a,b)->{throw new IllegalStateException();},  TreeMap::new)));
+																													.collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue,  (a,b)->a,  TreeMap::new)));
 
 	/**
 	 *  Converter request packet

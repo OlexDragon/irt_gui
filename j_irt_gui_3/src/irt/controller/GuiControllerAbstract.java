@@ -44,7 +44,6 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.serial_port.ComPortJSerialComm;
 import irt.controller.serial_port.ComPortJssc;
-import irt.controller.serial_port.ComPortPureJavaComm;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
@@ -126,7 +125,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		logger.traceEntry(threadName);
 
 		final String className = prefs.get(SERIAL_PORT_CLASS, ComPortJSerialComm.class.getSimpleName());
-		serialPortClass = Stream.of(ComPortJssc.class, ComPortJSerialComm.class, ComPortPureJavaComm.class).filter(c->c.getSimpleName().equals(className)).findAny().orElse(ComPortJssc.class);
+		serialPortClass = Stream.of(ComPortJssc.class, ComPortJSerialComm.class).filter(c->c.getSimpleName().equals(className)).findAny().orElse(ComPortJssc.class);
 
 		this.gui = gui;
 		guiController = this;
@@ -190,7 +189,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 					if(!guiBeenClosedProperly) {
 						stop();
 
-						ChoiceDialog<Class<? extends SerialPortInterface>> alert = new ChoiceDialog<>(serialPortClass, ComPortJssc.class, ComPortJSerialComm.class, ComPortPureJavaComm.class);
+						ChoiceDialog<Class<? extends SerialPortInterface>> alert = new ChoiceDialog<>(serialPortClass, ComPortJssc.class, ComPortJSerialComm.class);
 						alert.setTitle("The GUI was not closed properly.");
 						alert.setHeaderText("Try to select a different serial port driver.");
 						ComboBox<Class<?>> comboBox = (ComboBox<Class<?>>) alert.getDialogPane().lookup(".combo-box");
@@ -305,7 +304,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		float fontSize = Translation.getValue(Float.class, "serialPortSelection.font.size", 16f);
 		serialPortSelection.setFont(Translation.getFont().deriveFont(fontSize));
-						logger.error(serialPortClass);
+
 		final String[] array = Optional.ofNullable(serialPortClass)
 		.map(
 				clazz->{
@@ -331,7 +330,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 					return null;
 				})
 		.map(list->list.toArray(new String[0]))
-		.orElseGet(()->ComPortPureJavaComm.getPortNames().toArray(new String[0]));
+		.orElseGet(()->ComPortJSerialComm.getPortNames().toArray(new String[0]));
 
 		DefaultComboBoxModel<String> defaultComboBoxModel = new DefaultComboBoxModel<String>(array);
 		defaultComboBoxModel.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);
@@ -372,13 +371,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		menu.add(mi);
 		buttonGroup.add(mi);
 		serialPortClasses.put(mi, ComPortJssc.class);
-
-		mi = new JRadioButtonMenuItem();
-		mi.setText("PureJava");
-		mi.addActionListener(miListener);
-		menu.add(mi);
-		buttonGroup.add(mi);
-		serialPortClasses.put(mi, ComPortPureJavaComm.class);
 
 		mi = new JRadioButtonMenuItem();
 		mi.setText("JSerialComm");

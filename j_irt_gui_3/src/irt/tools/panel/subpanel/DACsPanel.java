@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -63,6 +64,8 @@ import irt.tools.textField.RegisterTextField;
 @SuppressWarnings("serial")
 public class DACsPanel extends JPanel implements PacketListener, Runnable {
 	private final Logger logger = LogManager.getLogger();
+
+	private static Preferences prefs = Preferences.userRoot().node(GuiControllerAbstract.IRT_TECHNOLOGIES_INC);
 
 	private RegisterTextField txtDAC1;
 	private RegisterTextField txtDAC2;
@@ -350,12 +353,17 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		lblCalibrationMode.setBounds(6, 8, 107, 17);
 		add(lblCalibrationMode);
 		lblCalibrationMode.setFont(font);
-		
+
+		boolean on = prefs.getBoolean("converter step on", false);
+		slider.setSnapToTicks(on);
 		chckbxStep = new JCheckBox("Step:");
+		chckbxStep.setSelected(on);
 		chckbxStep.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				slider.setSnapToTicks(chckbxStep.isSelected());
+				final boolean selected = chckbxStep.isSelected();
+				slider.setSnapToTicks(selected);
 				slider.requestFocusInWindow();
+				prefs.putBoolean("converter step on", selected);
 			}
 		});
 		chckbxStep.setOpaque(false);
@@ -364,7 +372,6 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		chckbxStep.setFont(font.deriveFont(12f));
 		
 		txtStep = new JTextField();
-		txtStep.setText("1");
 		txtStep.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtStep.setColumns(10);
 		txtStep.setBounds(59, 81, 34, 20);
@@ -372,6 +379,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			@Override
 			public void focusLost(FocusEvent arg0) {
 				slider.setMinorTickSpacing(getStep());
+				prefs.put("converter step", txtStep.getText());
 			}
 		});
 		txtStep.addActionListener(new ActionListener() {
@@ -380,6 +388,8 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 				slider.requestFocusInWindow();
 			}
 		});
+		txtStep.setText(prefs.get("converter step", "100"));
+		slider.setMinorTickSpacing(getStep());
 		add(txtStep);
 		txtStep.setFont(font);
 

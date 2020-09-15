@@ -28,7 +28,6 @@ import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
-import purejavacomm.PortInUseException;
 
 public class ComPortThreadQueue implements Runnable {
 
@@ -184,7 +183,7 @@ public class ComPortThreadQueue implements Runnable {
 				if(!sp.isOpened())
 					sp.openPort();
 
-			} catch (PortInUseException | SerialPortException e) {
+			} catch (SerialPortException e) {
 
 				logger.catching(Level.DEBUG, e);
 

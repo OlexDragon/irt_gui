@@ -90,8 +90,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	public MonitorPanelFx() {
 		logger.traceEntry();
 
-		Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.catching(e));
-
 		Thread currentThread = Thread.currentThread();
 		currentThread.setUncaughtExceptionHandler((t, e) -> logger.catching(e));
 

@@ -13,7 +13,6 @@
 	<classpathentry kind="lib" path="library/jssc-2.8.0.jar" sourcepath="C:/Users/Alex/.m2/repository/org/scream3r/jssc/2.8.0/jssc-2.8.0-sources.jar"/>
 	<classpathentry kind="lib" path="library/log4j-api-2.13.3.jar"/>
 	<classpathentry kind="lib" path="library/log4j-core-2.13.3.jar"/>
-	<classpathentry kind="lib" path="library/purejavacomm-1.0.2.RELEASE.jar" sourcepath="C:/Users/Alex/.m2/repository/com/github/purejavacomm/purejavacomm/1.0.2.RELEASE/purejavacomm-1.0.2.RELEASE-sources.jar"/>
 	<classpathentry kind="lib" path="library/jSerialComm-2.6.2.jar" sourcepath="C:/Users/Alex/.m2/repository/com/fazecast/jSerialComm/2.6.2/jSerialComm-2.6.2-sources.jar"/>
 	<classpathentry kind="lib" path="library/jna-4.5.2.jar"/>
 	<classpathentry kind="lib" path="library/jna-platform-4.5.2.jar"/>

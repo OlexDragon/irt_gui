@@ -255,7 +255,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 			message.put(PacketFormats.PROFILE, lblProfile.getTooltip().getText());
 
 		if(cbProgram.isSelected())
-			message.put(PacketFormats.BINARY, lblProgram.getTooltip().getText());
+			message.put(PacketFormats.IMAGE, lblProgram.getTooltip().getText());
 
 		return message;
 	}
@@ -557,7 +557,9 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE)!=null;
 		}
 
-		private String format = "%s{path{%s}}";
+		public final static String setupInfoPathern = "%s any.any.any {\n %s }";
+		public final static String pathPathern = "%s { path {\"%s\"} %s }";
+		private final static String format = "%s{path{%s}}";
 		@Override
 		public String toString() {
 
@@ -572,8 +574,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
-		public final static String setupInfoPathern = "%s any.any.any { %s }";
-		public final static String pathPathern = "%s { path {\"%s\"} %s }";
 		public String getSetupInfo() {
 
 			return String.format(
