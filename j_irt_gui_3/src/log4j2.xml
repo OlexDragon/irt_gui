@@ -81,6 +81,7 @@
 <!--  	<Logger name="irt.data.profile.ProfileValidator" level="debug"/> -->
 <!--  	<Logger name="irt.tools.fx.ControlPanelIrPcFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.debug.DeviceDebugPanel" level="all"/> -->
+<!--  	<Logger name="irt.tools.fx.UpdateButtonJFXPanel" level="all"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

@@ -31,9 +31,9 @@ public class LnbReferencePacket  extends PacketSuper{
 																															.map(v->v[index]);
 																												});
 
-	private static final PacketIDs PACKET_ID 	= PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE;
-	private static final PacketGroupIDs GROUP_ID 		= PacketGroupIDs.CONFIGURATION;
-	private static final byte PARAMETER 	= PacketImp.PARAMETER_CONFIG_FCM_LNB_REFERENCE_CONTROL;
+	private final static PacketIDs PACKET_ID 	= PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE;
+	private final static PacketGroupIDs GROUP_ID 		= PacketGroupIDs.CONFIGURATION;
+	private final static byte PARAMETER 	= PacketImp.PARAMETER_CONFIG_FCM_LNB_REFERENCE_CONTROL;
 
 	public enum ReferenceStatus{
 		UNDEFINED,
@@ -42,7 +42,7 @@ public class LnbReferencePacket  extends PacketSuper{
 	}
 
 	public LnbReferencePacket() {
-		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PACKET_ID, GROUP_ID, PARAMETER, null, Priority.REQUEST);
+		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE, GROUP_ID, PARAMETER, null, Priority.REQUEST);
 	}
 
 	public LnbReferencePacket(ReferenceStatus referenceStatus) {

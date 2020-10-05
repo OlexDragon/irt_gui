@@ -36,6 +36,7 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 	private int maxSize;
 
 	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, PacketGroupIDs groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
+
 		linkHeader = Optional.ofNullable(linkAddr).filter(la->la!=0).map(la-> new LinkHeader(linkAddr, (byte)0, (short)0)).orElse(null);
 		header = new PacketHeader();
 		header.setType(packetType);

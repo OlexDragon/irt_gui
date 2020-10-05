@@ -228,6 +228,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	}
 
 	private void setStatus(final List<?> status) {
+		logger.traceEntry("{}", status);
 
 		if(status==null || status.isEmpty())
 			return;
@@ -236,15 +237,10 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		List<?> collect;
 		Stream<?> stream = status.stream();
 
-		if(status.get(0) instanceof StatusBitsBUC) 
-			collect = stream.filter(phc->phc==StatusBitsBUC.UNLOCKED || phc==StatusBitsBUC.LOCKED || phc==StatusBitsBUC.MUTE).collect(Collectors.toList());
+		collect = stream.filter(phc->phc==StatusBitsBUC.UNLOCKED || phc==StatusBitsBUC.LOCKED || phc==StatusBitsBUC.MUTE || phc==StatusBitsFCM.LOCK  || phc==StatusBitsFCM.MUTE || phc==StatusBitsFCM.MUTE_TTL).collect(Collectors.toList());
 
-		//StatusBitsFCM
-		else
-			collect = stream.filter(phc->phc==StatusBitsFCM.LOCK  || phc==StatusBitsFCM.MUTE || phc==StatusBitsFCM.MUTE_TTL).collect(Collectors.toList());
-
-		ObservableList<Node> children = statusPane.getChildren();
-		int size = children.size();
+		final ObservableList<Node> children = statusPane.getChildren();
+		final int size = children.size();
 
 		String toolTipText = status.toString().replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
 		Tooltip tooltip = new Tooltip(toolTipText);
@@ -258,16 +254,13 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 				index->{
 
-					if(collect.isEmpty() || children.isEmpty())
-						return;
-
 					// Show only UNLOCKED, LOCKED, MUTE statuses
 					Object statusBit = collect.get(index);
 					String string = statusBit.toString();
 
 					Platform.runLater(
 							()->{
-								
+
 								if(children.size()<=index) {
 
 									final Label label = new Label(string);

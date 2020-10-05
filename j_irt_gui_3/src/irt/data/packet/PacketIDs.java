@@ -110,8 +110,8 @@ public enum PacketIDs {
 	MEASUREMENT_SNB2_STATUS				( null, null, null, null, null, null),
 	MEASUREMENT_WGS_POSITION			( null, null, null, null, null, null),
 
-	CONFIGURATION_LO					( null, null, null, LOPacket.parseValueFunction, null, null),
-	CONFIGURATION_LO_FREQUENCIES		( null, null, null, LOFrequenciesPacket.parseValueFunction, null, 18),
+	CONFIGURATION_LO					( null, null, null, LOPacket.parseValueFunction, null, 8),
+	CONFIGURATION_LO_FREQUENCIES		( null, null, null, LOFrequenciesPacket.parseValueFunction, null, 32),
 	CONFIGURATION_MUTE					( null, null, null, MuteControlPacket.parseValueFunction, null, null),
 	CONFIGURATION_GAIN					( null, null, null, AttenuationPacket.parseValueFunction, null, null),
 	CONFIGURATION_GAIN_RANGE			( null, null, null, AttenuationRangePacket.parseValueFunction, null, null),
@@ -149,13 +149,13 @@ public enum PacketIDs {
 	FCM_DEVICE_DEBUG_PLL_REG_UP_GAIN	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, null, null, null),
 	FCM_DEVICE_DEBUG_PLL_REG_OFFSET		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, null, null, null),
 
-	FCM_ADC_INPUT_POWER		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
-	FCM_ADC_OUTPUT_POWER	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
-	FCM_ADC_TEMPERATURE		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
-	FCM_ADC_CURRENT			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
-	FCM_ADC_5V5				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
-	FCM_ADC_13v2			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
-	FCM_ADC_13V2_NEG		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
+	FCM_ADC_INPUT_POWER		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	FCM_ADC_OUTPUT_POWER	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	FCM_ADC_TEMPERATURE		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	FCM_ADC_CURRENT			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	FCM_ADC_5V5				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	FCM_ADC_13v2			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	FCM_ADC_13V2_NEG		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 
 	PRODUCTION_GENERIC_SET_1_INITIALIZE( PacketGroupIDs.PRODUCTION_GENERIC_SET_1, PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT, null, null, null, null),
 
@@ -173,7 +173,7 @@ public enum PacketIDs {
 
 	DEVICE_DEBUG_INFO					( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_CPU_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
-	DEVICE_DEBUG_HARDWARE_FAULTS_INFO	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 50),
+	DEVICE_DEBUG_HARDWARE_FAULTS_INFO	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
 	DEVICE_DEBUG_THRESHOLDS_INFO		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
 	DEVICE_DEBUG_I2C1_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_MUTE_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),

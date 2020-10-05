@@ -297,7 +297,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 					logger.catching(e1);
 				}
 			});
-			contextMenu.getItems().add(menuItem);
+			final ObservableList<MenuItem> menuItems = contextMenu.getItems();
+			menuItems.add(menuItem);
 
 			menuItem = new MenuItem("Open file location");
 			menuItem.setOnAction(e-> {
@@ -307,7 +308,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 					logger.catching(e1);
 				}
 			});
-			contextMenu.getItems().add(menuItem);
+			menuItems.add(menuItem);
 			lblProfile.setContextMenu(contextMenu);
 
 		};
@@ -557,8 +558,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE)!=null;
 		}
 
-		public final static String setupInfoPathern = "%s any.any.any {\n %s }";
-		public final static String pathPathern = "%s { path {\"%s\"} %s }";
 		private final static String format = "%s{path{%s}}";
 		@Override
 		public String toString() {
@@ -574,17 +573,20 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
+		public final static String setupInfoPathern = "%s any.any.any {\n%s }";
+		public final static String pathPathern = "%s { path {%s} %s }";
 		public String getSetupInfo() {
 
-			return String.format(
-					setupInfoPathern,
-					system,
-					paths
-						.entrySet()
-						.stream()
-						.map(es->new java.util.AbstractMap.SimpleEntry<String, String>(es.getKey().name().toLowerCase(), new File(es.getValue()).getName()))
-						.map(es->String.format(pathPathern, es.getKey(), es.getValue(), getAddress(es)))
-						.collect(Collectors.joining("\n")));
+			return String
+					.format(
+							setupInfoPathern,
+							system,
+							paths
+								.entrySet()
+								.stream()
+								.map(es->new SimpleEntry<String, String>(es.getKey().name().toLowerCase(), new File(es.getValue()).getName()))
+								.map(es->String.format(pathPathern, es.getKey(), es.getValue(), getAddress(es)))
+								.collect(Collectors.joining("\n")));
 		}
 
 		private String getAddress(SimpleEntry<String, String> es){
@@ -592,9 +594,9 @@ public class UpdateMessageFx extends Dialog<Message>{
 			if(cbBUC.isSelected())
 				return "";
 
-			// Firmware address
+			// Converter firmware address
 			final String value = es.getValue();
-			if(PacketFormats.BINARY.toString().equals(value))
+			if(PacketFormats.IMAGE.toString().equals(value))
 				return "address {0x08000000}";
 
 			// Converter profile address
@@ -641,15 +643,15 @@ public class UpdateMessageFx extends Dialog<Message>{
 		}
 	}
 
+	public static void setProfilePath(Path path) {
+		profilePath = path;
+	}
+
 	public enum PacketFormats{
 		PROFILE,
 		BINARY,
 		OEM,
 		IMAGE,
 		PACKAGE
-	}
-
-	public static void setProfilePath(Path path) {
-		profilePath = path;
 	}
 }

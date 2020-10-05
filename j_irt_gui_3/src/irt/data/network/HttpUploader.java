@@ -40,9 +40,8 @@ public class HttpUploader {
 		return isIpReachable(ipAddress);
 	}
 
-
 	private static boolean isIpReachable(String targetIp) {
-		 
+
         try {
             InetAddress target = InetAddress.getByName(targetIp);
             return target.isReachable(5000);  //timeout 5sec
@@ -65,6 +64,19 @@ public class HttpUploader {
 	}
 
 	public void upload(InputStream inputStream) throws IOException {
+
+		// Save package to the file
+//		try {
+//			File file = new File("C:\\Users\\Alex\\Desktop\\tmp\\deleteMe.pkg");
+//			file.createNewFile();
+//			byte[] b = new byte[inputStream.available()];
+//			inputStream.read(b);
+//			try (FileOutputStream os = new FileOutputStream(file)) {
+//				os.write(b);
+//			}
+//		} catch (Exception e) {
+//			LogManager.getLogger().catching(e);
+//		}
 
 		String boundary =  "*****"+Long.toHexString(System.currentTimeMillis())+"*****";
 

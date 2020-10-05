@@ -10,6 +10,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.concurrent.CancellationException;
@@ -101,6 +103,20 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 			JMenuItem locationMenuItem = new JMenuItem("Open file location");
 			locationMenuItem.setEnabled(false);
 			popup.add(locationMenuItem);
+
+			deviceInfo.getSerialNumber().ifPresent(
+					sn->{
+						JMenuItem httpMenuItem = new JMenuItem("Open in Web Browser");
+						popup.add(httpMenuItem);
+						httpMenuItem.addActionListener(
+								e->{
+									try {
+										Desktop.getDesktop().browse(new URI("http://" + sn));
+									} catch (IOException | URISyntaxException e2) {
+										logger.catching(e2);
+									}
+								});
+					});
 
 			JMenuItem updateMenuItem = new JMenuItem("Update");
 			popup.add(updateMenuItem);

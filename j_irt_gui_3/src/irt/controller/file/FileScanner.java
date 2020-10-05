@@ -19,7 +19,7 @@ import java.util.concurrent.FutureTask;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.ThreadWorker;
+import irt.data.MyThreadFactory;
 import irt.tools.fx.interfaces.StopInterface;
 
 public class FileScanner extends FutureTask<List<Path>> implements StopInterface{
@@ -41,11 +41,14 @@ public class FileScanner extends FutureTask<List<Path>> implements StopInterface
 
 		paths.clear();
 		busy = true;
-		new ThreadWorker(this, "FileScanner");
+		new MyThreadFactory(this, "FileScanner");
 	}
 
 	private static Callable<List<Path>> getPaths(Path defaultFolder, String fileToSearch) {
 		return ()->{
+
+			if(!defaultFolder.toFile().exists())
+				return null;
 
 			final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + fileToSearch);
 			final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {

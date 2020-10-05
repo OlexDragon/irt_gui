@@ -25,7 +25,7 @@ public class LnbPowerPacket  extends PacketSuper{
 																										.filter(bb->bb.remaining()==1)
 																										.flatMap(
 																												bb->{
-																													final int index = bb.get()&7;
+																													final int index = bb.get()&3;
 																													return Optional
 																															.of( PowerStatus.values())
 																															.map(v->v[index]);
@@ -43,7 +43,7 @@ public class LnbPowerPacket  extends PacketSuper{
 	}
 
 	public LnbPowerPacket() {
-		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PACKET_ID, GROUP_ID, PARAMETER, null, Priority.REQUEST);
+		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONFIGURATION_FCM_LNB_POWER, GROUP_ID, PARAMETER, null, Priority.REQUEST);
 	}
 
 	public LnbPowerPacket(PowerStatus powerStatus) {

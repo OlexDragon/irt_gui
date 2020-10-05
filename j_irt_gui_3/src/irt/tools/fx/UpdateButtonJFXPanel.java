@@ -176,6 +176,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 						{
 
 							final String setupInfo = message.getSetupInfo();
+							logger.debug(setupInfo);
 
 							final byte[] setupInfoBytes = setupInfo.getBytes(Profile.charEncoding);
 
