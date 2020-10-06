@@ -26,7 +26,6 @@ public enum PacketGroupIDs {
 /* Network */
 	NETWORK ((byte)11), /* Network configuration. */
 
-/* backwards compatibility - to be deleted */
 	PRODUCTION_GENERIC_SET_1 ((byte)100),
 	DEVELOPER_GENERIC_SET_1 ((byte)120);
 

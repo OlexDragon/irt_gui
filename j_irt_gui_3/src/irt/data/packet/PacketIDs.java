@@ -157,7 +157,7 @@ public enum PacketIDs {
 	FCM_ADC_13v2			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	FCM_ADC_13V2_NEG		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 
-	PRODUCTION_GENERIC_SET_1_INITIALIZE( PacketGroupIDs.PRODUCTION_GENERIC_SET_1, PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT, null, null, null, null),
+	PRODUCTION_GENERIC_SET_1_INITIALIZE( PacketGroupIDs.PRODUCTION_GENERIC_SET_1, PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT, null, null, 5000L, null),
 
 	NETWORK_ADDRESS		( null, null, null, NetworkAddressPacket.parseValueFunction, null, 13),
 

@@ -358,14 +358,13 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		slider.setSnapToTicks(on);
 		chckbxStep = new JCheckBox("Step:");
 		chckbxStep.setSelected(on);
-		chckbxStep.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				final boolean selected = chckbxStep.isSelected();
-				slider.setSnapToTicks(selected);
-				slider.requestFocusInWindow();
-				prefs.putBoolean("converter step on", selected);
-			}
-		});
+		chckbxStep.addActionListener(
+				e->{
+					final boolean selected = chckbxStep.isSelected();
+					slider.setSnapToTicks(selected);
+					slider.requestFocusInWindow();
+					prefs.putBoolean("converter step on", selected);
+				});
 		chckbxStep.setOpaque(false);
 		chckbxStep.setBounds(6, 80, 59, 23);
 		add(chckbxStep);

@@ -287,8 +287,8 @@
 					</children>
 				</AnchorPane>
             <CheckBox fx:id="inHex" mnemonicParsing="false" onAction="#onHex" text="In HEX" GridPane.columnIndex="1" />
-            <ToggleButton fx:id="btnCalMode" mnemonicParsing="false" onAction="#onCalOn" text="Cal. OFF" GridPane.columnIndex="2" />
-            <Button disable="true" mnemonicParsing="false" onAction="#onInitialize" text="Initialize" GridPane.columnIndex="3" />
+            <ToggleButton fx:id="btnCalMode" mnemonicParsing="false" onAction="#onCalOn" text="Cal. is N/A" GridPane.columnIndex="2" />
+            <Button fx:id="btnInitialize" disable="true" mnemonicParsing="false" onAction="#onInitialize" text="Initialize" GridPane.columnIndex="3" />
 			</children>
 		</GridPane>
 	</children>

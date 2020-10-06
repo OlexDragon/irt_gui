@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,14 +25,16 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
-import irt.controller.serial_port.ComPortThreadQueue;
-import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
+import irt.data.packet.InitializePacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketImp;
 import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketImp;
+import irt.data.packet.PacketWork;
+import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
@@ -149,40 +152,41 @@ public class DeviceDebugPanel extends JFXPanel {
 		@FXML private Button btnSet4;
 
 	    @FXML private ToggleButton btnCalMode;
-
+	    @FXML private Button btnInitialize;
 
 	    @FXML private CheckBox inHex;
 
 		@FXML protected void initialize() {
 
+			// Indexes
 			tfIndex1.textProperty().addListener(textListener);
 			tfIndex2.textProperty().addListener(textListener);
 			tfIndex3.textProperty().addListener(textListener);
 			tfIndex4.textProperty().addListener(textListener);
+
 			Optional.ofNullable(pref.get("tfIndex1", null)).ifPresent(text->Platform.runLater(()->tfIndex1.setText(text)));
 			Optional.ofNullable(pref.get("tfIndex2", null)).ifPresent(text->Platform.runLater(()->tfIndex2.setText(text)));
 			Optional.ofNullable(pref.get("tfIndex3", null)).ifPresent(text->Platform.runLater(()->tfIndex3.setText(text)));
 			Optional.ofNullable(pref.get("tfIndex4", null)).ifPresent(text->Platform.runLater(()->tfIndex4.setText(text)));
 
+			//Addresses
 			tfAddr1.textProperty().addListener(textListener);
 			tfAddr2.textProperty().addListener(textListener);
 			tfAddr3.textProperty().addListener(textListener);
 			tfAddr4.textProperty().addListener(textListener);
+
 			Optional.ofNullable(pref.get("tfAddr1", null)).ifPresent(text->Platform.runLater(()->tfAddr1.setText(text)));
 			Optional.ofNullable(pref.get("tfAddr2", null)).ifPresent(text->Platform.runLater(()->tfAddr2.setText(text)));
 			Optional.ofNullable(pref.get("tfAddr3", null)).ifPresent(text->Platform.runLater(()->tfAddr3.setText(text)));
 			Optional.ofNullable(pref.get("tfAddr4", null)).ifPresent(text->Platform.runLater(()->tfAddr4.setText(text)));
 
-//			tfValue1.textProperty().addListener(textListener);
-//			tfValue2.textProperty().addListener(textListener);
-//			tfValue3.textProperty().addListener(textListener);
-//			tfValue4.textProperty().addListener(textListener);
-
+			// CheckBoxes
 			cb1.selectedProperty().addListener(cbChangeListener);
 			cb2.selectedProperty().addListener(cbChangeListener);
 			cb3.selectedProperty().addListener(cbChangeListener);
 			cb4.selectedProperty().addListener(cbChangeListener);
 
+			// CheckBox to HEX
 			inHex.setSelected(pref.getBoolean(inHex.getId(), false));
 		}
 
@@ -335,11 +339,16 @@ public class DeviceDebugPanel extends JFXPanel {
 
 	    @FXML void onCalOn() {
 
+	    	Optional.ofNullable(btnCalMode.getUserData()).map(Boolean.class::cast).ifPresent(isCalMode->sendComand(new CallibrationModePacket(linkAddr, !isCalMode)));
 	    }
 
 	    @FXML void onInitialize() {
-
+	    	sendComand(new InitializePacket(linkAddr));
 	    }
+
+		private void sendComand(PacketWork packet) {
+			GuiControllerAbstract.getComPortThreadQueue().add(packet);
+		}
 
 		private void get(Node source) {
 			createGetPacket(source).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
@@ -355,9 +364,15 @@ public class DeviceDebugPanel extends JFXPanel {
 			Optional<Packet> oPacket = Optional.ofNullable(packet);
 			Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
 
-			if(!oHeader.map(PacketHeader::getPacketId).filter(PacketIDs.DEVICE_DEBUG_PACKET::match).isPresent())
+			final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
+
+			// Return if other packets
+			if(!oPacketId.filter(id->PacketIDs.DEVICE_DEBUG_PACKET.match(id) || PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.match(id) || PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE.match(id)).isPresent())
 				return;
 
+			logger.traceEntry("{}", packet);
+
+			// Return if unit address do not match
 			if(oPacket
 					.filter(LinkedPacket.class::isInstance)
 					.map(LinkedPacket.class::cast)
@@ -366,8 +381,7 @@ public class DeviceDebugPanel extends JFXPanel {
 					.orElse((byte)0) != linkAddr)
 				return;
 
-			logger.traceEntry("{}", packet);
-
+			// Return if packet has an error
 			if(oHeader
 					.map(PacketHeader::getOption)
 					.filter(o->o!=PacketImp.ERROR_NO_ERROR)
@@ -377,18 +391,53 @@ public class DeviceDebugPanel extends JFXPanel {
 				return;
 			}
 
-			PacketIDs
-			.DEVICE_DEBUG_PACKET
-			.valueOf(packet)
-			.map(RegisterValue.class::cast)
-			.ifPresent(
-					registerValue->{
+			oPacketId.filter(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE::match).ifPresent(ifCalibrationMode(packet));
 
-						setValue(registerValue, tfIndex1, tfAddr1, tfValue1);
-						setValue(registerValue, tfIndex2, tfAddr2, tfValue2);
-						setValue(registerValue, tfIndex3, tfAddr3, tfValue3);
-						setValue(registerValue, tfIndex4, tfAddr4, tfValue4);
-					});
+			oPacketId.filter(PacketIDs.DEVICE_DEBUG_PACKET::match).ifPresent(ifDeviceDebug(packet));
+
+			oPacketId.filter(PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE::match).ifPresent(ifInitialise(packet));
+		}
+
+		private Consumer<? super Short> ifCalibrationMode(Packet packet) {
+			return id->{
+
+				CallibrationModePacket.parseValueFunction.apply(packet).map(Boolean.class::cast)
+				.ifPresent(isCalMode->{
+					Platform.runLater(
+							()->{
+								btnCalMode.setUserData(isCalMode);
+								btnCalMode.setText("Cal. is " + (isCalMode ? "ON" : "OFF"));
+								btnCalMode.setSelected(isCalMode);
+								btnInitialize.setDisable(!isCalMode);
+							});
+				});
+			};
+		}
+
+		private Consumer<? super Short> ifDeviceDebug(Packet packet) {
+			return id->{
+
+				PacketIDs
+				.DEVICE_DEBUG_PACKET
+				.valueOf(packet)
+				.map(RegisterValue.class::cast)
+				.ifPresent(
+						registerValue->{
+
+							setValue(registerValue, tfIndex1, tfAddr1, tfValue1);
+							setValue(registerValue, tfIndex2, tfAddr2, tfValue2);
+							setValue(registerValue, tfIndex3, tfAddr3, tfValue3);
+							setValue(registerValue, tfIndex4, tfAddr4, tfValue4);
+						});
+			};
+		}
+
+		private Consumer<? super Short> ifInitialise(Packet packet) {
+			return id->{
+				final PacketHeader header = packet.getHeader();
+				if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE || header.getOption()!=PacketImp.ERROR_NO_ERROR)
+					;
+			};
 		}
 
 		private void setValue(RegisterValue registerValue, TextField tfIndex, TextField tfAddr, TextField tfValue) {
@@ -475,10 +524,9 @@ public class DeviceDebugPanel extends JFXPanel {
 			}
 		};
 
-		private ScheduledFuture<?> screateFuture(DeviceDebugPacket p) {
+		private ScheduledFuture<?> createFuture(DeviceDebugPacket p) {
 			logger.trace(p);
-			final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
-			return service.scheduleAtFixedRate(()->queue.add(p), 0, 3, TimeUnit.SECONDS);
+			return service.scheduleAtFixedRate(()->sendComand(p), 0, 3, TimeUnit.SECONDS);
 		}
 
 		private Optional<DeviceDebugPacket> createGetPacket(Node node) {
@@ -546,7 +594,7 @@ public class DeviceDebugPanel extends JFXPanel {
 
 		private void startFuture(CheckBox checkBox) {
 			createGetPacket(checkBox)
-			.ifPresent(p->mapScheduledFuture.put(checkBox, screateFuture(p)));
+			.ifPresent(p->mapScheduledFuture.put(checkBox, createFuture(p)));
 		}
 
 		private void stopFuture(CheckBox checkBox) {
@@ -557,7 +605,11 @@ public class DeviceDebugPanel extends JFXPanel {
 
 			if(!Optional.ofNullable(service).filter(sfr->!sfr.isShutdown()).isPresent()) {
 				service = Executors.newScheduledThreadPool(4, new ThreadWorker("DebugPanelFx.service"));
+
 				GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
+
+				// Send Calibration Mode packet
+				sendComand(new CallibrationModePacket(linkAddr));
 			}
 
 			mapScheduledFuture
@@ -575,7 +627,7 @@ public class DeviceDebugPanel extends JFXPanel {
 
 					entry->{
 						createGetPacket(entry.getKey())
-						.ifPresent(p->entry.setValue(screateFuture(p)));
+						.ifPresent(p->entry.setValue(createFuture(p)));
 					});
 					
 		}
