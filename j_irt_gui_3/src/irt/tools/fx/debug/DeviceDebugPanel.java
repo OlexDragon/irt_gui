@@ -323,7 +323,7 @@ public class DeviceDebugPanel extends JFXPanel {
 
 			try {
 
-				lookupAll("TextField").parallelStream().filter(tf->tf.getId().startsWith("tfValue")).map(TextField.class::cast).filter(tf->!tf.getText().isEmpty()).forEach(tf->setText(tf, Integer.parseInt(tf.getText(), selected ? 10 : 16)));
+				lookupAll("TextField").parallelStream().filter(tf->tf.getId().startsWith("tfValue")).map(TextField.class::cast).filter(tf->!tf.getText().isEmpty()).forEach(tf->setText(tf, Integer.parseInt(tf.getText().replace("0x", ""), selected ? 10 : 16)));
 
 			}catch(NumberFormatException e) {
 
@@ -436,7 +436,15 @@ public class DeviceDebugPanel extends JFXPanel {
 			return id->{
 				final PacketHeader header = packet.getHeader();
 				if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE || header.getOption()!=PacketImp.ERROR_NO_ERROR)
-					;
+					Platform.runLater(
+							()->{
+								final Alert alert = new Alert(AlertType.WARNING);
+								alert.initModality(Modality.APPLICATION_MODAL);
+								alert.setTitle("Initialisation");
+								alert.setHeaderText(null);
+								alert.setContentText("Something went wrong.\nTry to restart the unit and initializing again.");
+								alert.showAndWait();
+							});
 			};
 		}
 
@@ -455,7 +463,8 @@ public class DeviceDebugPanel extends JFXPanel {
 
 		private void setText(TextField tfValue, int value) {
 
-			final String text = Integer.toString(value, inHex.isSelected() ? 16 : 10);
+			final boolean isHex = inHex.isSelected();
+			final String text = (isHex ? "0x" : "") + Integer.toString(value, isHex ? 16 : 10);
 			Platform.runLater(()->tfValue.setText(text));
 		}
 
@@ -589,7 +598,7 @@ public class DeviceDebugPanel extends JFXPanel {
 					.map(TextField.class::cast)
 					.map(TextField::getText)
 					.filter(t->!t.isEmpty())
-					.map(text->Integer.parseInt(text, radix));
+					.map(text->Integer.parseInt(text.replace("0x", ""), radix));
 		}
 
 		private void startFuture(CheckBox checkBox) {
