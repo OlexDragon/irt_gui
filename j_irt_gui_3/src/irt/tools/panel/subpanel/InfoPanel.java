@@ -46,7 +46,7 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.Transformer;
-import irt.tools.fx.UpdateMessageFx;
+import irt.tools.fx.update.UpdateMessageFx;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 

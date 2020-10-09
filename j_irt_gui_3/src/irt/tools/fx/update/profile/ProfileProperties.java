@@ -1,5 +1,5 @@
 
-package irt.data.profile;
+package irt.tools.fx.update.profile;
 
 import java.util.Arrays;
 import java.util.List;

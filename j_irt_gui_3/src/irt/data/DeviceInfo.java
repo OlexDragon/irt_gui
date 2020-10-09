@@ -88,6 +88,14 @@ public class DeviceInfo implements PacketListener {
 			DESCRIPTION = description;
 		}
 
+		public Boolean isFCM() {
+			return PROTOCOL==Protocol.CONVERTER;
+		}
+
+		public String toStrong(){
+			return DESCRIPTION;
+		}
+
 		public static Optional<DeviceType> valueOf(int typeId){
 			return Arrays.stream(values()).parallel().filter(dt->dt.TYPE_ID==typeId).findAny();
 		}
@@ -100,10 +108,6 @@ public class DeviceInfo implements PacketListener {
 
 			final Optional<DeviceType> valueOf = valueOf(typeId);
 			return valueOf.map(dt->dt.PROTOCOL).map(pr->pr==Protocol.CONVERTER).orElse(null);
-		}
-
-		public String toStrong(){
-			return DESCRIPTION;
 		}
 	}
 

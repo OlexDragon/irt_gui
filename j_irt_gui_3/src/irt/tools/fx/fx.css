@@ -66,3 +66,6 @@
 	-fx-text-fill: YELLOW;
 	-fx-background-color: GREEN;
 }
+.RED_BORDER{
+	 -fx-border-color:red;
+}

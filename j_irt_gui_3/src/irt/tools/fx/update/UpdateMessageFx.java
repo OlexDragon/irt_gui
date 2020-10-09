@@ -1,4 +1,4 @@
-package irt.tools.fx;
+package irt.tools.fx.update;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -10,10 +10,8 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -23,18 +21,17 @@ import java.util.concurrent.TimeoutException;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.file.ProfileScannerFT;
 import irt.controller.file.ConverterProfileScanner;
+import irt.controller.file.ProfileScannerFT;
 import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
-import irt.data.profile.Profile;
 import irt.irt_gui.IrtGui;
-import irt.tools.fx.UpdateMessageFx.Message;
+import irt.tools.fx.update.UpdateMessageFx.Message;
+import irt.tools.fx.update.profile.Profile;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.StringProperty;
@@ -144,7 +141,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		setTitle("IP Address");
 		setHeaderText("Type a valid IP address.");
 		final DialogPane dialogPane = getDialogPane();
-		dialogPane.getStylesheets().add(getClass().getResource("fx.css").toExternalForm());
+		dialogPane.getStylesheets().add(getClass().getResource("..\\fx.css").toExternalForm());
 
 		final ButtonType updateButtonType = new ButtonType("Update", ButtonData.OK_DONE);
 		dialogPane.getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
@@ -173,7 +170,14 @@ public class UpdateMessageFx extends Dialog<Message>{
 		grid.addRow(0, new Label("IP Address:"), tfAddress);
 
 		tfAddress.setPromptText("192.168.0.1");
-		tfAddress.textProperty().addListener(getListener(updateButton));
+
+		tfAddress.textProperty()
+		.addListener(
+				(o, oV, nV)->{
+
+					final boolean disable = !validateNodes();
+					updateButton.setDisable(disable);
+				});
 
 		//Package selection row #1
 
@@ -428,18 +432,12 @@ public class UpdateMessageFx extends Dialog<Message>{
 														.map(CheckBox.class::cast)
 														.filter(CheckBox::isSelected);
 
-//		Optional.ofNullable(fileScanner)
-//		.ifPresent(
-//				fs->{
 
 			if(oIsSelected.map(cb->cb==cbPackage).orElse(false)){
 
-//				fs.cancel(true);
 				cbProfile.setSelected(false);
 				cbProgram.setSelected(false);
 			}
-//		});
-//		logger.error(fileScanner);
 
 
 		if(oIsSelected.map(cb->cb!=cbPackage).orElse(false)){
@@ -451,9 +449,10 @@ public class UpdateMessageFx extends Dialog<Message>{
 		Platform.runLater(()->updateButton.setDisable(disable));
 	}
 
+	/** Validate IP Address and Path selection */
 	private boolean validateNodes() {
 
-		// IP Address
+		// validate IP Address
 		boolean ipAddress = Optional
 						.ofNullable(tfAddress.getText())
 						.map(String::trim)
@@ -463,21 +462,27 @@ public class UpdateMessageFx extends Dialog<Message>{
 		if(!ipAddress)
 			return false;
 
-		// Package
-		// if is address and package return true
-		if(validate(lblPackage.getText(), cbPackage))
+		// validate Package
+		// return true if address and package exist,
+		if(validatePath(lblPackage, cbPackage))
 			return true;
 
 		// When none production mode 'lblProfile' and 'lblProgram' equal null.
-		return Optional.ofNullable(lblProfile).map(lbl->validate(lbl.getText(), cbProfile)).orElse(false)
-				|| Optional.ofNullable(lblProgram).map(lbl->validate(lbl.getText(), cbProgram)).orElse(false);
+		return Optional.ofNullable(lblProfile).map(lbl->validatePath(lbl, cbProfile)).orElse(false)
+				|| Optional.ofNullable(lblProgram).map(lbl->validatePath(lbl, cbProgram)).orElse(false);
 	}
 
-	private boolean validate(String text, CheckBox cb){
+	/**
+	 * @param label
+	 * @param checkBox
+	 * @return true if the label contains a path and the CheckBox is checked, otherwise false
+	 */
+	private boolean validatePath(Label label, CheckBox checkBox){
 
+		String text = label.getText();
 		return Optional.ofNullable(text)
 				.filter(value->!value.isEmpty())
-				.map(v->cb.isSelected())
+				.map(v->checkBox.isSelected())
 				.orElse(false);
 	}
 
@@ -501,22 +506,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 				setLabelText(lblPackage, cbPackage, result.toPath());
 //				getDialogPane().getScene().getWindow().sizeToScene();
 			}
-		};
-	}
-
-	private ChangeListener<? super String> getListener(final Node button) {
-		return (o, oV, nV)->{
-
-			final List<String> ipAddr = Optional.ofNullable(nV).filter(a->!a.isEmpty()).map(a->a.split("\\D")).map(Arrays::stream).orElse(Stream.empty()).filter(s->!s.isEmpty()).collect(Collectors.toList());
-
-			if(ipAddr.size()!=4){
-				final boolean disable = !validateNodes();
-				button.setDisable(disable);
-				return;
-			}
-
-			ipAddressStr = ipAddr.stream().collect(Collectors.joining("."));
-			button.setDisable(false);
 		};
 	}
 
@@ -606,18 +595,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 		public Optional<Profile> getProfile() {
 			return Optional
 					.ofNullable(paths.get(PacketFormats.PROFILE))
-					.map(path -> {
-
-						try {
-
-							return new Profile(path);
-
-						} catch (IOException e) {
-							logger.catching(e);
-						}
-
-						return null;
-					});
+					.map(Paths::get)
+					.map(Profile::new);
 		}
 
 		public Optional<ByteBuffer> getByteBuffer(PacketFormats packetFormat) {

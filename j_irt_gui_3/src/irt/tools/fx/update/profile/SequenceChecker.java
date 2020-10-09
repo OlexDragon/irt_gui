@@ -1,5 +1,5 @@
 
-package irt.data.profile;
+package irt.tools.fx.update.profile;
 class SequenceChecker{
 
 	private Double value;

@@ -57,7 +57,7 @@ import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.network.NetworkAddressPacket;
 import irt.tools.fx.OpenHTTPButtonJFXPanel;
-import irt.tools.fx.UpdateButtonJFXPanel;
+import irt.tools.fx.update.UpdateButtonJFXPanel;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.head.IrtPanel;
