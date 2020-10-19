@@ -28,7 +28,6 @@ public class HttpUploader {
 
 	private static final String twoHyphens = "--";
 	private static final String lineEnd = "\r\n";
-	private static final int maxBufferSize = 1*1024*1024;
 
 	private final String ipAddress;
 
@@ -58,14 +57,19 @@ public class HttpUploader {
 
 	public void upload(File file) throws FileNotFoundException, IOException {
 
+		byte[] bytes;
 		try(InputStream inputStream = new FileInputStream(file);) {
-			upload(inputStream);
+
+			bytes = new byte[inputStream.available()];
+			inputStream.read(bytes);
 		}
+
+		upload(bytes);
 	}
 
-	public void upload(InputStream inputStream) throws IOException {
+	public void upload(byte[] bytes) throws IOException {
 
-		// Save package to the file
+		// TODO Save package to the file (For test only)
 //		try {
 //			File file = new File("C:\\Users\\Alex\\Desktop\\tmp\\deleteMe.pkg");
 //			file.createNewFile();
@@ -99,18 +103,8 @@ public class HttpUploader {
 			dataOutputStream.writeBytes("Upgrade" + lineEnd);
 			dataOutputStream.writeBytes(lineEnd);
 
-			int bytesAvailable = inputStream.available();
-			int bufferSize = Math.min(bytesAvailable, maxBufferSize);
-			byte[] buffer = new byte[bufferSize];
 
-			int bytesRead = inputStream.read(buffer, 0, bufferSize);
-			while(bytesRead > 0) {
-				dataOutputStream.write(buffer, 0, bufferSize);
-				bytesAvailable = inputStream.available();
-				bufferSize = Math.min(bytesAvailable, maxBufferSize);
-				bytesRead = inputStream.read(buffer, 0, bufferSize);
-			}
-					
+			dataOutputStream.write(bytes, 0, bytes.length);
 			dataOutputStream.writeBytes(lineEnd);
 			dataOutputStream.flush();
 

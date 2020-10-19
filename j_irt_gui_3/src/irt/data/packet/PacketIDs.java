@@ -340,7 +340,7 @@ public Byte getParameterCode() {
 }
 
 public  Optional<Object> valueOf(Packet packet) {
-	logger.trace(packet);
+
 	try {
 
 		return Optional.ofNullable(function).flatMap(f->f.apply(packet));

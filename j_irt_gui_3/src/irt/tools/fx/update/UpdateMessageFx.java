@@ -4,11 +4,14 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -22,6 +25,8 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
+import javax.xml.bind.DatatypeConverter;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,6 +35,7 @@ import irt.controller.file.ProfileScannerFT;
 import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
 import irt.irt_gui.IrtGui;
+import irt.tools.fx.MonitorPanelFx;
 import irt.tools.fx.update.UpdateMessageFx.Message;
 import irt.tools.fx.update.profile.Profile;
 import javafx.application.Platform;
@@ -61,6 +67,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.util.Pair;
 
 public class UpdateMessageFx extends Dialog<Message>{
 
@@ -141,7 +148,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		setTitle("IP Address");
 		setHeaderText("Type a valid IP address.");
 		final DialogPane dialogPane = getDialogPane();
-		dialogPane.getStylesheets().add(getClass().getResource("..\\fx.css").toExternalForm());
+		dialogPane.getStylesheets().add(MonitorPanelFx.class.getResource("fx.css").toExternalForm());
 
 		final ButtonType updateButtonType = new ButtonType("Update", ButtonData.OK_DONE);
 		dialogPane.getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
@@ -539,7 +546,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.put(packetFormats, path);
 		}
 
-		public Map<PacketFormats, String> eetPaths() {
+		public Map<PacketFormats, String> getPaths() {
 			return paths;
 		}
 
@@ -564,9 +571,16 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		public final static String setupInfoPathern = "%s any.any.any {\n%s }";
 		public final static String pathPathern = "%s { path {%s} %s }";
-		public String getSetupInfo() {
 
-			return String
+		/**
+		 * 
+		 * @return Setup.info and its MD5
+		 * @throws NoSuchAlgorithmException
+		 * @throws UnsupportedEncodingException
+		 */
+		public Pair<String, String> getSetupInfo() throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
+			final String setupInfo = String
 					.format(
 							setupInfoPathern,
 							system,
@@ -576,6 +590,13 @@ public class UpdateMessageFx extends Dialog<Message>{
 								.map(es->new SimpleEntry<String, String>(es.getKey().name().toLowerCase(), new File(es.getValue()).getName()))
 								.map(es->String.format(pathPathern, es.getKey(), es.getValue(), getAddress(es)))
 								.collect(Collectors.joining("\n")));
+
+			final byte[] bytes = setupInfo.getBytes(Profile.charEncoding);
+
+			return new Pair<>(
+
+					setupInfo,
+					DatatypeConverter.printHexBinary(MessageDigest.getInstance("MD5").digest(bytes)));
 		}
 
 		private String getAddress(SimpleEntry<String, String> es){

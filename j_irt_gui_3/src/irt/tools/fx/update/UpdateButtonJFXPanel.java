@@ -2,7 +2,6 @@ package irt.tools.fx.update;
 
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +10,6 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -22,7 +19,6 @@ import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,19 +28,17 @@ import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
 import irt.data.network.HttpUploader;
 import irt.data.network.NetworkAddress;
+import irt.tools.fx.MonitorPanelFx;
 import irt.tools.fx.update.UpdateMessageFx.PacketFormats;
+import irt.tools.fx.update.profile.EditTablesMessageFx.Action;
 import irt.tools.fx.update.profile.Profile;
 import irt.tools.fx.update.profile.ProfileValidator;
-import irt.tools.fx.update.profile.ProfileValidator.ProfileErrors;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.DialogPane;
 import javafx.scene.text.Font;
 import javafx.util.Pair;
@@ -67,7 +61,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 		Platform.runLater(()->{
 			Scene scene = new Scene(root);
-			scene.getStylesheets().add(getClass().getResource("..\\fx.css").toExternalForm());
+			scene.getStylesheets().add(MonitorPanelFx.class.getResource("fx.css").toExternalForm());
 			setScene(scene);
 		});
 	}
@@ -76,7 +70,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 	public class UpdateButtonFx extends Button{
 
 		private UpdateMessageFx updateMessage;
-		private boolean timerDone;
+		private boolean showProductionMessage;
 
 		// ******************************* constructor UpdateButtonFx   ***************************************************
 		public UpdateButtonFx() {
@@ -90,7 +84,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 						(int) TimeUnit.SECONDS.toMillis(10),
 						a->{
-							timerDone=true;
+							showProductionMessage=true;
 							getStyleClass().add("RED_BORDER");
 						});
 				
@@ -103,7 +97,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 				@Override
 				public void mousePressed(MouseEvent e) {
 
-					timerDone = false;	//Reset the timer setting
+					showProductionMessage = false;	//Reset the timer setting
 					timer.restart();
 				}
 				
@@ -112,7 +106,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 				@Override public void mouseClicked(MouseEvent e) { }
 			});
 
-			setOnAction(e->{
+			setOnAction(event->{
 
 				// Return if message already showing
 				Optional<TKStage> oStage = Optional.ofNullable(updateMessage)
@@ -139,7 +133,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 								.filter(a->!a.isEmpty())
 								.orElseGet(()->deviceInfo.getSerialNumber().orElse(""));
 
-				updateMessage = new UpdateMessageFx(deviceInfo, timerDone);
+				updateMessage = new UpdateMessageFx(deviceInfo, showProductionMessage);
 
 				updateMessage.setIpAddress(addrStr);
 				updateMessage.showAndWait()
@@ -182,61 +176,66 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 								//*************************************************   Create package   *****************************************************
 
-								try(	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-										TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(byteArrayOutputStream);){
+								try {
+
+									byte[] bytes;
+
+									try(	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+											TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(byteArrayOutputStream);){
 											
-									StringBuffer setupMD5 = new StringBuffer();
-									MessageDigest md5 = MessageDigest.getInstance("MD5");
+										StringBuffer setupMD5 = new StringBuffer();
+										MessageDigest md5 = MessageDigest.getInstance("MD5");
 
-									//SETUP.INFO file
-									{
+										{	//SETUP.INFO file
 
-										final String setupInfo = message.getSetupInfo();
-										logger.debug(setupInfo);
+											final Pair<String, String> setupInfo = message.getSetupInfo();
+											logger.debug(setupInfo);
 
-										final byte[] setupInfoBytes = setupInfo.getBytes(Profile.charEncoding);
+											addToTar(tarArchiveOutputStream, "setup.info", setupInfo.getKey().getBytes(Profile.charEncoding));
 
-										addToTar(tarArchiveOutputStream, "setup.info", setupInfo.getBytes(Profile.charEncoding));
+											setupMD5.append(setupInfo.getValue()).append(" *setup.info").append("\n") ;
+										}
 
-										setupMD5.append(DatatypeConverter.printHexBinary(md5.digest(setupInfoBytes))).append(" *setup.info").append("\n") ;
+										addProfileToTheTar(message.getProfile(), setupMD5, tarArchiveOutputStream);
+
+										// PROGRAM
+										message
+										.getByteBuffer(PacketFormats.IMAGE)
+										.map(bb->{
+											byte[] dst = new byte[bb.capacity()];
+											bb.get(dst);
+											return dst;
+										})
+										.ifPresent(b->{
+											message
+											.getPath(PacketFormats.IMAGE)
+											.map(Path::getFileName)
+											.map(Path::toString)
+											.ifPresent(fileName->{
+
+												try {
+
+													addToTar(tarArchiveOutputStream, fileName, b);
+													setupMD5.append(DatatypeConverter.printHexBinary(md5.digest(b))).append(" *" + fileName).append("\n");
+
+												} catch (IOException e) {
+													logger.catching(e);
+												}
+											});
+										});
+
+										bytes = byteArrayOutputStream.toByteArray();
+
+										addToTar(tarArchiveOutputStream, "setup.md5", setupMD5.toString().getBytes());
+
 									}
 
-									addProfileToTheTar(message.getProfile(), setupMD5, tarArchiveOutputStream);
+									uploader.upload(bytes);
 
-									// PROGRAM
-									message
-									.getByteBuffer(PacketFormats.IMAGE)
-									.map(bb->{
-										byte[] dst = new byte[bb.capacity()];
-										bb.get(dst);
-										return dst;
-									})
-									.ifPresent(bytes->{
-										message
-										.getPath(PacketFormats.IMAGE)
-										.map(Path::getFileName)
-										.map(Path::toString)
-										.ifPresent(fileName->{
-
-											try {
-
-												addToTar(tarArchiveOutputStream, fileName, bytes);
-												setupMD5.append(DatatypeConverter.printHexBinary(md5.digest(bytes))).append(" *" + fileName).append("\n");
-
-											} catch (IOException e1) {
-												logger.catching(e1);
-											}
-										});
-									});
-
-									addToTar(tarArchiveOutputStream, "setup.md5", setupMD5.toString().getBytes());
-
-									ByteArrayInputStream is = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
-									uploader.upload(is);
-
-								} catch (NoSuchAlgorithmException | IOException e1) {
-									logger.catching(e1);
+								} catch (NoSuchAlgorithmException | IOException e) {
+									logger.catching(e);
 								}
+
 							}, "UpdateMessageFx action");
 				});
 			});
@@ -244,7 +243,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 		private void addProfileToTheTar(Optional<Profile> oProfile, StringBuffer setuoMD5, TarArchiveOutputStream tarArchiveOutputStream) {
 
-			final ProfileErrors profileErrors = oProfile.map(
+			final Action actiom = oProfile.map(
 
 					t -> {
 						try {
@@ -255,40 +254,11 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 							logger.catching(e1);
 							return null;
 						}
-					}).map(ProfileValidator::getProfileError).orElse(ProfileErrors.DO_NOT_EXSISTS);
+					}).map(ProfileValidator::getAction)
+					.orElse(Action.CANCEL);
 
-			if(profileErrors==ProfileErrors.DO_NOT_EXSISTS)
+			if(actiom==Action.CANCEL)
 				return;
-
-			// If profile has error show alert message
-			if(profileErrors!=ProfileErrors.NO_ERROR){
-
-				// Alert message
-				final FutureTask<Boolean> ft = new FutureTask<Boolean>(
-
-						()->{
-							Alert alert = new Alert(AlertType.WARNING);
-							alert.setTitle("Profile error: " + profileErrors);
-							alert.setHeaderText("The profile contains errors.\nYou must decide to stop or continue the upload.");
-							alert.setContentText("Press 'Continue' or 'Stop' buton.");
-
-							ButtonType btContinue = new ButtonType("Continue", ButtonData.OK_DONE);
-							ButtonType btStop = new ButtonType("Stop", ButtonData.CANCEL_CLOSE);
-							final ObservableList<ButtonType> buttonTypes = alert.getButtonTypes();
-							buttonTypes.addAll(btContinue, btStop);
-							buttonTypes.remove(ButtonType.OK);
-
-							final Optional<ButtonType> oButtonType = alert.showAndWait();
-							if(oButtonType.get()==btStop)
-								return true;
-
-							return false;
-						});
-				Platform.runLater(ft);
-
-				// Action to alert message
-				try { if(ft.get()) return; } catch (InterruptedException | ExecutionException e) { logger.catching(Level.DEBUG, e); }
-			}
 
 			// if profile does not have errors prepare a profile for uploading
 			oProfile.ifPresent(
@@ -323,13 +293,14 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 		}
 
 		private void showAlert(final String errorMessage) {
+			logger.error(errorMessage);
 
-			final Alert alert = new Alert(AlertType.ERROR);
-			alert.setContentText(errorMessage);
-
-			Platform.runLater(()->{
-				alert.show();
-			});
+			Platform.runLater(
+					()->{
+						final Alert alert = new Alert(AlertType.ERROR);
+						alert.setContentText(errorMessage);
+						alert.show();
+					});
 		}
 	}
 

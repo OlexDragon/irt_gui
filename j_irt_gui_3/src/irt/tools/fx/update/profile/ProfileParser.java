@@ -34,4 +34,9 @@ public class ProfileParser{
 	public DeviceType getDeviceType() {
 		return deviceType;
 	}
+
+	@Override
+	public String toString() {
+		return "ProfileParser [deviceType=" + deviceType + "]";
+	}
 }

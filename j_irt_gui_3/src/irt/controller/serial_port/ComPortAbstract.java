@@ -13,8 +13,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.Checksum;
-import irt.data.ThreadWorker;
 import irt.data.PacketThread;
+import irt.data.ThreadWorker;
 import irt.data.ToHex;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.LinkedPacketImp;
@@ -27,7 +27,6 @@ import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
-import purejavacomm.PureJavaIllegalStateException;
 
 public abstract class ComPortAbstract implements SerialPortInterface {
 
@@ -199,7 +198,7 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 
 	sendAcknowledge(packet);
 
-		} catch (InterruptedException | PureJavaIllegalStateException e) {
+		} catch (InterruptedException e) {
 			new ThreadWorker(()->closePort(), "ComPortAbstract-send-1");
 		}catch (Exception e) {
 			logger.catching(e);

@@ -90,6 +90,7 @@ public class UserPicobucPanel extends DevicePanel {
 		.filter(dt->!IrtGui.isRedundancyController())
 		.filter(dt->!dt.equals(DeviceType.IR_PC))
 		.filter(dt->!dt.equals(DeviceType.DLRS))
+		.filter(dt->!dt.equals(DeviceType.DLRS2))
 		.map(dt->dt.TYPE_ID)
 		.filter(tId->tId>DeviceType.BIAS_BOARD.TYPE_ID || deviceInfo.getRevision()>1)
 		.ifPresent(

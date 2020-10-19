@@ -155,23 +155,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	@Override
 	public void onPacketReceived(final Packet packet) {
 
-		Optional<Packet> 		oPacket = Optional.ofNullable(packet);
-		Optional<PacketHeader> 	oHeader = oPacket.map(Packet::getHeader);
+		Optional<Packet> oPacket = Optional.ofNullable(packet);
 
-		Byte addr = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
-		if(addr!=unitAddress)
-			return;
-		
-		if(!oHeader.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(PacketHeader::getPacketId).filter(PacketIDs.MEASUREMENT_ALL::match).isPresent())
-			return;
-
-		if(oHeader.map(PacketHeader::getPacketType).filter(t->t!=PacketImp.PACKET_TYPE_RESPONSE).isPresent())
-			return;
-
-		if(oHeader.map(PacketHeader::getOption).filter(t->t!=PacketImp.ERROR_NO_ERROR).isPresent()) {
-			logger.warn(packet);
-			return;
-		}
+		if(notMyPacket(oPacket)) return;
 
 		new ThreadWorker(()->{
 
@@ -184,7 +170,14 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 						Optional
 						.ofNullable((List<?>)map.remove("STATUS"))
 						.ifPresent(this::setStatus);
-						final List<Map.Entry<?, ?>> listToRemove = map.entrySet().parallelStream().filter(entry->entry.getValue().equals("N/A")).collect(Collectors.toList());
+
+						final List<Map.Entry<?, ?>> listToRemove = map.entrySet().parallelStream()
+								.filter(
+										entry->{
+											final Object value = entry.getValue();
+											return value.equals("N/A") || value.equals("UNDEFINED");
+										}).collect(Collectors.toList());
+
 						listToRemove.forEach(entry->map.remove(entry.getKey()));
 
 						setValues(map);
@@ -192,7 +185,27 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}, "MonitorPanelFx.onPacketReceived()");
 	}
 
+	private boolean notMyPacket(Optional<Packet> oPacket) {
+		Optional<PacketHeader> 	oHeader = oPacket.map(Packet::getHeader);
+
+		Byte addr = oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
+		if(addr!=unitAddress)
+			return true;
+		
+		if(!oHeader.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(PacketHeader::getPacketId).filter(PacketIDs.MEASUREMENT_ALL::match).isPresent())
+			return true;
+
+		if(oHeader.map(PacketHeader::getPacketType).filter(t->t!=PacketImp.PACKET_TYPE_RESPONSE).isPresent())
+			return true;
+
+		if(oHeader.map(PacketHeader::getOption).filter(t->t!=PacketImp.ERROR_NO_ERROR).isPresent()) 
+			return true;
+
+		return false;
+	}
+
 	private void setValues(Map<?, ?> map) {
+		logger.traceEntry("{}", map);
 
 		final ObservableList<Node> children = gridPane.getChildren();
 		final Set<? extends Entry<?,?>> entrySet = map.entrySet();

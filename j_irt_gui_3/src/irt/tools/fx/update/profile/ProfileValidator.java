@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.CharBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -15,76 +16,84 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceInfo.DeviceType;
+import irt.data.ThreadWorker;
+import irt.tools.fx.update.profile.EditTablesMessageFx.Action;
 import irt.tools.fx.update.profile.ProfileTables.Table;
 import javafx.application.Platform;
-import javafx.util.Pair;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Modality;
 
 public class ProfileValidator {
 
 	private final Logger logger = LogManager.getLogger();
 	private Boolean isFCM;
-	private ProfileErrors profileError;
+	private Action action;
 
 	public ProfileValidator(Profile profile) throws FileNotFoundException, NoSuchAlgorithmException, IOException {
 
 		final ProfileParser profileParser = new ProfileParser();
 
-		final Pair<String, CharBuffer> asCharBuffer = profile.asCharBufferWithMD5();
-		try (Scanner scanner = new Scanner(asCharBuffer.getValue())) {
+		final CharBuffer asCharBuffer = profile.asCharBuffer();
+		try (Scanner scanner = new Scanner(asCharBuffer)) {
 
 			while (scanner.hasNextLine()){
 				final String trim = scanner.nextLine().trim();
 				profileParser.parseLine(trim);
 			}
 
-			final DeviceType deviceType = profileParser.getDeviceType();
-			isFCM = deviceType.isFCM();
+			isFCM = Optional.ofNullable(profileParser.getDeviceType()).map(DeviceType::isFCM).orElse(null);
 
-			logger.trace("{}: is FCM - {}", deviceType, isFCM);
+			logger.trace("{}: is FCM - {}", profileParser, isFCM);
 
 			//Return if can not get Device type
 			if(isFCM==null){
-				logger.info("Can not get Device type");
-				profileError = ProfileErrors.CAN_NOT_GET_DEVICE_TYPE;
+				logger.warn("Can not get Device type");
+
+				Platform.runLater(
+						()->{
+							Alert alert = new Alert(AlertType.WARNING);
+							alert.initModality(Modality.APPLICATION_MODAL);
+							alert.setTitle("Profile error.");
+							alert.setHeaderText(null);
+							alert.setContentText("The profile does not have the Devuce Type property. (\"device-type\")");
+							alert.showAndWait();
+						});
+
+				action = Action.CANCEL;
 				return;
 			}
 
 			final List<Table> tablesWithError = ProfileTables.getTablesWithError();
 			
-			if(!tablesWithError.isEmpty()) {
+			if(tablesWithError.isEmpty())
+				action = Action.CONTINUE;
 
-				Callable<Void> r =
-						()->{
-							final EditTableMessageFx message = new EditTableMessageFx(profile, tablesWithError);
-							return null;
-						};
-				FutureTask<Void> ft = new FutureTask<>(r);
-				Platform.runLater(ft);
+			else{
 
-				try { ft.get(); } catch (InterruptedException | ExecutionException e) { logger.catching(Level.DEBUG, e); }
+				Callable<Action> r =  EditTablesMessageFx.getMessageTask(profile, tablesWithError);
+				FutureTask<Action> ft = new FutureTask<>(r);
+				ThreadWorker.runThread(ft, "Start EditTableMessageFx");
+
+				try {
+
+					action = ft.get();
+
+				} catch (InterruptedException | ExecutionException e) {
+					logger.catching(Level.DEBUG, e);
+					action = Action.CANCEL;
+				}
 			}
-
-				profileError = ProfileErrors.ERROR;
 		}
 
-//		profileError = ProfileErrors.NO_ERROR;
-		logger.debug(profileError);
+		logger.debug(action);
 	}
 
 	public Boolean isFCM() {
 		return isFCM;
 	}
 
-	public ProfileErrors getProfileError() {
-		return profileError;
-	}
-
-	public enum ProfileErrors{
-		NO_ERROR,
-		FILE_DOES_NOT_EXISTS,
-		LODE_FILE_ERROR,
-		CAN_NOT_GET_DEVICE_TYPE,
-		ERROR,
-		DO_NOT_EXSISTS
+	public Action getAction() {
+		return action;
 	}
 }
