@@ -39,6 +39,8 @@ public class Profile {
 
 	private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM d yyyy HH:mm");
 
+	public final static String[] BEGINNING_OF_THE_PROFILE = {"# IRT Technologies board environment config", "# First two lines must start from this text - do not modify"};
+
 	private Path filePath;
 
 	public Profile(Path filePath){
@@ -55,7 +57,7 @@ public class Profile {
 	 */
 	public Pair<String, CharBuffer> asCharBufferWithMD5() throws FileNotFoundException, IOException, NoSuchAlgorithmException {
 
-		CharBuffer charBuffer = asCharBuffer();
+		CharBuffer charBuffer = asCharBufferWithSignature();
 		return new Pair<>(getMD5(charBuffer), charBuffer);
 	}
 
@@ -66,15 +68,9 @@ public class Profile {
 	 * @throws UnknownHostException
 	 * @throws FileNotFoundException
 	 */
-	public CharBuffer asCharBuffer() throws IOException, UnknownHostException, FileNotFoundException {
+	public CharBuffer asCharBufferWithSignature() throws IOException, UnknownHostException, FileNotFoundException {
 
-		CharBuffer cb;
-		try(	RandomAccessFile 	raf = new RandomAccessFile(filePath.toFile(), "rw");
-				FileChannel 		fileChannel 	= raf.getChannel();){
-
-			MappedByteBuffer mbb = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-			cb = Charset.forName(charEncoding).decode(mbb);
-		}
+		CharBuffer cb = asCharBuffer();
 
 		final ZonedDateTime now = ZonedDateTime.now();
 		String signature = "\n#Uploaded by IRT GUI" + IrtGui.VERTION + " on " + now.format(formatter) + " from "+ InetAddress.getLocalHost().getHostName() + " computer.";
@@ -83,8 +79,19 @@ public class Profile {
 		CharBuffer charBuffer = CharBuffer.allocate(cb.capacity() + signature.length());
 		cb.read(charBuffer);
 		charBuffer.put(signature);
-		charBuffer.rewind();
 		return charBuffer;
+	}
+
+	CharBuffer asCharBuffer() throws IOException, FileNotFoundException {
+
+		MappedByteBuffer mbb;
+		try(	RandomAccessFile 	raf				= new RandomAccessFile(filePath.toFile(), "r");
+				FileChannel 		fileChannel 	= raf.getChannel();){
+
+			mbb = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+		}
+
+		return Charset.forName(charEncoding).decode(mbb);
 	}
 
 	private String getMD5(CharBuffer charBuffer) throws NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -100,6 +107,42 @@ public class Profile {
 
 	public String getFileName() {
 		return filePath.getFileName().toString();
+	}
+
+	public static String getDefaultBeginning() {
+
+		StringBuilder stringBuilder = new StringBuilder();
+
+		for(int i=0; i<BEGINNING_OF_THE_PROFILE.length; i++) 
+			stringBuilder.append(BEGINNING_OF_THE_PROFILE[i]).append(lineSeparator);
+
+		return stringBuilder.append(lineSeparator).append("# Device information").append(lineSeparator).toString();
+	}
+
+	public String getBeginning() throws FileNotFoundException, IOException{
+
+		return getBeginning(asCharBuffer());
+	}
+
+	public static String getBeginning(final CharBuffer asCharBuffer) {
+		StringBuilder stringBuilder = new StringBuilder();
+		try(Scanner scanner = new Scanner(asCharBuffer)){
+
+			while(scanner.hasNextLine()) {
+
+				final String line = scanner.nextLine();
+				final String trim = line.trim();
+
+				if(trim.isEmpty() || trim.startsWith("#")) {
+					stringBuilder.append(line).append(lineSeparator);
+
+				}else
+					break;
+			}
+		}
+
+		asCharBuffer.rewind();
+		return stringBuilder.toString();
 	}
 
 	public Pair<String, Point> getTable(String key) throws UnknownHostException, FileNotFoundException, IOException {
@@ -219,14 +262,24 @@ public class Profile {
 				});
 
 		// save if profile has been changed
-		saveProfile(arCharBuffer.get());
-	}
-
-	private void saveProfile(CharBuffer charBuffer) throws IOException {
-		System.gc();	// to remove FileSystemException ("user-mapped section open")
-
+		CharBuffer charBuffer = arCharBuffer.get();
 		charBuffer.rewind();
 		final String string = charBuffer.toString();
-		Files.write(filePath, string.getBytes());
+
+		saveProfile(string);
+	}
+
+	private void saveProfile(String toSave) throws IOException {
+		System.gc();	// to remove FileSystemException ("user-mapped section open")
+		Files.write(filePath, toSave.getBytes(charEncoding));
+	}
+
+	public void updateAndSave(String beginning) throws FileNotFoundException, IOException {
+
+		final CharBuffer asCharBuffer = asCharBuffer();
+		final String actualBeginning = Profile.getBeginning(asCharBuffer);
+		final String replaced = asCharBuffer.toString().replace(actualBeginning, beginning);
+
+		saveProfile(replaced);
 	}
 }

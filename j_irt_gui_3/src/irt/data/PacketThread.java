@@ -233,7 +233,5 @@ public class PacketThread extends Thread implements PacketThreadWorker {
 
 	@Override
 	public void setPriority(Priority priority) {
-		// TODO Auto-generated method stub
-		
 	}
 }

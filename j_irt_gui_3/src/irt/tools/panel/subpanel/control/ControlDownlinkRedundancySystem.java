@@ -247,7 +247,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	@Override
 	public void refresh() {
-		// TODO Auto-generated method stub
+
 		lblSwitch.setText(Translation.getValue(String.class, "switch", "Switch"));
 
 		Font font = Translation.getFont().deriveFont(14f);

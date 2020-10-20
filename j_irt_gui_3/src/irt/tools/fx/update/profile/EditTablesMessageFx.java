@@ -151,7 +151,6 @@ public class EditTablesMessageFx extends Alert {
 					}
 
 					action = Action.CONTINUE;
-//					action = Action.CANCEL;	//TODO - to remove! For test only
 					
 					try {
 
@@ -162,6 +161,7 @@ public class EditTablesMessageFx extends Alert {
 						logger.catching(e);
 					}
 
+//					action = Action.CANCEL;	//TODO: action = Action.CANCEL (used For test only)
 				}, "EditTableMessageFx");
 	}
 

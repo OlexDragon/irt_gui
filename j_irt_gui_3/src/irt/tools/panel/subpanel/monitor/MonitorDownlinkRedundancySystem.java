@@ -217,7 +217,7 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	@Override
 	public void refresh() {
-		// TODO Auto-generated method stub
+
 		labelPosition.setText(Translation.getValue(String.class, "position", "Position"));
 		
 		String txtStatus = Translation.getValue(String.class, "status", "Status");

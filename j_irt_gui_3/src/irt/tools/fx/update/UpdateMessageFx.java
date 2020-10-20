@@ -161,7 +161,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		// Cancel button
 
 //		final Button cancelButton = (Button)
-		dialogPane.lookupButton(ButtonType.CANCEL);
+//		dialogPane.lookupButton(ButtonType.CANCEL);
 //		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
 //		logger.error(fileScanner);
 

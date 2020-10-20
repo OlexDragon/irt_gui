@@ -10,6 +10,7 @@ import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -20,13 +21,24 @@ import irt.data.ThreadWorker;
 import irt.tools.fx.update.profile.EditTablesMessageFx.Action;
 import irt.tools.fx.update.profile.ProfileTables.Table;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.DialogPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Modality;
 
 public class ProfileValidator {
-
 	private final Logger logger = LogManager.getLogger();
+
+	private final static ButtonData bdIgnore = ButtonData.OK_DONE;
+	private final static ButtonData bdReplace = ButtonData.OTHER;
+	private final static ButtonData bdSave = ButtonData.APPLY;
+
 	private Boolean isFCM;
 	private Action action;
 
@@ -34,13 +46,108 @@ public class ProfileValidator {
 
 		final ProfileParser profileParser = new ProfileParser();
 
-		final CharBuffer asCharBuffer = profile.asCharBuffer();
-		try (Scanner scanner = new Scanner(asCharBuffer)) {
+		AtomicReference<CharBuffer> arCharBuffer= new AtomicReference<>(profile.asCharBuffer());
+		final String beginning = Profile.getBeginning(arCharBuffer.get());
+
+		try (Scanner scanner = new Scanner(arCharBuffer.get())) {
 
 			while (scanner.hasNextLine()){
-				final String trim = scanner.nextLine().trim();
-				profileParser.parseLine(trim);
+				final String line = scanner.nextLine();
+				profileParser.parseLine(line);
 			}
+
+			// Corrupted beginning of the profile
+			if(profileParser.isCorrupted()) {
+				logger.trace("The Profile is corrupted.");
+
+				AtomicReference<String> textAreaContent = new AtomicReference<>(beginning);
+
+				FutureTask<Optional<ButtonType>> ft = new FutureTask<>(
+
+						()->{
+
+							Alert alert = new Alert(AlertType.WARNING);
+							alert.initModality(Modality.APPLICATION_MODAL);
+							alert.setTitle("Profile error.");
+							alert.setContentText("Beginning of the profile is corrupted. ");
+
+							// Buttons
+							final ButtonType buttonTypeIgnore = new ButtonType("Ignore", bdIgnore);		// Save as is
+							final ButtonType buttonTypeReplace = new ButtonType("Replace", bdReplace);	// Replace by default
+							final ButtonType buttonTypeSave = new ButtonType("Save", bdSave);			// Save changes
+
+							final ObservableList<ButtonType> buttonTypes = alert.getButtonTypes();
+							buttonTypes.setAll(buttonTypeIgnore, buttonTypeReplace, ButtonType.CANCEL, buttonTypeSave);
+
+							final DialogPane dialogPane = alert.getDialogPane();
+							((Button) dialogPane.lookupButton(buttonTypeReplace)).setTooltip(new Tooltip("Replace by default"));
+							final Button btnSave = (Button) dialogPane.lookupButton(buttonTypeSave);
+							btnSave.setDisable(true);
+
+							// Text Area
+
+							TextArea textArea = new TextArea(beginning);
+							dialogPane.setExpandableContent(textArea);
+							textArea.textProperty().addListener(
+									(o, oV, nV)->{
+
+										textAreaContent.set(nV);
+
+										try(	Scanner scanerNew = new Scanner(nV);
+												Scanner scanerOrigin = new Scanner(beginning);){
+
+											boolean equals = true;
+											while(scanerNew.hasNextLine() && scanerOrigin.hasNextLine()) {
+
+												if(!scanerNew.nextLine().equals(scanerOrigin.nextLine())) {
+													equals = false;
+													break;
+												}
+											}
+
+											btnSave.setDisable(equals & !(scanerNew.hasNextLine() || scanerOrigin.hasNextLine()));
+										}
+									});
+
+							return alert.showAndWait();
+						});
+				Platform.runLater(ft);
+
+
+				try {
+
+					ft.get().map(ButtonType::getButtonData)
+					.ifPresent(
+							bd->{
+
+								try {
+
+									if(bd==bdIgnore)
+										action = Action.CONTINUE;
+
+									else if(bd==bdReplace) {
+										profile.updateAndSave(Profile.getDefaultBeginning());
+										action = Action.CONTINUE;
+
+									}else if(bd==bdSave) {
+										profile.updateAndSave(textAreaContent.get());
+										action = Action.CONTINUE;
+
+									}else
+										action = Action.CANCEL;
+
+								} catch (IOException e) {
+									logger.catching(e);
+								}
+
+								return;
+							});
+
+				} catch (InterruptedException | ExecutionException e) { logger.catching(Level.DEBUG, e); }
+			}
+
+			if(action==Action.CANCEL)
+				return;
 
 			isFCM = Optional.ofNullable(profileParser.getDeviceType()).map(DeviceType::isFCM).orElse(null);
 

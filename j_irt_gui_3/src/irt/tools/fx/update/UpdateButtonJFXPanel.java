@@ -196,7 +196,9 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 											setupMD5.append(setupInfo.getValue()).append(" *setup.info").append("\n") ;
 										}
 
-										addProfileToTheTar(message.getProfile(), setupMD5, tarArchiveOutputStream);
+										// PROFILE
+										if(addProfileToTheTar(message.getProfile(), setupMD5, tarArchiveOutputStream)==Action.CANCEL)
+											return;
 
 										// PROGRAM
 										message
@@ -241,45 +243,45 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 			});
 		}
 
-		private void addProfileToTheTar(Optional<Profile> oProfile, StringBuffer setuoMD5, TarArchiveOutputStream tarArchiveOutputStream) {
+		private Action addProfileToTheTar(Optional<Profile> oProfile, StringBuffer setuoMD5, TarArchiveOutputStream tarArchiveOutputStream) throws IOException, NoSuchAlgorithmException {
 
 			final Action actiom = oProfile.map(
 
-					t -> {
+					profile -> {
 						try {
 
-							return new ProfileValidator(t);
+							return new ProfileValidator(profile);
 
 						} catch (NoSuchAlgorithmException | IOException e1) {
 							logger.catching(e1);
 							return null;
 						}
-					}).map(ProfileValidator::getAction)
+					})
+					.map(ProfileValidator::getAction)
 					.orElse(Action.CANCEL);
 
 			if(actiom==Action.CANCEL)
-				return;
+				return Action.CANCEL;
 
 			// if profile does not have errors prepare a profile for uploading
-			oProfile.ifPresent(
-					p->{
-						try {
+			if(oProfile.isPresent()) {
+				Profile profile = oProfile.get();
 
-							final Pair<String, CharBuffer> pair = p.asCharBufferWithMD5();
+					final Pair<String, CharBuffer> pair = profile.asCharBufferWithMD5();
 
-							// setup.md5 file content
-							final String profileMD5 = pair.getKey();
-							final String fileName = p.getFileName();
-							setuoMD5.append(profileMD5).append(" *").append(fileName);
+					// setup.md5 file content
+					final String profileMD5 = pair.getKey();
+					final String fileName = profile.getFileName();
+					setuoMD5.append(profileMD5).append(" *").append(fileName);
 
-							// Profile tar entry
-							CharBuffer charBuffer = pair.getValue();
-							addToTar(tarArchiveOutputStream, fileName, charBuffer.toString().getBytes());
+					// Profile tar entry
+					CharBuffer charBuffer = pair.getValue();
+					addToTar(tarArchiveOutputStream, fileName, charBuffer.toString().getBytes(Profile.charEncoding));
 
-						} catch (NoSuchAlgorithmException | IOException e) {
-							logger.catching(e);
-						}
-					});
+					return Action.CONTINUE;
+			}
+
+			return Action.CANCEL;
 		}
 
 		private void addToTar(TarArchiveOutputStream tarArchiveOutputStream, String fileName, byte[] content) throws IOException {
