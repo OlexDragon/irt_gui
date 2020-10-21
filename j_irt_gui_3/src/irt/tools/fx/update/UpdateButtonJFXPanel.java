@@ -178,6 +178,8 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 								try {
 
+									byte[] bytes;
+
 									try(	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 											TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(byteArrayOutputStream);){
 											
@@ -224,12 +226,13 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 											});
 										});
 
+										bytes = byteArrayOutputStream.toByteArray();
 
 										addToTar(tarArchiveOutputStream, "setup.md5", setupMD5.toString().getBytes());
 
 									}
 
-//									uploader.upload(bytes);	//TODO: uncomment to do update (commented For test only)
+									uploader.upload(bytes);	//TODO: uncomment to do update (commented For test only)
 
 								} catch (NoSuchAlgorithmException | IOException e) {
 									logger.catching(e);
