@@ -71,6 +71,7 @@ public class EditTablesMessageFx extends Alert {
 
 		textArea.textProperty().addListener(textChangeListener);
 
+		// Show alert message
 		ThreadWorker.runThread(
 				()->{
 
@@ -81,7 +82,7 @@ public class EditTablesMessageFx extends Alert {
 					.forEach(
 							table->{
 
-								logger.debug(map);
+								logger.debug("\n{}", table);
 
 								// Return after clicking the cancel button
 								if(resultProperty().get() == ButtonType.CANCEL)
@@ -97,6 +98,7 @@ public class EditTablesMessageFx extends Alert {
 
 								try {
 
+									// Get table string from the profile
 									final String t = profile.getTable(table.getKey()).getKey();
 
 									// Show alert
@@ -104,38 +106,44 @@ public class EditTablesMessageFx extends Alert {
 
 											()->{
 
+												// If this is the last or only one table, change the text of the Next button to Save.
 												if(table == lastTable)
 													saveButton.setText("Save");
 
+												// Show table in the TextArea
 												final StringProperty textProperty = textArea.textProperty();
 												textProperty.removeListener(textChangeListener);
 												textArea.setText(t);
 												textProperty.addListener(textChangeListener);
 
-												return EditTablesMessageFx.this.showAndWait();
+												return showAndWait();
 											});
 
 									Platform.runLater(ft);
 
+									// Response to user action
 									try {
 
-										final ButtonData bd = ft.get().get().getButtonData();
+										ft.get().map(ButtonType::getButtonData)
+										.ifPresent(
+												bd->{
 
-										logger.debug(bd);
+													logger.debug(bd);
 
-										// Cancel button
-										if(bd==ButtonData.CANCEL_CLOSE) {
-											map.clear();
-											map.put(table.getKey(), null);
-											return;
+													// Cancel button
+													if(bd==ButtonData.CANCEL_CLOSE) {
+														map.clear();
+														map.put(table.getKey(), null);
+														return;
 
-										// Ignore button
-										}else if(bd==IGNORE)
-											map.put(table.getKey(), "");
+													// Ignore button
+													}else if(bd==IGNORE)
+														map.put(table.getKey(), "");
 
-										// Next/Save button
-										else if(bd==NEXT_OR_SAVE)
-											map.put(table.getKey(), textArea.getText());
+													// Next/Save button
+													else if(bd==NEXT_OR_SAVE)
+														map.put(table.getKey(), textArea.getText());
+												});
 
 									} catch (InterruptedException | ExecutionException e) { logger.catching(Level.DEBUG, e); }
 
@@ -149,19 +157,19 @@ public class EditTablesMessageFx extends Alert {
 						action = Action.CANCEL;
 						return;
 					}
-
-					action = Action.CONTINUE;
 					
 					try {
 
 						// Update and Save profile
 						profile.updateAndSave(map);
 
+						action = Action.CONTINUE;
+
 					} catch (IOException e) {
 						logger.catching(e);
+						action = Action.CANCEL;
 					}
 
-//					action = Action.CANCEL;	//TODO: action = Action.CANCEL (used For test only)
 				}, "EditTableMessageFx");
 	}
 

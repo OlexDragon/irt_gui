@@ -76,7 +76,7 @@ public class ProfileTables {
 		private final String key;
 		private int size;
 		private final List<Pair<BigDecimal, BigDecimal>> values = new ArrayList<>();
-		private TableError tableError = TableError.NO_ERROR;
+		private TableError tableError;
 
 		public Table(String key) {
 			this.key = key;
@@ -121,11 +121,7 @@ public class ProfileTables {
 
 		private void checkTableForError() {
 
-			// Return if error already exists
-			if(tableError!=TableError.NO_ERROR) {
-				logger.debug("The table \"{}\". The Error already exists: {}", key, tableError);
-				return;
-			}
+			tableError = TableError.NO_ERROR;
 
 			// Size error
 			final int valuesSize = values.size();
