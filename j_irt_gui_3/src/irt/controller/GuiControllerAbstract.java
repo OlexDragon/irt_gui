@@ -551,7 +551,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		if(oPacketGroup.filter(PacketGroupIDs.CONTROL::match).isPresent()){
 
 			oPacketId
-			.filter(PacketIDs.CONTRO_MODULE_LIST::match)
+			.filter(PacketIDs.CONTROL_MODULE_LIST::match)
 			.flatMap(
 					pid->
 					oPacket.map(Packet::getPayloads)

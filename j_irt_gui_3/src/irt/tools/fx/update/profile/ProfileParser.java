@@ -19,10 +19,10 @@ public class ProfileParser{
 	private int lineCount;
 	public void parseLine(String line) {
 
+		//Check for first two lines ("# IRT Technologies board environment config" and "# First two lines must start from this text - do not modify")
 		if(lineCount<Profile.BEGINNING_OF_THE_PROFILE.length) {
 
 			corrupted = !line.startsWith(Profile.BEGINNING_OF_THE_PROFILE[lineCount++]);
-
 			return;
 		}
 
@@ -36,6 +36,10 @@ public class ProfileParser{
 
 			return;
 		}
+
+		// Ignore all commented lines
+		if(line.startsWith("#"))
+			return;
 
 		// Collect tables
 		ProfileTables.add(line);

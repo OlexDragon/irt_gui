@@ -20,8 +20,8 @@ public class ProfileTables {
 
 	public enum TableError { NO_ERROR, SIZES_DOES_NOT_MATCH, SEQUENCE_ERROR, NUMBER_FORMATEXCEPTION_ERROR }
 
-	private final static String[] EXCEPTIONS = {"frequency"};
-	private final static String IGNORE = "-lut-ref";
+	private final static List<String> EXCEPTIONS = new ArrayList<>(Arrays.asList(new String[]{"frequency"}));
+	private final static String TABLE_REFERENCE = "lut-ref";
 
 	final static String LUT = "lut-";
 
@@ -34,10 +34,20 @@ public class ProfileTables {
 	public static boolean add(String line) {
 		logger.traceEntry("{}", line);
 
-		if(line.contains(IGNORE))
-			return false;
+		final Optional<String> oLine = Optional.of(line).map(String::trim).filter(l->!l.isEmpty());
 
-		final Optional<String> oLine = Optional.ofNullable(line).map(String::trim).filter(l->!l.isEmpty());
+		// Add table reference to the exception list
+		if(oLine.filter(l->l.startsWith(TABLE_REFERENCE)).isPresent()) {
+
+			oLine.map(l->l.split("#")[0])	//Remove comments
+			.filter(l->EXCEPTIONS.stream().filter(exs->l.contains(exs)).findAny().isPresent())
+			.map(l->l.split("\\s+"))
+			.filter(arr->arr.length>2)
+			.map(arr->arr[2])
+			.ifPresent(EXCEPTIONS::add);
+			return false;
+		}
+
 		Optional<String> oKey = oLine.filter(l->l.contains(ProfileParser.LUT)).map(l->l.split(ProfileParser.LUT)[0]);
 
 		if(!oKey.isPresent()) {
@@ -127,7 +137,7 @@ public class ProfileTables {
 			final int valuesSize = values.size();
 			if(size!=valuesSize) {
 				tableError = TableError.SIZES_DOES_NOT_MATCH;
-				logger.debug("The table \"{}\" has table size error: {}", key, tableError);
+				logger.debug("The table \"{}\" has table size error: {}; {}", key, tableError, this);
 				return;
 			}
 
@@ -139,7 +149,7 @@ public class ProfileTables {
 			// Check for Sequence error
 			AtomicInteger valK = new AtomicInteger();
 			AtomicInteger valV = new AtomicInteger();
-			final boolean isException = Arrays.stream(EXCEPTIONS).filter(ex->ex.equals(key)).findAny().isPresent();
+			final boolean isException = EXCEPTIONS.parallelStream().filter(ex->ex.equals(key)).findAny().isPresent();
 //			logger.error("table:\"{}\" has exception {}", key, isException);
 
 			final long count = IntStream.range(1, valuesSize)

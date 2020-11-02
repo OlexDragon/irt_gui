@@ -142,7 +142,7 @@ public enum PacketIDs {
 	CONFIGURATION_LNB_LO_SELECT			( PacketGroupIDs.CONFIGURATION, PacketImp.PARAMETER_CONFIG_LNB_LO_SELECT, null, ConfigurationPacket	.parseValueFunction, null, null),
 
 	CONTROL_ACTIVE_MODULE	( null, null, null, ActiveModulePacket.parseValueFunction, null, null),
-	CONTRO_MODULE_LIST		( null, null, null, ModuleListPacket.parseValueFunction, null, 20),
+	CONTROL_MODULE_LIST		( null, null, null, ModuleListPacket.parseValueFunction, null, 30),
 
 	FCM_DEVICE_DEBUG_PLL_REG			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, null, null, null),
 	FCM_DEVICE_DEBUG_PLL_REG_DOWN_GAIN	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, null, null, null),
@@ -185,8 +185,8 @@ public enum PacketIDs {
 	DEVICE_DEBUG_DEVICE1_DUMP			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_DEVICE2_DUMP			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 1000),
 	DEVICE_DEBUG_DEVICE3_DUMP			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
-	DEVICE_DEBUG_HSS1_DUMP				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 300),
-	DEVICE_DEBUG_HSS2_DUMP				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 300),
+	DEVICE_DEBUG_HSS1_DUMP				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 400),
+	DEVICE_DEBUG_HSS2_DUMP				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 400),
 	DEVICE_DEBUG_VOLTAGES_DUMP			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_ADC_CHANNELS_DUMP		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_ADC_CHANNELS_mV_DUMP	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 50),

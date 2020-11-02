@@ -44,7 +44,7 @@ public class ModuleListPacket extends PacketSuper{
 																										});
 
 	public ModuleListPacket(Byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONTRO_MODULE_LIST, PacketGroupIDs.CONTROL, PacketImp.PACKET_ID_CONFIG_MODULE_LIST, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONTROL_MODULE_LIST, PacketGroupIDs.CONTROL, PacketImp.PACKET_ID_CONFIG_MODULE_LIST, null, Priority.REQUEST);
 	}
 
 }
