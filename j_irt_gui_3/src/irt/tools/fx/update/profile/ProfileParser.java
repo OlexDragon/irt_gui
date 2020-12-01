@@ -1,10 +1,13 @@
 
 package irt.tools.fx.update.profile;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceInfo.DeviceType;
+import irt.tools.fx.update.profile.ProfileTables.Table;
 
 /**
  * This class finds errors in the profile
@@ -15,6 +18,10 @@ public class ProfileParser{
 
 	private DeviceType deviceType;
 	private boolean corrupted;
+
+	public ProfileParser() {
+		ProfileTables.clear();
+	}
 
 	private int lineCount;
 	public void parseLine(String line) {
@@ -37,8 +44,8 @@ public class ProfileParser{
 			return;
 		}
 
-		// Ignore all commented lines
-		if(line.startsWith("#"))
+		// Ignore all commented and empty lines
+		if(line.startsWith("#") || line.trim().isEmpty())
 			return;
 
 		// Collect tables
@@ -56,5 +63,9 @@ public class ProfileParser{
 	@Override
 	public String toString() {
 		return "ProfileParser [deviceType=" + deviceType + "]";
+	}
+
+	public List<Table> getTablesWithError() {
+		return ProfileTables.getTablesWithError();
 	}
 }

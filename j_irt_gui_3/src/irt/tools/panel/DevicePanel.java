@@ -64,7 +64,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 													return monitorPanel;
 												}
 
-	protected Optional<DeviceType> deviceType = Optional.empty();
+	private Optional<DeviceType> deviceType = Optional.empty();
 
 	private LinkHeader linkHeader;
 

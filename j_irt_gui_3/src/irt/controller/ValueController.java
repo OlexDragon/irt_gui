@@ -119,7 +119,7 @@ public class ValueController extends ValueChangeListenerClass implements Runnabl
 				.filter(h->!errorWasRecorded)
 				.ifPresent(
 						h->{
-							logger.error("the unit does not respond: {}", packet);
+							logger.warn("the unit does not respond: {}", packet);
 							errorWasRecorded = true;
 						});
 			}

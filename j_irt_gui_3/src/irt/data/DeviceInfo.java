@@ -32,60 +32,71 @@ public class DeviceInfo implements PacketListener {
 								DEMO;
 	};
 
+	public static enum HardwareType{
+		CONVERTER,
+		CONTROLLER,
+		BAIS,
+		HP_BAIS,
+		KA_BIAS,
+		NEW_BAIS
+	}
+
 	public enum DeviceType{
-		MAIN_CONTROLLER	(1, Protocol.LINKED, "MAIN CONTROLLER"),
-		BIAS_BOARD		(2, Protocol.LINKED, "BIAS_BOARD"),
-		PICOBUC_L_TO_KU	(100, Protocol.LINKED, "PICOBUC_L_TO_KU"),
-		PICOBUC_L_TO_C 	(101, Protocol.LINKED, "PICOBUC_L_TO_C"),
-		SSPA 			(102, Protocol.LINKED, "SSPA"),
-		FUTURE_BIAS_BOARD(199, Protocol.LINKED, "FUTURE_BIAS_BOARD"),
-		HPB_L_TO_KU		(200, Protocol.LINKED, "HPB_L_TO_KU"),
-		HPB_L_TO_C		(201, Protocol.LINKED, "HPB_L_TO_C"),
-		HPB_SSPA		(202, Protocol.LINKED, "HPB_SSPA"),
-		KA_BAND			(210, Protocol.LINKED, "KA_BAND"),
-		KA_SSPA			(211, Protocol.LINKED, "KA_SSPA"),
+		MAIN_CONTROLLER	(1, Protocol.LINKED, "MAIN CONTROLLER"	, HardwareType.CONTROLLER),
+		BIAS_BOARD		(2, Protocol.LINKED, "BIAS_BOARD"		, HardwareType.BAIS),
+		PICOBUC_L_TO_KU	(100, Protocol.LINKED, "PICOBUC_L_TO_KU", HardwareType.BAIS),
+		PICOBUC_L_TO_C 	(101, Protocol.LINKED, "PICOBUC_L_TO_C"	, HardwareType.BAIS),
+		SSPA 			(102, Protocol.LINKED, "SSPA"			, HardwareType.BAIS),
+		FUTURE_BIAS_BOARD(199, Protocol.LINKED, "FUTURE_BIAS_BOARD", HardwareType.BAIS),
+		HPB_L_TO_KU		(200, Protocol.LINKED, "HPB_L_TO_KU"	, HardwareType.HP_BAIS),
+		HPB_L_TO_C		(201, Protocol.LINKED, "HPB_L_TO_C"		, HardwareType.HP_BAIS),
+		HPB_SSPA		(202, Protocol.LINKED, "HPB_SSPA"		, HardwareType.HP_BAIS),
+		KA_BAND			(210, Protocol.LINKED, "KA_BAND"		, HardwareType.KA_BIAS),
+		KA_SSPA			(211, Protocol.LINKED, "KA_SSPA"		, HardwareType.KA_BIAS),
 
-		KU_RACK_MOUNT	(250, Protocol.LINKED, "KU rack mount"),
-		C_RACK_MOUNT	(251, Protocol.LINKED, "C rack mount"),
+		KU_RACK_MOUNT	(250, Protocol.LINKED, "KU rack mount", HardwareType.CONTROLLER),
+		C_RACK_MOUNT	(251, Protocol.LINKED, "C rack mount", HardwareType.CONTROLLER),
 
-		TRANSCEIVER		(260, Protocol.LINKED, "Transceiver"),
+		TRANSCEIVER		(260, Protocol.LINKED, "Transceiver", HardwareType.BAIS),
 
-		IR_PC			(310, Protocol.LINKED, "Redundancy protection controller"),
+		IR_PC			(310, Protocol.LINKED, "Redundancy protection controller", HardwareType.CONTROLLER),
 
-		DLRS			(410, Protocol.LINKED, "DLRS"),	//Down link Redundancy System
-		DLRS2			(411, Protocol.LINKED, "DLRS2"),
+		DLRS			(410, Protocol.LINKED, "DLRS", HardwareType.CONTROLLER),	//Down link Redundancy System
+		DLRS2			(411, Protocol.LINKED, "DLRS2", HardwareType.CONTROLLER),
 
-		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.LINKED, "L to Ku Converter"),
-		CONVERTER_70_TO_L		(1001, Protocol.CONVERTER, "70 to L Converter"),
-		CONVERTER_L_TO_70		(1002, Protocol.CONVERTER, "L to 70 Converter"),
-		CONVERTER_140_TO_L		(1003, Protocol.CONVERTER, "140 to L Converter"),
-		CONVERTER_L_TO_140		(1004, Protocol.CONVERTER, "L to 140 Converter"),
-		CONVERTER_L_TO_KU		(1005, Protocol.CONVERTER, "L to Lu Converter"),
-		CONVERTER_L_TO_C		(1006, Protocol.CONVERTER, "L to C Converter"),
-		CONVERTER_70_TO_KY		(1007, Protocol.CONVERTER, "70 to Ku Converter"),
-		CONVERTER_KU_TO_70		(1008, Protocol.CONVERTER, "Ku to 70 Converter"),
-		CONVERTER_140_TO_KU		(1009, Protocol.CONVERTER, "140 to Ku Converter"),
-		CONVERTER_KU_TO_140		(1010, Protocol.CONVERTER, "Ku to 140 Converter"),
-		CONVERTER_KU_TO_L		(1011, Protocol.CONVERTER, "Lu to L Converter"),
-		CONVERTER_C_TO_L		(1012, Protocol.CONVERTER, "C to L Converter"),
-		CONVERTER_L_TO_DBS		(1013, Protocol.CONVERTER, "L to DBS Converter"),
-		CONVERTER_L_TO_KA		(1019, Protocol.CONVERTER, "L to KA Converter"),
-		CONVERTER_L_TO_X		(1021, Protocol.CONVERTER, "L to X Converter"),
-		CONVERTER_SSPA 			(1051, Protocol.CONVERTER, "L to SSPA Converter"),
-		CONVERTER_MODUL			(1052, Protocol.CONVERTER, "Modul"),
+		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.LINKED, "L to Ku Converter"	, HardwareType.CONVERTER),
+		CONVERTER_70_TO_L		(1001, Protocol.CONVERTER, "70 to L Converter"	, HardwareType.CONVERTER),
+		CONVERTER_L_TO_70		(1002, Protocol.CONVERTER, "L to 70 Converter"	, HardwareType.CONVERTER),
+		CONVERTER_140_TO_L		(1003, Protocol.CONVERTER, "140 to L Converter"	, HardwareType.CONVERTER),
+		CONVERTER_L_TO_140		(1004, Protocol.CONVERTER, "L to 140 Converter"	, HardwareType.CONVERTER),
+		CONVERTER_L_TO_KU		(1005, Protocol.CONVERTER, "L to Lu Converter"	, HardwareType.CONVERTER),
+		CONVERTER_L_TO_C		(1006, Protocol.CONVERTER, "L to C Converter"	, HardwareType.CONVERTER),
+		CONVERTER_70_TO_KY		(1007, Protocol.CONVERTER, "70 to Ku Converter"	, HardwareType.CONVERTER),
+		CONVERTER_KU_TO_70		(1008, Protocol.CONVERTER, "Ku to 70 Converter"	, HardwareType.CONVERTER),
+		CONVERTER_140_TO_KU		(1009, Protocol.CONVERTER, "140 to Ku Converter", HardwareType.CONVERTER),
+		CONVERTER_KU_TO_140		(1010, Protocol.CONVERTER, "Ku to 140 Converter", HardwareType.CONVERTER),
+		CONVERTER_KU_TO_L		(1011, Protocol.CONVERTER, "Lu to L Converter"	, HardwareType.CONVERTER),
+		CONVERTER_C_TO_L		(1012, Protocol.CONVERTER, "C to L Converter"	, HardwareType.CONVERTER),
+		CONVERTER_L_TO_DBS		(1013, Protocol.CONVERTER, "L to DBS Converter"	, HardwareType.CONVERTER),
+		CONVERTER_L_TO_KA		(1019, Protocol.CONVERTER, "L to KA Converter"	, HardwareType.CONVERTER),
+		CONVERTER_L_TO_X		(1021, Protocol.CONVERTER, "L to X Converter"	, HardwareType.CONVERTER),
+		CONVERTER_SSPA 			(1051, Protocol.CONVERTER, "L to SSPA Converter", HardwareType.CONVERTER),
+		CONVERTER_MODUL			(1052, Protocol.CONVERTER, "Modul"				, HardwareType.CONVERTER),
 
-		BIAS_BOARD_MODUL	(2001, Protocol.CONVERTER, "Bias Board Modul"),
+		BIAS_BOARD_MODUL	(2001, Protocol.CONVERTER, "Bias Board Modul", HardwareType.BAIS),
 
-		IMPOSSIBLE				( 0, null, "Impossible meaning");
+		IMPOSSIBLE				( 0, null, "Impossible meaning", null);
 
 		public final int TYPE_ID;
 		public final Protocol PROTOCOL;
 		public final String DESCRIPTION;
+		public final HardwareType HARDWARE_TYPE;
 
-		private DeviceType(int typeId, Protocol protocol, String description){
+		private DeviceType(int typeId, Protocol protocol, String description, HardwareType hardwareType){
 			TYPE_ID = typeId;
 			PROTOCOL = protocol;
 			DESCRIPTION = description;
+			HARDWARE_TYPE = hardwareType;
 		}
 
 		public Boolean isFCM() {

@@ -70,6 +70,10 @@ public enum PacketIDs {
 	ALARMS_TODO7					( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
 	ALARMS_TODO8					( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
 	ALARMS_TODO9					( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
+	ALARMS_LNB1_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
+	ALARMS_LNB2_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
+	ALARMS_PSU1						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
+	ALARMS_PSU2						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
 
 	ALARMS_DESCRIPTION_OWER_CURRENT				( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_UNDER_CURRENT			( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
@@ -94,6 +98,10 @@ public enum PacketIDs {
 	ALARMS_DESCRIPTION_TODO7					( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_TODO8					( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_TODO9					( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
+	ALARMS_DESCRIPTION_LNB1_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
+	ALARMS_DESCRIPTION_LNB2_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
+	ALARMS_DESCRIPTION_PSU1						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
+	ALARMS_DESCRIPTION_PSU2						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 
 	MEASUREMENT_ALL						( null, null, null, MeasurementPacket.parseValueFunction, null, null),
 	MEASUREMENT_STATUS					( null, null, null, null, null, null),
@@ -174,7 +182,7 @@ public enum PacketIDs {
 	DEVICE_DEBUG_INFO					( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_CPU_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
 	DEVICE_DEBUG_HARDWARE_FAULTS_INFO	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
-	DEVICE_DEBUG_THRESHOLDS_INFO		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
+	DEVICE_DEBUG_THRESHOLDS_INFO		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 1000),
 	DEVICE_DEBUG_I2C1_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_MUTE_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_SCP_DEVICE_INFO		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
@@ -189,7 +197,7 @@ public enum PacketIDs {
 	DEVICE_DEBUG_HSS2_DUMP				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 400),
 	DEVICE_DEBUG_VOLTAGES_DUMP			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_ADC_CHANNELS_DUMP		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
-	DEVICE_DEBUG_ADC_CHANNELS_mV_DUMP	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 50),
+	DEVICE_DEBUG_ADC_CHANNELS_mV_DUMP	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
 	DEVICE_DEBUG_CHANGE_COUNTERS_DUMP	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_DP1_DUMP				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_DUMP, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 
@@ -220,14 +228,20 @@ public enum PacketIDs {
 	DEVICE_DEBUG_SWITCH_N1_REMOTE_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
 	DEVICE_DEBUG_SWITCH_N2_REMOTE_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
 	DEVICE_DEBUG_HS1_CURRENT_REMOTE_BIAS( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
-	DEVICE_DEBUG_HS1_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS1_1_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS1_2_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	DEVICE_DEBUG_NGLOBAL_REMOTE_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 
 	//address = 2
 	DEVICE_DEBUG_ADDR_2					( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
 	DEVICE_DEBUG_HS2_CURRENT			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),	//PACKET_ID_DEVICE_DEBUG_ADDR_2 + index
 	DEVICE_DEBUG_HS2_CURRENT_REMOTE_BIAS( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
-	DEVICE_DEBUG_HS2_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS2_1_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS2_2_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS3_1_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS3_2_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS4_1_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_HS4_2_CURRENT_HP_BIAS	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 
 	//address = 3
 	DEVICE_DEBUG_ADDR_3						( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),
@@ -249,6 +263,8 @@ public enum PacketIDs {
 	DEVICE_DEBUG_POTENTIOMETER_N1		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),	//PACKET_ID_DEVICE_DEBUG_ADDR_8 + index
 	DEVICE_DEBUG_POTENTIOMETER_N6		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	DEVICE_DEBUG_POTENTIOMETER_N3		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_POTENTIOMETER_N7		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	DEVICE_DEBUG_POTENTIOMETER_N8		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 
 	//address = 11
 	DEVICE_DEBUG_ADDR_11				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, null),

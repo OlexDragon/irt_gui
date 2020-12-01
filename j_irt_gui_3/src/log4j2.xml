@@ -85,6 +85,7 @@
 <!--  	<Logger name="irt.tools.fx.update.profile.ProfileValidator" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.update.profile.ProfileTables" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.update.profile.Profile" level="all"/> -->
+<!--  	<Logger name="irt.tools.fx.AlarmPanelFx" level="all"/> -->
 
     <Logger name="dumper" level="INFO">
       <AppenderRef ref="DumpFile" />

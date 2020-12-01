@@ -171,7 +171,7 @@ public class ProfileValidator {
 				return;
 			}
 
-			final List<Table> tablesWithError = ProfileTables.getTablesWithError();
+			final List<Table> tablesWithError = profileParser.getTablesWithError();
 			
 			if(tablesWithError.isEmpty())
 				action = Action.CONTINUE;

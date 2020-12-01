@@ -38,6 +38,10 @@ public interface PacketWork extends Comparable<PacketWork>{
 		TODO7					((byte)18, PacketIDs.ALARMS_TODO7					, false),
 		TODO8					((byte)19, PacketIDs.ALARMS_TODO8					, false),
 		TODO9					((byte)20, PacketIDs.ALARMS_TODO9					, false),
+		LNB1_UNDER_CURRENT		((byte)30, PacketIDs.ALARMS_LNB1_UNDER_CURRENT		, false),
+		LNB2_UNDER_CURRENT		((byte)31, PacketIDs.ALARMS_LNB2_UNDER_CURRENT		, false),
+		PSU1					((byte)40, PacketIDs.ALARMS_PSU1					, false),
+		PSU2					((byte)41, PacketIDs.ALARMS_PSU2					, false),
 
 		DESCRIPTION_PLL_OUT_OF_LOCK			((byte) 1, PacketIDs.ALARMS_DESCRIPTION_PLL_OUT_OF_LOCK			, true),
 		DESCRIPTION_TEMPERATURE_ThRESHOLD_1	((byte) 2, PacketIDs.ALARMS_DESCRIPTION_TEMPERATURE_ThRESHOLD_1	, true),
@@ -56,7 +60,11 @@ public interface PacketWork extends Comparable<PacketWork>{
 		DESCRIPTION_BUC_S_SUMMARY			((byte)17, PacketIDs.ALARMS_DESCRIPTION_BUC_S_SUMMARY			, true),
 		DESCRIPTION_TODO7					((byte)18, PacketIDs.ALARMS_DESCRIPTION_TODO7					, true),
 		DESCRIPTION_TODO8					((byte)19, PacketIDs.ALARMS_DESCRIPTION_TODO8					, true),
-		DESCRIPTION_TODO9					((byte)20, PacketIDs.ALARMS_DESCRIPTION_TODO9					, true);
+		DESCRIPTION_TODO9					((byte)20, PacketIDs.ALARMS_DESCRIPTION_TODO9					, true),
+		DESCRIPTION_LNB1_UNDER_CURRENT		((byte)30, PacketIDs.ALARMS_DESCRIPTION_LNB1_UNDER_CURRENT		, true),
+		DESCRIPTION_LNB2_UNDER_CURRENT		((byte)31, PacketIDs.ALARMS_DESCRIPTION_LNB2_UNDER_CURRENT		, true),
+		DESCRIPTION_PSU1					((byte)40, PacketIDs.ALARMS_DESCRIPTION_PSU1					, true),
+		DESCRIPTION_PSU2					((byte)41, PacketIDs.ALARMS_DESCRIPTION_PSU2					, true);
 
 		private final static Logger logger = LogManager.getLogger();
 		private final short alarmId;
@@ -80,8 +88,9 @@ public interface PacketWork extends Comparable<PacketWork>{
 		public static Optional<AlarmsPacketIds> valueOf(short alarmId, boolean description){
 			final Optional<AlarmsPacketIds> oAlarmsPacketIds = Arrays.stream(values()).parallel().filter(a->a.isDescription==description).filter(a->a.alarmId==alarmId).findAny();
 
+//			logger.error("alarmId: {}; {} : {}", alarmId, !oAlarmsPacketIds.isPresent(), oAlarmsPacketIds);
 			if(!oAlarmsPacketIds.isPresent())
-				logger.warn(alarmId);
+				logger.warn("Alarm ID({}) does not exists", alarmId);
 
 			return oAlarmsPacketIds;
 		}
@@ -135,11 +144,17 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 		HS1_CURRENT					(1		, 5		, PacketIDs.DEVICE_DEBUG_HS1_CURRENT			, "DEVICE_DEBUG_HS1_CURRENT"		),
 		HS1_CURRENT_REMOTE_BIAS		(1		, 205	, PacketIDs.DEVICE_DEBUG_HS1_CURRENT_REMOTE_BIAS, "DEVICE_DEBUG_HS1_CURRENT_REMOTE_BIAS"),
-		HS1_CURRENT_HP_BIAS			(1		, 20	, PacketIDs.DEVICE_DEBUG_HS1_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS1_CURRENT"		),
+		HS1_1_CURRENT_HP_BIAS		(16		, 20	, PacketIDs.DEVICE_DEBUG_HS1_1_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS1_1_CURRENT"		),
+		HS1_2_CURRENT_HP_BIAS		(17		, 20	, PacketIDs.DEVICE_DEBUG_HS1_2_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS1_2_CURRENT"		),
 //		HS1_CURRENT_HP_BIAS_REMOTE	(0		, 0		, PacketIDs.DEVICE_DEBUG_HS1_CURRENT			, "DEVICE_DEBUG_HS1_CURRENT"		),
 		HS2_CURRENT					(2		, 5		, PacketIDs.DEVICE_DEBUG_HS2_CURRENT			, "DEVICE_DEBUG_HS2_CURRENT"		),
 		HS2_CURRENT_REMOTE_BIAS		(2		, 205	, PacketIDs.DEVICE_DEBUG_HS2_CURRENT_REMOTE_BIAS, "DEVICE_DEBUG_HS2_CURRENT_REMOTE_BIAS"),
-		HS2_CURRENT_HP_BIAS			(2		, 20	, PacketIDs.DEVICE_DEBUG_HS1_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS1_CURRENT_HP_BIAS"),
+		HS2_1_CURRENT_HP_BIAS		(18		, 20	, PacketIDs.DEVICE_DEBUG_HS2_1_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS2_1_CURRENT_HP_BIAS"),
+		HS2_2_CURRENT_HP_BIAS		(19		, 20	, PacketIDs.DEVICE_DEBUG_HS2_2_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS2_2_CURRENT_HP_BIAS"),
+		HS3_1_CURRENT_HP_BIAS		(20		, 20	, PacketIDs.DEVICE_DEBUG_HS3_1_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS3_1_CURRENT_HP_BIAS"),
+		HS3_2_CURRENT_HP_BIAS		(21		, 20	, PacketIDs.DEVICE_DEBUG_HS3_2_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS3_2_CURRENT_HP_BIAS"),
+		HS4_1_CURRENT_HP_BIAS		(22		, 20	, PacketIDs.DEVICE_DEBUG_HS4_1_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS4_1_CURRENT_HP_BIAS"),
+		HS4_2_CURRENT_HP_BIAS		(23		, 20	, PacketIDs.DEVICE_DEBUG_HS4_2_CURRENT_HP_BIAS	, "DEVICE_DEBUG_HS4_2_CURRENT_HP_BIAS"),
 
 		OUTPUT_POWER				(3		, 5		, PacketIDs.DEVICE_DEBUG_OUTPUT_POWER			, "DEVICE_DEBUG_OUTPUT_POWER"		),
 		OUTPUT_POWER_REMOTE_BIAS	(3		, 205	, PacketIDs.DEVICE_DEBUG_OUTPUT_POWER_REMOTE_BIAS, "DEVICE_DEBUG_OUTPUT_POWER_REMOTE_BIAS"),
@@ -201,13 +216,13 @@ public interface PacketWork extends Comparable<PacketWork>{
 		private final static Logger logger = LogManager.getLogger();
 		private final PacketIDs packetId;
 		private final String text;
-		private final Integer index;
 		private final Integer addr;
+		private final Integer index;
 
-		private DeviceDebugPacketIds(Integer addr, Integer index, PacketIDs packetId, String text){
+		private DeviceDebugPacketIds(Integer index, Integer addr, PacketIDs packetId, String text){
 
-			this.index = index;
 			this.addr = addr;
+			this.index = index;
 			this.packetId = packetId;
 			this.text = text;
 		}
@@ -215,22 +230,22 @@ public interface PacketWork extends Comparable<PacketWork>{
 		public byte[] getPayloadData() {
 			int caseIndex = 0;
 
-			if(addr!=null)
+			if(index!=null)
 				caseIndex += ADDR;
 
-			if(index!=null)
+			if(addr!=null)
 				caseIndex += INDEX;
 
 			switch(caseIndex){
 
 			case ADDR:
-				return ByteBuffer.allocate(4).putInt(addr).array();
-
-			case INDEX:
 				return ByteBuffer.allocate(4).putInt(index).array();
 
+			case INDEX:
+				return ByteBuffer.allocate(4).putInt(addr).array();
+
 			case ADDR + INDEX:
-				return ByteBuffer.allocate(8).putInt(index).putInt(addr).array();
+				return ByteBuffer.allocate(8).putInt(addr).putInt(index).array();
 			}
 			return null;
 		}
@@ -257,10 +272,10 @@ public interface PacketWork extends Comparable<PacketWork>{
 							pId.packetId.getParameterCode()==deviceDebugType.getParameterCode())
 					.filter(
 							pId->
-							pId.index!=null)
+							pId.addr!=null)
 					.filter(
 							pId->
-							pId.index==index)
+							pId.addr==index)
 					.findAny();
 		}
 
@@ -269,7 +284,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 		}
 
 		public Integer getIndex() {
-			return index;
+			return addr;
 		}
 
 		@Override

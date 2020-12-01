@@ -27,14 +27,15 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.stage.Modality;
 
 public class EditTablesMessageFx extends Alert {
 	private final static Logger logger = LogManager.getLogger();
 
-	private static final ButtonData NEXT_OR_SAVE = ButtonData.APPLY;
-	private static final ButtonData IGNORE = ButtonData.OK_DONE;
+	private static final ButtonData NEXT_OR_SAVE = ButtonData.APPLY;	// Button with text "Next" or "Save"
+	private static final ButtonData IGNORE = ButtonData.OK_DONE;		// Button with text "Ignore"
 
 	private static Action action;
 
@@ -98,7 +99,7 @@ public class EditTablesMessageFx extends Alert {
 
 								try {
 
-									// Get table string from the profile
+									// Get table as string from the profile
 									final String t = profile.getTable(table.getKey()).getKey();
 
 									// Show alert
@@ -115,6 +116,9 @@ public class EditTablesMessageFx extends Alert {
 												textProperty.removeListener(textChangeListener);
 												textArea.setText(t);
 												textProperty.addListener(textChangeListener);
+
+												final Label label = new Label(table.toString());
+												getDialogPane().setExpandableContent(label);
 
 												return showAndWait();
 											});

@@ -86,7 +86,7 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		deviceType
+		deviceInfo.getDeviceType()
 		.filter(dt->!IrtGui.isRedundancyController())
 		.filter(dt->!dt.equals(DeviceType.IR_PC))
 		.filter(dt->!dt.equals(DeviceType.DLRS))

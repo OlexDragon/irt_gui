@@ -70,12 +70,12 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Pair;
 
 public class UpdateMessageFx extends Dialog<Message>{
+	private final Logger logger = LogManager.getLogger();
 
 	private static final String SYSTEM = "system";
+	private String serialNumber = "any";
 
 	private static Path profilePath;
-
-	private final Logger logger = LogManager.getLogger();
 
 	private final TextField tfAddress;
 
@@ -95,10 +95,13 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private final ChangeListener<? super String> textListener = (o, oV, nV)->enableUpdateButton(o);
 	private final ChangeListener<? super Boolean> cbListener = (o, oV, nV)->enableUpdateButton(o);
 	private final ChangeListener<? super Boolean> cbUnitTypeSelectListener = (o,oV,nV)->Optional.of(nV)
-			
+
 			.filter(v->v)
 			.ifPresent(
-					v->{	
+					v->{
+
+						serialNumber = "any";
+
 						findBucProfile.stop();
 						findConvProfile.stop();
 
@@ -123,7 +126,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 										logger.catching(e);
 									}
 								}, "Set Label Text");
-
 					});
 	
 //	private FileScanner fileScanner;
@@ -135,12 +137,16 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 	private String system = SYSTEM;
 
+	private DeviceInfo deviceInfo;
+
 	// ***************************************************************************************************************** //
 	// 																													 //
 	// 									 constructor UpdateMessageFx													 //
 	// 																													 //
 	// ***************************************************************************************************************** //
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
+
+		this.deviceInfo = deviceInfo;
 
 		Thread currentThread = Thread.currentThread();
 		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
@@ -158,13 +164,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 		updateButton = (Button) dialogPane.lookupButton(updateButtonType);
 		updateButton.setDisable(true);
 
-		// Cancel button
-
-//		final Button cancelButton = (Button)
-//		dialogPane.lookupButton(ButtonType.CANCEL);
-//		Optional.ofNullable(fileScanner).ifPresent(fs->cancelButton.setOnAction(e->fs.cancel(true)));
-//		logger.error(fileScanner);
-
 		GridPane grid = new GridPane();
 		grid.setHgap(10);
 		grid.setVgap(10);
@@ -172,7 +171,11 @@ public class UpdateMessageFx extends Dialog<Message>{
 		//IP Address row #0
 
 		tfAddress = new TextField();
-		deviceInfo.getSerialNumber().ifPresent(tfAddress::setText);;
+		deviceInfo.getSerialNumber().ifPresent(
+				sn->{
+					tfAddress.setText(sn);
+					serialNumber = sn;
+				});
 		tfAddress.textProperty().addListener( textListener );
 		grid.addRow(0, new Label("IP Address:"), tfAddress);
 
@@ -355,26 +358,35 @@ public class UpdateMessageFx extends Dialog<Message>{
 		VBox vBox = new VBox();
 
 		final ToggleGroup group = new ToggleGroup();
-		final EventHandler<ActionEvent> onAction = e->{
+		final EventHandler<ActionEvent> onSelectTypeAction = e->{
+
 			if(e.getSource()==cbBUC){
+
+				// Unit
 				imageView.setImage(imageBuc);
 				system = SYSTEM;
+				deviceInfo.getSerialNumber().ifPresent(sn->serialNumber = sn);
 			}else{
+
+				// Converter
 				imageView.setImage(imageConv);
-				system = "256";
+				if(deviceInfo.getRevision()>10)
+					system = "file";
+				else
+					system = "256";
 			}
 		};
 
 		cbBUC = new RadioButton("BUC");
 		cbBUC.setToggleGroup(group);
-		cbBUC.setOnAction(onAction);
+		cbBUC.setOnAction(onSelectTypeAction);
 		cbBUC.setUserData(findBucProfile);
 		cbBUC.selectedProperty().addListener(cbUnitTypeSelectListener);
 		cbBUC.setSelected(true);
 
 		cbConv = new RadioButton("Converter");
 		cbConv.setToggleGroup(group);
-		cbConv.setOnAction(onAction);
+		cbConv.setOnAction(onSelectTypeAction);
 		cbConv.setUserData(findConvProfile);
 		cbConv.selectedProperty().addListener(cbUnitTypeSelectListener);
 
@@ -569,7 +581,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
-		public final static String setupInfoPathern = "%s any.any.any {\n%s }";
+		public final static String setupInfoPathern = "%s any.any.%s {\n%s }";
 		public final static String pathPathern = "%s { path {%s} %s }";
 
 		/**
@@ -584,6 +596,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 					.format(
 							setupInfoPathern,
 							system,
+							serialNumber,
 							paths
 								.entrySet()
 								.stream()

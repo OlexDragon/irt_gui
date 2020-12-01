@@ -1,6 +1,7 @@
 package irt.tools.panel;
 
 import java.awt.HeadlessException;
+import java.util.Optional;
 
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -38,6 +39,7 @@ public class ConverterPanel extends DevicePanel {
 //		alarmPanel.setBorder(null);
 		tabbedPane.addTab("alarms", alarmPanel);
 
+		final Optional<DeviceType> deviceType = deviceInfo.getDeviceType();
 		hasDcOutput = 	deviceType
 				.filter(
 						dt->(dt==DeviceType.CONVERTER_L_TO_140 ||
@@ -59,18 +61,19 @@ public class ConverterPanel extends DevicePanel {
 		tabbedPane.addTab("DACs", null, dacPanel, null);
 		dacPanel.setLayout(null);
 
-		JPanel registersPanel = deviceInfo.getDeviceType().filter(dt->dt==DeviceType.CONVERTER_L_TO_KU).map(dt->new PLL_HMC807LP6CE_Reg9(deviceType)).map(JPanel.class::cast).orElse(new PLLsPanel(deviceType));
+		JPanel registersPanel = deviceType.filter(dt->dt==DeviceType.CONVERTER_L_TO_KU).map(dt->new PLL_HMC807LP6CE_Reg9(deviceType)).map(JPanel.class::cast).orElse(new PLLsPanel(deviceType));
 		tabbedPane.addTab("PLLs", null, registersPanel, null);
 
 		DeviceDebugPanel debugPanel = new DeviceDebugPanel((byte) 0);
 		getTabbedPane().addTab("Debug", null, debugPanel, null);
 
-		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceInfo.getDeviceType(), null, this);
+		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceType, null, this);
 		tabbedPane.addTab("Info", null, infoPanel, null);
 	}
 
 	@Override
 	protected ControlPanelImpl getNewControlPanel() {
+		final Optional<DeviceType> deviceType = deviceInfo.getDeviceType();
 		ControlPanelConverter controlPanel = hasDcOutput ? new ControlPanelDownConverter(deviceType) : new ControlPanelConverter(deviceType, hasFreqSet);
 		controlPanel.setLocation(10, 225);
 		return controlPanel;

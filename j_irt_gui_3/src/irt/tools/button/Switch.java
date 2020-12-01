@@ -133,7 +133,8 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 						stop();
 						setEnabled(false);
 					}
-					logger.error("packet has error: {}", packet);
+					logger.warn("packet has error: {}", packet);
+					getParent().remove(this);
 					return;
 				}
 

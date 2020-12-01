@@ -194,7 +194,9 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 					.filter(l->l.getText().isEmpty())
 					.map(Label::getUserData)
 					.map(Short.class::cast)
-					.map(alarmCode->new AlarmDescriptionPacket(unitAddress, AlarmsPacketIds.valueOf(alarmCode, true).orElse(AlarmsPacketIds.STATUS)));
+					.map(alarmCode->AlarmsPacketIds.valueOf(alarmCode, true))
+//					.peek(logger::error)
+					.map(packet->new AlarmDescriptionPacket(unitAddress, packet.orElse(AlarmsPacketIds.STATUS)));
 
 			descriptionPackets
 			.forEach(queue::add);
@@ -256,19 +258,18 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 													.map(Payload::getArrayShort);
 
 				availableAlarms = alarms.get();
-				logger.debug("{}", availableAlarms);
+				logger.debug("All alarm cods: {}", availableAlarms);
 				createLabels();
 
 				return;
 			}
-
 
 			//set alarm status
 			oPayload
 			.ifPresent(pl->{
 
 				byte[] buffer = pl.getBuffer();
-				if(pl.getParameterHeader().getCode()==PacketImp.ALARM_STATUS) 
+				if(pl.getParameterHeader().getCode()==PacketImp.ALARM_STATUS)
 									//Alarm Status
 									setAlarmStatus(buffer);
 
@@ -302,56 +303,60 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 		final ObservableList<RowConstraints> rowConstraints = gridPane.getRowConstraints();
 
-		IntStream.range(0, availableAlarms.length).forEach(row->{
+		IntStream.range(0, availableAlarms.length)
+		.forEach(
+				row->{
 
-			final short alarmCode = availableAlarms[row];
+					final short alarmCode = availableAlarms[row];
 
-			if(rowConstraints.size()<availableAlarms.length){
+					if(rowConstraints.size()<availableAlarms.length){
 
-				final RowConstraints rc = new RowConstraints();
-				rc.vgrowProperty().set(Priority.SOMETIMES);
+						final RowConstraints rc = new RowConstraints();
+						rc.vgrowProperty().set(Priority.SOMETIMES);
 			
-				rowConstraints.add(rc);
-			}
+						rowConstraints.add(rc);
+					}
 
-			//create new labels
-			final Label description = new Label();
-			description.setUserData(alarmCode);
-			description.getStyleClass().add(DESCRIPTION);
-			description.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			description.setAlignment(Pos.CENTER_RIGHT);
-			description.setPadding(new Insets(0, 10, 0, 0));
+					//create new labels
+					final Label description = new Label();
+					description.setUserData(alarmCode);
+					description.getStyleClass().add(DESCRIPTION);
+					description.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+					description.setAlignment(Pos.CENTER_RIGHT);
+					description.setPadding(new Insets(0, 10, 0, 0));
 
-			final Label label = new Label();
-			label.setUserData(alarmCode);
-			label.getStyleClass().add(VALUE);
-			label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-			label.setAlignment(Pos.CENTER);
+					final Label label = new Label();
+					label.setUserData(alarmCode);
+					label.getStyleClass().add(VALUE);
+					label.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+					label.setAlignment(Pos.CENTER);
 
-			GridPane.setMargin(description, new Insets(1, 0, 1, 0));
-			GridPane.setMargin(label, new Insets(1, 0, 1, 0));
+					GridPane.setMargin(description, new Insets(1, 0, 1, 0));
+					GridPane.setMargin(label, new Insets(1, 0, 1, 0));
 
-			Platform.runLater(()->{
-				gridPane.add(description, 0, row);
-				gridPane.add(label, 1, row);
-			});
-		});
+					Platform.runLater(()->{
+						gridPane.add(description, 0, row);
+						gridPane.add(label, 1, row);
+					});
+				});
 	}
 
 	private void setAlarmDescription(byte[] buffer) {
+
 		Optional
 		.ofNullable(buffer)
 		.map(AlarmDescription::new)
-		.ifPresent(ad->{
+		.ifPresent(alarmDescription->{
 
-			final String textToSet = Translation.getValue(String.class, ad.alarmDescription, ad.alarmDescription);
+			final String textToSet = Translation.getValue(String.class, alarmDescription.description, alarmDescription.description);
+//			logger.error("{} : {}", alarmDescription, buffer);
 
 			gridPane
 			.getChildren()
 			.parallelStream()
 			.filter(Label.class::isInstance)
 			.map(Label.class::cast)
-			.filter(n->n.getUserData().equals(ad.alarmCode))
+			.filter(n->n.getUserData().equals(alarmDescription.code))
 			.filter(n->n.getStyleClass().contains(DESCRIPTION))
 			.findAny()
 			.ifPresent(label->{
@@ -419,25 +424,29 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);
 	}
 
+	@Override
+	public void shutdownNow() {
+		stop();
+	}
+
 	public class AlarmDescription {
 
-		public final short alarmCode;
-		public final String alarmDescription;
+		public final short code;
+		public final String description;
 
 		public AlarmDescription(byte[] bytes) {
 
 			final ByteBuffer buffer = ByteBuffer.wrap(bytes);
-			alarmCode =buffer.getShort();
-			final int status = buffer.getInt(2)&7;
-			logger.trace("\n{}\n{}\n{}", alarmCode, status, bytes);
-			alarmDescription = new String(bytes).trim();
+			code =buffer.getShort();
+//			final int status = buffer.getInt(2)&7;
+			description = new String(bytes).trim();
 
-			logger.trace("\nbytes={}\nalarmCode={}\nalarmDescription={}", bytes, alarmCode, alarmDescription);
+			logger.trace("\n bytes={}\n Code={}\n Description=\"{}\"", bytes, code, description);
 		}
-	}
 
-	@Override
-	public void shutdownNow() {
-		stop();
+		@Override
+		public String toString() {
+			return "AlarmDescription [Code=" + code + ", Description=" + description + "]";
+		}
 	}
 }

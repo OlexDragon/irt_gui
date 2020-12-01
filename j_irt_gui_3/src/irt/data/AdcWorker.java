@@ -25,15 +25,18 @@ public class AdcWorker {
 
 	private final DeviceDebugPacket packetToSend;
 													public DeviceDebugPacket getPacketToSend() {
-														return packetToSend;
+														return attempts<3 ? packetToSend : null;	// if more than 3 attempts do nothing.
 													}
 	private final JLabel label;
 	private final DeviceDebugPacketIds deviceDebugPacketIds;
 	private final double multiplier;
 	private final DecimalFormat format;
 
+	private int attempts;
+
 	public AdcWorker(JLabel label, byte linkAddr, Value value, DeviceDebugPacketIds packetID, double multiplier, String pattern) {
 		packetToSend = new DeviceDebugPacket(linkAddr, value, packetID);
+		logger.debug("packetToSend: {}", packetToSend);
 
 		this.label = label;
 		this.deviceDebugPacketIds = packetID;
@@ -48,6 +51,7 @@ public class AdcWorker {
 				final int clickCount = e.getClickCount();
 				if(clickCount==2){
 					label.setText("");
+					attempts = 0;
 				}
 			}
 			@Override public void mouseReleased(MouseEvent e) { }
@@ -67,52 +71,58 @@ public class AdcWorker {
 		if(!oMatch.isPresent())
 			return;
 
-		logger.traceEntry("{}{}", packet, packetToSend);
+		logger.traceEntry("{}", packet);
 
 		final Thread currentThread = Thread.currentThread();
 		new ThreadWorker(
 				()->{
 
-					final Optional<PacketHeader> oNoError = oMatch
-					.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+					final Optional<PacketHeader> oResponse = oMatch
+					.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
+					final Optional<PacketHeader> oNoError = oResponse
 					.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
 
 					if(!oNoError.isPresent()) {
-						logger.warn("No response or error: {}");
+						++attempts;
+						logger.warn("No response or error: {}", packet);
+						label.setText(":");
+						oResponse.ifPresent(p->label.setToolTipText(p.getOptionStr()));
 						return;
 					}
-
+					attempts = 0;
 					oNoError
 					.map(h->packet.getPayloads().stream())
 					.orElse(Stream.empty())
 					.findAny()
-					.ifPresent(pl->{
-						final RegisterValue registerValue = pl.getRegisterValue();
-						Optional
-						.ofNullable(registerValue.getValue())
-						.map(Value::getValue)
-						.ifPresent(v->{
+					.ifPresent(
+							pl->{
+								final RegisterValue registerValue = pl.getRegisterValue();
+								Optional
+								.ofNullable(registerValue.getValue())
+								.map(Value::getValue)
+								.ifPresent(v->{
 
-							final boolean useMultiplier = Double.compare(multiplier, 0)!=0;
+									final boolean useMultiplier = Double.compare(multiplier, 0)!=0;
 
-							double value = useMultiplier ? multiplier*v/1000 : v;
+									double value = useMultiplier ? multiplier*v/1000 : v;
 
-							String text = useMultiplier ? format.format(value) : Long.toString(Math.round(value));
+									final String text = useMultiplier ? format.format(value) : Long.toString(Math.round(value));
 
-							final String t = text;
+									logger.debug("Text to set: '{}'", text);
 
-							SwingUtilities.invokeLater(
-									()-> {
-
-										if(!label.getText().equals(t)){
-											label.setText(t);
-											label.setToolTipText(Long.toString(v));
-										}
-									});
-						});
-					});
+									SwingUtilities.invokeLater(
+											()-> {
+												label.setText(text);
+												label.setToolTipText(Long.toString(v));
+											});
+								});
+							});
 
 				}, deviceDebugPacketIds.name() + ":" + currentThread.getId());
+	}
+
+	public JLabel getLabel() {
+		return label;
 	}
 
 	@Override

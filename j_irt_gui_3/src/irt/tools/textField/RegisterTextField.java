@@ -80,7 +80,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		final int index = registerValue.getIndex();
 		final int addr = registerValue.getAddr();
 
-		setToolTipText("Address=" + addr + "; Index=" + index);
+		setToolTipText("Index=" + index + "; Address=" + addr);
 
 		MIN = min;
 		MAX = max;
