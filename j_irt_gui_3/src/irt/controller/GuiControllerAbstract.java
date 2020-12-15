@@ -4,11 +4,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -71,7 +68,6 @@ import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.fx.module.ModuleSelectFxPanel;
 import irt.tools.panel.DevicePanel;
-import irt.tools.panel.head.Console;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.textField.UnitAddressField;
@@ -100,7 +96,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	private ScheduledFuture<?> scheduledFuture;
 	private ScheduledExecutorService service;
 
-	private Console console;
 	protected JComboBox<String> serialPortSelection;
 	protected JComboBox<KeyValue<String, String>> languageComboBox;
 	protected HeadPanel headPanel;
@@ -130,8 +125,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		this.gui = gui;
 		guiController = this;
 
-		console = new Console(gui, "Console");
-
 			JPanel contentPane = (JPanel) gui.getContentPane();
 			Component[] components = contentPane.getComponents();
 			for (Component c : components) {
@@ -154,18 +147,6 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 						}
 					}
 				case "IrtPanel":
-					c.addMouseListener(new MouseListener() {
-
-						@Override
-						public void mouseReleased(MouseEvent e) {
-							if ((e.getModifiers() & InputEvent.CTRL_MASK) > 0)
-								console.setVisible(!console.isVisible());
-						}
-						@Override public void mousePressed	(MouseEvent e) { }
-						@Override public void mouseExited	(MouseEvent e) { }
-						@Override public void mouseEntered	(MouseEvent e) { }
-						@Override public void mouseClicked	(MouseEvent e) { }
-					});
 				}
 			}
 			comPortThreadQueue.addPacketListener(guiController);

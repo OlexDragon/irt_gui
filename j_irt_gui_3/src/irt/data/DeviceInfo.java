@@ -56,6 +56,7 @@ public class DeviceInfo implements PacketListener {
 
 		KU_RACK_MOUNT	(250, Protocol.LINKED, "KU rack mount", HardwareType.CONTROLLER),
 		C_RACK_MOUNT	(251, Protocol.LINKED, "C rack mount", HardwareType.CONTROLLER),
+		C_SSPA_RACK_MOUNT(252, Protocol.LINKED, "C rack mount SSPA", HardwareType.CONTROLLER),
 
 		TRANSCEIVER		(260, Protocol.LINKED, "Transceiver", HardwareType.BAIS),
 
@@ -82,6 +83,9 @@ public class DeviceInfo implements PacketListener {
 		CONVERTER_L_TO_X		(1021, Protocol.CONVERTER, "L to X Converter"	, HardwareType.CONVERTER),
 		CONVERTER_SSPA 			(1051, Protocol.CONVERTER, "L to SSPA Converter", HardwareType.CONVERTER),
 		CONVERTER_MODUL			(1052, Protocol.CONVERTER, "Modul"				, HardwareType.CONVERTER),
+		CONVERTER_MODUL_C_BAND	(1053, Protocol.CONVERTER, "C Band Modul"		, HardwareType.CONVERTER),
+
+		REFERENCE_BOARD		(1100, Protocol.CONVERTER, "Reference Board"		, HardwareType.CONVERTER),
 
 		BIAS_BOARD_MODUL	(2001, Protocol.CONVERTER, "Bias Board Modul", HardwareType.BAIS),
 

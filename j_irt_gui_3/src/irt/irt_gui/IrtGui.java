@@ -61,6 +61,8 @@ import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.event.PopupMenuEvent;
 
 public class IrtGui extends IrtMainFrame {
 
@@ -71,10 +73,11 @@ public class IrtGui extends IrtMainFrame {
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.212";
+	public static final String VERTION = "- 3.217";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
+	private boolean controlPressed;
 
 	public IrtGui() {
 		super(700, 571);
@@ -148,17 +151,21 @@ public class IrtGui extends IrtMainFrame {
 		manager.addKeyEventDispatcher(new KeyEventDispatcher() {
 			
 			private boolean isPressed;
-//			private boolean isShowing;
 
 			@Override
 			public boolean dispatchKeyEvent(KeyEvent e) {
-				if(e.getID() == KeyEvent.KEY_PRESSED){
-					if(!isPressed && e.isControlDown() && e.isAltDown() && e.getKeyCode()==KeyEvent.VK_D){
+
+				controlPressed = e.isControlDown();
+				if(e.getID() != KeyEvent.KEY_PRESSED){
+
+					if(!isPressed && controlPressed && e.isAltDown() && e.getKeyCode()==KeyEvent.VK_D){
 						isPressed = true;
-//						guiController.showDebugPanel(isShowing = !isShowing);
 					}
-				}else
+
+				}else {
 					isPressed = false;
+				}
+
 				return false;
 			}
 		});
@@ -166,8 +173,19 @@ public class IrtGui extends IrtMainFrame {
 
 	@SuppressWarnings("unchecked")
 	protected void setHeaderLabel(HeadPanel headPanel) throws IOException, FontFormatException {
-		
+
 		JPopupMenu popupMenu = new JPopupMenu();
+
+		popupMenu.addPopupMenuListener(new PopupMenuListener() {
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				if(!controlPressed)
+					return;
+				JMenu loggerMenu = new JMenu("Logger");
+				popupMenu.add(loggerMenu);
+			}
+			public void popupMenuCanceled(PopupMenuEvent e) { }
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) { }
+		});
 		addPopup(headPanel, popupMenu);
 
 		JMenuItem monitortMenuItem = new JMenuItem(Translation.getValue(String.class, "monitor", "Monitor"));

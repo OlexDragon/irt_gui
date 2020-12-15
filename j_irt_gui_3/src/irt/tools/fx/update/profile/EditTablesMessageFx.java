@@ -48,6 +48,7 @@ public class EditTablesMessageFx extends Alert {
 		initModality(Modality.APPLICATION_MODAL);
 
 		TextArea textArea = new TextArea();
+		textArea.setStyle("-fx-font-family: Consolas;");
 		getDialogPane().setContent(textArea);
 
 		ButtonType buttonTypeSave = new ButtonType("Next", NEXT_OR_SAVE);

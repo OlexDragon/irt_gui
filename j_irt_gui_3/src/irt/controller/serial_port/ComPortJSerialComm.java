@@ -132,6 +132,7 @@ public class ComPortJSerialComm implements SerialPortInterface {
 
 	@Override
 	public boolean writeBytes(byte[] data) {
+		logger.traceEntry("{}", data);
 		return serialPort.writeBytes(data, data.length) > 0;
 	}
 

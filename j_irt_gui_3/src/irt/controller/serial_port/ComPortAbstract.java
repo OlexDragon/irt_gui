@@ -25,7 +25,6 @@ import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
 
 public abstract class ComPortAbstract implements SerialPortInterface {
@@ -73,7 +72,6 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 			readPacket = new PacketImp();
 		}
 
-		int runTimes = 0;
 		byte[] readData;
 		byte[] cs;
 		PacketHeader packetHeader;
@@ -86,16 +84,10 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 	clear();
 
 	byte[] data = packet.toBytes();
-	String hexStr = ToHex.bytesToHex(data);
-
-	String prefix = (runTimes+1)+") send";
-	Console.appendLn(packet, prefix);
-	Console.appendLn(hexStr, prefix);
 
 	if(data!=null && isOpened()){
-//		writeBytes(data);
 
-		logger.debug("writeBytes({})", hexStr);
+		writeBytes(data);
 
 		if (isConfirmBytes(packet)){
 
@@ -104,9 +96,9 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 				if (linkHeader != null)
 					if ((readData = readLinkHeader()) != null)
 						checksum = new Checksum(byteStuffing(readData));
+
 					else {
-						logger.warn("\n\tlinkHeader==null\n\tSent packet {}", packet);
-						Console.appendLn("LinkHeader", "Break");
+						logger.warn("\n\t linkHeader==null\n\t Sent packet {}", packet);
 					}
 
 				if ((readData = readHeader()) != null) {
@@ -152,49 +144,41 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 							int payloadSize = parameterHeader.getSize();
 
 							if (parameterHeader.getCode()>300 || payloadSize>3000 || payloadSize<=0 ) {
-								Console.appendLn("ParameterHeader Sizes", "Break ");
 								logger.warn("parameterHeader.getCode()>300({}) || payloadSize>3000({}) || payloadSize<=0({}) \n{} \n{}\nSent Packet{}", parameterHeader.getCode(), payloadSize, payloadSize, packetHeader, parameterHeader, packet);
 								break;
 							}
 
-										Console.appendLn("", "Payload ");
-										if (payloadSize <= 0) {
-											Console.appendLn("Payload", "Break ");
-											logger.warn("ev < 0 || (readData = readBytes(ev))==null");
-											break;
-										}
+							if(waitComPort(payloadSize)){
 
-										if(waitComPort(payloadSize)){
+								readData = readFromBuffer(payloadSize);
+								final byte[] payloadByteStuffing = byteStuffing(readData);
 
-											readData = readFromBuffer(payloadSize);
-											final byte[] payloadByteStuffing = byteStuffing(readData);
+								final byte[] rd = readData;
+								logger.debug("payload size: {}; parameter data: {}", ()->payloadSize, ()->ToHex.bytesToHex(rd));
 
-											final byte[] rd = readData;
-											logger.debug("payload size: {}; parameter data: {}", ()->payloadSize, ()->ToHex.bytesToHex(rd));
+								if (Optional.ofNullable(payloadByteStuffing).map(bs->bs.length).orElse(0)>=payloadSize) {
 
-											if (Optional.ofNullable(payloadByteStuffing).map(bs->bs.length).orElse(0)>=payloadSize) {
+									checksum.add(payloadByteStuffing);
+									Payload payload = new Payload(parameterHeader, payloadByteStuffing);
+									payloadsList.add(payload);
 
-												checksum.add(payloadByteStuffing);
-												Payload payload = new Payload(parameterHeader, payloadByteStuffing);
-												payloadsList.add(payload);
-
-											}else
-												logger.warn("readData.length>={}", payloadSize);
-										}else{
-											logger.warn("No data or wrong data size({}), buffer: {}", payloadSize, buffer);
-											break;
-										}
-									}
-								} else
-									logger.warn("packetHeader.asBytes() == null || packetHeader.getGroupId({})!={}", newGroupId, groupId);
-							} else
-								logger.warn("(readData=readHeader())==null");
-						}else
-							logger.warn("isFlagSequence returns false\nSent packet{}", packet);
-				}else
-					logger.warn("isConfirmBytes returns false\nSent Packet:{}", packet);
-			}else 
-				logger.warn("data!=null && isOpened() does not hold");
+								}else
+									logger.warn("readData.length>={}", payloadSize);
+							}else{
+								logger.warn("No data or wrong data size({}), buffer: {}", payloadSize, buffer);
+								break;
+							}
+						}
+					} else
+						logger.warn("packetHeader.asBytes() == null || packetHeader.getGroupId({})!={}", newGroupId, groupId);
+				} else
+					logger.warn("(readData=readHeader())==null");
+			}else
+				logger.warn("isFlagSequence returns false\nSent packet{}", packet);
+		}else
+			logger.warn("isConfirmBytes returns false\nSent Packet:{}", packet);
+	}else 
+		logger.warn("data!=null && isOpened() does not hold");
 
 	sendAcknowledge(packet);
 
@@ -202,7 +186,6 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 			new ThreadWorker(()->closePort(), "ComPortAbstract-send-1");
 		}catch (Exception e) {
 			logger.catching(e);
-			Console.appendLn(e.getLocalizedMessage(), "Error");
 			new ThreadWorker(()->closePort(), "ComPortAbstract-send-2");
 		}
 
@@ -211,12 +194,9 @@ public abstract class ComPortAbstract implements SerialPortInterface {
 		if(readPacket.getHeader()==null || readPacket.getPayloads()==null)
 			readPacket = packet;
 
-		Console.appendLn(readPacket, "Get");
 		final long workTime = System.currentTimeMillis()-start;
-		Console.appendLn(""+workTime, "Time");
 		logger.debug("Time taken to send the packet: {}", workTime);
 
-//		logger.traceExit(packet);
 		return readPacket;
 	}
 

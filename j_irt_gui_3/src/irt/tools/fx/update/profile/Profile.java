@@ -165,10 +165,11 @@ public class Profile {
 			// StringBuffer length
 			int noKeyLineCount = 0;
 
+			String startWith = key + '-' + ProfileTables.LUT;
 			for (int i=0; scanner.hasNextLine(); i++) {
 				String line = scanner.nextLine();
 
-				if(line.contains(ProfileTables.LUT) && line.contains(key)) {
+				if(line.startsWith(startWith) || (line.startsWith(ProfileTables.LUT) && line.contains(key))) {
 
 					// Set position of the first line
 					if(startStop.x==0)

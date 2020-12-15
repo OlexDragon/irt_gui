@@ -20,7 +20,7 @@ public class ProfileTables {
 
 	public enum TableError { NO_ERROR, SIZES_DOES_NOT_MATCH, SEQUENCE_ERROR, NUMBER_FORMATEXCEPTION_ERROR }
 
-	private final static List<String> EXCEPTIONS = new ArrayList<>(Arrays.asList(new String[]{"frequency"}));
+	private final static List<String> EXCEPTIONS = new ArrayList<>(Arrays.asList(new String[]{"frequency", "power-out-freq"}));
 	private final static String TABLE_REFERENCE = "lut-ref";
 
 	final static String LUT = "lut-";

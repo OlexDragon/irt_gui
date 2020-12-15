@@ -26,7 +26,6 @@ import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.tools.panel.head.Console;
 import jssc.SerialPortException;
 
 public class ComPortThreadQueue implements Runnable {
@@ -93,7 +92,6 @@ public class ComPortThreadQueue implements Runnable {
 //			Optional.ofNullable(serialPort).filter(sp->sp.isOpened()).ifPresent(sp->sp.closePort());
 		} catch (Exception e) {
 			logger.catching(e);
-			Console.appendLn(e.getLocalizedMessage(), "ComPortThreadQueue:run");
 		}
 	}
 
@@ -137,7 +135,6 @@ public class ComPortThreadQueue implements Runnable {
 
 		} catch (Exception e) {
 			logger.catching(e);
-			Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:add");
 		}
 	}
 
@@ -192,7 +189,6 @@ public class ComPortThreadQueue implements Runnable {
 
 			} catch (Exception e) {
 				logger.catching(e);
-				Console.appendLn(e.getLocalizedMessage(), "ComPortQueue:setSerialPort 2");
 			}
 		};
 	}

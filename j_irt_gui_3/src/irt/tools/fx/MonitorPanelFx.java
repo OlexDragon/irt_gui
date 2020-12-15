@@ -207,6 +207,10 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private void setValues(Map<?, ?> map) {
 		logger.traceEntry("{}", map);
 
+		// Added for RM units. 
+		if(map.size()<2)
+			return;
+
 		final ObservableList<Node> children = gridPane.getChildren();
 		final Set<? extends Entry<?,?>> entrySet = map.entrySet();
 
@@ -245,7 +249,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 		if(status==null || status.isEmpty())
 			return;
-
 
 		List<?> collect;
 		Stream<?> stream = status.stream();

@@ -23,7 +23,6 @@ import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.tools.panel.head.Console;
 
 public class SerialPortWorker {
 	private final static Logger logger = LogManager.getLogger();
@@ -40,8 +39,6 @@ public class SerialPortWorker {
 
 		SerialPortWorker.serialPort = serialPort;
 		maxSize = packet.getMaxSize();
-
-		long start = System.currentTimeMillis();
 
 		PacketHeader ph = packet.getHeader();
 		byte groupId = ph.getGroupId();
@@ -77,10 +74,7 @@ public class SerialPortWorker {
 
 			String prefix = (runTimes+1)+") send";
 
-			logger.info(marker, ">> {}: {}", prefix, packet);
-			logger.info(marker, ">> {}: {}", prefix, hexStr);
-			Console.appendLn(packet, prefix);
-			Console.appendLn(hexStr, prefix);
+			logger.info(marker, ">> {}: {}\n\t as bytes: {}", prefix, packet, hexStr);
 
 			if(data!=null && serialPort.isOpened()){
 				logger.debug("writeBytes: {}", ()->Arrays.toString(data));
@@ -93,7 +87,6 @@ public class SerialPortWorker {
 							checksum = new Checksum(readData);
 						else{
 							logger.warn("linkHeader==null");
-							Console.appendLn("LinkHeader", "Break");
 							return packet;
 						}
 					}
@@ -128,7 +121,6 @@ public class SerialPortWorker {
 								ev = parameterHeader.getSize();
 								logger.trace("parameterHeader.getSize()={}", ev);
 								if(parameterHeader.getCode()>300 || ev>maxSize){
-									Console.appendLn("ParameterHeader Sizes", "Break ");
 									logger.error(
 											"parameterHeader.getCode()>300({}) || ev>{}({}) \n{} \n{} \n readData: {}",
 											parameterHeader.getCode(),
@@ -139,14 +131,12 @@ public class SerialPortWorker {
 											readData);
 									break;
 								}
-								Console.appendLn("", "Payload ");
 								if (ev >= 0 && (readData = readBytes(ev))!=null) {
 
 									checksum.add(readData);
 									Payload payload = new Payload(parameterHeader,	readData);
 									payloadsList.add(payload);
 								}else{
-									Console.appendLn("Payload", "Break ");
 									logger.warn("ev < 0 || (readData = readBytes(ev))==null");
 									break;
 								}
@@ -176,11 +166,7 @@ public class SerialPortWorker {
 			logger.catching(Level.DEBUG, e);
 		} catch (Exception e) {
 			logger.catching(e);
-			Console.appendLn(e.getLocalizedMessage(), "Error");
 		}
-
-		Console.appendLn(readPacket, "Get");
-		Console.appendLn(""+(System.currentTimeMillis()-start), "Time");
 
 		return readPacket;
 	}
@@ -201,8 +187,6 @@ public class SerialPortWorker {
 		final int newLength = byteCount + escapes;
 		readBytes = Arrays.copyOf(readBytes, newLength);
 		System.arraycopy(tmp, 0, readBytes, byteCount, escapes);
-
-		Console.appendLn(ToHex.bytesToHex(readBytes), "Read");
 
 		return byteStuffing(readBytes);
 	}
