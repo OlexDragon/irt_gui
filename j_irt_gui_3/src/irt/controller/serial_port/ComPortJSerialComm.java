@@ -27,8 +27,6 @@ public class ComPortJSerialComm implements SerialPortInterface {
 
 	@Override
 	public Packet send(PacketWork packetWork) {
-//		logger.error("{}", packetWork);
-		logger.traceEntry("{}", packetWork);
 
 		Packet packet = packetWork.getPacketThread().getPacket();
 

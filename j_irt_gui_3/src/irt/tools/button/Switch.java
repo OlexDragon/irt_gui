@@ -67,8 +67,8 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	};
 
 	public Switch(PacketSuper packet) {
-		super(Optional.ofNullable(IrtGui.class.getResource("/irt/irt_gui/images/switch_off.png")).map(r->new ImageIcon(r).getImage()).orElse(null),
-				Optional.ofNullable(IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png")).map(r->new ImageIcon(r).getImage()).orElse(null));
+		super(Optional.ofNullable(IrtGui.class.getResource("/irt/irt_gui/images/switch_off.png")).map(ImageIcon::new).map(ImageIcon::getImage).orElse(null),
+				Optional.ofNullable(IrtGui.class.getResource("/irt/irt_gui/images/switch_on.png")).map(ImageIcon::new).map(ImageIcon::getImage).orElse(null));
 
 		this.packetToGet = packet;
 		setCursor(new Cursor(Cursor.HAND_CURSOR));

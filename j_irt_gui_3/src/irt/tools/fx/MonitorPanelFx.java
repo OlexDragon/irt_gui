@@ -121,6 +121,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private SerialPortInterface serialPort;
 
 	private int retransmitDelay;
+
 	@Override
 	public void run() {
 		logger.traceEntry();
@@ -152,6 +153,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 	}
 
+	private Tooltip tooltip;
 	@Override
 	public void onPacketReceived(final Packet packet) {
 
@@ -166,6 +168,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			.map(v->(Map<?, ?>)v)
 			.ifPresent(
 					map->{
+
+						if(System.getProperty("sun.java.command").equals("irt.irt_gui.IrtGui")) {
+
+							final String string = map.toString();
+
+							if(Optional.ofNullable(this.tooltip).map(Tooltip::getText).filter(string::equals).isPresent()) return;
+
+							Tooltip tooltip = new Tooltip(string);
+							Tooltip.install(this, tooltip);
+						}
 
 						Optional
 						.ofNullable((List<?>)map.remove("STATUS"))

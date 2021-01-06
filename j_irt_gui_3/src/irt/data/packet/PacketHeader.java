@@ -3,8 +3,6 @@ package irt.data.packet;
 import java.util.Arrays;
 import java.util.Optional;
 
-import irt.data.packet.PacketIDs;
-
 public class PacketHeader{
 
 //	private final Logger logger = (Logger) LogManager.getLogger();

@@ -72,6 +72,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 			stop();
 		}
 	};
+	private final String toolTip;
 
 	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, PacketIDs packetID, int min, int max) {
 		addFocusListener(focusListener);
@@ -80,7 +81,8 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		final int index = registerValue.getIndex();
 		final int addr = registerValue.getAddr();
 
-		setToolTipText("Index=" + index + "; Address=" + addr);
+		toolTip = "Index=" + index + "; Address=" + addr;
+		setToolTipText(toolTip);
 
 		MIN = min;
 		MAX = max;
@@ -121,6 +123,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		}else
 			a = addr+3;
 
+//		logger.error("index: {}; addr: {}: a: {}", index, addr, a);
 		final Value value = new Value(0, 0, 0, 0);
 		valueSaveRegister = new RegisterValue(index, a, value);
 
@@ -205,7 +208,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 					showAction(Color.RED);
 					logger.warn("Packet has error {}", packet);
 
-					setToolTipText(hasResponse.get().getOptionStr());
+					setToolTipText("<html>" + toolTip + "<BR>" + hasResponse.get().getOptionStr() + "</html>");
 					return;
 				}
 
@@ -272,17 +275,14 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 		//KA band
 		if(valueSaveRegister.getIndex()==30){
-			Optional
-			.ofNullable(getText())
-			.filter(String::isEmpty)
-			.map(Integer::parseInt)
-			.ifPresent(v->{
+			getValue().ifPresent(v->{
 				final Value value = new Value(v, v, v, 0);
 				valueSaveRegister.setValue(value);
 			});
 		}
 
 		((RegisterPacket)setPacket).setValue(valueSaveRegister);
+//		logger.error("{}; {}", valueSaveRegister, setPacket);
 		GuiControllerAbstract.getComPortThreadQueue().add(setPacket);
 	}
 
@@ -323,5 +323,10 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	@Override
 	public void run() {
 			GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
+	}
+
+	public Optional<Integer> getValue() {
+		final String text = getText().replace(",", "");
+		return Optional.of(text).filter(t->!t.isEmpty()).map(Integer::parseInt);
 	}
 }

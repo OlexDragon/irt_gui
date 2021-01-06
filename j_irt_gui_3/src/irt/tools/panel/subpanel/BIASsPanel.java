@@ -3,7 +3,6 @@ package irt.tools.panel.subpanel;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -21,13 +20,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,12 +33,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
@@ -49,13 +45,9 @@ import javax.swing.event.ChangeListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.controller.DefaultController;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
-import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.controller.serial_port.value.setter.Setter;
 import irt.data.AdcWorker;
 import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
@@ -69,13 +61,10 @@ import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork;
 import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.packet.interfaces.PacketThreadWorker;
-import irt.data.value.Value;
 import irt.irt_gui.IrtGui;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.button.ImageButton;
@@ -83,13 +72,15 @@ import irt.tools.button.Switch;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.textField.RegisterTextField;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 @SuppressWarnings("serial")
 public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 	protected final Logger logger = LogManager.getLogger();
 
-	private static final int MAX_POTENTIOMETER_VALUE = 896;
 	private static final int P1 = 13;
 	private static final int P2 = 40;
 	private static final int P3 = 67;
@@ -112,12 +103,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	private JTextField txtStep;
 	private SwitchBox switch_1;
 	private SwitchBox switch_2;
-	private RegisterTextField txtPotentiometer1;
-	private RegisterTextField txtPotentiometer2;
-	private RegisterTextField txtPotentiometer3;
-	private RegisterTextField txtPotentiometer4;
-	private RegisterTextField txtPotentiometer5;
-	private RegisterTextField txtPotentiometer6;
 	private JLabel lblPotentiometer1;
 	private JLabel lblPotentiometer4;
 	private JLabel lblPotentiometer2;
@@ -138,28 +123,41 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	private JLabel lblTemp_1;
 	private JLabel lblTemp;
 
+	private final ChangeListener sliderChangeListener = new ChangeListener() {
+		public void stateChanged(ChangeEvent e) {
+			if(activeTextField!=null)
+				activeTextField.setText(Integer.toString(slider.getValue()));
+		}
+	};
+
 	private final FocusListener potentiometerfocusListener = new FocusListener() {
 		@Override public void focusGained(FocusEvent e) {
+
 			final RegisterTextField source = (RegisterTextField) e.getSource();
 			setColors(source);
 			setSliderValue(source);
 		}
 		private void setSliderValue(RegisterTextField registerTextField) {
-			final String text = registerTextField.getText().replace(",", "");
-			if(text.isEmpty())
-				return;
 
-			slider.setValue(Integer.parseInt(text));
+			slider.removeChangeListener(sliderChangeListener);
+
+			slider.setMaximum(registerTextField.MAX);
+			registerTextField.getValue().ifPresent(slider::setValue);
+
+			slider.addChangeListener(sliderChangeListener);
 		}
 		private void setColors(RegisterTextField registerTextField) {
-			if(activeTextField!=null){
-				activeTextField.setBackground(Color.WHITE);
-				activeTextField.start();
-			}
+
+			Optional.ofNullable(activeTextField)
+			.ifPresent(
+					active->{
+						active.setBackground(Color.WHITE);
+						active.start();
+					});
 
 			activeTextField = registerTextField;
-			activeTextField.stop();
 
+			activeTextField.stop();
 			activeTextField.setBackground(Color.YELLOW);
 		}
 		@Override public void focusLost(FocusEvent e) {}
@@ -180,11 +178,12 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		setLayout(null);
 
 		final byte addr = Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte) 0);
-		addAncestorListener(new AncestorListener() {
 
-			public void ancestorAdded(AncestorEvent arg0)  { start(); }
-			public void ancestorRemoved(AncestorEvent arg0){ stop();  }
-			public void ancestorMoved(AncestorEvent arg0) {}
+		addAncestorListener(
+				new AncestorListener() {
+					public void ancestorAdded(AncestorEvent arg0)  { start(); }
+					public void ancestorRemoved(AncestorEvent arg0){ stop();  }
+					public void ancestorMoved(AncestorEvent arg0) {}
 		});
 
 		switch_1 = new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.SWITCH_N1 : DeviceDebugPacketIds.SWITCH_N1_REMOTE_BIAS));
@@ -199,17 +198,13 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		slider = new JSlider();
 		slider.setMinimum(0);
-		slider.setMaximum(896);
+		int maxValue = 896;
+		slider.setMaximum(maxValue);
 		slider.setOpaque(false);
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setBounds(249, 0, 22, 260);
 		add(slider);
-		slider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				if(activeTextField!=null)
-					activeTextField.setText(Integer.toString(slider.getValue()));
-			}
-		});
+		slider.addChangeListener(sliderChangeListener);
 		slider.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
@@ -250,6 +245,8 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		add(txtStep);
 		txtStep.setFont(font);
 
+		List<RegisterTextField> allTextFields = new ArrayList<>();
+
 		final RegisterValue registerValue1;
 		final RegisterValue registerValue2;
 		final RegisterValue registerValue3;
@@ -285,12 +282,14 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 
 			// Text Field
-			RegisterTextField txtPotentiometer7 = new RegisterTextField(addr, registerValue7, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, 0, 896);
+			RegisterTextField txtPotentiometer7 = new RegisterTextField(addr, registerValue7, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, 0, maxValue);
 			txtPotentiometer7.setHorizontalAlignment(SwingConstants.RIGHT);
 			txtPotentiometer7.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			txtPotentiometer7.setColumns(10);
 			txtPotentiometer7.setBounds(184, P7, 55, 20);
+			txtPotentiometer7.addFocusListener(potentiometerfocusListener);
 			add(txtPotentiometer7);
+			allTextFields.add(txtPotentiometer7);
 
 			// Label
 			JLabel lblPotentiometer7 = new JLabel("MMIC:");
@@ -300,32 +299,38 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			lblPotentiometer7.setBounds(126, P7, 57, 17);
 			add(lblPotentiometer7);
 
-			//New Bias board
 		}else if(deviceInfo.getRevision()>10) {	
+		//New Bias board
 
-			registerValue1 = new RegisterValue(1, 0, null);
-			registerValue2 = new RegisterValue(1, 4, null);
-			registerValue3 = new RegisterValue(1, 8, null);
-			registerValue4 = new RegisterValue(1, 12,null);
-			registerValue5 = new RegisterValue(2, 0, null);
-			registerValue6 = new RegisterValue(2, 4, null);
-			registerValue7 = new RegisterValue(2, 8, null);
-			registerValue8 = new RegisterValue(2, 12,null);
+			maxValue = 255;
+
+			registerValue1 = new RegisterValue(1, 0x0, null);
+			registerValue2 = new RegisterValue(1, 0x8, null);
+			registerValue3 = new RegisterValue(1, 0x30, null);
+			registerValue4 = new RegisterValue(1, 0x38,null);
+			registerValue5 = new RegisterValue(2, 0x0, null);
+			registerValue6 = new RegisterValue(2, 0x8, null);
+			registerValue7 = new RegisterValue(2, 0x30, null);
+			registerValue8 = new RegisterValue(2, 0x38,null);
 
 			// Text Fields
-			RegisterTextField txtPotentiometer7 = new RegisterTextField(addr, registerValue7, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, 0, 896);
+			RegisterTextField txtPotentiometer7 = new RegisterTextField(addr, registerValue7, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, 0, maxValue);
 			txtPotentiometer7.setHorizontalAlignment(SwingConstants.RIGHT);
 			txtPotentiometer7.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			txtPotentiometer7.setColumns(10);
 			txtPotentiometer7.setBounds(184, P7, 55, 20);
+			txtPotentiometer7.addFocusListener(potentiometerfocusListener);
 			add(txtPotentiometer7);
+			allTextFields.add(txtPotentiometer7);
 
-			RegisterTextField txtPotentiometer8 = new RegisterTextField(addr, registerValue8, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N8, 0, 896);
+			RegisterTextField txtPotentiometer8 = new RegisterTextField(addr, registerValue8, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N8, 0, maxValue);
 			txtPotentiometer8.setHorizontalAlignment(SwingConstants.RIGHT);
 			txtPotentiometer8.setFont(new Font("Tahoma", Font.PLAIN, 14));
 			txtPotentiometer8.setColumns(10);
 			txtPotentiometer8.setBounds(184, P8, 55, 20);
+			txtPotentiometer8.addFocusListener(potentiometerfocusListener);
 			add(txtPotentiometer8);
+			allTextFields.add(txtPotentiometer8);
 
 			//labels
 			JLabel lblPotentiometer7 = new JLabel("POT7:");
@@ -352,49 +357,55 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			registerValue6 = new RegisterValue(2, 8, null);
 		}
 
-		txtPotentiometer1 = new RegisterTextField(addr, registerValue1, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N1, 0, 896);
+		RegisterTextField txtPotentiometer1 = new RegisterTextField(addr, registerValue1, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N1, 0, maxValue);
 		txtPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer1.setBounds(184, P1, 55, 20);
 		txtPotentiometer1.setFont(font);
 		txtPotentiometer1.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer1);
+		allTextFields.add(txtPotentiometer1);
 
-		txtPotentiometer2 = new RegisterTextField(addr, registerValue2, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N2, 0, 896);
+		RegisterTextField txtPotentiometer2 = new RegisterTextField(addr, registerValue2, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N2, 0, maxValue);
 		txtPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer2.setFont(font);
 		txtPotentiometer2.setBounds(184, P2, 55, 20);
 		txtPotentiometer2.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer2);
+		allTextFields.add(txtPotentiometer2);
 
-		txtPotentiometer3 = new RegisterTextField(addr, registerValue3, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N3, 0, 896);
+		RegisterTextField txtPotentiometer3 = new RegisterTextField(addr, registerValue3, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N3, 0, maxValue);
 		txtPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer3.setFont(font);
 		txtPotentiometer3.setBounds(184, P3, 55, 20);
 		txtPotentiometer3.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer3);
+		allTextFields.add(txtPotentiometer3);
 
-		txtPotentiometer4 = new RegisterTextField(addr, registerValue4, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N4, 0, 896);
+		RegisterTextField txtPotentiometer4 = new RegisterTextField(addr, registerValue4, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N4, 0, maxValue);
 		txtPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer4.setFont(font);
 		txtPotentiometer4.setBounds(184, P4, 55, 20);
 		txtPotentiometer4.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer4);
+		allTextFields.add(txtPotentiometer4);
 
-		txtPotentiometer5 = new RegisterTextField(addr, registerValue5, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N5, 0, 896);
+		RegisterTextField txtPotentiometer5 = new RegisterTextField(addr, registerValue5, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N5, 0, maxValue);
 		txtPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		txtPotentiometer5.setColumns(10);
 		txtPotentiometer5.setBounds(184, P5, 55, 20);
 		txtPotentiometer5.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer5);
+		allTextFields.add(txtPotentiometer5);
 
-		txtPotentiometer6 = new RegisterTextField(addr, registerValue6, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N6, 0, 896);
+		RegisterTextField txtPotentiometer6 = new RegisterTextField(addr, registerValue6, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N6, 0, maxValue);
 		txtPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 14));
 		txtPotentiometer6.setColumns(10);
 		txtPotentiometer6.setBounds(184, P6, 55, 20);
 		txtPotentiometer6.addFocusListener(potentiometerfocusListener);
 		add(txtPotentiometer6);
+		allTextFields.add(txtPotentiometer6);
 
 		font = font.deriveFont(12f);
 
@@ -613,255 +624,214 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		adcWorker = new AdcWorker(lblTemp, 		addr, null, temperature, 0, "#.###");
 		synchronized(adcWorkers) {	adcWorkers.add(adcWorker); }
 
-		
 		URL resource = IrtGui.class.getResource("/irt/irt_gui/images/whitehouse_button.png");
-		ImageButton imageButton = new ImageButton(resource!=null ? new ImageIcon(resource).getImage() : null);
-		imageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		imageButton.addMouseListener(new MouseAdapter() {
-			DefaultController controller;
+		ImageButton btnInItialise = new ImageButton(resource!=null ? new ImageIcon(resource).getImage() : null);
+		btnInItialise.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		btnInItialise.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				SwingUtilities.invokeLater(()->{
+				ThreadWorker.runThread(
+						()->{
 
-					if(isMainBoard) {
+							try {
 
-						final Optional<Boolean> oCallMode = checkCallibrationMode(addr);
-						if(!oCallMode.isPresent()) {
-							showMessage("Packet does not have value.");
-							return;
-						}
+								if(setCalibrationModeOn()) {
 
-						final Boolean callMode = oCallMode.get();
-						if(!callMode) {
-							if(!setCallibrationModeOn(addr).filter(b->b).orElse(false)) {
-								showMessage("Unable to set calibration mode on.");
-								return;
+									final String errorMessage = initialize();
+
+									// No error
+									if(errorMessage.isEmpty()) {
+										Platform.runLater(
+												()->{
+
+													Alert alert = new Alert(AlertType.CONFIRMATION);
+													alert.setTitle("Initialize");
+													alert.setHeaderText(null);
+													alert.setContentText("Initialization completed.");
+													alert.showAndWait();												
+												});
+										return;
+									}
+
+									Platform.runLater(
+											()->{
+
+												Alert alert = new Alert(AlertType.ERROR);
+												alert.setTitle("Initialize Error");
+												alert.setHeaderText(null);
+												alert.setContentText(errorMessage);
+												alert.showAndWait();												
+											});
+
+								}else {
+									Platform.runLater(
+											()->{
+
+												Alert alert = new Alert(AlertType.ERROR);
+												alert.setTitle("Calibration Mode Error");
+												alert.setHeaderText(null);
+												alert.setContentText("Cannot enable calibration mode.");
+												alert.showAndWait();												
+											});
+								}
+
+							} catch (InterruptedException | ExecutionException e) {
+								logger.catching(e);
 							}
-						}
 
-						final boolean initialize = initialize(addr).orElse(false);
+						}, "Bias Board Initialisation");
 
-						if(initialize)
-							showMessage("Initialization complete.\nReboot the unit.");
-						else
-							showMessage("Unable to initialize.");
-
-					}else{
-						logger.trace("\n\t{}", controller);
-						if(controller==null || !controller.isRun()){
-							if(setCalibrationMode(CalibrationMode.ON)){
-
-								if(	initialisePotenciometr(1,0x10, MAX_POTENTIOMETER_VALUE) &&
-									initialisePotenciometr(1,0x11, MAX_POTENTIOMETER_VALUE) &&
-									initialisePotenciometr(1,0x12, 0xFFFF) &&
-									initialisePotenciometr(1,0x13, 0xFFFF)
-								);
-
-								if(	initialisePotenciometr(2,0x10, MAX_POTENTIOMETER_VALUE) &&
-									initialisePotenciometr(2,0x11, MAX_POTENTIOMETER_VALUE) &&
-									initialisePotenciometr(2,0x12, 0xFFFF) &&
-									initialisePotenciometr(2,0x13, 0xFFFF)
-								);
-
-								if(	initialisePotenciometr(7,0x10, MAX_POTENTIOMETER_VALUE) &&
-									initialisePotenciometr(7,0x11, MAX_POTENTIOMETER_VALUE) &&
-									initialisePotenciometr(7,0x12, 0xFFFF) &&
-									initialisePotenciometr(7,0x13, 0xFFFF)
-								);
-
-								setCalibrationMode(CalibrationMode.OFF);
-							}else
-								showMessage("Set Calibration Mode 'ON' error.");
-						}else
-							showMessage("Operation is not completed");
-					}
-				});
+//				SwingUtilities.invokeLater(()->{
+//
+//					if(isMainBoard) {
+//
+//						final Optional<Boolean> oCallMode = checkCallibrationMode(addr);
+//						if(!oCallMode.isPresent()) {
+//							showMessage("Packet does not have value.");
+//							return;
+//						}
+//
+//						final Boolean callMode = oCallMode.get();
+//						if(!callMode) {
+//							if(!setCallibrationModeOn(addr).filter(b->b).orElse(false)) {
+//								showMessage("Unable to set calibration mode on.");
+//								return;
+//							}
+//						}
+//
+//						final boolean initialize = initialize(addr).orElse(false);
+//
+//						if(initialize)
+//							showMessage("Initialization complete.\nReboot the unit.");
+//						else
+//							showMessage("Unable to initialize.");
+//
+//					}else{
+//						logger.trace("\n\t{}", controller);
+//						if(controller==null || !controller.isRun()){
+//							if(setCalibrationMode(CalibrationMode.ON)){
+//
+//								if(	initialisePotenciometr(1,0x10, MAX_POTENTIOMETER_VALUE) &&
+//									initialisePotenciometr(1,0x11, MAX_POTENTIOMETER_VALUE) &&
+//									initialisePotenciometr(1,0x12, 0xFFFF) &&
+//									initialisePotenciometr(1,0x13, 0xFFFF)
+//								);
+//
+//								if(	initialisePotenciometr(2,0x10, MAX_POTENTIOMETER_VALUE) &&
+//									initialisePotenciometr(2,0x11, MAX_POTENTIOMETER_VALUE) &&
+//									initialisePotenciometr(2,0x12, 0xFFFF) &&
+//									initialisePotenciometr(2,0x13, 0xFFFF)
+//								);
+//
+//								if(	initialisePotenciometr(7,0x10, MAX_POTENTIOMETER_VALUE) &&
+//									initialisePotenciometr(7,0x11, MAX_POTENTIOMETER_VALUE) &&
+//									initialisePotenciometr(7,0x12, 0xFFFF) &&
+//									initialisePotenciometr(7,0x13, 0xFFFF)
+//								);
+//
+//								setCalibrationMode(CalibrationMode.OFF);
+//							}else
+//								showMessage("Set Calibration Mode 'ON' error.");
+//						}else
+//							showMessage("Operation is not completed");
+//					}
+//				});
 			}
 
-			private Optional<Boolean> initialize(byte addr) {
-				final PacketWork initializePacket = new InitializePacket(addr);
-				return sendPacket(initializePacket, InitializePacket.parseValueFunction).filter(Boolean.class::isInstance).map(Boolean.class::cast);
-			}
+			private Boolean setCalibrationModeOn() throws InterruptedException, ExecutionException {
 
-			private Optional<Boolean> checkCallibrationMode(byte addr) {
-				final PacketWork callibrationModePacket = new CallibrationModePacket(addr);
-				return sendPacket(callibrationModePacket, CallibrationModePacket.parseValueFunction).filter(Boolean.class::isInstance).map(Boolean.class::cast);
-			}
-
-			private Optional<Boolean> setCallibrationModeOn(byte addr) {
-				final PacketWork callibrationModePacket = new CallibrationModePacket(addr, true);
-				return sendPacket(callibrationModePacket, CallibrationModePacket.parseValueFunction).filter(Boolean.class::isInstance).map(Boolean.class::cast);
-			}
-
-			private Optional<?> sendPacket(PacketWork packetToSend, Function<Packet, Optional<Object>> function) {
-
-				final ParsePacket parsePacket = new ParsePacket(function);
-				FutureTask<Optional<?>> ft = new FutureTask<>(parsePacket);
-
-				final PacketListener packetListener = new PacketListener() {
-					
-					@Override
-					public void onPacketReceived(Packet packet) {
-
-						if(packet==null)
-							return;
-
-						final Optional<PacketIDs> oPacketId = PacketIDs.valueOf(packet.getHeader().getPacketId());
-						if(!oPacketId.isPresent())
-							return;
-
-						final PacketIDs packetID = oPacketId.get();
-						if(!packetID.match(packet))
-							return;
-
-						parsePacket.setPacket(packet);
-						new ThreadWorker(ft, "Get Callibration Mode");
-					}
-				};
-
+				final AtomicBoolean value = new AtomicBoolean();
+				final Callable<Boolean> callable = ()->value.get();
+				final FutureTask<Boolean> ft = new FutureTask<>(callable);
 				final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
 
+				PacketListener packetListener = new PacketListener() {
+
+					private boolean haveToSend = true;
+
+					@Override
+					public void onPacketReceived(Packet packet) {
+
+						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE::match);
+
+						if(myPacket.isPresent())
+							ThreadWorker.runThread(
+									()->{
+
+										if(
+												myPacket.flatMap(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE::valueOf)
+												.filter(
+														b->{
+															final Boolean bool = (Boolean)b;
+															value.set(bool);
+															return !bool;
+														})
+												.isPresent()) {
+
+											if(haveToSend) {
+												haveToSend = false;
+												comPortThreadQueue.add(new CallibrationModePacket(addr, true));
+												return;
+											}
+										}
+
+										comPortThreadQueue.removePacketListener(this);
+										ThreadWorker.runThread(ft, "Get Result");
+
+									}, "Calibration Mode Listener");
+					}
+				};
+
 				comPortThreadQueue.addPacketListener(packetListener);
+				comPortThreadQueue.add(new CallibrationModePacket(addr));
 
-				comPortThreadQueue.add(packetToSend);
-				Optional<?> result;
-				try {
-
-					result = ft.get(3, TimeUnit.SECONDS);
-
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					logger.catching(e);
-					result = Optional.empty();
-				}
-				comPortThreadQueue.removePacketListener(packetListener);
-
-				return result;
+				return ft.get();
 			}
 
-			private boolean initialisePotenciometr(int index, int addr, int potentiometerValue) {
-				Value value = new Value( potentiometerValue, 0, MAX_POTENTIOMETER_VALUE, 0);
-				RegisterValue registerValue = new RegisterValue(index, addr, value);
-				DeviceDebagSetter setter = new DeviceDebagSetter(linkHeader,
-						index,
-						addr,
-						PacketIDs.DEVICE_POTENTIOMETERS_INIT,
-						PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE);
-				PacketThreadWorker packetThread = setter.getPacketThread();
-				packetThread.start();
-				try { packetThread.join(); } catch (InterruptedException e) { logger.catching(e); }
-				setter.preparePacketToSend(registerValue);
-				return runController(createController(setter, index, addr));
-			}
+			private String initialize() throws InterruptedException, ExecutionException {
 
-			private DefaultController createController(DeviceDebagSetter setter, int index, int address) {
-				return new DefaultController(deviceInfo.getDeviceType(), "Potenciometer index="+index+", address="+address, setter, Style.CHECK_ONCE){
+				final StringBuilder value = new StringBuilder();
+				final Callable<String> callable = ()->value.toString();
+				final FutureTask<String> ft = new FutureTask<>(callable);
+				final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
+
+				PacketListener packetListener = new PacketListener() {
 
 					@Override
 					public void onPacketReceived(Packet packet) {
 
-						new ThreadWorker(()->{
+						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE::match);
 
-							if(		getPacketWork().isAddressEquals(packet) &&
-									packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
-									PacketIDs.DEVICE_POTENTIOMETERS_INIT.match(packet.getHeader().getPacketId())){
+						if(myPacket.isPresent())
+							ThreadWorker.runThread(
+									()->{
 
-								BIASsPanel.this.logger.trace("\n\t{}", packet);
-								PacketHeader header = packet.getHeader();
-								if(header!=null && header.getOption()==0){
-									BIASsPanel.this.logger.info("\n\tPacket recived");
-									stop();
-								} else
-									showMessage("Some Problem("+header.getOptionStr()+")");
-							}
-						}, "BIASsPanel.DefaultController.onPacketReceived()");
+										final PacketHeader header = packet.getHeader();
+
+										if(header.getPacketType()==PacketImp.PACKET_TYPE_COMMAND)
+											value.append("The Unit did not answer.");
+
+										else if(header.getOption()!=0)
+											value.append("The Unit answer with an error: " + header.getOptionStr());
+
+										comPortThreadQueue.removePacketListener(this);
+										ThreadWorker.runThread(ft, "Get Result");
+
+									}, "Initialize Listener");
 					}
 				};
-			}
+				comPortThreadQueue.addPacketListener(packetListener);
+				comPortThreadQueue.add(new InitializePacket(addr));
 
-			private void showMessage(final String message) {
-				EventQueue.invokeLater(new Runnable() {
-				    @Override
-				    public void run() {
-				    	try{
-				    		JOptionPane.showMessageDialog(null, message);
-				    	}catch (Exception e) {
-							logger.catching(e);
-						}
-				    }
-				});
-			}
-
-			private synchronized boolean setCalibrationMode(final CalibrationMode calibrationMode) {
-
-				Setter setter = new Setter(
-						linkHeader,
-						PacketImp.PACKET_TYPE_COMMAND,
-						PacketGroupIDs.DEVICE_DEBUG.getId(),
-						PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE,
-						PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE,
-						(Integer)calibrationMode.ordinal()
-				);
-				controller = new DefaultController(deviceInfo.getDeviceType(), "CalibrationMode", setter, Style.CHECK_ONCE){
-
-					@Override
-					public void onPacketReceived(Packet packet) {
-
-						new ThreadWorker(()->{
-
-							if(		getPacketWork().isAddressEquals(packet) &&
-									packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE &&
-									PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.match(packet.getHeader().getPacketId())){
-
-								BIASsPanel.this.logger.trace("\n\t{}", packet);
-										
-								PacketHeader header = packet.getHeader();
-								if(header!=null && header.getOption()==0){
-									BIASsPanel.this.logger.info("\n\tPacket recived");
-									stop();
-								}else{
-									String optionStr = header.getOptionStr();
-									BIASsPanel.this.logger.warn("\n\theader.getOptionStr() = {}", optionStr);
-									showMessage("Some Problem("+optionStr+")");
-								}
-							}
-						}, "BIASsPanel.DefaultController-2.onPacketReceived()");
-					}
-				};
-				return runController(controller);
-			};
-
-			private static final long TIMEOUT = 1000;
-			private boolean runController(DefaultController controller) {
-
-				boolean don;
-				if(controller!=null){
-					ExecutorService executor = Executors.newFixedThreadPool(1, new ThreadWorker("BIASsPanel.runController(DefaultController)"));
-					executor.execute(controller);
-					executor.shutdown();
-
-					don = true;
-					Long start = System.currentTimeMillis();
-
-					while(!executor.isShutdown() || controller.isRun()){
-						try { Thread.sleep(100); } catch (InterruptedException e) { logger.catching(e); }
-						if(System.currentTimeMillis()-start>TIMEOUT){
-							controller.stop();
-							logger.warn("Timeout");
-							don = false;
-						}
-					}
-				}else
-					don = false;
-
-				return don;
+				return ft.get();
 			}
 		});
 
-		imageButton.setToolTipText("Initialize");
-		imageButton.setName("Initialize");
-		imageButton.setBounds(68, 90, 33, 33);
-		add(imageButton);
+		btnInItialise.setToolTipText("Initialize");
+		btnInItialise.setName("Initialize");
+		btnInItialise.setBounds(68, 90, 33, 33);
+		add(btnInItialise);
 		
 		JLabel lblInitialize = new JLabel("Initialize");
 		lblInitialize.setFont(new Font("Tahoma", Font.BOLD, 10));
@@ -884,16 +854,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		JButton btnSave = new JButton("S");
 		btnSave.setToolTipText("Save");
 		btnSave.setMargin(new Insets(0,0,0,0));
-		btnSave.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				txtPotentiometer1.saveRegister();
-				txtPotentiometer2.saveRegister();
-				txtPotentiometer3.saveRegister();
-				txtPotentiometer4.saveRegister();
-				txtPotentiometer5.saveRegister();
-				txtPotentiometer6.saveRegister();
-			}
-		});
+		btnSave.addActionListener(e->allTextFields.forEach(RegisterTextField::saveRegister));
 		btnSave.setBounds(140, 234, 34, 23);
 		add(btnSave);
 	}

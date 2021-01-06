@@ -110,15 +110,20 @@ public class DebugPanel extends JPanel{
 									serialNumber;
 
 				File sourceFile = new File(pathName+".log");
+
 				try {
+
 					File destinationFile = File.createTempFile(serialNumber+"(", ").txt");
 					destinationFile.deleteOnExit();
 
 					if (sourceFile.exists() && sourceFile.isFile()) {
-						try (FileChannel source = new FileInputStream(sourceFile).getChannel();
-							FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
-							FileChannel destination = fileOutputStream.getChannel()) {
-									destination.transferFrom(source, 0, source.size());
+
+						try (	final FileInputStream fileInputStream = new FileInputStream(sourceFile);
+								FileChannel source = fileInputStream.getChannel();
+								FileOutputStream fileOutputStream = new FileOutputStream(destinationFile);
+								FileChannel destination = fileOutputStream.getChannel()) {
+
+							destination.transferFrom(source, 0, source.size());
 						}
 					}
 

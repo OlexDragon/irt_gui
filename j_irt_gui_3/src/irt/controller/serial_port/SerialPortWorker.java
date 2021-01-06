@@ -36,6 +36,7 @@ public class SerialPortWorker {
 	private static int maxSize = 3;
 
 	public synchronized static Packet send(SerialPortInterface serialPort, Packet packet) {
+		logger.traceEntry("{} : {}", serialPort, packet);
 
 		SerialPortWorker.serialPort = serialPort;
 		maxSize = packet.getMaxSize();
@@ -56,7 +57,6 @@ public class SerialPortWorker {
 
 		int runTimes = 0;
 		byte[] readData;
-		int ev;
 		byte[] cs;
 		PacketHeader packetHeader;
 		List<Payload> payloadsList;
@@ -118,20 +118,20 @@ public class SerialPortWorker {
 								checksum.add(readData);
 								parameterHeader = new ParameterHeader(readData);
 
-								ev = parameterHeader.getSize();
-								logger.trace("parameterHeader.getSize()={}", ev);
-								if(parameterHeader.getCode()>300 || ev>maxSize){
+								int size = parameterHeader.getSize();
+								logger.trace("parameterHeader.getSize()={}", size);
+								if(parameterHeader.getCode()>300 || size>maxSize){
 									logger.error(
-											"parameterHeader.getCode()>300({}) || ev>{}({}) \n{} \n{} \n readData: {}",
+											"parameterHeader.getCode()>300({}) || size>{}({}) \n{} \n{} \n readData: {}",
 											parameterHeader.getCode(),
 											maxSize,
-											ev,
+											size,
 											packetHeader,
 											parameterHeader,
 											readData);
 									break;
 								}
-								if (ev >= 0 && (readData = readBytes(ev))!=null) {
+								if (size >= 0 && (readData = readBytes(size))!=null) {
 
 									checksum.add(readData);
 									Payload payload = new Payload(parameterHeader,	readData);
@@ -172,6 +172,9 @@ public class SerialPortWorker {
 	}
 
 	private static byte[] readBytes(int byteCount) throws Exception {
+
+		if(byteCount==0)
+			return new byte[0];
 
 		byte[] readBytes = serialPort.getFromBuffer(byteCount);
 		final int escapes = escapeCount(readBytes);

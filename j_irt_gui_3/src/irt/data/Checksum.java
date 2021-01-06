@@ -1,5 +1,7 @@
 package irt.data;
 
+import java.util.Optional;
+
 import irt.data.packet.PacketImp;
 
 public class Checksum {
@@ -71,8 +73,14 @@ public class Checksum {
 	}
 
 	public void add(byte[] data) {
-		fcs = fcs^0xFFFF;
-		checksum(data);
+
+		Optional.ofNullable(data).filter(a->a.length!=0)
+		.ifPresent(
+				a->{
+
+					fcs = fcs^0xFFFF;
+					checksum(data);
+				});
 	}
 
 	public byte[] toBytes() {
