@@ -46,7 +46,7 @@ public class DeviceInfo implements PacketListener {
 		BIAS_BOARD		(2, Protocol.LINKED, "BIAS_BOARD"		, HardwareType.BAIS),
 		PICOBUC_L_TO_KU	(100, Protocol.LINKED, "PICOBUC_L_TO_KU", HardwareType.BAIS),
 		PICOBUC_L_TO_C 	(101, Protocol.LINKED, "PICOBUC_L_TO_C"	, HardwareType.BAIS),
-		SSPA 			(102, Protocol.LINKED, "SSPA"			, HardwareType.BAIS),
+		C_SSPA 			(102, Protocol.LINKED, "C Band SSPA"	, HardwareType.BAIS),
 		FUTURE_BIAS_BOARD(199, Protocol.LINKED, "FUTURE_BIAS_BOARD", HardwareType.BAIS),
 		HPB_L_TO_KU		(200, Protocol.LINKED, "HPB_L_TO_KU"	, HardwareType.HP_BAIS),
 		HPB_L_TO_C		(201, Protocol.LINKED, "HPB_L_TO_C"		, HardwareType.HP_BAIS),
@@ -267,7 +267,7 @@ public class DeviceInfo implements PacketListener {
 		return 	deviceType
 				.filter(dt->getSubtype()>10)
 				.filter(dt->dt.TYPE_ID>=DeviceType.BIAS_BOARD.TYPE_ID)
-				.filter(dt->dt.TYPE_ID<=DeviceType.SSPA.TYPE_ID)
+				.filter(dt->dt.TYPE_ID<=DeviceType.C_SSPA.TYPE_ID)
 				.map(dt->true)
 				.orElse(false);
 	}

@@ -65,7 +65,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 
 	@Override
 	public void refresh() {
-		LogManager.getLogger().error("refresh()");
+//		LogManager.getLogger().error("refresh()");
 		//TODO
 	}
 

@@ -50,8 +50,8 @@ public class AlarmsIDsPacket extends PacketSuper{
 	public static class MyArrayList extends ArrayList<Integer>{
 		private static final long serialVersionUID = -8574611953700905786L;
 
-		public MyArrayList(short[] bytes) {
-			IntStream.range(0, bytes.length).forEach(index->add(bytes[index]&0xFF));
+		public MyArrayList(short[] shorts) {
+			IntStream.range(0, shorts.length).forEach(index->add(shorts[index]&0xFF));
 		}
 
 		@Override

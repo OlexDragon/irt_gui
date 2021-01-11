@@ -75,8 +75,8 @@
 <!--  	<Logger name="irt.controller.serial_port.ComPortPureJava" level="debug"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortJssc" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortJSerialComm" level="all"/> -->
-<!--  	<Logger name="irt.controller.serial_port.SerialPortListener" level="all"/> -->
-<!--  	<Logger name="irt.controller.serial_port.SerialPortWorker" level="all"/> -->
+ 	<Logger name="irt.controller.serial_port.SerialPortListener" level="all"/>
+ 	<Logger name="irt.controller.serial_port.SerialPortWorker" level="debug"/>
 
 <!--  	<Logger name="irt.data.AdcWorker" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.ControlPanelIrPcFx" level="all"/> -->

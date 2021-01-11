@@ -1,7 +1,6 @@
 package irt.tools.panel.subpanel;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Insets;
@@ -26,8 +25,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -103,12 +102,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	private JTextField txtStep;
 	private SwitchBox switch_1;
 	private SwitchBox switch_2;
-	private JLabel lblPotentiometer1;
-	private JLabel lblPotentiometer4;
-	private JLabel lblPotentiometer2;
-	private JLabel lblPotentiometer3;
-	private JLabel lblPotentiometer5;
-	private JLabel lblPotentiometer6;
 	private JLabel lblOutput_1;
 	private JLabel lblLineUp;
 	private SwitchBox switchNGlobal;
@@ -198,8 +191,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		slider = new JSlider();
 		slider.setMinimum(0);
-		int maxValue = 896;
-		slider.setMaximum(maxValue);
 		slider.setOpaque(false);
 		slider.setOrientation(SwingConstants.VERTICAL);
 		slider.setBounds(249, 0, 22, 260);
@@ -225,7 +216,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 		});
 
-		Font font = new Font("Tahoma", Font.PLAIN, 14);
+		final Font font = new Font("Tahoma", Font.PLAIN, 14);
 
 		txtStep = new JTextField("1", 10);
 		txtStep.setToolTipText("Step Size");
@@ -245,7 +236,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		add(txtStep);
 		txtStep.setFont(font);
 
-		List<RegisterTextField> allTextFields = new ArrayList<>();
+		final List<RegisterTextField> allTextFields = new ArrayList<>();
 
 		final RegisterValue registerValue1;
 		final RegisterValue registerValue2;
@@ -256,8 +247,29 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		final RegisterValue registerValue7;
 		final RegisterValue registerValue8;
 
+		final String text1;
+		final String text2;
+		final String text3;
+		final String text4;
+		final String text5;
+		final String text6;
+		final String text7;
+		final String text8;
+
+		final int maxValue;
 		final boolean hpBais = deviceInfo.getDeviceType().map(dt->dt.HARDWARE_TYPE).filter(ht->ht==HardwareType.HP_BAIS).isPresent();
 		if(hpBais) {
+
+			maxValue = 896;
+
+			text1 = "OUTPUT1:";
+			text2 = "OUTPUT2:";
+			text3 = "DRIVER1:";
+			text4 = "DRIVER2:";;
+			text5 = "PREDRIV:";
+			text6 = "PREDRIV:";
+			text7 = "8 VATTS:";
+			text8 = null;
 
 			if(isMainBoard) {
 
@@ -268,6 +280,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				registerValue5 = new RegisterValue(3, 8, null);
 				registerValue6 = new RegisterValue(3, 0, null);
 				registerValue7 = new RegisterValue(7, 8, null);
+				registerValue8 = null;
 
 			}else{
 
@@ -278,31 +291,47 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				registerValue5 = new RegisterValue(6, 8, null);
 				registerValue6 = new RegisterValue(6, 0, null);
 				registerValue7 = new RegisterValue(7, 0, null);
+				registerValue8 = null;
 
 			}
 
-			// Text Field
-			RegisterTextField txtPotentiometer7 = new RegisterTextField(addr, registerValue7, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, 0, maxValue);
-			txtPotentiometer7.setHorizontalAlignment(SwingConstants.RIGHT);
-			txtPotentiometer7.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			txtPotentiometer7.setColumns(10);
-			txtPotentiometer7.setBounds(184, P7, 55, 20);
-			txtPotentiometer7.addFocusListener(potentiometerfocusListener);
-			add(txtPotentiometer7);
-			allTextFields.add(txtPotentiometer7);
+		//New Bias board
+		}else if(deviceInfo.getDeviceType().filter(dt->dt==DeviceType.C_SSPA).isPresent()) {	
+			//New Bias board C Band SSPA
 
-			// Label
-			JLabel lblPotentiometer7 = new JLabel("MMIC:");
-			lblPotentiometer7.setRequestFocusEnabled(false);
-			lblPotentiometer7.setHorizontalAlignment(SwingConstants.RIGHT);
-			lblPotentiometer7.setFont(font);
-			lblPotentiometer7.setBounds(126, P7, 57, 17);
-			add(lblPotentiometer7);
+			maxValue = 255;
+
+			text1 = "OUTPUT:";
+			text2 = "DRIVER:";
+			text3 = "MMIC:";
+			text4 = null;
+			text5 = null;
+			text6 = null;
+			text7 = null;
+			text8 = null;
+
+			registerValue1 = new RegisterValue(1, 0x0, null);
+			registerValue2 = new RegisterValue(1, 0x30, null);
+			registerValue3 = new RegisterValue(1, 0x8, null);
+			registerValue4 = null;
+			registerValue5 = null;
+			registerValue6 = null;
+			registerValue7 = null;
+			registerValue8 = null;
 
 		}else if(deviceInfo.getRevision()>10) {	
 		//New Bias board
 
 			maxValue = 255;
+
+			text1 = "OUTPUT1:";
+			text2 = "OUTPUT2:";
+			text3 = "DRIVER1:";
+			text4 = "DRIVER2:";;
+			text5 = "PREDRIV:";
+			text6 = "TOT-6:";
+			text7 = "POT-7:";
+			text8 = "POT-8";
 
 			registerValue1 = new RegisterValue(1, 0x0, null);
 			registerValue2 = new RegisterValue(1, 0x8, null);
@@ -313,41 +342,18 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			registerValue7 = new RegisterValue(2, 0x30, null);
 			registerValue8 = new RegisterValue(2, 0x38,null);
 
-			// Text Fields
-			RegisterTextField txtPotentiometer7 = new RegisterTextField(addr, registerValue7, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, 0, maxValue);
-			txtPotentiometer7.setHorizontalAlignment(SwingConstants.RIGHT);
-			txtPotentiometer7.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			txtPotentiometer7.setColumns(10);
-			txtPotentiometer7.setBounds(184, P7, 55, 20);
-			txtPotentiometer7.addFocusListener(potentiometerfocusListener);
-			add(txtPotentiometer7);
-			allTextFields.add(txtPotentiometer7);
-
-			RegisterTextField txtPotentiometer8 = new RegisterTextField(addr, registerValue8, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N8, 0, maxValue);
-			txtPotentiometer8.setHorizontalAlignment(SwingConstants.RIGHT);
-			txtPotentiometer8.setFont(new Font("Tahoma", Font.PLAIN, 14));
-			txtPotentiometer8.setColumns(10);
-			txtPotentiometer8.setBounds(184, P8, 55, 20);
-			txtPotentiometer8.addFocusListener(potentiometerfocusListener);
-			add(txtPotentiometer8);
-			allTextFields.add(txtPotentiometer8);
-
-			//labels
-			JLabel lblPotentiometer7 = new JLabel("POT7:");
-			lblPotentiometer7.setRequestFocusEnabled(false);
-			lblPotentiometer7.setHorizontalAlignment(SwingConstants.RIGHT);
-			lblPotentiometer7.setFont(font);
-			lblPotentiometer7.setBounds(126, P7, 57, 17);
-			add(lblPotentiometer7);
-
-			JLabel lblPotentiometer8 = new JLabel("POT8:");
-			lblPotentiometer8.setRequestFocusEnabled(false);
-			lblPotentiometer8.setHorizontalAlignment(SwingConstants.RIGHT);
-			lblPotentiometer8.setFont(font);
-			lblPotentiometer8.setBounds(126, P8, 57, 17);
-			add(lblPotentiometer8);
-
 		}else {
+
+			maxValue = 896;
+
+			text1 = "OUTPUT1:";
+			text2 = "OUTPUT2:";
+			text3 = "DRIVER1:";
+			text4 = "DRIVER2:";;
+			text5 = "PREDRIV:";
+			text6 = "PREDRIV:";
+			text7 = "8 VATTS:";
+			text8 = "MMIC:";
 
 			registerValue1 = new RegisterValue(1, 8, null);
 			registerValue2 = new RegisterValue(1, 0, null);
@@ -355,101 +361,66 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			registerValue4 = new RegisterValue(7, 0, null);
 			registerValue5 = new RegisterValue(2, 0, null);
 			registerValue6 = new RegisterValue(2, 8, null);
+			registerValue7 = null;
+			registerValue8 = null;
 		}
 
-		RegisterTextField txtPotentiometer1 = new RegisterTextField(addr, registerValue1, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N1, 0, maxValue);
-		txtPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer1.setBounds(184, P1, 55, 20);
-		txtPotentiometer1.setFont(font);
-		txtPotentiometer1.addFocusListener(potentiometerfocusListener);
-		add(txtPotentiometer1);
-		allTextFields.add(txtPotentiometer1);
+		// 1 -registerValue1
+		Optional.ofNullable(registerValue1).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N1, P1, text1, maxValue, allTextFields));
 
-		RegisterTextField txtPotentiometer2 = new RegisterTextField(addr, registerValue2, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N2, 0, maxValue);
-		txtPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer2.setFont(font);
-		txtPotentiometer2.setBounds(184, P2, 55, 20);
-		txtPotentiometer2.addFocusListener(potentiometerfocusListener);
-		add(txtPotentiometer2);
-		allTextFields.add(txtPotentiometer2);
+		// 2 -registerValue2
+		Optional.ofNullable(registerValue2).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N2, P2, text2, maxValue, allTextFields));
 
-		RegisterTextField txtPotentiometer3 = new RegisterTextField(addr, registerValue3, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N3, 0, maxValue);
-		txtPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer3.setFont(font);
-		txtPotentiometer3.setBounds(184, P3, 55, 20);
-		txtPotentiometer3.addFocusListener(potentiometerfocusListener);
-		add(txtPotentiometer3);
-		allTextFields.add(txtPotentiometer3);
+		// 3 -registerValue3
+		Optional.ofNullable(registerValue3).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N3, P3, text3, maxValue, allTextFields));
 
-		RegisterTextField txtPotentiometer4 = new RegisterTextField(addr, registerValue4, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N4, 0, maxValue);
-		txtPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer4.setFont(font);
-		txtPotentiometer4.setBounds(184, P4, 55, 20);
-		txtPotentiometer4.addFocusListener(potentiometerfocusListener);
-		add(txtPotentiometer4);
-		allTextFields.add(txtPotentiometer4);
+		// 4 -registerValue4
+		Optional.ofNullable(registerValue4).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N4, P4, text4, maxValue, allTextFields));
 
-		RegisterTextField txtPotentiometer5 = new RegisterTextField(addr, registerValue5, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N5, 0, maxValue);
-		txtPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		txtPotentiometer5.setColumns(10);
-		txtPotentiometer5.setBounds(184, P5, 55, 20);
-		txtPotentiometer5.addFocusListener(potentiometerfocusListener);
-		add(txtPotentiometer5);
-		allTextFields.add(txtPotentiometer5);
+		// 5 - registerValue5
+		Optional.ofNullable(registerValue5).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N5, P5, text5, maxValue, allTextFields));
 
-		RegisterTextField txtPotentiometer6 = new RegisterTextField(addr, registerValue6, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N6, 0, maxValue);
-		txtPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
-		txtPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 14));
-		txtPotentiometer6.setColumns(10);
-		txtPotentiometer6.setBounds(184, P6, 55, 20);
-		txtPotentiometer6.addFocusListener(potentiometerfocusListener);
-		add(txtPotentiometer6);
-		allTextFields.add(txtPotentiometer6);
+		// 6 - registerValue6
+		Optional.ofNullable(registerValue6).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N6, P6, text6, maxValue, allTextFields));
 
-		font = font.deriveFont(12f);
+		// 7 - registerValue7
+		Optional.ofNullable(registerValue7).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, P7, text7, maxValue, allTextFields));
 
-		lblPotentiometer1 = new JLabel("OUTPUT1:");
-		lblPotentiometer1.setRequestFocusEnabled(false);
-		lblPotentiometer1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPotentiometer1.setFont(font);
-		lblPotentiometer1.setBounds(126, P1, 59, 17);
-		add(lblPotentiometer1);
+		// 8 - registerValue8
+		Optional.ofNullable(registerValue8).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N8, P8, text8, maxValue, allTextFields));
 
-		lblPotentiometer2 = new JLabel("OUTPUT2:");
-		lblPotentiometer2.setRequestFocusEnabled(false);
-		lblPotentiometer2.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPotentiometer2.setFont(font);
-		lblPotentiometer2.setBounds(126, P2, 59, 17);
-		add(lblPotentiometer2);
+//		FocusListener listener = new FocusListener() {
+//			
+//			@Override public void focusGained(FocusEvent e) {
+//				Component c = (Component) e.getSource();
+//				final String[] a = c.getName().split(":");
+//
+//				// Set measurement name
+//				lblCurrent1_text.setText(a[0] + '1');
+//				lblCurrent2_text.setText(a[0] + '2');
+//				lblCurrent1.setText(":");
+//				lblCurrent2.setText(":");
+//				
+//				synchronized(adcWorkers) {
+//
+//					final List<AdcWorker> toRemove = adcWorkers.parallelStream()
+//
+//							.filter(
+//									w->{
+//										final JLabel label = w.getLabel();
+//										return label==lblCurrent1 || label==lblCurrent2;
+//									})
+//							.collect(Collectors.toList());
+//
+//					adcWorkers.removeAll(toRemove);
+//					adcWorkers.add(new AdcWorker(lblCurrent1, addr, null, DeviceDebugPacketIds.valueOf(a[1 ]+ '1' + a[2]), 1, "#.### A"));
+//					adcWorkers.add(new AdcWorker(lblCurrent2, addr, null, DeviceDebugPacketIds.valueOf(a[1 ]+ '2' + a[2]), 1, "#.### A"));
+//				}
+//			}
+//			@Override public void focusLost(FocusEvent e) { }
+//		};
 
-		lblPotentiometer3 = new JLabel("DRIVER:");
-		lblPotentiometer3.setRequestFocusEnabled(false);
-		lblPotentiometer3.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPotentiometer3.setFont(font);
-		lblPotentiometer3.setBounds(126, P3, 57, 17);
-		add(lblPotentiometer3);
-
-		lblPotentiometer4 = new JLabel("PRED:");
-		lblPotentiometer4.setRequestFocusEnabled(false);
-		lblPotentiometer4.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPotentiometer4.setFont(font);
-		lblPotentiometer4.setBounds(126, P4, 57, 17);
-		add(lblPotentiometer4);
-
-		lblPotentiometer5 = new JLabel("Pot. #5:");
-		lblPotentiometer5.setRequestFocusEnabled(false);
-		lblPotentiometer5.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPotentiometer5.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblPotentiometer5.setBounds(126, P5, 57, 17);
-		add(lblPotentiometer5);
-
-		lblPotentiometer6 = new JLabel("Pot. #6:");
-		lblPotentiometer6.setRequestFocusEnabled(false);
-		lblPotentiometer6.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblPotentiometer6.setFont(new Font("Tahoma", Font.PLAIN, 12));
-		lblPotentiometer6.setBounds(126, P6, 57, 17);
-		add(lblPotentiometer6);
+//		allTextFields.forEach(tf->tf.addFocusListener(listener));
 
 		lblOutput_1 = new JLabel("OUTPUT");
 		lblOutput_1.setRequestFocusEnabled(false);
@@ -482,7 +453,9 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				slider.setSnapToTicks(chckbxStep.isSelected());
 			}
 		});
-		chckbxStep.setFont(font.deriveFont(11f));
+
+		final Font font2 = font.deriveFont(12f);
+		chckbxStep.setFont(font2.deriveFont(11f));
 		chckbxStep.setOpaque(false);
 		chckbxStep.setBounds(184, 234, 22, 23);
 		add(chckbxStep);
@@ -490,45 +463,10 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		// HP BAIAS Current Measurement
 		if(hpBais) {
 
-			txtPotentiometer1.setName(isMainBoard ? "HSS 1.:HS1_:_CURRENT_HP_BIAS" : "HSS 3.:HS3_:_CURRENT_HP_BIAS");	// HSS1.1 or HSS3.1
-			txtPotentiometer2.setName(isMainBoard ? "HSS 1.:HS1_:_CURRENT_HP_BIAS" : "HSS 3.:HS3_:_CURRENT_HP_BIAS");	// HSS1.2 or HSS3.2
-			txtPotentiometer3.setName(isMainBoard ? "HSS 2.:HS2_:_CURRENT_HP_BIAS" : "HSS 4.:HS4_:_CURRENT_HP_BIAS");	// HSS2.1 or HSS4.1
-			txtPotentiometer4.setName(isMainBoard ? "HSS 2.:HS2_:_CURRENT_HP_BIAS" : "HSS 4.:HS4_:_CURRENT_HP_BIAS");	// HSS2.2 or HSS4.2
-
-			FocusListener listener = new FocusListener() {
-				
-				@Override public void focusGained(FocusEvent e) {
-					Component c = (Component) e.getSource();
-					final String[] a = c.getName().split(":");
-
-					// Set measurement name
-					lblCurrent1_text.setText(a[0] + '1');
-					lblCurrent2_text.setText(a[0] + '2');
-					lblCurrent1.setText(":");
-					lblCurrent2.setText(":");
-					
-					synchronized(adcWorkers) {
-
-						final List<AdcWorker> toRemove = adcWorkers.parallelStream()
-
-								.filter(
-										w->{
-											final JLabel label = w.getLabel();
-											return label==lblCurrent1 || label==lblCurrent2;
-										})
-								.collect(Collectors.toList());
-
-						adcWorkers.removeAll(toRemove);
-						adcWorkers.add(new AdcWorker(lblCurrent1, addr, null, DeviceDebugPacketIds.valueOf(a[1 ]+ '1' + a[2]), 1, "#.### A"));
-						adcWorkers.add(new AdcWorker(lblCurrent2, addr, null, DeviceDebugPacketIds.valueOf(a[1 ]+ '2' + a[2]), 1, "#.### A"));
-					}
-				}
-				@Override public void focusLost(FocusEvent e) { }
-			};
-			txtPotentiometer1.addFocusListener(listener);
-			txtPotentiometer2.addFocusListener(listener);
-			txtPotentiometer3.addFocusListener(listener);
-			txtPotentiometer4.addFocusListener(listener);
+//			txtPotentiometer1.setName(isMainBoard ? "HSS 1.:HS1_:_CURRENT_HP_BIAS" : "HSS 3.:HS3_:_CURRENT_HP_BIAS");	// HSS1.1 or HSS3.1
+//			txtPotentiometer2.setName(isMainBoard ? "HSS 1.:HS1_:_CURRENT_HP_BIAS" : "HSS 3.:HS3_:_CURRENT_HP_BIAS");	// HSS1.2 or HSS3.2
+//			txtPotentiometer3.setName(isMainBoard ? "HSS 2.:HS2_:_CURRENT_HP_BIAS" : "HSS 4.:HS4_:_CURRENT_HP_BIAS");	// HSS2.1 or HSS4.1
+//			txtPotentiometer4.setName(isMainBoard ? "HSS 2.:HS2_:_CURRENT_HP_BIAS" : "HSS 4.:HS4_:_CURRENT_HP_BIAS");	// HSS2.2 or HSS4.2
 		}
 
 		lblCurrent1_text = new JLabel("CURR:");
@@ -541,7 +479,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		lblCurrent1 = new JLabel(":");
 		lblCurrent1.setRequestFocusEnabled(false);
 		lblCurrent1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurrent1.setFont(font);
+		lblCurrent1.setFont(font2);
 		lblCurrent1.setBounds(54, 158, 68, 17);
 		add(lblCurrent1);
 
@@ -555,7 +493,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		lblCurrent2 = new JLabel(":");
 		lblCurrent2.setRequestFocusEnabled(false);
 		lblCurrent2.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblCurrent2.setFont(font);
+		lblCurrent2.setFont(font2);
 		lblCurrent2.setBounds(54, 186, 68, 17);
 		add(lblCurrent2);
 		
@@ -569,7 +507,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		lblOPower = new JLabel(":");
 		lblOPower.setRequestFocusEnabled(false);
 		lblOPower.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblOPower.setFont(font);
+		lblOPower.setFont(font2);
 		lblOPower.setBounds(54, 242, 68, 17);
 		add(lblOPower);
 		
@@ -583,7 +521,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		lblTemp = new JLabel(":");
 		lblTemp.setRequestFocusEnabled(false);
 		lblTemp.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblTemp.setFont(font);
+		lblTemp.setFont(font2);
 		lblTemp.setBounds(54, 214, 68, 17);
 		add(lblTemp);
 
@@ -594,12 +532,12 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		double multiplier;
 		if(isNewBiasBoard){
-			lblPotentiometer1.setText("Output1:");
-			lblPotentiometer2.setText("Output2:");
-			lblPotentiometer3.setText("Driver1:");
-			lblPotentiometer4.setText("Driver2:");
-			lblPotentiometer5.setText("Driver:");
-			lblPotentiometer6.setText("Pred.Dr");
+//			lblPotentiometer1.setText("Output1:");
+//			lblPotentiometer2.setText("Output2:");
+//			lblPotentiometer3.setText("Driver1:");
+//			lblPotentiometer4.setText("Driver2:");
+//			lblPotentiometer5.setText("Driver:");
+//			lblPotentiometer6.setText("Pred.Dr");
 
 //			index = isMainBoard ? 7 : 207;
 			multiplier = 10.8;
@@ -857,6 +795,28 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		btnSave.addActionListener(e->allTextFields.forEach(RegisterTextField::saveRegister));
 		btnSave.setBounds(140, 234, 34, 23);
 		add(btnSave);
+	}
+
+	public Consumer<? super RegisterValue> addFields(final byte addr, PacketIDs packetID, int y, String lblText, final int maxValue, List<RegisterTextField> allTextFields) {
+
+		return rv->{
+
+			RegisterTextField tf = new RegisterTextField(addr, rv, packetID, 0, maxValue);
+			tf.setHorizontalAlignment(SwingConstants.RIGHT);
+			tf.setFont(new Font("Tahoma", Font.PLAIN, 14));
+			tf.setColumns(10);
+			tf.setBounds(184, y, 55, 20);
+			tf.addFocusListener(potentiometerfocusListener);
+			add(tf);
+			allTextFields.add(tf);
+
+			JLabel lbl = new JLabel(lblText);
+			lbl.setRequestFocusEnabled(false);
+			lbl.setHorizontalAlignment(SwingConstants.RIGHT);
+			lbl.setFont(new Font("Tahoma", Font.PLAIN, 12));
+			lbl.setBounds(126, y, 57, 17);
+			add(lbl);
+		};
 	}
 
 	private int getStep() {

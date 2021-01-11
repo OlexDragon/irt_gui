@@ -1,5 +1,8 @@
 package irt.tools.fx;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
@@ -114,7 +117,14 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
     @FXML
     void onMouseClicked(MouseEvent event) {
-    	if(event.getClickCount()==3)
+
+    	if(event.getClickCount()==2) {
+
+    		StringSelection selection = new StringSelection(tooltip);
+    		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    		clipboard.setContents(selection, selection);
+
+    	}else if(event.getClickCount()==3)
     		gridPane.getChildren().clear();
     }
 
@@ -153,7 +163,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 	}
 
-	private Tooltip tooltip;
+	private String tooltip;
 	@Override
 	public void onPacketReceived(final Packet packet) {
 
@@ -173,8 +183,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 							final String string = map.toString();
 
-							if(Optional.ofNullable(this.tooltip).map(Tooltip::getText).filter(string::equals).isPresent()) return;
+							if(Optional.ofNullable(this.tooltip).filter(string::equals).isPresent()) return;
 
+							tooltip = string;
 							Tooltip tooltip = new Tooltip(string);
 							Tooltip.install(this, tooltip);
 						}

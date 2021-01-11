@@ -77,8 +77,8 @@ public class SerialPortWorker {
 			logger.info(marker, ">> {}: {}\n\t as bytes: {}", prefix, packet, hexStr);
 
 			if(data!=null && serialPort.isOpened()){
-				logger.debug("writeBytes: {}", ()->Arrays.toString(data));
 				serialPort.writeBytes(data);
+				logger.debug("writeBytes: {}", data);
 
 				if ((isConfirmBytes()) && isFlagSequence()){
 
@@ -98,7 +98,7 @@ public class SerialPortWorker {
 							checksum = new Checksum(readData);
 
 						packetHeader = new PacketHeader(readData);
-						logger.debug(packetHeader);
+						logger.trace(packetHeader);
 
 						if (packetHeader.toBytes() != null && packetHeader.getGroupId()==groupId) {
 							readPacket.setHeader(packetHeader);
@@ -153,11 +153,13 @@ public class SerialPortWorker {
 
 			Optional.ofNullable(getAcknowledge()).filter(a->serialPort.isOpened())
 			.ifPresent(
-					acknowledge->{ try {
-						serialPort.writeBytes(acknowledge);
-					} catch (Exception e) {
-						logger.catching(e);
-					}});
+					acknowledge->{
+						try {
+							logger.error("writeBytes(acknowledge): {}", acknowledge);
+							serialPort.writeBytes(acknowledge);
+						} catch (Exception e) {
+							logger.catching(e);
+						}});
 
 			if(readPacket.getHeader()==null || readPacket.getPayloads()==null)
 				readPacket = packet;
@@ -209,7 +211,7 @@ public class SerialPortWorker {
 		System.arraycopy(packetId, 0, b, ++idPosition, 2);
 
 		final byte[] preparePacket = PacketThread.preparePacket(b);
-		logger.debug("{}", preparePacket);
+		logger.trace("{}", preparePacket);
 
 		return preparePacket;
 	}
@@ -251,7 +253,7 @@ public class SerialPortWorker {
 
 		byte[] readBytes = readBytes(ev);
 
-		logger.debug("readBytes= {}", readBytes);
+		logger.trace("readBytes= {}", readBytes);
 
 		SerialPortWorker.isComfirm = readBytes!=null && readBytes[0]==PacketImp.FLAG_SEQUENCE && readBytes[readBytes.length-1]==PacketImp.FLAG_SEQUENCE;
 
@@ -278,7 +280,7 @@ public class SerialPortWorker {
 		}else
 			logger.warn("Acknowledge is wrong({})", readBytes);
 
-		logger.debug("RETURN: {}; size:{}; read bytes:{}", isComfirm, ev, readBytes);
+		logger.trace("RETURN: {}; size:{}; read bytes:{}", isComfirm, ev, readBytes);
 		return isComfirm;
 	}
 

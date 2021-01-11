@@ -195,7 +195,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 									dt->{
 
 										switch(dt){
-										case SSPA:
+										case C_SSPA:
 											return new ControlPanelSSPA(deviceType, linkHeader, 0);
 										case DLRS:
 										case DLRS2:

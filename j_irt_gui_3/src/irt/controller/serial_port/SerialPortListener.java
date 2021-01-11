@@ -2,6 +2,7 @@ package irt.controller.serial_port;
 
 import java.util.Arrays;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +29,6 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 						synchronized (SerialPortListener.this) {
 
 							final int bytesAvailable = serialPort.bytesAvailable();
-							logger.debug("bytesAvailable: {}", bytesAvailable);
 
 							if(bytesAvailable<=0)
 								return;
@@ -37,9 +37,9 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 							byte[] b = null;
 							try { b = serialPort.readBytes(bytesAvailable); } catch (Exception e) { logger.catching(e); }
 
-							logger.debug("\nread: {};\nbuffer: {};", b, buffer);
+							logger.debug("\nbytesAvailable: {};\nread: {};\nbuffer: {};\n", bytesAvailable, b, buffer);
 
-							if(buffer==null)
+							if(buffer==null || buffer.length==0)
 								buffer = b;
 
 							else {
@@ -75,8 +75,8 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 
 	@Override
 	public void serialEvent(jssc.SerialPortEvent event) {
-		logger.traceEntry();
 		final int eventType = event.getEventType();
+		logger.traceEntry("Event Type: {};", eventType);
 
 		if (eventType != jssc.SerialPortEvent.RXCHAR)
 			return;
@@ -88,13 +88,21 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 		return buffer;
 	}
 
-	public synchronized void clear() {
-		buffer = null;
+	public void clear() {
+		logger.debug("buffer to clear: {}", buffer);
+
+		synchronized (this) { buffer = null; }
+
+		try { Thread.sleep(20); } catch (InterruptedException e) {logger.catching(Level.DEBUG, e);}
+
+		if(buffer!=null)
+			clear();
 	}
 
 	public synchronized byte[] getBytes(int size) {
 
 		byte[] result = Arrays.copyOf(buffer, size);
+		logger.debug("size:{}; result: {}", size, result);
 		buffer = Arrays.copyOfRange(buffer, size, buffer.length);
 
 		return result;

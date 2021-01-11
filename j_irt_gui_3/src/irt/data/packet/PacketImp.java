@@ -318,18 +318,20 @@ public class PacketImp implements Packet{
 	}
 
 	public static <T> byte[] toBytes(T value) {
+
+		if(value==null)
+			return null;
+
 		byte[] bytes = null;
 
-		if(value!=null){
-			if(value instanceof Byte)
-				bytes = new byte[]{(Byte) value};
-			else if(value instanceof Short)
-				bytes = shortToBytes((Short)value);
-			else if(value instanceof Integer)
-				bytes = intToBytes((Integer)value);
-			else if(value instanceof Long)
-				bytes = longToBytes((Long)value);
-		}
+		if(value instanceof Byte)
+			bytes = new byte[]{(Byte) value};
+		else if(value instanceof Short)
+			bytes = shortToBytes((Short)value);
+		else if(value instanceof Integer)
+			bytes = intToBytes((Integer)value);
+		else if(value instanceof Long)
+			bytes = longToBytes((Long)value);
 
 		return bytes;
 	}
