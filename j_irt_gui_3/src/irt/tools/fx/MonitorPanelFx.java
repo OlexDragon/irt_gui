@@ -171,6 +171,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 		if(notMyPacket(oPacket)) return;
 
+		logger.trace(packet);
+
 		new ThreadWorker(()->{
 
 			oPacket
@@ -178,6 +180,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			.map(v->(Map<?, ?>)v)
 			.ifPresent(
 					map->{
+
+						logger.trace(map);
 
 						if(System.getProperty("sun.java.command").equals("irt.irt_gui.IrtGui")) {
 
@@ -221,18 +225,21 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		if(oHeader.map(PacketHeader::getPacketType).filter(t->t!=PacketImp.PACKET_TYPE_RESPONSE).isPresent())
 			return true;
 
-		if(oHeader.map(PacketHeader::getOption).filter(t->t!=PacketImp.ERROR_NO_ERROR).isPresent()) 
+		if(oHeader.map(PacketHeader::getError).filter(t->t!=PacketImp.ERROR_NO_ERROR).isPresent()) 
 			return true;
 
 		return false;
 	}
 
+	private int count;
 	private void setValues(Map<?, ?> map) {
 		logger.traceEntry("{}", map);
 
 		// Added for RM units. 
-		if(map.size()<2)
+		if(map.size()<2 && count<10) {
+			count++;
 			return;
+		}
 
 		final ObservableList<Node> children = gridPane.getChildren();
 		final Set<? extends Entry<?,?>> entrySet = map.entrySet();

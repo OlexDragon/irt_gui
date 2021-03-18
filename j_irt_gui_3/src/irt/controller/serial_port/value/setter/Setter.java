@@ -64,8 +64,8 @@ public class Setter extends SetterAbstract {
 
 				Object source = null;
 
-				if(cph.getOption()>0 || cph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
-					source = new Byte((byte) -cph.getOption());
+				if(cph.getError()>0 || cph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
+					source = new Byte((byte) -cph.getError());
 					if((byte)source==0)
 						source=-20;
 				}else{

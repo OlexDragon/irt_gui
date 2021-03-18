@@ -51,7 +51,7 @@ public class StoreConfigController implements PacketListener{
 				timer.stop();
 
 				final byte packetType = p.getHeader().getPacketType();
-				final byte option = p.getHeader().getOption();
+				final byte option = p.getHeader().getError();
 
 				if(packetType!= PacketImp.PACKET_TYPE_RESPONSE || option!=PacketImp.ERROR_NO_ERROR)
 					if(JOptionPane.showConfirmDialog( owner, "Could not store the configuration. Try one more time?", "Store Config", JOptionPane.YES_NO_OPTION)==JOptionPane.YES_OPTION) {

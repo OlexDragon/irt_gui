@@ -42,6 +42,7 @@ import irt.data.packet.denice_debag.DeviceDebugPacket.DeviceDebugType;
 import irt.data.packet.denice_debag.DeviceDebugReadWritePacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.network.NetworkAddressPacket;
+import irt.tools.panel.subpanel.DebagInfoPanel;
 
 public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
@@ -59,6 +60,8 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 	public static final Logger logger = LogManager.getLogger();
 	public static final Logger dumper = LogManager.getLogger("dumper");
 	public static final Marker marker = MarkerManager.getMarker("FileWork");
+
+	private	final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
 
 	private DeviceInfo deviceInfo;
 	private final byte addr;
@@ -90,7 +93,6 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 	@Override
 	public void run() {
 
-		final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
 		if(deviceIndexes==null) {
 			comPortThreadQueue.add(helpPacket);
 			return;
@@ -147,39 +149,41 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 		if(header==null || header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE)
 			return;
 
-		new ThreadWorker(()->{
+		new ThreadWorker(
+				()->{
 
-			final short packetId = header.getPacketId();
-			PacketIDs.valueOf(packetId)
-			.ifPresent(pId->{
+					final short packetId = header.getPacketId();
+					PacketIDs.valueOf(packetId)
+					.ifPresent(
+							pId->{
 
-				if(header.getOption()!=PacketImp.ERROR_NO_ERROR) {
-					dump(pId, header.getOptionStr());
-					return;
-				}
+								if(header.getError()!=PacketImp.ERROR_NO_ERROR) {
+									dump(pId, header.getErrorStr());
+									return;
+								}
 
-				final Optional<Object> valueOf = pId.valueOf(packet);
+								final Optional<Object> oValue = pId.valueOf(packet);
 
-				if(!valueOf.isPresent()){
-					logger.warn("{} - have to add parseValueFunction. {}", pId, packet);
-					return;
-				}
+								if(!oValue.isPresent()){
+									logger.warn("{} - have to add parseValueFunction. {}", pId, packet);
+									return;
+								}
 
-				valueOf
-				.ifPresent(
-						value->{
+								oValue
+								.ifPresent(
+										value->{
 
-							// parse indexes from DeviceDebugHelpPacket and return
-							if(pId.equals(PacketIDs.DEVICE_DEBUG_HELP)){
+											// parse indexes from DeviceDebugHelpPacket and return
+											if(pId.equals(PacketIDs.DEVICE_DEBUG_HELP)){
 
-								getIndexes((String) value);
+												setIndexes((String) value);
 
-								logger.trace(value);
+												logger.trace(value);
 
-								Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));
-								scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
-								return;
-							}
+												Optional.of(scheduleAtFixedRate).filter(sf->!sf.isDone()).ifPresent(sf->sf.cancel(false));
+												scheduleAtFixedRate = service.scheduleAtFixedRate(this, 0, 10, TimeUnit.SECONDS);
+												return;
+											}
 
 							final Optional<Map<PacketIDs, Object>> oOldValues = Optional.ofNullable(oldValues);
 
@@ -331,24 +335,28 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 //				.orElse(-1);
 //	}
 
-	private void getIndexes(String value) {
+	private void setIndexes(String value) {
+		logger.traceEntry("{}", value);
 
 		Optional
 		.ofNullable(value)
 		.map(HelpValue::new)
 		.map(HelpValue::parse)
-		.ifPresent(ints->{
+		.ifPresent(
+				ints->{
 
-			deviceIndexes = ints[DeviceDebugHelpPacket.DEVICES].toArray();
+					deviceIndexes = ints[DeviceDebugHelpPacket.DEVICES].toArray();
 
-			dumpIndexes = ints[DeviceDebugHelpPacket.DUMP].toArray();
-			if(dumpIndexes.length==0)
-				dumpIndexes = new int[] {0, 1, 2, 3, 4, 10, 11};
+					dumpIndexes = ints[DeviceDebugHelpPacket.DUMP].toArray();
+					if(dumpIndexes.length==0)
+						dumpIndexes = new int[] {0, 1, 2, 3, 4, 10, 11};
 
-			getAllDumps(deviceIndexes, DeviceDebugType.DEVICE);
-			getAllDumps(dumpIndexes, DeviceDebugType.INFO);
-			dumper.debug("\n\t {}\n\t {}", deviceIndexes, dumpIndexes);
-		});
+					dumper.info(marker, "\n\t deviceIndexes: {}\n\t dumpIndexes: {}", deviceIndexes, dumpIndexes);
+
+					DebagInfoPanel.setIndexes(dumpIndexes, deviceIndexes);
+					getAllDumps(deviceIndexes, DeviceDebugType.DEVICE);
+					getAllDumps(dumpIndexes, DeviceDebugType.INFO);
+				});
 	}
 
 	private void getAllDumps(int[] dumps, DeviceDebugType deviceDebugType) {

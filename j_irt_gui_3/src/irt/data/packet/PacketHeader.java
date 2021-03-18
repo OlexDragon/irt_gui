@@ -32,7 +32,7 @@ public class PacketHeader{
 	public byte[]	packetIdAsBytes	()	{ return new byte[]{packetHeader[1], packetHeader[2]};	}
 	public byte		getGroupId	()	{ return Optional.ofNullable(packetHeader).map(ph->ph[3]).orElse((byte) 0);	}
 	public short	getReserved	()	{ return (short) Optional.ofNullable(packetHeader).map(ph->(short) PacketImp.shiftAndAdd(Arrays.copyOfRange(packetHeader, 4, 6))).orElse((short) 0);}
-	public byte		getOption	()	{ return Optional.ofNullable(packetHeader).map(ph->ph[6]).orElse((byte) 0);	}
+	public byte		getError	()	{ return Optional.ofNullable(packetHeader).map(ph->ph[6]).orElse((byte) 0);	}
 
 	public byte[] set(byte[]data){
 		if(data!=null && data.length>=SIZE)
@@ -51,8 +51,8 @@ public class PacketHeader{
 		return PacketIDs.toString(getPacketId());
 	}
 
-	public String getOptionStr() {
-		return packetHeader!=null ? getOptionStr(getOption()) : null;
+	public String getErrorStr() {
+		return packetHeader!=null ? getOptionStr(getError()) : null;
 
 	}
 
@@ -149,6 +149,6 @@ public class PacketHeader{
 
 	@Override
 	public String toString() {
-		return "PacketHeader [type="+ getPacketTypeStr() + ",packetId=" +getPacketIdStr()+",groupId=" +getGroupIdStr()+",reserved=" +getReserved()+",option=" +getOptionStr()+"]";
+		return "PacketHeader [type="+ getPacketTypeStr() + ",packetId=" +getPacketIdStr()+",groupId=" +getGroupIdStr()+",reserved=" +getReserved()+",option=" +getErrorStr()+"]";
 	}
 }

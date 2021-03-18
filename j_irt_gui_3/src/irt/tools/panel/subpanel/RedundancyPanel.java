@@ -351,7 +351,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 					return;
 				}
 
-				final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+				final Optional<PacketHeader> noError = hasResponse.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR);
 
 				if(!noError.isPresent()){
 					logger.warn("Packet has error {}", packet);

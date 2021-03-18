@@ -128,8 +128,8 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 			.ifPresent(h->{
 
-				if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
-					if(h.getOption()==PacketImp.ERROR_FUNCTION_NOT_IMPLEMENTED) {
+				if(h.getError()!=PacketImp.ERROR_NO_ERROR){
+					if(h.getError()==PacketImp.ERROR_FUNCTION_NOT_IMPLEMENTED) {
 						stop();
 						setEnabled(false);
 					}

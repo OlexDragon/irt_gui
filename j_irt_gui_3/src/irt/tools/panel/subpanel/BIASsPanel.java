@@ -750,8 +750,8 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 										if(header.getPacketType()==PacketImp.PACKET_TYPE_COMMAND)
 											value.append("The Unit did not answer.");
 
-										else if(header.getOption()!=0)
-											value.append("The Unit answer with an error: " + header.getOptionStr());
+										else if(header.getError()!=0)
+											value.append("The Unit answer with an error: " + header.getErrorStr());
 
 										comPortThreadQueue.removePacketListener(this);
 										ThreadWorker.runThread(ft, "Get Result");

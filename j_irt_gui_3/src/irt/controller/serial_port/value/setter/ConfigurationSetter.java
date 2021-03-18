@@ -147,9 +147,9 @@ public class ConfigurationSetter extends SetterAbstract {
 				long tmp = value;
 				Object source = null;
 
-				if(ph.getOption()>0 || ph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
+				if(ph.getError()>0 || ph.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
 
-					tmp = -ph.getOption();
+					tmp = -ph.getError();
 					if(tmp>=0)
 						tmp = -20; //Communication error
 					source = new Byte((byte) tmp);

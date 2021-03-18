@@ -477,7 +477,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 			.filter(p->p.getLinkHeader().getAddr()==unitAddress)
 			.map(Packet::getHeader)
 			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+			.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR)
 			.filter(h->PacketGroupIDs.NETWORK.match(h.getGroupId()))
 			.ifPresent(h->{
 

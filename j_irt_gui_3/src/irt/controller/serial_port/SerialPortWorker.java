@@ -155,7 +155,7 @@ public class SerialPortWorker {
 			.ifPresent(
 					acknowledge->{
 						try {
-							logger.error("writeBytes(acknowledge): {}", acknowledge);
+							logger.debug("writeBytes(acknowledge): {}", acknowledge);
 							serialPort.writeBytes(acknowledge);
 						} catch (Exception e) {
 							logger.catching(e);

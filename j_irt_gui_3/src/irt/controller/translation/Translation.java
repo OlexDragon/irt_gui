@@ -126,7 +126,7 @@ public class Translation {
 			try{
 				returnValue = defaultValue.get();
 			}catch (NullPointerException e) {
-				logger.warn("Con not find value for key={}, Used Default={}", key, defaultValue);
+				logger.error("Con not find value for key={}, Used Default={}", key, defaultValue);
 				returnValue = null;
 			}
 		}

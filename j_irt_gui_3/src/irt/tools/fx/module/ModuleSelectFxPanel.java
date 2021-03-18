@@ -177,7 +177,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 
 		if(!oPacketHeader.map(PacketHeader::getPacketType).filter(pId->pId==PacketImp.PACKET_TYPE_RESPONSE).isPresent())
 			return;
-		if(!oPacketHeader.map(PacketHeader::getOption).filter(pId->pId==PacketImp.ERROR_NO_ERROR).isPresent()) {
+		if(!oPacketHeader.map(PacketHeader::getError).filter(pId->pId==PacketImp.ERROR_NO_ERROR).isPresent()) {
 			logger.warn(packet);
 			return;
 		}

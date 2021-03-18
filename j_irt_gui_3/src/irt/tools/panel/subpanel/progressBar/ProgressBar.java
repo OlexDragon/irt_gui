@@ -173,7 +173,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 		.map(Packet::getHeader)
 		.filter(h->PacketIDs.MEASUREMENT_ALL.match(h.getPacketId()))
 		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
-		.filter(h->h.getOption()	== PacketImp.ERROR_NO_ERROR)
+		.filter(h->h.getError()	== PacketImp.ERROR_NO_ERROR)
 		.map(h->packet.getPayloads())
 		.map(pls->pls.parallelStream())
 		.orElse(Stream.empty())
@@ -203,7 +203,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 		.map(Packet::getHeader)
 		.filter(h->PacketIDs.DEVICE_INFO.match(h.getPacketId()))
 		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
-		.filter(h->h.getOption()	== PacketImp.ERROR_NO_ERROR)
+		.filter(h->h.getError()	== PacketImp.ERROR_NO_ERROR)
 		.ifPresent(p->{
 			new DeviceInfo(packet)
 			.getUnitPartNumber()

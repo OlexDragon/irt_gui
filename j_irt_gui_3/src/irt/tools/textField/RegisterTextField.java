@@ -202,13 +202,13 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 					return;
 				}
 
-				final Optional<PacketHeader> noError = hasResponse.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+				final Optional<PacketHeader> noError = hasResponse.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR);
 
 				if(!noError.isPresent()){
 					showAction(Color.RED);
 					logger.warn("Packet has error {}", packet);
 
-					setToolTipText("<html>" + toolTip + "<BR>" + hasResponse.get().getOptionStr() + "</html>");
+					setToolTipText("<html>" + toolTip + "<BR>" + hasResponse.get().getErrorStr() + "</html>");
 					return;
 				}
 
@@ -287,7 +287,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	}
 
 	public void send() {
-		final String text = getText();
+		final String text = getText().replaceAll("\\D", "");
 		if(text.isEmpty()){
 		    getToolkit().beep();
 		    return;

@@ -231,7 +231,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 							ldLnb2.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 						}
 					}else
-						logger.warn("Error code {}", packet.getHeader().getOptionStr());
+						logger.warn("Error code {}", packet.getHeader().getErrorStr());
 				}
 				return true;
 			}
@@ -381,7 +381,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 	}
 
 	private boolean hasError(Optional<PacketHeader> oHeader) {
-		return !oHeader.map(PacketHeader::getOption).filter(err->err==PacketImp.ERROR_NO_ERROR).isPresent();
+		return !oHeader.map(PacketHeader::getError).filter(err->err==PacketImp.ERROR_NO_ERROR).isPresent();
 	}
 
 	private void stop() {

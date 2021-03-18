@@ -61,8 +61,10 @@
 <!--   	<Logger name="irt.tools.panel.subpanel.control.ControlPanelHPB" level="all"/> -->
 <!--   	<Logger name="irt.tools.panel.subpanel.NetworkPanel" level="all"/> -->
 
-<!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
 <!--  	<Logger name="irt.controller.DumpControllerFull" level="all"/> -->
+<!--  	<Logger name="irt.data.packet.denice_debag.DeviceDebugHelpPacket" level="debug"/> -->
+
+<!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
 <!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
 <!--  	<Logger name="irt.controller.GuiController" level="error" /> -->
 <!-- 	<Logger name="irt.tools.panel.UserPicobucPanel" level="debug"/> -->
@@ -75,10 +77,11 @@
 <!--  	<Logger name="irt.controller.serial_port.ComPortPureJava" level="debug"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortJssc" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortJSerialComm" level="all"/> -->
- 	<Logger name="irt.controller.serial_port.SerialPortListener" level="all"/>
- 	<Logger name="irt.controller.serial_port.SerialPortWorker" level="debug"/>
+<!--  	<Logger name="irt.controller.serial_port.SerialPortListener" level="all"/> -->
+<!--  	<Logger name="irt.controller.serial_port.SerialPortWorker" level="debug"/> -->
 
 <!--  	<Logger name="irt.data.AdcWorker" level="all"/> -->
+
 <!--  	<Logger name="irt.tools.fx.ControlPanelIrPcFx" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.debug.DeviceDebugPanel" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.UpdateButtonJFXPanel" level="all"/> -->
@@ -88,7 +91,7 @@
 <!--  	<Logger name="irt.tools.fx.update.profile.Profile" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.AlarmPanelFx" level="all"/> -->
 
-    <Logger name="dumper" level="INFO">
+    <Logger name="dumper" level="ALL">
       <AppenderRef ref="DumpFile" />
     </Logger>
 

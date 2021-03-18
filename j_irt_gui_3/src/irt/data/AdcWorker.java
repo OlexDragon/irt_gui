@@ -80,13 +80,13 @@ public class AdcWorker {
 					final Optional<PacketHeader> oResponse = oMatch
 					.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE);
 					final Optional<PacketHeader> oNoError = oResponse
-					.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR);
+					.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR);
 
 					if(!oNoError.isPresent()) {
 						++attempts;
 						logger.warn("No response or error: {}", packet);
 						label.setText(":");
-						oResponse.ifPresent(p->label.setToolTipText(p.getOptionStr()));
+						oResponse.ifPresent(p->label.setToolTipText(p.getErrorStr()));
 						return;
 					}
 					attempts = 0;

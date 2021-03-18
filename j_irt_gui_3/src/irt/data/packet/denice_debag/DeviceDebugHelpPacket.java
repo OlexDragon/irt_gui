@@ -10,13 +10,16 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 
 public class DeviceDebugHelpPacket extends PacketSuper {
-//	private final static Logger logger = LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	public static final int DEVICES = 0, DUMP = 1;
 
@@ -43,6 +46,7 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 		private IntStream[] indexes = new IntStream[2];
 
 		public HelpValue(String text) {
+			logger.traceEntry(text);
 			this.text = text;
 		}
 
@@ -55,16 +59,17 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 
 			Map<Boolean, List<String>> collect = Optional
 													.ofNullable(text)
-													.map(t->Arrays.stream(t.split("List of ")))
+													.map(t->Arrays.stream(t.split("List of devices \\(switch -")))
 													.orElse(Stream.empty())
 													.map(String::trim)
 													.filter(s->!s.isEmpty())
-													.collect(Collectors.partitioningBy(s->!s.startsWith("devices")));
+													.collect(Collectors.partitioningBy(s->s.charAt(0)=='d'));
 
-//			logger.error(collect);
+			logger.debug(collect);
+
 			//Devices
 			List<String> list = collect.get(true);
-			indexes[DEVICES] = getIndexes(list);
+			indexes[DEVICES] = getIndexes(list).distinct();
 
 			list = collect.get(false);
 			indexes[DUMP] = getIndexes(list).distinct();
@@ -76,17 +81,21 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 
 			return list
 					.stream()
-					.findAny()
-					.map(t->Arrays.stream(t.split("\n")))
-					.orElse(Stream.empty())
-					.map(String::trim)
-					.filter(s->!s.isEmpty())
-					.filter(s->s.charAt(0) == '[')
+					.flatMap(toStream())
 					.flatMapToInt(parseIndexes());
+		}
+
+		private Function<String, Stream<String>> toStream() {
+
+			return string->{
+				final String[] split = string.split("\n");
+				return Arrays.stream(split).map(String::trim).filter(s->!s.isEmpty()).filter(s->s.charAt(0) == '[');
+			};
 		}
 
 		private Function<String, IntStream> parseIndexes() {
 			return inputText->{
+
 
 				String[] split = inputText.split("]", 2);
 

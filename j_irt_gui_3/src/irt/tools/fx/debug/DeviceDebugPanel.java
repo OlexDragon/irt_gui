@@ -383,7 +383,7 @@ public class DeviceDebugPanel extends JFXPanel {
 
 			// Return if packet has an error
 			if(oHeader
-					.map(PacketHeader::getOption)
+					.map(PacketHeader::getError)
 					.filter(o->o!=PacketImp.ERROR_NO_ERROR)
 					.isPresent()) {
 
@@ -435,7 +435,7 @@ public class DeviceDebugPanel extends JFXPanel {
 		private Consumer<? super Short> ifInitialise(Packet packet) {
 			return id->{
 				final PacketHeader header = packet.getHeader();
-				if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE || header.getOption()!=PacketImp.ERROR_NO_ERROR)
+				if(header.getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE || header.getError()!=PacketImp.ERROR_NO_ERROR)
 					Platform.runLater(
 							()->{
 								final Alert alert = new Alert(AlertType.WARNING);

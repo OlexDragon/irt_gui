@@ -74,7 +74,7 @@ public class ComPortThreadQueue implements Runnable {
 		try {
 
 			PacketWork packetWork = comPortQueue.take();
-			logger.debug(packetWork);
+			logger.info("Packet to send: {}", packetWork);
 
 			Optional
 			.ofNullable(serialPort)
@@ -209,6 +209,7 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public void firePacketListener(Packet packet) {
+		logger.info("Recived Packet: {}", packet);
 
 		Arrays
 		.stream(packetListeners.getListenerList())

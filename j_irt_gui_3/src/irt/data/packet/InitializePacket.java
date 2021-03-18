@@ -11,7 +11,7 @@ public class InitializePacket extends PacketSuper {
 	public final static Function<Packet, Optional<Object>> parseValueFunction = packet-> Optional
 																										.ofNullable(packet)
 																										.map(Packet::getHeader)
-																										.map(PacketHeader::getOption)
+																										.map(PacketHeader::getError)
 																										.map(error->error==PacketImp.ERROR_NO_ERROR);
 
 	public InitializePacket(byte linkAddr) {

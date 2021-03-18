@@ -114,7 +114,7 @@ public class ALCComboBox extends JCheckBox implements Runnable, PacketListener{
 
 				o.map(Packet::getHeader)
 				.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-				.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+				.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR)
 				.filter(h->PacketGroupIDs.CONFIGURATION.match(h.getGroupId()))
 				.map(h->packet.getPayloads())
 				.map(pls->pls.parallelStream())

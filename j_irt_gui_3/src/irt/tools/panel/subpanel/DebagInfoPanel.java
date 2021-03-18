@@ -5,16 +5,18 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -44,7 +46,7 @@ import irt.tools.panel.PicobucPanel;
 public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 	private JTextArea textArea;
 	private JComboBox<String> cbParameterCode;
-	private JComboBox<Integer> cbParameter;
+	private static JComboBox<Integer> cbParameter;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
 	private ScheduledExecutorService service;
@@ -108,14 +110,16 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		cbParameterCode.addItem("device information: parts, firmware and etc.");
 		cbParameterCode.addItem("dump of registers for specified device index ");
 		panel.add(cbParameterCode, BorderLayout.CENTER);
-		cbParameterCode.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent itemEvent) {
-				if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-					cbParameterCode.setToolTipText(cbParameterCode.getSelectedItem().toString());
-					packetToSend.setParameterCode((byte)(cbParameterCode.getSelectedIndex()+1));
-					reset();
+
+		cbParameterCode
+		.addItemListener(
+
+				itemEvent->{
+					if(itemEvent.getStateChange()==ItemEvent.SELECTED){
+						cbParameterCode.setToolTipText(cbParameterCode.getSelectedItem().toString());
+						packetToSend.setParameterCode((byte)(cbParameterCode.getSelectedIndex()+1));
+						reset();
 				}
-			}
 		});
 
 		cbParameter = new JComboBox<Integer>();
@@ -185,10 +189,10 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 					setBorder(new LineBorder(Color.PINK));
 					text = "No Communication";
 
-				}else if(h.getOption()!=PacketImp.ERROR_NO_ERROR){
+				}else if(h.getError()!=PacketImp.ERROR_NO_ERROR){
 
 					setBorder(new LineBorder(Color.RED));
-					text = "ERROR: " + h.getOptionStr();
+					text = "ERROR: " + h.getErrorStr();
 
 				}else{
 
@@ -211,5 +215,15 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 	@Override
 	public void run() {
 		GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
+	}
+
+	public static void setIndexes(int[] dumpIndexes, int[] deviceIndexes) {
+		if(cbParameter!=null)
+		ThreadWorker.runThread(
+				()->{
+					final Integer[] concat = IntStream.concat(Arrays.stream(dumpIndexes), Arrays.stream(deviceIndexes)).distinct().sorted().mapToObj(Integer::new).toArray(Integer[]::new);
+					DefaultComboBoxModel<Integer> model = new DefaultComboBoxModel<>( concat );
+					cbParameter.setModel( model );
+				}, "setIndexes");
 	}
 }

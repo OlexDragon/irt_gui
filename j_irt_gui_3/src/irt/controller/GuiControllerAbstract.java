@@ -7,7 +7,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +30,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -38,11 +41,15 @@ import javax.swing.Timer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.spi.StandardLevel;
 
 import irt.controller.serial_port.ComPortJSerialComm;
 import irt.controller.serial_port.ComPortJssc;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
+import irt.controller.serial_port.SerialPortListener;
+import irt.controller.serial_port.SerialPortWorker;
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
@@ -197,7 +204,9 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 						}
 					}
 
-					addMenuSelectPortDriver(className);
+					final JPopupMenu popup = getPopupMenu();
+					addMenuSelectPortDriver(popup, className);
+					addLoggerMenu(popup);
 				});
 	}
 
@@ -322,16 +331,52 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		return defaultComboBoxModel;
 	}
 
-	private void addMenuSelectPortDriver(String className) {
+	private void addLoggerMenu(JPopupMenu popup) {
 
-		final JPopupMenu popup = Optional
-								.ofNullable(serialPortSelection.getComponentPopupMenu())
-								.orElseGet(
-										()->{
-											final JPopupMenu jPopupMenu = new JPopupMenu();
-											serialPortSelection.setComponentPopupMenu(jPopupMenu);
-											return jPopupMenu;
-										});
+		final JMenu menu = new JMenu("Logger Level");
+		popup.add(menu);
+		final JMenu submenu = new JMenu("Serial Port");
+		menu.add(submenu);
+
+		ActionListener levelListener =
+
+				e->{
+
+					JMenuItem mi = (JMenuItem) e.getSource();
+					final String text = mi.getText();
+
+					try {
+
+						setLoggerLevel(text, ComPortThreadQueue.class);
+						setLoggerLevel(text, SerialPortWorker.class);
+						setLoggerLevel(text, ComPortJSerialComm.class);
+						setLoggerLevel(text, ComPortJssc.class);
+						setLoggerLevel(text, SerialPortListener.class);
+
+					} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e1) {
+						logger.catching(e1);
+					}
+				};
+
+		Arrays.stream(StandardLevel.values()).map(Object::toString)
+		.forEach(
+				level->{
+					final JMenuItem menuItem = new JMenuItem(level);
+					submenu.add(menuItem);
+					menuItem.addActionListener(levelListener);
+				});
+	}
+
+	public void setLoggerLevel(final String text, Class<?> clazz) throws NoSuchFieldException, IllegalAccessException {
+
+		final Field field = Level.class.getDeclaredField(text);
+		field.setAccessible(true);
+		final Level level = (Level) field.get(Level.class);
+		final String name = clazz.getName();
+		Configurator.setLevel(name, level);
+	}
+
+	private void addMenuSelectPortDriver(JPopupMenu popup, String className) {
 
 		final JMenu menu = new JMenu("Serial Port Drivers");
 		popup.add(menu);
@@ -377,6 +422,18 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		}
 
 		setSerialPort();
+	}
+
+	public JPopupMenu getPopupMenu() {
+		final JPopupMenu popup = Optional
+								.ofNullable(serialPortSelection.getComponentPopupMenu())
+								.orElseGet(
+										()->{
+											final JPopupMenu jPopupMenu = new JPopupMenu();
+											serialPortSelection.setComponentPopupMenu(jPopupMenu);
+											return jPopupMenu;
+										});
+		return popup;
 	}
 
 	protected void setSerialPort() {

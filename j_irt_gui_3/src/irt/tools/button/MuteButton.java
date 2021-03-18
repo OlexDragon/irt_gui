@@ -122,7 +122,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 			oPacket
 			.map(Packet::getHeader)
 			.filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId()))
-			.filter(h->h.getOption()==PacketImp.ERROR_NO_ERROR)
+			.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR)
 			.filter(h->MuteControlPacket.GROUP_ID.match(h.getGroupId()))
 			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 			.ifPresent(h->{

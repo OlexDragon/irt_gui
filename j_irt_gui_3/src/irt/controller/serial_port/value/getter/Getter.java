@@ -62,10 +62,10 @@ public class Getter extends GetterAbstract {
 					long tmp = value;
 					Object source = null;
 
-					byte error = cph.getOption();
+					byte error = cph.getError();
 					if (error > 0) {
 						tmp = -error;
-						source = cph.getOptionStr();
+						source = cph.getErrorStr();
 						logger.warn("Packet has error: {}", packet);
 					} else {
 

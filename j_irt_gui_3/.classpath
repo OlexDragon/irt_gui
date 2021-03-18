@@ -10,8 +10,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="library/commons-compress-1.19.jar"/>
 	<classpathentry kind="lib" path="library/jssc-2.8.0.jar" sourcepath="library/jssc-2.8.0.jar"/>
-	<classpathentry kind="lib" path="library/log4j-api-2.13.3.jar"/>
-	<classpathentry kind="lib" path="library/log4j-core-2.13.3.jar"/>
+	<classpathentry kind="lib" path="library/log4j-api-2.13.3.jar" sourcepath="C:/Users/Alex/.m2/repository/org/apache/logging/log4j/log4j-api/2.13.3/log4j-api-2.13.3-sources.jar"/>
+	<classpathentry kind="lib" path="library/log4j-core-2.13.3.jar" sourcepath="C:/Users/Alex/.m2/repository/org/apache/logging/log4j/log4j-core/2.13.3/log4j-core-2.13.3-sources.jar"/>
 	<classpathentry kind="lib" path="library/jna-4.5.2.jar"/>
 	<classpathentry kind="lib" path="library/jna-platform-4.5.2.jar"/>
 	<classpathentry kind="lib" path="library/jSerialComm-2.6.2.jar"/>

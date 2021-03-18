@@ -33,7 +33,7 @@ public class LnbReferenceSwitch extends SwitchBoxImpl {
 		logger.debug(packet);
 
 		final Payload pl = packet.getPayload(0);
-		if(h.getOption()!=0 || pl.getByte()==0){
+		if(h.getError()!=0 || pl.getByte()==0){
 			setVisible(false);
 			return;
 		}
