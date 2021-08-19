@@ -57,7 +57,7 @@ public class ConverterPanel extends DevicePanel {
 				.map(dt->true)
 				.orElse(false);
 
-		JPanel dacPanel = new DACsPanel(deviceType, null);
+		JPanel dacPanel = new DACsPanel(deviceInfo, null);
 		tabbedPane.addTab("DACs", null, dacPanel, null);
 		dacPanel.setLayout(null);
 

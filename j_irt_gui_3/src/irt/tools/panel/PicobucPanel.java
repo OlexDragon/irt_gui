@@ -37,7 +37,7 @@ public class PicobucPanel extends UserPicobucPanel {
 			tabbedPane.addTab("BIASs#2", biasPanel);
 		}
 
-		JPanel converterPanel = new DACsPanel(deviceInfo.getDeviceType(), linkHeader);
+		JPanel converterPanel = new DACsPanel(deviceInfo, linkHeader);
 		converterPanel.setBackground(new Color(0xD1,0xD1,0xD1));
 		tabbedPane.addTab("Converter", converterPanel);
 		

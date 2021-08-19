@@ -44,7 +44,7 @@ public enum PacketIDs {
 
 	UNNECESSARY	( null, null, null, null, null, null),
 
-	DEVICE_INFO	( null, null, null, DeviceInfoPacket.parseValueFunction, null, 2000),
+	DEVICE_INFO	( null, null, null, DeviceInfoPacket.parseValueFunction, 1000L, 2000),
 
 	ALARMS_ALL_IDs					( null, null,  null, AlarmsIDsPacket.parseValueFunction, null, 50),
 	ALARMS_SUMMARY					( null, null, null, AlarmsSummaryPacket.parseValueFunction, null, null),
@@ -160,6 +160,7 @@ public enum PacketIDs {
 	FCM_ADC_INPUT_POWER		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	FCM_ADC_OUTPUT_POWER	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	FCM_ADC_TEMPERATURE		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
+	FCM_ADC_CLKREF_LVL		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	FCM_ADC_CURRENT			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	FCM_ADC_5V5				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),
 	FCM_ADC_13v2			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, RegisterPacket.parseValueFunction, null, 12),

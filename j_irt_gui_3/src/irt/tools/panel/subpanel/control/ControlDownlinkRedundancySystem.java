@@ -357,7 +357,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 		service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("AlarmPanelFx"));
 
-		scheduledFuture = service.scheduleAtFixedRate(this, 3, 3, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
 
 		aListener = new ItemListener() {
 		

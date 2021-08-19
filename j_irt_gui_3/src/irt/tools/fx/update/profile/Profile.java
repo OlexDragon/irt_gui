@@ -29,6 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.irt_gui.IrtGui;
+import irt.tools.fx.update.profile.table.ProfileTables;
 import javafx.util.Pair;
 
 public class Profile {
@@ -70,7 +71,7 @@ public class Profile {
 	 */
 	public CharBuffer asCharBufferWithSignature() throws IOException, UnknownHostException, FileNotFoundException {
 
-		CharBuffer cb = asCharBuffer();
+		CharBuffer cb = fileToCharBuffer();
 
 		final ZonedDateTime now = ZonedDateTime.now();
 		String signature = "\n#Uploaded by IRT GUI" + IrtGui.VERTION + " on " + now.format(formatter) + " from "+ InetAddress.getLocalHost().getHostName() + " computer.";
@@ -82,7 +83,7 @@ public class Profile {
 		return charBuffer;
 	}
 
-	CharBuffer asCharBuffer() throws IOException, FileNotFoundException {
+	protected CharBuffer fileToCharBuffer() throws IOException, FileNotFoundException {
 
 		MappedByteBuffer mbb;
 		try(	RandomAccessFile 	raf				= new RandomAccessFile(filePath.toFile(), "r");
@@ -121,7 +122,7 @@ public class Profile {
 
 	public String getBeginning() throws FileNotFoundException, IOException{
 
-		return getBeginning(asCharBuffer());
+		return getBeginning(fileToCharBuffer());
 	}
 
 	public static String getBeginning(final CharBuffer asCharBuffer) {
@@ -147,7 +148,7 @@ public class Profile {
 
 	public Pair<String, Point> getTable(String key) throws UnknownHostException, FileNotFoundException, IOException {
 
-		final CharBuffer charBuffer = asCharBuffer();
+		final CharBuffer charBuffer = fileToCharBuffer();
 		return getTable(key, charBuffer);
 	}
 
@@ -213,7 +214,7 @@ public class Profile {
 	public void updateAndSave(Map<String, String> map) throws IOException {
 		logger.traceEntry("{}", map);
 
-		AtomicReference<CharBuffer> arCharBuffer = new AtomicReference<>(asCharBuffer());
+		AtomicReference<CharBuffer> arCharBuffer = new AtomicReference<>(fileToCharBuffer());
 
 		final Map<String, String> filted = map.entrySet().stream().filter(entry->!entry.getValue().isEmpty()).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
@@ -277,7 +278,7 @@ public class Profile {
 
 	public void updateAndSave(String beginning) throws FileNotFoundException, IOException {
 
-		final CharBuffer asCharBuffer = asCharBuffer();
+		final CharBuffer asCharBuffer = fileToCharBuffer();
 		final String actualBeginning = Profile.getBeginning(asCharBuffer);
 		final String replaced = asCharBuffer.toString().replace(actualBeginning, beginning);
 

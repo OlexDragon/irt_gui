@@ -2,7 +2,6 @@ package irt.data.packet.measurement;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -34,49 +33,58 @@ public class MeasurementPacket extends PacketSuper{
 	public final static Function<Packet, Optional<Object>> parseValueFunction =
 
 			packet-> Optional.ofNullable(packet)
-			.map(p->Optional.of(p).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte)0)!=0)	//is not a converter
-																										.map(b-> b ? ParameterHeaderCodeBUC.class : ParameterHeaderCodeFCM.class)
-																										.map(parameterHCodeClass->{
-																											try {
-																												return parameterHCodeClass.getMethod("valueOf", Byte.class);
-																											} catch (NoSuchMethodException | SecurityException e) {
-																												logger.catching(e);
-																											}
-																											return null;
-																										})
-																										.map(
-																												method->packet
-																													.getPayloads()
-																													.stream()
-																													.map(
-																															pl->{
-																																try {
+			.map(
+					p->
+					Optional.of(p)
+					.filter(LinkedPacket.class::isInstance)
+					.map(LinkedPacket.class::cast)
+					.map(LinkedPacket::getLinkHeader)
+					.map(LinkHeader::getAddr)
+					.orElse((byte)0)!=0)	// not a converter
 
-																																	byte code = pl.getParameterHeader().getCode();
+			.map(b-> b ? ParameterHeaderCodeBUC.class : ParameterHeaderCodeFCM.class)
 
-																																	return ((Optional<?>) method.invoke(null, code))
+			.map(
+					parameterHCodeClass->{
+						try {
+							return parameterHCodeClass.getMethod("valueOf", Byte.class);
+						} catch (NoSuchMethodException | SecurityException e) {
+							logger.catching(e);
+						}
+						return null;
+					})
+			.map(
+					method->
+					packet
+					.getPayloads()
+					.stream()
+					.map(
+							pl->{
+								try {
+									byte code = pl.getParameterHeader().getCode();
+									return ((Optional<?>) method.invoke(null, code))
 
-																																			.map(ParameterHeaderCode.class::cast)
-																																			.map(
-																																					pc->{
+											.map(ParameterHeaderCode.class::cast)
+											.map(
+													pc->{
 
-																																					// status flags
-																																						if(pc.getStatus().getCode()==code){
-																																							int statusBits = pl.getInt(0);
-																																							List<StatusBits> parseStatusBits = pc.parseStatusBits(statusBits);
-																																							return new AbstractMap.SimpleEntry<>(pc.name(), parseStatusBits);
-																																						}
+														// status flags
+														if(pc.getStatus().getCode()==code){
+															int statusBits = pl.getInt(0);
+															List<StatusBits> parseStatusBits = pc.parseStatusBits(statusBits);
+															return new AbstractMap.SimpleEntry<>(pc.name(), parseStatusBits);
+														}
 
-																																						return new AbstractMap.SimpleEntry<>(pc.name(), pc.toString(pl.getBuffer()));
-																																					})
-																																			.orElse(null);
+														return pc.toEntry(pl.getBuffer());
+													})
+											.orElse(null);
 
-																																} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-																																	logger.catching(e);
-																																}
-																																return null;
-																															})
-																													.collect(Collectors.toMap(SimpleEntry::getKey, SimpleEntry::getValue,  (a,b)->a,  TreeMap::new)));
+								} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+									logger.catching(e);
+								}
+								return null;
+							})
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue,  (a,b)->a,  TreeMap::new)));
 
 	/**
 	 *  Converter request packet

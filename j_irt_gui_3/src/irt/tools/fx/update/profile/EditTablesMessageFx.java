@@ -18,7 +18,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.ThreadWorker;
-import irt.tools.fx.update.profile.ProfileTables.Table;
+import irt.tools.fx.update.profile.table.ProfileTable;
+import irt.tools.fx.update.profile.table.ProfileTables;
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -39,7 +40,7 @@ public class EditTablesMessageFx extends Alert {
 
 	private static Action action;
 
-	public EditTablesMessageFx(final Profile profile, final List<Table> tablesWithError) {
+	public EditTablesMessageFx(final Profile profile, final List<ProfileTable> tablesWithError) {
 		super(AlertType.ERROR);
 
 		setTitle("The profile \"" + profile.getFileName() + "\" has " + tablesWithError.size() + " Errors.");
@@ -78,7 +79,7 @@ public class EditTablesMessageFx extends Alert {
 				()->{
 
 					Map<String, String> map = new HashMap<>();
-					final Table lastTable = tablesWithError.get(tablesWithError.size()-1);
+					final ProfileTable lastTable = tablesWithError.get(tablesWithError.size()-1);
 
 					tablesWithError
 					.forEach(
@@ -101,7 +102,8 @@ public class EditTablesMessageFx extends Alert {
 								try {
 
 									// Get table as string from the profile
-									final String t = profile.getTable(table.getKey()).getKey();
+									final String key = Optional.ofNullable(table.getIndex()).map(Object::toString).orElseGet(()->table.getName());
+									final String t = profile.getTable(key).getKey();
 
 									// Show alert
 									FutureTask<Optional<ButtonType>> ft = new FutureTask<>(
@@ -138,16 +140,16 @@ public class EditTablesMessageFx extends Alert {
 													// Cancel button
 													if(bd==ButtonData.CANCEL_CLOSE) {
 														map.clear();
-														map.put(table.getKey(), null);
+														map.put(key, null);
 														return;
 
 													// Ignore button
 													}else if(bd==IGNORE)
-														map.put(table.getKey(), "");
+														map.put(key, "");
 
 													// Next/Save button
 													else if(bd==NEXT_OR_SAVE)
-														map.put(table.getKey(), textArea.getText());
+														map.put(key, textArea.getText());
 												});
 
 									} catch (InterruptedException | ExecutionException e) { logger.catching(Level.DEBUG, e); }
@@ -193,7 +195,6 @@ public class EditTablesMessageFx extends Alert {
 
 			synchronized (EditTablesMessageFx.class) {
 
-				ProfileTables.clear();
 				try (Scanner scanner = new Scanner(text)) {
 
 					while (scanner.hasNextLine()) {
@@ -209,7 +210,7 @@ public class EditTablesMessageFx extends Alert {
 		}
 	}
 
-	public static Callable<Action> getMessageTask(Profile profile, List<Table> tablesWithError) {
+	public static Callable<Action> getMessageTask(Profile profile, List<ProfileTable> tablesWithError) {
 
 		action = null;
 		Platform.runLater(()->new EditTablesMessageFx(profile, tablesWithError));

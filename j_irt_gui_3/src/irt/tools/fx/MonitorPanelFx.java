@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -34,8 +35,8 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketImp;
 import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
 import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -91,7 +92,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private GridPane 	gridPane;
 
 	public MonitorPanelFx() {
-		logger.traceEntry();
 
 		Thread currentThread = Thread.currentThread();
 		currentThread.setUncaughtExceptionHandler((t, e) -> logger.catching(e));
@@ -134,7 +134,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	@Override
 	public void run() {
-		logger.traceEntry();
 
 		try{
 
@@ -375,6 +374,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		String toString(byte[] bytes);
 		ParameterHeaderCode getStatus();
 		List<StatusBits> parseStatusBits(int statusBits);
+		Entry<String, String> toEntry(byte[] bytes);
 	}
 
 	public enum ParameterHeaderCodeFCM implements ParameterHeaderCode{
@@ -426,6 +426,11 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		public List<StatusBits> parseStatusBits(int statusBits) {
 			return StatusBitsFCM.parse(statusBits);
 		}
+
+		@Override
+		public Entry<String, String> toEntry(byte[] bytes) {
+			return new AbstractMap.SimpleEntry<>(name(), function.apply(bytes));
+		}
 	}
 
 	public enum ParameterHeaderCodeBUC implements ParameterHeaderCode {
@@ -465,14 +470,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		}
 
 		private static String lnbReady(byte[] bytes) {
-			return Optional
-					.of(bytes)
-					.filter(b->b.length==1)
-					.map(b->{
-						final String string = b[0]==1 ? "ready" : "ready.not";
-						return Translation.getValue(String.class, string, string);
-					})
-					.orElse("N/A");
+
+			if(bytes==null)
+				return "N/A";
+
+			if(bytes.length==1) {
+				final String string = bytes[0]==1 ? "ready" : "ready.not";
+				return Translation.getValue(String.class, string, string);
+			}
+
+			return bytesToString(bytes, "dbm");
 		}
 
 		private static String switchPosition(byte[] bytes) {
@@ -495,6 +502,19 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		@Override
 		public List<StatusBits> parseStatusBits(int statusBits) {
 			return StatusBitsBUC.parse(statusBits);
+		}
+
+		@Override
+		public Entry<String, String> toEntry(byte[] bytes) {
+
+			final String name;
+
+			if(this==LNB1_STATUS && bytes.length>1) {
+				name = REFLECTED_POWER.name();
+			}else
+				name = name();
+
+			return new AbstractMap.SimpleEntry<>(name, function.apply(bytes));
 		}
 	}
 

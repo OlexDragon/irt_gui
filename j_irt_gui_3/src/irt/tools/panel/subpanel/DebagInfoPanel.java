@@ -149,7 +149,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		startService();
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(DebagInfoPanel.this);
-		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 0, 10, TimeUnit.SECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 0, 3, TimeUnit.SECONDS);
 	}
 
 	private synchronized void stop() {
@@ -163,7 +163,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		startService();
 
 		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
-		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 1, 10, TimeUnit.SECONDS);
+		scheduleAtFixedRate = service.scheduleAtFixedRate(DebagInfoPanel.this, 1, 3, TimeUnit.SECONDS);
 	}
 
 	private void startService() {

@@ -197,9 +197,6 @@ public class DeviceInfo implements PacketListener {
 					case Payload.DI_DEVICE_TYPE:
 						set(pl.getBuffer());
 						break;
-					case Payload.DI_DEVICE_SN:
-						serialNumber = Optional.of(pl.getStringData()).map(StringData::toString);
-						break;
 					case Payload.DI_FIRMWARE_VERSION:
 						firmwareVersion = Optional.of(pl.getStringData()).map(StringData::toString);
 						break;
@@ -208,6 +205,9 @@ public class DeviceInfo implements PacketListener {
 						break;
 					case Payload.DI_UNIT_UPTIME_COUNTER:
 						uptimeCounter = pl.getInt(0);
+						break;
+					case Payload.DI_DEVICE_SN:
+						serialNumber = Optional.of(pl.getStringData()).map(StringData::toString);
 						break;
 					case Payload.DI_UNIT_NAME:
 						unitName = Optional.of(pl.getStringData()).map(StringData::toString);

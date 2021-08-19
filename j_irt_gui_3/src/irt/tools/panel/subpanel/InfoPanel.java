@@ -49,6 +49,9 @@ import irt.tools.Transformer;
 import irt.tools.fx.update.UpdateMessageFx;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 @SuppressWarnings("serial")
 public class InfoPanel extends JPanel implements Refresh, PacketListener {
@@ -120,7 +123,22 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 			JMenuItem updateMenuItem = new JMenuItem("Update");
 			popup.add(updateMenuItem);
-			updateMenuItem.addActionListener(e->NetworkPanel.updateButton.fire());
+			updateMenuItem.addActionListener(
+					e->{
+						if(NetworkPanel.updateButton==null) {
+							Platform.runLater(
+									()->{
+										Alert alert = new Alert(AlertType.WARNING);
+										alert.setTitle("Update");
+										alert.setHeaderText("It is not possible to update.");
+										alert.setContentText("The update is not supported for this unit.");
+										alert.showAndWait();
+									});
+							return;
+						}
+
+						NetworkPanel.updateButton.fire();
+					});
 
 			new ThreadWorker("Popup Menu Worker").newThread(()->{
 
@@ -463,7 +481,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 			return;
 
 		new ThreadWorker(()->{
-			
+
 			DeviceInfo
 			.parsePacket(packet)
 			.filter(di->di.getSerialNumber().equals(deviceInfo.getSerialNumber()))

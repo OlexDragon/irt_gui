@@ -68,7 +68,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 			if(service.isShutdown() || Optional.ofNullable(scheduleAtFixedRate).filter(f->!f.isDone()).isPresent())
 				return;
 
-			scheduleAtFixedRate = service.scheduleAtFixedRate(LoSelectComboBox.this, 1, TimeUnit.SECONDS.toMillis(30), TimeUnit.MILLISECONDS);
+			scheduleAtFixedRate = service.scheduleAtFixedRate(LoSelectComboBox.this, 1, 30, TimeUnit.SECONDS);
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(LoSelectComboBox.this);
 		}
 		@Override public void ancestorMoved(AncestorEvent event) { }

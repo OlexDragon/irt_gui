@@ -2,27 +2,28 @@
 package irt.tools.fx.update.profile;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceInfo.DeviceType;
-import irt.tools.fx.update.profile.ProfileTables.Table;
+import irt.tools.fx.update.profile.table.ProfileTable;
+import irt.tools.fx.update.profile.table.ProfileTables;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.text.Text;
+import javafx.stage.Modality;
 
 /**
  * This class finds errors in the profile
  */
 public class ProfileParser{
 	private final static Logger logger = LogManager.getLogger();
-	public final static String LUT = "-lut-";
 
 	private DeviceType deviceType;
 	private boolean corrupted;
-
-	public ProfileParser() {
-		ProfileTables.clear();
-	}
-
 	private int lineCount;
 	public void parseLine(String line) {
 
@@ -33,23 +34,34 @@ public class ProfileParser{
 			return;
 		}
 
-		// Get the Device Type
-		if(deviceType==null && line.startsWith(ProfileProperties.DEVICE_TYPE.toString())) {
-
-			String dtStr = line.split("\\s+", 3)[1];
-			deviceType = DeviceType.valueOf(Integer.parseInt(dtStr)).orElse(null);
-			if(deviceType==null)
-				logger.warn("The device type cannot be parsed. Original line: \"{}\"", line);
-
-			return;
-		}
-
 		// Ignore all commented and empty lines
 		if(line.startsWith("#") || line.trim().isEmpty())
 			return;
 
+		// Get the Device Type
+		if(deviceType==null && ProfileProperties.DEVICE_TYPE.match(line)) {
+
+			String dtStr = line.split("\\s+", 3)[1].replaceAll("\\D", "");
+			deviceType = Optional.of(dtStr).filter(dt->!dt.isEmpty()).flatMap(dt->DeviceType.valueOf(Integer.parseInt(dtStr))).orElse(null);
+
+			if(deviceType==null) {
+				logger.warn("The device type cannot be parsed. Original line: \"{}\"", line);
+				Platform.runLater(
+						()->{
+							Alert alert = new Alert(AlertType.WARNING);
+							alert.initModality(Modality.APPLICATION_MODAL);
+							alert.setHeaderText("Profile parsing");
+							alert.setHeaderText("The device type cannot be parsed.");
+							alert.getDialogPane().setExpandableContent(new Text(line));
+							alert.showAndWait();
+						});
+			}
+			return;
+		}
+
 		// Collect tables
-		ProfileTables.add(line);
+		if(line.contains(ProfileTables.LUT))
+			ProfileTables.add(line);
 	}
 
 	public boolean isCorrupted() {
@@ -65,7 +77,7 @@ public class ProfileParser{
 		return "ProfileParser [deviceType=" + deviceType + "]";
 	}
 
-	public List<Table> getTablesWithError() {
+	public List<ProfileTable> getTablesWithError() {
 		return ProfileTables.getTablesWithError();
 	}
 }

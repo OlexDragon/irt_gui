@@ -36,7 +36,7 @@ public class SerialPortWorker {
 	private static int maxSize = 3;
 
 	public synchronized static Packet send(SerialPortInterface serialPort, Packet packet) {
-		logger.traceEntry("{} : {}", serialPort, packet);
+		logger.info("{} : {}", serialPort, packet);
 
 		SerialPortWorker.serialPort = serialPort;
 		maxSize = packet.getMaxSize();
@@ -65,16 +65,13 @@ public class SerialPortWorker {
 
 
 
-	Checksum checksum = null;
+			Checksum checksum = null;
 
-	serialPort.clear();
+			serialPort.clear();
 
 			byte[] data = packet.toBytes();
-			String hexStr = ToHex.bytesToHex(data);
 
-			String prefix = (runTimes+1)+") send";
-
-			logger.info(marker, ">> {}: {}\n\t as bytes: {}", prefix, packet, hexStr);
+			logger.info(marker, ">> {}: {}\n\t as bytes: {}", ()->(runTimes+1)+") send", ()->packet, ()->ToHex.bytesToHex(data));
 
 			if(data!=null && serialPort.isOpened()){
 				serialPort.writeBytes(data);
@@ -176,7 +173,7 @@ public class SerialPortWorker {
 	private static byte[] readBytes(int byteCount) throws Exception {
 
 		if(byteCount==0)
-			return new byte[0];
+			return null;
 
 		byte[] readBytes = serialPort.getFromBuffer(byteCount);
 		final int escapes = escapeCount(readBytes);
@@ -184,7 +181,7 @@ public class SerialPortWorker {
 		if(escapes==0)
 			return readBytes;
 
-		final byte[] tmp = serialPort.getFromBuffer(escapes);
+		final byte[] tmp = readBytes(escapes);
 
 		if(tmp==null)
 			return SerialPortWorker.byteStuffing(readBytes);
@@ -305,11 +302,11 @@ public class SerialPortWorker {
 		return readBytes==null ? null : index==readBytes.length ? readBytes : Arrays.copyOf(readBytes, index);
 	}
 
-	private static int escapeCount(final byte[] readBytes) {
+	private static int escapeCount(final byte[] bytes) {
 
-		if(readBytes==null)
+		if(bytes==null)
 			return 0;
 
-		return (int) IntStream.range(0, readBytes.length).filter(i->readBytes[i]==PacketImp.CONTROL_ESCAPE).count();
+		return (int) IntStream.range(0, bytes.length).filter(i->bytes[i]==PacketImp.CONTROL_ESCAPE).count();
 	}
 }

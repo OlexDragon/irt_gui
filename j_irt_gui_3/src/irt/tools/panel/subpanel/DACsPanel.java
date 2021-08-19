@@ -44,6 +44,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.data.AdcWorker;
+import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
@@ -133,7 +134,9 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		@Override public void focusLost(FocusEvent e) {}
 	};
 
-	public DACsPanel(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
+	public DACsPanel(final DeviceInfo deviceInfo, final LinkHeader linkHeader) {
+
+		final Optional<DeviceType> oDeviceType = deviceInfo.getDeviceType();
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -162,20 +165,48 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 				scheduleAtFixedRate = service.scheduleAtFixedRate(DACsPanel.this, 0, 3, TimeUnit.SECONDS);
 
 
-				if(unitAddr==0){
-					synchronized (adcWorkers) {
-						adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_OUTPUT_POWER, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_TEMPERATURE, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_CURRENT, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_5V5, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_13v2, 1, "#.###"));
-						adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_13V2_NEG, 1, "#.###"));
-					}
+				oDeviceType.map(DeviceType::isFCM)
+				.ifPresent(
+						dt->{
+							final int revision = deviceInfo.getRevision();
+							final int typeId = deviceInfo.getTypeId();
+
+							synchronized (adcWorkers) {
+								if(typeId==1006 && (revision==10 || revision==11 || revision==21 || revision==31)) {	// L to X or L to C (0091)
+
+									adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_R31_ADC_5V5			, 1, "#.###"));
+									lbl13V2.setText("N/A");
+									lbl13V2_neg.setText("N/A");
+								}else {
+
+									adcWorkers.add(new AdcWorker(lbl13V2, 		MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_13v2			, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lbl13V2_neg, 	MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_13V2_NEG		, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lbl5V5, 		MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_5V5			, 1, "#.###"));
+								}
+
+								if(typeId==1006 && revision==31) {	// controller - stm32f439
+
+									lblCu.setText("Ref:");
+									lblCu.setToolTipText("Reference tune voltage.");
+									
+									adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_R31_ADC_INPUT_POWER	, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_R31_ADC_OUTPUT_POWER	, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_R31_ADC_TEMPERATURE	, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_R31_ADC_CLKREF_LVL		, 1, "#.###"));
+
+								}else {
+
+									adcWorkers.add(new AdcWorker(lblInputPower, MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER	, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lblOutputPower,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_OUTPUT_POWER	, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lblTemperature,MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_TEMPERATURE	, 1, "#.###"));
+									adcWorkers.add(new AdcWorker(lblCurrent, 	MonitorPanelFx.CONVERTER, null, DeviceDebugPacketIds.FCM_ADC_CURRENT		, 1, "#.###"));
+
+								}
+							}
+						});
 
 					Value value = new Value(0, -100, 100, 0);
-					startController(new TextSliderController(deviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketIDs.CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
-				}
+					startController(new TextSliderController(oDeviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketIDs.CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
 
 			}
 
@@ -278,7 +309,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		else
 			rAddr++;
 
-		final Optional<DeviceType> kaBand = deviceType.filter(dt->dt==DeviceType.CONVERTER_L_TO_KA);
+		final Optional<DeviceType> kaBand = oDeviceType.filter(dt->dt==DeviceType.CONVERTER_L_TO_KA);
 		registerValue = kaBand.map(dt->new RegisterValue(30, 0, null)).orElse(new RegisterValue(index, rAddr, null));
 		final Integer maxValue = kaBand.map(dt->1023).orElse(4095);
 

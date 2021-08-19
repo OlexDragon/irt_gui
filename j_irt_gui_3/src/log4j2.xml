@@ -75,10 +75,10 @@
 
 <!--  	<Logger name="irt.controller.serial_port.ComPortThreadQueue" level="all"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortPureJava" level="debug"/> -->
-<!--  	<Logger name="irt.controller.serial_port.ComPortJssc" level="all"/> -->
+<!--  	<Logger name="irt.controller.serial_port.ComPortJssc" level="warn"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortJSerialComm" level="all"/> -->
-<!--  	<Logger name="irt.controller.serial_port.SerialPortListener" level="all"/> -->
-<!--  	<Logger name="irt.controller.serial_port.SerialPortWorker" level="debug"/> -->
+<!--  	<Logger name="irt.controller.serial_port.SerialPortListener" level="info"/> -->
+<!--  	<Logger name="irt.controller.serial_port.SerialPortWorker" level="info"/> -->
 
 <!--  	<Logger name="irt.data.AdcWorker" level="all"/> -->
 
@@ -87,7 +87,7 @@
 <!--  	<Logger name="irt.tools.fx.UpdateButtonJFXPanel" level="all"/> -->
 
 <!--  	<Logger name="irt.tools.fx.update.profile.ProfileValidator" level="all"/> -->
-<!--  	<Logger name="irt.tools.fx.update.profile.ProfileTables" level="all"/> -->
+<!--  	<Logger name="irt.tools.fx.update.profile.table.ProfileTables" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.update.profile.Profile" level="all"/> -->
 <!--  	<Logger name="irt.tools.fx.AlarmPanelFx" level="all"/> -->
 

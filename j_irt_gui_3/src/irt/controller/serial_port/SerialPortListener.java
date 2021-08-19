@@ -76,7 +76,6 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 	@Override
 	public void serialEvent(jssc.SerialPortEvent event) {
 		final int eventType = event.getEventType();
-		logger.traceEntry("Event Type: {};", eventType);
 
 		if (eventType != jssc.SerialPortEvent.RXCHAR)
 			return;
@@ -89,7 +88,7 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 	}
 
 	public void clear() {
-		logger.debug("buffer to clear: {}", buffer);
+		logger.info("buffer to clear: {}", buffer);
 
 		synchronized (this) { buffer = null; }
 
@@ -102,7 +101,8 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 	public synchronized byte[] getBytes(int size) {
 
 		byte[] result = Arrays.copyOf(buffer, size);
-		logger.debug("size:{}; result: {}", size, result);
+		logger.info("size: {}; result: {}", size, result);
+
 		buffer = Arrays.copyOfRange(buffer, size, buffer.length);
 
 		return result;

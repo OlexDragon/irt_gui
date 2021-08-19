@@ -3,6 +3,7 @@ package irt.tools.fx.update.profile;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 public enum ProfileProperties {
 	/**
@@ -102,5 +103,9 @@ public enum ProfileProperties {
 
 	public List<String> getProperties() {
 		return properties;
+	}
+
+	public boolean match(String line) {
+		return Optional.ofNullable(line).map(l->l.startsWith(name)).orElse(false);
 	}
 }
