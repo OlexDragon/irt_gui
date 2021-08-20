@@ -350,12 +350,17 @@ public class DeviceDebugPanel extends JFXPanel {
 			GuiControllerAbstract.getComPortThreadQueue().add(packet);
 		}
 
-		private void get(Node source) {
-			createGetPacket(source).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
+		private void get(Node node) {
+			createGetPacket(node).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
 		}
 
 		private void set(Node node) {
-			createSetPacket(node).ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
+
+			final Optional<DeviceDebugPacket> oPacket = createSetPacket(node);
+			oPacket.ifPresent(p->GuiControllerAbstract.getComPortThreadQueue().add(p));
+
+			if(!oPacket.isPresent())
+				get(node);
 		}
 
 		@Override
@@ -408,7 +413,13 @@ public class DeviceDebugPanel extends JFXPanel {
 								btnCalMode.setUserData(isCalMode);
 								btnCalMode.setText("Cal. is " + (isCalMode ? "ON" : "OFF"));
 								btnCalMode.setSelected(isCalMode);
-								btnInitialize.setDisable(!isCalMode);
+
+								final boolean disable = !isCalMode;
+								btnInitialize.setDisable(disable);
+								btnSet1.setDisable(disable);
+								btnSet2.setDisable(disable);
+								btnSet3.setDisable(disable);
+								btnSet4.setDisable(disable);
 							});
 				});
 			};
