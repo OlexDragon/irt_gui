@@ -71,7 +71,7 @@ public class ProfileTable {
 
 			case "lut-size":
 
-				this.size = Optional.of(splitSpace[1]).map(str->str.replaceAll("\\D", "")).map(Integer::parseInt).orElse(null);
+				this.size = Optional.of(splitSpace[2]).map(str->str.replaceAll("\\D", "")).map(Integer::parseInt).orElse(null);
 				Optional.of(splitComment).filter(array->array.length==2).map(array->array[1]).ifPresent(d->description = d);
 				break;
 
@@ -189,7 +189,7 @@ public class ProfileTable {
 		if(name==null && joinTable.name!=null)
 			name = joinTable.name;
 
-		if(!(name!=null && name.equals(joinTable.name)))
+		if(name!=null && joinTable.name!=null && !name.equals(joinTable.name))
 			throw new RuntimeException("Tables are not match. This table: " + this + "; join table: " + joinTable);
 
 		content.addEntries(joinTable.content.getTableEntries());
@@ -200,16 +200,21 @@ public class ProfileTable {
 
 	public TableError getError() {
 
-		if(size==null || size!=content.getTableEntries().size())
-			return TableError.SIZES_DOES_NOT_MATCH;
+		final TableError error;
 
-		if(name==null)
-			return TableError.NO_NAME;
+		if(size==null || size!=content.getTableEntries().size()) 
+			error = TableError.SIZES_DOES_NOT_MATCH;
 
-		if(hasSequenceError())
-			return TableError.SEQUENCE_ERROR;
+		else if(name==null)
+			error = TableError.NO_NAME;
 
-		return TableError.NO_ERROR;
+		else if(hasSequenceError())
+			error = TableError.SEQUENCE_ERROR;
+
+		else
+			error = TableError.NO_ERROR;
+
+		return error;
 	}
 
 	private final static List<String> EXCEPTIONS = new ArrayList<>(Arrays.asList(new String[]{"frequency", "power-out-freq"}));
@@ -222,7 +227,9 @@ public class ProfileTable {
 
 		return IntStream.range(1, tableEntries.size())
 				.mapToObj(
+
 						index->{
+
 							final TableEntry previous = tableEntries.get(index-1);
 							final TableEntry next = tableEntries.get(index);
 
@@ -230,31 +237,31 @@ public class ProfileTable {
 							final int compareKeys = compare(previous.getKey(), next.getKey());
 
 							if(compareKeys==0)
-								return true;
+								return true;	// ERROR: The keys are the same
 
-							if(atomicKey.get()==0) {
-								atomicKey.set(compareKeys);
+							if(atomicKey.get()==0) {		// if the direction is not saved,
+								atomicKey.set(compareKeys);	// save keys direction
 								return false;
 							}
 
 							if(atomicKey.get()!=compareKeys)
-								return true;
+								return true;	// ERROR: The keys direction is not correct
 
-							if(exception)
+							if(exception)	// The sequence of values may be out of order.
 								return false;
 
 							// Compare values
 							final int compareValues = compare(previous.getValue(), next.getValue());
 
 							if(compareValues==0)
-								return true;
+								return true;	// ERROR: The values are the same
 
-							if(atomicValue.get()==0) {
-								atomicValue.set(compareValues);
+							if(atomicValue.get()==0) {			// if the direction is not saved,
+								atomicValue.set(compareValues);	// save values direction
 								return false;
 							}
 
-							return atomicValue.get()!=compareValues;
+							return atomicValue.get()!=compareValues; // ERROR: If values direction is not correct return true
 
 						})
 				.filter(hasError->hasError==true)

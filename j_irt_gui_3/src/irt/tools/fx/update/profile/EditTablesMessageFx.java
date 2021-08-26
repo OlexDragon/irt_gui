@@ -205,6 +205,20 @@ public class EditTablesMessageFx extends Alert {
 					final boolean noError = ProfileTables.getTablesWithError().isEmpty();
 					buttonToEnable.setDisable(!noError);
 					Platform.runLater(()->setAlertType(noError ? AlertType.CONFIRMATION : AlertType.ERROR));
+
+				}catch(NumberFormatException e) {
+
+					logger.catching(Level.DEBUG, e);
+
+					Platform.runLater(
+							()->{
+								Alert alert = new Alert(AlertType.ERROR);
+								alert.initModality(Modality.APPLICATION_MODAL);
+								alert.setTitle("NumberFormatException");
+								alert.setHeaderText(null);
+								alert.setContentText(e.getLocalizedMessage());
+								alert.showAndWait();
+							});
 				}
 			}
 		}

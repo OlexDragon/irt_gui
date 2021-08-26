@@ -35,4 +35,9 @@ public class TableEntry {
 			return Pattern.matches("-*([0-9]*)\\.([0-9]*)", str) ? Double.parseDouble(str) : Long.parseLong(str);
 		};
 	}
+
+	@Override
+	public String toString() {
+		return "TableEntry [key=" + key + ", value=" + value + "]";
+	}
 }
