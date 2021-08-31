@@ -273,6 +273,6 @@ public class ProfileTable {
 		return new BigDecimal(a.toString()).compareTo(new BigDecimal(b.toString()));
 	}
 	private String toString(String constant, Object value) {
-		return Optional.ofNullable(index).map(i->constant + "\t " + i).orElseGet(()->Optional.of(name).map(n->n + "-" + constant).orElse(constant)) + "\t " + value;
+		return Optional.ofNullable(index).map(i->constant + "\t " + i).orElseGet(()->Optional.ofNullable(name).map(n->n + "-" + constant).orElse(constant)) + "\t " + value;
 	}
 }

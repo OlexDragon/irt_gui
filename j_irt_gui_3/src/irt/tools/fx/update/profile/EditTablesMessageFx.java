@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.data.ThreadWorker;
 import irt.tools.fx.update.profile.table.ProfileTable;
-import irt.tools.fx.update.profile.table.ProfileTables;
+import irt.tools.fx.update.profile.table.ProfileTable.TableError;
 import javafx.application.Platform;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -197,12 +197,22 @@ public class EditTablesMessageFx extends Alert {
 
 				try (Scanner scanner = new Scanner(text)) {
 
+					ProfileTable table = null;
 					while (scanner.hasNextLine()) {
-						final String trim = scanner.nextLine();
-						ProfileTables.add(trim);
+
+						final String nextLine = scanner.nextLine().trim();
+						if(nextLine.isEmpty())
+							continue;
+
+						if(table==null) {
+							table = new ProfileTable(nextLine);
+							continue;
+						}
+
+						table.join(new ProfileTable(nextLine));
 					}
 
-					final boolean noError = ProfileTables.getTablesWithError().isEmpty();
+					final boolean noError = table.getError()==TableError.NO_ERROR;
 					buttonToEnable.setDisable(!noError);
 					Platform.runLater(()->setAlertType(noError ? AlertType.CONFIRMATION : AlertType.ERROR));
 

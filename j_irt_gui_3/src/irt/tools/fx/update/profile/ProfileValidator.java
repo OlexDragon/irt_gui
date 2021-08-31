@@ -20,6 +20,7 @@ import irt.data.DeviceInfo.DeviceType;
 import irt.data.ThreadWorker;
 import irt.tools.fx.update.profile.EditTablesMessageFx.Action;
 import irt.tools.fx.update.profile.table.ProfileTable;
+import irt.tools.fx.update.profile.table.ProfileTables;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
@@ -43,6 +44,7 @@ public class ProfileValidator {
 	private Action action;
 
 	public ProfileValidator(Profile profile) throws FileNotFoundException, NoSuchAlgorithmException, IOException {
+		ProfileTables.clear();
 
 		AtomicReference<CharBuffer> arCharBuffer= new AtomicReference<>(profile.fileToCharBuffer());
 

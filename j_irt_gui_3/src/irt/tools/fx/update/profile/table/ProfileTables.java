@@ -23,15 +23,19 @@ public class ProfileTables {
 			return false;
 		}
 
-		final ProfileTable orElse = tables.parallelStream().filter(t->t.equals(profileTable)).findAny().orElse(null);
+		final ProfileTable existingTable = tables.parallelStream().filter(t->t.equals(profileTable)).findAny().orElse(null);
 
-		if(orElse==null) {
+		if(existingTable==null) {
 			tables.add(profileTable);
 			return true;
 		}
 
-		orElse.join(profileTable);
+		existingTable.join(profileTable);
 
 		return true;
+	}
+
+	public static void clear() {
+		tables.clear();
 	}
 }

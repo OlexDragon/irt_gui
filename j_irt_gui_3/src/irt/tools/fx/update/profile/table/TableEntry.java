@@ -10,7 +10,7 @@ public class TableEntry {
 	private final Number value;
 
 	public TableEntry(String key, String value) {
-		this(Optional.ofNullable(key).map(str->str.replaceAll("\\D", "")).map(parse()).orElse(null), Optional.ofNullable(value).map(str->str.replaceAll("\\D", "")).map(parse()).orElse(null));
+		this(Optional.ofNullable(key).map(parse()).orElse(null), Optional.ofNullable(value).map(parse()).orElse(null));
 	}
 
 	public TableEntry(Number key, Number value) {

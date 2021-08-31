@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
@@ -13,7 +12,6 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -21,8 +19,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 import javax.xml.bind.DatatypeConverter;
@@ -30,6 +27,7 @@ import javax.xml.bind.DatatypeConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.GuiControllerAbstract;
 import irt.controller.file.ConverterProfileScanner;
 import irt.controller.file.ProfileScannerFT;
 import irt.data.DeviceInfo;
@@ -70,6 +68,10 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Pair;
 
 public class UpdateMessageFx extends Dialog<Message>{
+
+	public static final ButtonData UPDATE_BUTTON = ButtonData.OK_DONE;
+	public static final ButtonData TO_PACKAGE_BUTTON = ButtonData.OTHER;
+
 	private final Logger logger = LogManager.getLogger();
 
 	private static final String SYSTEM = "system";
@@ -131,6 +133,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 //	private FileScanner fileScanner;
 
 	private Button updateButton;
+	private Button toPkgButton;
 
 	private RadioButton cbBUC;
 	private RadioButton cbConv;
@@ -156,8 +159,27 @@ public class UpdateMessageFx extends Dialog<Message>{
 		final DialogPane dialogPane = getDialogPane();
 		dialogPane.getStylesheets().add(MonitorPanelFx.class.getResource("fx.css").toExternalForm());
 
-		final ButtonType updateButtonType = new ButtonType("Update", ButtonData.OK_DONE);
-		dialogPane.getButtonTypes().addAll(updateButtonType, ButtonType.CANCEL);
+		final ButtonType updateButtonType = new ButtonType("Update", UPDATE_BUTTON);
+		ButtonType toPkgButtonType = null;
+
+		ButtonType[] buttonTypes;
+		if(isProduction) {
+			toPkgButtonType = new ButtonType("To Package", TO_PACKAGE_BUTTON);
+			buttonTypes = new ButtonType[] {toPkgButtonType, updateButtonType, ButtonType.CANCEL};
+
+		}else
+			buttonTypes = new ButtonType[] {updateButtonType, ButtonType.CANCEL};
+
+		dialogPane.getButtonTypes().addAll(buttonTypes);
+
+		// To Package Button
+		Optional.ofNullable(toPkgButtonType)
+		.ifPresent(
+				bt->{
+
+					toPkgButton = (Button) dialogPane.lookupButton(bt);
+					toPkgButton.setDisable(true);
+				});
 
 		// Update button
 
@@ -187,6 +209,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 					final boolean disable = !validateNodes();
 					updateButton.setDisable(disable);
+					Optional.ofNullable(toPkgButton).ifPresent(b->b.setDisable(disable));
 				});
 
 		//Package selection row #1
@@ -204,40 +227,6 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		grid.addRow(1, cbPackage, lblPackage, btnPackageSelection);
 
-		if(!isProduction){
-
-			// if the "Main-Class" of manifest.mf is "irt.irt_gui.IrtGui", this means that
-			// this is production GUI
-			try {
-				Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/MANIFEST.MF");
-				while (resources.hasMoreElements()) {
-					Manifest manifest = new Manifest(resources.nextElement().openStream());
-
-					final Attributes.Name key = new Attributes.Name("Main-Class");
-					isProduction = manifest
-										.getMainAttributes()
-										.entrySet()
-										.stream()
-										.filter(es->es.getKey().equals(key))
-										.map(es->es.getValue())
-										.map(v->v.equals("irt.irt_gui.IrtGui"))
-										.findAny()
-										.orElse(false);
-					if(isProduction)
-						break;
-				}
-
-				if(!isProduction){
-					
-					final String property = System.getProperty("sun.java.command");
-					isProduction = "irt.irt_gui.IrtGui".equals(property);
-				}
-
-			} catch (IOException e) {
-				logger.catching(e);
-			}
-		}
-
 		if(isProduction){
 
 			// Search profile by the unit serial number on the drive Z:
@@ -248,17 +237,21 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 		dialogPane.setContent(grid);
 
-		setResultConverter(button->{
+		// 
+		setResultConverter(
 
-			if(button == updateButtonType)
-				return getMessage();
+				buttonType->{
 
-			return null;
-		});
+					if(buttonType != ButtonType.CANCEL)
+						return getMessage(buttonType);
+
+					return null;
+				});
 	}
 
-	private Message getMessage() {
+	private Message getMessage(ButtonType buttonType) {
 		final Message message = new Message(tfAddress.getText());
+		message.setButtonType(buttonType);
 
 		if(cbPackage.isSelected()){
 			message.put(PacketFormats.PACKAGE, lblPackage.getTooltip().getText());
@@ -395,10 +388,14 @@ public class UpdateMessageFx extends Dialog<Message>{
 		grid.add(vBox, 0, 5);
 	}
 
+	protected static Preferences prefs = Preferences.userRoot().node(GuiControllerAbstract.IRT_TECHNOLOGIES_INC);
 	private EventHandler<ActionEvent> selectProfile() {
 		return e->{
 
 			FileChooser fileChooser = getFileChooser(lblProfile, "*.bin");
+
+			final String key = "selectProfile";
+			initialDirectory(key, fileChooser, lblProfile);
 
 			final File result = fileChooser.showOpenDialog(getOwner());
 			if(result!=null){
@@ -406,6 +403,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 //					fileScanner.cancel(true);	// Cancel fileScaneron before the new path setting
 //				logger.error(fileScanner);
 				setLabelText(lblProfile, cbProfile, result.toPath());
+				prefs.put(key, result.getAbsolutePath());
 //				getDialogPane().getScene().getWindow().sizeToScene();
 			}
 		};
@@ -416,6 +414,9 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 			FileChooser fileChooser = getFileChooser(lblProgram, "*.bin");
 
+			final String key = "selectProgram";
+			initialDirectory(key, fileChooser, lblProgram);
+
 			final File file = Paths.get("Z:", "4alex", "boards", "SW release", "latest").toFile();
 			if(file.exists() && file.isDirectory())
 				fileChooser.setInitialDirectory(file);
@@ -423,11 +424,13 @@ public class UpdateMessageFx extends Dialog<Message>{
 			final File result = fileChooser.showOpenDialog(getOwner());
 			if(result!=null){
 				setLabelText(lblProgram, cbProgram, result.toPath());
+				prefs.put(key, result.getAbsolutePath());
 			}
 		};
 	}
 
 	private FileChooser getFileChooser(Label label, String ext) {
+
 		FileChooser fileChooser = new FileChooser();
 		final ObservableList<ExtensionFilter> extensionFilters = fileChooser.getExtensionFilters();
 		extensionFilters.add(new ExtensionFilter("IRT Technologies BIN file", ext));
@@ -452,11 +455,12 @@ public class UpdateMessageFx extends Dialog<Message>{
 														.filter(CheckBox::isSelected);
 
 
-			if(oIsSelected.map(cb->cb==cbPackage).orElse(false)){
+		final Boolean isPackage = oIsSelected.map(cb->cb==cbPackage).orElse(false);
+		if(isPackage){
 
-				cbProfile.setSelected(false);
-				cbProgram.setSelected(false);
-			}
+			cbProfile.setSelected(false);
+			cbProgram.setSelected(false);
+		}
 
 
 		if(oIsSelected.map(cb->cb!=cbPackage).orElse(false)){
@@ -465,7 +469,11 @@ public class UpdateMessageFx extends Dialog<Message>{
 		}
 
 		final boolean disable = !validateNodes();
-		Platform.runLater(()->updateButton.setDisable(disable));
+		Platform.runLater(
+				()->{
+					updateButton.setDisable(disable);
+					Optional.ofNullable(toPkgButton).ifPresent(b->b.setDisable(isPackage? true : disable));
+				});
 	}
 
 	/** Validate IP Address and Path selection */
@@ -520,12 +528,26 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 			FileChooser fileChooser = getFileChooser(lblPackage, "*.pkg");
 
+			final String key = "selectPackage";
+			initialDirectory(key, fileChooser, lblPackage);
+
 			final File result = fileChooser.showOpenDialog(getOwner());
 			if(result!=null){
 				setLabelText(lblPackage, cbPackage, result.toPath());
-//				getDialogPane().getScene().getWindow().sizeToScene();
+				prefs.put(key, result.getAbsolutePath());
 			}
 		};
+	}
+
+	private void initialDirectory(final String key, FileChooser fileChooser, Label label) {
+
+		final File directory = Optional.ofNullable(label.getTooltip()).map(Tooltip::getText).map(File::new).map(File::getParentFile)
+
+				.orElseGet(()->Optional.ofNullable(prefs.get(key, null)).map(File::new).map(File::getParentFile).orElse(null));
+
+		logger.debug(directory);
+
+		Optional.ofNullable(directory).ifPresent(fileChooser::setInitialDirectory);
 	}
 
 	public void setIpAddress(String addrStr) {
@@ -540,18 +562,27 @@ public class UpdateMessageFx extends Dialog<Message>{
 	public class Message{
 
 		private final Map<PacketFormats, String> paths = new HashMap<>();
-		private String address;
+		private String ipAddress;
+		private ButtonType buttonType;
 
 		public Message(String address) {
-			this.address = address;
+			this.ipAddress = address;
 		}
 
-		public String getAddress() {
-			return address;
+		public ButtonType getButtonType() {
+			return buttonType;
 		}
 
-		public void setAddress(String address) {
-			this.address = address;
+		public void setButtonType(ButtonType buttonType) {
+			this.buttonType = buttonType;
+		}
+
+		public String getIpAddress() {
+			return ipAddress;
+		}
+
+		public void setIpAddress(String address) {
+			ipAddress = address;
 		}
 
 		public String put(PacketFormats packetFormats, String path) {
@@ -577,7 +608,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 					.collect(Collectors.joining("\n"));
 		}
 
-		public String getPacksgePath() {
+		public String getPackagePath() {
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
