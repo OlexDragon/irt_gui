@@ -31,6 +31,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.file.ConverterProfileScanner;
 import irt.controller.file.ProfileScannerFT;
 import irt.data.DeviceInfo;
+import irt.data.DeviceInfo.HardwareType;
 import irt.data.ThreadWorker;
 import irt.irt_gui.IrtGui;
 import irt.tools.fx.MonitorPanelFx;
@@ -356,14 +357,17 @@ public class UpdateMessageFx extends Dialog<Message>{
 			if(e.getSource()==cbBUC){
 
 				// Unit
+
 				imageView.setImage(imageBuc);
 				system = SYSTEM;
 				deviceInfo.getSerialNumber().ifPresent(sn->serialNumber = sn);
+
 			}else{
 
 				// Converter
+
 				imageView.setImage(imageConv);
-				if(deviceInfo.getRevision()>10)
+				if(deviceInfo.getDeviceType().map(dt->dt.HARDWARE_TYPE).map(ht->ht==HardwareType.CONTROLLER).orElse(false) || deviceInfo.getRevision()>10)
 					system = "file";
 				else
 					system = "256";

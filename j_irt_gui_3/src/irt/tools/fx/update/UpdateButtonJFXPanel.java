@@ -279,8 +279,19 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 													else if(buttonData==UpdateMessageFx.TO_PACKAGE_BUTTON) 
 														try {
 
-															final Path path = Paths.get(System.getProperty("user.home"), "Desktop", deviceInfo.getSerialNumber().orElse("unknown") + ".pkg");
+															final String fileName = deviceInfo.getSerialNumber().orElse("unknown") + ".pkg";
+															final Path path = Paths.get(System.getProperty("user.home"), "Desktop", fileName);
 															Files.write(path, bytes);
+
+															Platform.runLater(
+																	()->{
+																		Alert alert = new Alert(AlertType.INFORMATION);
+																		alert.initModality(Modality.APPLICATION_MODAL);
+																		alert.setTitle("File System");
+																		alert.setHeaderText("The package has been saved.");
+																		alert.setContentText("The package '" + fileName + "' has been saved to the Desktop. ");
+																		alert.showAndWait();
+																	});
 
 														}catch (FileSystemException e) {
 
