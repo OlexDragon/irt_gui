@@ -38,6 +38,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 		TODO7					((byte)18, PacketIDs.ALARMS_TODO7					, false),
 		TODO8					((byte)19, PacketIDs.ALARMS_TODO8					, false),
 		TODO9					((byte)20, PacketIDs.ALARMS_TODO9					, false),
+		TODO10					((byte)21, PacketIDs.ALARMS_TODO10					, false),
 		LNB1_UNDER_CURRENT		((byte)30, PacketIDs.ALARMS_LNB1_UNDER_CURRENT		, false),
 		LNB2_UNDER_CURRENT		((byte)31, PacketIDs.ALARMS_LNB2_UNDER_CURRENT		, false),
 		PSU1					((byte)40, PacketIDs.ALARMS_PSU1					, false),
@@ -61,6 +62,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 		DESCRIPTION_TODO7					((byte)18, PacketIDs.ALARMS_DESCRIPTION_TODO7					, true),
 		DESCRIPTION_TODO8					((byte)19, PacketIDs.ALARMS_DESCRIPTION_TODO8					, true),
 		DESCRIPTION_TODO9					((byte)20, PacketIDs.ALARMS_DESCRIPTION_TODO9					, true),
+		DESCRIPTION_TODO10					((byte)21, PacketIDs.ALARMS_DESCRIPTION_TODO10					, true),
 		DESCRIPTION_LNB1_UNDER_CURRENT		((byte)30, PacketIDs.ALARMS_DESCRIPTION_LNB1_UNDER_CURRENT		, true),
 		DESCRIPTION_LNB2_UNDER_CURRENT		((byte)31, PacketIDs.ALARMS_DESCRIPTION_LNB2_UNDER_CURRENT		, true),
 		DESCRIPTION_PSU1					((byte)40, PacketIDs.ALARMS_DESCRIPTION_PSU1					, true),
@@ -90,7 +92,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 
 //			logger.error("alarmId: {}; {} : {}", alarmId, !oAlarmsPacketIds.isPresent(), oAlarmsPacketIds);
 			if(!oAlarmsPacketIds.isPresent())
-				logger.warn("Alarm ID({}) does not exists", alarmId);
+				logger.error("Alarm ID({}) does not exists", alarmId);
 
 			return oAlarmsPacketIds;
 		}

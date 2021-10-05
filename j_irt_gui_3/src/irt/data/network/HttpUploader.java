@@ -103,7 +103,6 @@ public class HttpUploader {
 			dataOutputStream.writeBytes("Upgrade" + lineEnd);
 			dataOutputStream.writeBytes(lineEnd);
 
-
 			dataOutputStream.write(bytes, 0, bytes.length);
 			dataOutputStream.writeBytes(lineEnd);
 			dataOutputStream.flush();

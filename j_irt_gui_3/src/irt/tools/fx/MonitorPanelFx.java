@@ -437,7 +437,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		NONE			( b->Arrays.toString(b)),
 		INPUT_POWER		( b->bytesToString(b, "dbm")),
 		OUTPUT_POWER	( b->bytesToString(b, "dbm")),
-		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
+		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? (b[0] & 0x80)>0 ? "UNDEFINED" : nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
 		STATUS			( b->Arrays.toString(b)),
 		LNB1_STATUS		( b->lnbReady(b)),
 		LNB2_STATUS		( b->lnbReady(b)),

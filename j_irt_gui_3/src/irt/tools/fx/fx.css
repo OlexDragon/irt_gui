@@ -42,10 +42,6 @@
 .button{
 	-fx-cursor: hand;
 }
-.yborder{
-	-fx-border-color: YELLOW;
-	-fx-border-width: 1px;
-}
 .activeButton{
 	-fx-text-fill: yellow;
 	-fx-background-color: blue;
@@ -66,6 +62,15 @@
 	-fx-text-fill: YELLOW;
 	-fx-background-color: GREEN;
 }
+.GREEN_BORDER{
+	 -fx-border-color: GREEN;
+	-fx-border-width: 1px;
+}
+.YELLOW_BORDER{
+	-fx-border-color: YELLOW;
+	-fx-border-width: 1px;
+}
 .RED_BORDER{
-	 -fx-border-color:red;
+	 -fx-border-color: RED;
+	-fx-border-width: 1px;
 }

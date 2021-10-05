@@ -34,13 +34,17 @@ public class MeasurementPacket extends PacketSuper{
 
 			packet-> Optional.ofNullable(packet)
 			.map(
-					p->
-					Optional.of(p)
-					.filter(LinkedPacket.class::isInstance)
-					.map(LinkedPacket.class::cast)
-					.map(LinkedPacket::getLinkHeader)
-					.map(LinkHeader::getAddr)
-					.orElse((byte)0)!=0)	// not a converter
+					p->{
+
+						final Byte addr = Optional.of(p)
+						.filter(LinkedPacket.class::isInstance)
+						.map(LinkedPacket.class::cast)
+						.map(LinkedPacket::getLinkHeader)
+						.map(LinkHeader::getAddr)
+						.orElse((byte)0);
+
+						return addr != 0;
+					})	// not a converter
 
 			.map(b-> b ? ParameterHeaderCodeBUC.class : ParameterHeaderCodeFCM.class)
 
@@ -70,8 +74,10 @@ public class MeasurementPacket extends PacketSuper{
 
 														// status flags
 														if(pc.getStatus().getCode()==code){
+
 															int statusBits = pl.getInt(0);
 															List<StatusBits> parseStatusBits = pc.parseStatusBits(statusBits);
+
 															return new AbstractMap.SimpleEntry<>(pc.name(), parseStatusBits);
 														}
 

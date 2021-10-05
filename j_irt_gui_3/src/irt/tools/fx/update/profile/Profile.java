@@ -71,7 +71,7 @@ public class Profile {
 	 */
 	public CharBuffer asCharBufferWithSignature() throws IOException, UnknownHostException, FileNotFoundException {
 
-		CharBuffer cb = fileToCharBuffer();
+		CharBuffer cb = toCharBuffer();
 
 		final ZonedDateTime now = ZonedDateTime.now();
 		String signature = "\n#Uploaded by IRT GUI" + IrtGui.VERTION + " on " + now.format(formatter) + " from "+ InetAddress.getLocalHost().getHostName() + " computer.";
@@ -83,7 +83,7 @@ public class Profile {
 		return charBuffer;
 	}
 
-	protected CharBuffer fileToCharBuffer() throws IOException, FileNotFoundException {
+	protected CharBuffer toCharBuffer() throws IOException, FileNotFoundException {
 
 		MappedByteBuffer mbb;
 		try(	RandomAccessFile 	raf				= new RandomAccessFile(filePath.toFile(), "r");
@@ -122,7 +122,7 @@ public class Profile {
 
 	public String getBeginning() throws FileNotFoundException, IOException{
 
-		return getBeginning(fileToCharBuffer());
+		return getBeginning(toCharBuffer());
 	}
 
 	public static String getBeginning(final CharBuffer asCharBuffer) {
@@ -148,7 +148,7 @@ public class Profile {
 
 	public Pair<String, Point> getTable(String key) throws UnknownHostException, FileNotFoundException, IOException {
 
-		final CharBuffer charBuffer = fileToCharBuffer();
+		final CharBuffer charBuffer = toCharBuffer();
 		return getTable(key, charBuffer);
 	}
 
@@ -214,7 +214,7 @@ public class Profile {
 	public void updateAndSave(Map<String, String> map) throws IOException {
 		logger.traceEntry("{}", map);
 
-		AtomicReference<CharBuffer> arCharBuffer = new AtomicReference<>(fileToCharBuffer());
+		AtomicReference<CharBuffer> arCharBuffer = new AtomicReference<>(toCharBuffer());
 
 		final Map<String, String> filted = map.entrySet().stream().filter(entry->!entry.getValue().isEmpty()).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
@@ -278,7 +278,7 @@ public class Profile {
 
 	public void updateAndSave(String beginning) throws FileNotFoundException, IOException {
 
-		final CharBuffer asCharBuffer = fileToCharBuffer();
+		final CharBuffer asCharBuffer = toCharBuffer();
 		final String actualBeginning = Profile.getBeginning(asCharBuffer);
 		final String replaced = asCharBuffer.toString().replace(actualBeginning, beginning);
 

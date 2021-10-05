@@ -268,7 +268,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			text4 = "DRIVER2:";;
 			text5 = "PREDRIV:";
 			text6 = "PREDRIV:";
-			text7 = "8 VATTS:";
+			text7 = "8 WATTS:";
 			text8 = null;
 
 			if(isMainBoard) {
@@ -352,7 +352,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			text4 = "DRIVER2:";;
 			text5 = "PREDRIV:";
 			text6 = "PREDRIV:";
-			text7 = "8 VATTS:";
+			text7 = "8 WATTS:";
 			text8 = "MMIC:";
 
 			registerValue1 = new RegisterValue(1, 8, null);

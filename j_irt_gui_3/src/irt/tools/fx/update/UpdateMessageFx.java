@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
@@ -58,6 +60,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -76,7 +79,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private final Logger logger = LogManager.getLogger();
 
 	private static final String SYSTEM = "system";
-	private String serialNumber = "any";
+	private String serialNumber = "N/A";
 
 	private static Path profilePath;
 
@@ -95,6 +98,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 	private ProfileScannerFT findBucProfile;
 	private ConverterProfileScanner findConvProfile;
 
+	private DeviceInfo deviceInfo;
+
 	private final ChangeListener<? super String> textListener = (o, oV, nV)->enableUpdateButton(o);
 	private final ChangeListener<? super Boolean> cbListener = (o, oV, nV)->enableUpdateButton(o);
 	private final ChangeListener<? super Boolean> cbUnitTypeSelectListener = (o,oV,nV)->Optional.of(nV)
@@ -103,33 +108,74 @@ public class UpdateMessageFx extends Dialog<Message>{
 			.ifPresent(
 					v->{
 
-						serialNumber = "any";
+						setSerialNumber(Optional.ofNullable(deviceInfo).flatMap(DeviceInfo::getSerialNumber).orElse("N/A"));
 
 						findBucProfile.stop();
 						findConvProfile.stop();
 
-						final Node node = (Node)((BooleanProperty )o).getBean();
-						FutureTask<?> userData = (FutureTask<?>) node.getUserData();
-						if(userData==findBucProfile && profilePath!=null) {
+						final Node node = (Node)((BooleanProperty)o).getBean();
+						FutureTask<?> findProfile = (FutureTask<?>) node.getUserData();
+
+						if(findProfile==findBucProfile && profilePath!=null) {
 							setLabelText(lblProfile, cbProfile, profilePath);
 							return;
 						}
 
-						Platform.runLater(()->lblProfile.setText(""));
-						new ThreadWorker(userData, "Utin Type Select Listener");
+						Platform.runLater(
+								()->{
+									lblProfile.setText("");
+									final ObservableList<String> styleClass = lblProfile.getStyleClass();
+									styleClass.add("YELLOW_BORDER");
+									styleClass.remove("RED_BORDER");
+								});
+
+						new ThreadWorker(findProfile, "Utin Type Select Listener");
 						new ThreadWorker(
 								()->{
 
 									try {
 
-										final Optional<?> get = (Optional<?>) userData.get(500, TimeUnit.SECONDS);
-										get.ifPresent(path->setLabelText(lblProfile, cbProfile, (Path) path));
+										final Optional<Path> oPath = ((Optional<?>) findProfile.get(5, TimeUnit.MINUTES)).map(Path.class::cast);
+										oPath.ifPresent(
+												path->{
+													setProfileLabelText(path);
+													final ObservableList<String> styleClass = lblProfile.getStyleClass();
+													styleClass.remove("YELLOW_BORDER");
+													styleClass.remove("RED_BORDER");
+												});
+
+										if(!oPath.isPresent()) {
+											final ObservableList<String> styleClass = lblProfile.getStyleClass();
+											styleClass.remove("YELLOW_BORDER");
+											styleClass.add("RED_BORDER");
+										}
 
 									} catch (InterruptedException | ExecutionException | TimeoutException e) {
+
 										logger.catching(e);
+										lblProfile.setTooltip(new Tooltip(e.getLocalizedMessage()));
+
+										final ObservableList<String> styleClass = lblProfile.getStyleClass();
+										styleClass.remove("YELLOW_BORDER");
+										styleClass.add("RED_BORDER");
 									}
 								}, "Set Label Text");
 					});
+
+	private void setProfileLabelText(final Path path) {
+		final String[] split = path.getFileName().toString().split("\\.");
+
+		if(split.length==0)
+			return;
+
+		setSerialNumber(split[0]);
+		setLabelText(lblProfile, cbProfile, path);
+	}
+
+	private void setSerialNumber(final String newSerialNumber) {
+		serialNumber = newSerialNumber;
+		miChangeSerialNumber.setText("Change " + serialNumber);
+	}
 	
 //	private FileScanner fileScanner;
 
@@ -141,7 +187,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 	private String system = SYSTEM;
 
-	private DeviceInfo deviceInfo;
+	private MenuItem miChangeSerialNumber;
 
 	// ***************************************************************************************************************** //
 	// 																													 //
@@ -150,7 +196,31 @@ public class UpdateMessageFx extends Dialog<Message>{
 	// ***************************************************************************************************************** //
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
 
+		ThreadWorker.runThread(
+				()->{
+					try {
+
+						URL url = new URL("http://op-2123100/update.cgi");
+						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+						connection.setRequestMethod("POST"); // PUT is another valid option
+						connection.setDoOutput(true);
+
+						connection.setDoOutput(true);
+						connection.setDoInput(true);
+						connection.setUseCaches(false);
+						connection.setRequestMethod("POST");
+						connection.setRequestProperty("Connection", "Keep-Alive");
+						final String value = "IRT GUI" + IrtGui.VERTION + "; User: " + System.getProperty("user.name") + "; os.name: " + System.getProperty("os.name") + "; os.arch: " + System.getProperty("os.arch") + ";";
+						connection.setRequestProperty("User-Agent", value);
+						connection.setRequestProperty("Content-Type", "text/plain;charset=UTF-8");
+
+					} catch (IOException e) {
+						logger.catching(e);
+					}
+				}, "Test");
+
 		this.deviceInfo = deviceInfo;
+		miChangeSerialNumber = new MenuItem("Change Serial Number");
 
 		Thread currentThread = Thread.currentThread();
 		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
@@ -197,7 +267,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		deviceInfo.getSerialNumber().ifPresent(
 				sn->{
 					tfAddress.setText(sn);
-					serialNumber = sn;
+					setSerialNumber(sn);
 				});
 		tfAddress.textProperty().addListener( textListener );
 		grid.addRow(0, new Label("IP Address:"), tfAddress);
@@ -298,25 +368,40 @@ public class UpdateMessageFx extends Dialog<Message>{
 
 			ContextMenu contextMenu = new ContextMenu();
 			MenuItem menuItem = new MenuItem("Edit");
-			menuItem.setOnAction(e-> {
-				try {
-					Desktop.getDesktop().open(new File(lblProfile.getTooltip().getText()));
-				} catch (IOException e1) {
-					logger.catching(e1);
-				}
-			});
+			menuItem.setOnAction(
+					e-> {
+						try {
+							Desktop.getDesktop().open(new File(lblProfile.getTooltip().getText()));
+						} catch (IOException e1) {
+							logger.catching(e1);
+						}
+					});
 			final ObservableList<MenuItem> menuItems = contextMenu.getItems();
 			menuItems.add(menuItem);
 
 			menuItem = new MenuItem("Open file location");
-			menuItem.setOnAction(e-> {
-				try {
-					Runtime.getRuntime().exec("explorer.exe /select," + lblProfile.getTooltip().getText());
-				} catch (IOException e1) {
-					logger.catching(e1);
-				}
-			});
+			menuItem.setOnAction(
+					e-> {
+						try {
+							Runtime.getRuntime().exec("explorer.exe /select," + lblProfile.getTooltip().getText());
+						} catch (IOException e1) {
+							logger.catching(e1);
+						}
+					});
 			menuItems.add(menuItem);
+
+			miChangeSerialNumber.setOnAction(
+					e->Platform.runLater(
+							()->{
+
+								TextInputDialog dialog = new TextInputDialog(serialNumber);
+								dialog.setTitle("Serial Number");
+								dialog.setHeaderText("Actual Module or Converter Serial Number.");
+								dialog.setContentText("Please enter Serial Number:");
+
+								dialog.showAndWait().ifPresent(this::setSerialNumber);
+							}));
+			menuItems.add(miChangeSerialNumber);
 			lblProfile.setContextMenu(contextMenu);
 
 		};
@@ -352,27 +437,29 @@ public class UpdateMessageFx extends Dialog<Message>{
 		VBox vBox = new VBox();
 
 		final ToggleGroup group = new ToggleGroup();
-		final EventHandler<ActionEvent> onSelectTypeAction = e->{
 
-			if(e.getSource()==cbBUC){
+		final EventHandler<ActionEvent> onSelectTypeAction =
+				e->{
 
-				// Unit
+					if(e.getSource()==cbBUC){
 
-				imageView.setImage(imageBuc);
-				system = SYSTEM;
-				deviceInfo.getSerialNumber().ifPresent(sn->serialNumber = sn);
+						// Unit
 
-			}else{
+						imageView.setImage(imageBuc);
+						system = SYSTEM;
+						deviceInfo.getSerialNumber().ifPresent(this::setSerialNumber);
 
-				// Converter
+					}else{
 
-				imageView.setImage(imageConv);
-				if(deviceInfo.getDeviceType().map(dt->dt.HARDWARE_TYPE).map(ht->ht==HardwareType.CONTROLLER).orElse(false) || deviceInfo.getRevision()>10)
-					system = "file";
-				else
-					system = "256";
-			}
-		};
+						// Converter
+
+						imageView.setImage(imageConv);
+						if(deviceInfo.getDeviceType().map(dt->dt.HARDWARE_TYPE).map(ht->ht==HardwareType.CONTROLLER).orElse(false) || deviceInfo.getRevision()>10)
+							system = "file";
+						else
+							system = "256";
+					}
+				};
 
 		cbBUC = new RadioButton("BUC");
 		cbBUC.setToggleGroup(group);
@@ -406,7 +493,8 @@ public class UpdateMessageFx extends Dialog<Message>{
 //				if(fileScanner!=null)
 //					fileScanner.cancel(true);	// Cancel fileScaneron before the new path setting
 //				logger.error(fileScanner);
-				setLabelText(lblProfile, cbProfile, result.toPath());
+				final Path path = result.toPath();
+				setLabelText(lblProfile, cbProfile, path);
 				prefs.put(key, result.getAbsolutePath());
 //				getDialogPane().getScene().getWindow().sizeToScene();
 			}
@@ -616,7 +704,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
-		public final static String setupInfoPathern = "%s any.any.%s {\n%s }";
+		public final static String setupInfoPathern = "%s any.any.any.%s {\n%s }";
 		public final static String pathPathern = "%s { path {%s} %s }";
 
 		/**

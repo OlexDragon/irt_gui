@@ -44,6 +44,7 @@ import irt.tools.panel.PicobucPanel;
 
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
+
 	private JTextArea textArea;
 	private JComboBox<String> cbParameterCode;
 	private static JComboBox<Integer> cbParameter;

@@ -46,7 +46,7 @@ public class ProfileValidator {
 	public ProfileValidator(Profile profile) throws FileNotFoundException, NoSuchAlgorithmException, IOException {
 		ProfileTables.clear();
 
-		AtomicReference<CharBuffer> arCharBuffer= new AtomicReference<>(profile.fileToCharBuffer());
+		AtomicReference<CharBuffer> arCharBuffer= new AtomicReference<>(profile.toCharBuffer());
 
 		final ProfileParser profileParser = parseProfile(arCharBuffer);
 

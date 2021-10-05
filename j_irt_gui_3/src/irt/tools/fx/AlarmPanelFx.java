@@ -342,6 +342,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 	}
 
 	private void setAlarmDescription(byte[] buffer) {
+//		logger.error("{}", buffer);
 
 		Optional
 		.ofNullable(buffer)
@@ -440,6 +441,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			code =buffer.getShort();
 //			final int status = buffer.getInt(2)&7;
 			description = new String(bytes).trim();
+//			logger.error(description);
 
 			logger.trace("\n bytes={}\n Code={}\n Description=\"{}\"", bytes, code, description);
 		}

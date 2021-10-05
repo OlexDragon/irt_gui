@@ -85,7 +85,7 @@ public class ProfileTable {
 			case "lut-ref":
 
 				this.size = null;
-				this.name = splitSpace[2];
+				this.name = splitSpace[2].replaceAll("\"", "");
 				break;
 
 			default :
@@ -103,7 +103,7 @@ public class ProfileTable {
 				return;
 			}
 
-			name = splitName[0];
+			this.name = splitName[0];
 			line = splitName[1];
 
 			splitSpace = line.split("\\s+", 3);	// split[0] = "ref"; split[1] = Table reference number (1003); split[2] = ("Turbo" 3)

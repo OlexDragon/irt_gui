@@ -16,5 +16,6 @@
 	<classpathentry kind="lib" path="library/jna-5.6.0.jar"/>
 	<classpathentry kind="lib" path="library/jna-platform-5.6.0.jar"/>
 	<classpathentry kind="lib" path="library/purejavacomm-1.0.2.RELEASE.jar"/>
+	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
