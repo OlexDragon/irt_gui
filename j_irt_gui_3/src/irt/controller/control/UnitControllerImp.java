@@ -59,7 +59,7 @@ public class UnitControllerImp implements UnitController{
 
 	private final ChangeListener sliderUpdateText;
 
-	private final Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->onFocusLost());
+	private final Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(5), a->onFocusLost());
 	private final FocusListener txtGainFocusListener = new FocusListener() {
 
 		@Override
@@ -164,6 +164,7 @@ public class UnitControllerImp implements UnitController{
 	public UnitControllerImp(JTextField txtGain, JSlider slider, JTextField txtStep, String key, RangePacket rangePacket, ValueToString packet) {
 		KEY = key;
 
+		txtGain.setText("");
 		this.txtGain = txtGain;
 		this.slider = slider;
 		this.txtStep = txtStep;
@@ -345,6 +346,10 @@ public class UnitControllerImp implements UnitController{
 
 			minimum = range.getMinimum();
 			maximum = range.getMaximum();
+
+			if(minimum==Short.MIN_VALUE || maximum==Short.MIN_VALUE)	// Range is undefined
+				return;
+
 			relative = minimum;
 
 			//TODO			slider.setToolTipText("from" + minimum + " to " + maximum);

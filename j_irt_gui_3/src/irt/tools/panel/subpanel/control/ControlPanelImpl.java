@@ -376,14 +376,6 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		}
 	}
 
-	//	protected GainController getNewGainController() {
-//		return new GainController(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
-//	}
-
-//	protected FrequencyContriller getNewFreqController() {
-//		return new FrequencyContriller(deviceType, getLinkHeader(), txtGain, slider, txtStep, Style.CHECK_ALWAYS);
-//	}
-
 	protected ControllerAbstract getNewAlcController() {
 		return null;
 	}

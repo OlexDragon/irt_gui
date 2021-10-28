@@ -22,8 +22,7 @@ public class PicobucPanel extends UserPicobucPanel {
 	public PicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight){
 		super(deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
 
-		final JTabbedPane tabbedPane2 = getTabbedPane();
-		tabbedPane = tabbedPane2;
+		tabbedPane = getTabbedPane();
 
 		final LinkHeader linkHeader = Optional.ofNullable(deviceInfo.getLinkHeader()).orElse(new LinkHeader((byte)0, (byte)0, (short) 0));
 
@@ -42,9 +41,9 @@ public class PicobucPanel extends UserPicobucPanel {
 		tabbedPane.addTab("Converter", converterPanel);
 		
 		DebagInfoPanel infoPanel = new DebagInfoPanel(deviceInfo.getDeviceType(), linkHeader, this);
-		tabbedPane2.addTab("Info", infoPanel);
+		tabbedPane.addTab("Info", infoPanel);
 
 		DeviceDebugPanel debugPanel = new DeviceDebugPanel(linkHeader.getAddr());
-		tabbedPane2.addTab("Debug", null, debugPanel, null);
+		tabbedPane.addTab("Debug", null, debugPanel, null);
 	}
 }

@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
@@ -22,6 +23,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
@@ -56,7 +58,9 @@ import irt.irt_gui.IrtGui;
 import irt.tools.label.ImageLabel;
 import irt.tools.label.VarticalLabel;
 import irt.tools.panel.ConverterPanel;
+import irt.tools.panel.DevicePanel;
 import irt.tools.panel.PicobucPanel;
+import irt.tools.panel.UserPicobucPanel;
 
 public class RedundancyPanel extends RedundancyPanelDemo implements PacketListener, Runnable{
 
@@ -367,9 +371,17 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 
 								final byte code = pl.getParameterHeader().getCode();
 								final byte index = pl.getByte();
+
 								switch(code){
 								case PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_ENABLE:
 
+									if(index>=RedundancyEnable.values().length) {
+										final JTabbedPane tabbedPane = DevicePanel.getTabbedPane();
+										final int tabCount = tabbedPane.getTabCount();
+										IntStream.range(0, tabCount).parallel().filter(i->tabbedPane.getTitleAt(i).equals(UserPicobucPanel.REDUNDANCY)).findAny()
+										.ifPresent(i->tabbedPane.remove(i));
+										return;
+									}
 									//Set Enable status
 
 									final RedundancyEnable redundancyEnable = RedundancyEnable.values()[index];
@@ -431,7 +443,7 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 							});
 						});
 			}catch (Exception e) {
-				logger.catching(e);
+				logger.catching(new Throwable(packet.toString(), e));
 			}
 		}, "RedundancyPanel.onPacketReceived()");
 	}

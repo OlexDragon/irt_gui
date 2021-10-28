@@ -42,6 +42,7 @@ import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.measurement.MeasurementPacket;
+import irt.irt_gui.IrtGui;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -166,49 +167,53 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	@Override
 	public void onPacketReceived(final Packet packet) {
 
-		Optional<Packet> oPacket = Optional.ofNullable(packet);
-
-		if(notMyPacket(oPacket)) return;
-
-		logger.trace(packet);
-
 		new ThreadWorker(()->{
+
+			Optional<Packet> oPacket = Optional.ofNullable(packet);
+
+			if(notMyPacket(oPacket)) return;
+
+			logger.traceEntry("{}", packet);
 
 			oPacket
 			.flatMap(PacketIDs.MEASUREMENT_ALL::valueOf)
 			.map(v->(Map<?, ?>)v)
 			.ifPresent(
+
 					map->{
 
 						logger.trace(map);
 
-						if(System.getProperty("sun.java.command").equals("irt.irt_gui.IrtGui")) {
-
-							final String string = map.toString();
-
-							if(Optional.ofNullable(this.tooltip).filter(string::equals).isPresent()) return;
-
-							tooltip = string;
-							Tooltip tooltip = new Tooltip(string);
-							Tooltip.install(this, tooltip);
-						}
+						if(IrtGui.isProduction()) 
+							setMonitorPanelTooltip(map);
 
 						Optional
 						.ofNullable((List<?>)map.remove("STATUS"))
 						.ifPresent(this::setStatus);
 
-						final List<Map.Entry<?, ?>> listToRemove = map.entrySet().parallelStream()
+						Map<?, ?> collect = map.entrySet().parallelStream()
+
 								.filter(
 										entry->{
 											final Object value = entry.getValue();
-											return value.equals("N/A") || value.equals("UNDEFINED");
-										}).collect(Collectors.toList());
+											return !value.equals("N/A") && !value.equals("UNDEFINED");
+										})
+								.collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
 
-						listToRemove.forEach(entry->map.remove(entry.getKey()));
-
-						setValues(map);
+						setValues(collect);
 					});
 		}, "MonitorPanelFx.onPacketReceived()");
+	}
+
+	private void setMonitorPanelTooltip(Map<?, ?> map) {
+
+		final String string = map.toString();
+
+		if(Optional.ofNullable(tooltip).filter(string::equals).isPresent())
+			return;
+
+		tooltip = string;
+		Tooltip.install(this, new Tooltip(string));
 	}
 
 	private boolean notMyPacket(Optional<Packet> oPacket) {
@@ -230,47 +235,52 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		return false;
 	}
 
-	private int count;
 	private void setValues(Map<?, ?> map) {
 		logger.traceEntry("{}", map);
-
-		// Added for RM units. 
-		if(map.size()<2 && count<10) {
-			count++;
-			return;
-		}
 
 		final ObservableList<Node> children = gridPane.getChildren();
 		final Set<? extends Entry<?,?>> entrySet = map.entrySet();
 
-		if(children.isEmpty()) {
-			Iterator<?> iterator = entrySet.iterator();
-			final int size = entrySet.size();
-			IntStream.range(0, size).forEach(
-					rowIndex->{
-						if(!iterator.hasNext())
-							return;
-						Entry<?, ?> next = (Entry<?, ?>) iterator.next();
-						String key = next.getKey().toString();
-						Label descriptionLabel = new Label(Translation.getValue(String.class, key, "* " + key) + ": ");
-						descriptionLabel.setPadding(new Insets(0, 5, 0, 0));
-						descriptionLabel.getStyleClass().add("description");
-						setLabelProperties(descriptionLabel, Pos.CENTER_RIGHT);
+		Platform.runLater(
+				()->{
+					if(children.size()!=map.size())
+						children.clear();
 
-						Label valueLabel = new Label(next.getValue().toString());
-						valueLabel.getStyleClass().add("value");
-						valueLabel.setUserData(key);
-						setLabelProperties(valueLabel, Pos.CENTER_LEFT);
-						Platform.runLater(
+					if(children.isEmpty()) {
+						ThreadWorker.runThread(
 								()->{
-									gridPane.add(descriptionLabel, 0, rowIndex);
-									gridPane.add(valueLabel, 1, rowIndex);
-								});
-					});
-		}else {
-			final Map<Object, Node> collect = children.stream().filter(node->node.getUserData()!=null).collect(Collectors.toMap(Node::getUserData, node->node));
-			entrySet.forEach(s->Optional.ofNullable((Label) collect.get(s.getKey().toString())).ifPresent(label->Platform.runLater(()->label.setText(s.getValue().toString()))));
-		}
+									Iterator<?> iterator = entrySet.iterator();
+									final int size = entrySet.size();
+									IntStream.range(0, size).forEach(
+											rowIndex->{
+												if(!iterator.hasNext())
+													return;
+												Entry<?, ?> next = (Entry<?, ?>) iterator.next();
+												String key = next.getKey().toString();
+												Label descriptionLabel = new Label(Translation.getValue(String.class, key, "* " + key) + ": ");
+												descriptionLabel.setPadding(new Insets(0, 5, 0, 0));
+												descriptionLabel.getStyleClass().add("description");
+												setLabelProperties(descriptionLabel, Pos.CENTER_RIGHT);
+
+												Label valueLabel = new Label(next.getValue().toString());
+												valueLabel.getStyleClass().add("value");
+												valueLabel.setUserData(key);
+												setLabelProperties(valueLabel, Pos.CENTER_LEFT);
+												Platform.runLater(
+														()->{
+															gridPane.add(descriptionLabel, 0, rowIndex);
+															gridPane.add(valueLabel, 1, rowIndex);
+														});
+											});
+								}, "Monitor Fields Creation");
+					}else {
+						ThreadWorker.runThread(
+								()->{
+									final Map<Object, Node> collect = children.stream().filter(node->node.getUserData()!=null).collect(Collectors.toMap(Node::getUserData, node->node));
+									entrySet.forEach(s->Optional.ofNullable((Label) collect.get(s.getKey().toString())).ifPresent(label->Platform.runLater(()->label.setText(s.getValue().toString()))));
+								}, "Monitor Set Values");
+					}
+				});
 	}
 
 	private void setStatus(final List<?> status) {
@@ -437,7 +447,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		NONE			( b->Arrays.toString(b)),
 		INPUT_POWER		( b->bytesToString(b, "dbm")),
 		OUTPUT_POWER	( b->bytesToString(b, "dbm")),
-		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? (b[0] & 0x80)>0 ? "UNDEFINED" : nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
+		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? ((b[0]&0x80)>0 && b[1]==0) ? "UNDEFINED" : nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
 		STATUS			( b->Arrays.toString(b)),
 		LNB1_STATUS		( b->lnbReady(b)),
 		LNB2_STATUS		( b->lnbReady(b)),

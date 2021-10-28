@@ -65,7 +65,7 @@ public class ProfileTable {
 			splitSpace = line.split("\\s+", 4);	// split[0] = "lut-entry" or "lut-size" or "lut-ref"; split[1] = Table reference number(this.index); split[2] = table key value; split[3] = table output value;
 
 			// Table reference number(this.index)
-			index = Optional.of(splitSpace[1]).map(str->str.replaceAll("\\D", "")).map(Integer::parseInt).orElse(null);
+			index = parseInt(splitSpace[1]).orElse(parseInt(splitSpace[2]).orElse(null));
 
 			switch(splitSpace[0]) {
 
@@ -85,7 +85,10 @@ public class ProfileTable {
 			case "lut-ref":
 
 				this.size = null;
-				this.name = splitSpace[2].replaceAll("\"", "");
+				if(splitSpace.length==4)// Ka-Band
+					this.name = splitSpace[1].replaceAll("\"", "");
+				else
+					this.name = splitSpace[2].replaceAll("\"", "");
 				break;
 
 			default :
@@ -132,6 +135,10 @@ public class ProfileTable {
 				index = null;
 			}
 		}
+	}
+
+	private Optional<Integer> parseInt(final String n) {
+		return Optional.of(n).map(str->str.replaceAll("\\D", "")).filter(d->!d.isEmpty()).map(Integer::parseInt);
 	}
 
 	@Override

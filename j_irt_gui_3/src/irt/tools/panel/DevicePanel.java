@@ -55,7 +55,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 	private JComponent controlPanel;
 	private JLabel clickedLabel;
 	private InfoPanel infoPanel;
-	private JTabbedPane tabbedPane;
+	private static JTabbedPane tabbedPane;
 
 	protected final Preferences pref = GuiController.getPrefs();
 
@@ -229,7 +229,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 		return clickedLabel;
 	}
 
-	protected JTabbedPane getTabbedPane() {
+	public static JTabbedPane getTabbedPane() {
 		return tabbedPane;
 	}
 
@@ -246,11 +246,4 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 	public int compareTo(Component o) {
 		return Optional.of(o).filter(DevicePanel.class::isInstance).map(DevicePanel.class::cast).map(DevicePanel::getLinkHeader).map(linkHeader::compareTo).orElse(1);
 	}
-//
-//	public void showDebugPanel(boolean show) {
-//		if(show)
-//			tabbedPane.add("Debug", DEBUG_PANEL);
-//		else
-//			tabbedPane.remove(DEBUG_PANEL);
-//	}
 }

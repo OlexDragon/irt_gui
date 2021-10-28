@@ -12,6 +12,13 @@ import java.awt.event.FocusListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +35,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.script.ScriptException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -64,6 +72,8 @@ import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.data.value.SonValue;
+import irt.data.value.JSonValueMapper;
 import irt.irt_gui.IrtGui;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.button.ImageButton;
@@ -156,7 +166,11 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		@Override public void focusLost(FocusEvent e) {}
 	};
 
+	private DeviceInfo deviceInfo;
+
 	public BIASsPanel(final DeviceInfo deviceInfo, final LinkHeader linkHeader, final boolean isMainBoard) {
+
+		this.deviceInfo = deviceInfo;
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -853,31 +867,83 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	@Override
 	public void run() {
 
-		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
-		final int size = queue.size();
+		try {
+			// HTTP request
+			final boolean isPresent;
+			synchronized(adcWorkers) {
+				isPresent = adcWorkers.parallelStream().filter(w->w.getLabel().equals(lblOPower)).map(AdcWorker::getPacketToSend).filter(w->w!=null).findAny().isPresent();
+			}
+			if(!isPresent){
+
+				final List<SonValue> sonValues = deviceInfo.getSerialNumber()
+
+						.map(
+								sn->{
+									try {
+										return getHttpUpdate(sn);
+									} catch (ScriptException e1) {
+										logger.catching(e1);
+										return null;
+									}
+								}).orElse(null);
+
+				if(sonValues!=null) {
+
+						sonValues.parallelStream().filter(sv->sv.getName().equals("bias")).map(SonValue::getValue).map(a->(List<?>)a).flatMap(List::parallelStream).map(SonValue.class::cast)
+						.forEach(
+								sv->{
+
+									final String name = sv.getName();
+									final Object value = sv.getValue();
+
+									switch(name) {
+
+									case "power":
+										((List<?>)value).stream().map(SonValue.class::cast).filter(v->v.getName().equals("value")).findAny().ifPresent(v->lblOPower.setText(v.getValue().toString()));
+										break;
+
+									case "temperature":
+										lblTemp.setText(sv.getValue().toString());
+										break;
+
+									case "refl_power":
+										lblCurrent2_text.setText("R.Pow.:");
+										((List<?>)value).stream().map(SonValue.class::cast).filter(v->v.getName().equals("value")).findAny().ifPresent(v->lblCurrent2.setText(v.getValue().toString()));
+									}
+								});
+				}
+				return;
+			}
+
+			final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+			final int size = queue.size();
 
 //		logger.error("delay: {}; size: {}", delay, size);
 
-		if(delay<=0)
-			try{
-				new ThreadWorker(
-						()->{
-							synchronized(adcWorkers) { 
-								adcWorkers
-								.stream()
-								.forEach(adc->queue.add(adc.getPacketToSend()));
-							}
-						}, "BIASsPanel.run()");
-			}catch (Exception e) {
-				logger.catching(e);
-			}
-		else
-			delay--;
+			if(delay<=0)
+				try{
+					new ThreadWorker(
+							()->{
+								synchronized(adcWorkers) { 
+									adcWorkers
+									.stream()
+									.forEach(adc->queue.add(adc.getPacketToSend()));
+								}
+							}, "BIASsPanel.run()");
+				}catch (Exception e) {
+					logger.catching(e);
+				}
+			else
+				delay--;
 
-		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
-			delay = ComPortThreadQueue.DELAY_TIMES;
-		else if(size<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
-			delay = 0;
+			if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<=0)
+				delay = ComPortThreadQueue.DELAY_TIMES;
+			else if(size<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
+				delay = -1;
+
+		} catch (Exception e) {
+			logger.catching(e);
+		}
 	}
 
 	private synchronized void start() {
@@ -959,5 +1025,48 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				return Optional.empty();
 			return function.apply(packet);
 		}
+	}
+
+	private List<SonValue> getHttpUpdate(String ipAddress) throws ScriptException {
+
+		StringBuilder sb = new StringBuilder();
+		String urlParams = "exec=calib_ro_info";
+
+		URL url;
+		HttpURLConnection connection = null;
+		try {
+
+			url = new URL("http", ipAddress, "/update.cgi");
+			connection = (HttpURLConnection) url.openConnection();	
+			connection.setDoOutput(true);
+			connection.setDoInput(true);
+			connection.setUseCaches(false);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Connection", "keep-alive");
+
+			try(	OutputStream outputStream = connection.getOutputStream();
+					OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);){
+
+				outputStreamWriter.write(urlParams);
+				outputStreamWriter.flush();
+
+				String line;
+				try(	final InputStream inputStream = connection.getInputStream();
+						final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+						final BufferedReader reader = new BufferedReader(inputStreamReader);){
+
+					while ((line = reader.readLine()) != null)
+						sb.append(line);
+					
+				}
+			}
+
+		} catch (IOException e) {
+			logger.catching(e);
+		}
+
+		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
+		JSonValueMapper mapper = new JSonValueMapper();
+		return mapper.toSonValue(sb.toString());
 	}
 }

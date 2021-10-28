@@ -69,98 +69,89 @@ public class HttpUploader {
 
 	public void upload(byte[] bytes) throws IOException {
 
-		// TODO Save package to the file (For test only)
-//		try {
-//			File file = new File("C:\\Users\\Alex\\Desktop\\tmp\\deleteMe.pkg");
-//			file.createNewFile();
-//			byte[] b = new byte[inputStream.available()];
-//			inputStream.read(b);
-//			try (FileOutputStream os = new FileOutputStream(file)) {
-//				os.write(b);
-//			}
-//		} catch (Exception e) {
-//			LogManager.getLogger().catching(e);
-//		}
-
 		String boundary =  "*****"+Long.toHexString(System.currentTimeMillis())+"*****";
 
 		URL url = new URL("http", ipAddress, "/upgrade.cgi");
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();	
 
-		connection.setDoOutput(true);
-		connection.setDoInput(true);
-		connection.setUseCaches(false);
-		connection.setRequestMethod("POST");
-		connection.setRequestProperty("Connection", "Keep-Alive");
-		final String value = "IRT GUI" + IrtGui.VERTION + "; User: " + System.getProperty("user.name") + "; os.name: " + System.getProperty("os.name") + "; os.arch: " + System.getProperty("os.arch") + ";";
-		connection.setRequestProperty("User-Agent", value);
-		connection.setRequestProperty("Content-Type", "multipart/form-data; boundary="+boundary);
+		try {
+			connection.setDoOutput(true);
+			connection.setDoInput(true);
+			connection.setUseCaches(false);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Connection", "Keep-Alive");
+			final String value = "IRT GUI" + IrtGui.VERTION + "; User: " + System.getProperty("user.name") + "; os.name: " + System.getProperty("os.name") + "; os.arch: " + System.getProperty("os.arch") + ";";
+			connection.setRequestProperty("User-Agent", value);
+			connection.setRequestProperty("Content-Type", "multipart/form-data; boundary="+boundary);
 
-		try(	OutputStream outputStream = connection.getOutputStream();
-				DataOutputStream dataOutputStream = new DataOutputStream(outputStream);) {
+			try(	OutputStream outputStream = connection.getOutputStream();
+					DataOutputStream dataOutputStream = new DataOutputStream(outputStream);) {
 
-			dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
-			dataOutputStream.writeBytes("Upgrade" + lineEnd);
-			dataOutputStream.writeBytes(lineEnd);
+				dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
+				dataOutputStream.writeBytes("Upgrade" + lineEnd);
+				dataOutputStream.writeBytes(lineEnd);
 
-			dataOutputStream.write(bytes, 0, bytes.length);
-			dataOutputStream.writeBytes(lineEnd);
-			dataOutputStream.flush();
+				dataOutputStream.write(bytes, 0, bytes.length);
+				dataOutputStream.writeBytes(lineEnd);
+				dataOutputStream.flush();
 
-			// Read Response
-			try(InputStream in = connection.getInputStream()) {
+				// Read Response
+				try(InputStream in = connection.getInputStream()) {
 
-				BufferedReader r = new BufferedReader(new InputStreamReader(in));
-				StringBuffer buf = new StringBuffer();
-				String line;
+					BufferedReader r = new BufferedReader(new InputStreamReader(in));
+					StringBuffer buf = new StringBuffer();
+					String line;
 
-				AlertType t = null;;
-				String em = null;
-				// When the unit accepts the update it return page with the title 'End of session'
-				while ((line = r.readLine())!=null) {
-					buf.append(line).append(System.getProperty("line.separator"));
-					final int indexOf = buf.indexOf("End of session");
-					if(indexOf>0){
-						t = AlertType.INFORMATION;
-						em = "Firmware upgrade is in progress. It may take up to 30 seconds to complete operation";
-						break;
-					}
-				}
-
-				if(t==null){
-					
-					String m = "var httpd_message='";
-					em = Optional
-														.of(buf.indexOf(m))
-														.filter(index->index>0)
-														.map(index->index+m.length())
-														.map(index->buf.substring(index))
-														.map(str->str.substring(0, str.indexOf("'")))
-														.orElse("Ooops, there was an error!");
-					t = AlertType.ERROR;
-				}
-
-				final AlertType type = t;
-				final String errorMessage = em;
-				Platform.runLater(()->{
-					
-					Alert alert = new Alert(type);
-					alert.setTitle(type==AlertType.ERROR ? "Upload Error" : "Package Upload");
-					alert.setHeaderText(type==AlertType.ERROR ? "Error Message:" : "Message:");
-					alert.setContentText(errorMessage);
-
-					TimerTask task = new TimerTask() {
-						
-						@Override
-						public void run() {
-							Platform.runLater(()->alert.close());
+					AlertType t = null;;
+					String em = null;
+					// When the unit accepts the update it return page with the title 'End of session'
+					while ((line = r.readLine())!=null) {
+						buf.append(line).append(System.getProperty("line.separator"));
+						final int indexOf = buf.indexOf("End of session");
+						if(indexOf>0){
+							t = AlertType.INFORMATION;
+							em = "Firmware upgrade is in progress. It may take up to 30 seconds to complete operation";
+							break;
 						}
-					};
-					new Timer().schedule(task, 10*1000);
-					alert.show();
-				});
+					}
+
+					if(t==null){
+						
+						String m = "var httpd_message='";
+						em = Optional
+															.of(buf.indexOf(m))
+															.filter(index->index>0)
+															.map(index->index+m.length())
+															.map(index->buf.substring(index))
+															.map(str->str.substring(0, str.indexOf("'")))
+															.orElse("Ooops, there was an error!");
+						t = AlertType.ERROR;
+					}
+
+					final AlertType type = t;
+					final String errorMessage = em;
+					Platform.runLater(()->{
+						
+						Alert alert = new Alert(type);
+						alert.setTitle(type==AlertType.ERROR ? "Upload Error" : "Package Upload");
+						alert.setHeaderText(type==AlertType.ERROR ? "Error Message:" : "Message:");
+						alert.setContentText(errorMessage);
+
+						TimerTask task = new TimerTask() {
+							
+							@Override
+							public void run() {
+								Platform.runLater(()->alert.close());
+							}
+						};
+						new Timer().schedule(task, 10*1000);
+						alert.show();
+					});
+				}
 			}
+		} catch (IOException e) {
+			connection.disconnect();
+			throw new IOException(e);
 		}
-		connection.disconnect();
 	}
 }

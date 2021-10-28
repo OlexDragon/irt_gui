@@ -67,13 +67,15 @@ import javax.swing.event.PopupMenuEvent;
 public class IrtGui extends IrtMainFrame {
 
 	private static final long serialVersionUID = 1611718189640547787L;
+	protected static boolean production = true;  public static boolean isProduction() { return production; }
 
 	private static final String PREF_KEY_ADDRESS = "address";
+
 	public static final int DEFAULT_ADDRESS = 254;
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.230";
+	public static final String VERTION = "- 3.236";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;

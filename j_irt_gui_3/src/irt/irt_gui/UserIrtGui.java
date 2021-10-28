@@ -14,6 +14,7 @@ public class UserIrtGui extends IrtGui {
 	private final static Logger logger = LogManager.getLogger();
 
 	public UserIrtGui() {
+		production = false;
 	}
 
 	public static void main(String[] args) {

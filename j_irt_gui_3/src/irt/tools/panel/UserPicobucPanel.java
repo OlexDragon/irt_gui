@@ -34,6 +34,8 @@ import irt.tools.panel.subpanel.RedundancyPanel;
 @SuppressWarnings("serial")
 public class UserPicobucPanel extends DevicePanel {
 
+	public static final String REDUNDANCY = "redundancy";
+
 	private final static Logger logger = LogManager.getLogger();
 
 	private JTabbedPane tabbedPane;
@@ -125,7 +127,7 @@ public class UserPicobucPanel extends DevicePanel {
 	}
 
 	public void showRedundant() {
-		tabbedPane.addTab("redundancy", new RedundancyPanel(getLinkHeader()));
+		tabbedPane.addTab(REDUNDANCY, new RedundancyPanel(getLinkHeader()));
 
 		int index = tabbedPane.getTabCount()-1;
 		String title = tabbedPane.getTitleAt(index);

@@ -65,11 +65,14 @@ public class EditTablesMessageFx extends Alert {
 		resultProperty().set(ButtonType.NO);
 
 		final ChangeListener<? super String> textChangeListener = (o,ov,nv)->{
-			saveButton.setDisable(true);
-			setAlertType(AlertType.WARNING);
-			final TableChecker t = new TableChecker(nv, saveButton);
-			Optional.ofNullable(task.getAndSet(t)).ifPresent(TimerTask::cancel);
-			timer.schedule(t, 3000);
+			Platform.runLater(
+					()->{
+						saveButton.setDisable(true);
+						setAlertType(AlertType.WARNING);
+						final TableChecker t = new TableChecker(nv, saveButton);
+						Optional.ofNullable(task.getAndSet(t)).ifPresent(TimerTask::cancel);
+						timer.schedule(t, 3000);
+					});
 		};
 
 		textArea.textProperty().addListener(textChangeListener);
@@ -201,7 +204,7 @@ public class EditTablesMessageFx extends Alert {
 					while (scanner.hasNextLine()) {
 
 						final String nextLine = scanner.nextLine().trim();
-						if(nextLine.isEmpty())
+						if(nextLine.isEmpty() || nextLine.startsWith("#"))
 							continue;
 
 						if(table==null) {

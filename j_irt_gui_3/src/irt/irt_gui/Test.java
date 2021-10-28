@@ -1,159 +1,67 @@
 
 package irt.irt_gui;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 
-import irt.controller.serial_port.ComPortJssc;
-import irt.controller.serial_port.ComPortThreadQueue;
-import irt.controller.serial_port.SerialPortInterface;
-import irt.controller.serial_port.SerialPortWorker;
-import irt.data.ThreadWorker;
-import irt.data.ToHex;
-import irt.data.listener.PacketListener;
-import irt.data.packet.InitializePacket;
-import irt.data.packet.PacketImp;
-import irt.data.packet.PacketSuper;
-import irt.data.packet.Payload;
-import irt.data.packet.configuration.Offset1to1toMultiPacket;
-import irt.data.packet.interfaces.Packet;
+import irt.controller.DumpControllerFull;
 
 public class Test {
+
+	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 
 	private final static Logger logger = LogManager.getLogger();
 
 	public static void main(String[] args) {
+		logger.trace(ctx);
 
-		byteStuffingTest();
+		String ipAddress = "op-2123100";
+		String urlParams = "exec=calib_ro_info";
 
-		SerialPortInterface port = null;
+		URL url;
+		HttpURLConnection connection = null;
 		try {
 
-			logger.error("\n\n************************   START   ***********************************\n\n");
+			url = new URL("http", ipAddress, "/update.cgi");
+			connection = (HttpURLConnection) url.openConnection();	
+			connection.setDoOutput(true);
+			connection.setDoInput(true);
+			connection.setUseCaches(false);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Connection", "keep-alive");
 
-//			final byte linkAddr = (byte) 101;
-			final byte linkAddr = (byte) 254;
-//			final byte linkAddr = (byte) 0;
-//			port = new PureJavaComPort("COM13");
-			port = new ComPortJssc("COM3");
-//			port = new JsscComPort("COM14");
-			port.openPort();
-			logger.error("Serial port {} is opend={}", port, port.isOpened());
-			final ComPortThreadQueue comPortThreadQueue = new ComPortThreadQueue();
-			comPortThreadQueue.setSerialPort(port);
-			final PacketListenerTest packetListener = new PacketListenerTest();
-			comPortThreadQueue.addPacketListener(packetListener);
+			try(	OutputStream outputStream = connection.getOutputStream();
+					OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);){
 
-			PacketSuper[] packets = new PacketSuper[]{
+				outputStreamWriter.write(urlParams);
+				outputStreamWriter.flush();
 
-//					new DeviceInfoPacket(linkAddr),
-//					new MeasurementPacket(linkAddr),
-//					new AlarmsSummaryPacket(linkAddr),
-//					new AlarmsIDsPacket(linkAddr),
-//					new DeviceDebugInfoPacket(linkAddr, (byte)1),
-//					new ModuleListPacket(linkAddr),
-//					new ActiveModulePacket(linkAddr, null),
-//					new SwitchoverModePacket(linkAddr, null),
-//					new DeviceDebugPacket(linkAddr, DeviceDebugPacketIds.FCM_ADC_INPUT_POWER),
-//					new Offset1to1toMultiPacket(linkAddr, (byte) 1, null),
-					new InitializePacket(linkAddr)
-				};
+				String line;
+				try(	final InputStream inputStream = connection.getInputStream();
+						final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+						final BufferedReader reader = new BufferedReader(inputStreamReader);){
 
-			for(int i=0, x=0;i<=1000; i++, x++){
-				if(x>=packets.length)
-					x=0;
-				final long start = System.currentTimeMillis();
-
-				packetListener.start();
-				comPortThreadQueue.add(packets[x]);
-				logger.error("Sent packet {}", packets[x]);
-
-				final Packet packet = packetListener.get();
-
-				logger.error("*******   {}) time = {} *******", i, System.currentTimeMillis()-start);
-				if(packet==null || packet.getHeader().getPacketType()!=PacketImp.PACKET_TYPE_RESPONSE){
-					logger.error(">>>>> ????? Did not get answer: {}\n\n\t\t\t got {} answers. \n\n************************   STOP   ***********************************\n\n", packet, i);
-					Thread.sleep(2000);
-					return;
+while ((line = reader.readLine()) != null) {
+    System.out.println(line);
+}
+					
 				}
-
-				Offset1to1toMultiPacket.parseValueFunction.apply(packet).ifPresent(o->logger.error("{}" , o));
-
-				logger.error("{} : {}\n{}", Optional.of(packet).map(Packet::getPayloads).map(List::stream).orElse(Stream.empty()).map(Payload::getBuffer).map(String::new).toArray(), packet, Optional.ofNullable(packet).map(Packet::toBytes).map(ToHex::bytesToHex).orElse(null));
 			}
-			logger.error("\n\n************************   STOP   ***********************************\n\n");
-
-			Thread.sleep(2000);
-
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.catching(e);
-		}finally{
-			if(port!=null)
-				port.closePort();
-		}
-	}
-
-	private static void byteStuffingTest() {
-		byte[] bytes = new byte[]{0, 00, 00, 01, 0x5C, (byte) 0xAF, (byte) 0xEA, (byte) 0x80, 00, 00, 00, 01, 0x7D, 0x5D, 0x78, 0x40, 00};
-		logger.error("*** Start byteStuffingTest - {}" + ToHex.bytesToHex(bytes));
-		logger.error("*** End byteStuffingTest - {}" + ToHex.bytesToHex(SerialPortWorker.byteStuffing(bytes)));
-	}
-
-	public static class PacketListenerTest implements PacketListener, Callable<Packet>{
-
-		private Packet packet;
-		private FutureTask<Packet> task;
-		private boolean notified;
-
-		public void start() {
-			packet = null;
-			notified = false;
-			task = new FutureTask<>(this);
-			new ThreadWorker("Test").newThread(task).start();
 		}
 
-		@Override
-		public void onPacketReceived(Packet packet) {
-
-			new ThreadWorker(()->{
-
-				logger.error(packet);
-				this.packet = packet;
-				synchronized (this) {
-					notified = true;
-					notify();
-				}
-			}, "Test");
-		}
-
-		@Override
-		public Packet call() throws Exception {
-			synchronized (this) {
-
-				final long start = System.currentTimeMillis();
-
-				while(!notified && System.currentTimeMillis()-start<1500)
-					try{
-						wait(1500);
-					}catch (Exception e) {
-						logger.catching(e);
-					}
-
-				logger.error("time: {}; notivied: {}", System.currentTimeMillis()-start, notified);
-			}
-
-			return packet;
-		}
-
-		public Packet get() throws InterruptedException, ExecutionException {
-			return task.get();
-		}		
+		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
 	}
 }
