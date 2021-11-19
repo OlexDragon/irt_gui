@@ -10,6 +10,8 @@ import javax.swing.SwingUtilities;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.sun.javafx.tk.Toolkit;
+
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
@@ -54,7 +56,8 @@ public class UserPicobucPanel extends DevicePanel {
 //				.filter(c->c.getParent()==null)
 //				.ifPresent(c->Optional.ofNullable(target).ifPresent(DefaultController::stop)));
 
-		final LinkHeader linkHeader = deviceInfo.getLinkHeader();
+		final Optional<DeviceInfo> oDeviceInfo = Optional.ofNullable(deviceInfo);
+		final LinkHeader linkHeader = oDeviceInfo.map(DeviceInfo::getLinkHeader).orElse(null);
 
 		try {
 			tabbedPane = getTabbedPane();
@@ -63,6 +66,11 @@ public class UserPicobucPanel extends DevicePanel {
 				JLabel lblNewLabel = new ImageLabel(IrtPanel.logoIcon, "");
 				tabbedPane.addTab("Logo", lblNewLabel);
 			}
+
+			// for WindowBuilder Editor
+			final Toolkit toolkit = Toolkit.getToolkit();
+			if(toolkit==null)
+				return;
 
 			JavaFxWrapper alarmPanel = new JavaFxWrapper(new AlarmPanelFx());
 			alarmPanel.setUnitAddress(linkHeader.getAddr());
@@ -88,7 +96,7 @@ public class UserPicobucPanel extends DevicePanel {
 			logger.catching(e);
 		}
 
-		deviceInfo.getDeviceType()
+		oDeviceInfo.flatMap(DeviceInfo::getDeviceType)
 		.filter(dt->!IrtGui.isRedundancyController())
 		.filter(dt->!dt.equals(DeviceType.IR_PC))
 		.filter(dt->!dt.equals(DeviceType.DLRS))

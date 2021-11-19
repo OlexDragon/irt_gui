@@ -342,8 +342,20 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 							return new ProfileValidator(profile);
 
-						} catch (NoSuchAlgorithmException | IOException e1) {
+						} catch (NoSuchAlgorithmException | IOException | NumberFormatException e1) {
+
 							logger.catching(e1);
+
+							Platform.runLater(
+									()->{
+										Alert alert = new Alert(AlertType.ERROR);
+										alert.initModality(Modality.APPLICATION_MODAL);
+										alert.setTitle("Profile Validation Error");
+										alert.setHeaderText(null);
+										alert.setContentText(e1.getLocalizedMessage());
+										alert.showAndWait();
+									});
+
 							return null;
 						}
 					})

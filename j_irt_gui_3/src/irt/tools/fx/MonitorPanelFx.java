@@ -9,6 +9,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.AbstractMap;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -187,10 +188,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 						if(IrtGui.isProduction()) 
 							setMonitorPanelTooltip(map);
 
+						// Set Status
 						Optional
 						.ofNullable((List<?>)map.remove("STATUS"))
 						.ifPresent(this::setStatus);
 
+						// Remove Undefined and Not Available fields
 						Map<?, ?> collect = map.entrySet().parallelStream()
 
 								.filter(
@@ -200,6 +203,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 										})
 								.collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
 
+						// Feel Monitor fields
 						setValues(collect);
 					});
 		}, "MonitorPanelFx.onPacketReceived()");
@@ -243,7 +247,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 		Platform.runLater(
 				()->{
-					if(children.size()!=map.size())
+					if(children.size()/2<map.size())
 						children.clear();
 
 					if(children.isEmpty()) {
@@ -253,8 +257,10 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 									final int size = entrySet.size();
 									IntStream.range(0, size).forEach(
 											rowIndex->{
+
 												if(!iterator.hasNext())
 													return;
+
 												Entry<?, ?> next = (Entry<?, ?>) iterator.next();
 												String key = next.getKey().toString();
 												Label descriptionLabel = new Label(Translation.getValue(String.class, key, "* " + key) + ": ");
@@ -266,6 +272,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 												valueLabel.getStyleClass().add("value");
 												valueLabel.setUserData(key);
 												setLabelProperties(valueLabel, Pos.CENTER_LEFT);
+
 												Platform.runLater(
 														()->{
 															gridPane.add(descriptionLabel, 0, rowIndex);
@@ -274,6 +281,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 											});
 								}, "Monitor Fields Creation");
 					}else {
+
 						ThreadWorker.runThread(
 								()->{
 									final Map<Object, Node> collect = children.stream().filter(node->node.getUserData()!=null).collect(Collectors.toMap(Node::getUserData, node->node));
@@ -294,16 +302,16 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 		collect = stream.filter(phc->phc==StatusBitsBUC.UNLOCKED || phc==StatusBitsBUC.LOCKED || phc==StatusBitsBUC.MUTE || phc==StatusBitsFCM.LOCK  || phc==StatusBitsFCM.MUTE || phc==StatusBitsFCM.MUTE_TTL).collect(Collectors.toList());
 
-		final ObservableList<Node> children = statusPane.getChildren();
-		final int size = children.size();
 
 		String toolTipText = status.toString().replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
 		Tooltip tooltip = new Tooltip(toolTipText);
 
 		int statusSize = collect.size();
+		final ObservableList<Node> children = statusPane.getChildren();
+		final int size = children.size();
 
 		if(size>statusSize)
-			IntStream.range(statusSize, size).forEach(index->Platform.runLater(()->children.remove(index)));
+			IntStream.range(statusSize, size).boxed().sorted(Collections.reverseOrder()).forEach(index->Platform.runLater(()->children.remove((int)index)));
 
 		IntStream.range(0, statusSize).forEach(
 

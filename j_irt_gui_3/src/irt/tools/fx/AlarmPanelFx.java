@@ -1,6 +1,7 @@
 package irt.tools.fx;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -88,16 +89,21 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 		packetAlarmIDs = (AlarmsIDsPacket) Packets.ALARM_ID.getPacketAbstract();
 
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("GridPanel.fxml"));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
+		final URL resource = getClass().getResource("GridPanel.fxml");
+		Optional.ofNullable(resource)
+		.ifPresent(
+				r->{
+					FXMLLoader fxmlLoader = new FXMLLoader(resource);
+			        fxmlLoader.setRoot(this);
+			        fxmlLoader.setController(this);
 
-        try {
-            fxmlLoader.load();
+			        try {
+			            fxmlLoader.load();
 
-        } catch (IOException exception) {
-            throw new RuntimeException(exception);
-        }
+			        } catch (IOException exception) {
+			            throw new RuntimeException(exception);
+			        }
+				});
 	}
 
 	@FXML protected void initialize() {

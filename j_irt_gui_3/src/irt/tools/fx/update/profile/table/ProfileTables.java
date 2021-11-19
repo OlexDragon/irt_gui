@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import irt.tools.fx.update.profile.table.ProfileTable.TableError;
 
 public class ProfileTables {
+	private final static Logger logger = LogManager.getLogger();
 
 	public final static String LUT = "lut-";
 	private final static List<ProfileTable> tables = new ArrayList<>();
@@ -16,6 +20,9 @@ public class ProfileTables {
 	}
 
 	public static boolean add(String line) {
+
+		if(line==null)
+			return false;
 
 		final ProfileTable profileTable = new ProfileTable(line);
 
@@ -30,7 +37,14 @@ public class ProfileTables {
 			return true;
 		}
 
-		existingTable.join(profileTable);
+		try {
+
+			existingTable.join(profileTable);
+
+		} catch (Exception e) {
+			logger.catching(e);
+			return false;
+		}
 
 		return true;
 	}

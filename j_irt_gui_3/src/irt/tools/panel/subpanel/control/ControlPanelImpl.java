@@ -293,14 +293,16 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		cbLoSelect.setFont(font);
 		cbLoSelect.setBounds(10, 141, 194, 26);
 		add(cbLoSelect);
-		cbLoSelect.addItemListener(e->{
-			//Reset Frequency controller
-			if(controller instanceof UnitFrequencyController){
-				Optional.ofNullable(controller).ifPresent(UnitController::stop);
-				controller = null;
-				startNewController(UnitFrequencyController.class);
-			}
-		});
+		cbLoSelect.addItemListener(
+
+				e->{
+					//Reset Frequency controller
+					if(controller instanceof UnitFrequencyController){
+						Optional.ofNullable(controller).ifPresent(UnitController::stop);
+						controller = null;
+						startNewController(UnitFrequencyController.class);
+					}
+				});
 
 		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));

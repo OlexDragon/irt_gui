@@ -1,9 +1,13 @@
 package irt.tools.panel.subpanel;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -18,7 +22,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,14 +40,15 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.script.ScriptException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -49,6 +57,7 @@ import javax.swing.event.AncestorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -72,8 +81,8 @@ import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
-import irt.data.value.SonValue;
 import irt.data.value.JSonValueMapper;
+import irt.data.value.SonValue;
 import irt.irt_gui.IrtGui;
 import irt.tools.CheckBox.SwitchBox;
 import irt.tools.button.ImageButton;
@@ -193,6 +202,56 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					public void ancestorMoved(AncestorEvent arg0) {}
 		});
 
+		deviceInfo.getSerialNumber()
+		.ifPresent(
+				serialNumber->{
+
+					try {
+
+						popupMenu = new JPopupMenu();
+						addPopup(this, popupMenu);
+
+						URL url = new URL("http", serialNumber, "/diagnostics.asp?devices=1");
+
+						JMenuItem browseMenuItem = new JMenuItem("Open Diagnostics Page");
+						popupMenu.add(browseMenuItem);
+						browseMenuItem.addActionListener(
+								e-> {
+									try {
+										Desktop.getDesktop().browse(url.toURI());
+									} catch (IOException | URISyntaxException e1) {
+										logger.catching(e1);
+									}
+								});
+
+						JMenuItem copyToClipboardMenuItem = new JMenuItem("Copy to Clipboard");
+						copyToClipboardMenuItem.addActionListener(
+								e->{
+									final String toolTipText = getToolTipText();
+									StringSelection stringSelection = new StringSelection(toolTipText);
+									Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
+								});
+
+						JMenuItem fromWebMenuItem = new JMenuItem("Data frome the Web");
+						popupMenu.add(fromWebMenuItem);
+						fromWebMenuItem.addActionListener(
+								e-> {
+									if(browseData) {
+										fromWebMenuItem.setText("Data frome the Web");
+										browseData = false;
+										popupMenu.remove(copyToClipboardMenuItem);
+									}else {
+										fromWebMenuItem.setText("Off Web");
+										browseData = true;
+										popupMenu.add(copyToClipboardMenuItem);
+									}
+								});
+
+					} catch (MalformedURLException e1) {
+						logger.catching(e1);
+					}
+				});
+
 		switch_1 = new Switch(new DeviceDebugPacket(addr, isMainBoard ? DeviceDebugPacketIds.SWITCH_N1 : DeviceDebugPacketIds.SWITCH_N1_REMOTE_BIAS));
 		switch_1.setName("Switch #1");
 		switch_1.setBounds(61, 2, 55, 25);
@@ -310,31 +369,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 
 		//New Bias board
-		}else if(deviceInfo.getDeviceType().filter(dt->dt==DeviceType.C_SSPA).isPresent()) {	
-			//New Bias board C Band SSPA
-
-			maxValue = 255;
-
-			text1 = "OUTPUT:";
-			text2 = "DRIVER:";
-			text3 = "MMIC:";
-			text4 = null;
-			text5 = null;
-			text6 = null;
-			text7 = null;
-			text8 = null;
-
-			registerValue1 = new RegisterValue(1, 0x0, null);
-			registerValue2 = new RegisterValue(1, 0x30, null);
-			registerValue3 = new RegisterValue(1, 0x8, null);
-			registerValue4 = null;
-			registerValue5 = null;
-			registerValue6 = null;
-			registerValue7 = null;
-			registerValue8 = null;
-
 		}else if(deviceInfo.getRevision()>10) {	
-		//New Bias board
 
 			maxValue = 255;
 
@@ -864,6 +899,9 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	}
 
 	private int delay;
+	private JPopupMenu popupMenu;
+	private boolean browseData;
+	private boolean httpRequest;
 	@Override
 	public void run() {
 
@@ -873,45 +911,72 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			synchronized(adcWorkers) {
 				isPresent = adcWorkers.parallelStream().filter(w->w.getLabel().equals(lblOPower)).map(AdcWorker::getPacketToSend).filter(w->w!=null).findAny().isPresent();
 			}
-			if(!isPresent){
 
-				final List<SonValue> sonValues = deviceInfo.getSerialNumber()
+			if(!isPresent || browseData){
 
-						.map(
-								sn->{
-									try {
-										return getHttpUpdate(sn);
-									} catch (ScriptException e1) {
-										logger.catching(e1);
-										return null;
+				if(httpRequest)
+					return;
+
+				ThreadWorker.runThread(
+						()->{
+
+							httpRequest = true;
+
+							try {
+								final List<SonValue> sonValues = deviceInfo.getSerialNumber()
+
+										.map(
+												sn->{
+													try {
+														return getHttpUpdate(sn);
+													} catch (ScriptException e1) {
+														logger.catching(e1);
+														return null;
+													}
+												}).orElse(null);
+
+//							logger.error("{}", sonValues);
+								if(sonValues!=null) {
+
+									if(sonValues.size()==0) {
+
+										deviceInfo.getSerialNumber().ifPresent(this::loginToHttp);
+
+										return;
 									}
-								}).orElse(null);
 
-				if(sonValues!=null) {
+									sonValues.parallelStream().filter(sv->sv.getName().equals("bias")).map(SonValue::getValue).map(a->(List<?>)a)
+										.flatMap(List::parallelStream).map(SonValue.class::cast)
+										.forEach(
+												sv->{
 
-						sonValues.parallelStream().filter(sv->sv.getName().equals("bias")).map(SonValue::getValue).map(a->(List<?>)a).flatMap(List::parallelStream).map(SonValue.class::cast)
-						.forEach(
-								sv->{
+													final String name = sv.getName();
+													final Object value = sv.getValue();
 
-									final String name = sv.getName();
-									final Object value = sv.getValue();
+													switch(name) {
 
-									switch(name) {
+													case "det1":
+													case "power":
+														((List<?>)value).stream().map(SonValue.class::cast).filter(v->v.getName().equals("value")).findAny().ifPresent(v->lblOPower.setText(v.getValue().toString()));
+														break;
 
-									case "power":
-										((List<?>)value).stream().map(SonValue.class::cast).filter(v->v.getName().equals("value")).findAny().ifPresent(v->lblOPower.setText(v.getValue().toString()));
-										break;
+													case "temperature":
+														lblTemp.setText(sv.getValue().toString());
+														break;
 
-									case "temperature":
-										lblTemp.setText(sv.getValue().toString());
-										break;
+													case "det2":
+													case "refl_power":
+														lblCurrent2_text.setText("R.Pow.:");
+														((List<?>)value).stream().map(SonValue.class::cast).filter(v->v.getName().equals("value")).findAny().ifPresent(v->lblCurrent2.setText(v.getValue().toString()));
+													}
+												});
+								}
+							} catch (Exception e) {
+								logger.catching(e);
+							}
+							httpRequest = false;
+						}, "HTTP request");
 
-									case "refl_power":
-										lblCurrent2_text.setText("R.Pow.:");
-										((List<?>)value).stream().map(SonValue.class::cast).filter(v->v.getName().equals("value")).findAny().ifPresent(v->lblCurrent2.setText(v.getValue().toString()));
-									}
-								});
-				}
 				return;
 			}
 
@@ -1004,45 +1069,65 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		}
 	}
 
-	public class ParsePacket implements Callable<Optional<?>>{
+	private void loginToHttp(String ipAddress) {
 
-		private Function<Packet, Optional<Object>> function;
-		private Packet packet;
-
-		public ParsePacket(Function<Packet, Optional<Object>> function) {
-			this.function = function;
-		}
-		public Packet getPacket() {
-			return packet;
-		}
-		public void setPacket(Packet packet) {
-			this.packet = packet;
-		}
-
-		@Override
-		public Optional<?> call() throws Exception {
-			if(function==null || packet==null)
-				return Optional.empty();
-			return function.apply(packet);
-		}
-	}
-
-	private List<SonValue> getHttpUpdate(String ipAddress) throws ScriptException {
-
-		StringBuilder sb = new StringBuilder();
-		String urlParams = "exec=calib_ro_info";
-
-		URL url;
 		HttpURLConnection connection = null;
+
 		try {
 
-			url = new URL("http", ipAddress, "/update.cgi");
+			final URL url = new URL("http", ipAddress, "/hidden.cgi");
+//			logger.error(url);
 			connection = (HttpURLConnection) url.openConnection();	
 			connection.setDoOutput(true);
 			connection.setDoInput(true);
 			connection.setUseCaches(false);
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Connection", "keep-alive");
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+			try(	OutputStream outputStream = connection.getOutputStream();
+					OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);){
+
+				outputStreamWriter.write("pwd=jopa");
+				outputStreamWriter.flush();
+
+				try(	final InputStream inputStream = connection.getInputStream();
+						final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+						final BufferedReader reader = new BufferedReader(inputStreamReader);){
+
+					String line;
+					while ((line = reader.readLine()) != null)
+						logger.debug(line);
+					
+				}
+			}
+
+		} catch (ConnectException e) {
+			logger.catching(Level.DEBUG, e);
+
+		} catch (IOException e) {
+			logger.catching(e);
+		}
+
+		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
+	}
+
+	private List<SonValue> getHttpUpdate(String ipAddress) throws ScriptException {
+
+		StringBuilder sb = new StringBuilder();
+		String urlParams = "exec=calib_ro_info&_http_id=irt";
+
+		HttpURLConnection connection = null;
+
+		try {
+
+			final URL url = new URL("http", ipAddress, "/update.cgi");
+			connection = (HttpURLConnection) url.openConnection();	
+			connection.setDoOutput(true);
+			connection.setUseCaches(false);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Connection", "keep-alive");
+			connection.setRequestProperty("Content-Type", "text/plain;charset=UTF-8");
 
 			try(	OutputStream outputStream = connection.getOutputStream();
 					OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);){
@@ -1061,12 +1146,58 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 				}
 			}
 
+		} catch (ConnectException e) {
+			logger.catching(Level.DEBUG, e);
+
 		} catch (IOException e) {
 			logger.catching(e);
 		}
 
 		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
 		JSonValueMapper mapper = new JSonValueMapper();
-		return mapper.toSonValue(sb.toString());
+		final String sonString = sb.toString();
+		setToolTipText(sonString);
+		return mapper.toSonValue(sonString);
 	}
+
+	private static void addPopup(Component component, final JPopupMenu popup) {
+		component.addMouseListener(new MouseAdapter() {
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger()) {
+					showMenu(e);
+				}
+			}
+			private void showMenu(MouseEvent e) {
+				popup.show(e.getComponent(), e.getX(), e.getY());
+			}
+		});
+	}
+//
+//	public class ParsePacket implements Callable<Optional<?>>{
+//
+//		private Function<Packet, Optional<Object>> function;
+//		private Packet packet;
+//
+//		public ParsePacket(Function<Packet, Optional<Object>> function) {
+//			this.function = function;
+//		}
+//		public Packet getPacket() {
+//			return packet;
+//		}
+//		public void setPacket(Packet packet) {
+//			this.packet = packet;
+//		}
+//
+//		@Override
+//		public Optional<?> call() throws Exception {
+//			if(function==null || packet==null)
+//				return Optional.empty();
+//			return function.apply(packet);
+//		}
+//	}
 }

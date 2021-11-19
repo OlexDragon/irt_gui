@@ -289,14 +289,16 @@ public class UnitControllerImp implements UnitController{
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		new ThreadWorker(()->{
+		new ThreadWorker(
+				()->{
 			
-			if(isValuePacket(packet))
-				setValue(Packets.cast(packet));
+					if(isValuePacket(packet))
+						setValue(Packets.cast(packet));
 
-			else if(isRangePacket(packet))
-				setRange(Packets.cast(packet));
-		}, "UnitControllerImp.onPacketReceived(Packet)");
+					else if(isRangePacket(packet))
+						setRange(Packets.cast(packet));
+
+				}, "UnitControllerImp.onPacketReceived(Packet)");
 	}
 
 	private boolean isValuePacket(Packet packet) {
@@ -338,36 +340,38 @@ public class UnitControllerImp implements UnitController{
 	}
 
 	private void setRange(Optional<? extends PacketSuper> optional) {
+
 		optional
 		.flatMap(p->(Optional<?>)p.getValue())
 		.filter(Range.class::isInstance)
 		.map(Range.class::cast)
-		.ifPresent(range->{
+		.ifPresent(
+				range->{
 
-			minimum = range.getMinimum();
-			maximum = range.getMaximum();
+					minimum = range.getMinimum();
+					maximum = range.getMaximum();
 
-			if(minimum==Short.MIN_VALUE || maximum==Short.MIN_VALUE)	// Range is undefined
-				return;
+					if(minimum==Short.MIN_VALUE || minimum==Integer.MIN_VALUE || maximum==Short.MIN_VALUE || maximum==Integer.MIN_VALUE)	// Range is undefined
+						return;
 
-			relative = minimum;
+					relative = minimum;
 
-			//TODO			slider.setToolTipText("from" + minimum + " to " + maximum);
+					//TODO			slider.setToolTipText("from" + minimum + " to " + maximum);
 
-			slider.removeChangeListener(sliderChange);
-			slider.removeChangeListener(sliderUpdateText);
-			slider.setMinimum(0);
-			final int sliderMax = (int) (maximum - minimum);
-			slider.setMaximum(sliderMax);
-			addSliderChangeListener(sliderUpdateText);
-			addSliderChangeListener(sliderChange);
-			logger.trace("minimum={}; maximum={}; sliderMax={}", minimum, maximum, sliderMax);
+					slider.removeChangeListener(sliderChange);
+					slider.removeChangeListener(sliderUpdateText);
+					slider.setMinimum(0);
+					final int sliderMax = (int) (maximum - minimum);
+					slider.setMaximum(sliderMax);
+					addSliderChangeListener(sliderUpdateText);
+					addSliderChangeListener(sliderChange);
+					logger.trace("minimum={}; maximum={}; sliderMax={}", minimum, maximum, sliderMax);
 
-			rangesAreSet = true;
-			txtStepFocusListener.focusLost(null);
+					rangesAreSet = true;
+					txtStepFocusListener.focusLost(null);
 
-			GuiControllerAbstract.getComPortThreadQueue().add(this.packet);
-		});
+					GuiControllerAbstract.getComPortThreadQueue().add(this.packet);
+				});
 	}
 
 	private void onFocusLost() {

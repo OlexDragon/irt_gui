@@ -12,7 +12,7 @@ public class ProfileScannerFT extends FutureTask<Optional<Path>> implements Stop
 	private static ProfileScanner CALLABLE;
 
 	public ProfileScannerFT(DeviceInfo deviceInfo) {
-		super(CALLABLE = new ProfileScanner(deviceInfo.getSerialNumber().map(sn->sn + ".bin")));
+		super(CALLABLE = new ProfileScanner(deviceInfo));
 	}
 
 	@Override

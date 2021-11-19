@@ -1,5 +1,6 @@
 package irt.data.value;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,9 @@ public class JSonValueMapper {
 	}
 
 	public List<SonValue> toSonValue(String sonString) throws ScriptException{
+
+		if(sonString==null || sonString.isEmpty())
+			return new ArrayList<>();
 
 		String script = "Java.asJSONCompatible(" + sonString.replace(";", "") + ")";
 		ScriptObjectMirror result = (ScriptObjectMirror) engine.eval(script);

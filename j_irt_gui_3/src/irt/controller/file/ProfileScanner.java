@@ -11,10 +11,15 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.DeviceInfo;
 import irt.tools.panel.head.IrtPanel;
 
 public class ProfileScanner implements Callable<Optional<Path>> {
 	private static final Logger logger = LogManager.getLogger();
+
+	public ProfileScanner(DeviceInfo deviceInfo) {
+		this(Optional.ofNullable(deviceInfo).flatMap(DeviceInfo::getSerialNumber).map(sn->sn + ".bin"));
+	}
 
 	public ProfileScanner(Optional<String> oFileName) {
 		this.defaultFolder = Paths.get(IrtPanel.PROPERTIES.getProperty("path_to_profiles"));
@@ -29,19 +34,20 @@ public class ProfileScanner implements Callable<Optional<Path>> {
 	public Optional<Path> call() throws Exception {
 
 		return oFileName
-		.flatMap(fileName->{
+		.flatMap(
+				fileName->{
 
-			try {
-				fileScanner = new FileScanner( defaultFolder, fileName);
+					try {
+						fileScanner = new FileScanner( defaultFolder, fileName);
 
-				return getAbsolutePath(fileScanner);
+						return getAbsolutePath(fileScanner);
 
-			} catch (Exception e) {
-				logger.catching(e);
-			}
+					} catch (Exception e) {
+						logger.catching(e);
+					}
 
-			return Optional.empty();
-		});
+					return Optional.empty();
+				});
 	}
 
 	public void stop() {

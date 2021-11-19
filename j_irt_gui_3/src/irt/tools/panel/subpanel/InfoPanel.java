@@ -9,9 +9,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.ConnectException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.concurrent.CancellationException;
@@ -45,6 +53,7 @@ import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.interfaces.Packet;
+import irt.irt_gui.IrtGui;
 import irt.tools.Transformer;
 import irt.tools.fx.update.UpdateMessageFx;
 import irt.tools.panel.ConverterPanel;
@@ -107,18 +116,14 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 			locationMenuItem.setEnabled(false);
 			popup.add(locationMenuItem);
 
-			deviceInfo.getSerialNumber().ifPresent(
+			Optional.ofNullable(deviceInfo).flatMap(DeviceInfo::getSerialNumber)
+			.ifPresent(
 					sn->{
-						JMenuItem httpMenuItem = new JMenuItem("Open in Web Browser");
-						popup.add(httpMenuItem);
-						httpMenuItem.addActionListener(
-								e->{
-									try {
-										Desktop.getDesktop().browse(new URI("http://" + sn));
-									} catch (IOException | URISyntaxException e2) {
-										logger.catching(e2);
-									}
-								});
+
+						addOpenWebBrowserMenuItem(popup, sn);
+
+						if(IrtGui.isProduction())
+							addLogInMenuItem(popup, sn);
 					});
 
 			JMenuItem updateMenuItem = new JMenuItem("Update");
@@ -366,6 +371,72 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		});
 
 		setInfo(deviceInfo);
+	}
+
+	private void addLogInMenuItem(JPopupMenu popup, String serialNumber) {
+		JMenuItem httpMenuItem = new JMenuItem("Log In and Open Browser");
+		popup.add(httpMenuItem);
+		httpMenuItem.addActionListener(
+				e->{
+					login(serialNumber);
+					openBrowser(serialNumber);
+				});
+	}
+
+	private void login(String serialNumber) {
+		HttpURLConnection connection = null;
+
+		try {
+
+			final URL url = new URL("http", serialNumber, "/hidden.cgi");
+//			logger.error(url);
+			connection = (HttpURLConnection) url.openConnection();	
+			connection.setDoOutput(true);
+			connection.setDoInput(true);
+			connection.setUseCaches(false);
+			connection.setRequestMethod("POST");
+			connection.setRequestProperty("Connection", "keep-alive");
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+			try(	OutputStream outputStream = connection.getOutputStream();
+					OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream);){
+
+				outputStreamWriter.write("pwd=jopa");
+				outputStreamWriter.flush();
+
+				try(	final InputStream inputStream = connection.getInputStream();
+						final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+						final BufferedReader reader = new BufferedReader(inputStreamReader);){
+
+					String line;
+					while ((line = reader.readLine()) != null)
+						logger.debug(line);
+					
+				}
+			}
+
+		} catch (ConnectException e) {
+			logger.catching(Level.DEBUG, e);
+
+		} catch (IOException e) {
+			logger.catching(e);
+		}
+
+		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
+	}
+
+	private void addOpenWebBrowserMenuItem(JPopupMenu popup, String serialNumber) {
+		JMenuItem httpMenuItem = new JMenuItem("Open in Web Browser");
+		popup.add(httpMenuItem);
+		httpMenuItem.addActionListener(e->openBrowser(serialNumber));
+	}
+
+	private void openBrowser(String rerialNumber) {
+		try {
+			Desktop.getDesktop().browse(new URI("http://" + rerialNumber));
+		} catch (IOException | URISyntaxException e2) {
+			logger.catching(e2);
+		}
 	}
 
 	public void setInfo(DeviceInfo deviceInfo) {

@@ -20,23 +20,26 @@ public class JavaFxFrame extends JFrame {
 	private Scene scene;
 
 	public JavaFxFrame(Parent root, JMenu menu) throws HeadlessException {
+
 		fxPanel = new JFXPanel();
 		getContentPane().add(fxPanel);
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setVisible(true);
 		
-		Optional.ofNullable(menu).ifPresent(m->{
-			JMenuBar menuBar = new JMenuBar();
-			setJMenuBar(menuBar);
+		Optional.ofNullable(menu).ifPresent(
+				m->{
+					JMenuBar menuBar = new JMenuBar();
+					setJMenuBar(menuBar);
 		
-			this.menu = menu;
-			menuBar.add(menu);
-		});
+					this.menu = menu;
+					menuBar.add(menu);
+				});
 
-		Platform.runLater(()->{
-	        scene = new Scene(root);
-	        fxPanel.setScene(scene);
-		});
+		Platform.runLater(
+				()->{
+					scene = new Scene(root);
+	    	    fxPanel.setScene(scene);
+				});
 
 		Optional.ofNullable(root).filter(JavaFxPanel.class::isInstance).map(JavaFxPanel.class::cast).ifPresent(JavaFxPanel::start);
 	}
