@@ -102,7 +102,7 @@ public class ProfileValidator {
 						alert.initModality(Modality.APPLICATION_MODAL);
 						alert.setTitle("Profile error.");
 						alert.setHeaderText(null);
-						alert.setContentText("The profile does not have the Devuce Type property. (\"device-type\")");
+						alert.setContentText("The profile does not have the Device Type property. (\"device-type\")");
 						alert.showAndWait();
 					});
 

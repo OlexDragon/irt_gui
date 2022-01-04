@@ -96,6 +96,7 @@ public class PacketImp implements Packet{
 		PARAMETER_CONFIG_BUC_APC_LEVEL		          					= 111,     /* APC target power level */
 		PARAMETER_CONFIG_BUC_APC_RANGE        		  					= 112,     /* APC target power range */
 		PARAMETER_CONFIG_LNB_LO_SELECT                					= 124, 
+		PARAMETER_CONFIG_LNB_STATUST                					= 125, 
 
 		PARAMETER_CONFIG_FCM_ALL = PARAMETER_ALL;		/* Read all available parameters. */
 

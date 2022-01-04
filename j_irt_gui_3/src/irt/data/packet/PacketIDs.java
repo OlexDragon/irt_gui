@@ -28,6 +28,7 @@ import irt.data.packet.configuration.RedundancyModePacket;
 import irt.data.packet.configuration.RedundancyNamePacket;
 import irt.data.packet.configuration.RedundancyStatusPacket;
 import irt.data.packet.configuration.SpectrumInversionPacket;
+import irt.data.packet.configuration.LnbStatusPacket;
 import irt.data.packet.control.ActiveModulePacket;
 import irt.data.packet.control.ModuleListPacket;
 import irt.data.packet.denice_debag.CallibrationModePacket;
@@ -73,6 +74,7 @@ public enum PacketIDs {
 	ALARMS_TODO10					( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
 	ALARMS_LNB1_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
 	ALARMS_LNB2_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
+	ALARMS_LNBS_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
 	ALARMS_PSU1						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
 	ALARMS_PSU2						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
 
@@ -102,6 +104,7 @@ public enum PacketIDs {
 	ALARMS_DESCRIPTION_TODO10					( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_LNB1_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_LNB2_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
+	ALARMS_DESCRIPTION_LNBS_UNDER_CURRENT		( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_PSU1						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_PSU2						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 
@@ -150,6 +153,8 @@ public enum PacketIDs {
 	CONFIGURATION_OFFSET_RANGE			( null, null, null, AttenuationRangePacket	.parseValueFunction, null, null),
 	CONFIGURATION_OFFSET_1_TO_MULTI		( null, null, null, Offset1to1toMultiPacket	.parseValueFunction, null, null),
 	CONFIGURATION_LNB_LO_SELECT			( PacketGroupIDs.CONFIGURATION, PacketImp.PARAMETER_CONFIG_LNB_LO_SELECT, null, ConfigurationPacket	.parseValueFunction, null, null),
+	CONFIGURATION_LNB_STATUS			( null, null, null, LnbStatusPacket.parseValueFunction, null, null),
+	CONFIGURATION_LNB_SWITCH_OVER		( null, null, null, LnbStatusPacket.parseValueFunction, null, null),
 
 	CONTROL_ACTIVE_MODULE	( null, null, null, ActiveModulePacket.parseValueFunction, null, null),
 	CONTROL_MODULE_LIST		( null, null, null, ModuleListPacket.parseValueFunction, null, 30),

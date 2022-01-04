@@ -10,6 +10,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.DeviceInfo.DeviceType;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.subpanel.monitor.Monitor;
@@ -23,7 +24,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 
 	private MonitorPanelFx root;
 
-	public MonitorPanelSwingWithFx() {
+	public MonitorPanelSwingWithFx(Optional<DeviceType> deviceType) {
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -53,7 +54,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 
 			try {
 
-				root = new MonitorPanelFx();
+				root = new MonitorPanelFx(deviceType);
 				Scene scene = new Scene(root);
 				setScene(scene);
 

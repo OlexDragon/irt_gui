@@ -281,6 +281,7 @@ public class HeadPanel extends MainPanel implements PacketListener {
 
 						.map(v->(Map<?,?>)v)
 						.map(m->m.get("STATUS"))
+						.filter(List.class::isInstance)
 						.map(v->(List<?>)v)
 						.map(List::stream)
 						.orElse(Stream.empty())

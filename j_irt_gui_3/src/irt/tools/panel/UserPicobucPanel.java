@@ -102,7 +102,8 @@ public class UserPicobucPanel extends DevicePanel {
 		.filter(dt->!dt.equals(DeviceType.DLRS))
 		.filter(dt->!dt.equals(DeviceType.DLRS2))
 		.map(dt->dt.TYPE_ID)
-		.filter(tId->tId>DeviceType.BIAS_BOARD.TYPE_ID || deviceInfo.getRevision()>1)
+		.filter(tId-> tId != DeviceType.LNB_REDUNDANCY_1x2.TYPE_ID)
+		.filter(tId-> tId > DeviceType.BIAS_BOARD.TYPE_ID || deviceInfo.getRevision() > 1)
 		.ifPresent(
 				tId->{
 					showRedundant();

@@ -420,7 +420,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("AlarmPanelFx"));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
-		scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
 	}
 
 	public void stop(){
@@ -444,10 +444,9 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 		public AlarmDescription(byte[] bytes) {
 
 			final ByteBuffer buffer = ByteBuffer.wrap(bytes);
-			code =buffer.getShort();
-//			final int status = buffer.getInt(2)&7;
-			description = new String(bytes).trim();
-//			logger.error(description);
+			code = buffer.getShort();
+			final byte[] copyOfRange = Arrays.copyOfRange(bytes, buffer.position(), bytes.length);
+			description = new String(copyOfRange).trim();
 
 			logger.trace("\n bytes={}\n Code={}\n Description=\"{}\"", bytes, code, description);
 		}

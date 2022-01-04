@@ -33,6 +33,7 @@ import irt.controller.serial_port.ComPortThreadQueue;
 import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
 import irt.data.ThreadWorker;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
@@ -93,20 +94,27 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 	private GridPane 	statusPane;
 	private GridPane 	gridPane;
 
-	public MonitorPanelFx() {
+	private Optional<DeviceType> deviceType;
+
+	public MonitorPanelFx(Optional<DeviceType> deviceType) {
+		this.deviceType = deviceType;
+
+		MeasurementPacket.setDeviceType(deviceType.orElse(null));
 
 		Thread currentThread = Thread.currentThread();
 		currentThread.setUncaughtExceptionHandler((t, e) -> logger.catching(e));
 
 		currentThread.setName(getClass().getSimpleName() + "-" + currentThread.getId());
 
-		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MonitorPanel.fxml"));
-        fxmlLoader.setRoot(this);
-        fxmlLoader.setController(this);
+		try {
 
-        try {
+			FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("MonitorPanel.fxml"));
+			fxmlLoader.setRoot(this);
+			fxmlLoader.setController(this);
+
             fxmlLoader.load();
-        } catch (IOException exception) {
+ 
+		} catch (IOException exception) {
             throw new RuntimeException(exception);
         }
 	}
@@ -188,6 +196,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 						if(IrtGui.isProduction()) 
 							setMonitorPanelTooltip(map);
 
+						if(deviceType.map(dt->dt!=DeviceType.LNB_REDUNDANCY_1x2).orElse(true))
 						// Set Status
 						Optional
 						.ofNullable((List<?>)map.remove("STATUS"))
@@ -203,6 +212,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 										})
 								.collect(Collectors.toMap(e->e.getKey(), e->e.getValue()));
 
+						logger.trace(collect);
 						// Feel Monitor fields
 						setValues(collect);
 					});
@@ -217,7 +227,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			return;
 
 		tooltip = string;
-		Tooltip.install(this, new Tooltip(string));
+//		Tooltip.install(this, new Tooltip(string));
 	}
 
 	private boolean notMyPacket(Optional<Packet> oPacket) {
@@ -253,7 +263,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 					if(children.isEmpty()) {
 						ThreadWorker.runThread(
 								()->{
-									Iterator<?> iterator = entrySet.iterator();
+									Iterator<?> iterator = entrySet.stream().sorted((a,b)->((String)a.getKey()).compareTo((String)b.getKey())).iterator();
 									final int size = entrySet.size();
 									IntStream.range(0, size).forEach(
 											rowIndex->{
@@ -533,6 +543,99 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 				name = name();
 
 			return new AbstractMap.SimpleEntry<>(name, function.apply(bytes));
+		}
+	}
+	public enum ParameterHeaderCodeLNB implements ParameterHeaderCode {
+		NONE			( b->Arrays.toString(b)),
+		INPUT_POWER		( b->bytesToString(b, "dbm")),
+		OUTPUT_POWER	( b->bytesToString(b, "dbm")),
+		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? ((b[0]&0x80)>0 && b[1]==0) ? "UNDEFINED" : nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
+		STATUS			( b->systemStatus(b)),
+		LNBA_STATUS		( b->lnbReady(b)),
+		LNBB_STATUS		( b->lnbReady(b)),
+		LNBS_STATUS 	( b->lnbReady(b)),
+		DOWNLINK_WAVEGUIDE_SWITCH( b->switchPosition(b)),
+		DOWNLINK_STATUS(b->null);// Downlink status is deprecated
+
+		private final Function<byte[], String> function;
+		private final byte code;
+
+		public byte getCode() {
+			return code;
+		}
+
+		private static String systemStatus(byte[] bs) {
+
+			final int b = bs[0]&0xff;
+			switch(b) {
+			case 10:
+				return "Prohibited";
+			case 11:
+				return "Default";
+			case 12:
+				return "Protection LNB A";
+			case 13:
+				return "Protection LNB B";
+			}
+			return "Unknown";
+		}
+
+		private ParameterHeaderCodeLNB(Function<byte[], String> function){
+			this.code = (byte) ordinal();
+			this.function = function;
+		}
+
+		public static Optional<? extends ParameterHeaderCode> valueOf(Byte code){
+			return Arrays.stream(values()).parallel().filter(v->v.code==code).findAny();
+		}
+
+		public String toString(byte[] bytes){
+			return function.apply(bytes);
+		}
+
+		private static String bytesToString(byte[] bytes, String prefix){
+			return MonitorPanelFx.bytesToString(bytes, prefix);
+		}
+
+		private static String lnbReady(byte[] bytes) {
+
+			if(bytes==null)
+				return "N/A";
+
+			if(bytes.length==1) {
+				final String string = bytes[0]==1 ? "ready" : "ready.not";
+				return Translation.getValue(String.class, string, string);
+			}
+
+			return bytesToString(bytes, "dbm");
+		}
+
+		private static String switchPosition(byte[] bytes) {
+			return Optional
+					.of(bytes)
+					.filter(b->b.length==1)
+					.map(b->b[0])
+					.filter(b->b!=0)
+					.map(b->{
+						return (b==1 ? "LNB 1" : "LNB 2");
+					})
+					.orElse("N/A");
+		}
+
+		@Override
+		public ParameterHeaderCode getStatus() {
+			return STATUS;
+		}
+
+		@Override
+		public List<StatusBits> parseStatusBits(int statusBits) {
+			return StatusBitsBUC.parse(statusBits);
+		}
+
+		@Override
+		public Entry<String, String> toEntry(byte[] bytes) {
+
+			return new AbstractMap.SimpleEntry<>(name(), function.apply(bytes));
 		}
 	}
 

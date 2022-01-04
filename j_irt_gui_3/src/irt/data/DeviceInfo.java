@@ -64,6 +64,7 @@ public class DeviceInfo implements PacketListener {
 
 		DLRS			(410, Protocol.LINKED, "DLRS", HardwareType.CONTROLLER),	//Down link Redundancy System
 		DLRS2			(411, Protocol.LINKED, "DLRS2", HardwareType.CONTROLLER),
+		LNB_REDUNDANCY_1x2(412, Protocol.LINKED, "1:2 Redundancy LNB", HardwareType.CONTROLLER),
 
 		CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.LINKED, "L to Ku Converter"	, HardwareType.CONVERTER),
 		CONVERTER_70_TO_L		(1001, Protocol.CONVERTER, "70 to L Converter"	, HardwareType.CONVERTER),
@@ -91,7 +92,7 @@ public class DeviceInfo implements PacketListener {
 
 		IMPOSSIBLE				( 0, null, "Impossible meaning", null);
 
-		public final int TYPE_ID;
+		public final int TYPE_ID; public int getTypeId() {return TYPE_ID;}
 		public final Protocol PROTOCOL;
 		public final String DESCRIPTION;
 		public final HardwareType HARDWARE_TYPE;

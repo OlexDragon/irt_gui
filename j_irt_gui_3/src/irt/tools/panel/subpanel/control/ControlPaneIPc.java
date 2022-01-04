@@ -17,11 +17,11 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 
-public class ControlPaneIrPc extends JFXPanel implements Refresh {
+public class ControlPaneIPc extends JFXPanel implements Refresh {
 	private static final long serialVersionUID = 7804070932251629214L;
 	private final static Logger logger = LogManager.getLogger();
 
-	public ControlPaneIrPc(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
+	public ControlPaneIPc(Optional<DeviceType> deviceType, LinkHeader linkHeader) {
 
 		ControlPanelIrPcFx controlPanelIrPcFx = new ControlPanelIrPcFx(Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte) 0));
 

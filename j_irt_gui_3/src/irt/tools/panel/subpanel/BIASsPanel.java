@@ -923,24 +923,15 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 							httpRequest = true;
 
 							try {
-								final List<SonValue> sonValues = deviceInfo.getSerialNumber()
+								final List<SonValue> sonValues = deviceInfo.getSerialNumber().map(this::getHttpUpdate).orElse(null);
 
-										.map(
-												sn->{
-													try {
-														return getHttpUpdate(sn);
-													} catch (ScriptException e1) {
-														logger.catching(e1);
-														return null;
-													}
-												}).orElse(null);
-
-//							logger.error("{}", sonValues);
+							logger.error("{}", sonValues);
 								if(sonValues!=null) {
 
 									if(sonValues.size()==0) {
 
 										deviceInfo.getSerialNumber().ifPresent(this::loginToHttp);
+										httpRequest = false;
 
 										return;
 									}
@@ -1112,7 +1103,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
 	}
 
-	private List<SonValue> getHttpUpdate(String ipAddress) throws ScriptException {
+	private List<SonValue> getHttpUpdate(String ipAddress){
 
 		StringBuilder sb = new StringBuilder();
 		String urlParams = "exec=calib_ro_info&_http_id=irt";
@@ -1157,7 +1148,15 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		JSonValueMapper mapper = new JSonValueMapper();
 		final String sonString = sb.toString();
 		setToolTipText(sonString);
-		return mapper.toSonValue(sonString);
+
+		try {
+
+			return mapper.toSonValue(sonString);
+
+		} catch (ScriptException e) {
+			logger.catching(e);
+		}
+		return null;
 	}
 
 	private static void addPopup(Component component, final JPopupMenu popup) {

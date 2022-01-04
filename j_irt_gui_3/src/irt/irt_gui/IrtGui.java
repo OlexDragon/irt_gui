@@ -71,11 +71,11 @@ public class IrtGui extends IrtMainFrame {
 
 	private static final String PREF_KEY_ADDRESS = "address";
 
-	public static final int DEFAULT_ADDRESS = 254;
+	public static final int DEFAULT_ADDRESS = 255;
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.245";
+	public static final String VERTION = "- 3.247";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -201,7 +201,7 @@ public class IrtGui extends IrtMainFrame {
 					return;
 				}
 
-				MonitorPanelFx monitorPanel = new MonitorPanelFx();
+				MonitorPanelFx monitorPanel = new MonitorPanelFx(Optional.empty());
 				final JavaFxFrame javaFxFrame = new JavaFxFrame(monitorPanel, new JMenu("Menu"));
 				javaFxFrame.setSize(200, 200);
 

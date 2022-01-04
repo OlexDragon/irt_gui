@@ -10,9 +10,6 @@
 .monitor .label.value{
 	-fx-text-fill: WHITE;
 }
-.monitor .label.value{
-	-fx-text-fill: WHITE;
-}
 .monitor .label, .alarms .label{
 	-fx-font-weight: BOLD;
 	-fx-font-size: 12px;

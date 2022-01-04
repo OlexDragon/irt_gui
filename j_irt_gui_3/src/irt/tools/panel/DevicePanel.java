@@ -31,12 +31,13 @@ import irt.data.DeviceInfo;
 import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.tools.fx.MonitorPanelSwingWithFx;
+import irt.tools.fx.control.ControlPanelSwingWithFx;
 import irt.tools.fx.interfaces.StopInterface;
 import irt.tools.panel.head.Panel;
 import irt.tools.panel.subpanel.DebugPanel;
 import irt.tools.panel.subpanel.InfoPanel;
 import irt.tools.panel.subpanel.control.ControlDownlinkRedundancySystem;
-import irt.tools.panel.subpanel.control.ControlPaneIrPc;
+import irt.tools.panel.subpanel.control.ControlPaneIPc;
 import irt.tools.panel.subpanel.control.ControlPanelHPB;
 import irt.tools.panel.subpanel.control.ControlPanelPicobuc;
 import irt.tools.panel.subpanel.control.ControlPanelSSPA;
@@ -96,7 +97,7 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 			public void ancestorAdded(AncestorEvent event) {
 
 				if(deviceType.map(dt->!dt.equals(DeviceType.IR_PC)).orElse(true)){
-					monitorPanel = new MonitorPanelSwingWithFx();
+					monitorPanel = new MonitorPanelSwingWithFx(deviceType);
 					monitorPanel.setLocation(10, 11);
 					monitorPanel.setSize(215, 210);
 					oLinkHeader.ifPresent(lh->monitorPanel.setUnitAddress(lh.getAddr()));
@@ -201,7 +202,9 @@ public class DevicePanel extends Panel implements Comparable<Component>{
 										case DLRS2:
 											return new ControlDownlinkRedundancySystem(deviceType, linkHeader);
 										case IR_PC:
-											return new ControlPaneIrPc(deviceType, linkHeader);
+											return new ControlPaneIPc(deviceType, linkHeader);
+										case LNB_REDUNDANCY_1x2:
+											return new ControlPanelSwingWithFx(linkHeader);
 										case HPB_L_TO_C:
 										case HPB_L_TO_KU:
 										case HPB_SSPA:

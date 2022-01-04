@@ -41,6 +41,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 		TODO10					((byte)21, PacketIDs.ALARMS_TODO10					, false),
 		LNB1_UNDER_CURRENT		((byte)30, PacketIDs.ALARMS_LNB1_UNDER_CURRENT		, false),
 		LNB2_UNDER_CURRENT		((byte)31, PacketIDs.ALARMS_LNB2_UNDER_CURRENT		, false),
+		LNBS_UNDER_CURRENT		((byte)32, PacketIDs.ALARMS_LNBS_UNDER_CURRENT		, false),
 		PSU1					((byte)40, PacketIDs.ALARMS_PSU1					, false),
 		PSU2					((byte)41, PacketIDs.ALARMS_PSU2					, false),
 
@@ -65,6 +66,7 @@ public interface PacketWork extends Comparable<PacketWork>{
 		DESCRIPTION_TODO10					((byte)21, PacketIDs.ALARMS_DESCRIPTION_TODO10					, true),
 		DESCRIPTION_LNB1_UNDER_CURRENT		((byte)30, PacketIDs.ALARMS_DESCRIPTION_LNB1_UNDER_CURRENT		, true),
 		DESCRIPTION_LNB2_UNDER_CURRENT		((byte)31, PacketIDs.ALARMS_DESCRIPTION_LNB2_UNDER_CURRENT		, true),
+		DESCRIPTION_LNBS_UNDER_CURRENT		((byte)32, PacketIDs.ALARMS_DESCRIPTION_LNBS_UNDER_CURRENT		, true),
 		DESCRIPTION_PSU1					((byte)40, PacketIDs.ALARMS_DESCRIPTION_PSU1					, true),
 		DESCRIPTION_PSU2					((byte)41, PacketIDs.ALARMS_DESCRIPTION_PSU2					, true);
 

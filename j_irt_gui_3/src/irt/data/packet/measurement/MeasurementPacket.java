@@ -15,38 +15,39 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.packet.LinkHeader;
+import irt.data.DeviceInfo.DeviceType;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCode;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeBUC;
 import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeFCM;
+import irt.tools.fx.MonitorPanelFx.ParameterHeaderCodeLNB;
 import irt.tools.fx.MonitorPanelFx.StatusBits;
 
 public class MeasurementPacket extends PacketSuper{
 	private final static Logger logger = LogManager.getLogger();
 
+	private static Optional<DeviceType> deviceType = Optional.empty(); public static void setDeviceType(DeviceType deviceType) { MeasurementPacket.deviceType = Optional.ofNullable(deviceType); }
+
 	public final static Function<Packet, Optional<Object>> parseValueFunction =
 
 			packet-> Optional.ofNullable(packet)
+
 			.map(
 					p->{
 
-						final Byte addr = Optional.of(p)
-						.filter(LinkedPacket.class::isInstance)
-						.map(LinkedPacket.class::cast)
-						.map(LinkedPacket::getLinkHeader)
-						.map(LinkHeader::getAddr)
-						.orElse((byte)0);
+						if(deviceType.map(dt->dt==DeviceType.LNB_REDUNDANCY_1x2).orElse(false)) 
+							return ParameterHeaderCodeLNB.class;
 
-						return addr != 0;
-					})	// not a converter
+						final Integer typeId = deviceType.map(DeviceType::getTypeId).orElse(0);
+						if(typeId>=500)
+							return ParameterHeaderCodeFCM.class;
 
-			.map(b-> b ? ParameterHeaderCodeBUC.class : ParameterHeaderCodeFCM.class)
+						return ParameterHeaderCodeBUC.class;
+					})
 
 			.map(
 					parameterHCodeClass->{
@@ -71,9 +72,8 @@ public class MeasurementPacket extends PacketSuper{
 											.map(ParameterHeaderCode.class::cast)
 											.map(
 													pc->{
-
 														// status flags
-														if(pc.getStatus().getCode()==code){
+														if(pc.getStatus().getCode()==code && deviceType.map(dt->dt!=DeviceType.LNB_REDUNDANCY_1x2).orElse(true)){
 
 															int statusBits = pl.getInt(0);
 															List<StatusBits> parseStatusBits = pc.parseStatusBits(statusBits);
