@@ -13,12 +13,12 @@ import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiApp;
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.LinkedPacketsQueue;
-import irt.gui.controllers.PacketSenderJSerialComm;
-import irt.gui.controllers.PacketSenderJssc;
-import irt.gui.controllers.SerialPortParams;
 import irt.gui.controllers.enums.SerialPortStatus;
+import irt.gui.controllers.serial_port.IrtSerialPort;
+import irt.gui.controllers.serial_port.PacketSenderJSerialComm;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
+import irt.gui.controllers.serial_port.SerialPortParams;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -103,7 +103,6 @@ public class ComboBoxSerialPort extends Observable {
 				alert.setTitle("The GUI was not closed properly.");
 				alert.setHeaderText("Try to select a different serial port driver.");
 				Node comboBox = (Node) alert.getDialogPane().lookup(".combo-box");
-				logger.er
 				Optional<Class<?>> oClass = alert.showAndWait();
 
 				if(!oClass.isPresent())

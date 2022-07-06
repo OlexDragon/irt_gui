@@ -1,4 +1,4 @@
-package irt.gui.controllers;
+package irt.gui.controllers.serial_port;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

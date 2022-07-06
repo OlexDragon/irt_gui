@@ -13,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.After;
 import org.junit.Test;
 
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.packet.observable.InfoPacket;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;

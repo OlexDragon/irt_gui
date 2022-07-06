@@ -8,8 +8,8 @@ import java.util.ResourceBundle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.controllers.serial_port.IrtSerialPort;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.observable.production.ConnectFCMPacket;
 import irt.gui.errors.PacketParsingException;

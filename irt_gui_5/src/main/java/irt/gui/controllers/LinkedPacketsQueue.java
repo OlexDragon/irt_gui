@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.gui.controllers.serial_port.IrtSerialPort;
 import irt.gui.controllers.socket.ClientSocket;
 import irt.gui.controllers.socket.SocketWorker;
 import irt.gui.data.LinkedPacketPriorityBlockingQueue;

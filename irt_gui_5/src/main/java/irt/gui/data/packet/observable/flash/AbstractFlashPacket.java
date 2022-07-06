@@ -7,9 +7,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Vector;
 
-import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.flash.enums.Command;
 import irt.gui.controllers.interfaces.WaitTime;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.PacketHeader;

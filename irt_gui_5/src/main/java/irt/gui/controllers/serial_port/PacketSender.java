@@ -1,4 +1,4 @@
-package irt.gui.controllers;
+package irt.gui.controllers.serial_port;
 
 import irt.gui.data.packet.interfaces.PacketToSend;
 import lombok.AllArgsConstructor;

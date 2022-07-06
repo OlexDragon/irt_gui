@@ -3,9 +3,9 @@ package irt.gui.data.packet.observable.alarms;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -19,7 +19,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.PacketSenderJssc;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketProperties;

@@ -2,9 +2,9 @@ package irt.gui.data.packet.observable.calibration;
 
 import java.util.Arrays;
 
-import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.calibration.tools.enums.ToolCommands;
 import irt.gui.controllers.interfaces.WaitTime;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.MyObservable;
 import irt.gui.data.packet.LinkHeader;
 import irt.gui.data.packet.interfaces.PacketToSend;

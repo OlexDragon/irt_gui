@@ -1,7 +1,7 @@
 package irt.gui.controllers.components;
 
-import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.enums.SerialPortStatus;
+import irt.gui.controllers.serial_port.IrtSerialPort;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

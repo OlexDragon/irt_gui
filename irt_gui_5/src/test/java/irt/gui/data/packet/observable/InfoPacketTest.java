@@ -14,7 +14,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.PacketSenderJssc;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.ToHex;
 import irt.gui.data.packet.Packet;
 import irt.gui.data.packet.PacketProperties;

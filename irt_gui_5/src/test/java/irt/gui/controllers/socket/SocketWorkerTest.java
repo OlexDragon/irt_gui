@@ -14,8 +14,8 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.LinkedPacketsQueue;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.packet.observable.InfoPacket;
 import irt.gui.errors.PacketParsingException;
 import jssc.SerialPortException;

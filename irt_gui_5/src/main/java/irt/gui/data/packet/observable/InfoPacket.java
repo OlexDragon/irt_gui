@@ -5,8 +5,8 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.interfaces.WaitTime;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.PacketIdDetails;
 import irt.gui.data.packet.PacketHeader;
 import irt.gui.data.packet.PacketProperties;

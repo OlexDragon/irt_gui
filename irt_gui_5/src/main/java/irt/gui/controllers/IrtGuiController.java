@@ -10,6 +10,7 @@ import irt.gui.IrtGuiProperties;
 import irt.gui.controllers.components.RegistersController;
 import irt.gui.controllers.components.SerialPortController;
 import irt.gui.controllers.interfaces.FieldController;
+import irt.gui.controllers.serial_port.IrtSerialPort;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.fxml.FXML;

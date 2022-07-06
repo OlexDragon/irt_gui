@@ -15,10 +15,10 @@ import org.junit.After;
 import org.junit.Test;
 
 import irt.gui.controllers.ComPortTest;
-import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.calibration.tools.Tool;
 import irt.gui.controllers.calibration.tools.Tool.Commands;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.interfaces.PacketToSend;
 import irt.gui.data.packet.observable.calibration.GetPowerMeterPacket;

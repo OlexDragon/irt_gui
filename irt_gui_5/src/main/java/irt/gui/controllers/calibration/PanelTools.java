@@ -1,9 +1,9 @@
 package irt.gui.controllers.calibration;
 
-import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.components.ButtonOpenSerialPort;
 import irt.gui.controllers.components.ComboBoxSerialPort;
+import irt.gui.controllers.serial_port.IrtSerialPort;
 import javafx.fxml.FXML;
 import lombok.Getter;
 

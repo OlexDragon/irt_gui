@@ -17,9 +17,9 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import com.sun.javafx.application.LauncherImpl;
 
-import irt.gui.controllers.IrtSerialPort;
 import irt.gui.controllers.calibration.PanelTools;
 import irt.gui.controllers.components.SerialPortController;
+import irt.gui.controllers.serial_port.IrtSerialPort;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.application.Preloader;

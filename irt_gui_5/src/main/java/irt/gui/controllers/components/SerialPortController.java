@@ -18,10 +18,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.gui.IrtGuiProperties;
-import irt.gui.controllers.IrtSerialPort;
-import irt.gui.controllers.PacketSenderJssc;
 import irt.gui.controllers.LinkedPacketsQueue;
 import irt.gui.controllers.enums.Baudrate;
+import irt.gui.controllers.serial_port.IrtSerialPort;
+import irt.gui.controllers.serial_port.PacketSenderJssc;
 import irt.gui.controllers.socket.SocketWorker;
 import irt.gui.data.MyThreadFactory;
 import irt.gui.data.packet.interfaces.LinkedPacket;

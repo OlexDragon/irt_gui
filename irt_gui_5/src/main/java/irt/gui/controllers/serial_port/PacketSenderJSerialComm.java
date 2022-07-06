@@ -1,4 +1,4 @@
-package irt.gui.controllers;
+package irt.gui.controllers.serial_port;
 
 import com.fazecast.jSerialComm.SerialPort;
 
