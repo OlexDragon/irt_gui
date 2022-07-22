@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.Protocol;
+import irt.data.Protocol;
 import irt.irt_gui.IrtGui;
 import irt.tools.panel.DemoPanel;
 import irt.tools.panel.DevicePanel;

@@ -2,7 +2,7 @@ package irt.controller.control;
 
 import java.util.Optional;
 
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.tools.panel.subpanel.monitor.MonitorPanelAbstract;
 

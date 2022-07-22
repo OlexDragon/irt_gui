@@ -118,10 +118,16 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		setPacket = new RegisterPacket(linkAddr, valueToSend, packetID);
 
 		int a;
-		if(index==30){ //ka band
+		switch(index) {
+		case 26:
+			a = addr+0x10;
+			break;
+		case 30: //ka band
 			a = addr==0 ? 16 : 17;
-		}else
+			break;
+		default:
 			a = addr+3;
+		}
 
 //		logger.error("index: {}; addr: {}: a: {}", index, addr, a);
 		final Value value = new Value(0, 0, 0, 0);
@@ -274,7 +280,8 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		start();
 
 		//KA band
-		if(valueSaveRegister.getIndex()==30){
+		final int index = valueSaveRegister.getIndex();
+		if(index==30 || index==26){
 			getValue().ifPresent(v->{
 				final Value value = new Value(v, v, v, 0);
 				valueSaveRegister.setValue(value);

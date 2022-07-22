@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.data.packet.DeviceDebugPacketIds;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;

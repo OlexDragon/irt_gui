@@ -2,7 +2,6 @@ package irt.controller.file;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -70,10 +69,9 @@ public class ProfileScanner implements Callable<Optional<Path>> {
 							} catch (Exception e) {
 								logger.catching(e);
 							}
-							return new ArrayList<Path>();
+							return null;
 						})
 
-				.filter(paths->paths.size()==1)
-				.map(paths->paths.get(0));
+				.filter(path->path!=null);
 	}
 }

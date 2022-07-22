@@ -12,6 +12,10 @@ public class RegisterValue {
 	private int addr;
 	private Value value;
 
+	public RegisterValue(int index, int addr) {
+		this(index, addr, null);
+	}
+
 	public RegisterValue(int index, int addr, Value value) {
 		this.addr = addr;
 		this.index = index;

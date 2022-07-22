@@ -28,7 +28,7 @@ import irt.controller.Dumper;
 import irt.controller.GuiController;
 import irt.controller.interfaces.ControlPanel;
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.tools.fx.MonitorPanelSwingWithFx;
 import irt.tools.fx.control.ControlPanelSwingWithFx;

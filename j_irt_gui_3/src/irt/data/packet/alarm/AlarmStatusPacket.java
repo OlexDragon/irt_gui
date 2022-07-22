@@ -12,6 +12,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
+import irt.data.packet.AlarmsPacketIds;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.interfaces.Packet;
 

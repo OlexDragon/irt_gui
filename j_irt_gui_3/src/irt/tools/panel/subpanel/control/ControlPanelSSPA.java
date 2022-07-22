@@ -8,7 +8,7 @@ import java.util.Optional;
 import irt.controller.control.ControlControllerPicobuc;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.packet.LinkHeader;
 
 @SuppressWarnings("serial")

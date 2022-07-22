@@ -121,6 +121,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 					sn->{
 
 						addOpenWebBrowserMenuItem(popup, sn);
+						addCalibrateMenuItem(popup, sn);
 
 						if(IrtGui.isProduction())
 							addLogInMenuItem(popup, sn);
@@ -423,6 +424,12 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		}
 
 		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
+	}
+
+	private void addCalibrateMenuItem(JPopupMenu popup, String serialNumber) {
+		JMenuItem httpMenuItem = new JMenuItem("Calibrate");
+		popup.add(httpMenuItem);
+		httpMenuItem.addActionListener(e->openBrowser("irttechnologies:8089/calibration?sn=" + serialNumber));
 	}
 
 	private void addOpenWebBrowserMenuItem(JPopupMenu popup, String serialNumber) {

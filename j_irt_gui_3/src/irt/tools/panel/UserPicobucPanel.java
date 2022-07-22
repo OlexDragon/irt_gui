@@ -16,7 +16,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;

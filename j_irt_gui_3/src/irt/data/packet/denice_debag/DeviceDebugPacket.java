@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import irt.data.packet.DeviceDebugPacketIds;
 import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;

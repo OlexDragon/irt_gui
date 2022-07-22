@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.DeviceType;
-import irt.data.DeviceInfo.Protocol;
+import irt.data.DeviceType;
+import irt.data.Protocol;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.JavaFxWrapper;
 import irt.tools.fx.debug.DeviceDebugPanel;

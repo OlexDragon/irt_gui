@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.tools.fx.update.profile.EditTablesMessageFx.Action;
 import irt.tools.fx.update.profile.table.ProfileTable;

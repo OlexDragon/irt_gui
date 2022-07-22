@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;

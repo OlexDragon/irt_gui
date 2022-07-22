@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import irt.controller.interfaces.Refresh;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.module.ControlPanelIrPcFx;

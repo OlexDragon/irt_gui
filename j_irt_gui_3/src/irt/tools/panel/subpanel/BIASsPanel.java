@@ -66,18 +66,18 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.ComPortThreadQueue;
 import irt.data.AdcWorker;
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.DeviceType;
-import irt.data.DeviceInfo.HardwareType;
+import irt.data.DeviceType;
+import irt.data.HardwareType;
 import irt.data.RegisterValue;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
+import irt.data.packet.DeviceDebugPacketIds;
 import irt.data.packet.InitializePacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketIDs;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketWork.DeviceDebugPacketIds;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
@@ -331,6 +331,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 		final int maxValue;
 		final boolean hpBais = deviceInfo.getDeviceType().map(dt->dt.HARDWARE_TYPE).filter(ht->ht==HardwareType.HP_BAIS).isPresent();
+
 		if(hpBais) {
 
 			maxValue = 896;
@@ -369,50 +370,67 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			}
 
 		//New Bias board
-		}else if(deviceInfo.getRevision()>10) {	
+	} else {
 
-			maxValue = 255;
+		final int revision = deviceInfo.getRevision();
+		text1 = "OUTPUT1:";
+		text2 = "OUTPUT2:";
+		text3 = "DRIVER1:";
+		text4 = "DRIVER2:";
+		text5 = "PREDRIV:";
 
-			text1 = "OUTPUT1:";
-			text2 = "OUTPUT2:";
-			text3 = "DRIVER1:";
-			text4 = "DRIVER2:";;
-			text5 = "PREDRIV:";
+		if(revision > 20) {
+
+			maxValue = 4095;
+
 			text6 = "TOT-6:";
 			text7 = "POT-7:";
 			text8 = "POT-8";
 
-			registerValue1 = new RegisterValue(1, 0x0, null);
-			registerValue2 = new RegisterValue(1, 0x8, null);
-			registerValue3 = new RegisterValue(1, 0x30, null);
-			registerValue4 = new RegisterValue(1, 0x38,null);
-			registerValue5 = new RegisterValue(2, 0x0, null);
-			registerValue6 = new RegisterValue(2, 0x8, null);
-			registerValue7 = new RegisterValue(2, 0x30, null);
-			registerValue8 = new RegisterValue(2, 0x38,null);
+			registerValue1 = new RegisterValue(26, 3);
+			registerValue2 = new RegisterValue(26, 1);
+			registerValue3 = new RegisterValue(26, 7);
+			registerValue4 = new RegisterValue(26, 5);
+			registerValue5 = new RegisterValue(26, 2);
+			registerValue6 = new RegisterValue(26, 0);
+			registerValue7 = new RegisterValue(26, 6);
+			registerValue8 = new RegisterValue(26, 4);
 
-		}else {
+		}else if (revision > 10) {
+
+			maxValue = 255;
+
+			text6 = "TOT-6:";
+			text7 = "POT-7:";
+			text8 = "POT-8";
+
+			registerValue1 = new RegisterValue(1, 0x0);
+			registerValue2 = new RegisterValue(1, 0x8);
+			registerValue3 = new RegisterValue(1, 0x30);
+			registerValue4 = new RegisterValue(1, 0x38);
+			registerValue5 = new RegisterValue(2, 0x0);
+			registerValue6 = new RegisterValue(2, 0x8);
+			registerValue7 = new RegisterValue(2, 0x30);
+			registerValue8 = new RegisterValue(2, 0x38);
+
+		} else {
 
 			maxValue = 896;
 
-			text1 = "OUTPUT1:";
-			text2 = "OUTPUT2:";
-			text3 = "DRIVER1:";
-			text4 = "DRIVER2:";;
-			text5 = "PREDRIV:";
 			text6 = "PREDRIV:";
 			text7 = "8 WATTS:";
 			text8 = "MMIC:";
 
-			registerValue1 = new RegisterValue(1, 8, null);
-			registerValue2 = new RegisterValue(1, 0, null);
-			registerValue3 = new RegisterValue(7, 8, null);
-			registerValue4 = new RegisterValue(7, 0, null);
-			registerValue5 = new RegisterValue(2, 0, null);
-			registerValue6 = new RegisterValue(2, 8, null);
+			registerValue1 = new RegisterValue(1, 8);
+			registerValue2 = new RegisterValue(1, 0);
+			registerValue3 = new RegisterValue(7, 8);
+			registerValue4 = new RegisterValue(7, 0);
+			registerValue5 = new RegisterValue(2, 0);
+			registerValue6 = new RegisterValue(2, 8);
 			registerValue7 = null;
 			registerValue8 = null;
 		}
+	}
 
 		// 1 -registerValue1
 		Optional.ofNullable(registerValue1).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N1, P1, text1, maxValue, allTextFields));
@@ -925,7 +943,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 							try {
 								final List<SonValue> sonValues = deviceInfo.getSerialNumber().map(this::getHttpUpdate).orElse(null);
 
-							logger.error("{}", sonValues);
 								if(sonValues!=null) {
 
 									if(sonValues.size()==0) {

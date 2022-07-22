@@ -16,7 +16,7 @@ import irt.controller.DefaultController;
 import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.Refresh;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketIDs;

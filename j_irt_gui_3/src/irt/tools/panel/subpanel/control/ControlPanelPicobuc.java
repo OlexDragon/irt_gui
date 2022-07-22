@@ -23,7 +23,7 @@ import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.IdValueForComboBox;
 import irt.data.ThreadWorker;
 import irt.data.Range;

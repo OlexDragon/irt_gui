@@ -36,7 +36,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
 import irt.controller.serial_port.value.setter.DeviceDebagSetter;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.IdValueForComboBox;
 import irt.data.Listeners;
 import irt.data.ThreadWorker;

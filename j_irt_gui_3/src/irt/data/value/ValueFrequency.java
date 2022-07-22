@@ -2,7 +2,7 @@ package irt.data.value;
 
 import java.text.NumberFormat;
 
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 
 public class ValueFrequency extends Value implements Comparable<ValueFrequency>{
 

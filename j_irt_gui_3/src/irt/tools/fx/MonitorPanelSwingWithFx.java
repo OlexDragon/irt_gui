@@ -10,7 +10,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
 import irt.tools.panel.subpanel.monitor.Monitor;

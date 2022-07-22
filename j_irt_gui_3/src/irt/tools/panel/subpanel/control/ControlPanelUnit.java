@@ -2,7 +2,7 @@ package irt.tools.panel.subpanel.control;
 
 import java.util.Optional;
 
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.packet.LinkHeader;
 
 public class ControlPanelUnit extends ControlPanelImpl {

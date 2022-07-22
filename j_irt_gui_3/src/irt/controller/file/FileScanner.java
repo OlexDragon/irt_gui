@@ -10,8 +10,6 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -22,12 +20,13 @@ import org.apache.logging.log4j.Logger;
 import irt.data.MyThreadFactory;
 import irt.tools.fx.interfaces.StopInterface;
 
-public class FileScanner extends FutureTask<List<Path>> implements StopInterface{
+public class FileScanner extends FutureTask<Path> implements StopInterface{
 	private final static Logger logger = LogManager.getLogger();
 
 	private static volatile boolean busy;
-	private static final List<Path> paths = new ArrayList<>();
 	private static FileScanner fileScanner;
+
+	private static Path path;
 
 	public FileScanner(Path defaultFolder, String fileToSearch) throws IOException {
 		super(getPaths( Optional.ofNullable(defaultFolder).orElse(Paths.get("\\")), fileToSearch));
@@ -39,12 +38,12 @@ public class FileScanner extends FutureTask<List<Path>> implements StopInterface
 
 		fileScanner = this;
 
-		paths.clear();
+		path = null;
 		busy = true;
 		new MyThreadFactory(this, "FileScanner");
 	}
 
-	private static Callable<List<Path>> getPaths(Path defaultFolder, String fileToSearch) {
+	private static Callable<Path> getPaths(Path defaultFolder, String fileToSearch) {
 		return ()->{
 
 			if(!defaultFolder.toFile().exists())
@@ -62,8 +61,10 @@ public class FileScanner extends FutureTask<List<Path>> implements StopInterface
 						return FileVisitResult.CONTINUE;
 
 					Path name = file.getFileName();
-					if (matcher.matches(name)) 
-						paths.add(file);
+					if (matcher.matches(name)) { 
+						path = file;
+						return FileVisitResult.TERMINATE;
+					}
 
 					return FileVisitResult.CONTINUE;
 				}
@@ -74,8 +75,9 @@ public class FileScanner extends FutureTask<List<Path>> implements StopInterface
 				}
 			};
 			Files.walkFileTree(defaultFolder, visitor);
+			busy = false;
 
-			return paths;
+			return path;
 		};
 	}
 

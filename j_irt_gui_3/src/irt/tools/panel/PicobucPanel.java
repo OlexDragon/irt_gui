@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.HardwareType;
+import irt.data.HardwareType;
 import irt.data.packet.LinkHeader;
 import irt.tools.fx.debug.DeviceDebugPanel;
 import irt.tools.panel.subpanel.BIASsPanel;

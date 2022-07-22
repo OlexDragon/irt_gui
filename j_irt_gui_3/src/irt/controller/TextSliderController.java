@@ -16,8 +16,8 @@ import javax.swing.event.ChangeListener;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
+import irt.data.DeviceType;
 import irt.data.IdValue;
-import irt.data.DeviceInfo.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketHeader;

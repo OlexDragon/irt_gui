@@ -12,7 +12,7 @@ import javax.swing.JTextField;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketWork;

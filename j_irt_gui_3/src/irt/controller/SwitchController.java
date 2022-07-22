@@ -11,7 +11,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.serial_port.value.getter.GetterAbstract;
 import irt.controller.serial_port.value.setter.Setter;
 import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;

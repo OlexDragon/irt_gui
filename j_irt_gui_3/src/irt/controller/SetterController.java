@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import irt.controller.control.ControllerAbstract;
 import irt.controller.interfaces.ToDo;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;

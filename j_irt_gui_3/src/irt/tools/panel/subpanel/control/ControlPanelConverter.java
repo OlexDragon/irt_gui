@@ -2,7 +2,7 @@ package irt.tools.panel.subpanel.control;
 
 import java.util.Optional;
 
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 
 public class ControlPanelConverter extends ControlPanelImpl {
 	private static final long serialVersionUID = 6835849607961108331L;

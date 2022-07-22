@@ -6,7 +6,7 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;

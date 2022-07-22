@@ -43,7 +43,7 @@ import irt.controller.control.UnitFrequencyController;
 import irt.controller.control.UnitGainController;
 import irt.controller.interfaces.ControlPanel;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.IdValue;
 import irt.data.IdValueForComboBox;
 import irt.data.IdValueFreq;

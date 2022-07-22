@@ -27,8 +27,8 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import irt.controller.GuiControllerAbstract;
-import irt.data.DeviceInfo.DeviceType;
 import irt.data.ThreadWorker;
+import irt.data.DeviceType;
 import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;

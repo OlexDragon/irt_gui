@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.tools.fx.update.profile.table.ProfileTable;
 import irt.tools.fx.update.profile.table.ProfileTables;
 import javafx.application.Platform;

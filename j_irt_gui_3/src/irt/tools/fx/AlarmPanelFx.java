@@ -22,11 +22,11 @@ import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
+import irt.data.packet.AlarmsPacketIds;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketWork.AlarmsPacketIds;
 import irt.data.packet.PacketIDs;
 import irt.data.packet.Packets;
 import irt.data.packet.Payload;
@@ -159,9 +159,8 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 		try{
 
-			final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
-
 			boolean haveToGetAlarmIDs = !Optional.ofNullable(availableAlarms).filter(a->a.length>0).isPresent();
+//		logger.error("haveToGetAlarmIDs: {}", haveToGetAlarmIDs);
 			if(haveToGetAlarmIDs && availableAlarmsSent){
 				availableAlarmsSent = false;
 				return;
@@ -174,42 +173,47 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 				return;
 			}
 
-			final int size = queue.size();
-
-			if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<0)
-				delay = ComPortThreadQueue.DELAY_TIMES;
-			else if(size<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
-				delay = 0;
-
-			if(++index>=availableAlarms.length)
-				index = 0;
-
-
-			IntStream
-				.range(0, availableAlarms.length)
-				.mapToObj(i->new AlarmStatusPacket( unitAddress, AlarmsPacketIds.valueOf(availableAlarms[i], false).orElse(AlarmsPacketIds.STATUS)))
-				.forEach(queue::add);
-
-			final Stream<AlarmDescriptionPacket> descriptionPackets = gridPane
-
-					.getChildren()
-					.parallelStream()
-					.filter(Label.class::isInstance)
-					.map(Label.class::cast)
-					.filter(l->l.getStyleClass().contains(DESCRIPTION))
-					.filter(l->l.getText().isEmpty())
-					.map(Label::getUserData)
-					.map(Short.class::cast)
-					.map(alarmCode->AlarmsPacketIds.valueOf(alarmCode, true))
-//					.peek(logger::error)
-					.map(packet->new AlarmDescriptionPacket(unitAddress, packet.orElse(AlarmsPacketIds.STATUS)));
-
-			descriptionPackets
-			.forEach(queue::add);
+			getAlarms();
 
 		}catch (Exception e) {
 			logger.catching(e);
 		}
+	}
+
+	private void getAlarms() {
+		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
+		final int size = queue.size();
+
+		if(size>ComPortThreadQueue.QUEUE_SIZE_TO_DELAY && delay<0)
+			delay = ComPortThreadQueue.DELAY_TIMES;
+		else if(size<=ComPortThreadQueue.QUEUE_SIZE_TO_RESUME)
+			delay = 0;
+
+		if(++index>=availableAlarms.length)
+			index = 0;
+
+
+		IntStream
+			.range(0, availableAlarms.length)
+			.mapToObj(i->new AlarmStatusPacket( unitAddress, AlarmsPacketIds.valueOf(availableAlarms[i], false).orElse(AlarmsPacketIds.STATUS)))
+			.forEach(queue::add);
+
+		final Stream<AlarmDescriptionPacket> descriptionPackets = gridPane
+
+				.getChildren()
+				.parallelStream()
+				.filter(Label.class::isInstance)
+				.map(Label.class::cast)
+				.filter(l->l.getStyleClass().contains(DESCRIPTION))
+				.filter(l->l.getText().isEmpty())
+				.map(Label::getUserData)
+				.map(Short.class::cast)
+				.map(alarmCode->AlarmsPacketIds.valueOf(alarmCode, true))
+//					.peek(logger::error)
+				.map(packet->new AlarmDescriptionPacket(unitAddress, packet.orElse(AlarmsPacketIds.STATUS)));
+
+		descriptionPackets
+		.forEach(queue::add);
 	}
 
 	@Override
@@ -266,6 +270,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 				availableAlarms = alarms.get();
 				logger.debug("All alarm cods: {}", availableAlarms);
 				createLabels();
+				getAlarms();
 
 				return;
 			}
@@ -420,7 +425,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 			service = Executors.newSingleThreadScheduledExecutor(new ThreadWorker("AlarmPanelFx"));
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
-		scheduledFuture = service.scheduleAtFixedRate(this, 1, 3, TimeUnit.SECONDS);
+		scheduledFuture = service.scheduleAtFixedRate(this, 0, 3, TimeUnit.SECONDS);
 	}
 
 	public void stop(){

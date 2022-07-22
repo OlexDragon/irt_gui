@@ -11,8 +11,8 @@ import javax.swing.Timer;
 import org.apache.logging.log4j.Level;
 
 import irt.controller.control.ControllerAbstract;
-import irt.data.DeviceInfo.DeviceType;
 import irt.data.ThreadWorker;
+import irt.data.DeviceType;
 import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;

@@ -11,7 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 import irt.tools.CheckBox.LnbReferenceSwitch;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.tools.CheckBox.LnbPowerSwitch;
 import irt.tools.CheckBox.SpectrumInversionSwitch;
 import irt.tools.CheckBox.SwitchBox;

@@ -33,7 +33,7 @@ import irt.controller.GuiControllerAbstract;
 import irt.controller.file.ConverterProfileScanner;
 import irt.controller.file.ProfileScannerFT;
 import irt.data.DeviceInfo;
-import irt.data.DeviceInfo.HardwareType;
+import irt.data.HardwareType;
 import irt.data.ThreadWorker;
 import irt.irt_gui.IrtGui;
 import irt.tools.fx.MonitorPanelFx;
@@ -704,7 +704,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 			return paths.get(PacketFormats.PACKAGE);
 		}
 
-		public final static String setupInfoPathern = "%s any.any.any.%s {\n%s }";
+		public final static String setupInfoPathern = "%s any.any.any.%s {%s}";
 		public final static String pathPathern = "%s { path {%s} %s }";
 
 		/**

@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.serial_port.value.setter.SetterAbstract;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.FireValue;
 import irt.data.ThreadWorker;
 import irt.data.event.ValueChangeEvent;

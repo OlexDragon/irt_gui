@@ -4,7 +4,7 @@ import java.awt.Component;
 import java.util.Optional;
 
 import irt.controller.control.ControllerAbstract;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketWork;
 

@@ -38,7 +38,7 @@ import irt.controller.control.ControllerAbstract;
 import irt.controller.control.ControllerAbstract.Style;
 import irt.controller.serial_port.value.getter.Getter;
 import irt.controller.translation.Translation;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;

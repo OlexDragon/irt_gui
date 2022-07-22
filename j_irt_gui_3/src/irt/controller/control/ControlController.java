@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import irt.controller.StoreConfigController;
 import irt.controller.SwitchController;
 import irt.controller.serial_port.value.setter.ConfigurationSetter;
-import irt.data.DeviceInfo.DeviceType;
+import irt.data.DeviceType;
 import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
