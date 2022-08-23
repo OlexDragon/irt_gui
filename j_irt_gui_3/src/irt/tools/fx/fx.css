@@ -55,6 +55,10 @@
 	-fx-text-fill: YELLOW;
 	-fx-background-color: RED;
 }
+.INTERNAL{
+	-fx-text-fill: BLACK;
+	-fx-background-color: WHITE;
+}
 .LOCK, .LOCKED, .PLL1, .PLL2, .PLL3{
 	-fx-text-fill: YELLOW;
 	-fx-background-color: GREEN;

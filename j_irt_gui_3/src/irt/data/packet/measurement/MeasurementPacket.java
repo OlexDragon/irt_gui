@@ -71,17 +71,17 @@ public class MeasurementPacket extends PacketSuper{
 
 											.map(ParameterHeaderCode.class::cast)
 											.map(
-													pc->{
+													phc->{
 														// status flags
-														if(pc.getStatus().getCode()==code && deviceType.map(dt->dt!=DeviceType.LNB_REDUNDANCY_1x2).orElse(true)){
+														if(phc.getStatus().getCode()==code && deviceType.map(dt->dt!=DeviceType.LNB_REDUNDANCY_1x2).orElse(true)){
 
 															int statusBits = pl.getInt(0);
-															List<StatusBits> parseStatusBits = pc.parseStatusBits(statusBits);
+															List<StatusBits> parseStatusBits = phc.parseStatusBits(statusBits);
 
-															return new AbstractMap.SimpleEntry<>(pc.name(), parseStatusBits);
+															return new AbstractMap.SimpleEntry<>(phc.name(), parseStatusBits);
 														}
 
-														return pc.toEntry(pl.getBuffer());
+														return phc.toEntry(pl.getBuffer());
 													})
 											.orElse(null);
 

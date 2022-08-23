@@ -383,7 +383,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 			maxValue = 4095;
 
-			text6 = "TOT-6:";
+			text6 = "POT-6:";
 			text7 = "POT-7:";
 			text8 = "POT-8";
 
@@ -400,7 +400,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 			maxValue = 255;
 
-			text6 = "TOT-6:";
+			text6 = "POT-6:";
 			text7 = "POT-7:";
 			text8 = "POT-8";
 

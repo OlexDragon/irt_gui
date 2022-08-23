@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -307,10 +306,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		if(status==null || status.isEmpty())
 			return;
 
-		List<?> collect;
-		Stream<?> stream = status.stream();
-
-		collect = stream.filter(phc->phc==StatusBitsBUC.UNLOCKED || phc==StatusBitsBUC.LOCKED || phc==StatusBitsBUC.MUTE || phc==StatusBitsFCM.LOCK  || phc==StatusBitsFCM.MUTE || phc==StatusBitsFCM.MUTE_TTL).collect(Collectors.toList());
+		List<?> collect = status.stream().filter(phc->phc==StatusBitsBUC.UNLOCKED || phc==StatusBitsBUC.LOCKED || phc==StatusBitsBUC.MUTE || phc==StatusBitsBUC.INTERNAL || phc==StatusBitsFCM.LOCK  || phc==StatusBitsFCM.MUTE || phc==StatusBitsFCM.MUTE_TTL).collect(Collectors.toList());
 
 
 		String toolTipText = status.toString().replaceAll(",", "\n").replaceAll("[\\[\\]]", "");
@@ -708,7 +704,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		MUTE		(1, 1),
 		PLL_UNKNOWN	(0, 6),
 		LOCKED		(2, 6),
-		UNLOCKED	(4, 6); 
+		UNLOCKED	(4, 6),
+		INTERNAL	(16, 16); 
 
 		private int value;
 		private int bitMask;
