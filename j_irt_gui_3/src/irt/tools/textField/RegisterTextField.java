@@ -43,6 +43,7 @@ import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
+import irt.tools.panel.head.IrtPanel;
 
 public class RegisterTextField extends JTextField implements PacketListener, Runnable {
 	private static final long serialVersionUID = 517630309792962880L;
@@ -78,7 +79,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		addFocusListener(focusListener);
 
 		focusListenerTimer.setRepeats(false);
-		final int index = registerValue.getIndex();
+		int index = registerValue.getIndex();
 		final int addr = registerValue.getAddr();
 
 		toolTip = "Index=" + index + "; Address=" + addr;
@@ -118,10 +119,18 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		setPacket = new RegisterPacket(linkAddr, valueToSend, packetID);
 
 		int a;
+
 		switch(index) {
 		case 26:
-			a = addr+0x10;
+			final String dacHotMute = IrtPanel.PROPERTIES.getProperty("dac-hot-mute");
+			final boolean hasDacHotMute = Optional.ofNullable(dacHotMute).filter(pr->pr.equals("1")).isPresent();
+			if(hasDacHotMute) {
+				a = addr;
+				index++;
+			}else
+				a = addr+0x10;
 			break;
+
 		case 30: //ka band
 			a = addr==0 ? 16 : 17;
 			break;

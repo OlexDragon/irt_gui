@@ -20,6 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.concurrent.CancellationException;
@@ -58,6 +59,7 @@ import irt.tools.Transformer;
 import irt.tools.fx.update.UpdateMessageFx;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
+import irt.tools.panel.head.IrtPanel;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -94,6 +96,8 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 	private ProfileScannerFT profileScannerFT;
 
 	public InfoPanel(DeviceInfo deviceInfo) {
+
+		Arrays.stream(IrtPanel.PROFILE_PROPERTIES_TO_GET).forEach(IrtPanel.PROPERTIES::remove);
 
 		setForeground(Color.WHITE);
 		setBackground(new Color(0,0x33,0x33));
@@ -149,7 +153,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 			new ThreadWorker("Popup Menu Worker").newThread(()->{
 
 				profileScannerFT = new ProfileScannerFT(deviceInfo);
-				new ThreadWorker("Profile Scaner").newThread(profileScannerFT).start();
+				ThreadWorker.runThread(profileScannerFT, "Profile Scaner");
 				try {
 
 					profileScannerFT.get().ifPresent(path->{

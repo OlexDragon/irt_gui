@@ -453,12 +453,12 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			stop();
 			reset();
 
-		}else {
+		}else if(ComPortThreadQueue.getSerialPort()==null || !ComPortThreadQueue.getSerialPort().getPortName().equals(serialPortName)){
 
 			final Optional<SerialPortInterface> oSerialPort = Optional.ofNullable(ComPortThreadQueue.getSerialPort()).filter(sp->sp.getPortName().equals(serialPortName)).filter(sp->serialPortClass.isInstance(sp));
 
 			if(!oSerialPort.isPresent())
-
+				
 				new ThreadWorker(
 						()->{
 							try {

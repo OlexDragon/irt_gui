@@ -152,6 +152,7 @@ public class ComPortThreadQueue implements Runnable {
 
 	public synchronized void setSerialPort(SerialPortInterface serialPort) {
 		logger.traceEntry("{}", serialPort);
+		
 //		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
 
 		clear();
@@ -166,6 +167,7 @@ public class ComPortThreadQueue implements Runnable {
 
 		ComPortThreadQueue.serialPort = serialPort;
 
+		logger.error("1) {}", serialPort);
 		Optional
 		.ofNullable(serialPort)
 		.filter(sp->sp.getPortName().startsWith("COM") || sp.getPortName().startsWith("/dev"))

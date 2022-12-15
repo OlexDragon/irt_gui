@@ -3,6 +3,8 @@ package irt.controller.serial_port;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,8 +12,12 @@ import org.apache.logging.log4j.Logger;
 
 import com.fazecast.jSerialComm.SerialPort;
 
+import irt.data.ThreadWorker;
 import irt.data.packet.PacketWork;
 import irt.data.packet.interfaces.Packet;
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 
 public class ComPortJSerialComm implements SerialPortInterface {
 	private final Logger logger = LogManager.getLogger();
@@ -51,6 +57,7 @@ public class ComPortJSerialComm implements SerialPortInterface {
 		return serialPort.getSystemPortName();
 	}
 
+	private boolean opening;
 	@Override
 	public boolean openPort() throws Exception {
 		logger.traceEntry("{}", this);
@@ -58,11 +65,32 @@ public class ComPortJSerialComm implements SerialPortInterface {
 		//Show Stack Trace
 //		logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
 
-		if(serialPort.isOpen())
+		if(serialPort.isOpen() || opening)
 			return true;
+
+		opening = true;
+
+		FutureTask<Void> ft = new FutureTask<>(
+				()->{
+					TimeUnit.SECONDS.sleep(1);
+					
+					Platform.runLater(()->{
+						Alert alert = new Alert(AlertType.WARNING);
+						alert.setTitle("Unable to open serial port.");
+						alert.setContentText("Problem with serial port. Try restarting your computer.");
+						alert.show();
+					});
+					logger.error("3) {}", getPortName());
+					
+					return null;
+				});
+		ThreadWorker.runThread(ft, "Wait to opent the serial port.");
 
 		if(!serialPort.openPort())
 			return false;
+
+		opening = false;
+		ft.cancel(true);
 
 		serialPort.setBaudRate(Baudrate.getDefaultBaudrate().getValue());
 

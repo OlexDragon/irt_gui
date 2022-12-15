@@ -1,8 +1,12 @@
 package irt.controller.file;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
@@ -61,7 +65,9 @@ public class ProfileScanner implements Callable<Optional<Path>> {
 						fs->{
 							try {
 
-								return fs.get(10, TimeUnit.SECONDS);
+								final Path path = fs.get(10, TimeUnit.SECONDS);
+								getProperties(path, IrtPanel.PROFILE_PROPERTIES_TO_GET);
+								return path;
 
 							} catch (CancellationException | InterruptedException e) {
 								logger.info("fileScaner has been canceled.");
@@ -73,5 +79,41 @@ public class ProfileScanner implements Callable<Optional<Path>> {
 						})
 
 				.filter(path->path!=null);
+	}
+
+	private static void getProperties(Path path, String...properies) {
+
+		if(properies==null)
+			return;
+
+		final List<String> asList = Arrays.asList(properies);
+		try (Scanner scanner = new Scanner(path);){
+
+			while(scanner.hasNextLine()) {
+
+				if(asList.isEmpty())
+					break;
+
+				final String nextLine = scanner.nextLine();
+				final List<String> l = asList;
+
+				l.stream().filter(pr->nextLine.startsWith(pr)).findAny()
+				.ifPresent(
+						pr->{
+							asList.remove(pr);
+							final String[] split = nextLine.split("\\s+", 3);
+							String value;
+							if(split.length>1)
+								value = split[1];
+							else
+								value = "0";
+							IrtPanel.PROPERTIES.put(pr, value);
+						});
+			}
+			logger.error(IrtPanel.PROPERTIES);
+		} catch (IOException e) {
+			logger.catching(e);
+		}
+		
 	}
 }

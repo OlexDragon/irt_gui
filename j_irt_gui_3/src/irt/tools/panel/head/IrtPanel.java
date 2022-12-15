@@ -25,9 +25,9 @@ import irt.tools.label.ImageLabel;
 
 @SuppressWarnings("serial")
 public class IrtPanel extends MainPanel {
-
 	private final static Logger logger = LogManager.getLogger();
 
+	public static final String[] PROFILE_PROPERTIES_TO_GET = {"dac-hot-mute"};
 	private static Map<String, Integer> fontStyle;
 
 	public static ImageIcon logoIcon;
