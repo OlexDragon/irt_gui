@@ -39,7 +39,7 @@ import irt.data.ThreadWorker;
 import irt.data.RegisterValue;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
@@ -112,7 +112,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 				controller = new DefaultController(deviceType, "PLL reg.N9", new DeviceDebagSetter(null,
 						INDEX,
 						ADDRESS,
-						PacketIDs.FCM_DEVICE_DEBUG_PLL_REG,
+						PacketID.FCM_DEVICE_DEBUG_PLL_REG,
 						PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE), Style.CHECK_ONCE){
 
 							@Override
@@ -121,7 +121,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 								new ThreadWorker(()->{
 									
 									PacketHeader header = packet.getHeader();
-									if(PacketIDs.FCM_DEVICE_DEBUG_PLL_REG.match(header.getPacketId())){
+									if(PacketID.FCM_DEVICE_DEBUG_PLL_REG.match(header.getPacketId())){
 
 										if(header.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 											Payload payload = packet.getPayload(PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE);
@@ -266,7 +266,7 @@ public class PLL_HMC807LP6CE_Reg9 extends JPanel {
 			public void actionPerformed(ActionEvent arg0) {
 				try {
 					ConfigurationSetter packetWork = new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_FLAGS,
-							PacketIDs.CONFIGURATION_FCM_FLAGS);
+							PacketID.CONFIGURATION_FCM_FLAGS);
 					packetWork.preparePacketToSend(0);
 					GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
 				} catch (Exception ex) {

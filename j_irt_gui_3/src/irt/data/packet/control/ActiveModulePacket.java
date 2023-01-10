@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
@@ -30,7 +30,7 @@ public class ActiveModulePacket extends PacketSuper{
 		super(
 				linkAddr,
 				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.CONTROL_ACTIVE_MODULE,
+				PacketID.CONTROL_ACTIVE_MODULE,
 				PacketGroupIDs.CONTROL,
 				PacketImp.PACKET_ID_CONFIG_ACTIVE_MODULE_INDEX,
 				Optional.ofNullable(value).map(v->new byte[]{v}).orElse(null),

@@ -15,7 +15,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.DeviceDebugPacketIds;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketWork;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.interfaces.StopInterface;
@@ -76,11 +76,11 @@ public class ConverterProfileScanner extends FutureTask<Optional<Path>> implemen
 			Optional<Packet> oPacket = Optional.of(packet);
 			Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
 
-			if(!oHeader.map(PacketHeader::getPacketId).filter(PacketIDs.DEVICE_DEBUG_CONVERTER_INFO_DUMP::match).isPresent())
+			if(!oHeader.map(PacketHeader::getPacketId).filter(PacketID.DEVICE_DEBUG_CONVERTER_INFO_DUMP::match).isPresent())
 				return;
 
 			setFileName(oPacket
-			.flatMap(PacketIDs.DEVICE_DEBUG_CONVERTER_INFO_DUMP::valueOf)
+			.flatMap(PacketID.DEVICE_DEBUG_CONVERTER_INFO_DUMP::valueOf)
 			.map(String.class::cast)
 			.map(getConverterSerialNumber())
 			.map(sn->sn+".bin"));

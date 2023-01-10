@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.Packet;
 
@@ -30,7 +30,7 @@ public class AlarmsSummaryPacket extends PacketSuper {
 	public AlarmsSummaryPacket(byte linkAddr){
 		super(linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketIDs.ALARMS_SUMMARY,
+				PacketID.ALARMS_SUMMARY,
 				PacketGroupIDs.ALARM,
 				PacketImp.ALARM_SUMMARY_STATUS,
 				null,

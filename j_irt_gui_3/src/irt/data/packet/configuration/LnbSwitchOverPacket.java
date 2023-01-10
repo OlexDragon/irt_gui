@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
@@ -31,7 +31,7 @@ public class LnbSwitchOverPacket extends PacketSuper implements ValueToString{
 		super(
 				linkAddr,
 				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.CONFIGURATION_LNB_SWITCH_OVER,
+				PacketID.CONFIGURATION_LNB_SWITCH_OVER,
 				PacketGroupIDs.CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER,
 				PacketImp.toBytes(value),

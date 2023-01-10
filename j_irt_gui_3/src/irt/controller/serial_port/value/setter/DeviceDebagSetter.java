@@ -6,7 +6,7 @@ import irt.data.RegisterValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.Payload;
@@ -18,15 +18,15 @@ public class DeviceDebagSetter extends SetterAbstract {
 
 	private int hashCode;
 
-	public DeviceDebagSetter(LinkHeader linkHeader, int index, PacketIDs packetId, byte parameterId) {
+	public DeviceDebagSetter(LinkHeader linkHeader, int index, PacketID packetId, byte parameterId) {
 		this(linkHeader, index, 1, packetId, parameterId);
 	}
 
-	public DeviceDebagSetter(LinkHeader linkHeader, int index, int addr, PacketIDs packetID, byte parameterId) {
+	public DeviceDebagSetter(LinkHeader linkHeader, int index, int addr, PacketID packetID, byte parameterId) {
 		super(linkHeader, new RegisterValue(index, addr, null), PacketGroupIDs.DEVICE_DEBUG.getId(), parameterId, packetID.getId());
 	}
 
-	public DeviceDebagSetter(LinkHeader linkHeader,int index, int addr, PacketIDs packetID, byte parameterId, int value) {
+	public DeviceDebagSetter(LinkHeader linkHeader,int index, int addr, PacketID packetID, byte parameterId, int value) {
 		super(linkHeader, new RegisterValue(index, addr, new Value(value, 0, Long.MAX_VALUE, 0)), PacketImp.PACKET_TYPE_COMMAND, PacketGroupIDs.DEVICE_DEBUG.getId(), parameterId, packetID.getId());
 	}
 
@@ -48,8 +48,8 @@ public class DeviceDebagSetter extends SetterAbstract {
 			Packet up = upt.getPacket();
 
 			final int intId = cph.getPacketId()&0XFF;
-			final PacketIDs[] values = PacketIDs.values();
-			PacketIDs packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+			final PacketID[] values = PacketID.values();
+			PacketID packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 			if(cph!=null && up!=null && up.getHeader().getPacketId()==intId){
 
 				Object source = null;

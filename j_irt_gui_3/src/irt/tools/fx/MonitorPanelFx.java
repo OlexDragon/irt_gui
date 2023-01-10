@@ -36,7 +36,7 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
 import irt.data.packet.RetransmitPacket;
@@ -184,7 +184,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			logger.traceEntry("{}", packet);
 
 			oPacket
-			.flatMap(PacketIDs.MEASUREMENT_ALL::valueOf)
+			.flatMap(PacketID.MEASUREMENT_ALL::valueOf)
 			.map(v->(Map<?, ?>)v)
 			.ifPresent(
 
@@ -236,7 +236,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		if(addr!=unitAddress)
 			return true;
 		
-		if(!oHeader.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(PacketHeader::getPacketId).filter(PacketIDs.MEASUREMENT_ALL::match).isPresent())
+		if(!oHeader.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE).map(PacketHeader::getPacketId).filter(PacketID.MEASUREMENT_ALL::match).isPresent())
 			return true;
 
 		if(oHeader.map(PacketHeader::getPacketType).filter(t->t!=PacketImp.PACKET_TYPE_RESPONSE).isPresent())

@@ -34,7 +34,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Packets;
 import irt.data.packet.configuration.LOFrequenciesPacket;
 import irt.data.packet.configuration.LOPacket;
@@ -144,7 +144,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 		// Fill JComboBox
 		oId
-		.filter(PacketIDs.CONFIGURATION_LO_FREQUENCIES::match)
+		.filter(PacketID.CONFIGURATION_LO_FREQUENCIES::match)
 		.ifPresent(
 				id->
 				new ThreadWorker(()->{
@@ -179,7 +179,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 
 		// Select JComboBox item
 		oId
-		.filter(PacketIDs.CONFIGURATION_LO::match)
+		.filter(PacketID.CONFIGURATION_LO::match)
 		.ifPresent(
 				id->
 				new ThreadWorker(()->{

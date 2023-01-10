@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -41,7 +41,7 @@ public class Offset1to1toMultiPacket extends PacketSuper {
 		super(
 				linkAddr,
 				Optional.ofNullable(ofsetIndex).flatMap(i->Optional.ofNullable(value)).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI,
+				PacketID.CONFIGURATION_OFFSET_1_TO_MULTI,
 				PacketGroupIDs.CONFIGURATION,
 				PacketImp.PARAMETER_CONFIG_BUC_OFFSET_1_TO_MULTI,
 				Optional.ofNullable(ofsetIndex).map(i->Optional.ofNullable(value).map(v->ByteBuffer.allocate(3).put(i).putShort(v)).orElse(ByteBuffer.allocate(3).put(i)).array()).orElse(null),

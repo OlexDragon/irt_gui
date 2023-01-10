@@ -33,7 +33,7 @@ import irt.data.listener.ValueChangeListener;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.value.Value;
@@ -185,8 +185,8 @@ public class DeviceDebugController extends ControllerAbstract {
 								if(addrToSave>=0 && oldValue!=uv.getValue()){
 									int index = urv.getIndex();
 									final int intId = ((GetterAbstract)unitPacketWork).getPacketId()+1;
-									final PacketIDs[] values = PacketIDs.values();
-									PacketIDs packetID = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+									final PacketID[] values = PacketID.values();
+									PacketID packetID = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 									new DeviceDebagSaveController(
 											deviceType, txtField,
 											new DeviceDebagSetter(unitPacketThread.getLinkHeader(),

@@ -3,7 +3,9 @@ package irt.controller.file;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -86,7 +88,7 @@ public class ProfileScanner implements Callable<Optional<Path>> {
 		if(properies==null)
 			return;
 
-		final List<String> asList = Arrays.asList(properies);
+		final List<String> asList = new LinkedList<>(Arrays.asList(properies));
 		try (Scanner scanner = new Scanner(path);){
 
 			while(scanner.hasNextLine()) {
@@ -95,22 +97,23 @@ public class ProfileScanner implements Callable<Optional<Path>> {
 					break;
 
 				final String nextLine = scanner.nextLine();
-				final List<String> l = asList;
+				final List<String> l = new ArrayList<>(asList);
 
 				l.stream().filter(pr->nextLine.startsWith(pr)).findAny()
 				.ifPresent(
 						pr->{
 							asList.remove(pr);
 							final String[] split = nextLine.split("\\s+", 3);
+
 							String value;
 							if(split.length>1)
 								value = split[1];
 							else
-								value = "0";
+								value = "X";
 							IrtPanel.PROPERTIES.put(pr, value);
 						});
 			}
-			logger.error(IrtPanel.PROPERTIES);
+
 		} catch (IOException e) {
 			logger.catching(e);
 		}

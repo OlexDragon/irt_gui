@@ -20,7 +20,7 @@ import irt.data.DeviceType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
@@ -122,21 +122,21 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 		List<ControllerAbstract> controllers = new ArrayList<>();
 		controllers.add(getTemperaturController());
 		controllers.add(getWGSController());
-		controllers.add(getLNBStatusController(lblLNB1Status, PacketImp.PARAMETER_MEASUREMENT_LNB1_STATUS, PacketIDs.MEASUREMENT_SNB1_STATUS));
-		controllers.add(getLNBStatusController(lblLNB2Status, PacketImp.PARAMETER_MEASUREMENT_LNB2_STATUS, PacketIDs.MEASUREMENT_SNB2_STATUS));
+		controllers.add(getLNBStatusController(lblLNB1Status, PacketImp.PARAMETER_MEASUREMENT_LNB1_STATUS, PacketID.MEASUREMENT_SNB1_STATUS));
+		controllers.add(getLNBStatusController(lblLNB2Status, PacketImp.PARAMETER_MEASUREMENT_LNB2_STATUS, PacketID.MEASUREMENT_SNB2_STATUS));
 		return controllers;
 	}
 
 
-	private ControllerAbstract getLNBStatusController(final JLabel lblLNBStatus, byte parameterMeasurement, final PacketIDs packetIDs) {
+	private ControllerAbstract getLNBStatusController(final JLabel lblLNBStatus, byte parameterMeasurement, final PacketID packetID) {
 
-		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), parameterMeasurement, packetIDs, logger){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), parameterMeasurement, packetID, logger){
 
 			private final Value value = new ValueBoolean(Translation.getValue(String.class, "ready.not", "Not Ready"), Translation.getValue(String.class, "ready", "Ready"));
 
 			@Override
 			public boolean set(Packet packet) {
-				if(packetIDs.match(packet.getHeader().getPacketId())){
+				if(packetID.match(packet.getHeader().getPacketId())){
 					
 					Payload payload = packet.getPayload(0);
 					if(payload!=null){
@@ -162,13 +162,13 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	private ControllerAbstract getWGSController() {
 
-		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), PacketImp.PARAMETER_MEASUREMENT_WGS_POSITION, PacketIDs.MEASUREMENT_WGS_POSITION, logger){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), PacketImp.PARAMETER_MEASUREMENT_WGS_POSITION, PacketID.MEASUREMENT_WGS_POSITION, logger){
 
 			private final ValueThreeState value = new ValueThreeState("Unknown", "LNB1", "LNB2");
 
 			@Override
 			public boolean set(Packet packet) {
-				if(PacketIDs.MEASUREMENT_WGS_POSITION.match(packet.getHeader().getPacketId())){
+				if(PacketID.MEASUREMENT_WGS_POSITION.match(packet.getHeader().getPacketId())){
 					
 					Payload payload = packet.getPayload(0);
 					if(payload!=null){
@@ -194,11 +194,11 @@ public class MonitorDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	private ControllerAbstract getTemperaturController() {
 
-		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE, PacketIDs.MEASUREMENT_TEMPERATURE, logger){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.MEASUREMENT.getId(), PacketImp.PARAMETER_MEASUREMENT_TEMPERATURE, PacketID.MEASUREMENT_TEMPERATURE, logger){
 
 			@Override
 			public boolean set(Packet packet) {
-				if(PacketIDs.MEASUREMENT_TEMPERATURE.match(packet.getHeader().getPacketId())){
+				if(PacketID.MEASUREMENT_TEMPERATURE.match(packet.getHeader().getPacketId())){
 					Payload payload = packet.getPayload(0);
 					if(payload!=null){
 						Value v = new ValueDouble(payload.getShort(0), 1);

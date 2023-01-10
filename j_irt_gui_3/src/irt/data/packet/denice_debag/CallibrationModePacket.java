@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.interfaces.Packet;
@@ -23,11 +23,11 @@ public class CallibrationModePacket extends PacketSuper {
 																										.map(i->i==1);
 
 	public CallibrationModePacket(byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketID.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.REQUEST);
 	}
 
 	public CallibrationModePacket(byte linkAddr, Boolean value) {
-		super(linkAddr, PacketImp.PACKET_TYPE_COMMAND, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.COMMAND);
+		super(linkAddr, PacketImp.PACKET_TYPE_COMMAND, PacketID.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_CALIBRATION_MODE, null, Priority.COMMAND);
 		Optional.ofNullable(value).ifPresent(this::setValue);
 	}
 }

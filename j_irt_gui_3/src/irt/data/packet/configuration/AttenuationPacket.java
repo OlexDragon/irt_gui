@@ -13,7 +13,7 @@ import irt.controller.translation.Translation;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.ValueToString;
 
@@ -33,7 +33,7 @@ public class AttenuationPacket extends PacketSuper implements ValueToString{
 		super(
 				linkAddr,
 				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.CONFIGURATION_ATTENUATION,
+				PacketID.CONFIGURATION_ATTENUATION,
 				PacketGroupIDs.CONFIGURATION,
 				Optional.ofNullable(linkAddr).filter(b->b!=0).map(b->PacketImp.PARAMETER_ID_CONFIGURATION_ATTENUATION).orElse(PacketImp.PARAMETER_CONFIG_FCM_ATTENUATION),
 				Optional.ofNullable(value).map(v->PacketImp.toBytes(value)).orElse(null),

@@ -22,7 +22,7 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.configuration.MuteControlPacket;
 import irt.data.packet.configuration.MuteControlPacket.MuteCommands;
 import irt.data.packet.configuration.MuteControlPacket.MuteStatus;
@@ -121,7 +121,7 @@ public class MuteButton extends ImageButton implements Runnable, PacketListener 
 
 			oPacket
 			.map(Packet::getHeader)
-			.filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId()))
+			.filter(h->PacketID.CONFIGURATION_MUTE.match(h.getPacketId()))
 			.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR)
 			.filter(h->MuteControlPacket.GROUP_ID.match(h.getGroupId()))
 			.filter(h->h.getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)

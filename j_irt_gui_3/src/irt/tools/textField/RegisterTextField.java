@@ -35,7 +35,7 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketWork;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.RegisterPacket;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -52,17 +52,15 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	public final int MIN;
 	public final int MAX;
 
-	private PacketWork getPacket;
-	private PacketWork setPacket;
-
+	private final RegisterPacket getValuePacket;
 	private final RegisterValue valueToSend;
-	private final RegisterValue valueSaveRegister;
 
 	private ScheduledFuture<?> scheduleAtFixedRate;
 	private ScheduledExecutorService	service;
 
 	private Byte unitAddress;
-	private short packetId;
+	private PacketID packetId;
+	private PacketID packetId_Set;
 	private Timer showActionTimer;
 
 	private Timer focusListenerTimer = new Timer((int) TimeUnit.SECONDS.toMillis(10), a->start());
@@ -75,7 +73,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	};
 	private final String toolTip;
 
-	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, PacketIDs packetID, int min, int max) {
+	public RegisterTextField(Byte linkAddr, RegisterValue registerValue, PacketID packetId, int min, int max) {
 		addFocusListener(focusListener);
 
 		focusListenerTimer.setRepeats(false);
@@ -88,7 +86,8 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		MIN = min;
 		MAX = max;
 		unitAddress = linkAddr;
-		this.packetId = packetID.getId();
+		this.packetId = packetId;
+		packetId_Set = PacketID.valueOf(packetId.name() + "_SET");
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -111,36 +110,12 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		});
 
 		registerValue.setValue(null); // if value is null packet type is REQIEST
-		getPacket = new RegisterPacket(linkAddr, registerValue, packetID);
-		GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
+		getValuePacket = new RegisterPacket(linkAddr, registerValue, packetId);
+		GuiControllerAbstract.getComPortThreadQueue().add(getValuePacket);
 
 		valueToSend = new RegisterValue(registerValue);
 		valueToSend.setValue( new Value(MAX, MIN, MAX, 0)); // if value not null packet type is COMMAND
-		setPacket = new RegisterPacket(linkAddr, valueToSend, packetID);
-
-		int a;
-
-		switch(index) {
-		case 26:
-			final String dacHotMute = IrtPanel.PROPERTIES.getProperty("dac-hot-mute");
-			final boolean hasDacHotMute = Optional.ofNullable(dacHotMute).filter(pr->pr.equals("1")).isPresent();
-			if(hasDacHotMute) {
-				a = addr;
-				index++;
-			}else
-				a = addr+0x10;
-			break;
-
-		case 30: //ka band
-			a = addr==0 ? 16 : 17;
-			break;
-		default:
-			a = addr+3;
-		}
-
-//		logger.error("index: {}; addr: {}: a: {}", index, addr, a);
-		final Value value = new Value(0, 0, 0, 0);
-		valueSaveRegister = new RegisterValue(index, a, value);
+		logger.debug("valueToSend: {}", valueToSend);
 
 		addActionListener(new ActionListener() {
 			
@@ -202,8 +177,11 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 				if(addr!=unitAddress)
 					return;
 
+				final String idName = packetId.name();
+				final short packetId_Save = Optional.of(idName).filter(i->i.startsWith("DEVICE_DEBUG_POTENTIOMETER_")).map(i->PacketID.valueOf(i + "_SAVE").getId()).orElse((short) -1);
+
 				final Optional<PacketHeader> sameGroupId = o.map(Packet::getHeader)
-															.filter(h->h.getPacketId()==packetId)
+															.filter(h->h.getPacketId()==packetId.getId() || h.getPacketId()==packetId_Set.getId() || h.getPacketId()==packetId_Save)
 															.filter(h->PacketGroupIDs.DEVICE_DEBUG.match(h.getGroupId()));
 
 				if(!sameGroupId.isPresent())
@@ -234,18 +212,18 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 				.orElse(Stream.empty())
 				.filter(pl->pl.getParameterHeader().getCode()==PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE)
 				.map(Payload::getRegisterValue)
-				.filter(rv->rv.getIndex()==valueToSend.getIndex())
 				.forEach(rv->{
 
-					final int aR = rv.getAddr();
-					final int aS = valueSaveRegister.getAddr();
-					final int aV = valueToSend.getAddr();
-
-					if(aR==aS)
+					final short pID = noError.get().getPacketId();
+					if(pID==packetId_Save)
 						showSaved();
 
-					else if(aR==aV)
-						setValue(rv);
+					else {
+						final int aR = rv.getAddr();
+						final int aV = valueToSend.getAddr();
+						if(aR==aV) 
+							setValueToTextField(rv);
+					}
 				});
 			}catch(Exception e){
 				logger.catching(e);
@@ -288,18 +266,43 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 		start();
 
-		//KA band
-		final int index = valueSaveRegister.getIndex();
-		if(index==30 || index==26){
-			getValue().ifPresent(v->{
-				final Value value = new Value(v, v, v, 0);
-				valueSaveRegister.setValue(value);
-			});
+		int a;
+		int index = valueToSend.getIndex();
+		final int addr = valueToSend.getAddr();
+
+		switch(index) {
+		case 26:
+			final String dacHotMute = IrtPanel.PROPERTIES.getProperty("dac-hot-mute");
+			final boolean hasDacHotMute = Optional.ofNullable(dacHotMute).filter(pr->pr.equals("0")).isPresent();
+			if(hasDacHotMute) {
+				a = addr;
+				index++;
+			}else
+				a = addr+0x10;
+			break;
+
+		case 30: //ka band
+			a = addr==0 ? 16 : 17;
+			break;
+		default:
+			a = addr+3;
 		}
 
-		((RegisterPacket)setPacket).setValue(valueSaveRegister);
-//		logger.error("{}; {}", valueSaveRegister, setPacket);
-		GuiControllerAbstract.getComPortThreadQueue().add(setPacket);
+		RegisterValue valueToSave = new RegisterValue(index, a, null);
+
+		getValue().ifPresent(
+				v->{
+					final Value value = new Value(v, v, v, 0);
+					valueToSave.setValue(value);
+				});
+		
+		if(valueToSave.getValue()==null)
+			return;
+
+		logger.debug("valueToSave: {}", valueToSave);
+
+		PacketID packetId_Save = PacketID.valueOf(packetId.name() + "_SAVE");
+		GuiControllerAbstract.getComPortThreadQueue().add(getPacketToSend(packetId_Save, valueToSave));
 	}
 
 	public void send() {
@@ -311,38 +314,27 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 		final int value = Integer.parseInt(text);
 		valueToSend.getValue().setValue(value);
-		((RegisterPacket)setPacket).setValue(valueToSend);
 
-		GuiControllerAbstract.getComPortThreadQueue().add(setPacket);
-	}
-
-	private void setValue(final RegisterValue registerValue) {
-		final String str = registerValue.getValue().toString();
-
-		SwingUtilities.invokeLater(()-> {
-			if(!str.equals(getText()))
-				setText(str);
-		});
+		GuiControllerAbstract.getComPortThreadQueue().add(getPacketToSend(packetId_Set, valueToSend));
 	}
 
 	private void showSaved() {
 
-			try {
-				stop();
-				setText("SAVED");
-				new Timer(500, e->start()).start();
-			} catch (Exception e) {
-				logger.catching(e);
-			}
+		try {
+			stop();
+			setText("SAVED");
+			new Timer(500, e->start()).start();
+		} catch (Exception e) {
+			logger.catching(e);
 		}
+	}
+
+	private PacketWork 		getPacketToSend(PacketID pId, RegisterValue value)					{ return logger.traceExit(new RegisterPacket(unitAddress, value, pId)); }
+	private void 			setValueToTextField(final RegisterValue registerValue) 	{ SwingUtilities.invokeLater(()->Optional.of(registerValue.getValue().toString()).filter(str->!str.equals(getText())).ifPresent(this::setText)); }
 
 	@Override
-	public void run() {
-			GuiControllerAbstract.getComPortThreadQueue().add(getPacket);
-	}
+	public void				 run() 		{ GuiControllerAbstract.getComPortThreadQueue().add(getValuePacket); }
 
-	public Optional<Integer> getValue() {
-		final String text = getText().replace(",", "");
-		return Optional.of(text).filter(t->!t.isEmpty()).map(Integer::parseInt);
-	}
+	/** @return value from textField */
+	public Optional<Integer> getValue() { return Optional.of(getText().replace(",", "")).filter(t->!t.isEmpty()).map(Integer::parseInt); }
 }

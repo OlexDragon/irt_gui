@@ -111,10 +111,10 @@ public enum Packets {
 			if(p instanceof AlarmStatusPacket)
 				return Arrays.stream(AlarmsPacketIds.values()).filter(a->a.getPacketId().getId()==packetId).findAny().isPresent();
 
-			if(packetId>=PacketIDs.DUMPS.getId() && packetId<PacketIDs.CLEAR_STATISTICS.getId()) 
+			if(packetId>=PacketID.DUMPS.getId() && packetId<PacketID.CLEAR_STATISTICS.getId()) 
 				return p.getClass() == DeviceDebugPacket.class;
 
-			if(packetId>=PacketIDs.DEVICE_FCM_INDEX_1.getId() && packetId<PacketIDs.DEVICE_DEBUG_ADDR_0.getId())
+			if(packetId>=PacketID.DEVICE_FCM_INDEX_1.getId() && packetId<PacketID.DEVICE_DEBUG_ADDR_0.getId())
 				return p.getClass() == DeviceDebugReadWritePacket.class;
 
 //			logger.error(packet);

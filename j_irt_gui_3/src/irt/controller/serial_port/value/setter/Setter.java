@@ -6,7 +6,7 @@ import irt.data.IdValue;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -16,19 +16,19 @@ public class Setter extends SetterAbstract {
 
 	private int value = Integer.MIN_VALUE;
 
-	public Setter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketIDs packetId) {
+	public Setter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketID packetId) {
 		super(linkHeader, groupId, packetParameterHeaderCode, packetId.getId());
 	}
 
-	public Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, PacketIDs packetID) {
+	public Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, PacketID packetID) {
 		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetID.getId());
 	}
 
-	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, PacketIDs packetID, T integer) {
+	public <T> Setter(LinkHeader linkHeader, byte packetType, byte groupId,	byte packetParameterHeaderCode, PacketID packetID, T integer) {
 		super(linkHeader, packetType, groupId, packetParameterHeaderCode, packetID.getId(), integer);
 	}
 
-	public Setter(byte groupId, byte packetParameterHeaderCode,	PacketIDs packetId) {
+	public Setter(byte groupId, byte packetParameterHeaderCode,	PacketID packetId) {
 		this(null, groupId, packetParameterHeaderCode, packetId);
 	}
 
@@ -56,8 +56,8 @@ public class Setter extends SetterAbstract {
 			Packet up = upt.getPacket();
 
 			final short intId = getPacketId();
-			final PacketIDs[] values = PacketIDs.values();
-			PacketIDs packetID = Optional.of(intId).filter(i->i>values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+			final PacketID[] values = PacketID.values();
+			PacketID packetID = Optional.of(intId).filter(i->i>values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 			if(cph!=null && up!=null &&
 					cph.getGroupId()==up.getHeader().getGroupId() &&
 							cph.getPacketId()==intId){

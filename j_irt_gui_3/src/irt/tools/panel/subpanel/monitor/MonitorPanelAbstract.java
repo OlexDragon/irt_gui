@@ -19,7 +19,7 @@ import irt.controller.translation.Translation;
 import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 
 @SuppressWarnings("serial")
@@ -98,7 +98,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 		titledBorder.setTitleFont(font);
 	}
 
-	protected DefaultController getController(String controllerName, byte parameter, final PacketIDs packetID) {
+	protected DefaultController getController(String controllerName, byte parameter, final PacketID packetID) {
 		return null;
 	}
 

@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -33,7 +33,7 @@ public class LnbSwitchPacket extends ConfigurationPacket {
 	public LnbSwitchPacket(byte linkAddr, LnbPosition redundancyEnable) {
 		super(
 				linkAddr,
-				PacketIDs.CONFIGURATION_DLRS_WGS_SWITCHOVER,
+				PacketID.CONFIGURATION_DLRS_WGS_SWITCHOVER,
 				PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER,
 				Optional.ofNullable(redundancyEnable).map(v->redundancyEnable.toBytes()).orElse(null));
 	}

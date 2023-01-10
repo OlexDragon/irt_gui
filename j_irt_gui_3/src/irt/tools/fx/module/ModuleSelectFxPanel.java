@@ -28,7 +28,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.control.ActiveModulePacket;
 import irt.data.packet.interfaces.Packet;
@@ -170,7 +170,7 @@ public class ModuleSelectFxPanel extends JFXPanel implements Runnable, PacketLis
 		final Optional<Packet> oPacket = Optional.of(packet);
 		final Optional<PacketHeader> oPacketHeader = oPacket.map(Packet::getHeader);
 
-		if(!oPacketHeader.map(PacketHeader::getPacketId).filter(PacketIDs.CONTROL_ACTIVE_MODULE::match).isPresent())
+		if(!oPacketHeader.map(PacketHeader::getPacketId).filter(PacketID.CONTROL_ACTIVE_MODULE::match).isPresent())
 			return;
 
 //		logger.error(packet);

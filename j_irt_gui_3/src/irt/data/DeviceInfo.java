@@ -12,7 +12,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
@@ -235,7 +235,7 @@ public class DeviceInfo implements PacketListener {
 		return Optional
 		.ofNullable(packet)
 		.filter(p->p.getHeader()!=null)
-		.filter(p->PacketIDs.DEVICE_INFO.match(p.getHeader().getPacketId()))
+		.filter(p->PacketID.DEVICE_INFO.match(p.getHeader().getPacketId()))
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
 		.map(DeviceInfo::new);		
 	}

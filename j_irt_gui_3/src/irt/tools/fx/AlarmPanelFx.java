@@ -27,7 +27,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Packets;
 import irt.data.packet.Payload;
 import irt.data.packet.alarm.AlarmDescriptionPacket;
@@ -244,7 +244,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 
 			//Summary alarm
 			Optional<Short> oPacketId = noError.map(PacketHeader::getPacketId);
-			if(	oPacketId.filter(PacketIDs.ALARMS_SUMMARY::match).isPresent()){
+			if(	oPacketId.filter(PacketID.ALARMS_SUMMARY::match).isPresent()){
 
 //				final Optional<? extends PacketSuper> p = Packets.cast(packet);
 //				p.ifPresent(pa->{
@@ -261,7 +261,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 											.flatMap(Stream::findAny);
 
 			//Available alarms
-			if(oPacketId.filter(PacketIDs.ALARMS_ALL_IDs::match).isPresent() && oPayload.filter(pl->pl.getParameterHeader().getCode()==2).isPresent()){
+			if(oPacketId.filter(PacketID.ALARMS_ALL_IDs::match).isPresent() && oPayload.filter(pl->pl.getParameterHeader().getCode()==2).isPresent()){
 
 			//Initialize available alarms
 				final Optional<short[]> alarms = oPayload

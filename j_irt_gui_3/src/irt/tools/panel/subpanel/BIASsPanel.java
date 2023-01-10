@@ -76,7 +76,7 @@ import irt.data.packet.InitializePacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
@@ -433,28 +433,28 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 	}
 
 		// 1 -registerValue1
-		Optional.ofNullable(registerValue1).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N1, P1, text1, maxValue, allTextFields));
+		Optional.ofNullable(registerValue1).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N1, P1, text1, maxValue, allTextFields));
 
 		// 2 -registerValue2
-		Optional.ofNullable(registerValue2).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N2, P2, text2, maxValue, allTextFields));
+		Optional.ofNullable(registerValue2).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N2, P2, text2, maxValue, allTextFields));
 
 		// 3 -registerValue3
-		Optional.ofNullable(registerValue3).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N3, P3, text3, maxValue, allTextFields));
+		Optional.ofNullable(registerValue3).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N3, P3, text3, maxValue, allTextFields));
 
 		// 4 -registerValue4
-		Optional.ofNullable(registerValue4).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N4, P4, text4, maxValue, allTextFields));
+		Optional.ofNullable(registerValue4).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N4, P4, text4, maxValue, allTextFields));
 
 		// 5 - registerValue5
-		Optional.ofNullable(registerValue5).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N5, P5, text5, maxValue, allTextFields));
+		Optional.ofNullable(registerValue5).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N5, P5, text5, maxValue, allTextFields));
 
 		// 6 - registerValue6
-		Optional.ofNullable(registerValue6).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N6, P6, text6, maxValue, allTextFields));
+		Optional.ofNullable(registerValue6).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N6, P6, text6, maxValue, allTextFields));
 
 		// 7 - registerValue7
-		Optional.ofNullable(registerValue7).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N7, P7, text7, maxValue, allTextFields));
+		Optional.ofNullable(registerValue7).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N7, P7, text7, maxValue, allTextFields));
 
 		// 8 - registerValue8
-		Optional.ofNullable(registerValue8).ifPresent(addFields(addr, PacketIDs.DEVICE_DEBUG_POTENTIOMETER_N8, P8, text8, maxValue, allTextFields));
+		Optional.ofNullable(registerValue8).ifPresent(addFields(addr, PacketID.DEVICE_DEBUG_POTENTIOMETER_N8, P8, text8, maxValue, allTextFields));
 
 //		FocusListener listener = new FocusListener() {
 //			
@@ -758,14 +758,14 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					@Override
 					public void onPacketReceived(Packet packet) {
 
-						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE::match);
+						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketID.DEVICE_DEBUG_CALIBRATION_MODE::match);
 
 						if(myPacket.isPresent())
 							ThreadWorker.runThread(
 									()->{
 
 										if(
-												myPacket.flatMap(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE::valueOf)
+												myPacket.flatMap(PacketID.DEVICE_DEBUG_CALIBRATION_MODE::valueOf)
 												.filter(
 														b->{
 															final Boolean bool = (Boolean)b;
@@ -806,7 +806,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 					@Override
 					public void onPacketReceived(Packet packet) {
 
-						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE::match);
+						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketID.PRODUCTION_GENERIC_SET_1_INITIALIZE::match);
 
 						if(myPacket.isPresent())
 							ThreadWorker.runThread(
@@ -864,7 +864,7 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 		add(btnSave);
 	}
 
-	public Consumer<? super RegisterValue> addFields(final byte addr, PacketIDs packetID, int y, String lblText, final int maxValue, List<RegisterTextField> allTextFields) {
+	public Consumer<? super RegisterValue> addFields(final byte addr, PacketID packetID, int y, String lblText, final int maxValue, List<RegisterTextField> allTextFields) {
 
 		return rv->{
 

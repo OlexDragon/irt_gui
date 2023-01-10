@@ -19,7 +19,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.ParameterHeader;
 import irt.data.packet.Payload;
 import irt.data.DeviceType;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.value.ValueDouble;
 import irt.tools.label.LED;
 
@@ -192,7 +192,7 @@ public class MonitorPanelConverter extends MonitorPanelAbstract {
 		DefaultController defaultController = getController(
 				"IrtControllPanel",
 				PacketImp.PARAMETER_MEASUREMENT_FCM_ALL,
-				PacketIDs.MEASUREMENT_ALL);
+				PacketID.MEASUREMENT_ALL);
 		controllers.add(defaultController);
 		return controllers;
 	}

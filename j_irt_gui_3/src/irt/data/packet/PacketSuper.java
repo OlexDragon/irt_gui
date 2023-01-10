@@ -35,13 +35,13 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 
 	private int maxSize;
 
-	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, PacketGroupIDs groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
+	protected PacketSuper(Byte linkAddr, byte packetType, PacketID packetID, PacketGroupIDs groupId, byte parameterHeaderCode, byte[] payloadData, Priority priority){
 
 		linkHeader = Optional.ofNullable(linkAddr).filter(la->la!=0).map(la-> new LinkHeader(linkAddr, (byte)0, (short)0)).orElse(null);
 		header = new PacketHeader();
 		header.setType(packetType);
 		header.setGroupId(groupId.getId());
-		header.setPacketId(Optional.ofNullable(packetID).map(PacketIDs::getId).orElseGet(()->(short)(PacketIDs.values().length + new Random().nextInt(Short.MAX_VALUE - PacketIDs.values().length))));
+		header.setPacketId(Optional.ofNullable(packetID).map(PacketID::getId).orElseGet(()->(short)(PacketID.values().length + new Random().nextInt(Short.MAX_VALUE - PacketID.values().length))));
 		payloads.add(new Payload( new ParameterHeader( parameterHeaderCode), payloadData));
 		this.priority = priority;
 		timestamp = System.currentTimeMillis();
@@ -49,7 +49,7 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 		maxSize = packetID.getMaxSize();
 	}
 
-	protected PacketSuper(Byte linkAddr, byte packetType, PacketIDs packetID, byte[] payloadData, Priority priority){
+	protected PacketSuper(Byte linkAddr, byte packetType, PacketID packetID, byte[] payloadData, Priority priority){
 		this(linkAddr, packetType, packetID, packetID.getPacketGroupIDs(), packetID.getParameterCode(), payloadData, priority);
 	}
 
@@ -57,7 +57,7 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 		this(
 				configurationSetter.getLinkHeader().getAddr(),
 				configurationSetter.getPacketType(),
-				PacketIDs.valueOf(configurationSetter.getPacketId()).orElse(PacketIDs.UNNECESSARY),
+				PacketID.valueOf(configurationSetter.getPacketId()).orElse(PacketID.UNNECESSARY),
 				PacketGroupIDs.valueOf(configurationSetter.getGroupId()),
 				configurationSetter.getPacketParameterHeaderCode(),
 				null,
@@ -209,7 +209,7 @@ public class PacketSuper implements PacketWork, PacketThreadWorker, LinkedPacket
 
 	@Override
 	public Object getValue() {
-		 return Optional.ofNullable(header).map(PacketHeader::getPacketId).flatMap(PacketIDs::valueOf).flatMap(pId->pId.valueOf(this)).map(Object.class::cast).orElse("not implemented");
+		 return Optional.ofNullable(header).map(PacketHeader::getPacketId).flatMap(PacketID::valueOf).flatMap(pId->pId.valueOf(this)).map(Object.class::cast).orElse("not implemented");
 	}
 
 	@Override

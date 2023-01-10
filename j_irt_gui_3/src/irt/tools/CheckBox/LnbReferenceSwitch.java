@@ -4,7 +4,7 @@ import java.awt.Image;
 
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.LnbReferencePacket;
 import irt.data.packet.configuration.LnbReferencePacket.ReferenceStatus;
@@ -27,7 +27,7 @@ public class LnbReferenceSwitch extends SwitchBoxImpl {
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
 
-		if(!PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE.match(pID))
+		if(!PacketID.CONFIGURATION_FCM_LNB_REFERENCE.match(pID))
 			return;
 
 		logger.debug(packet);

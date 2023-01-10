@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import irt.data.packet.DeviceDebugPacketIds;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.ParameterHeader;
@@ -23,7 +23,7 @@ public class DeviceDebugPacket extends PacketSuper{
 				Priority.REQUEST);
 	}
 
-	public DeviceDebugPacket(byte linkAddr, int index, int addr, Integer value, PacketIDs çacketId) {
+	public DeviceDebugPacket(byte linkAddr, int index, int addr, Integer value, PacketID çacketId) {
 		super(
 				linkAddr,
 				value ==null ? PacketImp.PACKET_TYPE_REQUEST : PacketImp.PACKET_TYPE_COMMAND,
@@ -78,8 +78,8 @@ public class DeviceDebugPacket extends PacketSuper{
 
 	public String getParsePacketId() {
 		final int intId = getHeader().getPacketId()&0xFF;
-		final PacketIDs[] values = PacketIDs.values();
-		PacketIDs packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+		final PacketID[] values = PacketID.values();
+		PacketID packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 
 
 		return packetId.toString();

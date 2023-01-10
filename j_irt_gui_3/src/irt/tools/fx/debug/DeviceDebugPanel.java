@@ -31,7 +31,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.InitializePacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork;
 import irt.data.packet.denice_debag.CallibrationModePacket;
@@ -372,7 +372,7 @@ public class DeviceDebugPanel extends JFXPanel {
 			final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
 
 			// Return if other packets
-			if(!oPacketId.filter(id->PacketIDs.DEVICE_DEBUG_PACKET.match(id) || PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.match(id) || PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE.match(id)).isPresent())
+			if(!oPacketId.filter(id->PacketID.DEVICE_DEBUG_PACKET.match(id) || PacketID.DEVICE_DEBUG_CALIBRATION_MODE.match(id) || PacketID.PRODUCTION_GENERIC_SET_1_INITIALIZE.match(id)).isPresent())
 				return;
 
 			logger.traceEntry("{}", packet);
@@ -396,11 +396,11 @@ public class DeviceDebugPanel extends JFXPanel {
 				return;
 			}
 
-			oPacketId.filter(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE::match).ifPresent(ifCalibrationMode(packet));
+			oPacketId.filter(PacketID.DEVICE_DEBUG_CALIBRATION_MODE::match).ifPresent(ifCalibrationMode(packet));
 
-			oPacketId.filter(PacketIDs.DEVICE_DEBUG_PACKET::match).ifPresent(ifDeviceDebug(packet));
+			oPacketId.filter(PacketID.DEVICE_DEBUG_PACKET::match).ifPresent(ifDeviceDebug(packet));
 
-			oPacketId.filter(PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE::match).ifPresent(ifInitialise(packet));
+			oPacketId.filter(PacketID.PRODUCTION_GENERIC_SET_1_INITIALIZE::match).ifPresent(ifInitialise(packet));
 		}
 
 		private Consumer<? super Short> ifCalibrationMode(Packet packet) {
@@ -428,7 +428,7 @@ public class DeviceDebugPanel extends JFXPanel {
 		private Consumer<? super Short> ifDeviceDebug(Packet packet) {
 			return id->{
 
-				PacketIDs
+				PacketID
 				.DEVICE_DEBUG_PACKET
 				.valueOf(packet)
 				.map(RegisterValue.class::cast)
@@ -551,12 +551,12 @@ public class DeviceDebugPanel extends JFXPanel {
 
 		private Optional<DeviceDebugPacket> createGetPacket(Node node) {
 			return getIndexAndAddress(node)
-					.map(ib->new DeviceDebugPacket(linkAddr, ib.get(), ib.get(), null, PacketIDs.DEVICE_DEBUG_PACKET));
+					.map(ib->new DeviceDebugPacket(linkAddr, ib.get(), ib.get(), null, PacketID.DEVICE_DEBUG_PACKET));
 		}
 
 		private Optional<DeviceDebugPacket> createSetPacket(Node node) {
 			return getIndexAndAddressValue(node)
-					.map(ib->new DeviceDebugPacket(linkAddr, ib.get(), ib.get(), ib.get(), PacketIDs.DEVICE_DEBUG_PACKET));
+					.map(ib->new DeviceDebugPacket(linkAddr, ib.get(), ib.get(), ib.get(), PacketID.DEVICE_DEBUG_PACKET));
 		}
 
 		/**

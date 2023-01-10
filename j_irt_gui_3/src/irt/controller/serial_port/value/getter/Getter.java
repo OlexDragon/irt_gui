@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -18,11 +18,11 @@ public class Getter extends GetterAbstract {
 
 	private long value;
 
-	public Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketIDs packetID) {
+	public Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketID packetID) {
 		super(linkHeader, PacketImp.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetID.getId());
 	}
 
-	public <T> Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketIDs packetID, Logger logger) {
+	public <T> Getter(LinkHeader linkHeader, byte groupId,	byte packetParameterHeaderCode, PacketID packetID, Logger logger) {
 		super(linkHeader, PacketImp.PACKET_TYPE_REQUEST, groupId, packetParameterHeaderCode, packetID.getId(), logger);
 	}
 
@@ -31,12 +31,12 @@ public class Getter extends GetterAbstract {
 		boolean isSet = false;
 		if(isAddressEquals(packet)) {
 
-			final PacketIDs[] values = PacketIDs.values();
+			final PacketID[] values = PacketID.values();
 
 			PacketThreadWorker 	upt = getPacketThread();
 			PacketHeader 		cph = packet.getHeader();
 			Packet 				up = upt.getPacket();
-			PacketIDs 				packetId = Optional.of(getPacketId()&0xFF).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+			PacketID 				packetId = Optional.of(getPacketId()&0xFF).filter(i->i<values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 
 			final boolean notNull = cph!=null && up!=null;
 			if (notNull) {
@@ -45,7 +45,7 @@ public class Getter extends GetterAbstract {
 				final byte groupId = cph.getGroupId();
 				final byte groupId2 = up.getHeader().getGroupId();
 
-				final PacketIDs packetId2 = Optional.of(cph.getPacketId()&0xFF).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+				final PacketID packetId2 = Optional.of(cph.getPacketId()&0xFF).filter(i->i<values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 				final boolean prepared = packetType==PacketImp.PACKET_TYPE_RESPONSE && groupId==groupId2 && packetId2.equals(packetId);
 
 //				logger.debug("\n\t prepared:{}\n\t"

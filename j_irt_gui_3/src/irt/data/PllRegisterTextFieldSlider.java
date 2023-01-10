@@ -14,7 +14,7 @@ import javax.swing.event.ChangeListener;
 
 import irt.controller.serial_port.value.getter.ValueChangeListenerClass;
 import irt.data.event.ValueChangeEvent;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.value.Value;
 
 public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
@@ -23,16 +23,16 @@ public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
 	private JTextField textField;
 	private JSlider slider;
 	private ChangeListener sliderChangeListener;
-	private PacketIDs packetIDs;
+	private PacketID packetID;
 	private Value value;
 	private int multiplier;
 	private KeyListener textFieldKeyListener;
 	private ActionListener actionListener;
 	private FocusListener focusListener;
 
-	public PllRegisterTextFieldSlider(PacketIDs packetIDs, JTextField textField, JSlider slider, int multiplier) {
+	public PllRegisterTextFieldSlider(PacketID packetID, JTextField textField, JSlider slider, int multiplier) {
 		setListeners();
-		this.packetIDs = packetIDs;
+		this.packetID = packetID;
 		this.multiplier = multiplier;
 		setTextField(textField);
 		this.slider = slider;
@@ -90,7 +90,7 @@ public class PllRegisterTextFieldSlider extends ValueChangeListenerClass{
 					setText();
 
 				if (!slider.getValueIsAdjusting()) {
-					fireValueChangeListener(new ValueChangeEvent(value, packetIDs));
+					fireValueChangeListener(new ValueChangeEvent(value, packetID));
 				}
 			}
 		};

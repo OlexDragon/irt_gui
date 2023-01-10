@@ -33,7 +33,7 @@ import irt.data.StringData;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.interfaces.Packet;
@@ -181,7 +181,7 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 			Optional
 			.ofNullable(packet)
 			.map(p->p.getHeader())
-			.filter(h->PacketIDs.DEVICE_DEBUG_INFO.match(h.getPacketId()))
+			.filter(h->PacketID.DEVICE_DEBUG_INFO.match(h.getPacketId()))
 			.ifPresent(h->{
 
 				String text;

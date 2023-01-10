@@ -17,7 +17,7 @@ import irt.data.Range;
 import irt.data.event.ValueChangeEvent;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.Payload;
@@ -44,10 +44,10 @@ public class ConfigurationSetter extends SetterAbstract {
 		this(linkHeader,
 				linkHeader!=null && linkHeader.getAddr()!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_LO_FREQUENCIES :
 					PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
-					PacketIDs.CONFIGURATION_LO_FREQUENCIES);
+					PacketID.CONFIGURATION_LO_FREQUENCIES);
 	}
 
-	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, PacketIDs packetID) {
+	public ConfigurationSetter(LinkHeader linkHeader, byte packetParameterHeaderCode, PacketID packetID) {
 		super(linkHeader, PacketGroupIDs.CONFIGURATION.getId(), packetParameterHeaderCode, packetID.getId());
 	}
 
@@ -59,7 +59,7 @@ public class ConfigurationSetter extends SetterAbstract {
 			PacketThread pt = packetThread;
 			LinkHeader lh = pt.getLinkHeader();
 
-			final PacketIDs[] values = PacketIDs.values();
+			final PacketID[] values = PacketID.values();
 
 			if(id<values.length)
 			switch (values[id]) {
@@ -73,7 +73,7 @@ public class ConfigurationSetter extends SetterAbstract {
 				break;
 			case CONFIGURATION_MUTE_OUTDOOR:
 			case CONFIGURATION_MUTE:
-				pt.preparePacket(lh != null && PacketIDs.CONFIGURATION_MUTE_OUTDOOR.match((short) id) ? PacketImp.PARAMETER_ID_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
+				pt.preparePacket(lh != null && PacketID.CONFIGURATION_MUTE_OUTDOOR.match((short) id) ? PacketImp.PARAMETER_ID_CONFIGURATION_MUTE : PacketImp.PARAMETER_CONFIG_FCM_MUTE_CONTROL,
 						(byte) (((boolean) ((IdValue) value).getValue()) ? 1 : 0));
 				break;
 			case CONFIGURATION_GAIN:
@@ -138,8 +138,8 @@ public class ConfigurationSetter extends SetterAbstract {
 		if(isAddressEquals(packet)){
 			PacketHeader ph = packet.getHeader();
 			final int intId = getPacketId()&0xFF;
-			final PacketIDs[] values = PacketIDs.values();
-			PacketIDs packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+			final PacketID[] values = PacketID.values();
+			PacketID packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 			if(ph!=null &&
 					PacketGroupIDs.CONFIGURATION.match(ph.getGroupId()) &&
 							packetId.match(ph.getPacketId()) && packet.getPayloads()!=null){

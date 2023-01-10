@@ -14,7 +14,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.DeviceDebugHelpPacket;
 import irt.data.packet.interfaces.Packet;
@@ -88,7 +88,7 @@ public class HelpPaneFx extends AnchorPane implements PacketListener, JavaFxPane
 		Optional<Packet> oPacket = Optional.of(packet);
 		Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
 
-		if(!oHeader.map(PacketHeader::getPacketId).filter(PacketIDs.DEVICE_DEBUG_HELP::match).isPresent())
+		if(!oHeader.map(PacketHeader::getPacketId).filter(PacketID.DEVICE_DEBUG_HELP::match).isPresent())
 			return;
 
 		if(oHeader.map(PacketHeader::getPacketType).filter(pt->pt!=PacketImp.PACKET_TYPE_RESPONSE).isPresent())

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -31,7 +31,7 @@ public class LnbReferencePacket  extends PacketSuper{
 																															.map(v->v[index]);
 																												});
 
-	private final static PacketIDs PACKET_ID 	= PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE;
+	private final static PacketID PACKET_ID 	= PacketID.CONFIGURATION_FCM_LNB_REFERENCE;
 	private final static PacketGroupIDs GROUP_ID 		= PacketGroupIDs.CONFIGURATION;
 	private final static byte PARAMETER 	= PacketImp.PARAMETER_CONFIG_FCM_LNB_REFERENCE_CONTROL;
 
@@ -42,7 +42,7 @@ public class LnbReferencePacket  extends PacketSuper{
 	}
 
 	public LnbReferencePacket() {
-		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONFIGURATION_FCM_LNB_REFERENCE, GROUP_ID, PARAMETER, null, Priority.REQUEST);
+		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PacketID.CONFIGURATION_FCM_LNB_REFERENCE, GROUP_ID, PARAMETER, null, Priority.REQUEST);
 	}
 
 	public LnbReferencePacket(ReferenceStatus referenceStatus) {

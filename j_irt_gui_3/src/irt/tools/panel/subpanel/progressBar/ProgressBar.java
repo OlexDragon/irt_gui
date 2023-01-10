@@ -22,7 +22,7 @@ import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.MeasurementValue;
 import irt.data.value.MeasurementValue.MeasurementStatus;
@@ -171,7 +171,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 		Optional
 		.ofNullable(packet)
 		.map(Packet::getHeader)
-		.filter(h->PacketIDs.MEASUREMENT_ALL.match(h.getPacketId()))
+		.filter(h->PacketID.MEASUREMENT_ALL.match(h.getPacketId()))
 		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
 		.filter(h->h.getError()	== PacketImp.ERROR_NO_ERROR)
 		.map(h->packet.getPayloads())
@@ -201,7 +201,7 @@ public class ProgressBar extends JPanel implements PacketListener{
 		Optional
 		.ofNullable(packet)
 		.map(Packet::getHeader)
-		.filter(h->PacketIDs.DEVICE_INFO.match(h.getPacketId()))
+		.filter(h->PacketID.DEVICE_INFO.match(h.getPacketId()))
 		.filter(h->h.getPacketType()== PacketImp.PACKET_TYPE_RESPONSE)
 		.filter(h->h.getError()	== PacketImp.ERROR_NO_ERROR)
 		.ifPresent(p->{

@@ -12,7 +12,7 @@ import irt.data.event.ValueChangeEvent;
 import irt.data.listener.ValueChangeListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.value.ValueDouble;
 
 public class GainController extends ValueRangeControllerAbstract {
@@ -24,7 +24,7 @@ public class GainController extends ValueRangeControllerAbstract {
 				"Gain UnitController",
 				new ConfigurationSetter(linkHeader,
 						PacketImp.PARAMETER_ID_CONFIGURATION_GAIN_RANGE,
-						PacketIDs.CONFIGURATION_GAIN_RANGE),
+						PacketID.CONFIGURATION_GAIN_RANGE),
 				txtField,
 				slider,
 				txtStep,
@@ -38,7 +38,7 @@ public class GainController extends ValueRangeControllerAbstract {
 			
 			@Override
 			public void valueChanged(ValueChangeEvent valueChangeEvent) {
-				if(PacketIDs.CONFIGURATION_GAIN_RANGE.match((short) valueChangeEvent.getID()))
+				if(PacketID.CONFIGURATION_GAIN_RANGE.match((short) valueChangeEvent.getID()))
 					new ControllerWorker(valueChangeEvent);
 			}
 		};
@@ -66,7 +66,7 @@ public class GainController extends ValueRangeControllerAbstract {
 				Range r = (Range) source;
 				ValueDouble value = new ValueDouble(0, r.getMinimum(), r.getMaximum(), 1);
 				value.setPrefix(" dB");
-				startTextSliderController(GainController.this.getName(), value, PacketIDs.CONFIGURATION_GAIN, PacketImp.PARAMETER_ID_CONFIGURATION_GAIN, style);
+				startTextSliderController(GainController.this.getName(), value, PacketID.CONFIGURATION_GAIN, PacketImp.PARAMETER_ID_CONFIGURATION_GAIN, style);
 			}
 			}catch (Exception e) {
 				logger.catching(e);

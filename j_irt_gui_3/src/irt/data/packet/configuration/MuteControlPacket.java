@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
@@ -31,7 +31,7 @@ public class MuteControlPacket extends PacketSuper {
 		super(
 				linkAddr,
 				Optional.ofNullable(value).map(b->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.CONFIGURATION_MUTE,
+				PacketID.CONFIGURATION_MUTE,
 				GROUP_ID,
 				getParameterCode(linkAddr),
 				Optional.ofNullable(value).map(b->PacketImp.toBytes((byte)value.ordinal())).orElse(null),
@@ -41,13 +41,13 @@ public class MuteControlPacket extends PacketSuper {
 	public MuteControlPacket(Packet packet) {
 		super(Optional.ofNullable(packet).filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0),
 				packet.getHeader().getPacketType(),
-				PacketIDs.CONFIGURATION_MUTE,
+				PacketID.CONFIGURATION_MUTE,
 				GROUP_ID,
 				packet.getPayload(0).getParameterHeader().getCode(),
 				packet.getPayload(0).getBuffer(),
 				packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_COMMAND ? Priority.COMMAND : Priority.REQUEST);
 
-		Optional.of(packet).map(Packet::getHeader).filter(h->GROUP_ID.match(h.getGroupId())).filter(h->PacketIDs.CONFIGURATION_MUTE.match(h.getPacketId())).orElseThrow(()->new IllegalArgumentException(packet.toString()));
+		Optional.of(packet).map(Packet::getHeader).filter(h->GROUP_ID.match(h.getGroupId())).filter(h->PacketID.CONFIGURATION_MUTE.match(h.getPacketId())).orElseThrow(()->new IllegalArgumentException(packet.toString()));
 	}
 
 	public MuteControlPacket() {

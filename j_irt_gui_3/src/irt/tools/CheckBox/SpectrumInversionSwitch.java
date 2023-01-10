@@ -4,7 +4,7 @@ import java.awt.Image;
 
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.SpectrumInversionPacket;
 import irt.data.packet.configuration.SpectrumInversionPacket.Spectrum;
@@ -27,7 +27,7 @@ public class SpectrumInversionSwitch extends SwitchBoxImpl {
 	protected void update(Packet packet) {
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
-		if(!PacketIDs.CONFIGURATION_SPECTRUM_INVERSION.match(pID))
+		if(!PacketID.CONFIGURATION_SPECTRUM_INVERSION.match(pID))
 			return;
 
 		logger.trace(packet);

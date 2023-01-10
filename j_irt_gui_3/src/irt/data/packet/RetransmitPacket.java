@@ -20,7 +20,7 @@ public class RetransmitPacket  extends PacketSuper{
 		super(
 				linkAddr,
 				Optional.ofNullable(retransmitsNumbet).map(rn->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.PROTO_RETRANSNIT,
+				PacketID.PROTO_RETRANSNIT,
 				PacketGroupIDs.PROTO,
 				PacketImp.PARAMETER_ID_RETRANSMIT,
 				Optional.ofNullable(retransmitsNumbet).map(b->new byte[]{b}).orElse(null),

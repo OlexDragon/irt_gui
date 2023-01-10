@@ -48,7 +48,7 @@ public class PacketHeader{
 
 	public String getPacketIdStr() {
 //		LogManager.getLogger().error(getPacketId());
-		return PacketIDs.toString(getPacketId());
+		return PacketID.toString(getPacketId());
 	}
 
 	public String getErrorStr() {

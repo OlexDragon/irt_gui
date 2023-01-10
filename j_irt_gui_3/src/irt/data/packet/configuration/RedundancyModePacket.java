@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -34,7 +34,7 @@ public class RedundancyModePacket extends ConfigurationPacket {
 	public RedundancyModePacket(byte linkAddr, RedundancyMode redundancyMode) {
 		super(
 				linkAddr,
-				PacketIDs.CONFIGURATION_REDUNDANCY_MODE,
+				PacketID.CONFIGURATION_REDUNDANCY_MODE,
 				PacketImp.PARAMETER_ID_CONFIGURATION_REDUNDANCY_MODE,
 				Optional.ofNullable(redundancyMode).map(v->redundancyMode.toBytes()).orElse(null));
 	}

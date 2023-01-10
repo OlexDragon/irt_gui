@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.data.DeviceType;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.interfaces.Packet;
@@ -107,7 +107,7 @@ public class MeasurementPacket extends PacketSuper{
 		super(
 				linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketIDs.MEASUREMENT_ALL,
+				PacketID.MEASUREMENT_ALL,
 				PacketGroupIDs.MEASUREMENT,
 				PacketImp.PARAMETER_ALL,
 				null,

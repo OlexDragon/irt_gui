@@ -33,7 +33,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.ValueDouble;
@@ -55,23 +55,23 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 					alcEnableSetterController.stop();
 				}
 
-				ConfigurationSetter configurationSetter = new ConfigurationSetter(linkHeader, PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED, PacketIDs.CONFIGURATION_ALC_ENABLE){
+				ConfigurationSetter configurationSetter = new ConfigurationSetter(linkHeader, PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED, PacketID.CONFIGURATION_ALC_ENABLE){
 
 					private int times;
 
 					@Override
 					public boolean set(Packet packet) {
 
-						if(PacketIDs.CONFIGURATION_ALC_ENABLE.match(packet.getHeader().getPacketId())){
+						if(PacketID.CONFIGURATION_ALC_ENABLE.match(packet.getHeader().getPacketId())){
 
 							if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 								Boolean enabled = packet.getPayload(0).getByte()==1;
 								logger.trace(packet);
-								fireValueChangeListener(new ValueChangeEvent(enabled, PacketIDs.CONFIGURATION_ALC_ENABLE));
+								fireValueChangeListener(new ValueChangeEvent(enabled, PacketID.CONFIGURATION_ALC_ENABLE));
 							}else{
 								logger.warn(packet);
 								if(++times>=3)
-									fireValueChangeListener(new ValueChangeEvent("error", PacketIDs.CONFIGURATION_ALC_ENABLE));
+									fireValueChangeListener(new ValueChangeEvent("error", PacketID.CONFIGURATION_ALC_ENABLE));
 							}
 						}
 
@@ -173,7 +173,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 						linkHeader,
 						PacketGroupIDs.CONFIGURATION.getId(),
 						PacketImp.PARAMETER_CONFIG_FCM_ALC_ENABLED,
-						PacketIDs.CONFIGURATION_ALC_ENABLE){
+						PacketID.CONFIGURATION_ALC_ENABLE){
 
 					@Override
 					public boolean set(Packet packet) {
@@ -184,7 +184,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 							return false;
 
 						final int intId = header.getPacketId()&0xFF;
-						PacketIDs[] values = PacketIDs.values();
+						PacketID[] values = PacketID.values();
 						if(intId<values.length)
 						switch(values[intId]){
 						case CONFIGURATION_ALC_ENABLE:
@@ -214,15 +214,15 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 				linkHeader,
 				PacketGroupIDs.CONFIGURATION.getId(),
 				PacketImp.PARAMETER_CONFIG_FCM_ALC_RANGE,
-				PacketIDs.CONFIGURATION_ALC_RANGE, logger){
+				PacketID.CONFIGURATION_ALC_RANGE, logger){
 
 					@Override
 					public boolean set(Packet packet) {
-						if(PacketIDs.CONFIGURATION_ALC_RANGE.match(packet.getHeader().getPacketId())){
+						if(PacketID.CONFIGURATION_ALC_RANGE.match(packet.getHeader().getPacketId())){
 							logger.debug(packet);
 							Payload payload = packet.getPayload(0);
 							if(payload!=null)
-								fireValueChangeListener(new ValueChangeEvent(new Range(payload), PacketIDs.CONFIGURATION_ALC_RANGE));
+								fireValueChangeListener(new ValueChangeEvent(new Range(payload), PacketID.CONFIGURATION_ALC_RANGE));
 						}
 						return false;
 					}
@@ -243,7 +243,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 							
 							@Override
 							public void valueChanged(ValueChangeEvent valueChangeEvent) {
-								if(PacketIDs.CONFIGURATION_ALC_RANGE.match((short) valueChangeEvent.getID()) && valueChangeEvent.getSource() instanceof Range){
+								if(PacketID.CONFIGURATION_ALC_RANGE.match((short) valueChangeEvent.getID()) && valueChangeEvent.getSource() instanceof Range){
 									logger.debug(valueChangeEvent);
 									String prefix = Translation.getValue(String.class, "dbm", " dBm");
 
@@ -257,7 +257,7 @@ public class ControlPanelPicobuc extends ControlPanelSSPA{
 
 									ValueDouble value = new ValueDouble(0, minimum, maximum, 1);
 									value.setPrefix(prefix);
-									startTextSliderController(ControlPanelPicobuc.this.getName(), value, PacketIDs.CONFIGURATION_ALC_LEVEL, PacketImp.PARAMETER_CONFIG_FCM_ALC_LEVEL, style);
+									startTextSliderController(ControlPanelPicobuc.this.getName(), value, PacketID.CONFIGURATION_ALC_LEVEL, PacketImp.PARAMETER_CONFIG_FCM_ALC_LEVEL, style);
 								}
 							}
 						};

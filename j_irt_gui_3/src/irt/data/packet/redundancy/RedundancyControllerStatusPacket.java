@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.data.RedundancyControllerUnitStatus;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
@@ -101,6 +101,6 @@ public class RedundancyControllerStatusPacket extends PacketSuper{
 	}
 
 	public RedundancyControllerStatusPacket(Byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.REDUNDANCY_STATUS, PacketGroupIDs.REDUNDANCY, PacketImp.PARAMETER_ID_REDUNDANCY_CONTROLLER_STATUS, null, Priority.REQUEST);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketID.REDUNDANCY_STATUS, PacketGroupIDs.REDUNDANCY, PacketImp.PARAMETER_ID_REDUNDANCY_CONTROLLER_STATUS, null, Priority.REQUEST);
 	}
 }

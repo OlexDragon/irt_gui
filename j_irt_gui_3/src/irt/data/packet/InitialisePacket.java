@@ -14,7 +14,7 @@ public class InitialisePacket extends PacketSuper {
 																										.map(DeviceInfo::parsePacket);
 
 	public InitialisePacket(byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_ALL, null, Priority.IMPORTANT);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketID.DEVICE_DEBUG_CALIBRATION_MODE, PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_ALL, null, Priority.IMPORTANT);
 	}
 
 	public InitialisePacket() {

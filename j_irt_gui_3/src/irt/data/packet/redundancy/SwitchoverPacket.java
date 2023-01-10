@@ -4,13 +4,13 @@ import java.nio.ByteBuffer;
 import java.util.Optional;
 
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 
 public class SwitchoverPacket extends PacketSuper{
 
-	public static final PacketIDs PACKET_ID = PacketIDs.REDUNDANCY_SWITCHOVER;
+	public static final PacketID PACKET_ID = PacketID.REDUNDANCY_SWITCHOVER;
 
 	public SwitchoverPacket(Byte linkAddr, Integer switchNumber) {
 		super(

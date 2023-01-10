@@ -41,7 +41,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
@@ -363,7 +363,7 @@ public class Panel extends JPanel implements PacketListener {
 			return;
 
 		// not alarm summary packet
-		if(!oHeader.map(PacketHeader::getPacketId).filter(PacketIDs.ALARMS_SUMMARY::match).isPresent())
+		if(!oHeader.map(PacketHeader::getPacketId).filter(PacketID.ALARMS_SUMMARY::match).isPresent())
 			return;
 
 		// address not match
@@ -375,7 +375,7 @@ public class Panel extends JPanel implements PacketListener {
 		logger.trace("{}, {}", addr, packet);
 		new ThreadWorker(
 				()->
-				PacketIDs.ALARMS_SUMMARY.valueOf(packet)
+				PacketID.ALARMS_SUMMARY.valueOf(packet)
 				.filter(AlarmSeverities.class::isInstance)
 				.map(AlarmSeverities.class::cast)
 				.map(AlarmSeverities::getBackground)

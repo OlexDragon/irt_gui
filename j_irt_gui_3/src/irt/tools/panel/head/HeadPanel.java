@@ -29,7 +29,7 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.label.LED;
@@ -273,11 +273,11 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			ledRx.blink();
 
 			//Mute Status
-			Optional<Short> oIsMeasurement = oPacketId.filter(PacketIDs.MEASUREMENT_ALL::match);
+			Optional<Short> oIsMeasurement = oPacketId.filter(PacketID.MEASUREMENT_ALL::match);
 			oIsMeasurement
 			.ifPresent(measurement->{
 				
-				boolean isMuted = PacketIDs.MEASUREMENT_ALL.valueOf(packet)
+				boolean isMuted = PacketID.MEASUREMENT_ALL.valueOf(packet)
 
 						.map(v->(Map<?,?>)v)
 						.map(m->m.get("STATUS"))
@@ -294,8 +294,8 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			});
 
 			//Alarm Status
-			oPacketId.filter(PacketIDs.ALARMS_SUMMARY::match)
-			.flatMap(alarm->PacketIDs.ALARMS_SUMMARY.valueOf(packet))
+			oPacketId.filter(PacketID.ALARMS_SUMMARY::match)
+			.flatMap(alarm->PacketID.ALARMS_SUMMARY.valueOf(packet))
 			.map(AlarmSeverities.class::cast)
 			.ifPresent(
 					as->{

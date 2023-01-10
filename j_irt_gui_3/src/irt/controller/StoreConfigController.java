@@ -10,7 +10,7 @@ import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.control.SaveConfigPacket;
 import irt.data.packet.interfaces.Packet;
 
@@ -41,7 +41,7 @@ public class StoreConfigController implements PacketListener{
 
 		new ThreadWorker(()->{
 			
-			if(!PacketIDs.STORE_CONFIG.match(packet.getHeader().getPacketId()))
+			if(!PacketID.STORE_CONFIG.match(packet.getHeader().getPacketId()))
 				return;
 
 			Packets

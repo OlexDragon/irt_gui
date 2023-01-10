@@ -52,7 +52,7 @@ import irt.data.network.NetworkAddress.AddressType;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.network.NetworkAddressPacket;
@@ -464,7 +464,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		if(PacketIDs.NETWORK_ADDRESS.match(packet))
+		if(PacketID.NETWORK_ADDRESS.match(packet))
 			logger.trace(packet);
 
 		new ThreadWorker(()->{

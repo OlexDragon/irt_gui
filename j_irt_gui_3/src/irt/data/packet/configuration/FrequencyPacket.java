@@ -11,7 +11,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.ValueToString;
 import irt.data.value.ValueFrequency;
@@ -31,7 +31,7 @@ public class FrequencyPacket extends PacketSuper implements ValueToString{
 		super(
 				linkAddr,
 				Optional.ofNullable(value).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.CONFIGURATION_FREQUENCY,
+				PacketID.CONFIGURATION_FREQUENCY,
 				PacketGroupIDs.CONFIGURATION,
 				Optional.ofNullable(linkAddr).filter(la->la!=0).map(v->PacketImp.PARAMETER_ID_CONFIGURATION_USER_FREQUENCY).orElse(PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY),
 				Optional.ofNullable(linkAddr).filter(la->la!=0).map(v->PacketImp.toBytes(value)).orElse(null),

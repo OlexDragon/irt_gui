@@ -29,13 +29,14 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.configuration.AttenuationPacket;
 import irt.data.packet.configuration.FrequencyPacket;
 import irt.data.packet.configuration.GainPacket;
 import irt.data.packet.configuration.LOPacket;
 import irt.data.packet.configuration.MuteControlPacket;
 import irt.data.packet.denice_debag.DeviceDebugHelpPacket;
+import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.denice_debag.DeviceDebugHelpPacket.HelpValue;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket.DeviceDebugType;
@@ -73,7 +74,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 	private int[] deviceIndexes;
 	private int[] dumpIndexes;
 
-	private final Map<PacketIDs, Object> oldValues = new HashMap<>();
+	private final Map<PacketID, Object> oldValues = new HashMap<>();
 
 	public DumpControllerFull(DeviceInfo deviceInfo) {
 
@@ -153,7 +154,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 				()->{
 
 					final short packetId = header.getPacketId();
-					PacketIDs.valueOf(packetId)
+					PacketID.valueOf(packetId)
 					.ifPresent(
 							pId->{
 
@@ -174,7 +175,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 										value->{
 
 											// parse indexes from DeviceDebugHelpPacket and return
-											if(pId.equals(PacketIDs.DEVICE_DEBUG_HELP)){
+											if(pId.equals(PacketID.DEVICE_DEBUG_HELP)){
 
 												setIndexes((String) value);
 
@@ -185,45 +186,68 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 												return;
 											}
 
-							final Optional<Map<PacketIDs, Object>> oOldValues = Optional.ofNullable(oldValues);
+											final Optional<Map<PacketID, Object>> oOldValues = Optional.ofNullable(oldValues);
 
-							if(pId.equals(PacketIDs.MEASUREMENT_ALL)) {
+											if(pId.equals(PacketID.MEASUREMENT_ALL)) {
 
-								boolean noDump = oOldValues
-										.map(ovs->ovs.get(PacketIDs.MEASUREMENT_ALL))
-										.flatMap(this::castToMap)
-										.map(m->m.entrySet())
-										.map(Set::stream)
-										.map(
-												stream->
-												stream
-												.map(compareValues(castToMap(value)))
-												.filter(bool->bool==false)// check if need dump
-												.findAny()
-												.orElse(true))
-										.orElse(false);
+												boolean noDump = oOldValues
+														.map(ovs->ovs.get(PacketID.MEASUREMENT_ALL))
+														.flatMap(this::castToMap)
+														.map(m->m.entrySet())
+														.map(Set::stream)
+														.map(
+																stream->
+																stream
+																.map(compareValues(castToMap(value)))
+																.filter(bool->bool==false)// check if need dump
+																.findAny()
+																.orElse(true))
+														.orElse(false);
 
-								if(noDump) return;
-							}
+												if(noDump) return;
+											}
 
-							if(pId.equals(PacketIDs.DEVICE_INFO)) {
+											if(pId.equals(PacketID.DEVICE_INFO)) {
 
-								boolean noDump = oOldValues
-										.map(ovs->ovs.get(PacketIDs.DEVICE_INFO))
-										.flatMap(this::castToOptional)
-										.flatMap(
-												oldDeviveInfo->
-												Optional
-												.ofNullable(value)
-												.flatMap(this::castToOptional)
-												.map(newDeviceInfo->oldDeviveInfo.equals(newDeviceInfo)))
-										.orElse(false);
+												boolean noDump = oOldValues
+														.map(ovs->ovs.get(PacketID.DEVICE_INFO))
+														.flatMap(this::castToOptional)
+														.flatMap(
+																oldDeviveInfo->
+																Optional
+																.ofNullable(value)
+																.flatMap(this::castToOptional)
+																.map(newDeviceInfo->oldDeviveInfo.equals(newDeviceInfo)))
+														.orElse(false);
 
-								if(noDump) return;
-							}
+												if(noDump) return;
+											}
 
-							dump(pId, value);
-						});
+											if(pId.equals(PacketID.ALARMS_SUMMARY)) {
+
+												boolean noDump = oOldValues
+														.map(ovs->ovs.get(PacketID.ALARMS_SUMMARY))
+														.flatMap(this::castToOptional)
+														.flatMap(
+																oldSummaryAlarm->
+																Optional
+																.ofNullable(value)
+																.flatMap(this::castToOptional)
+																.map(newSummaryAlarm->oldSummaryAlarm.equals(newSummaryAlarm)))
+														.orElse(false);
+
+												if(noDump)
+													return;
+
+												else{
+													final DeviceDebugInfoPacket p = new DeviceDebugInfoPacket(addr, (byte) 1);
+													p.setValue(4);
+													GuiControllerAbstract.getComPortThreadQueue().add(p);
+												}
+											}
+
+											dump(pId, value);
+										});
 			});
 		}, "DumpControllerFull.onPacketReceived()");
 	}
@@ -260,17 +284,18 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 	}
 
 	private Optional<?> castToOptional(Object values) {
-		return Optional
-				.of(values)
-				.filter(Optional.class::isInstance)
-				.flatMap(Optional.class::cast);
+
+		if(values instanceof Optional)
+			return (Optional<?>) values;
+
+		return Optional.of(values);
 	}
 
 	public Optional<Double> getDouble(String value) {
 		return Optional.ofNullable(value).filter(v->!v.replaceAll("\\D", "").isEmpty()).map(v->v.replaceAll("[^\\d-.]", "")).map(Double::parseDouble);
 	}
 
-	private void dump(PacketIDs pId, Object value) {
+	private void dump(PacketID pId, Object value) {
 
 		final Object oldValue = oldValues.get(pId);
 

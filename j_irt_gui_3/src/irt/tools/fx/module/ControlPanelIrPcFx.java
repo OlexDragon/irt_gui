@@ -28,7 +28,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.redundancy.RedundancyControllerStatusPacket;
 import irt.data.packet.redundancy.RedundancyControllerStatusPacket.StatusFlags;
@@ -233,7 +233,7 @@ public class ControlPanelIrPcFx extends AnchorPane implements PacketListener, Ru
 					Optional<Map<?, ?>> oValue = oHeader
 
 							.map(PacketHeader::getPacketId)
-							.flatMap(PacketIDs::valueOf)
+							.flatMap(PacketID::valueOf)
 							.flatMap(pId->pId.valueOf(packet))
 							.filter(Map.class::isInstance)
 							.map(Map.class::cast);

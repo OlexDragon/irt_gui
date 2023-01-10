@@ -30,7 +30,7 @@ import irt.data.Range;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.configuration.Offset1to1toMultiPacket;
 import irt.data.packet.configuration.OffsetRange;
 import irt.data.packet.interfaces.Packet;
@@ -221,8 +221,8 @@ public class AttenuationOffsetFxPanel extends JFXPanel{
 
 			// Range
 			oPacketId
-			.filter(PacketIDs.CONFIGURATION_OFFSET_RANGE::match)
-			.flatMap(pId->PacketIDs.CONFIGURATION_OFFSET_RANGE.valueOf(packet))
+			.filter(PacketID.CONFIGURATION_OFFSET_RANGE::match)
+			.flatMap(pId->PacketID.CONFIGURATION_OFFSET_RANGE.valueOf(packet))
 			.map(Range.class::cast)
 			.ifPresent(
 					range->{
@@ -238,8 +238,8 @@ public class AttenuationOffsetFxPanel extends JFXPanel{
 					});
 
 			oPacketId
-			.filter(PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI::match)
-			.flatMap(pId->PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI.valueOf(packet))
+			.filter(PacketID.CONFIGURATION_OFFSET_1_TO_MULTI::match)
+			.flatMap(pId->PacketID.CONFIGURATION_OFFSET_1_TO_MULTI.valueOf(packet))
 			.map(short[].class::cast)
 			.ifPresent(
 					array->

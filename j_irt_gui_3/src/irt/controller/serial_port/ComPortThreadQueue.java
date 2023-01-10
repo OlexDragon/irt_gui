@@ -167,7 +167,6 @@ public class ComPortThreadQueue implements Runnable {
 
 		ComPortThreadQueue.serialPort = serialPort;
 
-		logger.error("1) {}", serialPort);
 		Optional
 		.ofNullable(serialPort)
 		.filter(sp->sp.getPortName().startsWith("COM") || sp.getPortName().startsWith("/dev"))

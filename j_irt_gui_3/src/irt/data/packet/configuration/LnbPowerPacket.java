@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -31,7 +31,7 @@ public class LnbPowerPacket  extends PacketSuper{
 																															.map(v->v[index]);
 																												});
 
-	private static final PacketIDs PACKET_ID 	= PacketIDs.CONFIGURATION_FCM_LNB_POWER;
+	private static final PacketID PACKET_ID 	= PacketID.CONFIGURATION_FCM_LNB_POWER;
 	private static final PacketGroupIDs GROUP_ID 		= PacketGroupIDs.CONFIGURATION;
 	private static final byte PARAMETER 	= PacketImp.PARAMETER_CONFIG_LNB_POWER;
 
@@ -43,7 +43,7 @@ public class LnbPowerPacket  extends PacketSuper{
 	}
 
 	public LnbPowerPacket() {
-		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PacketIDs.CONFIGURATION_FCM_LNB_POWER, GROUP_ID, PARAMETER, null, Priority.REQUEST);
+		super((byte)0, PacketImp.PACKET_TYPE_REQUEST, PacketID.CONFIGURATION_FCM_LNB_POWER, GROUP_ID, PARAMETER, null, Priority.REQUEST);
 	}
 
 	public LnbPowerPacket(PowerStatus powerStatus) {

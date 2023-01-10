@@ -45,7 +45,7 @@ import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.ConfigurationPacket;
 import irt.data.packet.configuration.LnbSwitchPacket;
@@ -188,7 +188,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 		GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 
-		GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketIDs.CONFIGURATION_LNB_LO_SELECT, null));
+		GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketID.CONFIGURATION_LNB_LO_SELECT, null));
 	}
 
 //	private void switchLNB(final Optional<DeviceType> deviceType, final LinkHeader linkHeader) {
@@ -202,11 +202,11 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 	protected List<ControllerAbstract> getControllers() {
 		List<ControllerAbstract> l = new ArrayList<>();
 
-		Getter getter = new Getter(linkHeader, PacketGroupIDs.CONFIGURATION.getId(), PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketIDs.CONFIGURATION_DLRS_WGS_SWITCHOVER){
+		Getter getter = new Getter(linkHeader, PacketGroupIDs.CONFIGURATION.getId(), PacketImp.PARAMETER_CONFIG_DLRS_WGS_SWITCHOVER, PacketID.CONFIGURATION_DLRS_WGS_SWITCHOVER){
 
 			@Override
 			public boolean set(Packet packet) {
-				if(PacketIDs.MEASUREMENT_WGS_POSITION.match(packet.getHeader().getPacketId()) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
+				if(PacketID.MEASUREMENT_WGS_POSITION.match(packet.getHeader().getPacketId()) && packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 					Payload payload = packet.getPayload(0);
 					if (payload != null) {
 						switch (payload.getByte()) {
@@ -274,7 +274,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 			if(oPacket.filter(LinkedPacket.class::isInstance).map(LinkedPacket.class::cast).map(LinkedPacket::getLinkHeader).map(LinkHeader::getAddr).orElse((byte) 0)!=addr)
 				return;
 
-			if(oPacketId.filter(PacketIDs.MEASUREMENT_ALL::match).isPresent()) {
+			if(oPacketId.filter(PacketID.MEASUREMENT_ALL::match).isPresent()) {
 
 				if(hasError(oHeader)) {
 					logger.warn(packet);
@@ -314,7 +314,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 				return;
 			}
 
-			if(oPacketId.filter(PacketIDs.CONFIGURATION_LNB_LO_SELECT::match).isPresent()) {
+			if(oPacketId.filter(PacketID.CONFIGURATION_LNB_LO_SELECT::match).isPresent()) {
 
 				if(hasError(oHeader)) {
 					logger.warn(packet);
@@ -322,7 +322,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 				}
 
 				oPacket
-				.flatMap(PacketIDs.CONFIGURATION_LNB_LO_SELECT::valueOf)
+				.flatMap(PacketID.CONFIGURATION_LNB_LO_SELECT::valueOf)
 				.flatMap(LnbLoSet::valueOf)
 				.filter(lnbLoSet->lnbLoSet!=LnbLoSet.UNDEFINED)
 				.ifPresent(
@@ -374,7 +374,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 				.map(LnbLoSet::ordinal)
 				.map(Integer::byteValue)
 				.ifPresent(
-						v->GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketIDs.CONFIGURATION_LNB_LO_SELECT, v)));
+						v->GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketID.CONFIGURATION_LNB_LO_SELECT, v)));
 			}
 		};
 		jComboBox.addItemListener(aListener);
@@ -392,7 +392,7 @@ public class ControlDownlinkRedundancySystem extends MonitorPanelAbstract implem
 
 	@Override
 	public void run() {
-		GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketIDs.CONFIGURATION_LNB_LO_SELECT, null));
+		GuiControllerAbstract.getComPortThreadQueue().add(new ConfigurationPacket(addr, PacketID.CONFIGURATION_LNB_LO_SELECT, null));
 	}
 
 	public enum LnbLoSet{

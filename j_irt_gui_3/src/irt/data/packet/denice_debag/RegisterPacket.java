@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import irt.data.RegisterValue;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
@@ -23,7 +23,7 @@ public class RegisterPacket extends PacketSuper {
 																										.flatMap(Stream::findAny)
 																										.map(Payload::getRegisterValue);
 
-	public RegisterPacket(Byte linkAddr, RegisterValue value, PacketIDs packetID) {
+	public RegisterPacket(Byte linkAddr, RegisterValue value, PacketID packetID) {
 		super(
 				linkAddr,
 				Optional.of(value).filter(v->v.getValue()!=null).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),

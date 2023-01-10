@@ -18,7 +18,7 @@ public class InitializePacket extends PacketSuper {
 		super(
 				linkAddr,
 				PacketImp.PACKET_TYPE_COMMAND,
-				PacketIDs.PRODUCTION_GENERIC_SET_1_INITIALIZE,
+				PacketID.PRODUCTION_GENERIC_SET_1_INITIALIZE,
 				PacketGroupIDs.PRODUCTION_GENERIC_SET_1,
 				PacketImp.PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT,
 				null,

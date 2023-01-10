@@ -28,7 +28,7 @@ import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 
 public class DebugPanel extends JPanel{
@@ -57,7 +57,7 @@ public class DebugPanel extends JPanel{
 										linkHeader,
 										0,
 										0,
-										PacketIDs.CLEAR_STATISTICS,
+										PacketID.CLEAR_STATISTICS,
 										PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE,
 										0
 								),
@@ -69,7 +69,7 @@ public class DebugPanel extends JPanel{
 										new ThreadWorker(()->{
 
 											if(getPacketWork().isAddressEquals(packet) &&
-													PacketIDs.CLEAR_STATISTICS.match(packet.getHeader().getPacketId())){
+													PacketID.CLEAR_STATISTICS.match(packet.getHeader().getPacketId())){
 
 												if(packet.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE){
 													stop();

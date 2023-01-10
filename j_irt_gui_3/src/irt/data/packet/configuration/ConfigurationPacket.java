@@ -11,7 +11,7 @@ import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 
 public class ConfigurationPacket extends PacketSuper {
@@ -38,7 +38,7 @@ public class ConfigurationPacket extends PacketSuper {
 																											}
 																										});
 
-	public ConfigurationPacket(byte linkAddr, PacketIDs packetIdConfiguration, byte parameterIdConfiguration, byte[] data) {
+	public ConfigurationPacket(byte linkAddr, PacketID packetIdConfiguration, byte parameterIdConfiguration, byte[] data) {
 		super(
 				linkAddr,
 				data!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,
@@ -50,10 +50,10 @@ public class ConfigurationPacket extends PacketSuper {
 	}
 
 	public ConfigurationPacket() {
-		this((byte) 0, PacketIDs.UNNECESSARY, (byte) 0, null);
+		this((byte) 0, PacketID.UNNECESSARY, (byte) 0, null);
 	}
 
-	public ConfigurationPacket(byte linkAddr, PacketIDs configurationPacketId, byte... data) {
+	public ConfigurationPacket(byte linkAddr, PacketID configurationPacketId, byte... data) {
 		super(
 				linkAddr,
 				data!=null ? PacketImp.PACKET_TYPE_COMMAND : PacketImp.PACKET_TYPE_REQUEST,

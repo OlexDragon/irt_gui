@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
@@ -32,7 +32,7 @@ public class SwitchoverModePacket extends PacketSuper{
 		super(
 				linkAddr,
 				Optional.ofNullable(switchoverModes).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketIDs.REDUNDANCY_SWITCHOVER_MODE,
+				PacketID.REDUNDANCY_SWITCHOVER_MODE,
 				PacketGroupIDs.REDUNDANCY,
 				PacketImp.PARAMETER_ID_REDUNDANCY_CONTROLLER_SWITCHOVER_MODE,
 				Optional.ofNullable(switchoverModes).map(SwitchoverModes::ordinal).map(Integer::byteValue).map(v->new byte[]{v}).orElse(null),

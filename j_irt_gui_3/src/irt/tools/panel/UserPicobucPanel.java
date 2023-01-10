@@ -21,7 +21,7 @@ import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.configuration.Offset1to1toMultiPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.irt_gui.IrtGui;
@@ -161,7 +161,7 @@ public class UserPicobucPanel extends DevicePanel {
 		//Add Offset panel
 		Optional<Packet> oPacket = Optional.of(packet);
 		Optional<PacketHeader> oHeader = oPacket.map(Packet::getHeader);
-		Optional<Short> oOffsetMulti = oHeader.map(PacketHeader::getPacketId).filter(PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI::match);
+		Optional<Short> oOffsetMulti = oHeader.map(PacketHeader::getPacketId).filter(PacketID.CONFIGURATION_OFFSET_1_TO_MULTI::match);
 
 		if(!oOffsetMulti.isPresent())
 			return;
@@ -169,7 +169,7 @@ public class UserPicobucPanel extends DevicePanel {
 		new ThreadWorker(()->{
 			
 			oPacket
-			.flatMap(PacketIDs.CONFIGURATION_OFFSET_1_TO_MULTI::valueOf)
+			.flatMap(PacketID.CONFIGURATION_OFFSET_1_TO_MULTI::valueOf)
 			.map(short[].class::cast)
 			.map(array->new AttenuationOffsetFxPanel(addr, array))
 			.ifPresent(p->SwingUtilities.invokeLater(()->tabbedPane.addTab("Offsets", p)));

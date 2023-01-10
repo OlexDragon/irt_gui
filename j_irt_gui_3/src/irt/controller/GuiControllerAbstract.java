@@ -63,7 +63,7 @@ import irt.data.packet.DeviceInfoPacket;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
@@ -576,7 +576,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		// check retransmit packet
 		final Optional<Short> oPacketId = oHeader.map(PacketHeader::getPacketId);
-		final Boolean isRetransmitPacket = oPacketId.filter(PacketIDs.PROTO_RETRANSNIT::match).isPresent();
+		final Boolean isRetransmitPacket = oPacketId.filter(PacketID.PROTO_RETRANSNIT::match).isPresent();
 		if(isRetransmitPacket){
 			logger.debug("received Retransmit Packet {}", packet);
 			setRetransmit = false;
@@ -589,7 +589,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		if(oPacketGroup.filter(PacketGroupIDs.CONTROL::match).isPresent()){
 
 			oPacketId
-			.filter(PacketIDs.CONTROL_MODULE_LIST::match)
+			.filter(PacketID.CONTROL_MODULE_LIST::match)
 			.flatMap(
 					pid->
 					oPacket.map(Packet::getPayloads)

@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import irt.data.packet.DeviceDebugPacketIds;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 
@@ -34,7 +34,7 @@ public class DeviceDebugHelpPacket extends PacketSuper {
 
 	@Override
 	public Object getValue() {
-		return new HelpValue(PacketIDs.DEVICE_DEBUG_HELP.valueOf(this).map(String.class::cast).orElse(""));
+		return new HelpValue(PacketID.DEVICE_DEBUG_HELP.valueOf(this).map(String.class::cast).orElse(""));
 	}
 
 	// class HelpValue

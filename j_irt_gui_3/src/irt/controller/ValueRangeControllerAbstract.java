@@ -16,7 +16,7 @@ import irt.data.DeviceType;
 import irt.data.ThreadWorker;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketWork;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.value.Value;
 
 public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
@@ -116,7 +116,7 @@ public abstract class ValueRangeControllerAbstract extends ControllerAbstract {
 		}
 	}
 
-	protected void startTextSliderController(String controllerName, Value value, PacketIDs packetID, byte parameterId, Style style) {
+	protected void startTextSliderController(String controllerName, Value value, PacketID packetID, byte parameterId, Style style) {
 
 		stepPref = GuiControllerAbstract.getPrefs().getInt(getClass().getSimpleName()+" Step", 1);
 

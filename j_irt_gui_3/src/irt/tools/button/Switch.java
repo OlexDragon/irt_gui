@@ -27,7 +27,7 @@ import irt.data.packet.DeviceDebugPacketIds;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
@@ -47,11 +47,11 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	private PacketSuper packetToGet;
 
 	private byte linkAddr;
-	private PacketIDs packetId;
+	private PacketID packetId;
 
 	final ActionListener actionListener = e->{
 
-		if(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.equals(packetId)){
+		if(PacketID.DEVICE_DEBUG_CALIBRATION_MODE.equals(packetId)){
 			final CallibrationModePacket packet = new CallibrationModePacket(linkAddr, isSelected());
 			GuiControllerAbstract.getComPortThreadQueue().add(packet);
 			return;
@@ -74,10 +74,10 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 		setCursor(new Cursor(Cursor.HAND_CURSOR));
 
 		linkAddr = Optional.ofNullable(packet.getLinkHeader()).map(LinkHeader::getAddr).orElse((byte) 0);
-		PacketIDs[] values = PacketIDs.values();
+		PacketID[] values = PacketID.values();
 
 		final int intId = packet.getHeader().getPacketId()&0xFF;
-		packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketIDs.UNNECESSARY);
+		packetId = Optional.of(intId).filter(i->i<values.length).map(i->values[i]).orElse(PacketID.UNNECESSARY);
 		
 
 		addHierarchyListener(
@@ -139,7 +139,7 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 				}
 
 				Boolean isSelected;
-				if(PacketIDs.DEVICE_DEBUG_CALIBRATION_MODE.match(h.getPacketId())){
+				if(PacketID.DEVICE_DEBUG_CALIBRATION_MODE.match(h.getPacketId())){
 
 					isSelected = Optional
 									.ofNullable(packet.getPayloads())

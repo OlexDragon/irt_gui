@@ -52,7 +52,7 @@ import irt.data.listener.PacketListener;
 import irt.data.packet.DeviceDebugPacketIds;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketImp;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.Value;
@@ -206,7 +206,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 						});
 
 					Value value = new Value(0, -100, 100, 0);
-					startController(new TextSliderController(oDeviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketIDs.CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
+					startController(new TextSliderController(oDeviceType, "Gain Offset UnitController", new ConfigurationSetter(null, PacketImp.PARAMETER_CONFIG_FCM_GAIN_OFFSET, PacketID.CONFIGURATION_GAIN_OFFSET), value, txtGainOffset, sliderGainOffset, Style.CHECK_ONCE));
 
 			}
 
@@ -282,7 +282,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			rAddr = 1;
 		}
 		RegisterValue registerValue = new RegisterValue(index, rAddr, null);
-		txtDAC1 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC1, 0, 4095);
+		txtDAC1 = new RegisterTextField(unitAddr, registerValue, PacketID.DEVICE_CONVERTER_DAC1, 0, 4095);
 		txtDAC1.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC1.setColumns(10);
 		txtDAC1.setBounds(186, 16, 55, 20);
@@ -296,7 +296,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 			rAddr++;
 
 		registerValue = new RegisterValue(index, rAddr, null);
-		txtDAC2 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC2, 0, 4095);
+		txtDAC2 = new RegisterTextField(unitAddr, registerValue, PacketID.DEVICE_CONVERTER_DAC2, 0, 4095);
 		txtDAC2.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC2.setColumns(10);
 		txtDAC2.setBounds(186, 44, 55, 20);
@@ -313,7 +313,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		registerValue = kaBand.map(dt->new RegisterValue(30, 0, null)).orElse(new RegisterValue(index, rAddr, null));
 		final Integer maxValue = kaBand.map(dt->1023).orElse(4095);
 
-		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC3, 0, maxValue);
+		txtDAC3 = new RegisterTextField(unitAddr, registerValue, PacketID.DEVICE_CONVERTER_DAC3, 0, maxValue);
 		txtDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC3.setColumns(10);
 		txtDAC3.setBounds(186, 72, 55, 20);
@@ -328,7 +328,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		registerValue = kaBand.map(dt->new RegisterValue(30, 8, null)).orElse(new RegisterValue(index, rAddr, null));//TODO
 
-		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketIDs.DEVICE_CONVERTER_DAC4, 0, maxValue);
+		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketID.DEVICE_CONVERTER_DAC4, 0, maxValue);
 		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtDAC4.setColumns(10);
 		txtDAC4.setBounds(187, 100, 55, 20);

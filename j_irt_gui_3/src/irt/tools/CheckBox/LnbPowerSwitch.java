@@ -4,7 +4,7 @@ import java.awt.Image;
 
 import irt.data.packet.PacketSuper;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.LnbPowerPacket;
 import irt.data.packet.configuration.LnbPowerPacket.PowerStatus;
@@ -30,7 +30,7 @@ public class LnbPowerSwitch extends SwitchBoxImpl {
 		final PacketHeader h = packet.getHeader();
 		final short pID = h.getPacketId();
 
-		if(!PacketIDs.CONFIGURATION_FCM_LNB_POWER.match(pID))
+		if(!PacketID.CONFIGURATION_FCM_LNB_POWER.match(pID))
 			return;
 
 		logger.debug(packet);

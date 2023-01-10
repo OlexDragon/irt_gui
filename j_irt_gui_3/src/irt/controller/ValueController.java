@@ -27,7 +27,7 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.RangePacket;
 import irt.data.value.Value;
@@ -36,8 +36,8 @@ import irt.tools.panel.PicobucPanel;
 
 public class ValueController extends ValueChangeListenerClass implements Runnable, PacketListener {
 
-	public static final PacketIDs RANGE = PacketIDs.CONFIGURATION_GAIN_RANGE;
-	public static final PacketIDs VALUE = PacketIDs.CONFIGURATION_GAIN;
+	public static final PacketID RANGE = PacketID.CONFIGURATION_GAIN_RANGE;
+	public static final PacketID VALUE = PacketID.CONFIGURATION_GAIN;
 
 	private final 	PacketListener 			pl 		= this;
 	private final 	ComPortThreadQueue 		cptq 	= GuiControllerAbstract.getComPortThreadQueue();

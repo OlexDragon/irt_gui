@@ -32,7 +32,7 @@ import irt.data.Listeners;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.Packet;
 import irt.tools.fx.module.ModuleSelectFxPanel;
@@ -167,7 +167,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		.ofNullable(packet)
 		.map(Packet::getHeader)
 		.map(PacketHeader::getPacketId)
-		.filter(PacketIDs.ALARMS_SUMMARY::match);
+		.filter(PacketID.ALARMS_SUMMARY::match);
 
 		if(!oPacket.isPresent())
 			return;
@@ -175,7 +175,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 		new ThreadWorker(
 				()->
 				oPacket
-				.map(id->PacketIDs.ALARMS_SUMMARY)
+				.map(id->PacketID.ALARMS_SUMMARY)
 				.flatMap(pId->pId.valueOf(packet))
 				.filter(AlarmSeverities.class::isInstance)
 				.map(AlarmSeverities.class::cast)

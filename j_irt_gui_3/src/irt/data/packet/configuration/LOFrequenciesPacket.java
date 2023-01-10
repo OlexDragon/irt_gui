@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import irt.data.IdValueFreq;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -32,7 +32,7 @@ public class LOFrequenciesPacket  extends PacketSuper{
 		super(
 				linkAddr,
 				PacketImp.PACKET_TYPE_REQUEST,
-				PacketIDs.CONFIGURATION_LO_FREQUENCIES,
+				PacketID.CONFIGURATION_LO_FREQUENCIES,
 				PacketGroupIDs.CONFIGURATION,
 				linkAddr!=0 ? PacketImp.PARAMETER_ID_CONFIGURATION_LO_FREQUENCIES : PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY_RANGE,
 				null,

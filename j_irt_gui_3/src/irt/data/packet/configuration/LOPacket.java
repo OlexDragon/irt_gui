@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import irt.data.IdValueFreq;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.Packet;
@@ -55,7 +55,7 @@ public class LOPacket extends PacketSuper{
 		super(
 				linkAddr,
 				Optional.ofNullable(idValueFreq).map(v->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST) ,
-				PacketIDs.CONFIGURATION_LO,
+				PacketID.CONFIGURATION_LO,
 				PacketGroupIDs.CONFIGURATION,
 				Optional.ofNullable(linkAddr).filter(la->la!=0).map(v->PacketImp.PARAMETER_ID_CONFIGURATION_LO_SET).orElse(PacketImp.PARAMETER_CONFIG_FCM_FREQUENCY) ,
 				Optional.ofNullable(idValueFreq).map(

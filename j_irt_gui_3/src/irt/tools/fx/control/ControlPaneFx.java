@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 import irt.controller.GuiControllerAbstract;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
-import irt.data.packet.PacketIDs;
+import irt.data.packet.PacketID;
 import irt.data.packet.PacketWork;
 import irt.data.packet.Payload;
 import irt.data.packet.configuration.LnbStatusPacket;
@@ -145,7 +145,7 @@ public class ControlPaneFx extends AnchorPane implements PacketListener, JavaFxP
 				()->{
 					
 					final short packetId = packet.getHeader().getPacketId();
-					if(PacketIDs.MEASUREMENT_ALL.match(packetId)) {
+					if(PacketID.MEASUREMENT_ALL.match(packetId)) {
 						packet.getPayloads().parallelStream().filter(pl->pl.getParameterHeader().getCode()==4).map(Payload::getBuffer).filter(b->b!=null && b.length==1).map(b->b[0]&0xff).findAny()
 						.ifPresent(
 								v->{
@@ -194,13 +194,13 @@ public class ControlPaneFx extends AnchorPane implements PacketListener, JavaFxP
 					packets.parallelStream().map(LinkedPacket.class::cast).filter(p->p.getHeader().getPacketId()==packetId).findAny()
 					.ifPresent(
 							p->{
-								final Optional<PacketIDs> oPacketIDs = PacketIDs.valueOf(packetId);
+								final Optional<PacketID> oPacketIDs = PacketID.valueOf(packetId);
 								oPacketIDs.flatMap(pid->pid.valueOf(packet)).map(Integer.class::cast).filter(v->v>0).map(v->--v)
 								.ifPresent(
 										v->Platform.runLater(
 												()->{
 
-													final PacketIDs packetID = oPacketIDs.get();
+													final PacketID packetID = oPacketIDs.get();
 													switch(packetID) {
 													case CONFIGURATION_LNB_STATUS:
 														final SingleSelectionModel<String> selectionModel = cbMode.getSelectionModel();
