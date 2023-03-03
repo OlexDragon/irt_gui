@@ -24,8 +24,9 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 
 	private static Logger logger = LogManager.getLogger();
 
-	private static SoftReleaseChecker checker;
 	private static DeviceInfo deviceInfo;
+
+	private static FileDialog dialog;
 
 	public SoftReleaseChecker() {
 		super(()->check());
@@ -77,7 +78,7 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 
 				.orElseGet(
 						()->{
-							FileDialog dialog = new FileDialog((Frame)null, "Select the Firmware File related to " + type);
+							dialog = new FileDialog((Frame)null, "Select the Firmware File related to " + type);
 						    dialog.setMode(FileDialog.LOAD);
 						    dialog.setVisible(true);
 						    dialog.dispose();
@@ -98,10 +99,7 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 						    return false;
 						});		
 	}
-
-	public static SoftReleaseChecker getInstance(){
-		if(checker==null)
-			checker = new SoftReleaseChecker();
-		return checker;
+	public void closeFileDialog() {
+		Optional.ofNullable(dialog).ifPresent(FileDialog::dispose);
 	}
 }

@@ -262,16 +262,18 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		
 				lblSn = new JLabel("SN");
 				lblSn.addAncestorListener(new AncestorListener() {
+
+					SoftReleaseChecker softReleaseChecker;
+
 					public void ancestorAdded(AncestorEvent event) {
 
 						if(IrtGui.isProduction()) {
 						
 							ThreadWorker.runThread(
 								()->{
-									final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
-									final Optional<Boolean> check = instance.check(deviceInfo);
-									final Boolean orElse = check.orElse(false);
-									SwingUtilities.invokeLater(()->lblError.setVisible(orElse));
+									softReleaseChecker = new SoftReleaseChecker();
+									final Boolean setVisible = softReleaseChecker.check(deviceInfo).orElse(false);
+									SwingUtilities.invokeLater(()->lblError.setVisible(setVisible));
 								},
 								"Check for softwere update.");
 						}
@@ -279,6 +281,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 					public void ancestorMoved(AncestorEvent event) {
 					}
 					public void ancestorRemoved(AncestorEvent event) {
+						Optional.ofNullable(softReleaseChecker).ifPresent(SoftReleaseChecker::closeFileDialog);
 					}
 				});
 				lblSn.setHorizontalAlignment(SwingConstants.LEFT);
