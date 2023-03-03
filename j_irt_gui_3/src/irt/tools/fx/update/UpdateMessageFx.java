@@ -425,6 +425,16 @@ public class UpdateMessageFx extends Dialog<Message>{
 		btnProgramSelection.setMaxWidth(Double.MAX_VALUE);
 		btnProgramSelection.setOnAction(selectProgram());
 
+		// Get Program Path fom the properties file.
+		final String type = deviceInfo.getTypeId()+"."+deviceInfo.getRevision();
+		final String key = type + ".path";
+		Optional.ofNullable(IrtGui.softProperties.get(key)).map(Object::toString).map(File::new).filter(File::exists)
+		.ifPresent(
+				file->{
+					lblProgram.setTooltip(new Tooltip(file.getAbsolutePath()));
+					lblProgram.setText(file.getName());
+				});
+
 		grid.addRow(4, cbProgram, lblProgram, btnProgramSelection);
 
 		ImageView imageView = new ImageView();

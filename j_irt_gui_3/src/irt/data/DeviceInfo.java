@@ -230,13 +230,13 @@ public class DeviceInfo implements PacketListener {
 		}, "DeviceInfo.onPacketReceived()");
 	}
 
-	static public Optional<DeviceInfo> parsePacket(Packet packet){
+	public static Optional<DeviceInfo> parsePacket(Packet packet){
 
 		return Optional
 		.ofNullable(packet)
 		.filter(p->p.getHeader()!=null)
-		.filter(p->PacketID.DEVICE_INFO.match(p.getHeader().getPacketId()))
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
+		.filter(p->PacketID.DEVICE_INFO.match(p.getHeader().getPacketId()))
 		.map(DeviceInfo::new);		
 	}
 

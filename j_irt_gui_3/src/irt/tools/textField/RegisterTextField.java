@@ -68,7 +68,6 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 		@Override
 		public void focusGained(FocusEvent e) {
 			focusListenerTimer.restart();
-			stop();
 		}
 	};
 	private final String toolTip;
@@ -153,7 +152,8 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 					return;
 				}
 
-				 focusListener.focusGained(null);
+				stop();
+				focusListener.focusGained(null);
 			}
 			@Override public void keyReleased(KeyEvent e) { }
 			@Override public void keyPressed(KeyEvent e) { }
@@ -162,6 +162,11 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 
 	@Override
 	public void onPacketReceived(Packet packet) {
+
+		if(!isVisible()) {
+			stop();
+			return;
+		}
 
 		new ThreadWorker(()->{
 
@@ -245,6 +250,8 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	}
 
 	public void start(){
+//		logger.error("Start; {}", valueToSend);
+
 		if(Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).isPresent())
 			return;
 
@@ -257,6 +264,7 @@ public class RegisterTextField extends JTextField implements PacketListener, Run
 	}
 
 	public void stop(){
+//		logger.error("Stop; {}", valueToSend);
 		GuiControllerAbstract.getComPortThreadQueue().removePacketListener(RegisterTextField.this);
 		Optional.ofNullable(scheduleAtFixedRate).filter(s->!s.isDone()).ifPresent(s->s.cancel(true));
 		Optional.ofNullable(service).filter(s->!s.isShutdown()).ifPresent(ScheduledExecutorService::shutdownNow);

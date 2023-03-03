@@ -18,11 +18,15 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -50,6 +54,7 @@ import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
+import irt.data.ThreadWorker;
 import irt.tools.KeyValue;
 import irt.tools.fx.AlarmPanelFx;
 import irt.tools.fx.BaudRateSelectorFx;
@@ -70,12 +75,14 @@ public class IrtGui extends IrtMainFrame {
 	protected static boolean production = true;  public static boolean isProduction() { return production; }
 
 	private static final String PREF_KEY_ADDRESS = "address";
+	public static final File FLASH3_PRPPERIES = new File("Z:\\4Olex\\flash\\templates\\flash3.properties");
+	public static Properties softProperties;
 
 	public static final int DEFAULT_ADDRESS = 255;
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.254";
+	public static final String VERTION = "- 3.259";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -171,6 +178,30 @@ public class IrtGui extends IrtMainFrame {
 				return false;
 			}
 		});
+
+		// Used for software release check
+		ThreadWorker.runThread(
+				()->Optional.of(FLASH3_PRPPERIES).filter(File::exists)
+				.map(
+						f -> {
+							try {
+								return new FileInputStream(f);
+							} catch (FileNotFoundException e) {
+								logger.catching(e);
+							}
+							return null;
+						})
+				.ifPresent(
+						is -> {
+							try {
+								softProperties = new Properties();
+								softProperties.load(is);
+								is.close();
+							} catch (IOException e) {
+								logger.catching(e);
+							}
+						}),
+				"Read Software Properies");
 	}
 
 	@SuppressWarnings("unchecked")

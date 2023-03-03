@@ -35,6 +35,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
@@ -127,7 +128,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 //						addOpenWebBrowserMenuItem(popup, sn);
 						addCalibrateMenuItem(popup, sn);
 
-						if(IrtGui.isProduction())
+						if(IrtGui.isProduction() && !IrtGui.softProperties.isEmpty())
 							addLogInMenuItem(popup, sn);
 					});
 
@@ -376,6 +377,18 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		});
 
 		setInfo(deviceInfo);
+
+		if(IrtGui.isProduction()) {
+		
+			ThreadWorker.runThread(
+				()->{
+					final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
+					final Optional<Boolean> check = instance.check(deviceInfo);
+					final Boolean orElse = check.orElse(false);
+					SwingUtilities.invokeLater(()->lblError.setVisible(orElse));
+				},
+				"Check for softwere update.");
+		}
 	}
 
 	private void addLogInMenuItem(JPopupMenu popup, String serialNumber) {
@@ -556,9 +569,9 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		lblUnitPartNumberTxt.setText(Translation.getValue(String.class, "part_number", "Part Number")+":");
 	}
 
-	private int softCheckerDeley;
 	@Override
 	public void onPacketReceived(Packet packet) {
+
 		if(deviceInfo == null)
 			return;
 
@@ -574,13 +587,6 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 
 				if(secondsCount!=null)
 					secondsCount.setUptimeCounter(di.getUptimeCounter());
-
-				if(--softCheckerDeley<0){
-					softCheckerDeley = 250;
-
-					final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
-					lblError.setVisible(instance.check(di).orElse(false));
-				}
 			});
 		}, "InfoPanel.onPacketReceived()");
 	}

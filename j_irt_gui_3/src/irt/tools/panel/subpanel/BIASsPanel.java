@@ -38,7 +38,6 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import javax.script.ScriptException;
@@ -78,7 +77,6 @@ import irt.data.packet.PacketGroupIDs;
 import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
-import irt.data.packet.denice_debag.CallibrationModePacket;
 import irt.data.packet.denice_debag.DeviceDebugPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.value.JSonValueMapper;
@@ -159,6 +157,12 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			slider.addChangeListener(sliderChangeListener);
 		}
 		private void setColors(RegisterTextField registerTextField) {
+
+			if(activeTextField==registerTextField) {
+
+				activeTextField.stop();
+				return;
+			}
 
 			Optional.ofNullable(activeTextField)
 			.ifPresent(
@@ -387,14 +391,14 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 			text7 = "POT-7:";
 			text8 = "POT-8";
 
-			registerValue1 = new RegisterValue(26, 3);
+			registerValue1 = new RegisterValue(26, 0);
 			registerValue2 = new RegisterValue(26, 1);
-			registerValue3 = new RegisterValue(26, 7);
-			registerValue4 = new RegisterValue(26, 5);
-			registerValue5 = new RegisterValue(26, 2);
-			registerValue6 = new RegisterValue(26, 0);
+			registerValue3 = new RegisterValue(26, 2);
+			registerValue4 = new RegisterValue(26, 3);
+			registerValue5 = new RegisterValue(26, 4);
+			registerValue6 = new RegisterValue(26, 5);
 			registerValue7 = new RegisterValue(26, 6);
-			registerValue8 = new RegisterValue(26, 4);
+			registerValue8 = new RegisterValue(26, 7);
 
 		}else if (revision > 10) {
 
@@ -641,8 +645,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 
 							try {
 
-								if(setCalibrationModeOn()) {
-
 									final String errorMessage = initialize();
 
 									// No error
@@ -668,18 +670,6 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 												alert.setContentText(errorMessage);
 												alert.showAndWait();												
 											});
-
-								}else {
-									Platform.runLater(
-											()->{
-
-												Alert alert = new Alert(AlertType.ERROR);
-												alert.setTitle("Calibration Mode Error");
-												alert.setHeaderText(null);
-												alert.setContentText("Cannot enable calibration mode.");
-												alert.showAndWait();												
-											});
-								}
 
 							} catch (InterruptedException | ExecutionException e) {
 								logger.catching(e);
@@ -744,55 +734,55 @@ public class BIASsPanel extends JPanel implements PacketListener, Runnable {
 //				});
 			}
 
-			private Boolean setCalibrationModeOn() throws InterruptedException, ExecutionException {
-
-				final AtomicBoolean value = new AtomicBoolean();
-				final Callable<Boolean> callable = ()->value.get();
-				final FutureTask<Boolean> ft = new FutureTask<>(callable);
-				final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
-
-				PacketListener packetListener = new PacketListener() {
-
-					private boolean haveToSend = true;
-
-					@Override
-					public void onPacketReceived(Packet packet) {
-
-						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketID.DEVICE_DEBUG_CALIBRATION_MODE::match);
-
-						if(myPacket.isPresent())
-							ThreadWorker.runThread(
-									()->{
-
-										if(
-												myPacket.flatMap(PacketID.DEVICE_DEBUG_CALIBRATION_MODE::valueOf)
-												.filter(
-														b->{
-															final Boolean bool = (Boolean)b;
-															value.set(bool);
-															return !bool;
-														})
-												.isPresent()) {
-
-											if(haveToSend) {
-												haveToSend = false;
-												comPortThreadQueue.add(new CallibrationModePacket(addr, true));
-												return;
-											}
-										}
-
-										comPortThreadQueue.removePacketListener(this);
-										ThreadWorker.runThread(ft, "Get Result");
-
-									}, "Calibration Mode Listener");
-					}
-				};
-
-				comPortThreadQueue.addPacketListener(packetListener);
-				comPortThreadQueue.add(new CallibrationModePacket(addr));
-
-				return ft.get();
-			}
+//			private Boolean setCalibrationModeOn() throws InterruptedException, ExecutionException {
+//
+//				final AtomicBoolean value = new AtomicBoolean();
+//				final Callable<Boolean> callable = ()->value.get();
+//				final FutureTask<Boolean> ft = new FutureTask<>(callable);
+//				final ComPortThreadQueue comPortThreadQueue = GuiControllerAbstract.getComPortThreadQueue();
+//
+//				PacketListener packetListener = new PacketListener() {
+//
+//					private boolean haveToSend = true;
+//
+//					@Override
+//					public void onPacketReceived(Packet packet) {
+//
+//						final Optional<Packet> myPacket = Optional.of(packet).filter(PacketID.DEVICE_DEBUG_CALIBRATION_MODE::match);
+//
+//						if(myPacket.isPresent())
+//							ThreadWorker.runThread(
+//									()->{
+//
+//										if(
+//												myPacket.flatMap(PacketID.DEVICE_DEBUG_CALIBRATION_MODE::valueOf)
+//												.filter(
+//														b->{
+//															final Boolean bool = (Boolean)b;
+//															value.set(bool);
+//															return !bool;
+//														})
+//												.isPresent()) {
+//
+//											if(haveToSend) {
+//												haveToSend = false;
+//												comPortThreadQueue.add(new CallibrationModePacket(addr, true));
+//												return;
+//											}
+//										}
+//
+//										comPortThreadQueue.removePacketListener(this);
+//										ThreadWorker.runThread(ft, "Get Result");
+//
+//									}, "Calibration Mode Listener");
+//					}
+//				};
+//
+//				comPortThreadQueue.addPacketListener(packetListener);
+//				comPortThreadQueue.add(new CallibrationModePacket(addr));
+//
+//				return ft.get();
+//			}
 
 			private String initialize() throws InterruptedException, ExecutionException {
 

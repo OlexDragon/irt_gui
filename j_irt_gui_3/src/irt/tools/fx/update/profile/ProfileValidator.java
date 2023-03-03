@@ -12,6 +12,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -205,12 +208,16 @@ public class ProfileValidator {
 	public ProfileParser parseProfile(AtomicReference<CharBuffer> arCharBuffer) {
 		final ProfileParser profileParser = new ProfileParser();
 
+		String line = null;
 		try (Scanner scanner = new Scanner(arCharBuffer.get())) {
 
 			while (scanner.hasNextLine()){
-				final String line = scanner.nextLine();
+				line = scanner.nextLine();
 				profileParser.parseLine(line);
 			}
+		}catch (Exception e) {
+			logger.catching(e);
+			Optional.ofNullable(line).ifPresent(l->SwingUtilities.invokeLater(()->JOptionPane.showMessageDialog(null, "An error occurred while processing this line: " + l)));
 		}
 
 		return profileParser;
