@@ -261,6 +261,26 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 						lblSnTxt.setFont(font);
 		
 				lblSn = new JLabel("SN");
+				lblSn.addAncestorListener(new AncestorListener() {
+					public void ancestorAdded(AncestorEvent event) {
+
+						if(IrtGui.isProduction()) {
+						
+							ThreadWorker.runThread(
+								()->{
+									final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
+									final Optional<Boolean> check = instance.check(deviceInfo);
+									final Boolean orElse = check.orElse(false);
+									SwingUtilities.invokeLater(()->lblError.setVisible(orElse));
+								},
+								"Check for softwere update.");
+						}
+					}
+					public void ancestorMoved(AncestorEvent event) {
+					}
+					public void ancestorRemoved(AncestorEvent event) {
+					}
+				});
 				lblSn.setHorizontalAlignment(SwingConstants.LEFT);
 				lblSn.setBounds(84, 35, 198, 14);
 				lblSn.setFont(new Font("Tahoma", Font.PLAIN, 14));
@@ -377,18 +397,6 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		});
 
 		setInfo(deviceInfo);
-
-		if(IrtGui.isProduction()) {
-		
-			ThreadWorker.runThread(
-				()->{
-					final SoftReleaseChecker instance = SoftReleaseChecker.getInstance();
-					final Optional<Boolean> check = instance.check(deviceInfo);
-					final Boolean orElse = check.orElse(false);
-					SwingUtilities.invokeLater(()->lblError.setVisible(orElse));
-				},
-				"Check for softwere update.");
-		}
 	}
 
 	private void addLogInMenuItem(JPopupMenu popup, String serialNumber) {
