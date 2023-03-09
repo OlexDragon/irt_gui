@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.concurrent.FutureTask;
 
 import org.apache.logging.log4j.LogManager;
@@ -86,11 +87,12 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 						    .ifPresent(
 						    		path->{
 
-						    			IrtGui.softProperties.put(key, path);
+						    			final Properties properties = IrtGui.loadFlash3Properties();
+						    			properties.put(key, path);
 
 						    			try(OutputStream os = new FileOutputStream(IrtGui.FLASH3_PRPPERIES);) {
 
-						    				IrtGui.softProperties.store(os, "Created by IRT GUI.");
+						    				properties.store(os, "Created by IRT GUI.");
 
 						    			} catch (IOException e) {
 						    				logger.catching(e);

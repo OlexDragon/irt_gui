@@ -82,7 +82,7 @@ public class IrtGui extends IrtMainFrame {
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.260";
+	public static final String VERTION = "- 3.261";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -180,28 +180,33 @@ public class IrtGui extends IrtMainFrame {
 		});
 
 		// Used for software release check
-		ThreadWorker.runThread(
-				()->Optional.of(FLASH3_PRPPERIES).filter(File::exists)
-				.map(
-						f -> {
-							try {
-								return new FileInputStream(f);
-							} catch (FileNotFoundException e) {
-								logger.catching(e);
-							}
-							return null;
-						})
-				.ifPresent(
-						is -> {
-							try {
-								softProperties = new Properties();
-								softProperties.load(is);
-								is.close();
-							} catch (IOException e) {
-								logger.catching(e);
-							}
-						}),
-				"Read Software Properies");
+		ThreadWorker.runThread(()->loadFlash3Properties(), "Read Software Properies");
+	}
+
+	public static Properties loadFlash3Properties() {
+
+		Properties p = new Properties();
+
+		Optional.of(FLASH3_PRPPERIES).filter(File::exists)
+		.map(
+				f -> {
+					try {
+						return new FileInputStream(f);
+					} catch (FileNotFoundException e) {
+						logger.catching(e);
+					}
+					return null;
+				})
+		.ifPresent(
+				is -> {
+					try {
+						p.load(is);
+						is.close();
+					} catch (IOException e) {
+						logger.catching(e);
+					}
+				});
+		return softProperties = p;
 	}
 
 	@SuppressWarnings("unchecked")

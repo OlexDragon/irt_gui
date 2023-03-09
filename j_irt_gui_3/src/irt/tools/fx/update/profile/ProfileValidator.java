@@ -215,9 +215,11 @@ public class ProfileValidator {
 				line = scanner.nextLine();
 				profileParser.parseLine(line);
 			}
+
 		}catch (Exception e) {
-			logger.catching(e);
-			Optional.ofNullable(line).ifPresent(l->SwingUtilities.invokeLater(()->JOptionPane.showMessageDialog(null, "An error occurred while processing this line: " + l)));
+			final String message = "An error occurred while processing this line: " + line;
+			Optional.ofNullable(line).ifPresent(l->SwingUtilities.invokeLater(()->JOptionPane.showMessageDialog(null, message)));
+			throw new RuntimeException(message, e);
 		}
 
 		return profileParser;
