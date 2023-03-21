@@ -234,8 +234,10 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 														}
 
 														// PROFILE
-														if(addProfileToTheTar(message.getProfile(), setupMD5, tarArchiveOutputStream)==Action.CANCEL)
+														if(addProfileToTheTar(message.getProfile(), setupMD5, tarArchiveOutputStream)==Action.CANCEL) {
+															logger.debug("Cancel");
 															return;
+														}
 
 														// PROGRAM
 														message
@@ -256,6 +258,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 																		try {
 
+																			logger.trace(fileName);
 																			addToTar(tarArchiveOutputStream, fileName, b);
 																			setupMD5.append(DatatypeConverter.printHexBinary(md5.digest(b))).append(" *" + fileName).append("\n");
 
@@ -318,6 +321,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 		}
 
 		private void packageUpdate(Message message, final HttpUploader uploader) {
+			logger.traceEntry("{}, message");
 			Optional
 			.ofNullable(message.getPackagePath())
 			.map(File::new)
@@ -360,7 +364,11 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 						}
 					})
 					.map(ProfileValidator::getAction)
-					.orElse(Action.CANCEL);
+					.orElse(null);
+
+			// If the profile is not selected go to the next step
+			if(actiom==null)
+				return Action.CONTINUE;
 
 			if(actiom==Action.CANCEL)
 				return Action.CANCEL;

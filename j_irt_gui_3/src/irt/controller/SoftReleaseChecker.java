@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -57,7 +58,7 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 
 				.map(
 						file->{
-					
+
 							try(	final FileReader fr = new FileReader(file);
 									final BufferedReader br = new BufferedReader(fr);){
 
@@ -88,11 +89,12 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 						    		path->{
 
 						    			final Properties properties = IrtGui.loadFlash3Properties();
-						    			properties.put(key, path);
+						    			Object old = properties.put(key, path);
 
+						    			if(!old.equals(path))
 						    			try(OutputStream os = new FileOutputStream(IrtGui.FLASH3_PRPPERIES);) {
 
-						    				properties.store(os, "Created by IRT GUI.");
+						    				properties.store(os, "Created by IRT GUI on " + InetAddress.getLocalHost().getHostName());
 
 						    			} catch (IOException e) {
 						    				logger.catching(e);

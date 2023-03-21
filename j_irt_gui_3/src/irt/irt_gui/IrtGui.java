@@ -82,7 +82,7 @@ public class IrtGui extends IrtMainFrame {
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.261";
+	public static final String VERTION = "- 3.262";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -180,7 +180,8 @@ public class IrtGui extends IrtMainFrame {
 		});
 
 		// Used for software release check
-		ThreadWorker.runThread(()->loadFlash3Properties(), "Read Software Properies");
+		final Runnable loadFlash3Properties = ()->loadFlash3Properties();
+		ThreadWorker.runThread(loadFlash3Properties, "Read Software Properies");
 	}
 
 	public static Properties loadFlash3Properties() {
