@@ -241,6 +241,7 @@ public class DumpControllerFull  implements PacketListener, Runnable, Dumper{
 
 												else{
 													final DeviceDebugInfoPacket p = new DeviceDebugInfoPacket(addr, (byte) 1);
+													p.getHeader().setPacketId(PacketID.DEVICE_DEBUG_INFO_FOR_DUMP.getId());
 													p.setValue(4);
 													GuiControllerAbstract.getComPortThreadQueue().add(p);
 												}

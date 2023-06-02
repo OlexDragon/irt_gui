@@ -211,7 +211,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	private void restart(long period) {
-		logger.info("restart({})", period);
+		logger.debug("restart({})", period);
 		stop();
 		start(period);
 	}
@@ -620,7 +620,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			oPacket
 			.map(DeviceInfo::new)
 			.ifPresent(di->{
-				logger.info(di);
+				logger.debug(di);
 
 				// Send Packet to get modules list
 				if(moduleList==null) {
@@ -711,7 +711,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	protected abstract void getInfo();
 
 	private void reset() {
-		logger.info("reset()");
+		logger.debug("reset()");
 		panelController.removeAll();
 		protocol = getDefaultProtocol();
 		moduleList = null;
@@ -787,7 +787,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 				timers.entrySet().parallelStream().map(ks->ks.getValue()).forEach(t->t.stop());
 				timers.clear();
 
-				logger.info("timers.isEmpty()-{}; Removed all panels from 'unitsPanel'. protocol: {}", timers.isEmpty(), protocol);
+				logger.debug("timers.isEmpty()-{}; Removed all panels from 'unitsPanel'. protocol: {}", timers.isEmpty(), protocol);
 
 
 //				Optional.ofNullable(scheduledFuture).filter(f->!f.isDone()).ifPresent(f->f.cancel(true));
@@ -807,7 +807,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 
 		private boolean demoPanelRemoved;
 		private synchronized Timer createPanel(DeviceInfo deviceInfo) {
-			logger.info(deviceInfo);
+			logger.debug(deviceInfo);
 
 			//Show Stack Trace
 //			logger.error(Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).reduce((s1, s2) -> s1 + "\n" + s2).get());
@@ -851,7 +851,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		}
 
 		private void removePanel(DeviceInfo deviceInfo) {
-			logger.info("removePanel{})", deviceInfo);
+			logger.debug("removePanel{})", deviceInfo);
 
 			SwingUtilities.invokeLater(
 					()->{

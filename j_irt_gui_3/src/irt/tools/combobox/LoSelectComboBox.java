@@ -93,6 +93,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 	private final Byte linkAddr;
 
 	public LoSelectComboBox(final Byte linkAddr) {
+		logger.traceEntry("{}", ()->linkAddr&0xff);
 
 		addHierarchyListener(
 				hierarchyEvent->
@@ -148,6 +149,7 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		.ifPresent(
 				id->
 				new ThreadWorker(()->{
+					logger.trace("onPacketReceived()\n", packet);
 
 					final Optional<List<?>> oValue = cast(packet).map(v->(List<?>)v);
 
@@ -173,8 +175,8 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 						});
 
 						packetToSend = new LOPacket(linkAddr, null);
-						LoSelectComboBox.this.run();
 					});
+					run();
 				}, "LoSelectComboBox: Fill JComboBox"));
 
 		// Select JComboBox item
@@ -182,7 +184,8 @@ public class LoSelectComboBox extends JComboBox<IdValueFreq> implements Runnable
 		.filter(PacketID.CONFIGURATION_LO::match)
 		.ifPresent(
 				id->
-				new ThreadWorker(()->{
+				ThreadWorker.runThread(()->{
+					logger.trace("onPacketReceived()\n{}", packet);
 
 					Optional<?> oValue = cast(packet);
 

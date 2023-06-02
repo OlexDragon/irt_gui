@@ -428,12 +428,18 @@ public class UpdateMessageFx extends Dialog<Message>{
 		// Get Program Path fom the properties file.
 		final String type = deviceInfo.getTypeId()+"."+deviceInfo.getRevision();
 		final String key = type + ".path";
-		Optional.ofNullable(IrtGui.softProperties.get(key)).map(Object::toString).map(File::new).filter(File::exists)
-		.ifPresent(
-				file->{
-					lblProgram.setTooltip(new Tooltip(file.getAbsolutePath()));
-					lblProgram.setText(file.getName());
-				});
+
+		try {
+			final Object prop = IrtGui.loadFlash3Properties().get(key);
+			Optional.ofNullable(prop).map(Object::toString).map(File::new).filter(File::exists)
+			.ifPresent(
+					file->{
+						lblProgram.setTooltip(new Tooltip(file.getAbsolutePath()));
+						lblProgram.setText(file.getName());
+					});
+		} catch (IOException e1) {
+			logger.catching(e1);
+		}
 
 		grid.addRow(4, cbProgram, lblProgram, btnProgramSelection);
 

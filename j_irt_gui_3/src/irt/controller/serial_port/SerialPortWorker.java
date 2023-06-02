@@ -36,7 +36,7 @@ public class SerialPortWorker {
 	private static int maxSize = 3;
 
 	public synchronized static Packet send(SerialPortInterface serialPort, Packet packet) {
-		logger.info("{} : {}", serialPort, packet);
+		logger.debug("{} : {}", serialPort, packet);
 
 		SerialPortWorker.serialPort = serialPort;
 		maxSize = packet.getMaxSize();
@@ -71,7 +71,7 @@ public class SerialPortWorker {
 
 			byte[] data = packet.toBytes();
 
-			logger.info(marker, ">> {}: {}\n\t as bytes: {}", ()->(runTimes+1)+") send", ()->packet, ()->ToHex.bytesToHex(data));
+			logger.debug(marker, ">> {}: {}\n\t as bytes: {}", ()->(runTimes+1)+") send", ()->packet, ()->ToHex.bytesToHex(data));
 
 			if(data!=null && serialPort.isOpened()){
 				serialPort.writeBytes(data);

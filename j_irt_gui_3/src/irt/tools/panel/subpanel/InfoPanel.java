@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -128,8 +129,14 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 //						addOpenWebBrowserMenuItem(popup, sn);
 						addCalibrateMenuItem(popup, sn);
 
-						if(IrtGui.isProduction() && !IrtGui.softProperties.isEmpty())
-							addLogInMenuItem(popup, sn);
+						try {
+
+							if(IrtGui.isProduction() && !IrtGui.loadFlash3Properties().isEmpty())
+								addLogInMenuItem(popup, sn);
+
+						} catch (IOException e1) {
+							logger.catching(e1);
+						}
 					});
 
 			JMenuItem updateMenuItem = new JMenuItem("Update");
@@ -273,7 +280,23 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 								()->{
 									softReleaseChecker = new SoftReleaseChecker();
 									final Boolean setVisible = softReleaseChecker.check(deviceInfo).orElse(false);
-									SwingUtilities.invokeLater(()->lblError.setVisible(setVisible));
+									SwingUtilities.invokeLater(
+											()->{
+												lblError.setVisible(setVisible);
+												final Timer t = new Timer();
+												TimerTask task = new TimerTask() {
+													
+													@Override
+													public void run() {
+														final Color foreground = lblError.getForeground();
+														if(foreground.equals(Color.RED))
+															lblError.setForeground(Color.WHITE);
+														else
+															lblError.setForeground(Color.RED);
+													}
+												};
+												t.scheduleAtFixedRate(task, 1000, 500);
+											});
 								},
 								"Check for softwere update.");
 						}

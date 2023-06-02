@@ -55,6 +55,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 	protected GuiControllerAbstract guiController;
 
 	private Timer timer;
+	private static IrtMainFrame mainFrame; public static IrtMainFrame getMainFrame() { return mainFrame; }
 
 	private static ModuleSelectFxPanel moduleSelectFxPanel;
 	public static boolean isRedundancyController(){
@@ -64,6 +65,7 @@ public abstract class IrtMainFrame extends JFrame implements PacketListener {
 	public IrtMainFrame(int width, int hight) {
 		super(IrtPanel.PROPERTIES.getProperty("company_name"));
 		new JFXPanel(); // this will prepare JavaFX toolkit and environment
+		mainFrame = this;
 
 		Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.catching(e));
 

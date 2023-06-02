@@ -20,7 +20,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -43,6 +42,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 
 import org.apache.logging.log4j.LogManager;
@@ -66,8 +67,6 @@ import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
 import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
-import javax.swing.event.PopupMenuListener;
-import javax.swing.event.PopupMenuEvent;
 
 public class IrtGui extends IrtMainFrame {
 
@@ -76,13 +75,12 @@ public class IrtGui extends IrtMainFrame {
 
 	private static final String PREF_KEY_ADDRESS = "address";
 	public static final File FLASH3_PRPPERIES = new File("Z:\\4Olex\\flash\\templates\\flash3.properties");
-	public static Properties softProperties;
 
 	public static final int DEFAULT_ADDRESS = 255;
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.262";
+	public static final String VERTION = "- 3.267";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -180,34 +178,28 @@ public class IrtGui extends IrtMainFrame {
 		});
 
 		// Used for software release check
-		final Runnable loadFlash3Properties = ()->loadFlash3Properties();
+		final Runnable loadFlash3Properties = ()->{
+
+			try {
+				loadFlash3Properties();
+			} catch (IOException e1) {
+				logger.catching(e1);
+			}
+		};
 		ThreadWorker.runThread(loadFlash3Properties, "Read Software Properies");
 	}
 
-	public static Properties loadFlash3Properties() {
+	public static Properties loadFlash3Properties() throws IOException {
 
 		Properties p = new Properties();
 
-		Optional.of(FLASH3_PRPPERIES).filter(File::exists)
-		.map(
-				f -> {
-					try {
-						return new FileInputStream(f);
-					} catch (FileNotFoundException e) {
-						logger.catching(e);
-					}
-					return null;
-				})
-		.ifPresent(
-				is -> {
-					try {
-						p.load(is);
-						is.close();
-					} catch (IOException e) {
-						logger.catching(e);
-					}
-				});
-		return softProperties = p;
+		if(FLASH3_PRPPERIES.exists())
+			try(FileInputStream fis = new FileInputStream(FLASH3_PRPPERIES);) {
+
+				p.load(fis);
+
+			}
+		return p;
 	}
 
 	@SuppressWarnings("unchecked")

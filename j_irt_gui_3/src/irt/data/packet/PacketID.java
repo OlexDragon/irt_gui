@@ -124,7 +124,7 @@ public enum PacketID {
 	MEASUREMENT_WGS_POSITION			( null, null, null, null, null, null),
 
 	CONFIGURATION_LO					( null, null, null, LOPacket.parseValueFunction, null, 8),
-	CONFIGURATION_LO_FREQUENCIES		( null, null, null, LOFrequenciesPacket.parseValueFunction, null, 32),
+	CONFIGURATION_LO_FREQUENCIES		( null, null, null, LOFrequenciesPacket.parseValueFunction, null, 80),
 	CONFIGURATION_MUTE					( null, null, null, MuteControlPacket.parseValueFunction, null, null),
 	CONFIGURATION_GAIN					( null, null, null, AttenuationPacket.parseValueFunction, null, null),
 	CONFIGURATION_GAIN_RANGE			( null, null, null, AttenuationRangePacket.parseValueFunction, null, null),
@@ -188,6 +188,7 @@ public enum PacketID {
 	DEVICE_DEBUG_CONVERTER_PLL_2	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_READ_WRITE, null, null, null, null),
 
 	DEVICE_DEBUG_INFO					( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
+	DEVICE_DEBUG_INFO_FOR_DUMP			( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 2000),
 	DEVICE_DEBUG_CPU_INFO				( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
 	DEVICE_DEBUG_HARDWARE_FAULTS_INFO	( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 500),
 	DEVICE_DEBUG_THRESHOLDS_INFO		( PacketGroupIDs.DEVICE_DEBUG, PacketImp.PARAMETER_DEVICE_DEBUG_INFO, null, DeviceDebugInfoPacket.parseValueFunction, 1000L, 1000),

@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -27,13 +28,13 @@ import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 
 import irt.controller.GuiControllerAbstract;
-import irt.data.ThreadWorker;
 import irt.data.DeviceType;
 import irt.data.StringData;
+import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketImp;
 import irt.data.packet.PacketID;
+import irt.data.packet.PacketImp;
 import irt.data.packet.Payload;
 import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.interfaces.Packet;
@@ -44,6 +45,8 @@ import irt.tools.panel.PicobucPanel;
 
 @SuppressWarnings("serial")
 public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
+//	private final static Logger logger = LogManager.getLogger();
+	protected final static Preferences prefs = Preferences.userRoot().node(GuiControllerAbstract.IRT_TECHNOLOGIES_INC);
 
 	private JTextArea textArea;
 	private JComboBox<String> cbParameterCode;
@@ -79,7 +82,8 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		});
 
 		byte linkAddr = Optional.ofNullable(linkHeader).map(LinkHeader::getAddr).orElse((byte)0);
-		packetToSend = new DeviceDebugInfoPacket(linkAddr, (byte) 1);
+		final int dipSelectedIndex = prefs.getInt("dipSelectedIndex", 0);
+		packetToSend = new DeviceDebugInfoPacket(linkAddr, (byte) (dipSelectedIndex + 1));
 		setLayout(new BorderLayout(0, 0));
 
 		textArea = new JTextArea();
@@ -111,14 +115,19 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		cbParameterCode.addItem("device information: parts, firmware and etc.");
 		cbParameterCode.addItem("dump of registers for specified device index ");
 		panel.add(cbParameterCode, BorderLayout.CENTER);
+		cbParameterCode.setSelectedIndex(dipSelectedIndex);
 
 		cbParameterCode
 		.addItemListener(
 
 				itemEvent->{
 					if(itemEvent.getStateChange()==ItemEvent.SELECTED){
+						final int selectedIndex = cbParameterCode.getSelectedIndex();
+						prefs.putInt("dipSelectedIndex", selectedIndex);
+						
 						cbParameterCode.setToolTipText(cbParameterCode.getSelectedItem().toString());
 						packetToSend.setParameterCode((byte)(cbParameterCode.getSelectedIndex()+1));
+						textArea.setText("");
 						reset();
 				}
 		});
@@ -133,13 +142,21 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 		cbParameter.addItem(100);
 		panel.add(cbParameter, BorderLayout.EAST);
 
-		cbParameter.addItemListener(itemEvent->{
+		cbParameter.addItemListener(
 
-			if(itemEvent.getStateChange()==ItemEvent.SELECTED){
-				packetToSend.setValue(cbParameter.getSelectedItem());
-				reset();
-			}
-		});
+				itemEvent->{
+					if(itemEvent.getStateChange()==ItemEvent.SELECTED){
+						final Integer selectedItem = (Integer) cbParameter.getSelectedItem();
+						packetToSend.setValue(selectedItem);
+						prefs.putInt("dipCbParameter", selectedItem);
+						textArea.setText("");
+						reset();
+					}
+				});
+
+		final int dipCbParameter = prefs.getInt("dipCbParameter", 0);
+		cbParameter.getEditor().setItem(dipCbParameter);
+		packetToSend.setValue(dipCbParameter);
 	}
 
 	private synchronized void start() {
@@ -175,6 +192,11 @@ public class DebagInfoPanel extends JPanel implements Runnable, PacketListener {
 
 	@Override
 	public void onPacketReceived(Packet packet) {
+
+		if(!isVisible()) {
+			stop();
+			return;
+		}
 
 		new ThreadWorker(()->{
 

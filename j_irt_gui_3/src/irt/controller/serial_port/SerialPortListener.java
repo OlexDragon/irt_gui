@@ -88,7 +88,7 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 	}
 
 	public void clear() {
-		logger.info("buffer to clear: {}", buffer);
+		logger.debug("buffer to clear: {}", buffer);
 
 		synchronized (this) { buffer = null; }
 
@@ -101,7 +101,7 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 	public synchronized byte[] getBytes(int size) {
 
 		byte[] result = Arrays.copyOf(buffer, size);
-		logger.info("size: {}; result: {}", size, result);
+		logger.debug("size: {}; result: {}", size, result);
 
 		buffer = Arrays.copyOfRange(buffer, size, buffer.length);
 

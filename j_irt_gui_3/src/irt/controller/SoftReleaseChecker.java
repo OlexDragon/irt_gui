@@ -1,7 +1,6 @@
 package irt.controller;
 
 import java.awt.FileDialog;
-import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,7 +8,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
@@ -21,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
 import irt.irt_gui.IrtGui;
+import irt.irt_gui.IrtMainFrame;
 
 public class SoftReleaseChecker extends FutureTask<Boolean>{
 
@@ -49,12 +48,13 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 		return Optional.empty();
 	}
 
-	private static boolean check() {
+	private static boolean check() throws IOException {
 
 		final String type = deviceInfo.getTypeId()+"."+deviceInfo.getRevision();
 		final String key = type + ".path";
 
-		return Optional.ofNullable(IrtGui.softProperties.get(key)).map(Object::toString).map(File::new).filter(File::exists)
+		final Properties properties = IrtGui.loadFlash3Properties();
+		return Optional.ofNullable(properties.get(key)).map(Object::toString).map(File::new).filter(File::exists)
 
 				.map(
 						file->{
@@ -80,26 +80,36 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 
 				.orElseGet(
 						()->{
-							dialog = new FileDialog((Frame)null, "Select the Firmware File related to " + type);
+							dialog = new FileDialog(IrtMainFrame.getMainFrame(), "Select the Firmware File related to " + type);
 						    dialog.setMode(FileDialog.LOAD);
-						    dialog.setVisible(true);
 						    dialog.dispose();
-						    Optional.ofNullable(dialog.getFile()).map(f->Paths.get(dialog.getDirectory(), f)).map(Path::toString)
-						    .ifPresent(
-						    		path->{
+						    while(true) {
 
-						    			final Properties properties = IrtGui.loadFlash3Properties();
-						    			Object old = properties.put(key, path);
+						    	dialog.setVisible(true);
 
-						    			if(!old.equals(path))
-						    			try(OutputStream os = new FileOutputStream(IrtGui.FLASH3_PRPPERIES);) {
+						    	final String file = dialog.getFile();
+						    	if(file!=null) {
 
-						    				properties.store(os, "Created by IRT GUI on " + InetAddress.getLocalHost().getHostName());
+						    		final String path = Paths.get(dialog.getDirectory(), file).toString();
+					    			Object old = properties.put(key, path);
 
-						    			} catch (IOException e) {
-						    				logger.catching(e);
-						    			}
-						    		});
+					    			if(old==null || !old.equals(path)) {
+
+					    				try(OutputStream os = new FileOutputStream(IrtGui.FLASH3_PRPPERIES);) {
+
+					    					logger.info("key: {}; value: {}; added to the flash3.properties file", key, path);
+					    					properties.store(os, "Created by IRT GUI on " + InetAddress.getLocalHost().getHostName());
+					    					logger.info("The flash3.properties file has been resaved.");
+
+					    				} catch (IOException e) {
+											logger.catching(e);
+										}
+					    			}
+
+					    			break;
+						    	}
+						    }
+
 						    return false;
 						});		
 	}
