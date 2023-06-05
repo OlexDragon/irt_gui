@@ -23,7 +23,10 @@ public enum DeviceType{
 
 	TRANSCEIVER		(260, Protocol.LINKED, "Transceiver", HardwareType.BAIS),
 
+	ORPC			(301, Protocol.LINKED, "Outdoor Redundancy Protection Controller", HardwareType.CONTROLLER),
 	IR_PC			(310, Protocol.LINKED, "Redundancy protection controller", HardwareType.CONTROLLER),
+	ORPC_GD			(313, Protocol.LINKED, "Outdoor Redundancy Protection Controller", HardwareType.CONTROLLER),
+	RCP_FOR_ORCP	(314, Protocol.LINKED, "Remote Control Panel for ORCP", HardwareType.CONTROLLER),
 
 	DLRS			(410, Protocol.LINKED, "DLRS", HardwareType.CONTROLLER),	//Down link Redundancy System
 	DLRS2			(411, Protocol.LINKED, "DLRS2", HardwareType.CONTROLLER),
