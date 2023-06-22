@@ -260,14 +260,16 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		lblUnitName.setHorizontalAlignment(SwingConstants.CENTER);
 		lblUnitName.setForeground(Color.YELLOW);
 		lblUnitName.setFont(new Font("Tahoma", Font.BOLD, 14));
-				
+
+		if(deviceInfo!=null) {
 						lblSnTxt = new JLabel(Translation.getValue(String.class, "sn", "SN")+":");
 						lblSnTxt.setBounds(4, 36, 76, 14);
 						lblSnTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 						lblSnTxt.setForeground(new Color(153, 255, 255));
 						lblSnTxt.setFont(font);
+		}
 		
-				lblSn = new JLabel("SN");
+				lblSn = new JLabel("The Unit is not Connected");
 				lblSn.addAncestorListener(new AncestorListener() {
 
 					SoftReleaseChecker softReleaseChecker;
@@ -312,25 +314,29 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 				lblSn.setFont(new Font("Tahoma", Font.PLAIN, 14));
 				lblSn.setForeground(Color.YELLOW);
 		
-		lblUnitPartNumberTxt = new JLabel(Translation.getValue(String.class, "part_number", "Part Number")+":");
-		lblUnitPartNumberTxt.setBounds(4, 52, 76, 14);
-		lblUnitPartNumberTxt.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblUnitPartNumberTxt.setForeground(new Color(153, 255, 255));
-		lblUnitPartNumberTxt.setFont(font);
+				if(deviceInfo!=null) {
+					lblUnitPartNumberTxt = new JLabel(Translation.getValue(String.class, "part_number", "Part Number")+":");
+					lblUnitPartNumberTxt.setBounds(4, 52, 76, 14);
+					lblUnitPartNumberTxt.setHorizontalAlignment(SwingConstants.RIGHT);
+					lblUnitPartNumberTxt.setForeground(new Color(153, 255, 255));
+					lblUnitPartNumberTxt.setFont(font);
+				}
 		
-		lblUnitPartNumber = new JLabel("");
+		lblUnitPartNumber = new JLabel("This is a demo view.");
 		lblUnitPartNumber.setHorizontalAlignment(SwingConstants.LEFT);
 		lblUnitPartNumber.setBounds(84, 51, 198, 14);
 		lblUnitPartNumber.setForeground(Color.YELLOW);
 		lblUnitPartNumber.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
+		if(deviceInfo!=null) {
 				lblCountTxt = new JLabel(Translation.getValue(String.class, "count", "Count")+":");
 				lblCountTxt.setBounds(4, 68, 76, 14);
 				lblCountTxt.setForeground(new Color(153, 255, 255));
 				lblCountTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 				lblCountTxt.setFont(font);
 
-		lblCount = new JLabel(":");
+		
+		lblCount = new JLabel("");
 		lblCount.setHorizontalAlignment(SwingConstants.LEFT);
 		lblCount.setBounds(84, 67, 198, 14);
 		lblCount.setForeground(Color.WHITE);
@@ -340,8 +346,9 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 				lblBuiltDateTxt.setForeground(new Color(153, 255, 255));
 				lblBuiltDateTxt.setFont(font);
 				lblBuiltDateTxt.setHorizontalAlignment(SwingConstants.RIGHT);
+		}
 
-		lblBuiltDate = new JLabel("Oct  2 2012, 10:45:39");
+		lblBuiltDate = new JLabel("Check power or M&C cable .");
 		lblBuiltDate.setHorizontalAlignment(SwingConstants.LEFT);
 		lblBuiltDate.setBounds(84, 83, 198, 14);
 		lblBuiltDate.setForeground(Color.WHITE);
@@ -399,15 +406,21 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		setLayout(null);
 		add(lblError);
 		add(lblUnitName);
-		add(lblSnTxt);
+		if(lblSnTxt!=null)
+			add(lblSnTxt);
 		add(lblSn);
-		add(lblUnitPartNumberTxt);
+		if(lblUnitPartNumberTxt!=null)
+			add(lblUnitPartNumberTxt);
 		add(lblUnitPartNumber);
-		add(lblCountTxt);
-		add(lblCount);
-		add(lblBuiltDateTxt);
+		if(lblCountTxt!=null) {
+			add(lblCountTxt);
+			add(lblCount);
+		}
+		if(lblBuiltDateTxt!=null)
+			add(lblBuiltDateTxt);
 		add(lblBuiltDate);
-		add(lblVersionTxt);
+		if(lblVersionTxt!=null)
+				add(lblVersionTxt);
 		add(lblVersion);
 		add(lblDeviceTxt);
 		add(lblDeviceId);

@@ -156,6 +156,9 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 					event->{
 
+						if(deviceInfo == null) {
+							return;
+						}
 						// Return if message already showing
 						Optional<TKStage> oStage = Optional.ofNullable(updateMessage)
 

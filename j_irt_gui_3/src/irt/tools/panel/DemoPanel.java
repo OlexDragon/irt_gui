@@ -263,7 +263,7 @@ public class DemoPanel extends Panel {
 
 //		font = new Font("Tahoma", Font.PLAIN, 14);
 
-		lblDbm = new JLabel("-25 "+Translation.getValue(String.class, "dbm", " dBm"));
+		lblDbm = new JLabel("N/A");
 		lblDbm.setName("Input Power");
 		lblDbm.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDbm.setForeground(Color.WHITE);
@@ -281,7 +281,7 @@ public class DemoPanel extends Panel {
 		checkBoxStep.setBounds(13, 68, 65, 23);
 		controlPanel.add(checkBoxStep);
 		
-		JLabel lblDbm_1 = new JLabel("40 "+Translation.getValue(String.class, "dbm", " dBm"));
+		JLabel lblDbm_1 = new JLabel("N/A");
 		lblDbm_1.setName("Output Power");
 		lblDbm_1.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDbm_1.setForeground(Color.WHITE);
@@ -289,7 +289,7 @@ public class DemoPanel extends Panel {
 		lblDbm_1.setBounds(107, 64, 93, 17);
 		monitorPanel.add(lblDbm_1);
 		
-		JLabel lblC = new JLabel("46 C");
+		JLabel lblC = new JLabel("N/A");
 		lblC.setName("Temperature");
 		lblC.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblC.setForeground(Color.WHITE);
@@ -320,8 +320,8 @@ public class DemoPanel extends Panel {
 		cbLoSelect.setFont(font);
 		cbLoSelect.setBounds(10, 141, 194, 26);
 		String loTxt = Translation.getValue(String.class, "lo", "LO");
-		cbLoSelect.addItem(loTxt+":1 12800 MHz");
-		cbLoSelect.addItem(loTxt+":2 13050 MHz");
+		cbLoSelect.addItem(loTxt+":N/A");
+		cbLoSelect.addItem(loTxt+":N/A MHz");
 		((JLabel)cbLoSelect.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
 		controlPanel.add(cbLoSelect);
 

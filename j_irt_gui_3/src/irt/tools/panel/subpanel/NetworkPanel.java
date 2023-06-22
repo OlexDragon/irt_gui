@@ -224,31 +224,32 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		panel_1.setName("setting");
 		
 		JButton btnDefault = new JButton("Reset");
-		btnDefault.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					if (JOptionPane.showConfirmDialog(NetworkPanel.this, "Do you really want to change the network settings?", "Network", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
+		if(deviceInfo!=null) {
+			btnDefault.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					try {
+						if (JOptionPane.showConfirmDialog(NetworkPanel.this, "Do you really want to change the network settings?", "Network", JOptionPane.YES_NO_OPTION) == JOptionPane.OK_OPTION) {
 
-						String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
-						ipAddressTextField.setText(tmpStr);
+							String tmpStr = IrtPanel.PROPERTIES.getProperty("network_address", "192.168.0.100");
+							ipAddressTextField.setText(tmpStr);
 
-						tmpStr = IrtPanel.PROPERTIES.getProperty("network_mask", "255.255.255.0");
-						ipMaskTextField.setText(tmpStr);
+							tmpStr = IrtPanel.PROPERTIES.getProperty("network_mask", "255.255.255.0");
+							ipMaskTextField.setText(tmpStr);
 
-						tmpStr = IrtPanel.PROPERTIES.getProperty("network_gateway", "192.168.0.1");
-						ipGatewayTextField.setText(tmpStr);
+							tmpStr = IrtPanel.PROPERTIES.getProperty("network_gateway", "192.168.0.1");
+							ipGatewayTextField.setText(tmpStr);
 
-						comboBoxAddressType.setSelectedItem(AddressType.STATIC);
+							comboBoxAddressType.setSelectedItem(AddressType.STATIC);
 
-						saveSettings();
+							saveSettings();
+						}
+					} catch (Exception ex) {
+						logger.catching(ex);
 					}
-				} catch (Exception ex) {
-					logger.catching(ex);
 				}
-			}
-		});
-		btnDefault.setMargin(new Insets(0, 3, 0, 3));
-		
+			});
+			btnDefault.setMargin(new Insets(0, 3, 0, 3));
+		}
 		updateButton = new UpdateButtonJFXPanel(deviceInfo, networkAddress);
 		
 		OpenHTTPButtonJFXPanel updateButtonJFXPanel = new OpenHTTPButtonJFXPanel(networkAddress);

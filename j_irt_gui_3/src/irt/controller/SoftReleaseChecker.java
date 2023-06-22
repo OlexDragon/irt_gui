@@ -65,12 +65,16 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 								String line = null;
 								while((line = br.readLine())!=null) {
 									line = line.trim();
-									if(line.startsWith("FWTAG="))
+									if(line.contains("FWTAG="))
 										break;
 								}
+
 								final String l = line;
 
-								return deviceInfo.getFirmwareBuildDate().filter(bd->!l.contains(bd)).map(bd->true).orElse(false);
+								return deviceInfo
+										.getFirmwareBuildDate()
+										.filter(bd->!l.contains(bd))
+										.map(bd->true).orElse(false);
 
 							} catch (IOException e) {
 								logger.catching(e);
