@@ -517,19 +517,22 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	}
 
 	protected void getConverterInfo() {
-		logger.traceEntry();
 
 		if(protocol.equals(Protocol.LINKED))
 			return;
+
+		logger.traceEntry();
 
 		new ThreadWorker(()->comPortThreadQueue.add(new DeviceInfoPacket(getAddress())), getClass().getSimpleName() + ".getConverterInfo()");
 	}
 
 	protected void getUnitsInfo() {
-		logger.traceEntry();
 
 		if (protocol.equals(Protocol.CONVERTER))
 			return;
+
+
+		logger.traceEntry();
 
 		new ThreadWorker(()->{
 
@@ -863,8 +866,10 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 			comPortThreadQueue.clear();
 			setSysSerialNumber(deviceInfo);
 
-			if(timers.isEmpty())
+			if(timers.isEmpty()) {
 				start(1);
+				protocol = getDefaultProtocol();
+			}
 		}
 	}
 

@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import irt.data.ThreadWorker;
 import javafx.application.Platform;
 
 
@@ -23,7 +24,7 @@ public class ClosePanel extends JPanel {
 	 */
 	public ClosePanel(JFrame fraim) {
 
-		Platform.setImplicitExit(false); 
+		ThreadWorker.runThread(()->Platform.setImplicitExit(false), "Set Implicit Exit"); 
 
 		setOpaque(false);
 		setSize(25, 25);
