@@ -33,6 +33,8 @@ public class ComPortJSerialComm implements SerialPortInterface {
 
 	@Override
 	public Packet send(PacketWork packetWork) {
+//		if(packetWork.getPacketThread().getPacket().getHeader().getGroupId()==PacketGroupIDs.PROTOCOL.getId())
+//			logger.error(packetWork);
 
 		Packet packet = packetWork.getPacketThread().getPacket();
 
@@ -80,7 +82,6 @@ public class ComPortJSerialComm implements SerialPortInterface {
 						alert.setContentText("Problem with serial port. Try restarting your computer.");
 						alert.show();
 					});
-					logger.error("3) {}", getPortName());
 					
 					return null;
 				});
@@ -92,7 +93,7 @@ public class ComPortJSerialComm implements SerialPortInterface {
 		opening = false;
 		ft.cancel(true);
 
-		serialPort.setBaudRate(Baudrate.getDefaultBaudrate().getValue());
+		serialPort.setBaudRate((int) Baudrate.getDefaultBaudrate().getValue());
 
 		serialPortListener = new SerialPortListener(this);
 		serialPort.addDataListener(serialPortListener);
@@ -114,7 +115,7 @@ public class ComPortJSerialComm implements SerialPortInterface {
 		logger.traceEntry("baudrate: {}", baudrate);
 
 		Baudrate.setDefaultBaudrate(baudrate);
-		serialPort.setBaudRate(baudrate.getValue());
+		serialPort.setBaudRate((int) baudrate.getValue());
 	}
 
 	public int getBaudrate() {

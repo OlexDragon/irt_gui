@@ -10,6 +10,10 @@ public enum DeviceType{
 	PICOBUC_L_TO_KU	(100, Protocol.LINKED, "PICOBUC_L_TO_KU", HardwareType.BAIS),
 	PICOBUC_L_TO_C 	(101, Protocol.LINKED, "PICOBUC_L_TO_C"	, HardwareType.BAIS),
 	C_SSPA 			(102, Protocol.LINKED, "C Band SSPA"	, HardwareType.BAIS),
+	BUC_LP_KU	 	(110, Protocol.LINKED, "BUC Low Power Ku"	, HardwareType.BAIS),
+	BUC_LP_C 		(111, Protocol.LINKED, "BUC Low Power C"	, HardwareType.BAIS),
+	BUC_LP_SSPA		(112, Protocol.LINKED, "BUC Low Power SSPA", HardwareType.BAIS),
+	BUC_LP_LC		(113, Protocol.LINKED, "BUC Low Power LOW C", HardwareType.BAIS),
 	FUTURE_BIAS_BOARD(199, Protocol.LINKED, "FUTURE_BIAS_BOARD", HardwareType.BAIS),
 	HPB_L_TO_KU		(200, Protocol.LINKED, "HPB_L_TO_KU"	, HardwareType.HP_BAIS),
 	HPB_L_TO_C		(201, Protocol.LINKED, "HPB_L_TO_C"		, HardwareType.HP_BAIS),
@@ -23,14 +27,15 @@ public enum DeviceType{
 
 	TRANSCEIVER		(260, Protocol.LINKED, "Transceiver", HardwareType.BAIS),
 
-	ORPC			(301, Protocol.LINKED, "Outdoor Redundancy Protection Controller", HardwareType.CONTROLLER),
-	IR_PC			(310, Protocol.LINKED, "Redundancy protection controller", HardwareType.CONTROLLER),
-	ORPC_GD			(313, Protocol.LINKED, "Outdoor Redundancy Protection Controller", HardwareType.CONTROLLER),
-	RCP_FOR_ORCP	(314, Protocol.LINKED, "Remote Control Panel for ORCP", HardwareType.CONTROLLER),
+	ORPC					(301, Protocol.LINKED, "Outdoor Redundancy Protection Controller", HardwareType.CONTROLLER),
+	IR_PC					(310, Protocol.LINKED, "Redundancy protection controller", HardwareType.CONTROLLER),
+	TWO_SWITCHS_CONTROLLER	(311, Protocol.LINKED, "2 switchs Redundancy protection controller", HardwareType.CONTROLLER),
+	ORPC_GD					(313, Protocol.LINKED, "Outdoor Redundancy Protection Controller", HardwareType.CONTROLLER),
+	RCP_FOR_ORCP			(314, Protocol.LINKED, "Remote Control Panel for ORCP", HardwareType.CONTROLLER),
 
-	DLRS			(410, Protocol.LINKED, "DLRS", HardwareType.CONTROLLER),	//Down link Redundancy System
-	DLRS2			(411, Protocol.LINKED, "DLRS2", HardwareType.CONTROLLER),
-	LNB_REDUNDANCY_1x2(412, Protocol.LINKED, "1:2 Redundancy LNB", HardwareType.CONTROLLER),
+	DLRS					(410, Protocol.LINKED, "DLRS", HardwareType.CONTROLLER),	//Down link Redundancy System
+	DLRS2					(411, Protocol.LINKED, "DLRS2", HardwareType.CONTROLLER),
+	LNB_REDUNDANCY_1x2		(412, Protocol.LINKED, "1:2 Redundancy LNB", HardwareType.CONTROLLER),
 
 	CONVERTER_L_TO_KU_OUTDOOR (500, Protocol.LINKED, "L to Ku Converter"	, HardwareType.CONVERTER),
 	CONVERTER_70_TO_L		(1001, Protocol.CONVERTER, "70 to L Converter"	, HardwareType.CONVERTER),
@@ -52,9 +57,9 @@ public enum DeviceType{
 	CONVERTER_MODUL			(1052, Protocol.CONVERTER, "Modul"				, HardwareType.CONVERTER),
 	CONVERTER_MODUL_C_BAND	(1053, Protocol.CONVERTER, "C Band Modul"		, HardwareType.CONVERTER),
 
-	REFERENCE_BOARD		(1100, Protocol.CONVERTER, "Reference Board"		, HardwareType.CONVERTER),
+	REFERENCE_BOARD			(1100, Protocol.CONVERTER, "Reference Board"		, HardwareType.CONVERTER),
 
-	BIAS_BOARD_MODUL	(2001, Protocol.CONVERTER, "Bias Board Modul", HardwareType.BAIS),
+	BIAS_BOARD_MODUL		(2001, Protocol.CONVERTER, "Bias Board Modul", HardwareType.BAIS),
 
 	IMPOSSIBLE				( 0, null, "Impossible meaning", null);
 

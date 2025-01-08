@@ -132,7 +132,7 @@ public class UnitsContainer extends JPanel implements Runnable{
 			Arrays.sort(components);
 
 			for(Component c:components){
-				Dimension preferredSize = c.getPreferredSize(); //TODO stack trace
+				Dimension preferredSize = c.getPreferredSize();
 				c.setLocation(x, 0);
 				x += SPACE + preferredSize.width;
 				if(height<preferredSize.height)

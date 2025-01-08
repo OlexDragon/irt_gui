@@ -10,6 +10,7 @@ import javax.swing.event.AncestorListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import irt.controller.interfaces.Refresh;
 import irt.data.DeviceType;
 import irt.tools.panel.ConverterPanel;
 import irt.tools.panel.PicobucPanel;
@@ -18,7 +19,7 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 
-public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
+public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor, Refresh {
 	private final static long serialVersionUID = 1157429339979438261L;
 	private final static Logger logger = LogManager.getLogger();
 
@@ -66,8 +67,7 @@ public class MonitorPanelSwingWithFx extends JFXPanel implements Monitor {
 
 	@Override
 	public void refresh() {
-//		LogManager.getLogger().error("refresh()");
-		//TODO
+		Platform.runLater(()->root.refresh());
 	}
 
 	public void setUnitAddress(byte unitAddress) {

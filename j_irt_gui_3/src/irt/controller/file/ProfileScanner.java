@@ -85,8 +85,14 @@ public class ProfileScanner implements Callable<Optional<Path>> {
 
 	private static void getProperties(Path path, String...properies) {
 
-		if(properies==null)
+		if(path==null) {
+			logger.warn("The Path is null.");
 			return;
+		}
+		if(properies==null) {
+			logger.warn("The properies is null.");
+			return;
+		}
 
 		final List<String> asList = new LinkedList<>(Arrays.asList(properies));
 		try (Scanner scanner = new Scanner(path);){

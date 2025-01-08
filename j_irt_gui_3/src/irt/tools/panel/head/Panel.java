@@ -36,12 +36,13 @@ import org.apache.logging.log4j.Logger;
 
 import irt.controller.GuiControllerAbstract;
 import irt.controller.interfaces.Refresh;
+import irt.controller.translation.Translation;
 import irt.data.ThreadWorker;
 import irt.data.listener.PacketListener;
 import irt.data.packet.LinkHeader;
 import irt.data.packet.PacketHeader;
-import irt.data.packet.PacketImp;
 import irt.data.packet.PacketID;
+import irt.data.packet.PacketImp;
 import irt.data.packet.alarm.AlarmStatusPacket.AlarmSeverities;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
@@ -265,9 +266,11 @@ public class Panel extends JPanel implements PacketListener {
 		btnRight.setMargin(new Insets(0, 0, 0, 0));
 		btnRight.setFont(new Font("Tahoma", Font.BOLD, 16));
 		btnRight.setBackground(new Color(0,0x33,0x33));
-		
-		lblAddress = new JLabel("Address: ");
-		lblAddress.setFont(new Font("Tahoma", Font.BOLD, 14));
+
+		final String text = Translation.getValue(String.class, "address", "Address") + ": ";
+		lblAddress = new JLabel(text);
+		final Font font = Translation.getFont();
+		lblAddress.setFont(font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 14f)));
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
@@ -325,17 +328,17 @@ public class Panel extends JPanel implements PacketListener {
 
 	public void refresh() {
 		refresh(this);
+		lblAddress.setText(Translation.getValue(String.class, "address", "Address") + ": " + (addr&0xff));
+		lblAddress.setFont(Translation.getFont().deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 14f)));
 	}
 
 	private void refresh(Component component){
-		logger.trace("* refresh({})", component.getClass().getSimpleName());
 		if(component instanceof JComponent)
 			for(Component c:((Container)component).getComponents()){
+//				logger.error(c.getClass().getSimpleName());
 				if(c instanceof Refresh){
-					logger.debug("{} is refreshed", c.getClass().getSimpleName());
 					((Refresh)c).refresh();
 				}else if(c instanceof JComponent){
-					logger.trace("Next component is {}", c.getClass().getSimpleName());
 					refresh(c);
 				}
 			}

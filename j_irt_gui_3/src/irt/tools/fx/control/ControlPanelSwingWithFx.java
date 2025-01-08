@@ -72,7 +72,6 @@ public class ControlPanelSwingWithFx extends JFXPanel implements Monitor {
 	@Override
 	public void refresh() {
 //		LogManager.getLogger().error("refresh()");
-		//TODO
 	}
 
 	public void setUnitAddress(byte unitAddress) {

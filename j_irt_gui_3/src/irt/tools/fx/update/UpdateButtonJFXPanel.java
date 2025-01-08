@@ -32,6 +32,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.sun.javafx.tk.TKStage;
 
+import irt.controller.translation.Translation;
 import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
 import irt.data.network.HttpUploader;
@@ -86,7 +87,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 		// ******************************* constructor UpdateButtonFx   ***************************************************
 		public UpdateButtonFx() {
-			setText("Update");
+			refresh();
 
 			final Font font = new Font(12);
 			setFont(font);
@@ -280,7 +281,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 													final ButtonData buttonData = message.getButtonType().getButtonData();
 
 													if(buttonData==UpdateMessageFx.UPDATE_BUTTON) 
-														uploader.upload(bytes);	//TODO: uncomment to do update (commented For test only)
+														uploader.upload(bytes);
 
 													else if(buttonData==UpdateMessageFx.TO_PACKAGE_BUTTON) 
 														try {
@@ -320,6 +321,14 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 											}, "UpdateMessageFx action");
 								});
+					});
+		}
+
+		public void refresh() {
+			Platform.runLater(
+					()->{
+						final String value = Translation.getValue("update", "Update");
+						setText(value);
 					});
 		}
 
@@ -421,5 +430,9 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 
 	public void fire() {
 		Platform.runLater(()->root.fire());
+	}
+
+	public void refresh() {
+		root.refresh();
 	}
 }

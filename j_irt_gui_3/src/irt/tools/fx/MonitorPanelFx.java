@@ -39,7 +39,6 @@ import irt.data.packet.PacketHeader;
 import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.Packets;
-import irt.data.packet.RetransmitPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.measurement.MeasurementPacket;
@@ -86,10 +85,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 												public void setUnitAddress(byte unitAddress) {
 													this.unitAddress = unitAddress;
 													packetToSend.setAddr(unitAddress);
-													retransmitPacket.setAddr(unitAddress);
 												}
 
-	private final RetransmitPacket retransmitPacket = new RetransmitPacket();
 	private GridPane 	statusPane;
 	private GridPane 	gridPane;
 
@@ -139,8 +136,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 
 	private SerialPortInterface serialPort;
 
-	private int retransmitDelay;
-
 	@Override
 	public void run() {
 
@@ -158,13 +153,6 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 			logger.debug("Packet to send: {}", packetToSend);
 
 			GuiControllerAbstract.getComPortThreadQueue().add(packetToSend);
-
-			if(retransmitDelay>0)
-				retransmitDelay--;
-			else{
-				retransmitDelay = 200;
-				GuiControllerAbstract.getComPortThreadQueue().add(retransmitPacket);
-			}
 
 		}catch (Exception e) {
 			logger.catching(e);
@@ -324,8 +312,8 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 				index->{
 
 					// Show only UNLOCKED, LOCKED, MUTE statuses
-					Object statusBit = collect.get(index);
-					String string = statusBit.toString();
+					String statusBit = collect.get(index).toString();
+					String string = Translation.getValue(String.class, statusBit, statusBit);
 
 					Platform.runLater(
 							()->{
@@ -333,8 +321,9 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 								if(children.size()<=index) {
 
 									final Label label = new Label(string);
-									label.getStyleClass().add(string);
+									label.getStyleClass().add(statusBit);
 									label.setTooltip(tooltip);
+									label.setUserData(statusBit);
 									setLabelProperties(label, Pos.CENTER);
 									statusPane.add(label, index, 0);
 
@@ -343,9 +332,13 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 									Label label = (Label) children.get(index);
 									String text = label.getText();
 									if(!text.equals(string)) {
-										ObservableList<String> styleClass = label.getStyleClass();
-										styleClass.remove(label.getText());
-										styleClass.add(string);
+										final Object userData = label.getUserData();
+										if(!statusBit.equals(userData)) {
+											final ObservableList<String> styleClass = label.getStyleClass();
+											styleClass.remove(userData);
+											styleClass.add(statusBit);
+											label.setUserData(statusBit);
+										}
 										label.setText(string);
 									}
 
@@ -407,12 +400,12 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		STATUS			((byte) 2, b->Arrays.toString(b)),
 		INPUT_POWER_FCM	((byte) 4, b->bytesToString(b, "dbm")),
 		OUTPUT_POWER	((byte) 5, b->bytesToString(b, "dbm")),
-		UNIT_TEMPERATURE((byte) 3, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
+		UNIT_TEMPERATURE((byte) 3, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " °C" : Arrays.toString(b)),
 		V5_5			((byte) 6, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/1000.0) + " V" : Arrays.toString(b)),
 		V13_2			((byte) 7, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/1000.0) + " V" : Arrays.toString(b)),
 		V13_2_NEG		((byte) 8, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/1000.0) + " V" : Arrays.toString(b)),
 		CURRENT			((byte) 9, b->bytesToString(b, "A")),
-		CPU_TEMPERATURE	((byte)10, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
+		CPU_TEMPERATURE	((byte)10, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " °C" : Arrays.toString(b)),
 		INPUT_POWER		((byte)11, b->bytesToString(b, "dbm")),
 		ATTENUATION		((byte)20, b->b!=null && b.length==2 ? nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " dB" : Arrays.toString(b)),
 		REFERENCE_SOURCE((byte)21, b->b!=null && b.length==1 && b[0]<3 ? ReferenceSource.values()[b[0]].name() : Arrays.toString(b));
@@ -461,7 +454,7 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		NONE			( b->Arrays.toString(b)),
 		INPUT_POWER		( b->bytesToString(b, "dbm")),
 		OUTPUT_POWER	( b->bytesToString(b, "dbm")),
-		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? ((b[0]&0x80)>0 && b[1]==0) ? "UNDEFINED" : nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " C" : Arrays.toString(b)),
+		UNIT_TEMPERATURE( b->b!=null && b.length==2 ? ((b[0]&0x80)>0 && b[1]==0) ? "UNDEFINED" : nFormate1.format((ByteBuffer.wrap(b).getShort())/10.0) + " °C" : Arrays.toString(b)),
 		STATUS			( b->Arrays.toString(b)),
 		LNB1_STATUS		( b->lnbReady(b)),
 		LNB2_STATUS		( b->lnbReady(b)),
@@ -763,5 +756,26 @@ public class MonitorPanelFx extends AnchorPane implements Runnable, PacketListen
 		sb.append(nFormate1.format(value)).append(" ").append(Translation.getValue(String.class, prefix, prefix));
 
 		return sb.toString();
+	}
+
+	public void refresh() {
+
+		gridPane.getChildren().parallelStream().filter(Label.class::isInstance).collect(Collectors.groupingBy(GridPane::getRowIndex))
+		.entrySet().forEach(
+				e->{
+					e.getValue().parallelStream().map(Node::getUserData).filter(ud->ud!=null).findAny().map(Object::toString)
+					.ifPresent(
+							ud->{
+								final Optional<String> oTranslation = Optional.ofNullable(Translation.getValue(ud, null));
+
+								if(!oTranslation.isPresent())
+									logger.warn("'{}' - Have to add to Translation", ud);
+
+								oTranslation
+								.ifPresent(
+										text->e.getValue().parallelStream().filter(n->n.getUserData()==null).findAny().map(Label.class::cast)
+										.ifPresent(l->Platform.runLater(()->l.setText(text))));
+								});
+				});
 	}
 }

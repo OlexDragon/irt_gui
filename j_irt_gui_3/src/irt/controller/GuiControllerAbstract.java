@@ -67,10 +67,10 @@ import irt.data.packet.PacketID;
 import irt.data.packet.PacketImp;
 import irt.data.packet.PacketSuper;
 import irt.data.packet.Payload;
-import irt.data.packet.RetransmitPacket;
 import irt.data.packet.control.ModuleListPacket;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.data.packet.protocol.PacketRetransmit;
 import irt.irt_gui.IrtGui;
 import irt.tools.KeyValue;
 import irt.tools.fx.module.ModuleSelectFxPanel;
@@ -245,6 +245,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		if(name.equals("Unit's Serial Port")){
 
 			serialPortSelection = (JComboBox<String>) c;
+			serialPortSelection.setFont(Translation.getFont());
 
 			DefaultComboBoxModel<String> defaultComboBoxModel = initSerialPortSelection();
 
@@ -274,14 +275,20 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 							logger.trace("languageComboBox.itemStateChanged(ItemEvent {})", itemEvent);
 
 							Translation.setLocale(((KeyValue<String, String>)languageComboBox.getSelectedItem()).getKey());
-							Font font = Translation.getFont();
 
-							headPanel.refresh();
-							if(unitsPanel!=null)
-								unitsPanel.refresh();
+							ThreadWorker.runThread(()->{
 
-							if(font!=null)
-								serialPortSelection.setFont(font);
+								try {
+									TimeUnit.MICROSECONDS.sleep(200);
+								} catch (InterruptedException e) {
+									logger.catching(Level.DEBUG, e);
+								}
+								headPanel.refresh();
+								if(unitsPanel!=null)
+									unitsPanel.refresh();
+
+								refresh();
+							}, "Refresh");
 
 //							DefaultComboBoxModel<String> defaultComboBoxModel = initSerialPortSelection();
 						}
@@ -652,7 +659,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 							.map(PacketSuper::getLinkHeader)
 							.map(LinkHeader::getAddr)
 							.filter(addr->addr!=0)
-							.ifPresent(addr->comPortThreadQueue.add(new RetransmitPacket(addr, (byte) 0)));
+							.ifPresent(addr->comPortThreadQueue.add(new PacketRetransmit(addr, (byte) 0)));
 						}
 					}
 
@@ -714,12 +721,21 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	protected abstract void getInfo();
 
 	private void reset() {
-		logger.debug("reset()");
+		logger.traceEntry("reset()");
 		panelController.removeAll();
 		protocol = getDefaultProtocol();
 		moduleList = null;
 		setRetransmit = true;
 		gui.setModuleSelectFxPanel(null);
+
+	}
+	public void refresh() {
+
+		Font font = Translation.getFont();
+		serialPortSelection.setFont(font);
+		final DefaultComboBoxModel<String> model = (DefaultComboBoxModel<String>) serialPortSelection.getModel();
+		model.removeElementAt(0);
+		model.insertElementAt(Translation.getValue(String.class, "select_serial_port", "Select Serial Port"), 0);		
 	}
 
 	public void start(long period) {

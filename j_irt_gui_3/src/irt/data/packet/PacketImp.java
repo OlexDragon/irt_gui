@@ -161,7 +161,10 @@ public class PacketImp implements Packet{
 	public static final byte PARAMETER_ID_PRODUCTION_GENERIC_SET_1_DP_INIT = 1; /* Re-init default values of RDAC */
 
 	//ProtoPacketIds
-	public static final byte PARAMETER_ID_RETRANSMIT 		= 5;
+	public static final byte PARAMETER_ADDRESS 			= 3;
+	public static final byte PARAMETER_BAUDRATE 		= 4;
+	public static final byte PARAMETER_ID_RETRANSMIT 	= 5;
+	public static final byte PARAMETER_TRANCEIVER_MODE 	= 6;
 
 	public static final byte IRT_SLCP_PARAMETER_PROTOCOL_ADDRESS	= 3;
 

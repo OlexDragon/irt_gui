@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.function.Supplier;
@@ -26,14 +27,15 @@ public class Translation {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	private static final String DEFAULT_LANGUAGE = "en";
+	public static final String DEFAULT_LANGUAGE = "en";
 
 	private static final Preferences PREFS = GuiController.getPrefs();
 	private static Locale locale;
 	private static Font font;
 
 	static {
-		setLocale(PREFS.get("locale", DEFAULT_LANGUAGE));
+		final String localeStr = Optional.ofNullable(PREFS.get("locale", null)).orElseGet(()->getLanguage());
+		setLocale(localeStr);
 	}
 
 	private static Properties translationProperties;
@@ -43,23 +45,25 @@ public class Translation {
 	public static void setLocale(final String localeStr){
 		font = null;
 
-		new ThreadWorker(()->{
+		new ThreadWorker(
+				()->{
 
-			try{
+					try{
 
-			locale = new Locale(localeStr);
+						locale = new Locale(localeStr);
 
-			messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
-			map = getMap();
+						messages = ResourceBundle.getBundle("irt.controller.translation.messageBundle", locale);
+						map = getMap();
 
-			if(!PREFS.get("locale", DEFAULT_LANGUAGE).equals(localeStr))
-				PREFS.put("locale", localeStr);
+						if(!PREFS.get("locale", DEFAULT_LANGUAGE).equals(localeStr))
+							PREFS.put("locale", localeStr);
 
-			getFont(localeStr);
-			}catch (Exception e) {
-				logger.catching(e);
-			}
-		}, "Translation.setLocale()");
+						getFont(localeStr);
+
+					}catch (Exception e) {
+						logger.catching(e);
+					}
+				}, "Translation.setLocale()");
 	}
 
 	private static Map<String, String> getMap() {
@@ -72,6 +76,10 @@ public class Translation {
 			map.put(nextElement, messages.getString(nextElement));
 		}
 		return map;
+	}
+
+	public static String getValue(String key, String defaultValue){
+		return getValueWithSuplier(String.class, key, ()->defaultValue);
 	}
 
 	public static <T> T getValue(Class<T> clazz, String key, T defaultValue){
@@ -179,7 +187,7 @@ public class Translation {
 		while(font==null)
 			synchronized (logger) {
 				try {
-					logger.trace("Wait for Font");
+					logger.info("Wait for Font");
 					Thread.sleep(400);
 				} catch (InterruptedException e) {
 					logger.catching(e);
@@ -188,8 +196,8 @@ public class Translation {
 		return font;
 	}
 
-	public static String getSelectedLanguage() {
-		return locale!=null ? locale.toString() : Locale.getDefault().toString();
+	public static String getLanguage() {
+		return locale!=null ?  locale.getLanguage() : Locale.getDefault().getLanguage();
 	}
 
 	public static void setFont(Font font) {

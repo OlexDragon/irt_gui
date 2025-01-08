@@ -128,7 +128,8 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			@Override
 			protected void done() {
 				try {
-					ledPowerOn.setText(get());
+					final String text = get();
+					ledPowerOn.setText(text);
 				} catch (Exception e) {
 					logger.catching(e);
 				}
@@ -176,6 +177,26 @@ public class HeadPanel extends MainPanel implements PacketListener {
 	 * set Bounds and Font for ledPowerOn, ledAlarm, ledMute
 	 */
 	private void swingWorkers() {
+		new SwingWorker<Font, Void>() {
+
+			@Override
+			protected Font doInBackground() throws Exception {
+				logger.traceEntry();
+				return logger.traceExit(Translation.getFont());
+			}
+
+			@Override
+			protected void done() {
+				try {
+					Font font = get();
+					ledPowerOn.setFont(font);
+					ledAlarm.setFont(font);
+					ledMute.setFont(font);
+				} catch (Exception e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
 		new SwingWorker<Rectangle, Void>() {
 
 			@Override
@@ -219,26 +240,6 @@ public class HeadPanel extends MainPanel implements PacketListener {
 			protected void done() {
 				try {
 					ledMute.setBounds(get());
-				} catch (Exception e) {
-					logger.catching(e);
-				}
-			}
-		}.execute();
-		new SwingWorker<Font, Void>() {
-
-			@Override
-			protected Font doInBackground() throws Exception {
-				logger.traceEntry();
-				return logger.traceExit(Translation.getFont());
-			}
-
-			@Override
-			protected void done() {
-				try {
-					Font font = get();
-					ledPowerOn.setFont(font);
-					ledAlarm.setFont(font);
-					ledMute.setFont(font);
 				} catch (Exception e) {
 					logger.catching(e);
 				}

@@ -16,15 +16,10 @@ public enum PacketGroupIDs {
 	RESET			((byte)5),		/* Device reset: generic command. */
 	DEVICE_INFO		((byte)8),		/* Device information: generic command. */
 	CONTROL			((byte)9),		/* Device control operations. Save configuration: generic command. */
-	PROTO			((byte)10),
+	NETWORK			((byte)11),		/* Network configuration. */
+	PROTOCOL		((byte)10),		/* Packet protocol parameters configuration and monitoring. */
 	REDUNDANCY		((byte)12),
 	DEVICE_DEBUG	((byte)61),		/* Device Debug. */
-
-/* Protocol */
-	PROTOCOL ((byte)10), /* Packet protocol parameters configuration and monitoring. */
-
-/* Network */
-	NETWORK ((byte)11), /* Network configuration. */
 
 	PRODUCTION_GENERIC_SET_1 ((byte)100),
 	DEVELOPER_GENERIC_SET_1 ((byte)120);

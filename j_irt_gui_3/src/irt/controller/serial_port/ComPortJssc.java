@@ -95,7 +95,7 @@ public class ComPortJssc extends SerialPort implements SerialPortInterface {
 	}
 
 	private void setBaudrate() throws SerialPortException {
-		setParams(Baudrate.getDefaultBaudrate().getValue(), DATABITS_8, STOPBITS_1, PARITY_NONE);
+		setParams((int) Baudrate.getDefaultBaudrate().getValue(), DATABITS_8, STOPBITS_1, PARITY_NONE);
 	}
 
 	@Override

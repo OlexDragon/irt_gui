@@ -49,7 +49,6 @@ public class IntDocument extends PlainDocument {
 
 	}
 
-
 	private void beep() {
 	    java.awt.Toolkit.getDefaultToolkit().beep();
 	}

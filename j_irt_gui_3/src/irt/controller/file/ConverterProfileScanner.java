@@ -66,7 +66,7 @@ public class ConverterProfileScanner extends FutureTask<Optional<Path>> implemen
 		private Optional<Path> getFilePath() throws InterruptedException, ExecutionException, TimeoutException {
 			GuiControllerAbstract.getComPortThreadQueue().addPacketListener(this);
 			GuiControllerAbstract.getComPortThreadQueue().add(packetWork);
-			return get(10, TimeUnit.SECONDS);
+			return get(15, TimeUnit.SECONDS);
 		}
 
 		@Override

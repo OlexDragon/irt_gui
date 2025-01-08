@@ -26,6 +26,9 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -53,6 +56,9 @@ import org.apache.logging.log4j.core.LoggerContext;
 import irt.controller.DumpControllerFull;
 import irt.controller.GuiController;
 import irt.controller.GuiControllerAbstract;
+import irt.controller.serial_port.Baudrate;
+import irt.controller.serial_port.ComPortThreadQueue;
+import irt.controller.serial_port.SerialPortInterface;
 import irt.controller.translation.Translation;
 import irt.data.Listeners;
 import irt.data.ThreadWorker;
@@ -69,22 +75,22 @@ import irt.tools.panel.subpanel.progressBar.ProgressBar;
 import irt.tools.textField.UnitAddressField;
 
 public class IrtGui extends IrtMainFrame {
+	private final static Logger logger = LogManager.getLogger();
 
 	private static final long serialVersionUID = 1611718189640547787L;
 	protected static boolean production = true;  public static boolean isProduction() { return production; }
 
 	private static final String PREF_KEY_ADDRESS = "address";
 	public static final File FLASH3_PRPPERIES = new File("Z:\\4Olex\\flash\\templates\\flash3.properties");
-
-	public static final int DEFAULT_ADDRESS = 255;
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
-	private static final Logger logger = LogManager.getLogger();
 
-	public static final String VERTION = "- 3.270";
+	public static final String VERTION = "- 3.279";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
 	private boolean controlPressed;
+
+	private JavaFxFrame baudRateFrame;
 
 	public IrtGui() {
 		super(700, 571);
@@ -241,9 +247,15 @@ public class IrtGui extends IrtMainFrame {
 		});
 		popupMenu.add(monitortMenuItem);
 
+		Optional.ofNullable(prefs.get("baudrate", null)).map(b->Baudrate.valueOf(b)).filter(b->!b.equals(Baudrate.BAUDRATE_115200))
+		.ifPresent(
+				b->{
+					final Timer timer = new Timer();
+					final AtomicReference<Timer> arTimer = new AtomicReference<>(timer);
+					timer.schedule(getTimerTask(arTimer, b), 500);
+				});
 		JMenuItem baudrateMenuItem = new JMenuItem(Translation.getValue(String.class, "baudrates", "Baud Rates"));
 		baudrateMenuItem.addActionListener(new ActionListener() {
-			private JavaFxFrame baudRateFrame;
 
 			public void actionPerformed(ActionEvent e) {
 
@@ -317,7 +329,7 @@ public class IrtGui extends IrtMainFrame {
 
 			comboBoxLanguage.setModel(defaultComboBoxModel);
 
-			final String key = Optional.ofNullable(GuiController.getPrefs().get("locale", "en_US")).orElse("en_US");
+			final String key = GuiController.getPrefs().get("locale", Translation.getLanguage());
 			KeyValue<String, String> keyValue = new KeyValue<>(key, null);
 			comboBoxLanguage.setSelectedItem(keyValue);
 		});
@@ -410,6 +422,31 @@ public class IrtGui extends IrtMainFrame {
 				}
 			}
 		}.execute();
+	}
+
+	private TimerTask getTimerTask(final AtomicReference<Timer> arTimer, Baudrate baudrate) {
+		return new TimerTask() {
+			
+			@Override
+			public void run() {
+
+				arTimer.get().cancel();
+				final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
+
+				if(serialPort==null) {
+					final Timer timer = new Timer();
+					timer.schedule(getTimerTask(arTimer, baudrate), 500);
+					return;
+
+				}
+				SwingUtilities.invokeLater(
+				()->{
+					ComPortThreadQueue.getSerialPort().setBaudrate(baudrate);
+					baudRateFrame = new JavaFxFrame(new BaudRateSelectorFx(), new JMenu("Menu"));
+					baudRateFrame.setSize(200, 200);
+				});
+			}
+		};
 	}
 
 	public static void main(String[] args) {

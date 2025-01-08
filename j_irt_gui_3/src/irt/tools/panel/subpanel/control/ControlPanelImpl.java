@@ -103,7 +103,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		super(deviceType, linkHeader, Translation.getValue(String.class, "control", "Control") , 214, 180);
 		setName("ControlPanelImpl");
 
-		Font font = Translation.getFont();
+		Font translationFont = Translation.getFont();
 
 		this.flags = flags;
 
@@ -126,7 +126,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		btnMute.setCursor(cursor);
 		add(btnMute);
 
-		font = font.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
+		translationFont = translationFont.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f))
 				.deriveFont(Font.BOLD);
 
 		lblMute = new JLabel(muteText);
@@ -134,7 +134,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		lblMute.setName("Label Mute");
 		lblMute.setHorizontalAlignment(SwingConstants.LEFT);
 		lblMute.setForeground(Color.YELLOW);
-		lblMute.setFont(font);
+		lblMute.setFont(translationFont);
 		add(lblMute);
 		new SwingWorker<Rectangle, Void>() {
 
@@ -159,7 +159,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 			}
 		}.execute();
 
-		font = font.deriveFont(16f);
+		Font font = translationFont.deriveFont(16f);
 		if(font == null)//This is for WindowBuilder Editor
 			font = new Font("Tahoma", Font.PLAIN, 12);
 		txtGain = new JTextField();
@@ -203,13 +203,13 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		@Override public int getWidth() { return 0;}};}});
 		cbActionSelector.setBackground(color);
 		cbActionSelector.setForeground(Color.YELLOW);
-		cbActionSelector.setFont(font.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 14f))
-				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD)));
+		final Font deriveFont = translationFont.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 14f)).deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD));
+		cbActionSelector.setFont(deriveFont);
 		cbActionSelector.setCursor(cursor);
 		add(cbActionSelector);
 
 		lblChoice = new JLabel(prefs.get("choice"+deviceType, ""));
-		lblChoice.setFont(font);
+		lblChoice.setFont(deriveFont);
 		lblChoice.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
@@ -232,7 +232,6 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		lblChoice.setName("Label Choice");
 		lblChoice.setHorizontalAlignment(SwingConstants.LEFT);
 		lblChoice.setForeground(Color.LIGHT_GRAY);
-		lblChoice.setFont(new Font("Tahoma", Font.BOLD, 11));
 		lblChoice.setBounds(118, 19, 85, 20);
 		add(lblChoice);
 
@@ -283,14 +282,14 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		});
 
 
-		font = font.deriveFont(16f);
+		translationFont = translationFont.deriveFont(16f);
 
 		cbLoSelect = new LoSelectComboBox(linkHeader!=null ? linkHeader.getAddr() : 0);
 //		cbLoSelect.setName("LO Select");
 		cbLoSelect.setForeground(Color.YELLOW);
 		cbLoSelect.setBackground(color);
 		cbLoSelect.setCursor(cursor);
-		cbLoSelect.setFont(font);
+		cbLoSelect.setFont(translationFont);
 		cbLoSelect.setBounds(10, 141, 194, 26);
 		add(cbLoSelect);
 		cbLoSelect.addItemListener(
@@ -304,7 +303,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 					}
 				});
 
-		font = font.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
+		translationFont = translationFont.deriveFont(Translation.getValue(Float.class, "control.checkBox.font.size", 12f))
 				.deriveFont(Translation.getValue(Integer.class, "control.checkBox.font.style", Font.PLAIN));
 
 		String text = Translation.getValue(String.class, "step", "Step")+":";
@@ -319,7 +318,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		});
 		chckbxStep.setForeground(Color.WHITE);
 		chckbxStep.setOpaque(false);
-		chckbxStep.setFont(font);
+		chckbxStep.setFont(translationFont);
 		chckbxStep.setBounds(14, 65, 62, 23);
 		add(chckbxStep);
 
@@ -328,7 +327,7 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 		txtStep.setForeground(Color.WHITE);
 		txtStep.setText("1");
 		txtStep.setHorizontalAlignment(SwingConstants.CENTER);
-		txtStep.setFont(font);
+		txtStep.setFont(translationFont);
 		txtStep.setColumns(10);
 		txtStep.setBounds(75, 65, 127, 20);
 		txtStep.setCaretColor(Color.YELLOW);
@@ -391,7 +390,8 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 
 		titledBorder.setTitle(Translation.getValue(String.class, "control", "Control"));
 
-		Font font = Translation.getFont().deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f));
+		final Font translationFont = Translation.getFont();
+		Font font = translationFont.deriveFont(Translation.getValue(Float.class, "control.label.mute.font.size", 12f));
 		String muteText = Translation.getValue(String.class, "mute", "MUTE");
 
 		btnMute.setToolTipText(muteText);
@@ -429,8 +429,6 @@ public class ControlPanelImpl extends MonitorPanelAbstract implements ControlPan
 				.deriveFont(Translation.getValue(Float.class, "controll.comboBox.font.size", 18f))
 				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD)));
 		cbActionSelector.setModel(model);
-
-		lblChoice.setFont(font);
 	}
 
 	@Override

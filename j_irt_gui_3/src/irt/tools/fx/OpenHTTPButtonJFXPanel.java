@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.LogManager;
 
+import irt.controller.translation.Translation;
 import irt.data.network.NetworkAddress;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -40,7 +41,7 @@ public class OpenHTTPButtonJFXPanel extends JFXPanel {
 	public class OpenHTTPButtonFx extends Button{
 
 		public OpenHTTPButtonFx() {
-			setText("Open HTTP");
+			refresh();
 			setFont(new Font(12));
 			setOnAction(e->{
 
@@ -66,5 +67,16 @@ public class OpenHTTPButtonJFXPanel extends JFXPanel {
 					setDisable(true);
 			});
 		}
+
+		public void refresh() {
+			Platform.runLater(()->{
+				final String value = Translation.getValue("open_http", "Open HTTP");
+				setText(value);				
+			});
+		}
+	}
+
+	public void refresh() {
+		root.refresh();
 	}
 }

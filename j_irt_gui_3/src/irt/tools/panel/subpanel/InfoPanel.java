@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.AncestorEvent;
@@ -230,7 +231,7 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		this.deviceInfo = deviceInfo;
 
 		Font font = Translation.getFont()
-				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.size", 18))
+				.deriveFont(Translation.getValue(Float.class, "titledBorder.font.size", 18f))
 				.deriveFont(Translation.getValue(Integer.class, "titledBorder.font.type", Font.BOLD));
 
 		titledBorder = new TitledBorder(
@@ -269,7 +270,8 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 						lblSnTxt.setFont(font);
 		}
 		
-				lblSn = new JLabel("The Unit is not Connected");
+				final String text = Translation.getValue("not_connected", "The Unit is not Connected");
+				lblSn = new JLabel(text);
 				lblSn.addAncestorListener(new AncestorListener() {
 
 					SoftReleaseChecker softReleaseChecker;
@@ -311,7 +313,6 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 				});
 				lblSn.setHorizontalAlignment(SwingConstants.LEFT);
 				lblSn.setBounds(84, 35, 198, 14);
-				lblSn.setFont(new Font("Tahoma", Font.PLAIN, 14));
 				lblSn.setForeground(Color.YELLOW);
 		
 				if(deviceInfo!=null) {
@@ -321,12 +322,12 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 					lblUnitPartNumberTxt.setForeground(new Color(153, 255, 255));
 					lblUnitPartNumberTxt.setFont(font);
 				}
-		
-		lblUnitPartNumber = new JLabel("This is a demo view.");
+
+		final String text2 = Translation.getValue("is_demo", "This is a demo view.");
+		lblUnitPartNumber = new JLabel(text2);
 		lblUnitPartNumber.setHorizontalAlignment(SwingConstants.LEFT);
 		lblUnitPartNumber.setBounds(84, 51, 198, 14);
 		lblUnitPartNumber.setForeground(Color.YELLOW);
-		lblUnitPartNumber.setFont(new Font("Tahoma", Font.BOLD, 14));
 		
 		if(deviceInfo!=null) {
 				lblCountTxt = new JLabel(Translation.getValue(String.class, "count", "Count")+":");
@@ -348,11 +349,12 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 				lblBuiltDateTxt.setHorizontalAlignment(SwingConstants.RIGHT);
 		}
 
-		lblBuiltDate = new JLabel("Check power or M&C cable .");
+		final String text3 = Translation.getValue("check_power", "Check power or M&C cable .");
+		lblBuiltDate = new JLabel(text3);
+		setFont();
 		lblBuiltDate.setHorizontalAlignment(SwingConstants.LEFT);
 		lblBuiltDate.setBounds(84, 83, 198, 14);
 		lblBuiltDate.setForeground(Color.WHITE);
-		lblBuiltDate.setFont(new Font("Tahoma", Font.PLAIN, 14));
 
 		lblVersionTxt = new JLabel(Translation.getValue(String.class, "version", "Version")+":");
 		lblVersionTxt.setVisible(false);
@@ -436,6 +438,29 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		});
 
 		setInfo(deviceInfo);
+	}
+
+	public void setFont() {
+		ThreadWorker.runThread(()->{
+			try {
+				TimeUnit.MILLISECONDS.sleep(100);
+			} catch (InterruptedException e1) {
+				logger.catching(Level.DEBUG, e1);
+			}
+			new SwingWorker<Void, Void>() {
+
+				@Override
+				protected Void doInBackground() throws Exception {
+					Font f = Translation.getFont()
+							.deriveFont(14f)
+							.deriveFont(Font.BOLD);
+					lblSn.setFont(f);
+					lblUnitPartNumber.setFont(f);
+					lblBuiltDate.setFont(f);
+					return null;
+				}
+			}.execute();
+		}, "not_connected");
 	}
 
 	private void addLogInMenuItem(JPopupMenu popup, String serialNumber) {
@@ -601,19 +626,26 @@ public class InfoPanel extends JPanel implements Refresh, PacketListener {
 		titledBorder.setTitleFont(font);
 
 		font = font.deriveFont(Translation.getValue(Float.class, "infoPanel.labels.font.size", 12f));
-		
-		lblCountTxt.setFont(font);
-		lblCountTxt.setText(Translation.getValue(String.class, "count", "Count")+":");
-		lblBuiltDateTxt.setFont(font);
-		lblBuiltDateTxt.setText(Translation.getValue(String.class, "built_date", "Built Date")+":");
+		if(lblCountTxt!=null) {
+			lblCountTxt.setFont(font);
+			lblCountTxt.setText(Translation.getValue(String.class, "count", "Count")+":");
+			lblBuiltDateTxt.setFont(font);
+			lblBuiltDateTxt.setText(Translation.getValue(String.class, "built_date", "Built Date")+":");
+			lblSnTxt.setFont(font);
+			lblSnTxt.setText(Translation.getValue(String.class, "sn", "SN")+":");
+			lblUnitPartNumberTxt.setFont(font);
+			lblUnitPartNumberTxt.setText(Translation.getValue(String.class, "part_number", "Part Number")+":");
+		}else {
+
+			lblSn.setText(Translation.getValue("not_connected", "The Unit is not Connected"));
+			lblUnitPartNumber.setText(Translation.getValue("is_demo", "This is a demo view."));
+			lblBuiltDate.setText(Translation.getValue("check_power", "Check power or M&C cable ."));
+			setFont();
+		}
 		lblVersionTxt.setFont(font);
 		lblVersionTxt.setText(Translation.getValue(String.class, "version", "Version")+":");
 		lblDeviceTxt.setFont(font);
 		lblDeviceTxt.setText(Translation.getValue(String.class, "device", "Device")+":");
-		lblSnTxt.setFont(font);
-		lblSnTxt.setText(Translation.getValue(String.class, "sn", "SN")+":");
-		lblUnitPartNumberTxt.setFont(font);
-		lblUnitPartNumberTxt.setText(Translation.getValue(String.class, "part_number", "Part Number")+":");
 	}
 
 	@Override

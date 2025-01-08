@@ -17,7 +17,7 @@ public class SerialPortListener implements SerialPortDataListener, SerialPortEve
 	private final static Logger logger = LogManager.getLogger();
 
 	private final Runnable action;
-	private byte[] buffer;
+	private volatile static byte[] buffer;
 
 	public SerialPortListener(SerialPortInterface serialPort) {
 

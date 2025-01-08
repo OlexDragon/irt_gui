@@ -77,7 +77,7 @@ public class JavaFxWrapper extends JFXPanel implements Monitor {
 
 	@Override
 	public void refresh() {
-		logger.error("refresh()");//TODO
+		logger.debug("refresh()");
 	}
 
 	public void setUnitAddress(byte unitAddress) {

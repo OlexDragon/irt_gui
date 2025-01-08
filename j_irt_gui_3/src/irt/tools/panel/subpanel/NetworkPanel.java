@@ -50,9 +50,8 @@ import irt.data.listener.PacketListener;
 import irt.data.network.NetworkAddress;
 import irt.data.network.NetworkAddress.AddressType;
 import irt.data.packet.LinkHeader;
-import irt.data.packet.PacketImp;
 import irt.data.packet.PacketGroupIDs;
-import irt.data.packet.PacketID;
+import irt.data.packet.PacketImp;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.network.NetworkAddressPacket;
@@ -157,6 +156,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	private Timer activitiesTimer;
 	private final LineBorder border2 = new LineBorder(Color.YELLOW);
 
+	private JButton btnDefault;
+	private OpenHTTPButtonJFXPanel updateButtonJFXPanel;
+
 	// ************************************************************************************************************** //
 	// 																												  //
 	// 									constructor NetworkPanel													  //
@@ -223,7 +225,8 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		panel_1 = new JPanel();
 		panel_1.setName("setting");
 		
-		JButton btnDefault = new JButton("Reset");
+		final String text = Translation.getValue(String.class, "reset", "Reset");
+		btnDefault = new JButton(text);
 		if(deviceInfo!=null) {
 			btnDefault.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -252,7 +255,7 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		}
 		updateButton = new UpdateButtonJFXPanel(deviceInfo, networkAddress);
 		
-		OpenHTTPButtonJFXPanel updateButtonJFXPanel = new OpenHTTPButtonJFXPanel(networkAddress);
+		updateButtonJFXPanel = new OpenHTTPButtonJFXPanel(networkAddress);
 
 		GroupLayout groupLayout = new GroupLayout(this);
 		groupLayout.setHorizontalGroup(
@@ -454,6 +457,10 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 		comboBoxAddressType.setFont(font);
 		comboBoxAddressType.setModel(getComboboxModel());
 //		logger.debug("comboBoxAddressType.getSelectedItem()={}", comboBoxAddressType.getSelectedItem());
+
+		btnDefault.setText(Translation.getValue(String.class, "reset", "Reset"));
+		updateButton.refresh();
+		updateButtonJFXPanel.refresh();
 	}
 
 	@Override
@@ -465,9 +472,9 @@ public class NetworkPanel extends JPanel implements Refresh, Runnable, PacketLis
 	@Override
 	public void onPacketReceived(Packet packet) {
 
-		if(PacketID.NETWORK_ADDRESS.match(packet))
-			logger.trace(packet);
-
+//		if(PacketID.NETWORK_ADDRESS.match(packet))
+//			logger.trace(packet);
+//
 		new ThreadWorker(()->{
 
 			Optional

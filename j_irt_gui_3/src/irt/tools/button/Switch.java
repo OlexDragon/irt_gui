@@ -177,7 +177,6 @@ public class Switch extends SwitchBox implements Runnable, PacketListener {
 	@Override
 	public void run() {
 
-//		logger.error("{} : {}", getName(), packetToGet);
 		final ComPortThreadQueue queue = GuiControllerAbstract.getComPortThreadQueue();
 		final int size = queue.size();
 

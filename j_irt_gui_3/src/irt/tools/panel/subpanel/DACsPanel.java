@@ -326,7 +326,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		else
 			rAddr++;
 
-		registerValue = kaBand.map(dt->new RegisterValue(30, 8, null)).orElse(new RegisterValue(index, rAddr, null));//TODO
+		registerValue = kaBand.map(dt->new RegisterValue(30, 8, null)).orElse(new RegisterValue(index, rAddr, null));
 
 		txtDAC4 = new RegisterTextField(unitAddr, registerValue, PacketID.DEVICE_CONVERTER_DAC4, 0, maxValue);
 		txtDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -338,7 +338,8 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 
 		font = font.deriveFont(12f);
 
-		lblDAC4 = new JLabel("DAC 4:");
+		Optional<DeviceType> oNewVertion = oDeviceType.filter(dt->dt==DeviceType.CONVERTER_L_TO_C && deviceInfo.getRevision()>=12);
+		lblDAC4 = new JLabel(oNewVertion.map(t->"LO Gain:").orElse("DAC 4:"));
 		lblDAC4.setRequestFocusEnabled(false);
 		lblDAC4.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDAC4.setBounds(112, 102, 73, 17);
@@ -359,7 +360,7 @@ public class DACsPanel extends JPanel implements PacketListener, Runnable {
 		add(lblDAC2);
 		lblDAC2.setFont(font);
 
-		lblDAC3 = new JLabel("DAC 3:");
+		lblDAC3 = new JLabel(oNewVertion.map(t->"VC_EQ:").orElse("DAC 3:"));
 		lblDAC3.setRequestFocusEnabled(false);
 		lblDAC3.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblDAC3.setBounds(112, 74, 73, 17);

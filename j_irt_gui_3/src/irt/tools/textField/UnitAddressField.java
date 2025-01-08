@@ -26,6 +26,8 @@ public class UnitAddressField extends JTextField {
 	private static final long serialVersionUID = 7712969376488543032L;
 	private final Logger logger = LogManager.getLogger();
 
+	private static UnitAddressField thisFiald;
+
 	public static final byte[] DEFAULT_ADDRESS = new byte[]{(byte) 254};
 	public final String[] DEFAULT_ADDRESS_STR = new String[]{Integer.toString(DEFAULT_ADDRESS[0])};
 
@@ -36,6 +38,7 @@ public class UnitAddressField extends JTextField {
 
 	public UnitAddressField(String pref_key_address) {
 
+		thisFiald = this;
 		PREF_KEY_ADDRESS = pref_key_address;
 		setSelectedAddress();
 
@@ -149,6 +152,17 @@ public class UnitAddressField extends JTextField {
 				popup.show(e.getComponent(), e.getX(), e.getY());
 			}
 		});
+	}
+
+	public static void setAddress(Byte addr) {
+
+		if(thisFiald==null)
+			return;
+
+		final String text = new Integer(addr &0xff).toString();
+		thisFiald.setText(text);
+		for(ActionListener a: thisFiald.getActionListeners())
+			a.actionPerformed(null);
 	}
 
 	// class AddressListener **********************************************************************************

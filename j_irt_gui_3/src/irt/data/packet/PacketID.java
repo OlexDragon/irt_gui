@@ -38,6 +38,10 @@ import irt.data.packet.interfaces.Packet;
 import irt.data.packet.interfaces.PacketThreadWorker;
 import irt.data.packet.measurement.MeasurementPacket;
 import irt.data.packet.network.NetworkAddressPacket;
+import irt.data.packet.protocol.PacketBaudrate;
+import irt.data.packet.protocol.PacketRetransmit;
+import irt.data.packet.protocol.PacketTranceverMode;
+import irt.data.packet.protocol.PacketUnitAddress;
 import irt.data.packet.redundancy.RedundancyControllerStatusPacket;
 import irt.data.packet.redundancy.SwitchoverModePacket;
 
@@ -50,6 +54,7 @@ public enum PacketID {
 	ALARMS_ALL_IDs					( null, null,  null, AlarmsIDsPacket.parseValueFunction, null, 50),
 	ALARMS_SUMMARY					( null, null, null, AlarmsSummaryPacket.parseValueFunction, null, null),
 	ALARMS_OWER_CURRENT				( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
+	ALARMS_OWER_CURRENT2			( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
 	ALARMS_UNDER_CURRENT			( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
 	ALARMS_OWER_TEMPERATURE			( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
 	ALARMS_PLL_OUT_OF_LOCK			( null, null, null, AlarmStatusPacket.parseValueFunction, null, 6),
@@ -79,6 +84,7 @@ public enum PacketID {
 	ALARMS_PSU2						( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 6),
 
 	ALARMS_DESCRIPTION_OWER_CURRENT				( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
+	ALARMS_DESCRIPTION_OWER_CURRENT2			( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_UNDER_CURRENT			( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_OWER_TEMPERATURE			( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
 	ALARMS_DESCRIPTION_PLL_OUT_OF_LOCK			( null, null, null, AlarmDescriptionPacket.parseValueFunction, null, 30),
@@ -327,8 +333,15 @@ public enum PacketID {
 	DUMP_REGISTER_207	( PacketGroupIDs.DEVICE_DEBUG, null, null, DeviceDebugInfoPacket.parseValueFunction, null, null),
 	DUMP_REGISTER_220	( PacketGroupIDs.DEVICE_DEBUG, null, null, DeviceDebugInfoPacket.parseValueFunction, null, null),
 
-	CLEAR_STATISTICS	( null, null, null, null, null, null),
-	PROTO_RETRANSNIT	( null, null, null, RetransmitPacket.parseValueFunction, null, null);
+	CLEAR_STATISTICS		( null, null, null, null, null, null),
+	PROTO_UNIT_ADDRESS		( null, null, null, PacketUnitAddress.parseValueFunction, 200L, null),
+	PROTO_UNIT_ADDRESS_SET	( null, null, null, PacketUnitAddress.parseValueFunction, 200L, null),
+	PROTO_BAUDRATE			( null, null, null, PacketBaudrate.parseValueFunction, 200L, null),
+	PROTO_BAUDRATE_SET			( null, null, null, PacketBaudrate.parseValueFunction, 200L, null),
+	PROTO_RETRANSNIT		( null, null, null, PacketRetransmit.parseValueFunction, null, null),
+	PROTO_RETRANSNIT_SET	( null, null, null, PacketRetransmit.parseValueFunction, null, null),
+	PROTO_TRANCEIVER_MODE	( null, null, null, PacketTranceverMode.parseValueFunction, null, null),
+	PROTO_TRANCEIVER_MODE_SET	( null, null, null, PacketTranceverMode.parseValueFunction, null, null);
 
 private final static Logger logger = LogManager.getLogger();
 

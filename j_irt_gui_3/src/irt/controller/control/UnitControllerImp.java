@@ -142,13 +142,12 @@ public class UnitControllerImp implements UnitController{
 				if(spacing<=0)
 					spacing = 1;
 
-				if(slider.getMinorTickSpacing() == spacing)
-					return;
-
-				slider.setMinorTickSpacing(spacing);
 				final String txt = value.valueToString(spacing);
 				txtStep.setText(txt);
 				GuiControllerAbstract.getPrefs().put(KEY, txt);
+
+				if(slider.getMinorTickSpacing() != spacing)
+					slider.setMinorTickSpacing(spacing);
 			});
 
 			onFocusLost();

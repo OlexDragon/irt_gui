@@ -65,7 +65,7 @@
 <!--  	<Logger name="irt.data.packet.denice_debag.DeviceDebugHelpPacket" level="debug"/> -->
 
 <!--  	<Logger name="irt.controller.ValueController" level="all"/> -->
- 	<Logger name="irt.controller.GuiControllerAbstract" level="all"/>
+<!--  	<Logger name="irt.controller.GuiControllerAbstract" level="all"/> -->
 <!--  	<Logger name="irt.controller.GuiController" level="error" /> -->
 <!-- 	<Logger name="irt.tools.panel.UserPicobucPanel" level="debug"/> -->
 
@@ -77,8 +77,8 @@
 <!--  	<Logger name="irt.controller.serial_port.ComPortPureJava" level="debug"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortJssc" level="warn"/> -->
 <!--  	<Logger name="irt.controller.serial_port.ComPortJSerialComm" level="all"/> -->
-<!--  	<Logger name="irt.controller.serial_port.SerialPortListener" level="info"/> -->
-<!--  	<Logger name="irt.controller.serial_port.SerialPortWorker" level="info"/> -->
+<!--  	<Logger name="irt.controller.serial_port.SerialPortListener" level="all"/> -->
+<!--  	<Logger name="irt.controller.serial_port.SerialPortWorker" level="all"/> -->
 
 <!--  	<Logger name="irt.data.AdcWorker" level="all"/> -->
 
@@ -92,7 +92,7 @@
 <!--  	<Logger name="irt.tools.fx.update.profile.Profile" level="all"/> -->
 
 
-    <Logger name="dumper" level="ALL">
+    <Logger name="dumper" level="error">
       <AppenderRef ref="DumpFile" />
     </Logger>
 

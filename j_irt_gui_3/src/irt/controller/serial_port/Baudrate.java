@@ -1,5 +1,8 @@
 package irt.controller.serial_port;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 import jssc.SerialPort;
 
 public enum Baudrate {
@@ -10,31 +13,23 @@ public enum Baudrate {
 	BAUDRATE_115200	(SerialPort.BAUDRATE_115200);
 
 	private static Baudrate DEFAULT_BAUDRATE = BAUDRATE_115200;
-	private int value;
+	private long value;
 
-	private Baudrate(int baudrate){
+	private Baudrate(long baudrate){
 		value = baudrate;
 	}
 
-	public int getValue() {
+	public long getValue() {
 		return value;
 	}
 
 	@Override
 	public String toString(){
-		return Integer.toString(value);
+		return Long.toString(value);
 	}
 
-	public static Baudrate valueOf(int baudrate) {
-		Baudrate result = null;
-
-		for(Baudrate b:values())
-			if(b.getValue()==baudrate){
-				result = b;
-				break;
-			}
-
-		return result;
+	public static Optional<Baudrate> valueOf(long baudrate) {
+		return Arrays.stream(values()).parallel().filter(v->v.getValue()==baudrate).findAny();
 	}
 
 	public static Baudrate getDefaultBaudrate() {

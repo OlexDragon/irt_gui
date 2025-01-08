@@ -30,6 +30,7 @@ import irt.tools.fx.JavaFxWrapper;
 import irt.tools.fx.module.AttenuationOffsetFxPanel;
 import irt.tools.label.ImageLabel;
 import irt.tools.panel.head.IrtPanel;
+import irt.tools.panel.subpanel.ComPanel;
 import irt.tools.panel.subpanel.NetworkPanel;
 import irt.tools.panel.subpanel.RedundancyPanel;
 
@@ -45,16 +46,6 @@ public class UserPicobucPanel extends DevicePanel {
 
 	public UserPicobucPanel(DeviceInfo deviceInfo, int minWidth, int midWidth, int maxWidth, int minHeight, int maxHeight) {
 		super( deviceInfo, minWidth, midWidth, maxWidth, minHeight, maxHeight);
-
-//		addHierarchyListener(
-//				hierarchyEvent->
-//				Optional
-//				.of(hierarchyEvent)
-//				.filter(e->(e.getChangeFlags()&HierarchyEvent.PARENT_CHANGED)!=0)
-//				.map(HierarchyEvent::getChanged)
-//				.filter(c->c instanceof ConverterPanel || c instanceof PicobucPanel)
-//				.filter(c->c.getParent()==null)
-//				.ifPresent(c->Optional.ofNullable(target).ifPresent(DefaultController::stop)));
 
 		final Optional<DeviceInfo> oDeviceInfo = Optional.ofNullable(deviceInfo);
 		final LinkHeader linkHeader = oDeviceInfo.map(DeviceInfo::getLinkHeader).orElse(null);
@@ -79,6 +70,9 @@ public class UserPicobucPanel extends DevicePanel {
 
 			NetworkPanel networkPanel = new NetworkPanel(deviceInfo);
 			tabbedPane.addTab("network", networkPanel);
+
+			ComPanel comPanel = new ComPanel(deviceInfo);
+			tabbedPane.addTab("COM", comPanel);
 
 			int tabCount = tabbedPane.getTabCount();
 			for (int i = 0; i < tabCount; i++) {
@@ -119,7 +113,6 @@ public class UserPicobucPanel extends DevicePanel {
 		try{
 		super.refresh();
 		((Refresh)getControlPanel()).refresh();
-		getMonitorPanel().refresh();
 
 		int tabCount = tabbedPane.getTabCount();
 		for(int i=0; i<tabCount; i++){

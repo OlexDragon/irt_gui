@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -298,9 +299,25 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 		lblUnitName.setText(Translation.getValue(String.class, "redundancy.unit_name", "Unit Name"));
 		lblUnitName.setFont(font);
 
-		String text = Translation.getValue(String.class, lblSetOnline.getName(), SET_ONLINE);
-		lblSetOnline.setText(text);
-		lblSetOnline.setToolTipText(text);
+
+		new SwingWorker<String, Void>() {
+
+			@Override
+			protected String doInBackground() throws Exception {
+				return Translation.getValue("SET_ONLINE", "Set Online");
+			}
+
+			@Override
+			protected void done() {
+				try {
+					final String text = get();
+					lblSetOnline.setText(text);
+					lblSetOnline.setToolTipText(text);
+				} catch (Exception e) {
+					logger.catching(e);
+				}
+			}
+		}.execute();
 		lblSetOnline.setFont(font);
 
 		font = font.deriveFont(Translation.getValue(Float.class, "redundancy.combobox.font.size", 12f));

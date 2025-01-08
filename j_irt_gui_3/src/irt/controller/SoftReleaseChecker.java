@@ -13,6 +13,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.FutureTask;
 
+import javax.swing.JOptionPane;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +22,7 @@ import irt.data.DeviceInfo;
 import irt.data.ThreadWorker;
 import irt.irt_gui.IrtGui;
 import irt.irt_gui.IrtMainFrame;
+import javafx.application.Platform;
 
 public class SoftReleaseChecker extends FutureTask<Boolean>{
 
@@ -111,6 +114,12 @@ public class SoftReleaseChecker extends FutureTask<Boolean>{
 					    			}
 
 					    			break;
+						    	}else {
+						    		 final int result = JOptionPane.showConfirmDialog(IrtMainFrame.getMainFrame(), "The program will not work unless you select a path.\nPress 'YES' to close the GUI", "ALERT MESSAGE", JOptionPane.YES_NO_OPTION);
+						    		 if(result==0) {
+						 		    	Platform.exit();
+						 		    	System.exit(0);
+						    		 }
 						    	}
 						    }
 

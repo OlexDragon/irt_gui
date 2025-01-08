@@ -39,7 +39,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 		this.linkHeader = linkHeader!=null ? linkHeader : new LinkHeader((byte)0, (byte)0, (short)0);
 		this.deviceType = deviceType;
 
-		selectedLanguage = Translation.getSelectedLanguage();
+		selectedLanguage = Translation.getLanguage();
 
 		setOpaque(false);
 
@@ -92,7 +92,7 @@ public abstract class MonitorPanelAbstract extends JPanel implements Refresh, Mo
 
 	public void refresh() {
 
-		selectedLanguage = Translation.getSelectedLanguage();
+		selectedLanguage = Translation.getLanguage();
 
 		Font font = getTitledBorderFont();
 		titledBorder.setTitleFont(font);

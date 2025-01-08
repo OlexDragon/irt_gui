@@ -96,7 +96,7 @@ public class ComPortThreadQueue implements Runnable {
 	}
 
 	public synchronized void add(PacketWork packetWork){
-//		Optional.of(packetWork).map(PacketWork::getPacketThread).map(PacketThreadWorker::getPacket).filter(p->PacketIDs.CONTRO_MODULE_LIST.match(p.getHeader().getPacketId())).ifPresent(logger::error);
+//		Optional.of(packetWork).map(PacketWork::getPacketThread).map(PacketThreadWorker::getPacket).filter(p->PacketID.PROTO_UNIT_ADDRESS_SET.match(p.getHeader().getPacketId())).ifPresent(logger::error);
 
 		if(serialPort==null || packetWork==null)
 			return;
