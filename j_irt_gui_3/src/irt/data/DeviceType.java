@@ -27,6 +27,7 @@ public enum DeviceType{
 
 	TRANSCEIVER		(260, Protocol.LINKED, "Transceiver", HardwareType.BAIS),
 
+	KU__RACK_MOUNT			(300, Protocol.LINKED, "Ku rack mount SSPB", HardwareType.CONTROLLER),
 	ORPC					(301, Protocol.LINKED, "Outdoor Redundancy Protection Controller", HardwareType.CONTROLLER),
 	IR_PC					(310, Protocol.LINKED, "Redundancy protection controller", HardwareType.CONTROLLER),
 	TWO_SWITCHS_CONTROLLER	(311, Protocol.LINKED, "2 switchs Redundancy protection controller", HardwareType.CONTROLLER),

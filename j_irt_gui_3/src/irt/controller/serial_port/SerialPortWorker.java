@@ -77,7 +77,7 @@ public class SerialPortWorker {
 				serialPort.writeBytes(data);
 				logger.debug("writeBytes: {}", data);
 
-				if ((isConfirmBytes()) && isFlagSequence()){
+				if (isConfirmBytes() && isFlagSequence()){
 
 					if(linkHeader!=null){
 						if((readData=readLinkHeader())!=null)
@@ -142,8 +142,7 @@ public class SerialPortWorker {
 							logger.warn("packetHeader.asBytes() == null || packetHeader.getGroupId()!=groupId");
 					}else
 						logger.warn("(readData=readHeader())==null");
-				}else 
-					logger.warn("isFlagSequence() = false {}", packet);
+				}
 			}else {
 				logger.warn("the condition data!=null && isOpened({}) does not hold", serialPort.isOpened());
 			}
@@ -239,7 +238,10 @@ public class SerialPortWorker {
 	private static boolean isFlagSequence() throws Exception {
 
 		byte[] readBytes = readBytes(1);
-		return readBytes!=null && readBytes[0] == PacketImp.FLAG_SEQUENCE;
+		final boolean isFlag = readBytes!=null && readBytes[0] == PacketImp.FLAG_SEQUENCE;
+		if(!isFlag)
+			logger.warn("No sequence flag.");
+		return isFlag;
 	}
 
 	private static boolean isConfirmBytes() throws Exception {

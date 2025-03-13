@@ -92,7 +92,7 @@
 <!--  	<Logger name="irt.tools.fx.update.profile.Profile" level="all"/> -->
 
 
-    <Logger name="dumper" level="error">
+    <Logger name="dumper" level="ALL">
       <AppenderRef ref="DumpFile" />
     </Logger>
 

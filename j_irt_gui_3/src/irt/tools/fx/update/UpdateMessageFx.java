@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Path;
@@ -196,28 +194,28 @@ public class UpdateMessageFx extends Dialog<Message>{
 	// ***************************************************************************************************************** //
 	public UpdateMessageFx(DeviceInfo deviceInfo, boolean isProduction) {
 
-		ThreadWorker.runThread(
-				()->{
-					try {
-
-						URL url = new URL("http://op-2123100/update.cgi");
-						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-						connection.setRequestMethod("POST"); // PUT is another valid option
-						connection.setDoOutput(true);
-
-						connection.setDoOutput(true);
-						connection.setDoInput(true);
-						connection.setUseCaches(false);
-						connection.setRequestMethod("POST");
-						connection.setRequestProperty("Connection", "Keep-Alive");
-						final String value = "IRT GUI" + IrtGui.VERTION + "; User: " + System.getProperty("user.name") + "; os.name: " + System.getProperty("os.name") + "; os.arch: " + System.getProperty("os.arch") + ";";
-						connection.setRequestProperty("User-Agent", value);
-						connection.setRequestProperty("Content-Type", "text/plain;charset=UTF-8");
-
-					} catch (IOException e) {
-						logger.catching(e);
-					}
-				}, "Test");
+//		ThreadWorker.runThread(
+//				()->{
+//					try {
+//
+//						URL url = new URL("http://op-2123100/update.cgi");
+//						HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//						connection.setRequestMethod("POST"); // PUT is another valid option
+//						connection.setDoOutput(true);
+//
+//						connection.setDoOutput(true);
+//						connection.setDoInput(true);
+//						connection.setUseCaches(false);
+//						connection.setRequestMethod("POST");
+//						connection.setRequestProperty("Connection", "Keep-Alive");
+//						final String value = "IRT GUI" + IrtGui.VERTION + "; User: " + System.getProperty("user.name") + "; os.name: " + System.getProperty("os.name") + "; os.arch: " + System.getProperty("os.arch") + ";";
+//						connection.setRequestProperty("User-Agent", value);
+//						connection.setRequestProperty("Content-Type", "text/plain;charset=UTF-8");
+//
+//					} catch (IOException e) {
+//						logger.catching(e);
+//					}
+//				}, "Test");
 
 		this.deviceInfo = deviceInfo;
 		miChangeSerialNumber = new MenuItem("Change Serial Number");
@@ -537,7 +535,7 @@ public class UpdateMessageFx extends Dialog<Message>{
 		};
 	}
 
-	private FileChooser getFileChooser(Label label, String ext) {
+	public static FileChooser getFileChooser(Label label, String ext) {
 
 		FileChooser fileChooser = new FileChooser();
 		final ObservableList<ExtensionFilter> extensionFilters = fileChooser.getExtensionFilters();

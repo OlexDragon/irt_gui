@@ -142,7 +142,7 @@ public class ComPortJSerialComm implements SerialPortInterface {
 		logger.debug("waitTime: {} milles; elapsed time = {} milles; buffer: {};", timeout, elapsed, buffer);
 
 		if(buffer==null || buffer.length<size) {
-			logger.warn("No answer or it is to short. buffer= {}", buffer);
+			logger.warn("No answer or it is to short. buffer = {}", buffer);
 			return null;
 		}
 

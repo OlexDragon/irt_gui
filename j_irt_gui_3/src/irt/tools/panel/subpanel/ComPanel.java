@@ -82,9 +82,9 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 	private JComboBox<Baudrate> cbBaudrate;
 
 	private Byte unitAddress;
-	private JLabel lblAddress_1;
+	private JLabel lblRetransmit;
 	private JTextField tfRetransmit;
-	private JButton btnNewButton_1;
+	private JButton btnRetransmit;
 
 	private JComboBox<RecommendedStandard> cbStandard;
 
@@ -166,8 +166,8 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 				.of(itemEvent.getStateChange())
 				.filter(state->state==ItemEvent.SELECTED)
 				.ifPresent(s->{
-					final Integer value = ((RecommendedStandard) cbStandard.getSelectedItem()).getValue();
-					final PacketTranceverMode packetTranceverMode = new PacketTranceverMode(unitAddress, value.byteValue());
+					final Byte value = Optional.ofNullable(((RecommendedStandard) cbStandard.getSelectedItem()).getValue()).map(Integer::byteValue).orElse(null);
+					final PacketTranceverMode packetTranceverMode = new PacketTranceverMode(unitAddress, value);
 					GuiControllerAbstract.getComPortThreadQueue().add(packetTranceverMode);
 				});
 			
@@ -182,7 +182,7 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 		btnAddress.setFont(font);
 		btnAddress.addActionListener(addressAction);
 
-		btnNewButton_1 = new JButton(text);
+		btnRetransmit = new JButton(text);
 		final ActionListener retransmitAction = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String t = tfRetransmit.getText();
@@ -196,8 +196,8 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 				requestFocusInWindow();
 			}
 		};
-		btnNewButton_1.addActionListener(retransmitAction);
-		btnNewButton_1.setFont(font);
+		btnRetransmit.addActionListener(retransmitAction);
+		btnRetransmit.setFont(font);
 
 		text = Translation.getValue(String.class, "baudrate", "Baudrate") + ':';
 		lblBaudrate = new JLabel(text);
@@ -260,9 +260,9 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 		cbBaudrate.setModel(new DefaultComboBoxModel<>(Baudrate.values()));
 
 		text = Translation.getValue(String.class, "retransmits", "Retransmits") + ':';
-		lblAddress_1 = new JLabel(text);
-		lblAddress_1.setHorizontalAlignment(SwingConstants.RIGHT);
-		lblAddress_1.setFont(new Font("Tahoma", Font.BOLD, 13));
+		lblRetransmit = new JLabel(text);
+		lblRetransmit.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblRetransmit.setFont(new Font("Tahoma", Font.BOLD, 13));
 		
 		tfRetransmit = new JTextField();
 		tfRetransmit.addActionListener(retransmitAction);
@@ -281,14 +281,14 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 								.addComponent(lblStandard, GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE))
 							.addGap(3))
 						.addComponent(lblAddress, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE)
-						.addComponent(lblAddress_1, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
+						.addComponent(lblRetransmit, GroupLayout.DEFAULT_SIZE, 126, Short.MAX_VALUE))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(groupLayout.createParallelGroup(Alignment.LEADING, false)
 						.addComponent(cbBaudrate, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(tfRetransmit, GroupLayout.PREFERRED_SIZE, 61, GroupLayout.PREFERRED_SIZE)
 							.addGap(6)
-							.addComponent(btnNewButton_1, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE))
+							.addComponent(btnRetransmit, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE))
 						.addGroup(groupLayout.createSequentialGroup()
 							.addComponent(tfAddress, GroupLayout.PREFERRED_SIZE, 61, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
@@ -312,8 +312,8 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 							.addGap(2)
 							.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 								.addComponent(tfRetransmit, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-								.addComponent(lblAddress_1, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)))
-						.addComponent(btnNewButton_1))
+								.addComponent(lblRetransmit, GroupLayout.PREFERRED_SIZE, 16, GroupLayout.PREFERRED_SIZE)))
+						.addComponent(btnRetransmit))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(groupLayout.createParallelGroup(Alignment.BASELINE)
 						.addComponent(lblStandard)
@@ -335,6 +335,14 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 		Font font = Translation.getFont().deriveFont(13f);
 		lblAddress.setFont(font);
 
+		text = Translation.getValue(String.class, "retransmits", "Retransmits") + ':';
+		lblRetransmit.setText(text);
+		lblRetransmit.setFont(font);
+
+		text = Translation.getValue(String.class, "standard", "Standard") + ':';
+		lblStandard.setText(text);
+		lblStandard.setFont(font);
+
 		text = Translation.getValue(String.class, "baudrate", "Baudrate") + ':';
 		lblBaudrate.setText(text);
 		lblBaudrate.setFont(font);
@@ -342,6 +350,9 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 		text = Translation.getValue(String.class, "set", "Set");
 		btnAddress.setText(text);
 		btnAddress.setFont(font);
+		btnRetransmit.setText(text);
+		btnRetransmit.setFont(font);
+		
 	}
 
 	@Override
@@ -372,7 +383,15 @@ public class ComPanel extends JPanel implements Refresh, Runnable, PacketListene
 			final Optional<PacketHeader> oNoError = oHasResponse.filter(h->h.getError()==PacketImp.ERROR_NO_ERROR);
 
 			if(!oNoError.isPresent()) {
-				logger.warn(oSameDroup);
+				final Optional<PacketHeader> tranceiverMode = oSameDroup.filter(h->h.getPacketId()==PacketID.PROTO_TRANCEIVER_MODE.getId() || h.getPacketId()==PacketID.PROTO_TRANCEIVER_MODE_SET.getId());
+				if(tranceiverMode.isPresent()) {
+					final Object selectedItem = cbStandard.getSelectedItem();
+					if(!selectedItem.equals(RecommendedStandard.UNKNOWN)) {
+						cbStandard.setSelectedItem(RecommendedStandard.UNKNOWN);
+						logger.warn(oSameDroup);
+					}
+				}else
+					logger.warn(oSameDroup);
 				return;
 			}
 

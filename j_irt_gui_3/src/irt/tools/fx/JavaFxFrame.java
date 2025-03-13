@@ -2,6 +2,8 @@
 package irt.tools.fx;
 
 import java.awt.HeadlessException;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.Optional;
 
 import javax.swing.JFrame;
@@ -18,6 +20,13 @@ public class JavaFxFrame extends JFrame {
 	private JMenu menu;
 	final private JFXPanel fxPanel;
 	private Scene scene;
+
+	/**
+	 * @wbp.parser.constructor
+	 */
+	public JavaFxFrame(Parent root) throws HeadlessException {
+		this(root, null);
+	}
 
 	public JavaFxFrame(Parent root, JMenu menu) throws HeadlessException {
 
@@ -38,10 +47,17 @@ public class JavaFxFrame extends JFrame {
 		Platform.runLater(
 				()->{
 					scene = new Scene(root);
-	    	    fxPanel.setScene(scene);
+					fxPanel.setScene(scene);
 				});
 
 		Optional.ofNullable(root).filter(JavaFxPanel.class::isInstance).map(JavaFxPanel.class::cast).ifPresent(JavaFxPanel::start);
+		addWindowListener(new WindowAdapter() {
+
+			@Override
+			public void windowClosing(WindowEvent e) {
+				Platform.runLater(()->scene.getWindow().hide());
+			}
+		});
 	}
 
 	public JMenu getMenu() {

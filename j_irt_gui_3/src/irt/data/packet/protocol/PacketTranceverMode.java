@@ -28,7 +28,7 @@ public class PacketTranceverMode  extends PacketSuper{
 		super(
 				linkAddr,
 				Optional.ofNullable(mode).map(rn->PacketImp.PACKET_TYPE_COMMAND).orElse(PacketImp.PACKET_TYPE_REQUEST),
-				PacketID.PROTO_TRANCEIVER_MODE,
+				Optional.ofNullable(mode).map(rn->PacketID.PROTO_TRANCEIVER_MODE_SET).orElse(PacketID.PROTO_TRANCEIVER_MODE),
 				PacketGroupIDs.PROTOCOL,
 				PacketImp.PARAMETER_TRANCEIVER_MODE,
 				Optional.ofNullable(mode).map(b->new byte[]{b}).orElse(null),

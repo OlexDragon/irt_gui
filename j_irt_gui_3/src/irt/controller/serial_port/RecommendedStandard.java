@@ -4,22 +4,23 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum RecommendedStandard {
-	RS232(1),
+	UNKNOWN(null),
+//	RS232(1),
 	RS422(2),
 	RS485(3);
 
-	private final int value;
+	private final Integer value;
 
-	private RecommendedStandard(int value) {
+	private RecommendedStandard(Integer value) {
 		this.value = value;
 		
 	}
 
-	public int getValue() {
+	public Integer getValue() {
 		return value;
 	}
 
 	public static Optional<RecommendedStandard> valueOf(int value) {
-		return Arrays.stream(RecommendedStandard.values()).parallel().filter(v->v.value==value).findAny();
+		return Arrays.stream(RecommendedStandard.values()).parallel().filter(v->v.value!=null).filter(v->v.value==value).findAny();
 	}
 }

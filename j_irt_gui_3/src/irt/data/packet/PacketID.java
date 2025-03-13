@@ -49,7 +49,8 @@ public enum PacketID {
 
 	UNNECESSARY	( null, null, null, null, null, null),
 
-	DEVICE_INFO	( null, null, null, DeviceInfoPacket.parseValueFunction, 1000L, 2000),
+	DEVICE_INFO				( null, null, null, DeviceInfoPacket.parseValueFunction, 1000L, 2000),
+	DEVICE_INFO_CONVERTER	( null, null, null, DeviceInfoPacket.parseValueFunction, 1000L, 2000),
 
 	ALARMS_ALL_IDs					( null, null,  null, AlarmsIDsPacket.parseValueFunction, null, 50),
 	ALARMS_SUMMARY					( null, null, null, AlarmsSummaryPacket.parseValueFunction, null, null),
@@ -417,7 +418,7 @@ public String toString(){
 }
 
 public static String toString(short id){
-	int intID = id&0xFF;
+	int intID = id&0xFFFF;
 	final PacketID[] values = values();
 
 	if(intID<values.length){

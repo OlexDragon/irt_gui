@@ -68,6 +68,7 @@ import irt.tools.fx.BaudRateSelectorFx;
 import irt.tools.fx.JavaFxFrame;
 import irt.tools.fx.JavaFxPanel;
 import irt.tools.fx.MonitorPanelFx;
+import irt.tools.fx.UpdateFx;
 import irt.tools.panel.head.HeadPanel;
 import irt.tools.panel.head.IrtPanel;
 import irt.tools.panel.head.UnitsContainer;
@@ -84,7 +85,7 @@ public class IrtGui extends IrtMainFrame {
 	public static final File FLASH3_PRPPERIES = new File("Z:\\4Olex\\flash\\templates\\flash3.properties");
 	private static final LoggerContext ctx = DumpControllerFull.setSysSerialNumber(null);//need for log file name setting
 
-	public static final String VERTION = "- 3.279";
+	public static final String VERTION = "- 3.282";
 
 	protected HeadPanel headPanel;
 	private JTextField txtAddress;
@@ -286,6 +287,21 @@ public class IrtGui extends IrtMainFrame {
 		});
 		popupMenu.add(mntmAlarms);
 		popupMenu.add(baudrateMenuItem);
+		if(getClass().equals(IrtGui.class)) {
+			JMenuItem update = new JMenuItem("Update");
+			update.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					final JavaFxFrame javaFxFrame = new JavaFxFrame(new UpdateFx());
+					javaFxFrame.setLocationRelativeTo(txtAddress);
+					javaFxFrame.setSize(370, 160);
+					javaFxFrame.setVisible(true);
+				}
+			});
+			popupMenu.add(update);
+		}
 
 		final JLabel lblIrtTechnologies = new JLabel(IrtPanel.PROPERTIES.getProperty("company_name"));
 		lblIrtTechnologies.setForeground(Color.WHITE);
@@ -393,7 +409,7 @@ public class IrtGui extends IrtMainFrame {
 
 				try {
 					float fontSize = Translation.getValue(Float.class, "headPanel.language.comboBox.font.size", 12f);
-					String fontURL = "fonts/MINGLIU.TTF";
+					String fontURL = "fonts/MINGLIU.TTC";
 					Font f = Translation.getSystemFont(fontURL, Font.BOLD, (int) fontSize);
 					if (f == null) {
 						URL resource = getClass().getResource(fontURL);// Chinese
@@ -402,7 +418,7 @@ public class IrtGui extends IrtMainFrame {
 								f = Font.createFont(Font.TRUETYPE_FONT, openStream).deriveFont(fontSize).deriveFont(Font.BOLD);
 							}
 						} else
-							logger.warn("Can not get the resouce font 'MINGLIU.TTF'");
+							logger.warn("Can not get the resouce font " + fontURL);
 					}
 					return f;
 				} catch (Exception e) {

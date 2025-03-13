@@ -14,7 +14,7 @@ public class DeviceInfoPacket extends PacketSuper {
 																										.map(DeviceInfo::parsePacket);
 
 	public DeviceInfoPacket(byte linkAddr) {
-		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, PacketID.DEVICE_INFO, PacketGroupIDs.DEVICE_INFO, PacketImp.PARAMETER_ALL, null, Priority.IMPORTANT);
+		super(linkAddr, PacketImp.PACKET_TYPE_REQUEST, Optional.ofNullable(linkAddr).filter(la->la!=0).map(la->PacketID.DEVICE_INFO).orElse(PacketID.DEVICE_INFO_CONVERTER), PacketGroupIDs.DEVICE_INFO, PacketImp.PARAMETER_ALL, null, Priority.IMPORTANT);
 	}
 
 	public DeviceInfoPacket() {

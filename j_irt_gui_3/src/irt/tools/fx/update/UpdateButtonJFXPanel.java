@@ -58,7 +58,7 @@ import javafx.util.Pair;
 public class UpdateButtonJFXPanel extends JFXPanel {
 	private static final long serialVersionUID = -5186685111758208307L;
 
-	private final Logger logger = LogManager.getLogger();
+	private final static Logger logger = LogManager.getLogger();
 
 	private final DeviceInfo deviceInfo;
 	private final NetworkAddress networkAddress;
@@ -225,12 +225,11 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 															TarArchiveOutputStream tarArchiveOutputStream = new TarArchiveOutputStream(byteArrayOutputStream);){
 											
 														StringBuffer setupMD5 = new StringBuffer();
-														MessageDigest md5 = MessageDigest.getInstance("MD5");
 
 														{	//SETUP.INFO file
 
 															final Pair<String, String> setupInfo = message.getSetupInfo();
-															logger.debug(setupInfo);
+															logger.debug("setupInfo: {}", setupInfo);
 
 															addToTar(tarArchiveOutputStream, "setup.info", setupInfo.getKey().getBytes(Profile.charEncoding));
 
@@ -244,6 +243,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 														}
 
 														// PROGRAM
+														MessageDigest md5 = MessageDigest.getInstance("MD5");
 														message
 														.getByteBuffer(PacketFormats.IMAGE)
 														.map(
@@ -287,18 +287,7 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 														try {
 
 															final String fileName = deviceInfo.getSerialNumber().orElse("unknown") + ".pkg";
-															final Path path = Paths.get(System.getProperty("user.home"), "Desktop", fileName);
-															Files.write(path, bytes);
-
-															Platform.runLater(
-																	()->{
-																		Alert alert = new Alert(AlertType.INFORMATION);
-																		alert.initModality(Modality.APPLICATION_MODAL);
-																		alert.setTitle("File System");
-																		alert.setHeaderText("The package has been saved.");
-																		alert.setContentText("The package '" + fileName + "' has been saved to the Desktop. ");
-																		alert.showAndWait();
-																	});
+															toPackage(fileName, bytes);
 
 														}catch (FileSystemException e) {
 
@@ -348,84 +337,98 @@ public class UpdateButtonJFXPanel extends JFXPanel {
 						}
 					});
 		}
+	}
 
-		private Action addProfileToTheTar(Optional<Profile> oProfile, StringBuffer setuoMD5, TarArchiveOutputStream tarArchiveOutputStream) throws IOException, NoSuchAlgorithmException {
+	public static void toPackage(final String fileName, byte[] bytes) throws IOException {
+		final Path path = Paths.get(System.getProperty("user.home"), "Desktop", fileName);
+		Files.write(path, bytes);
 
-			final Action actiom = oProfile.map(
+		Platform.runLater(
+				()->{
+					Alert alert = new Alert(AlertType.INFORMATION);
+					alert.initModality(Modality.APPLICATION_MODAL);
+					alert.setTitle("File System");
+					alert.setHeaderText("The package has been saved.");
+					alert.setContentText("The package '" + fileName + "' has been saved to the Desktop. ");
+					alert.showAndWait();
+				});
+	}
 
-					profile -> {
-						try {
+	private static Action addProfileToTheTar(Optional<Profile> oProfile, StringBuffer setuoMD5, TarArchiveOutputStream tarArchiveOutputStream) throws IOException, NoSuchAlgorithmException {
 
-							return new ProfileValidator(profile);
+		final Action actiom = oProfile.map(
 
-						} catch (NoSuchAlgorithmException | IOException | NumberFormatException e1) {
+				profile -> {
+					try {
 
-							logger.catching(e1);
+						return new ProfileValidator(profile);
 
-							Platform.runLater(
-									()->{
-										Alert alert = new Alert(AlertType.ERROR);
-										alert.initModality(Modality.APPLICATION_MODAL);
-										alert.setTitle("Profile Validation Error");
-										alert.setHeaderText(null);
-										alert.setContentText(e1.getLocalizedMessage());
-										alert.showAndWait();
-									});
+					} catch (NoSuchAlgorithmException | IOException | NumberFormatException e1) {
 
-							return null;
-						}
-					})
-					.map(ProfileValidator::getAction)
-					.orElse(null);
+						logger.catching(e1);
 
-			// If the profile is not selected go to the next step
-			if(actiom==null)
-				return Action.CONTINUE;
+						Platform.runLater(
+								()->{
+									Alert alert = new Alert(AlertType.ERROR);
+									alert.initModality(Modality.APPLICATION_MODAL);
+									alert.setTitle("Profile Validation Error");
+									alert.setHeaderText(null);
+									alert.setContentText(e1.getLocalizedMessage());
+									alert.showAndWait();
+								});
 
-			if(actiom==Action.CANCEL)
-				return Action.CANCEL;
+						return null;
+					}
+				})
+				.map(ProfileValidator::getAction)
+				.orElse(null);
 
-			// if profile does not have errors prepare a profile for uploading
-			if(oProfile.isPresent()) {
-				Profile profile = oProfile.get();
+		// If the profile is not selected go to the next step
+		if(actiom==null)
+			return Action.CONTINUE;
 
-					final Pair<String, CharBuffer> pair = profile.asCharBufferWithMD5();
-
-					// setup.md5 file content
-					final String profileMD5 = pair.getKey();
-					final String fileName = profile.getFileName();
-					setuoMD5.append(profileMD5).append(" *").append(fileName);
-
-					// Profile tar entry
-					CharBuffer charBuffer = pair.getValue();
-					addToTar(tarArchiveOutputStream, fileName, charBuffer.toString().getBytes(Profile.charEncoding));
-
-					return Action.CONTINUE;
-			}
-
+		if(actiom==Action.CANCEL)
 			return Action.CANCEL;
+
+		// if profile does not have errors prepare a profile for uploading
+		if(oProfile.isPresent()) {
+			Profile profile = oProfile.get();
+
+				final Pair<String, CharBuffer> pair = profile.asCharBufferWithMD5();
+
+				// setup.md5 file content
+				final String profileMD5 = pair.getKey();
+				final String fileName = profile.getFileName();
+				setuoMD5.append(profileMD5).append(" *").append(fileName);
+
+				// Profile tar entry
+				CharBuffer charBuffer = pair.getValue();
+				addToTar(tarArchiveOutputStream, fileName, charBuffer.toString().getBytes(Profile.charEncoding));
+
+				return Action.CONTINUE;
 		}
 
-		private void addToTar(TarArchiveOutputStream tarArchiveOutputStream, String fileName, byte[] content) throws IOException {
+		return Action.CANCEL;
+	}
 
-			TarArchiveEntry infoEntry = new TarArchiveEntry(fileName);
-			infoEntry.setSize(content.length);
+	public static void addToTar(TarArchiveOutputStream tarArchiveOutputStream, String fileName, byte[] content) throws IOException {
 
-			tarArchiveOutputStream.putArchiveEntry(infoEntry);
-			tarArchiveOutputStream.write(content);
-			tarArchiveOutputStream.closeArchiveEntry();
-		}
+		TarArchiveEntry infoEntry = new TarArchiveEntry(fileName);
+		infoEntry.setSize(content.length);
 
-		private void showAlert(final String errorMessage) {
-			logger.error(errorMessage);
+		tarArchiveOutputStream.putArchiveEntry(infoEntry);
+		tarArchiveOutputStream.write(content);
+		tarArchiveOutputStream.closeArchiveEntry();
+	}
 
-			Platform.runLater(
-					()->{
-						final Alert alert = new Alert(AlertType.ERROR);
-						alert.setContentText(errorMessage);
-						alert.show();
-					});
-		}
+	public static void showAlert(final String errorMessage) {
+
+		Platform.runLater(
+				() -> {
+					final Alert alert = new Alert(AlertType.ERROR);
+					alert.setContentText(errorMessage);
+					alert.show();
+				});
 	}
 
 	public void fire() {

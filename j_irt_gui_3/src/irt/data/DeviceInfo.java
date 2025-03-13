@@ -16,6 +16,7 @@ import irt.data.packet.PacketID;
 import irt.data.packet.Payload;
 import irt.data.packet.interfaces.LinkedPacket;
 import irt.data.packet.interfaces.Packet;
+import irt.tools.fx.UpdateFx;
 
 public class DeviceInfo implements PacketListener {
 
@@ -107,6 +108,7 @@ public class DeviceInfo implements PacketListener {
 						break;
 					case Payload.DI_DEVICE_SN:
 						serialNumber = Optional.of(pl.getStringData()).map(StringData::toString);
+						serialNumber.ifPresent(UpdateFx::setSerialNumber);
 						break;
 					case Payload.DI_UNIT_NAME:
 						unitName = Optional.of(pl.getStringData()).map(StringData::toString);
@@ -236,7 +238,7 @@ public class DeviceInfo implements PacketListener {
 		.ofNullable(packet)
 		.filter(p->p.getHeader()!=null)
 		.filter(p->p.getHeader().getPacketType()==PacketImp.PACKET_TYPE_RESPONSE)
-		.filter(p->PacketID.DEVICE_INFO.match(p.getHeader().getPacketId()))
+		.filter(p->{ return PacketID.DEVICE_INFO.match(p.getHeader().getPacketId()) || PacketID.DEVICE_INFO_CONVERTER.match(p.getHeader().getPacketId()); })
 		.map(DeviceInfo::new);		
 	}
 
