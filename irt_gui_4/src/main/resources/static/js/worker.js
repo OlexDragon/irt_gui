@@ -1,0 +1,110 @@
+
+import {start as piStart, stop as piStop} from './panel-info.js'
+import {start as measStart, stop as measStop} from './panel-measurement.js'
+import {start as contrStart, stop as contrStop} from './panel-control.js'
+import {start as userStart, stop as userStop} from './user-panels.js'
+
+const $modal = $('#modal');
+const $serialPort = $('select[id=serialPort]').change(portSelected);
+const $btnStart =$('#btnStart').change(toggleStart);
+const $baudrate = $('#baudrate').change(baudrateChange);
+$('#btnShowErrors').change(btnShowErrorsChange);
+
+$('#unitAddress').change(unitAddressChange);
+
+let serialPort;
+let baudrate;
+let unitAddress = 254;
+let run;
+let showError;
+
+let cookies =  Cookies.get('baudrate');
+if(!cookies)
+	cookies = 115200;
+$baudrate.val(cookies);
+
+getPortNames();
+function getPortNames(){
+	$.get('/serial/ports')
+	.done(ports=>{
+		if(!ports)
+			return;
+		const serialPortCookies = Cookies.get('serialPort');
+		ports.forEach(name=>{
+			const selected = serialPortCookies === name;
+			if(selected)
+				serialPort = name;
+			$('<option>', {text: name, selected: selected}).appendTo($serialPort);
+			if(selected){
+				$btnStart.attr('disabled', false);
+				toggleStart();
+			}
+		});
+	});
+}
+
+function portSelected(e){
+	serialPort = e.currentTarget.value;
+	Cookies.set('serialPort', serialPort);
+	if($btnStart.prop('disabled'))
+		$btnStart.attr('disabled', false);
+	toggleStart();
+}
+
+function baudrateChange(e){
+	baudrate = e.currentTarget.value;
+	Cookies.set('baudrate', e.currentTarget.value);
+}
+
+function unitAddressChange(e){
+	unitAddress = e.currentTarget.value;
+}
+
+function btnShowErrorsChange(e){
+	showError = e.currentTarget.checked;
+	if(showError)
+		showToast('Display of error messages is enabled.', 'Error information will be displayed here..');
+}
+
+function toggleStart(){
+
+	const $lbl = $btnStart.next();
+	const text = $lbl.text();
+
+	switch(text){
+	case 'Start':
+		piStart(); measStart(); contrStart(); userStart();
+		$lbl.text('Stop');
+		$btnStart.attr('checked', true);
+		run = true;
+		break;
+
+	default:
+		piStop(); measStop(); contrStop(); userStop();
+		$lbl.text('Start');
+		$btnStart.attr('checked', false);
+		showToast('The GUI stopped accessing the serial port.', 'The serial port will be released in 20 seconds.');
+		
+	}
+}
+
+$('#appExit').click(()=>{
+
+	run = false;
+	$btnStart.attr('checked', false);
+
+	$.get('/exit').done(()=>{
+		$modal.load('/modal/exit');
+		$modal.attr('data-bs-backdrop', 'static');
+		$modal.modal('show');
+	})
+	.fail((jqXHR)=>{
+		if(!jqXHR.responseText){
+			if($btnStart.prop('checked'))
+				$btnStart.click();
+			alert('It looks like the IRT GUI is closed.');
+		}
+	});
+
+});
+export {serialPort, baudrate, unitAddress, run, showError}

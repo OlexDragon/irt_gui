@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>GUI - IRT Technologies</title>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="card-body">
+<!-- Auto calibration by Unit Gain -->
+<th:block th:fragment="buc">
+	<div class="row my-2">
+		<div class="col-4">Type:</div>
+		<div class="col">
+			<select id="selectNetworkType" class="form-select">
+				<option selected="selected" disabled="disabled" hidden="hidden">Select Type</option>
+				<option value="1">Static</option>
+				<option value="2">Dynamic</option>
+			</select>
+		</div>
+	</div>
+	<div class="row my-2">
+		<div class="col-4">Address:</div>
+		<div id="networkAddress" class="col input-group">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+		</div>
+	</div>
+	<div class="row my-2">
+		<div class="col-4">Mask:</div>
+		<div id="networkMask" class="col input-group">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+		</div>
+	</div>
+	<div class="row my-2">
+		<div class="col-4">Gateway:</div>
+		<div id="networkGateway" class="col input-group">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+			<input type="number" role="group" class="form-control">
+		</div>
+	</div>
+</th:block>
+ </div>
+</div>
+</html>

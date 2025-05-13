@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>GUI - IRT Technologies</title>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
+	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}">
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="row g-1">
+		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12">
+			<div class="row row-cols-1">
+				<div class="col">
+					<img src="../static/images/logo.png" th:src="@{/images/logo.png}" class="img-fluid" alt="Logo">
+				</div>
+				<h4 class="text-center" th:text="'IRT GUI v.' + ${version}"></h4>
+				<div class="col form-floating mb-3">
+					<select id="serialPort" class="form-select" aria-label="Select Serial Port">
+						<option selected="selected" disabled="disabled" hidden="hidden">Select Serial Port</option>
+					</select>
+					<label for="serialPort">Serial Port</label>
+				</div>
+				<div class="col form-floating mb-3">
+					<select id="baudrate" class="form-select" aria-label="Select Serial Port">
+						<option th:each="br : ${baudrates}" th:text="${br.value}">Baudrate</option>
+					</select>
+					<label for="baudrate">Baudrate</label>
+				</div>
+				<div class="col mb-3">
+					<input id="btnStart" type="checkbox" class="btn-check" autocomplete="off" disabled="disabled">
+					<label for="btnStart" class="btn btn-outline-primary form-control">Start</label>
+				</div>
+				<div class="col form-floating mb-3">
+					<input id="unitAddress" type="number" class="form-control" value="254">
+					<label for="unitAddress">Unit Address</label>
+				</div>
+				<div class="col mb-3">
+					<input id="btnShowErrors" type="checkbox" class="btn-check" autocomplete="off">
+					<label for="btnShowErrors" class="btn btn-outline-danger opacity-75 form-control">Show Errors</label>
+				</div>
+				<div class="col"><button id="appExit" class="btn btn-outline-dark form-control">Exit</button></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="row">
+				<div class="col-lg-6 col-12">
+					<div class="card infoCard">
+  						<div class="card-body info">
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 col-12">
+					<div class="card measurementCard">
+  						<div class="card-body measurement">
+						</div>
+					</div>
+				</div>
+				<div class="col-12">
+					<div class="card controlCard">
+  						<div class="card-body control">
+						</div>
+					</div>
+				</div>
+				<div class="col-12">
+					<div id="userCard" class="card">
+  						<div class="card-body userPanels">
+  							<ul class="nav nav-tabs">
+ 								<li class="nav-item">
+									<button id="userTabAlarn" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" type="button" role="tab" aria-controls="alarms-tab-pane" aria-selected="false">Alarms</button>
+								</li>
+								<li class="nav-item">
+									<button id="userTabNetwork" class="nav-link"  data-bs-toggle="tab" data-bs-target="#network-tab-pane" type="button" role="tab" aria-controls="network-tab-pane" aria-selected="false">Network</button>
+								 </li>
+								 <li class="nav-item">
+								 	<button id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" type="button" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
+								 </li>
+								 <li class="nav-item">
+								 	<button id="userTabCOM" class="nav-link"  data-bs-toggle="tab" data-bs-target="#com-tab-pane" type="button" role="tab" aria-controls="com-tab-pane" aria-selected="false">COM</button>
+								 </li>
+							</ul>
+
+							<div class="tab-content text-cente">
+								<div class="tab-pane fade" id="alarms-tab-pane" role="tabpanel" aria-labelledby="alarm-tab" tabindex="0">
+								</div>
+								<div class="tab-pane fade" id="network-tab-pane" role="tabpanel" aria-labelledby="network-tab" tabindex="0">
+								</div>
+								<div class="tab-pane fade" id="redundancy-tab-pane" role="tabpanel" aria-labelledby="redundancy-tab" tabindex="0">
+								</div>
+								<div class="tab-pane fade" id="com-tab-pane" role="tabpanel" aria-labelledby="com-tab" tabindex="0">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<div id="modal" class="modal fade" tabindex="-1">
+		<div class="modal-dialog">
+    		<div class="modal-content">
+<!-- Modal Header -->
+      			<div class="modal-header">
+        			<h5 class="modal-title ml-3 text-primary">The IRT GUI has been completed.</h5>
+      			</div>
+ <!-- Modal Body -->
+      			<div class="modal-body">
+      				<p>The IRT GUI has finished working.</p>
+      				<p>You can close your browser.</p>
+      			</div>
+    		</div>
+  		</div>
+</div>
+<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3">
+</div>
+
+	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+	<script src="/webjars/js-cookie/3.0.1/js.cookie.js"></script>
+	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
+	<script src="../static/js/home.js" th:src="@{/js/home.js}"></script>
+	<script type="module" src="../static/js/worker.js" th:src="@{/js/worker.js}"></script>
+
+</body>
+</html>

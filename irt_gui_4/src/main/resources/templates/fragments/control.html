@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>GUI - IRT Technologies</title>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="card-body">
+<!-- Auto calibration by Unit Gain -->
+<th:block th:fragment=buc>
+ <!-- Modal Body -->
+					<ul class="nav nav-tabs" role="tablist">
+						<li class="nav-item" role="presentation">
+    						<button class="nav-link" id="attenuationTab" data-bs-toggle="tab" data-bs-target="#attenuation-tab-pane" type="button" role="tab" aria-controls="attenuation-tab-pane" aria-selected="true">Attenuation</button>
+  						</li>
+  						<li class="nav-item" role="presentation">
+							<button class="nav-link" id="gainTab" data-bs-toggle="tab" data-bs-target="#gain-tab-pane" type="button" role="tab" aria-controls="gain-tab-pane" aria-selected="false">Gain</button>
+  						</li>
+ 						<li class="nav-item" role="presentation">
+    						<button class="nav-link" id="freqTab" data-bs-toggle="tab" data-bs-target="#frequency-tab-pane" type="button" role="tab" aria-controls="frequency-tab-pane" aria-selected="false">Frequency</button>
+ 						</li>
+					</ul>
+					<div class="tab-content text-cente">
+ 						<div class="tab-pane fade" id="attenuation-tab-pane" role="tabpanel" aria-labelledby="attenuation-tab" tabindex="0">
+							<div class="row mt-2">
+								<div class="col">
+									<div class="form-floating">
+										<input id="attenuationValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
+  										<label for="attenuationValue">Value</label>
+  									</div>
+								</div>
+  								<div class="col">
+									<div class="form-floating">
+										<input id="attenuationControl" type="number" class="form-control" placeholder="to Set">
+  										<label for="attenuationControl">to Set</label>
+									</div>
+								</div>
+								<div class="col">
+									<div class="col">
+										<div class="form-floating">
+											<input id="attenuationStep" class="form-control" type="number" placeholder="Step">
+  											<label for="attenuationStep">Step</label>
+										</div>
+									</div>
+								</div>
+ 							</div>
+							<div>
+								<input id="attenuationRange" type="range" class="form-range">
+							</div>
+ 						</div>
+ 						<div class="tab-pane fade" id="gain-tab-pane" role="tabpanel" aria-labelledby="gain-tab" tabindex="0">
+							<div class="row mt-2">
+								<div class="col">
+									<div class="form-floating">
+										<input id="gainValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
+  										<label for="gainValue">Value</label>
+  									</div>
+								</div>
+								<div class="col">
+									<div class="form-floating">
+										<input id="gainControl" type="number" class="form-control" placeholder="to Set">
+  										<label for="gainControl">to Set</label>
+									</div>
+ 								</div>
+								<div class="col">
+									<div class="col">
+										<div class="form-floating">
+											<input id="gainStep" class="form-control" type="number" placeholder="Step">
+  											<label for="gainStep">Step</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div>
+								<input id="gainRange" type="range" class="form-range">
+							</div>
+ 						</div>
+ 						<div class="tab-pane fade" id="frequency-tab-pane" role="tabpanel" aria-labelledby="frequency-tab" tabindex="0">
+							<div class="row mt-2">
+								<div class="col">
+									<div class="form-floating">
+										<input id="freqValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
+  										<label for="freqValue">Value</label>
+  									</div>
+								</div>
+  								<div class="col">
+									<div class="form-floating">
+										<input id="freqControl" type="number" class="form-control" placeholder="to Set">
+  										<label for="freqControl">to Set</label>
+									</div>
+								</div>
+								<div class="col">
+									<div class="col">
+										<div class="form-floating">
+											<input id="freqStep" class="form-control" type="number" placeholder="Step">
+  											<label for="freqStep">Step</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div>
+								<input id="freqRange" type="range" class="form-range">
+							</div>
+ 						</div>
+   					</div>
+   				</div>
+ </th:block>
+</div>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>GUI - IRT Technologies</title>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
+</head>
+
+<body>
+
+<!-- Modal Message -->
+<div id="modal" class="modal" tabindex="-1">
+
+<!-- Auto calibration by Unit Gain -->
+<th:block th:fragment="exit">
+ 		<div class="modal-dialog">
+    		<div class="modal-content">
+<!-- Modal Header -->
+      			<div class="modal-header">
+        			<h5 class="modal-title ml-3 text-primary">The IRT GUI has been completed.</h5>
+      			</div>
+ <!-- Modal Body -->
+      			<div class="modal-body">
+      				<p>The IRT GUI has finished working.</p>
+      				<p>You can close your browser.</p>
+      			</div>
+    		</div>
+  		</div>
+</th:block>
+</div>
+	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+	<script src="/webjars/js-cookie/3.0.1/js.cookie.js"></script>
+	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
+	<script src="../static/js/home.js" th:src="@{/js/home.js}"></script>
+</body>
+</html>

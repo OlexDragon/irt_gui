@@ -1,0 +1,9 @@
+.connection-ok{
+	border-color: green;
+}
+.connection-fail{
+	border-color: red;
+}
+.connection-wrong{
+	border-color: yellow;
+}
