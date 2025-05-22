@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import irt.gui.web.beans.Baudrate;
 
 @Controller
-public class WebGuiController {
+public class Gui4Controller {
 //	private final static Logger logger = LogManager.getLogger();
 
 	@Value("${info.app.version}")

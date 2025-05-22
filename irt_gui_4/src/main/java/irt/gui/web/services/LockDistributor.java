@@ -1,6 +1,7 @@
 package irt.gui.web.services;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -19,10 +20,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
+import irt.gui.web.beans.Packet;
+import irt.gui.web.beans.PacketType;
 import irt.gui.web.beans.RequestPacket;
 import irt.gui.web.exceptions.IrtSerialPortException;
 import lombok.EqualsAndHashCode;
@@ -58,7 +59,6 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 		final Optional<PacketTask> any = queue.parallelStream().filter(packetTask::equals).findAny();
 		if(any.isPresent()) {
-			logger.error("any.isPresent()");
 			any.get().tasks.add(task);
 		}else {
 			packetTask.tasks.add(task);
@@ -72,36 +72,35 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 		final String portName = requestPacket.getSerialPort();
 
-		try {
-				
-			Optional.ofNullable(requestPacket.getBaudrate()).ifPresent(br -> serialPort.open(portName, br));
-			serialPort.open(portName, requestPacket.getBaudrate());
-			final int timeout = Optional.ofNullable(requestPacket.getTimeout()).orElse(100);
-			final byte[] bytes = requestPacket.getBytes();
+		serialPort.open(portName, requestPacket.getBaudrate());
+		final int timeout = Optional.ofNullable(requestPacket.getTimeout()).orElse(100);
+		final byte[] bytes = requestPacket.getBytes();
 
-			if (bytes == null || bytes.length == 0)
-				throw new IrtSerialPortException("There is no data to send.", new Throwable());
+		if (bytes == null || bytes.length == 0)
+			throw new IrtSerialPortException("There is no data to send.");
 
-			byte[] received = serialPort.send(portName, timeout, bytes);
+		byte[] received = serialPort.send(portName, timeout, bytes);
 
-			byte[] acknowledgement = null;
-			if (acknowledgementSize == received.length) {
+		Packet packet;
+		PacketType packetType;
+		if (acknowledgementSize == received.length) {
 
-				acknowledgement = received;
+			packet = new Packet(received);
+			packetType = packet.getPacketType();
+			if(packetType == PacketType.ACKNOWLEDGEMENT) 
 				received = serialPort.read(portName, null);
 
-			}else 
-				logger.warn("No acknowledgement. {} : {}", received.length, received);
-
-			requestPacket.setAnswer(received);
-
-			if(acknowledgement!=null)
-				serialPort.send(portName, null, acknowledgement);
-
-		} catch (IrtSerialPortException e) {
-			logger.catching(Level.DEBUG, e);
-			throw new ResponseStatusException(HttpStatus.EXPECTATION_FAILED, e.getLocalizedMessage());
+		}else {
+			packet = new Packet(received);
+			packetType = packet.getPacketType();
+			if(packetType == PacketType.ACKNOWLEDGEMENT)
+				received = Arrays.copyOfRange(received, acknowledgementSize, received.length);
 		}
+
+		requestPacket.setAnswer(received);
+
+		serialPort.send(portName, null, packet.getAcknowledgement());
+
 	}
 
 	private boolean buisy;
@@ -110,11 +109,19 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		if(buisy)
 			return;
 		buisy = true;
+
+		PacketTask packetTask = null;;
 		try {
 
-			final PacketTask packetTask = queue.take();
+			packetTask = queue.take();
 			sendFromQueue(packetTask.packet);
 			packetTask.tasks.forEach(ThreadWorker::runThread);
+
+		} catch (IrtSerialPortException e) {
+
+			Optional.ofNullable(packetTask).map(pt->pt.tasks).ifPresent(ts->ts.forEach(t->t.cancel(true)));
+
+			logger.catching(Level.DEBUG, e);
 
 		} catch (Exception e) {
 			logger.catching(e);

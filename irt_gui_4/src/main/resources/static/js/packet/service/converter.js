@@ -1,12 +1,46 @@
 import {status as alarmStatus} from '../parameter/value/alarm-status.js'
 
-export function shortToBytes(val){
-	const bytes = [0,0];
+export function shortToBytes(val, reverse){
+
+	if(reverse)
+		return val ? numberToBytes(val, 2) : [0, 0];
+
+		const bytes = [0,0];
 	for ( let index = 0; index < bytes.length; index++ ) {
         let byte = val & 0xff;
         bytes[index] = byte;
         val = (val - byte) / 256 ;
     }
+    return bytes;
+}
+
+export function shortToBytesR(val){
+    return shortToBytes(val, true);
+}
+
+export function longToBytes(val){
+	return numberToBytes(val, 8);
+}
+
+export function numberToBytes(val, minBytes){
+	let hex = val.toString(16);
+	const hexArray = [];
+	while(hex.length){
+		const start = hex.length-2;
+		if(start>=0){
+			const substring = hex.substring(start, start+2);
+			hexArray.push(substring);
+			hex = hex.substring(0, start);
+		}else{
+			hexArray.push(hex);
+			hex = '';
+		}
+	}
+	const bytes = [];
+	hexArray.forEach(h=>bytes.unshift(parseInt(h, 16)));
+	if(minBytes)
+		while(minBytes>bytes.length)
+			bytes.unshift(0);
     return bytes;
 }
 
@@ -84,6 +118,11 @@ function parseToArray(bytes, size){
 	}
 	return ints;
 }
+export function parseToBoolean(bytes){
+	if(!bytes?.length)
+		return '';
+	return bytes[0]>0;
+}
 
 const prefixes = ['UNDEFINED', '', '<', '>']
 export function parseToIrtValue(bytes, divider){
@@ -147,3 +186,4 @@ export function parseToAlarmString(bytes){
 	value.string = parseToString(bytes);
 	return value;
 }
+

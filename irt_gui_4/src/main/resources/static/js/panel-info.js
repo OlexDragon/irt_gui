@@ -8,22 +8,27 @@ import {id as fGroupId} from './packet/packet-properties/group-id.js'
 const $card = $('.infoCard');
 const $body = $('.info');
 
-let type;
+export let type;
+
 let interval;
-let delay = 3000;
+let delay = 5000;
 
 export function start(){
-	stop();
+	if(interval)
+		return;
+
+	$body.empty();
+	run();
 	interval = setInterval(run, delay);
 }
 
 export function stop(){
 	clearInterval(interval) ;
+	interval = undefined;
 }
 
 const packetId = fPacketId('deviceInfo');
 
-let timeout;
 let buisy;
 function run(){
 
@@ -42,13 +47,14 @@ function run(){
 	postObject('/serial/send', requestPacket)
 	.done(data=>{
 		buisy = false;
-		timeout = blink($card, timeout);
 
 		if(!data.answer?.length){
+			console.log(data);
 			console.warn("No answer.");
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
+		blink($card);
 
 		if(!data.function){
 			console.warn("No function name.");
@@ -60,16 +66,25 @@ function run(){
 		if(packet.header.packetId !== packetId){
 			console.log(packet);
 			console.warn('Received wrong packet.');
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
 
+		if(packet.header.error){
+			console.log(data);
+			const packetStr = packet.toString();
+			console.error(packetStr);
+			blink($card, 'connection-wrong');
+			if(showError)
+				showToast('Packet Error', packetStr, 'text-bg-danger bg-opacity-50');
+
+			return;
+		}
 		module[data.function](packet);
 	})
 	.fail((jqXHR)=>{
 		buisy = false;
-		$card.addClass('connection-fail');
-		timeout = blink($card, timeout, 'connection-fail');
+		blink($card, 'connection-fail');
 
 		if(jqXHR.responseJSON?.message){
 			if(showError)
@@ -82,7 +97,7 @@ module.fInfo = function(packet){
 
 	if(packet.header.groupId == fGroupId('alarm')){
 		console.warn(packet);
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
 		return;
@@ -92,11 +107,11 @@ module.fInfo = function(packet){
 
 	if(!payloads?.length){
 		console.warn('No payloads to parse.');
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		return;
 	}
 
-	timeout = blink($card, timeout);
+	blink($card);
 
 	payloads.sort(comparator).forEach(pl=>{
 
@@ -112,8 +127,10 @@ module.fInfo = function(packet){
 			const showText = description(pl.parameter.code);
 			const $row = $('<div>', {class: 'row'});
 			const val = parser(pl.parameter.code)(pl.data);
-			if(pl.parameter.code === code('type'))
+			if(pl.parameter.code === code('type')){
 				type = val;
+				typeChangeEvents.forEach(e=>e(type));
+			}
 
 			let $v;
 			if(showText && showText !== 'Description'){
@@ -126,5 +143,7 @@ module.fInfo = function(packet){
 		}
 	});
 }
-
-export {type}
+const typeChangeEvents = [];
+export function onTypeChange(e){
+	typeChangeEvents.push(e);
+}

@@ -12,12 +12,24 @@ const packetId = Object.freeze(
 		'gainSet',
 		'frequency',
 		'frequencySet',
+		'mute_control',
 
-		'networkAll',
+		'network',
+		'networkSet',
 
+		'alarmAll',
 		'alarm',
 		'alarmSummary',
-		'alarmIDs'
+		'alarmIDs',
+
+		'redundancyAll',
+		'redundancySetOnline',
+		'redundancySetEnable',
+		'redundancySetDisable',
+		'redundancySetCold',
+		'redundancySetHot',
+		'redundancySetNameA',
+		'redundancySetNameB'
 	]);
 
 export function id(name){

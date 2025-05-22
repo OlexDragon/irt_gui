@@ -10,7 +10,12 @@ export default class Payload{
 				this.data = parameter.subarray(PARAMETER_SIZE);
 			return;
 		}
-		this.parameter = (parameter == undefined ? new Parameter() : parameter);
+		if(typeof parameter === 'number')
+			this.parameter = new Parameter(parameter)
+		else if(parameter)
+			this.parameter = parameter;
+		else
+			this.parameter =  new Parameter();
 		if(data){
 			this.data = data;
 			this.parameter.size = data.length;
@@ -28,10 +33,8 @@ export default class Payload{
 		if(!this.data)
 			str = '';
 		else if(packetGroupId){
-			let tmp = this.parameter.toStrinh(packetGroupId);
-			if(tmp)
-				str = tmp.parseFunction(this.data);
-			else
+			str = this.parameter.toString(packetGroupId);
+			if(!str)
 				str = this.data;
 		}else
 			str = this.data;

@@ -10,12 +10,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import irt.gui.web.WebGui;
+import irt.gui.web.Gui4;
 import irt.gui.web.services.IrtSerialPort;
 import irt.gui.web.services.SerialPortDistributor;
 import irt.gui.web.services.ThreadWorker;
 @RestController
-public class WebGuiRestController {
+public class Gui4RestController {
 	private final static Logger logger = LogManager.getLogger();
 
 	@Autowired @Qualifier("jSerialComm") IrtSerialPort serialPort;
@@ -41,7 +41,7 @@ public class WebGuiRestController {
 				logger.catching(Level.DEBUG, e);
 			}
 
-			WebGui.exit();
+			Gui4.exit();
 		});
 		return true;
 	}

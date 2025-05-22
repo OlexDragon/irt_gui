@@ -18,7 +18,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 @SpringBootApplication
-public class WebGui {
+public class Gui4 {
 	private final static Logger logger = LogManager.getLogger();
 
 	private static ConfigurableApplicationContext contex;
@@ -39,7 +39,7 @@ public class WebGui {
 
 		try {
 
-			contex = SpringApplication.run(WebGui.class, args);
+			contex = SpringApplication.run(Gui4.class, args);
 
 		}catch(Exception e) {
 			logger.catching(Level.TRACE, e);

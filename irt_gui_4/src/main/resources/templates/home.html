@@ -37,33 +37,40 @@
 					<label for="unitAddress">Unit Address</label>
 				</div>
 				<div class="col mb-3">
+					<div id="summaryAlarmCard" class="card">
+						<div class="card-body">
+							<h6 id="summaryAlarmTitle" class="card-title text-center p-2">Alarms</h6>
+						</div>
+					</div>
+				</div>
+				<div class="col mb-3">
 					<input id="btnShowErrors" type="checkbox" class="btn-check" autocomplete="off">
-					<label for="btnShowErrors" class="btn btn-outline-danger opacity-75 form-control">Show Errors</label>
+					<label for="btnShowErrors" class="btn btn-outline-danger opacity-75 form-control">App Errors</label>
 				</div>
 				<div class="col"><button id="appExit" class="btn btn-outline-dark form-control">Exit</button></div>
 			</div>
 		</div>
 		<div class="col">
 			<div class="row">
-				<div class="col-lg-6 col-12">
+				<div class="col-lg-6 col-12 mt-2">
 					<div class="card infoCard">
   						<div class="card-body info">
 						</div>
 					</div>
 				</div>
-				<div class="col-lg-6 col-12">
+				<div class="col-lg-6 col-12 mt-2">
 					<div class="card measurementCard">
   						<div class="card-body measurement">
 						</div>
 					</div>
 				</div>
-				<div class="col-12">
+				<div class="col-lg-6 col-12 mt-2">
 					<div class="card controlCard">
   						<div class="card-body control">
 						</div>
 					</div>
 				</div>
-				<div class="col-12">
+				<div class="col-lg-6 col-12 mt-2">
 					<div id="userCard" class="card">
   						<div class="card-body userPanels">
   							<ul class="nav nav-tabs">
@@ -76,7 +83,7 @@
 								 <li class="nav-item">
 								 	<button id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" type="button" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
 								 </li>
-								 <li class="nav-item">
+								 <li class="nav-item visually-hidden">
 								 	<button id="userTabCOM" class="nav-link"  data-bs-toggle="tab" data-bs-target="#com-tab-pane" type="button" role="tab" aria-controls="com-tab-pane" aria-selected="false">COM</button>
 								 </li>
 							</ul>
@@ -97,7 +104,12 @@
 			</div>
 		</div>
 	</div>
-
+	<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+		<div class="col-md-4 d-flex align-items-center">
+			 <a href="https://www.irttechnologies.com" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="IRT Technologies" target="_blank"><img class="logo__img" src="/images/logo_sm.png" alt="logo"></a>
+			 <span class="mb-3 mb-md-0 text-body-secondary">© 2025 IRT Technologies, Inc</span>
+		</div> 
+	</footer>
 </div>
 
 <div id="modal" class="modal fade" tabindex="-1">

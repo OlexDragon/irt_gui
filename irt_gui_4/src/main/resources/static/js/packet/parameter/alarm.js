@@ -1,6 +1,6 @@
-import {parseToAlarmStatus, parseToAlarmString, parseToShortArray, shortToBytes} from '../service/converter.js'
 import Payload from '../payload.js'
 import Parameter from '../parameter.js'
+import {parseToAlarmStatus, parseToAlarmString, parseToShortArray, shortToBytes} from '../service/converter.js'
 
 const alarms = Object.freeze([ 'none'	, 'number of alarms', 'IDs'				, 'summary status'	, 'config'	, 'status'			, 'description'	, 'name']);
 const parsers = Object.freeze([ undefined, bytes=>bytes[0]	, parseToShortArray	, parseToAlarmStatus, undefined	, parseToAlarmStatus, parseToAlarmString, parseToAlarmString]);

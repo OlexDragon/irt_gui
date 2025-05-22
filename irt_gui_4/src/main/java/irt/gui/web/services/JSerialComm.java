@@ -80,7 +80,7 @@ public class JSerialComm implements IrtSerialPort {
 			}
 		}
 		final String message = "The Serial Port " + spName + " couldn't be opened.";
-		throw new IrtSerialPortException(message, new Throwable());
+		throw new IrtSerialPortException(message);
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public class JSerialComm implements IrtSerialPort {
 									final int writeBytes = sp.writeBytes(bytes, bytes.length);
 									if(writeBytes<0) {
 										final String message = "There was an error writing to the port.";
-										throw new IrtSerialPortException(message, new Throwable());
+										throw new IrtSerialPortException(message);
 									}
 
 									if(timeout!=null)
@@ -141,7 +141,7 @@ public class JSerialComm implements IrtSerialPort {
 									read(is, bb);
 
 								} catch (Exception e) {
-									final String message = "Unable to send data via serial port " + serialPort;
+									final String message = "Unable to read data from serial port " + serialPort;
 									throw new IrtSerialPortException(message, e);
 								}
 
@@ -159,7 +159,12 @@ public class JSerialComm implements IrtSerialPort {
 		while((bytesAvailable = is.available())>0){
 			final byte[] b = new byte[bytesAvailable];
 			final int r = is.read(b);
-			logger.debug("Cleared {} Bytes: {}", r, b);
+			logger.error("Cleared {} Bytes: {}", r, b);
+			try {
+				TimeUnit.MICROSECONDS.sleep(500);
+			} catch (InterruptedException e) {
+				logger.catching(e);
+			}
 		};
 	}
 

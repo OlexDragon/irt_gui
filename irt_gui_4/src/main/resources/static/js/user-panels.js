@@ -1,5 +1,6 @@
 import {start as networkStart, stop as networkStop} from './panel-network.js'
-import {start as alarmsStart, stop as alarmskStop} from './panel-alarms.js'
+import {start as alarmsStart, stop as alarmsStop} from './panel-alarms.js'
+import {start as redundancyStart, stop as redundancyStop} from './panel-redundancy.js'
 
 const $body = $('.userPanels');
 const $tabs = $body.find('.nav-link').click(userTabsOnShow);
@@ -9,27 +10,29 @@ if(userTabsCookies)
 	new bootstrap.Tab($(`#${userTabsCookies}`)).show();
 else
 	new bootstrap.Tab($('#userTabAlarn')).show();
-	
-function userTabsOnClick(e){
-	Cookies.set('userTabsCookies', e.currentTarget.id);
-}
 
 export function start(){
+
 	const $selectedTab = $tabs.filter((_,el)=>el.classList.contains('active'));
+
 	if($selectedTab.length)
 		userTabsOnShow($selectedTab.prop('id'));
 	else
-	console.warn('User Tab is not selected.')
+		console.warn('User Tab is not selected.')
 }
 
 export function stop(){
-	networkStop(); alarmskStop();
+	networkStop(); alarmsStop(); redundancyStop();
 }
-function userTabsOnShow(e){
+function userTabsOnShow(selected){
 
 	stop();
 
-	const selected = typeof e === 'string' ? e : e.currentTarget.id
+	if(selected.currentTarget){
+		Cookies.set('userTabsCookies', selected.currentTarget.id);
+		selected = selected.currentTarget.id;
+	}
+
 	switch(selected){
 
 		case 'userTabNetwork':
@@ -38,6 +41,10 @@ function userTabsOnShow(e){
 
 		case 'userTabAlarn':
 			alarmsStart();
+			break;
+
+		case 'userTabRedundancy':
+			redundancyStart();
 			break;
 
 		default:

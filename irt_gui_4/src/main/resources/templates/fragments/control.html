@@ -31,26 +31,26 @@
 								<div class="col">
 									<div class="form-floating">
 										<input id="attenuationValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
-  										<label for="attenuationValue">Value</label>
+  										<label for="attenuationValue">Value (dB)</label>
   									</div>
 								</div>
   								<div class="col">
 									<div class="form-floating">
 										<input id="attenuationControl" type="number" class="form-control" placeholder="to Set">
-  										<label for="attenuationControl">to Set</label>
+  										<label for="attenuationControl">to Set (dB)</label>
 									</div>
 								</div>
 								<div class="col">
 									<div class="col">
 										<div class="form-floating">
 											<input id="attenuationStep" class="form-control" type="number" placeholder="Step">
-  											<label for="attenuationStep">Step</label>
+  											<label for="attenuationStep">Step (dB)</label>
 										</div>
 									</div>
 								</div>
  							</div>
 							<div>
-								<input id="attenuationRange" type="range" class="form-range">
+								<input id="attenuationRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
 							</div>
  						</div>
  						<div class="tab-pane fade" id="gain-tab-pane" role="tabpanel" aria-labelledby="gain-tab" tabindex="0">
@@ -58,26 +58,26 @@
 								<div class="col">
 									<div class="form-floating">
 										<input id="gainValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
-  										<label for="gainValue">Value</label>
+  										<label for="gainValue">Value (dB)</label>
   									</div>
 								</div>
 								<div class="col">
 									<div class="form-floating">
 										<input id="gainControl" type="number" class="form-control" placeholder="to Set">
-  										<label for="gainControl">to Set</label>
+  										<label for="gainControl">to Set (dB)</label>
 									</div>
  								</div>
 								<div class="col">
 									<div class="col">
 										<div class="form-floating">
 											<input id="gainStep" class="form-control" type="number" placeholder="Step">
-  											<label for="gainStep">Step</label>
+  											<label for="gainStep">Step (dB)</label>
 										</div>
 									</div>
 								</div>
 							</div>
 							<div>
-								<input id="gainRange" type="range" class="form-range">
+								<input id="gainRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
 							</div>
  						</div>
  						<div class="tab-pane fade" id="frequency-tab-pane" role="tabpanel" aria-labelledby="frequency-tab" tabindex="0">
@@ -85,26 +85,32 @@
 								<div class="col">
 									<div class="form-floating">
 										<input id="freqValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
-  										<label for="freqValue">Value</label>
+  										<label for="freqValue">Value (MHz)</label>
   									</div>
 								</div>
   								<div class="col">
 									<div class="form-floating">
 										<input id="freqControl" type="number" class="form-control" placeholder="to Set">
-  										<label for="freqControl">to Set</label>
+  										<label for="freqControl">to Set (MHz)</label>
 									</div>
 								</div>
 								<div class="col">
 									<div class="col">
 										<div class="form-floating">
 											<input id="freqStep" class="form-control" type="number" placeholder="Step">
-  											<label for="freqStep">Step</label>
+  											<label for="freqStep">Step (MHz)</label>
 										</div>
 									</div>
 								</div>
 							</div>
-							<div>
-								<input id="freqRange" type="range" class="form-range">
+							<div class="row">
+								<input id="freqRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
+							</div>
+							<div class="row justify-content-center">
+								<div class="col-5">
+									<input type="checkbox" class="btn-check" id="btnMute" autocomplete="off" disabled="disabled">
+									<label class="btn btn-outline-warning form-control" for="btnMute"></label><br>
+								</div>
 							</div>
  						</div>
    					</div>

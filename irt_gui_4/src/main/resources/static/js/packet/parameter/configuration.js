@@ -1,4 +1,4 @@
-import {parseToIrtValue, parseToShortArray, parseToBigInt, parseToBigIntArray} from '../service/converter.js'
+import {parseToIrtValue, parseToShortArray, parseToBigInt, parseToBigIntArray, parseToBoolean} from '../service/converter.js'
 import {type} from '../service/device-type.js'
 
 const control = {};
@@ -98,7 +98,7 @@ control.buc[1].parser =  data=>data.toString();
 control.buc[2] = {}
 control.buc.mute					 = 2;
 control.buc[2].description = 'Mute';
-control.buc[2].parser =  data=>data.toString();
+control.buc[2].parser =  parseToBoolean;
 control.buc[3] = {}
 control.buc.gain					 = 3;
 control.buc[3].description = 'Gain';
@@ -130,7 +130,7 @@ control.buc[9].parser = parseToBigIntArray;
 control.buc[10] = {}
 control.buc.redundancy_enable		 = 10;
 control.buc[10].description = 'Redundancy';
-control.buc[10].parser = data=>data.toString();
+control.buc[10].parser = parseToBoolean;
 control.buc[11] = {}
 control.buc.redundancy_mode			 = 11;
 control.buc[11].description = 'Mode';
@@ -142,7 +142,7 @@ control.buc[12].parser = data=>data.toString();
 control.buc[15] = {}
 control.buc.redundancy_status		 = 15;
 control.buc[15].description = 'Status';
-control.buc[15].parser = data=>data.toString();
+control.buc[15].parser = parseToIrtValue;
 control.buc[14] = {}
 control.buc.redundancy_set_online	 = 14;
 control.buc[14].description = 'Online';
@@ -169,7 +169,7 @@ export function name(code){
 	const keys = Object.keys(group);
 
 	for(const key of keys)
-		if(deviceInfo[key] == code)
+		if(group[key] == code)
 			return key;
 }
 
@@ -180,8 +180,8 @@ export function description(value){
 
 export function toString(value){
 	const c = code(value)
-	const name = name(value)
-	return `measurement: ${name} (${c})`;
+	const n = name(value)
+	return `configuration: ${n} (${c})`;
 }
 
 export function parser(value){

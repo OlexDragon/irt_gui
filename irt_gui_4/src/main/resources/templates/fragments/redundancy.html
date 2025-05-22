@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>GUI - IRT Technologies</title>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="card-body">
+<!-- Auto calibration by Unit Gain -->
+<th:block th:fragment="buc">
+	<div class="row mt-2">
+		<div class="col">Redundancy</div>
+		<div class="col">
+			<select id="selectEnable" class="form-select" disabled>
+				<option selected="selected" disabled="disabled" hidden="hidden"></option>
+				<option value="false">Disable</option>
+				<option value="true">Enable</option>
+			</select>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col">Standby</div>
+		<div class="col">
+			<select id="selectStandby" class="form-select" disabled>
+				<option selected="selected" disabled="disabled" hidden="hidden"></option>
+				<option value="0">Cold</option>
+				<option value="1">Hot</option>
+			</select>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col">Unit</div>
+		<div class="col">
+			<select id="selectName" class="form-select" disabled>
+				<option selected="selected" disabled="disabled" hidden="hidden"></option>
+				<option value="1">A</option>
+				<option value="2">B</option>
+			</select>
+		</div>
+	</div>
+	<div class="row mt-2">
+		<div class="col">Status</div>
+		<div id="redundancyStatus" class="col"></div>
+	</div>
+	<div class="row mt-2 justify-content-center">
+		<div class="col-8">
+			<img id="redundancyImg" src="../static/images/BUC_X.jpg" th:src="@{/images/BUC_X.jpg}" class="img-fluid" alt="Redundancy">
+		</div>
+	</div>
+	<div class="row mt-2 justify-content-center">
+		<div class="col-8">
+			<button id="btnSetOnline" class="btn btn-outline-primary form-control" disabled="disabled">Set Online</button>
+		</div>
+	</div>
+</th:block>
+ </div>
+</div>
+</html>

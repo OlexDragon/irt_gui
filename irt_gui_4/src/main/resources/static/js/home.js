@@ -36,10 +36,9 @@ function postObject(url, object){
 	    dataType: 'json'
 	});
 }
-function blink($el, timeout, bottstrapClass){
+function blink($el, bottstrapClass){
 	if(!bottstrapClass)
 		bottstrapClass = 'connection-ok';
-	clearTimeout(timeout);
-	$el.addClass('connection-ok');
-	return setTimeout(()=>$el.removeClass(bottstrapClass), 500);
+	$el.addClass(bottstrapClass);
+	setTimeout(()=>$el.removeClass(bottstrapClass), 500);
 }

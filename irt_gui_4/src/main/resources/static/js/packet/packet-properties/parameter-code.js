@@ -1,8 +1,10 @@
 import {id} from './group-id.js'
 import {description as diDescription, parser as diParser, name as diName, toString as diToSyting} from '../parameter/device-info.js'
+import {description as confDescription, parser as confParser, name as confName, toString as confToSyting} from '../parameter/configuration.js'
 
 const deviceInfo = id('deviceInfo')
 const deviceDebug = id('deviceDebug')
+const configuration = id('configuration')
 const functions = {};
 
 // Device Info
@@ -59,3 +61,10 @@ export function toString(groupId){
 //parameterCode[groupId.deviceDebug][deviceDebug.parameter.debugDump] = {};
 //parameterCode[groupId.deviceDebug][deviceDebug.parameter.debugDump].description	 = 'Dump Registers'
 //parameterCode[groupId.deviceDebug][deviceDebug.parameter.debugDump].parseFunction = parseToString;
+
+// Configuration
+functions[configuration] = {};
+functions[configuration].name = confName;
+functions[configuration].description = confDescription;
+functions[configuration].parser = confParser;
+functions[configuration].toString = confToSyting;

@@ -1,38 +1,37 @@
 import {showError} from './worker.js'
 import Packet from './packet/packet.js'
-import Header from './packet/header.js'
 import RequestPackt from './packet/request-packet.js'
-import {code, parser, payloads} from './packet/parameter/alarm.js'
+import {code, parser} from './packet/parameter/alarm.js'
 import {boorstrapClass} from './packet/parameter/value/alarm-status.js'
-import {type as typeFromDT} from './packet/service/device-type.js'
 import {id as groupId} from './packet/packet-properties/group-id.js'
-import {id as fPacketId} from './packet/packet-properties/packet-id.js'
+import {id as f_PacketId} from './packet/packet-properties/packet-id.js'
 import {code as packetTypeCode} from './packet/packet-properties/packet-type.js'
 
 const $card = $('#userCard');
 const $body = $('#alarms-tab-pane');
-const $userTabAlarn = $('#userTabAlarn');
 
-const packetIdSummary = fPacketId('alarmSummary');
-const packetIdAlarmIDs = fPacketId('alarmIDs');
-const packetIdAlarm = fPacketId('alarm');
+//const packetIdSummary = f_PacketId('alarmSummary');
+const packetIdAlarmIDs = f_PacketId('alarmIDs');
+const packetIdAlarmAll = f_PacketId('alarmAll');
+const packetIdAlarm = f_PacketId('alarm');
 let packetId;
 let alarmIDs;
 
 let interval;
-let delay = 1000;
+let delay = 5000;
 
 export function start(){
-	stop();
-	if(!$body.find(':first-child').length){
-		const name = chooseFragmentName();
-		$body.load(`/fragment/alarms/${name}`);
-	}
+	if(interval)
+		return;
+
+	$body.empty();
+	run();
 	interval = setInterval(run, delay);
 }
 
 export function stop(){
 	clearInterval(interval) ;
+	interval = undefined
 }
 
 function chooseFragmentName(){
@@ -43,12 +42,11 @@ function chooseFragmentName(){
 	}
 }
 
-let timeout;
 let buisy;
 function run(){
 
 	if(buisy){
-		console.log('Buisy')
+		console.warn('Buisy');
 		return
 	}
 
@@ -57,17 +55,14 @@ function run(){
 	sendRequest();
 }
 
-function sendRequest(){
+export function sendRequest(){
 
 	let requestPacket;
 
 	if(alarmIDs){
 
-		packetId = packetIdAlarm;
-		requestPacket = new RequestPackt(packetId);
-		const pls = payloads(alarmIDs,true);
-		const packet = new Packet(new Header(packetTypeCode('request'), requestPacket.id, groupId('alarm')), pls, requestPacket.unitAddr);
-		requestPacket.bytes = packet.toSend();
+		packetId = packetIdAlarmAll;
+		requestPacket = new RequestPackt(packetId, undefined, alarmIDs);
 
 	}else{
 		packetId = packetIdAlarmIDs;
@@ -77,11 +72,11 @@ function sendRequest(){
 	postObject('/serial/send', requestPacket)
 	.done(data=>{
 		buisy = false;
-		timeout = blink($card, timeout);
+		blink($card);
 
 		if(!data.answer?.length){
 			console.warn("No answer.");
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
 
@@ -95,7 +90,7 @@ function sendRequest(){
 		if(packet.header.packetId !== packetId){
 			console.log(packet);
 			console.warn('Received wrong packet.');
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
 
@@ -103,10 +98,11 @@ function sendRequest(){
 	})
 	.fail((jqXHR)=>{
 		buisy = false;
-		$card.addClass('connection-fail');
-		timeout = blink($card, timeout, 'connection-fail');
+		blink($card, 'connection-fail');
 
 		if(jqXHR.responseJSON?.message){
+			console.log(requestPacket);
+			console.error(jqXHR.responseJSON.message);
 			if(showError)
 				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
 		}
@@ -120,7 +116,7 @@ module.fAlarms = function(packet){
 
 	if(packet.header.groupId !== groupId('alarm')){
 		console.warn(packet);
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
 		return;
@@ -131,30 +127,35 @@ module.fAlarms = function(packet){
 	if(!payloads?.length){
 		console.log(packet.toString());
 		console.warn('No payloads to parse.');
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		return;
 	}
 
-	timeout = blink($card, timeout);
+	blink($card);
 
 	payloads.forEach(parseAlarm);
 }
+const codeIdIDs = code('IDs');
+const codeIdDescription = code('description');
+const codeIdStatus = code('status');
+const codeIdName = code('name');
 function parseAlarm(pl){
 
 	switch(pl.parameter.code){
-	case code('IDs'):
+	case codeIdIDs:
 		alarmIDs = parser(pl.parameter.code)(pl.data);
+		sendRequest();
 		break; 
 
-	case code('description'):
+	case codeIdDescription:
 		showDescription(pl);
 		break;
 
-//	case code('name'):
+//	case codeIdName:
 //		showName(pl);
 //		break;
 
-	case code('status'):
+	case codeIdStatus:
 		showValue(pl);
 		break;
 

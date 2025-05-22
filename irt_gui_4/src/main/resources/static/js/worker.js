@@ -1,8 +1,9 @@
 
-import {start as piStart, stop as piStop} from './panel-info.js'
+import {start as piStart, stop as piStop, onTypeChange} from './panel-info.js'
 import {start as measStart, stop as measStop} from './panel-measurement.js'
-import {start as contrStart, stop as contrStop} from './panel-control.js'
+import {start as controlStart, stop as controlStop} from './panel-control.js'
 import {start as userStart, stop as userStop} from './user-panels.js'
+import {start as summaryAlarmStart, stop as summaryAlarmStop, onStatusChange} from './panel-summary-alarm.js'
 
 const $modal = $('#modal');
 const $serialPort = $('select[id=serialPort]').change(portSelected);
@@ -73,14 +74,15 @@ function toggleStart(){
 
 	switch(text){
 	case 'Start':
-		piStart(); measStart(); contrStart(); userStart();
+		summaryAlarmStart()
+//		, piStart(); measStart(); controlStart(); userStart();
 		$lbl.text('Stop');
 		$btnStart.attr('checked', true);
 		run = true;
 		break;
 
 	default:
-		piStop(); measStop(); contrStop(); userStop();
+		summaryAlarmStop(), piStop(); measStop(); controlStop(); userStop();
 		$lbl.text('Start');
 		$btnStart.attr('checked', false);
 		showToast('The GUI stopped accessing the serial port.', 'The serial port will be released in 20 seconds.');
@@ -107,4 +109,32 @@ $('#appExit').click(()=>{
 	});
 
 });
+
+onStatusChange(sunnaryAlarm=>{
+
+	if(!sunnaryAlarm){
+		piStop(); measStop(); controlStop(); userStop();
+		return;
+	}
+
+	switch(sunnaryAlarm.severities){
+
+		case 'NO_ALARM':
+		case 'CRITICAL':
+		case 'INFO':
+		case 'WARNING':
+		case 'MINOR':
+		case 'MAJOR':
+		piStart(); measStart();
+		break;
+
+	default:
+		piStop(); measStop(); controlStop(); userStop();
+		console.warn(sunnaryAlarm);
+	}
+});
+
+onTypeChange(()=>{
+	controlStart(); userStart();
+})
 export {serialPort, baudrate, unitAddress, run, showError}

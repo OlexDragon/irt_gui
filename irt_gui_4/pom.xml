@@ -10,7 +10,7 @@
 	</parent>
 
 	<groupId>irt.gui</groupId>
-	<artifactId>web</artifactId>
+	<artifactId>gui</artifactId>
 	<version>4.1</version>
 	<name>web</name>
 	<description>IRT GUI Application</description>
@@ -93,6 +93,13 @@
 			<groupId>org.webjars</groupId>
 			<artifactId>bootstrap</artifactId>
 			<version>5.3.5</version>
+		</dependency>
+
+<!-- https://mvnrepository.com/artifact/io.nayuki/qrcodegen -->
+		<dependency>
+			<groupId>io.nayuki</groupId>
+			<artifactId>qrcodegen</artifactId>
+			<version>1.8.0</version>
 		</dependency>
 
 		<dependency>

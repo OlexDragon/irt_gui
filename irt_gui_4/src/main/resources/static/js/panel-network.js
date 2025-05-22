@@ -1,29 +1,41 @@
 import {type as typeFromDT} from './packet/service/device-type.js'
 import {showError} from './worker.js'
-
-import {id as fPacketId} from './packet/packet-properties/packet-id.js'
-import {id as fGroupId} from './packet/packet-properties/group-id.js'
+import {id as f_packetId} from './packet/packet-properties/packet-id.js'
+import {id as f_groupId} from './packet/packet-properties/group-id.js'
 import Packet from './packet/packet.js'
 import RequestPackt from './packet/request-packet.js'
+import NetworkControl from './network/network-control.js'
 
 const $card = $('#userCard');
 const $body = $('#network-tab-pane');
 
+let networkControl;
 let interval;
-let delay = 5000;
+let delay = 10000;
 
 export function start(){
-	console.log('Network')
-	stop();
-	if(!$body.find(':first-child').length){
-		const name = chooseFragmentName();
-		$body.load(`/fragment/network/${name}`);
-	}
+
+	if(interval)
+		return;
+
+	const name = chooseFragmentName();
+	$body.load(`/fragment/network/${name}`, ()=>{
+		const $selectNetworkType = $('#selectNetworkType');
+		const $networkAddress = $('#networkAddress');
+		const $networkMask = $('#networkMask');
+		const $networkGateway = $('#networkGateway');
+		const $btnVetworkOk = $('#btnVetworkOk');
+		const $btnNetworkCancel = $('#btnNetworkCancel');
+		networkControl = new NetworkControl($selectNetworkType, $networkAddress, $networkMask, $networkGateway, $btnVetworkOk, $btnNetworkCancel);
+		networkControl.onChange(onChange);
+		networkControl.onNotSaved(onNotSaved);
+		run();
+	});
 	interval = setInterval(run, delay);
 }
-
 export function stop(){
 	clearInterval(interval) ;
+	interval = undefined;
 }
 
 function chooseFragmentName(){
@@ -34,9 +46,9 @@ function chooseFragmentName(){
 	}
 }
 
-const packetId = fPacketId('networkAll');
+const packetId = f_packetId('network');
+const packetIdSet = f_packetId('networkSet');
 
-let timeout;
 let buisy;
 let oldType;
 function run(){
@@ -50,20 +62,24 @@ function run(){
 
 	sendRequest();
 }
+
 function sendRequest(){
 
 	const requestPacket = new RequestPackt(packetId);
+	post(requestPacket);
+}
+function post(requestPacket){
 
 	postObject('/serial/send', requestPacket)
 	.done(data=>{
 		buisy = false;
-		timeout = blink($card, timeout);
 
 		if(!data.answer?.length){
 			console.warn("No answer.");
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
+		blink($card);
 
 		if(!data.function){
 			console.warn("No function name.");
@@ -72,10 +88,10 @@ function sendRequest(){
 
 		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
 
-		if(packet.header.packetId !== packetId){
+		if(![packetId, packetIdSet].includes(packet.header.packetId)){
 			console.log(packet);
 			console.warn('Received wrong packet.');
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
 
@@ -83,22 +99,21 @@ function sendRequest(){
 	})
 	.fail((jqXHR)=>{
 		buisy = false;
-		$card.addClass('connection-fail');
-		timeout = blink($card, timeout, 'connection-fail');
+		blink($card, 'connection-fail');
 
 		if(jqXHR.responseJSON?.message){
 			if(showError)
 				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
 		}
-	
+
 	});
 }
 const module = {}
 module.fNetwork = function(packet){
 
-	if(packet.header.groupId !== fGroupId('network')){
+	if(packet.header.groupId !== f_groupId('network')){
 		console.warn(packet);
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
 		return;
@@ -108,11 +123,11 @@ module.fNetwork = function(packet){
 
 	if(!payloads?.length){
 		console.warn('No payloads to parse.');
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		return;
 	}
 
-	timeout = blink($card, timeout);
+	blink($card);
 
 	payloads.forEach(pl=>{
 		switch(pl.parameter.code){
@@ -126,13 +141,24 @@ module.fNetwork = function(packet){
 		}
 	});
 }
+
 function parseNetwork(pl){
+
 	if(pl.data?.length!=13){
 		console.warn('Wrong data size.');
 		return;
 	}
-	$('#selectNetworkType').val(pl.data[0]);
-	$('#networkAddress').children().each((i, el)=>el.value = pl.data[++i]&0xff);
-	$('#networkMask').children().each((i, el)=>el.value = pl.data[i + 5]&0xff);
-	$('#networkGateway').children().each((i, el)=>el.value = pl.data[i + 9]&0xff);
+
+	networkControl.value = pl.data;
+}
+
+function onChange(ipAddress){
+	const requestPacket = new RequestPackt(packetIdSet, ipAddress.bytes);
+	post(requestPacket);
+}
+
+function onNotSaved(e){
+
+	showToast("Network settings are not saved.", e.currentValue.toString(), 'text-bg-warning bg-opacity-50');
+	console.log(e);
 }

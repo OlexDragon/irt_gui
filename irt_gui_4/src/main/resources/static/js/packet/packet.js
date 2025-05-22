@@ -1,8 +1,8 @@
 import Header from './header.js'
 import Payload from './payload.js'
-import LinkHeader from './Link-header.js'
+import LinkHeader from './link-header.js'
 import Parameter from './parameter.js'
-import {code, description} from './packet-properties/packet-type.js'
+import {code} from './packet-properties/packet-type.js'
 import {checksumToBytes} from './service/checksum.js'
 
 // Default InfoPacket
@@ -38,7 +38,14 @@ export default class Packet{
 		}
 		this.header = (header == undefined ? new Header() : header);
 		if(this.header.type!=code('acknowledgement'))
-			this.payloads = payloads == undefined ? [new Payload()] : Array.isArray(payloads) ? payloads : [payloads];
+			if(!payloads)
+				this.payloads = [new Payload()];
+			else if(typeof payloads =='number')
+				this.payloads = [new Payload(payloads)] ;
+			else if(Array.isArray(payloads))
+				this.payloads = payloads;
+			else
+				this.payloads = [payloads];
 
 		if(unitAddr!=undefined)
 			this.linkHeader = new LinkHeader(unitAddr);
@@ -70,7 +77,12 @@ export default class Packet{
 		const linkHeaderrBytes = this.linkHeader?.toBytes();
 		const headerBytes = this.header.toBytes();
 		const payloadBytes = this.payloadsToBytes();
-		return linkHeaderrBytes ? linkHeaderrBytes.concat(headerBytes).concat(payloadBytes) : headerBytes.concat(payloadBytes);
+		if(linkHeaderrBytes){
+			let tmp = linkHeaderrBytes.concat(headerBytes)
+			tmp = tmp.concat(payloadBytes);
+			return tmp;
+		}else
+			return headerBytes.concat(payloadBytes);
 	}
 	toSend(){
 		return packetToSend(this);
@@ -87,7 +99,8 @@ export default class Packet{
 	}
 	toString(){
 		const linkHeader = this.linkHeader ? 'linkHeader: ' + this.linkHeader.toString() + ', ' : '';
-		return linkHeader + this.header.toString() + (this.payloads ? ', ' + this.payloads.map(pl=>pl.toString(this.header.groupId)) : '');
+		const plStr = this.payloads ? ', ' + this.payloads.map(pl=>pl.toString(this.header.groupId)) : '';
+		return linkHeader + this.header.toString() + plStr;
 	}
 	getData(parameterCode){
 		if(parameterCode)
@@ -138,3 +151,4 @@ function packetToSend(packet){
 	const checksum = checksumToBytes(bytes);
 	return [FLAG_SEQUENCE].concat(controlEscape(bytes.concat(checksum))).concat(FLAG_SEQUENCE);
 }
+

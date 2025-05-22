@@ -7,3 +7,6 @@
 .connection-wrong{
 	border-color: yellow;
 }
+.toast-body{
+	white-space: pre-wrap;
+}

@@ -4,7 +4,6 @@ import {run as doRun, showError} from './worker.js'
 import {id as fPacketId} from './packet/packet-properties/packet-id.js'
 import {id as fGroupId} from './packet/packet-properties/group-id.js'
 import {description, parser} from './packet/parameter/measurement.js'
-import {type as typeFromInfo} from './panel-info.js'
 
 const $card = $('.measurementCard');
 const $body = $('.measurement');
@@ -12,19 +11,22 @@ const $body = $('.measurement');
 let delay = 3000;
 let interval;
 export function start(){
-	stop();
+	if(interval)
+		return;
+
+	$body.empty();
+	run();
 	interval = setInterval(run, delay);
 }
 
 export function stop(){
-	clearInterval(interval) ;
+	clearInterval(interval);
+	interval = undefined;
 }
 
 const packetId = fPacketId('measurementAll');
 let buisy;
 function run(){
-	if(!typeFromInfo)
-		return;
 
 	if(buisy){
 		console.log('Buisy')
@@ -41,13 +43,14 @@ function run(){
 	postObject('/serial/send', requestPacket)
 	.done(data=>{
 		buisy = false;
-		timeout = blink($card, timeout);
 
 		if(!data.answer?.length){
+			console.log(data);
 			console.warn("No answer.");
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
+		blink($card);
 
 		if(!data.function){
 			console.warn("No function name.");
@@ -59,7 +62,7 @@ function run(){
 		if(packet.header.packetId !== packetId){
 			console.log(packet);
 			console.warn('Received wrong packet.');
-			timeout = blink($card, timeout, 'connection-wrong');
+			blink($card, 'connection-wrong');
 			return;
 		}
 
@@ -67,8 +70,7 @@ function run(){
 	})
 	.fail((jqXHR)=>{
 		buisy = false;
-		$card.addClass('connection-fail');
-		timeout = blink($card, timeout, 'connection-fail');
+		blink($card, 'connection-fail');
 
 		if(jqXHR.responseJSON?.message){
 			if(showError)
@@ -78,12 +80,11 @@ function run(){
 }
 
 const module = {};
-let timeout
 module.fMeasurement = function(packet){
 
 	if(packet.header.groupId == fGroupId('alarm')){
 		console.warn(packet);
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
 		return;
@@ -94,11 +95,11 @@ module.fMeasurement = function(packet){
 	if(!payloads?.length){
 		console.log(packet);
 		console.warn('No payloads to parse.');
-		timeout = blink($card, timeout, 'connection-wrong');
+		blink($card, 'connection-wrong');
 		return;
 	}
 
-	timeout = blink($card, timeout);
+	blink($card);
 	payloads.forEach(pl=>{
 
 		const valId = 'measVal' + pl.parameter.code;
