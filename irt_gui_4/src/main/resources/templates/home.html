@@ -3,6 +3,7 @@
 
 <head>
     <title>GUI - IRT Technologies</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
 	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}">
 </head>
@@ -83,7 +84,7 @@
 								 <li class="nav-item">
 								 	<button id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" type="button" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
 								 </li>
-								 <li class="nav-item visually-hidden">
+								 <li class="nav-item">
 								 	<button id="userTabCOM" class="nav-link"  data-bs-toggle="tab" data-bs-target="#com-tab-pane" type="button" role="tab" aria-controls="com-tab-pane" aria-selected="false">COM</button>
 								 </li>
 							</ul>
@@ -104,11 +105,13 @@
 			</div>
 		</div>
 	</div>
-	<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-		<div class="col-md-4 d-flex align-items-center">
-			 <a href="https://www.irttechnologies.com" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="IRT Technologies" target="_blank"><img class="logo__img" src="/images/logo_sm.png" alt="logo"></a>
-			 <span class="mb-3 mb-md-0 text-body-secondary">© 2025 IRT Technologies, Inc</span>
-		</div> 
+	<footer class="row align-items-center py-3 my-4 border-top">
+			<div class="col-auto"><img alt="https://www.irttechnologies.com" src="/qr-code?text=https://www.irttechnologies.com"></div>
+			<div class="col text-center">
+				 <a href="https://www.irttechnologies.com" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="IRT Technologies" target="_blank"><img class="logo__img" src="/images/logo_sm.png" alt="logo"></a>
+				 <span class="mb-3 mb-md-0 text-body-secondary">© 2025 IRT Technologies, Inc</span>
+			</div> 
+			<div class="col-auto"><img alt="IRT GUI" src="/qr-code"></div>
 	</footer>
 </div>
 

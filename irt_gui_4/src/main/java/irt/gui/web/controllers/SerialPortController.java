@@ -1,10 +1,13 @@
 package irt.gui.web.controllers;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -37,8 +40,10 @@ public class SerialPortController {
 	}
 
 	@PostMapping("send")
-    RequestPacket send(@RequestBody RequestPacket requestPacket){
+    RequestPacket send(@RequestBody RequestPacket requestPacket, HttpServletRequest request){
 		logger.traceEntry("{}", requestPacket);
+		final String headerNames = request.getHeader("User-Agent");
+		logger.error(headerNames);
 
 		final FutureTask<RequestPacket> respose = distributor.send(requestPacket);
 

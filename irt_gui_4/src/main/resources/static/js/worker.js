@@ -24,6 +24,7 @@ if(!cookies)
 	cookies = 115200;
 $baudrate.val(cookies);
 
+const interval = setInterval(()=>showToast("Serial port not selected.", "Select the serial port connected to the device.", 'text-bg-warning bg-opacity-50'), 10000);
 getPortNames();
 function getPortNames(){
 	$.get('/serial/ports')
@@ -69,6 +70,7 @@ function btnShowErrorsChange(e){
 
 function toggleStart(){
 
+	clearInterval(interval);
 	const $lbl = $btnStart.next();
 	const text = $lbl.text();
 
@@ -137,4 +139,5 @@ onStatusChange(sunnaryAlarm=>{
 onTypeChange(()=>{
 	controlStart(); userStart();
 })
+
 export {serialPort, baudrate, unitAddress, run, showError}
