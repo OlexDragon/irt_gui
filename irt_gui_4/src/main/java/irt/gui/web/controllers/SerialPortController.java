@@ -1,5 +1,4 @@
 package irt.gui.web.controllers;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -7,14 +6,13 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,10 +38,8 @@ public class SerialPortController {
 	}
 
 	@PostMapping("send")
-    RequestPacket send(@RequestBody RequestPacket requestPacket, HttpServletRequest request){
-		logger.traceEntry("{}", requestPacket);
-		final String headerNames = request.getHeader("User-Agent");
-		logger.error(headerNames);
+    RequestPacket send(@RequestBody RequestPacket requestPacket, @CookieValue(value = "sessionId") String sessionId){
+		logger.traceEntry("sessionId: {}; {}", sessionId, requestPacket);
 
 		final FutureTask<RequestPacket> respose = distributor.send(requestPacket);
 
