@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import irt.gui.data.packet.interfaces.LinkedPacket;
-import irt.gui.data.packet.observable.configuration.AttenuationPacket;
+import irt.gui.data.packet.observable.InfoPacket;
 import irt.gui.data.packet.observable.configuration.FrequencyPacket;
 import irt.gui.errors.PacketParsingException;
 
@@ -19,8 +19,10 @@ public class PacketTest {
 	public void createNewPacketTest1() throws PacketParsingException {
 		logger.traceEntry();
 
-		AttenuationPacket expecteds = new AttenuationPacket();
-		LinkedPacket actuals = (LinkedPacket) Packet.createNewPacket(AttenuationPacket.class, (Object[])null);
+		InfoPacket expecteds = new InfoPacket();
+		expecteds.setLinkHeaderAddr((byte) 0);
+		LinkedPacket actuals = (LinkedPacket) Packet.createNewPacket(InfoPacket.class, (Object[])null);
+		actuals.setLinkHeaderAddr((byte) 0);
 
 		logger.trace("\n expecteds:{}\n actuals{}", expecteds, actuals);
 		assertEquals(expecteds, actuals);

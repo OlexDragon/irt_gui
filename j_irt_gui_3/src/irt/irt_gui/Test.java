@@ -9,6 +9,7 @@ import org.apache.logging.log4j.core.LoggerContext;
 
 import irt.controller.DumpControllerFull;
 import irt.controller.serial_port.ComPortJSerialComm;
+import irt.data.packet.denice_debag.DeviceDebugInfoPacket;
 import irt.data.packet.interfaces.Packet;
 import irt.data.packet.protocol.PacketTranceverMode;
 
@@ -22,12 +23,24 @@ public class Test {
 		logger.trace(ctx);
 		final ComPortJSerialComm cp = new ComPortJSerialComm("COM3");
 		cp.openPort();
-		final byte linkAddr = (byte)254;
-		PacketTranceverMode packet = new PacketTranceverMode(linkAddr, null);
+		final byte linkAddr = 0;
+		DeviceDebugInfoPacket packet = new DeviceDebugInfoPacket(linkAddr, (byte) 2);
+		packet.setValue(1);
+		logger.error(packet);
+		final byte[] bytes = packet.toBytes();
+		logger.error("bytes: {}; {}", bytes.length, bytes);
 		final Packet send = cp.send(packet);
 		logger.error(send);
+		final byte[] ttoBytes = send.toBytes();
+		if(ttoBytes==null) {
+			logger.warn("No answer from the unit.");
+			return;
+		}
+		logger.error("bytes: {}; {}", ttoBytes.length, ttoBytes);
 		cp.closePort();
 		final Optional<Object> o = PacketTranceverMode.parseValueFunction.apply(send);
 		logger.error(o);
+		final byte[] acknowledg = packet.getAcknowledg();
+		logger.error("bytes: {}; {}", acknowledg.length, acknowledg);
 	}
 }

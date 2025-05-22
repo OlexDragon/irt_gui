@@ -446,7 +446,10 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 	protected void setSerialPort() {
 		logger.traceEntry();
 
-		final String portName = serialPortSelection.getSelectedItem().toString();
+		final Object selectedItem = serialPortSelection.getSelectedItem();
+		if(selectedItem==null)
+			return;
+		final String portName = selectedItem.toString();
 		setSerialPort(portName);
 	}
 
@@ -711,7 +714,7 @@ public abstract class GuiControllerAbstract implements Runnable, PacketListener{
 		try {
 
 			final SerialPortInterface serialPort = ComPortThreadQueue.getSerialPort();
-			Optional.ofNullable(serialPort).filter(SerialPortInterface::isOpened).ifPresent(sp->getInfo());
+			Optional.ofNullable(serialPort).ifPresent(sp->getInfo());
 
 		} catch (Exception e) {
 			logger.catching(e);

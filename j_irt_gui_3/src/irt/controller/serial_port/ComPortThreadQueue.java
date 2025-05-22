@@ -78,7 +78,6 @@ public class ComPortThreadQueue implements Runnable {
 
 			Optional
 			.ofNullable(serialPort)
-			.filter(SerialPortInterface::isOpened)
 			.ifPresent(sp->{
 
 				Optional
@@ -93,9 +92,12 @@ public class ComPortThreadQueue implements Runnable {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+
+		logger.traceExit();
 	}
 
 	public synchronized void add(PacketWork packetWork){
+		logger.traceEntry("{}", packetWork);
 //		Optional.of(packetWork).map(PacketWork::getPacketThread).map(PacketThreadWorker::getPacket).filter(p->PacketID.DEVICE_DEBUG_CPU_INFO.match(p.getHeader().getPacketId())).ifPresent(p->logger.catching(new Throwable()));
 
 		if(serialPort==null || packetWork==null)
@@ -136,6 +138,7 @@ public class ComPortThreadQueue implements Runnable {
 		} catch (Exception e) {
 			logger.catching(e);
 		}
+		logger.traceExit();
 	}
 
 	public synchronized void clear(){
@@ -171,6 +174,8 @@ public class ComPortThreadQueue implements Runnable {
 		.ofNullable(serialPort)
 		.filter(sp->sp.getPortName().startsWith("COM") || sp.getPortName().startsWith("/dev"))
 		.ifPresent(openPort());
+
+		logger.traceExit();
 	}
 
 	private Consumer<? super SerialPortInterface> openPort() {

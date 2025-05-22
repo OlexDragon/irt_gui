@@ -212,7 +212,7 @@ public class AlarmPanelFx extends AnchorPane implements Runnable, PacketListener
 //					.peek(logger::error)
 				.map(packet->new AlarmDescriptionPacket(unitAddress, packet.orElse(AlarmsPacketIds.STATUS)));
 
-		descriptionPackets
+		descriptionPackets.filter(p->p!=null)
 		.forEach(queue::add);
 	}
 

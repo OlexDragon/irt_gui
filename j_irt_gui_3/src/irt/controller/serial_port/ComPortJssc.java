@@ -33,6 +33,14 @@ public class ComPortJssc extends SerialPort implements SerialPortInterface {
 
 	public Packet send(PacketWork packetWork){
 
+		if(!isOpened())
+			try {
+				openPort();
+			} catch (Exception e) {
+				logger.catching(e);
+				return packetWork.getPacketThread().getPacket();
+			}
+
 		Packet packet = packetWork.getPacketThread().getPacket();
 
 		if(packet == null)

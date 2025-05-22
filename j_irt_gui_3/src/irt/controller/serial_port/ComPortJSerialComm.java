@@ -35,6 +35,13 @@ public class ComPortJSerialComm implements SerialPortInterface {
 	public Packet send(PacketWork packetWork) {
 //		if(packetWork.getPacketThread().getPacket().getHeader().getGroupId()==PacketGroupIDs.PROTOCOL.getId())
 //			logger.error(packetWork);
+		if(!isOpened())
+			try {
+				openPort();
+			} catch (Exception e) {
+				logger.catching(e);
+				return packetWork.getPacketThread().getPacket();
+			}
 
 		Packet packet = packetWork.getPacketThread().getPacket();
 
@@ -62,6 +69,7 @@ public class ComPortJSerialComm implements SerialPortInterface {
 	private boolean opening;
 	@Override
 	public boolean openPort() throws Exception {
+//		logger.error("");
 		logger.traceEntry("{}", this);
 
 		//Show Stack Trace

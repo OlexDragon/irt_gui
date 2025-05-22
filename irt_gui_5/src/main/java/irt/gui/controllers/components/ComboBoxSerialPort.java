@@ -6,8 +6,6 @@ import java.util.Optional;
 import java.util.prefs.Preferences;
 import java.util.stream.Stream;
 
-import javax.xml.soap.Node;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -102,7 +100,7 @@ public class ComboBoxSerialPort extends Observable {
 				ChoiceDialog<Class<?>> alert = new ChoiceDialog<>(selectedDriver, PacketSenderJSerialComm.class, PacketSenderJssc.class) ;
 				alert.setTitle("The GUI was not closed properly.");
 				alert.setHeaderText("Try to select a different serial port driver.");
-				Node comboBox = (Node) alert.getDialogPane().lookup(".combo-box");
+//				Node comboBox = (Node) alert.getDialogPane().lookup(".combo-box");
 				Optional<Class<?>> oClass = alert.showAndWait();
 
 				if(!oClass.isPresent())

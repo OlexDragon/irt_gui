@@ -125,21 +125,24 @@ public class RedundancyPanel extends RedundancyPanelDemo implements PacketListen
 			public void itemStateChanged(ItemEvent e) {
 
 				if(e.getStateChange()==ItemEvent.SELECTED) {
-					cptq.add(new RedundancyEnablePacket(redundancyEnablePacket.getLinkHeader().getAddr(), (RedundancyEnable) cmbBxRedundancy.getSelectedItem()));
+					final RedundancyEnablePacket packetWork = new RedundancyEnablePacket(redundancyEnablePacket.getLinkHeader().getAddr(), (RedundancyEnable) cmbBxRedundancy.getSelectedItem());
+					cptq.add(packetWork);
 				}
 			}
 		};
 		modeListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange()==ItemEvent.SELECTED) {
-					cptq.add(new RedundancyModePacket(redundancyModePacket.getLinkHeader().getAddr(), (RedundancyMode) cmbBxMode.getSelectedItem()));
+					final RedundancyModePacket packetWork = new RedundancyModePacket(redundancyModePacket.getLinkHeader().getAddr(), (RedundancyMode) cmbBxMode.getSelectedItem());
+					cptq.add(packetWork);
 				}
 			}
 		};
 		nameListener = new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if(e.getStateChange()==ItemEvent.SELECTED) {
-					cptq.add(new RedundancyNamePacket(redundancyNamePacket.getLinkHeader().getAddr(), (RedundancyName) cmbBxName.getSelectedItem()));
+					final RedundancyNamePacket packetWork = new RedundancyNamePacket(redundancyNamePacket.getLinkHeader().getAddr(), (RedundancyName) cmbBxName.getSelectedItem());
+					cptq.add(packetWork);
 				}
 			}
 		};

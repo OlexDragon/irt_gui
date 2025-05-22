@@ -3,6 +3,7 @@ package irt.gui.controllers.components;
 import java.net.URL;
 import java.time.Duration;
 import java.util.List;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.apache.logging.log4j.LogManager;
@@ -137,11 +138,20 @@ public class AlarmFieldController extends FieldsControllerAbstract implements In
 			final StringData stringData = pl.getStringData();
 			name = stringData.toString();
 
-			final String string = bundle.getString("alarms.name." + name);
+			String string;
+			try {
 
+				string = bundle.getString("alarms.name." + name);
+
+			} catch (MissingResourceException e) {
+				string = name;
+				logger.catching(e);
+			}
+
+			final String s = string;
 			Platform.runLater(()->{
-				if(!string.equals(titleLabel.getText())){
-					titleLabel.setText(string);
+				if(!s.equals(titleLabel.getText())){
+					titleLabel.setText(s);
 					toLog();
 				}
 			});
