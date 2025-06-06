@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.nayuki.qrcodegen.QrCode;
 import irt.gui.web.Gui4;
+import irt.gui.web.services.ConnectionCounter;
 import irt.gui.web.services.IrtSerialPort;
 import irt.gui.web.services.SerialPortDistributor;
 import irt.gui.web.services.ThreadWorker;
@@ -38,7 +39,9 @@ public class Gui4RestController {
 	private final static Logger logger = LogManager.getLogger();
 
 	@Autowired @Qualifier("jSerialComm") IrtSerialPort serialPort;
+	@Autowired ConnectionCounter counter;
 	@Autowired SerialPortDistributor distributor;
+
 	@Value("${server.port}") String serverPort;
 	@Value("${info.app.version}") String version;
 
@@ -86,6 +89,17 @@ public class Gui4RestController {
 				.body(new InputStreamResource(new ByteArrayInputStream(byteArray)));
 	}
 
+	@RequestMapping("connection/count")
+    int connectionCount() {
+		return counter.getConnectionCount();
+	}
+
+	@RequestMapping("connection/add")
+    int addConnection(String connectionId) {
+		counter.add(connectionId);
+		return connectionCount();
+	}
+
 	@RequestMapping("ping")
     Boolean ping() {
 		return true;
@@ -93,6 +107,7 @@ public class Gui4RestController {
 
 	@RequestMapping("exit")
     Boolean exit() {
+		logger.traceEntry();
 
 		serialPort.shutdown();
 		distributor.shutdown();

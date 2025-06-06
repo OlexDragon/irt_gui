@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import lombok.Getter;
 import lombok.ToString;
 
 @ToString
@@ -19,29 +20,37 @@ public class Packet {
 	public static final byte CONTROL_ESCAPE = 0x7D;;
 
 	private final byte[] bytes;
+	@Getter
+	private int lastIndex;
 
 	public Packet(byte[] bytes) {
+
+		if(bytes==null) {
+			this.bytes = new byte[0];
+			return;
+		}
+
 		final List<Integer> indexes = IntStream.range(0, bytes.length).map(i->bytes[i]==FLAG_SEQUENCE ? i : -1).filter(i->i>=0).boxed().collect(Collectors.toList());
 		int start = -1;
-		int stop = -1;
+		lastIndex = -1;
 		for(int i=0;i<indexes.size();++i) {
 
 			if(start < 0)
 				start = indexes.get(i);
 
 			else {
-				stop = indexes.get(i);
-				if(start+1==stop)
-					start = stop;
+				lastIndex = indexes.get(i);
+				if(start+1==lastIndex)
+					start = lastIndex;
 				else
 					break;
 			}
 		}
-		if(start<0 && start>=stop)
+		if(start<0 || start>=lastIndex)
 			this.bytes = new byte[0];
 
 		else{
-			this.bytes = byteStuffing(Arrays.copyOfRange(bytes, ++start, stop));
+			this.bytes = byteStuffing(Arrays.copyOfRange(bytes, ++start, lastIndex));
 		}
 	}
 
@@ -50,6 +59,7 @@ public class Packet {
 		return checksum[0] == bytes[bytes.length-2] && checksum[1] == bytes[bytes.length-1];
 	}
 
+	@ToString.Include
 	public PacketType getPacketType() {
 
 		if(bytes.length==0)
@@ -63,6 +73,9 @@ public class Packet {
 	}
 
 	public byte[] getAcknowledgement() {
+
+		if(bytes==null || bytes.length<Packet.PACKET_TYPE_POSITION)
+			return null;
 
 		final PacketType packetType = PacketType.valueOf(bytes[Packet.PACKET_TYPE_POSITION]);
 		if(packetType == PacketType.ACKNOWLEDGEMENT) {

@@ -10,18 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class FragmentsController {
 //	private final static Logger logger = LogManager.getLogger();
 
-	@GetMapping("control/{name}")
-    String control(@PathVariable(value = "name") String name) {
-		return "fragments/control :: " + name;
-	}
+	private final String template = "fragments/%s :: %s";
 
-	@GetMapping("network/{name}")
-    String network(@PathVariable(value = "name") String name) {
-		return "fragments/network :: " + name;
-	}
+	@GetMapping("{pageName}/{name}")
+    String control(@PathVariable String pageName, @PathVariable String name) {
+//		logger.error("pageName: {}; name: {};", pageName, name);
 
-	@GetMapping("redundancy/{name}")
-    String alarms(@PathVariable(value = "name") String name) {
-		return "fragments/redundancy :: " + name;
+		return String.format(template, pageName, name);
 	}
 }

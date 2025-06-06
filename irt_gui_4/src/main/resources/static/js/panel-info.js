@@ -3,7 +3,6 @@ import RequestPackt from './packet/request-packet.js'
 import {run as doRun, showError} from './worker.js'
 import {code, description, comparator, parser} from './packet/parameter/device-info.js'
 import {id as fPacketId} from './packet/packet-properties/packet-id.js'
-import {id as fGroupId} from './packet/packet-properties/group-id.js'
 
 const $card = $('.infoCard');
 const $body = $('.info');
@@ -95,8 +94,8 @@ function run(){
 const module = {}
 module.fInfo = function(packet){
 
-	if(packet.header.groupId == fGroupId('alarm')){
-		console.warn(packet);
+	if(packet.header.error){
+		console.warn(packet.toString());
 		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
@@ -106,6 +105,7 @@ module.fInfo = function(packet){
 	const payloads = packet.payloads;
 
 	if(!payloads?.length){
+		console.log(packet.toString());
 		console.warn('No payloads to parse.');
 		blink($card, 'connection-wrong');
 		return;
@@ -135,7 +135,10 @@ module.fInfo = function(packet){
 			let $v;
 			if(showText && showText !== 'Description'){
 				$row.append($('<div>', {id: descrId, class: 'col-5', text: showText}));
-				$v = $('<div>', {id: valId, class: 'col', text: val});
+				if(pl.parameter.code===5)	// Serial Number
+					$v = $('<div>', {class: 'col'}).append($('<a>', {id: valId, text: val, target: '_blank', href: `http://${val}`}));
+				else
+					$v = $('<div>', {id: valId, class: 'col', text: val});
 			}else
 				$v =$('<div>', {id: descrId, class: 'col'}).append($('<h4>', {text: val}));
 

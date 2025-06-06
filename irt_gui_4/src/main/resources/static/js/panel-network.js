@@ -26,7 +26,8 @@ export function start(){
 		const $networkGateway = $('#networkGateway');
 		const $btnVetworkOk = $('#btnVetworkOk');
 		const $btnNetworkCancel = $('#btnNetworkCancel');
-		networkControl = new NetworkControl($selectNetworkType, $networkAddress, $networkMask, $networkGateway, $btnVetworkOk, $btnNetworkCancel);
+		const $btnHttp = $('#btnHttp');
+		networkControl = new NetworkControl($selectNetworkType, $networkAddress, $networkMask, $networkGateway, $btnVetworkOk, $btnNetworkCancel, $btnHttp);
 		networkControl.onChange(onChange);
 		networkControl.onNotSaved(onNotSaved);
 		run();
@@ -36,6 +37,9 @@ export function start(){
 export function stop(){
 	clearInterval(interval) ;
 	interval = undefined;
+}
+export function disable(){
+	networkControl?.disable();
 }
 
 function chooseFragmentName(){
@@ -50,7 +54,6 @@ const packetId = f_packetId('network');
 const packetIdSet = f_packetId('networkSet');
 
 let buisy;
-let oldType;
 function run(){
 
 	if(buisy){
@@ -111,8 +114,8 @@ function post(requestPacket){
 const module = {}
 module.fNetwork = function(packet){
 
-	if(packet.header.groupId !== f_groupId('network')){
-		console.warn(packet);
+	if(packet.header.error){
+		console.warn(packet.toString());
 		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
@@ -122,6 +125,7 @@ module.fNetwork = function(packet){
 	const payloads = packet.payloads;
 
 	if(!payloads?.length){
+		console.log(packet.toString());
 		console.warn('No payloads to parse.');
 		blink($card, 'connection-wrong');
 		return;

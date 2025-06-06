@@ -1,23 +1,57 @@
 import {parseToInt} from '../../service/converter.js'
-const severities 		= Object.freeze(['NO_ALARM'			, 'INFO'			, 'WARNING'			, 'MINOR'			, 'MAJOR'			, 'CRITICAL']);
-const text 				= Object.freeze(['No Alarm'			, 'No Alarm'		, 'Warning'			, 'Warning'			, 'Alarm'			, 'Alarm']);
-export const boorstrapClass 	= Object.freeze(['text-bg-success'	, 'text-bg-success'	, 'text-bg-warning'	, 'text-bg-warning'	, 'text-bg-danger'	, 'text-bg-danger']);
 
 class AlarmStatus{
-	index;
-	severities;
-	text;
-	boorstrapClass;
+	constructor(index, severities, text, boorstrapClass){
+		this.index = index;
+		this.severities = severities;
+		this.text = text;
+		this.boorstrapClass = boorstrapClass;
+	}
 }
 
-export function status(bytes){
-	const status = new AlarmStatus();
+const statuses = [];
+statuses.push(new AlarmStatus(statuses.length,'NO_ALARM', 'No Alarm', 'text-bg-success'));
+statuses.push(new AlarmStatus(statuses.length,'INFO'	, 'No Alarm', 'text-bg-success'));
+statuses.push(new AlarmStatus(statuses.length,'WARNING'	, 'Warning'	, 'text-bg-warning'));
+statuses.push(new AlarmStatus(statuses.length,'MINOR'	, 'Warning'	, 'text-bg-warning'));
+statuses.push(new AlarmStatus(statuses.length,'MAJOR'	, 'Alarm'	, 'text-bg-danger'));
+statuses.push(new AlarmStatus(statuses.length,'CRITICAL', 'Alarm'	, 'text-bg-danger'));
+statuses.push(new AlarmStatus(statuses.length,'SP Error', undefined	, 'text-bg-danger'));
+statuses.push(new AlarmStatus(statuses.length,'Closed'	, 	'This program has been closed. \nDouble-click the jar file to open it again.', undefined));
+statuses.push(new AlarmStatus(statuses.length,'TIMEOUT', undefined, undefined));
+statuses.push(new AlarmStatus(statuses.length,'NC', 'No Connection', undefined));
+statuses.push(new AlarmStatus(statuses.length,'UA Error', 'Invalid device number. The device number value can be between 0 and 254 inclusive.', 'text-bg-warning'));
 
-	status.id = parseToInt(bytes.splice(0,2));
-	const index = parseToInt(bytes)&7;
-	status.index = index;
-	status.severities = severities[index];
-	status.text = text[index];
-	status.boorstrapClass = boorstrapClass[index];
+export function status(bytes){
+
+	if(Array.isArray(bytes))
+		return parseStatus(bytes);
+
+	const split = bytes.split(':');
+	const s = statuses.filter(s=>s.severities===split[0]);
+	
+	if(s.length){
+		const as = s[0];
+		if(split.length>1)
+			as.text = split[1];
+		return s[0];
+	}
+		
+
+	const status = new AlarmStatus();
+	status.index = -1;
+	status.severities = 'UNKNOWN';
+	if(status.index>=0)
+		status.text = text[status.text];
+	if(!status.text)
+		status.text = split.length>1 ? split[1] : bytes;
 	return status;
+}
+
+function parseStatus(bytes){
+	const id = parseToInt(bytes.splice(0,2));
+	const index = parseToInt(bytes)&7;
+	const s = index<statuses.length && statuses[index]; 
+	s.id = id;
+	return s;
 }

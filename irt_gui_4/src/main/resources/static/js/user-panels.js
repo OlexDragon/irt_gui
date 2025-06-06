@@ -1,6 +1,8 @@
-import {start as networkStart, stop as networkStop} from './panel-network.js'
+import {start as networkStart, stop as networkStop, disable as networkDisable} from './panel-network.js'
 import {start as alarmsStart, stop as alarmsStop} from './panel-alarms.js'
-import {start as redundancyStart, stop as redundancyStop} from './panel-redundancy.js'
+import {start as redundancyStart, stop as redundancyStop, disable as redundancyDisable} from './panel-redundancy.js'
+import {start as comStart, stop as comStop, disable as comDisable} from './panel-com.js'
+import {onStatusChange} from './panel-summary-alarm.js'
 
 const $body = $('.userPanels');
 const $tabs = $body.find('.nav-link').click(userTabsOnShow);
@@ -9,10 +11,12 @@ const userTabsCookies = Cookies.get('userTabsCookies');
 if(userTabsCookies)
 	new bootstrap.Tab($(`#${userTabsCookies}`)).show();
 else
-	new bootstrap.Tab($('#userTabAlarn')).show();
+	new bootstrap.Tab($('#userTabAlarm')).show();
 
+let run;
 export function start(){
 
+	run  = true;
 	const $selectedTab = $tabs.filter((_,el)=>el.classList.contains('active'));
 
 	if($selectedTab.length)
@@ -22,11 +26,18 @@ export function start(){
 }
 
 export function stop(){
-	networkStop(); alarmsStop(); redundancyStop();
+	run  = false;
+	networkStop(); alarmsStop(); redundancyStop(); comStop();
 }
+
+export function disable(){
+	networkDisable(); redundancyDisable(); comDisable();
+}
+
 function userTabsOnShow(selected){
 
-	stop();
+	if(!run)
+		return;
 
 	if(selected.currentTarget){
 		Cookies.set('userTabsCookies', selected.currentTarget.id);
@@ -39,7 +50,7 @@ function userTabsOnShow(selected){
 			networkStart();
 			break;
 
-		case 'userTabAlarn':
+		case 'userTabAlarm':
 			alarmsStart();
 			break;
 
@@ -47,7 +58,17 @@ function userTabsOnShow(selected){
 			redundancyStart();
 			break;
 
+		case 'userTabCOM':
+			comStart();
+			break;
+
 		default:
-			console.warn('Have to ccreate ' + e.currentTarget.id);
+			console.warn('Have to ccreate ' + selected);
 	}
 }
+onStatusChange(alarmStatus =>{
+	switch(alarmStatus.severities){
+	case 'CRITICAL':
+		$tabs.filter((_,el)=>el.id==='userTabAlarm').filter((_,el)=>!el.classList.contains('active')).click();
+	}
+});

@@ -8,5 +8,6 @@ public interface SerialPortDistributor {
 
 	FutureTask<RequestPacket> send(RequestPacket requestPacket);
 	void shutdown();
+	boolean closePort(String spName);
 
 }

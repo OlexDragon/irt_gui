@@ -1,28 +1,34 @@
 
 import {start as piStart, stop as piStop, onTypeChange} from './panel-info.js'
 import {start as measStart, stop as measStop} from './panel-measurement.js'
-import {start as controlStart, stop as controlStop} from './panel-control.js'
-import {start as userStart, stop as userStop} from './user-panels.js'
+import {start as controlStart, stop as controlStop, disable as contrilDisable} from './panel-control.js'
+import {start as userStart, stop as userStop, disable as userDisable} from './user-panels.js'
 import {start as summaryAlarmStart, stop as summaryAlarmStop, onStatusChange} from './panel-summary-alarm.js'
+import {status as f_alarmStatus} from './packet/parameter/value/alarm-status.js'
+import UnitAddress from './classes/unit-address.js'
+import Baudrate from './classes/baudrate.js'
 
 const $modal = $('#modal');
 const $serialPort = $('select[id=serialPort]').change(portSelected);
 const $btnStart =$('#btnStart').change(toggleStart);
-const $baudrate = $('#baudrate').change(baudrateChange);
+const $conections = $('#conections');
 $('#btnShowErrors').change(btnShowErrorsChange);
 
-$('#unitAddress').change(unitAddressChange);
+const baudrate = new Baudrate($('#baudrate'));
+const unitAddress = new UnitAddress($('#unitAddress'));
 
 let serialPort;
-let baudrate;
-let unitAddress = 254;
 let run;
 let showError;
 
-let cookies =  Cookies.get('baudrate');
-if(!cookies)
-	cookies = 115200;
-$baudrate.val(cookies);
+const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
+function countConnections(){
+	$.post('/connection/add', {connectionId: sessionId})
+	.done(count=>{
+		const text = count + ' conections';
+		$conections.text()!==text && $conections.text(text);
+	});
+}
 
 const interval = setInterval(()=>showToast("Serial port not selected.", "Select the serial port connected to the device.", 'text-bg-warning bg-opacity-50'), 10000);
 getPortNames();
@@ -42,6 +48,18 @@ function getPortNames(){
 				toggleStart();
 			}
 		});
+	})
+	.fail((jqXHR)=>{
+
+		if(jqXHR.responseJSON?.message){
+			if(showError)
+				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
+		}else{
+			const status = f_alarmStatus('Closed');
+			$('#summaryAlarmTitle').text(status.text);
+			setAlarm(status);
+		}
+
 	});
 }
 
@@ -53,21 +71,13 @@ function portSelected(e){
 	toggleStart();
 }
 
-function baudrateChange(e){
-	baudrate = e.currentTarget.value;
-	Cookies.set('baudrate', e.currentTarget.value);
-}
-
-function unitAddressChange(e){
-	unitAddress = e.currentTarget.value;
-}
-
 function btnShowErrorsChange(e){
 	showError = e.currentTarget.checked;
 	if(showError)
 		showToast('Display of error messages is enabled.', 'Error information will be displayed here..');
 }
 
+let countInterva;
 function toggleStart(){
 
 	clearInterval(interval);
@@ -81,63 +91,83 @@ function toggleStart(){
 		$lbl.text('Stop');
 		$btnStart.attr('checked', true);
 		run = true;
+		countInterva = setInterval(countConnections, 3000);
 		break;
 
 	default:
 		summaryAlarmStop(), piStop(); measStop(); controlStop(); userStop();
 		$lbl.text('Start');
 		$btnStart.attr('checked', false);
-		showToast('The GUI stopped accessing the serial port.', 'The serial port will be released in 20 seconds.');
-		
+		clearInterval(countInterva);
+		$conections.empty()
+		$.post('/serial/close', {spName: serialPort})
 	}
 }
 
-$('#appExit').click(()=>{
+$('#appExit').click(async ()=>{
 
-	run = false;
-	$btnStart.attr('checked', false);
+	const x = await $.post('/connection/add', {connectionId: sessionId}).fail(showExit);
 
-	$.get('/exit').done(()=>{
-		$modal.load('/modal/exit');
-		$modal.attr('data-bs-backdrop', 'static');
-		$modal.modal('show');
-	})
-	.fail((jqXHR)=>{
-		if(!jqXHR.responseText){
-			if($btnStart.prop('checked'))
-				$btnStart.click();
-			alert('It looks like the IRT GUI is closed.');
-		}
-	});
-
+	if(x < 2 || confirm(`${x - 1} more connection found.\nAre you sure you want to close this program?`))
+		$.get('/exit').done(showExit).fail(showExit);
 });
 
-onStatusChange(sunnaryAlarm=>{
+function showExit(){
+	run = false;
+	summaryAlarmStop();
+	stop();
+	$modal.load('/modal/exit');
+	$modal.attr('data-bs-backdrop', 'static');
+	$modal.modal('show');
+}
+
+onStatusChange(setAlarm);
+function setAlarm(sunnaryAlarm){
 
 	if(!sunnaryAlarm){
-		piStop(); measStop(); controlStop(); userStop();
+		stop();
 		return;
 	}
 
 	switch(sunnaryAlarm.severities){
 
-		case 'NO_ALARM':
-		case 'CRITICAL':
-		case 'INFO':
-		case 'WARNING':
-		case 'MINOR':
-		case 'MAJOR':
-		piStart(); measStart();
+	case 'NO_ALARM':
+	case 'CRITICAL':
+	case 'INFO':
+	case 'WARNING':
+	case 'MINOR':
+	case 'MAJOR':
+		piStart();
+		break;
+
+	case 'TIMEOUT':
+		contrilDisable();
+		stop();
+		break;
+
+	case 'Closed':
+	case 'SP Error':
+		$btnStart.prop('checked') && $btnStart.click();
+		contrilDisable();
+		stop();
 		break;
 
 	default:
-		piStop(); measStop(); controlStop(); userStop();
+	case 'UNKNOWN':
 		console.warn(sunnaryAlarm);
+		if(sunnaryAlarm.text==='Closed' && $btnStart.prop('checked')){
+			$btnStart.click();
+			contrilDisable();
+		}else
+			stop();
 	}
-});
+}
+function stop(){
+	piStop(); measStop(); controlStop(); userStop();
+}
 
 onTypeChange(()=>{
-	controlStart(); userStart();
+	measStart(); controlStart(); userStart();
 })
 
 export {serialPort, baudrate, unitAddress, run, showError}

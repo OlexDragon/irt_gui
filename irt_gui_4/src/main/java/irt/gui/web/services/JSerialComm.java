@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
@@ -22,8 +23,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fazecast.jSerialComm.SerialPort;
+import com.fazecast.jSerialComm.SerialPortTimeoutException;
 
-import irt.gui.web.exceptions.IrtSerialPortException;
+import irt.gui.web.beans.Packet;
+import irt.gui.web.exceptions.IrtSerialPortIOException;
+import irt.gui.web.exceptions.IrtSerialPortRTException;
+import irt.gui.web.exceptions.IrtSerialPortTOException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -48,11 +53,13 @@ public class JSerialComm implements IrtSerialPort {
 
 	@Override
 	public List<String> getSerialPortNames(){
-		return Arrays.stream(SerialPort.getCommPorts()).map(SerialPort::getSystemPortName).sorted().collect(Collectors.toList());
+		synchronized (JSerialComm.class) {
+			return Arrays.stream(SerialPort.getCommPorts()).map(sp->{ return sp.getSystemPortName(); }).sorted().collect(Collectors.toList());
+		}
 	}
 
 	@Override
-	public SerialPort open(String spName, Integer baudrate) {
+	public SerialPort open(String spName, Integer baudrate) throws IrtSerialPortIOException {
 		logger.traceEntry("spName: {}; baudrate: {}", spName, baudrate);
 		if(shutdown)
 			return null;
@@ -72,23 +79,23 @@ public class JSerialComm implements IrtSerialPort {
 			if(baudrate == null)
 				baudrate = 115200;
 
-			Optional.of(baudrate).filter(br->br!=commPort.getBaudRate()).ifPresent(commPort::setBaudRate);
-
 			if (!shutdown && (commPort.isOpen() || commPort.openPort())) {
+				Optional.of(baudrate).filter(br->br!=commPort.getBaudRate()).ifPresent(commPort::setBaudRate);
 				portCloseDelays.put(spName, myExecutor.submit(new RunDelay(commPort)));
 				return commPort;
 			}
 		}
-		final String message = "The Serial Port " + spName + " couldn't be opened.";
-		throw new IrtSerialPortException(message);
+		Optional.ofNullable(ports.remove(spName)).filter(SerialPort::isOpen).ifPresent(SerialPort::closePort);
+		final String message = "SP Error: The Serial Port " + spName + " couldn't be opened.";
+		throw new IrtSerialPortIOException(message);
 	}
 
 	@Override
-	public byte[] send(String serialPort, Integer timeout, byte[] bytes) {
-		logger.traceEntry("serialPort: {}; timeout: {}; {} : {}", serialPort, timeout, bytes.length, bytes);
+	public byte[] send(String serialPort, Integer timeout, byte[] bytes, Integer baudrate) throws IrtSerialPortIOException {
+		logger.traceEntry("serialPort: {}; timeout: {}; baudrate: {}; {} : {}", serialPort, timeout, baudrate, bytes.length, bytes);
 
 		return Optional
-				.ofNullable(open(serialPort, null))
+				.ofNullable(open(serialPort, baudrate))
 				.filter(SerialPort::isOpen)
 				.map(
 						sp->{
@@ -103,32 +110,55 @@ public class JSerialComm implements IrtSerialPort {
 									final int writeBytes = sp.writeBytes(bytes, bytes.length);
 									if(writeBytes<0) {
 										final String message = "There was an error writing to the port.";
-										throw new IrtSerialPortException(message);
+										throw new IrtSerialPortIOException(message);
 									}
 
-									if(timeout!=null)
+									if(timeout!=null) {
+										AtomicBoolean isTimeout = new AtomicBoolean();
+										Thread timeoutThread = ThreadWorker.runThread(
+
+												()->{
+													try {
+
+														Thread.sleep(timeout);
+														isTimeout.set(true);
+														is.close();
+														logger.debug("InputStream is closed; tymeout: {} sent: {} bytes : {}", timeout, bytes.length, bytes);
+
+													} catch (InterruptedException | IOException e) {
+//														logger.catching(Level.TRACE, e);
+													}
+												});
 										read(is, bb);
+										if(isTimeout.get()) {
+											throw new IrtSerialPortTOException("Serial Port Read Timeout");
+										}else
+											timeoutThread.interrupt();
+									}
+
+								} catch (SerialPortTimeoutException e) {
+									throw new IrtSerialPortTOException("TIMEOUT:" + e.getLocalizedMessage(), e);
 
 								} catch (Exception e) {
-									final String message = "Unable to send data via serial port " + serialPort;
-									throw new IrtSerialPortException(message, e);
+									throw new IrtSerialPortRTException(e.getLocalizedMessage(), e);
 								}
 
 								byte[] result = new byte[bb.position()];
 								bb.rewind();
 								bb.get(result);
+								logger.debug("resulet: {} bytes : {}", result.length, result);
 								return result;
 							}
 						}).orElse(null);
 	}
 
 	@Override
-	public byte[] read(String serialPort, Integer timeout) {
-		logger.traceEntry("serialPort: {}; timeout: {}", serialPort, timeout);
+	public byte[] read(String serialPort, Integer timeout, Integer baudrate) throws IrtSerialPortIOException {
+		logger.traceEntry("serialPort: {}; timeout: {}; : {}", serialPort, timeout, baudrate);
 
 		return Optional
 
-				.ofNullable(open(serialPort, null))
+				.ofNullable(open(serialPort, baudrate))
 				.filter(SerialPort::isOpen)
 				.map(
 						sp->{
@@ -142,12 +172,13 @@ public class JSerialComm implements IrtSerialPort {
 
 								} catch (Exception e) {
 									final String message = "Unable to read data from serial port " + serialPort;
-									throw new IrtSerialPortException(message, e);
+									throw new IrtSerialPortRTException(message, e);
 								}
 
 								byte[] result = new byte[bb.position()];
 								bb.rewind();
 								bb.get(result);
+								logger.debug("result: {} bytes : {}", result.length, result);
 								return result;
 							}
 						}).orElse(null);
@@ -159,7 +190,7 @@ public class JSerialComm implements IrtSerialPort {
 		while((bytesAvailable = is.available())>0){
 			final byte[] b = new byte[bytesAvailable];
 			final int r = is.read(b);
-			logger.error("Cleared {} Bytes: {}", r, b);
+			logger.trace("clearInputStream: {}", r);
 			try {
 				TimeUnit.MICROSECONDS.sleep(500);
 			} catch (InterruptedException e) {
@@ -180,14 +211,16 @@ public class JSerialComm implements IrtSerialPort {
 			final byte readByte = (byte)read;
 			bb.put(readByte);
 
-			final Byte t = Optional.ofNullable(termination).orElse((byte) 126);
-			if(t.equals(readByte)) {
-				final int available = is.available();
-				if(available == 0) {
-					break;
-				}else {
-					read(is, bb);
-					break;
+			if(bb.position()>0) {
+				final Byte t = Optional.ofNullable(termination).orElse(Packet.FLAG_SEQUENCE);
+				if(t.equals(readByte)) {
+					final int available = is.available();
+					if(available == 0) {
+						break;
+					}else {
+						read(is, bb);
+						break;
+					}
 				}
 			}
 		}
@@ -204,7 +237,10 @@ public class JSerialComm implements IrtSerialPort {
 			logger.catching(Level.DEBUG, e);
 		}
 
-		ports.values().stream().filter(SerialPort::isOpen).forEach(SerialPort::closePort);
+
+		synchronized (JSerialComm.class) {
+			ports.values().stream().filter(SerialPort::isOpen).forEach(SerialPort::closePort);
+		}
 	}
 
 	@RequiredArgsConstructor
@@ -224,16 +260,29 @@ public class JSerialComm implements IrtSerialPort {
 				final Integer d = Optional.ofNullable(delay).orElse(10);
 				TimeUnit.SECONDS.sleep(d);
 
-				Optional.ofNullable(sp).filter(SerialPort::isOpen).ifPresent(SerialPort::closePort);
+
+				synchronized (JSerialComm.class) {
+					Optional.ofNullable(sp).filter(SerialPort::isOpen).ifPresent(SerialPort::closePort);
+				}
 				logger.debug("Serial port has been closed. {}", ()->sp.getDescriptivePortName());
 
 			} catch (InterruptedException  e) {
-				logger.catching(Level.TRACE, e);
+//				logger.catching(Level.TRACE, e);
 			} catch (Exception e) {
 				logger.catching(e);
 				if(sp.isOpen())
-					sp.closePort();
+
+					synchronized (JSerialComm.class) {
+						sp.closePort();
+					}
 			}
+		}
+	}
+
+	@Override
+	public boolean close(String spName) {
+		synchronized (JSerialComm.class) {
+			return Optional.ofNullable(ports.remove(spName)).filter(SerialPort::isOpen).map(SerialPort::closePort).orElse(false);
 		}
 	}
 }

@@ -12,10 +12,10 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,7 +29,6 @@ public class SerialPortController {
 	private final static Logger logger = LogManager.getLogger();
 
 	@Autowired SerialPortDistributor distributor;
-
 	@Autowired @Qualifier("jSerialComm") IrtSerialPort serialPort;
 
 	@RequestMapping("ports")
@@ -38,8 +37,8 @@ public class SerialPortController {
 	}
 
 	@PostMapping("send")
-    RequestPacket send(@RequestBody RequestPacket requestPacket, @CookieValue(value = "sessionId") String sessionId){
-		logger.traceEntry("sessionId: {}; {}", sessionId, requestPacket);
+    RequestPacket send(@RequestBody RequestPacket requestPacket){
+		logger.traceEntry("{}", requestPacket);
 
 		final FutureTask<RequestPacket> respose = distributor.send(requestPacket);
 
@@ -50,10 +49,15 @@ public class SerialPortController {
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			logger.catching(Level.DEBUG, e);
 			throw new ResponseStatusException(HttpStatus.REQUEST_TIMEOUT, e.getLocalizedMessage());
+
 		}catch (CancellationException e) {
 			logger.catching(Level.DEBUG, e);
 			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getLocalizedMessage());
 		}
+	}
+	@PostMapping("close")
+    boolean close(@RequestParam String spName){
+		return distributor.closePort(spName);
 	}
 
 //	@ExceptionHandler(IrtSerialPortException.class)

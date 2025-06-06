@@ -1,11 +1,11 @@
 .connection-ok{
-	border-color: green;
+	border-color: green !important;
 }
 .connection-fail{
-	border-color: red;
+	border-color: red !important;
 }
 .connection-wrong{
-	border-color: yellow;
+	border-color: yellow !important;
 }
 .toast-body{
 	white-space: pre-wrap;

@@ -4,7 +4,7 @@ import RequestPackt from './packet/request-packet.js'
 import {type as typeFromDT} from './packet/service/device-type.js'
 import {id as f_groupId} from './packet/packet-properties/group-id.js'
 import {id as f_PacketId} from './packet/packet-properties/packet-id.js'
-import {code, parser} from './packet/parameter/configuration.js'
+import {code, parser} from './packet/parameter/control.js'
 
 const $card = $('#userCard');
 const $body = $('#redundancy-tab-pane');
@@ -51,7 +51,12 @@ export function stop(){
 	clearInterval(interval) ;
 	interval = undefined;
 }
-
+export function disable(){
+	$selectEnable?.prop('disabled', true);
+	$selectStandby?.prop('disabled', true);
+	$selectName?.prop('disabled', true);
+	$btnSetOnline?.prop('disabled', true);
+}
 function chooseFragmentName(){
 	const type = typeFromDT();
 	switch(type){
@@ -124,8 +129,8 @@ function sendRequest(packet){
 const module = {}
 module.fRedundancy = function(packet){
 
-	if(packet.header.groupId !== groupId){
-		console.warn(packet);
+	if(packet.header.error){
+		console.warn(packet.toString());
 		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
@@ -174,7 +179,7 @@ function parse(pl){
 
 	case statusCode:
 		$redundancyStatus.text(status[value]);
-		let disable = value===1;
+		let disable = value===1 || value===0;
 		$btnSetOnline.attr('disabled', disable);
 		disable = !disable;
 		$selectEnable.attr('disabled', disable);

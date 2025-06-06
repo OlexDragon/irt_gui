@@ -3,6 +3,7 @@ import {shortToBytes} from './service/converter.js'
 
 
 export default class Parameter{
+
 	constructor(code, size){
 		// From bytes
 		if(Array.isArray(code)){
@@ -13,21 +14,26 @@ export default class Parameter{
 		this.code = (code == undefined ? PARAMETER_ALL : code);
 		this.size = (size == undefined ? 0 : size);
 	}
+
 	toBytes(){
 		const sizeBytes = shortToBytes(this.size);
 		return [this.code, sizeBytes[1], sizeBytes[0]];
 	}
+
 	toString(packetGroupId){
 
 		let str;
 
 		if(packetGroupId){
-			let tmp = toString(packetGroupId)(this.code);
+			let tmp = toString(packetGroupId);
+			if(tmp){
+				tmp = tmp(this.code);
 
-			if(tmp)
-				str = tmp;
-
-			if(!tmp)
+				if(tmp)
+					str = tmp;
+				else
+					str = 'code: ' + this.code;
+			}else
 				str = 'code: ' + this.code;
 		}else
 			str = 'code: ' + this.code;

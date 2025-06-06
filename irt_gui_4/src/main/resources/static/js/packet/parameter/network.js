@@ -1,10 +1,10 @@
-import {parseToIrtValue, parseToString, parseToInt, parseToStatus} from '../service/converter.js'
+import {parseToIrtValue, parseToInt, parseToStatus} from '../service/converter.js'
 import {type} from '../service/device-type.js'
 
 const network = {};
 network.buc = {};
 
-function chooseGrout(){
+function chooseGroup(){
 	let t
 	switch(type){
 	default:
@@ -58,12 +58,12 @@ network.buc[9].parser = data=>data.toString();
 export function code(name){
 	if(typeof name === 'number')
 		return name;
-	const group = chooseGrout();
+	const group = chooseGroup();
 	return group[name];
 }
 
 export function name(code){
-	const group = chooseGrout();
+	const group = chooseGroup();
 	const keys = Object.keys(group);
 
 	for(const key of keys)
@@ -73,7 +73,7 @@ export function name(code){
 
 export function description(value){
 	const c = code(value)
-	return chooseGrout()[c].description;
+	return chooseGroup()[c].description;
 }
 
 export function toString(value){
@@ -84,5 +84,5 @@ export function toString(value){
 
 export function parser(value){
 	const c = code(value)
-	return chooseGrout()[c].parser;
+	return chooseGroup()[c].parser;
 }

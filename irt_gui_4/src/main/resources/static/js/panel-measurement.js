@@ -1,9 +1,10 @@
+import {type as typeFromDT} from './packet/service/device-type.js'
 import Packet from './packet/packet.js'
 import RequestPackt from './packet/request-packet.js'
 import {run as doRun, showError} from './worker.js'
-import {id as fPacketId} from './packet/packet-properties/packet-id.js'
-import {id as fGroupId} from './packet/packet-properties/group-id.js'
+import {id as f_PacketId} from './packet/packet-properties/packet-id.js'
 import {description, parser} from './packet/parameter/measurement.js'
+import ControllerMeasurement from './classes/controller-measurement.js'
 
 const $card = $('.measurementCard');
 const $body = $('.measurement');
@@ -15,6 +16,9 @@ export function start(){
 		return;
 
 	$body.empty();
+
+	chooseFragmentName();
+
 	run();
 	interval = setInterval(run, delay);
 }
@@ -24,13 +28,36 @@ export function stop(){
 	interval = undefined;
 }
 
-const packetId = fPacketId('measurementAll');
+const packetIdNoAction = f_PacketId('noAction');
+let packetId;
 let buisy;
+let contrillerMeasurement;
+
+function chooseFragmentName(){
+	switch(typeFromDT()){
+	case 'CONTROLLER':
+		packetId = f_PacketId('irpc');
+		const url = `/fragment/measurement/irpc`;
+		$body.load(url, ()=>{
+			const $controllerStatus	 = $body.find('#controllerStatus');
+			const $unitsStatus		 = $body.find('#unitsStatus');
+			contrillerMeasurement = new ControllerMeasurement($controllerStatus, $unitsStatus);
+		});
+		break;
+
+	default:
+		packetId = f_PacketId('measurementAll');
+	}
+}
 function run(){
 
+	if(packetId === packetIdNoAction){
+		stop();
+		return;
+	}
 	if(buisy){
 		console.log('Buisy')
-		return
+		return;
 	}
 
 	buisy = doRun;
@@ -50,7 +77,6 @@ function run(){
 			blink($card, 'connection-wrong');
 			return;
 		}
-		blink($card);
 
 		if(!data.function){
 			console.warn("No function name.");
@@ -60,11 +86,21 @@ function run(){
 		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
 
 		if(packet.header.packetId !== packetId){
-			console.log(packet);
+			console.log(packet.toString());
 			console.warn('Received wrong packet.');
 			blink($card, 'connection-wrong');
 			return;
 		}
+
+		if(packet.header.error){
+			console.warn(packet.toString());
+			blink($card, 'connection-wrong');
+			if(showError)
+				showToast("Packet Error", packet.toString());
+			return;
+		}
+
+		blink($card);
 
 		module[data.function](packet);
 	})
@@ -80,20 +116,12 @@ function run(){
 }
 
 const module = {};
-module.fMeasurement = function(packet){
-
-	if(packet.header.groupId == fGroupId('alarm')){
-		console.warn(packet);
-		blink($card, 'connection-wrong');
-		if(showError)
-			showToast("Packet Error", packet.toString());
-		return;
-	}
+module.fMeasurement = (packet)=>{
 
 	const payloads = packet.payloads;
 
 	if(!payloads?.length){
-		console.log(packet);
+		console.log(packet.toString());
 		console.warn('No payloads to parse.');
 		blink($card, 'connection-wrong');
 		return;
@@ -124,5 +152,6 @@ module.fMeasurement = function(packet){
 
 			$row.append($v).appendTo($body);
 		}
-});
+	});
 }
+module.f_IRPC = (packet)=>contrillerMeasurement.update = packet.payloads;

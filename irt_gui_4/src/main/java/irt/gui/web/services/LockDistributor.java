@@ -25,9 +25,13 @@ import org.springframework.stereotype.Service;
 import irt.gui.web.beans.Packet;
 import irt.gui.web.beans.PacketType;
 import irt.gui.web.beans.RequestPacket;
-import irt.gui.web.exceptions.IrtSerialPortException;
+import irt.gui.web.exceptions.IrtSerialPortIOException;
+import irt.gui.web.exceptions.IrtSerialPortRTException;
+import irt.gui.web.exceptions.IrtSerialPortTOException;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 
 @Service
 public class LockDistributor implements SerialPortDistributor, Runnable, ThreadFactory {
@@ -48,9 +52,37 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		scheduledFuture = service.scheduleAtFixedRate(this, 0, 100, TimeUnit.MILLISECONDS);
 	}
 
+	private boolean buisy;
+	@Override
+	public void run() {
+		if(buisy)
+			return;
+		buisy = true;
+
+		PacketTask packetTask = null;
+		try {
+
+			packetTask = queue.take();
+			sendFromQueue(packetTask.packet);
+
+		} catch (IrtSerialPortRTException | IrtSerialPortIOException | IrtSerialPortTOException e) {
+			logger.catching(Level.DEBUG, e);
+			packetTask.getPacket().setError(e.getLocalizedMessage());
+
+		} catch (InterruptedException e) {
+			logger.catching(Level.TRACE, e);
+
+		} catch (Exception e) {
+			logger.catching(e);
+			packetTask.getPacket().setError(e.getLocalizedMessage());
+		}
+		packetTask.tasks.forEach(ThreadWorker::runThread);
+		buisy = false;
+	}
+
 	@Override
 	public FutureTask<RequestPacket> send(RequestPacket requestPacket) {
-		logger.traceEntry("{}", requestPacket);
+//		logger.traceEntry("Put in queue -> {}", requestPacket);
 
 		final Callable<RequestPacket> callable = ()->requestPacket;
 		final FutureTask<RequestPacket> task = new FutureTask<>(callable );
@@ -58,6 +90,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		final PacketTask packetTask = new PacketTask(requestPacket, requestPacket.isCommand());
 
 		final Optional<PacketTask> any = queue.parallelStream().filter(packetTask::equals).findAny();
+
 		if(any.isPresent()) {
 			any.get().tasks.add(task);
 		}else {
@@ -68,65 +101,47 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		return task;
 	}
 
-	private void sendFromQueue(RequestPacket requestPacket) {
+	private void sendFromQueue(RequestPacket requestPacket) throws IrtSerialPortIOException {
+		logger.traceEntry("{}", requestPacket);
 
 		final String portName = requestPacket.getSerialPort();
 
-		serialPort.open(portName, requestPacket.getBaudrate());
 		final int timeout = Optional.ofNullable(requestPacket.getTimeout()).orElse(100);
 		final byte[] bytes = requestPacket.getBytes();
 
-		if (bytes == null || bytes.length == 0)
-			throw new IrtSerialPortException("There is no data to send.");
-
-		byte[] received = serialPort.send(portName, timeout, bytes);
-
-		Packet packet;
-		PacketType packetType;
-		if (acknowledgementSize == received.length) {
-
-			packet = new Packet(received);
-			packetType = packet.getPacketType();
-			if(packetType == PacketType.ACKNOWLEDGEMENT) 
-				received = serialPort.read(portName, null);
-
-		}else {
-			packet = new Packet(received);
-			packetType = packet.getPacketType();
-			if(packetType == PacketType.ACKNOWLEDGEMENT)
-				received = Arrays.copyOfRange(received, acknowledgementSize, received.length);
+		if (bytes == null || bytes.length == 0) {
+			requestPacket.setError("There is no data to send.");
+			return;
 		}
+
+		final Integer baudrate = requestPacket.getBaudrate();
+		byte[] received = serialPort.send(portName, timeout, bytes, baudrate);
+		if(received == null)
+			return;
+
+		Packet packet = new Packet(received);
+
+		logger.debug("\n\t{}\n\t{} : {}", packet, received.length, received);
+
+		final int lastIndex = packet.getLastIndex() + 1;
+		if(lastIndex==received.length && packet.getPacketType()== PacketType.ACKNOWLEDGEMENT)
+			received = serialPort.read(portName, timeout, baudrate);
+		else
+			received = Arrays.copyOfRange(received, lastIndex, received.length);
+
+		logger.debug("\n\t{}\n\t{} : {}", packet, received.length, received);
 
 		requestPacket.setAnswer(received);
 
-		serialPort.send(portName, null, packet.getAcknowledgement());
-
-	}
-
-	private boolean buisy;
-	@Override
-	public void run() {
-		if(buisy)
-			return;
-		buisy = true;
-
-		PacketTask packetTask = null;;
-		try {
-
-			packetTask = queue.take();
-			sendFromQueue(packetTask.packet);
-			packetTask.tasks.forEach(ThreadWorker::runThread);
-
-		} catch (IrtSerialPortException e) {
-
-			Optional.ofNullable(packetTask).map(pt->pt.tasks).ifPresent(ts->ts.forEach(t->t.cancel(true)));
-
-			logger.catching(Level.DEBUG, e);
-
-		} catch (Exception e) {
-			logger.catching(e);
-		}
-		buisy = false;
+		Optional.ofNullable(packet.getAcknowledgement()).filter(a->a.length>0)
+		.ifPresent(
+				a->{
+					try {
+						serialPort.send(portName, null, a, baudrate);
+					} catch (IrtSerialPortIOException e) {
+						throw new IrtSerialPortRTException(e.getLocalizedMessage(), e);
+					}
+				});
 	}
 
 	@Override
@@ -140,10 +155,15 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		service.shutdownNow();
 	}
 
-	@RequiredArgsConstructor @EqualsAndHashCode(exclude = {"tasks", "command"})
+	@RequiredArgsConstructor @Getter @EqualsAndHashCode(exclude = {"tasks", "command"}) @ToString
 	private static class PacketTask{
 		private final RequestPacket packet;
 		private final List<FutureTask<RequestPacket>> tasks = new ArrayList<>();
 		private final boolean command;
+	}
+
+	@Override
+	public boolean closePort(String spName) {
+		return serialPort.close(spName);
 	}
 }

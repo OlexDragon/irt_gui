@@ -106,15 +106,48 @@
 							<div class="row">
 								<input id="freqRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
 							</div>
-							<div class="row justify-content-center">
-								<div class="col-5">
-									<input type="checkbox" class="btn-check" id="btnMute" autocomplete="off" disabled="disabled">
-									<label class="btn btn-outline-warning form-control" for="btnMute"></label><br>
-								</div>
-							</div>
  						</div>
+						<div class="row justify-content-center">
+							<div class="col-5">
+								<input type="checkbox" class="btn-check" id="btnMute" autocomplete="off" disabled="disabled">
+								<label class="btn btn-outline-warning form-control" for="btnMute"></label><br>
+							</div>
+						</div>
    					</div>
-   				</div>
- </th:block>
+</th:block>
+<th:block th:fragment=irpc>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col form-floating">
+				<select id="salectSwtchHvr" class="form-select">
+					<option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
+					<option value="1">Automatic</option>
+					<option value="2">Manual</option>
+				</select>
+				<label for="salectSwtchHvr">Switchover Mode</label>
+			</div>
+			<div class="col form-floating">
+				<select id="salectStndBy" class="form-select">
+					<option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
+					<option value="1">Hot</option>
+					<option value="2">Cold</option>
+				</select>
+				<label for="salectSwtchHvr">Standby Mode</label>
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col">
+				<button id="btnIrspDefault" class="btn btn-outline-primary form-control" value="3" disabled="disabled">Default</button>
+			</div>
+			<div class="col">
+				<button id="btnHoverA" class="btn btn-outline-primary form-control" value="1" disabled="disabled">Switchover A</button>
+			</div>
+			<div class="col">
+				<button id="btnHoverB" class="btn btn-outline-primary form-control" value="2" disabled="disabled">Switchover B</button>
+			</div>
+		</div>
+	</div>
+</th:block>
+ 	</div>
 </div>
 </html>

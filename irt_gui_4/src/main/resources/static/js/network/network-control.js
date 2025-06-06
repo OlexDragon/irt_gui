@@ -9,16 +9,18 @@ export default class NetworkControl{
 	#gateway;
 	#btnOk;
 	#btnCansel;
+	#btnHttp;
 	#savedValue;	// Saved value
 	#onChangeEvents = [];
 	#onNotSaved = [];
 
-	constructor($typeSelect, $ipRow, $maskRow, $gatewayRow, $btnOk, $btnCansel){
+	constructor($typeSelect, $ipRow, $maskRow, $gatewayRow, $btnOk, $btnCansel, $btnHttp){
 
 		this.#typeSelect = $typeSelect.attr('disabled', true).on('input', this.#onInput).change(this.#onChange);
 		this.#typeSelect.attr('name' , 'type');
 		this.#btnOk = $btnOk.attr('disabled', true).click(this.#onOk);
 		this.#btnCansel = $btnCansel.attr('disabled', true).click(this.#onCansel);
+		this.#btnHttp = $btnHttp.attr('disabled', true);
 
 		this.#gateway	 = new IpRow($gatewayRow)	.onInput(this.#onInput).disable(true).onNext(this.#btnOk);
 		this.#gateway.name = 'gateway';
@@ -26,6 +28,7 @@ export default class NetworkControl{
 		this.#mask.name = 'mask';
 		this.#address	 = new IpRow($ipRow)		.onInput(this.#onInput).disable(true).onNext(this.#mask);
 		this.#address.name = 'address';
+		
 	}
 
 	get value(){
@@ -51,6 +54,8 @@ export default class NetworkControl{
 
 				if(value.equals(ipAddress))
 					return;
+
+				this.#btnHttp.prop('disabled', false).attr('href', `http://${ipAddress.address.join('.')}`);
 
 				this.#typeSelect.val(ipAddress.type).attr('disabled', false);
 				this.#address.value = ipAddress.address;
@@ -83,6 +88,16 @@ export default class NetworkControl{
 	onNotSaved = e =>{
 		this.#onNotSaved.push(e);
 		return this;
+	}
+
+	disable(){
+		this.#typeSelect.prop('disabled', true);
+		this.#btnOk.prop('disabled', true);
+		this.#btnCansel.prop('disabled', true);
+
+		this.#address.disable(disable);
+		this.#mask.disable(disable);
+		this.#gateway.disable(disable);
 	}
 
 	get #value(){

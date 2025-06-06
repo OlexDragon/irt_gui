@@ -40,5 +40,5 @@ function blink($el, bottstrapClass){
 	if(!bottstrapClass)
 		bottstrapClass = 'connection-ok';
 	$el.addClass(bottstrapClass);
-	setTimeout(()=>$el.removeClass(bottstrapClass), 500);
+	setTimeout(()=>$el.removeClass(bottstrapClass), 1000);
 }

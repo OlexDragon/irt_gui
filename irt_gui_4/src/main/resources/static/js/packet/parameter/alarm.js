@@ -62,8 +62,8 @@ export function payloads(ids, withName){
 		if(withName){
 //			array.push(payload(code('name'), id));
 			array.push(payload(code('description'), id));
-		}
-		array.push(payload(code('status'), id));
+		}else
+			array.push(payload(code('status'), id));
 	})
 	return array;
 }

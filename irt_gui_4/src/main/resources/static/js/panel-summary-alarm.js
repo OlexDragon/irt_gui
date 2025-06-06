@@ -1,8 +1,9 @@
 import {showError} from './worker.js'
 import Packet from './packet/packet.js'
-import {code, parser} from './packet/parameter/alarm.js'
+import {parser} from './packet/parameter/alarm.js'
 import RequestPackt from './packet/request-packet.js'
 import {id as f_PacketId} from './packet/packet-properties/packet-id.js'
+import {status as f_alarmStatus} from './packet/parameter/value/alarm-status.js'
 
 const $card = $('#summaryAlarmCard');
 const $title = $('#summaryAlarmTitle');
@@ -39,14 +40,26 @@ function run(){
 	postObject('/serial/send', requestPacket)
 	.done(data=>{
 		buisy = false;
-		blink($card);
 
 		if(!data.answer?.length){
-			console.warn("No answer.");
-			blink($card, 'connection-wrong');
+			if(data.error){
+//				console.warn(data.error);
+				blink($card, 'connection-fail');
+				showError && showToast('Error', data.error, 'text-bg-danger bg-opacity-50');
+				const status = f_alarmStatus(data.error);
+				setStatus(status);
+					
+			}else{
+//				console.warn('No answer.');
+				blink($card, 'connection-wrong');
+				showError && showToast('Warning', 'No answer.', 'text-bg-wrong bg-opacity-50');
+				const status = f_alarmStatus('No answer.');
+				setStatus(status);
+			}
 			return;
 		}
 
+		blink($card, 'connection-ok');
 		if(!data.function){
 			console.warn("No function name.");
 			return;
@@ -69,45 +82,74 @@ function run(){
 
 		if(!jqXHR.responseJSON){
 
-			$title.text('Closed').attr('title', 'GUI is Closed.');
-			if(oldValue){
-				$title.removeClass(oldValue.boorstrapClass);
-				oldValue = undefined;
-				statusChangeEvent.forEach(e=>e());
-			}
+			const status = f_alarmStatus('Closed');
+			setStatus(status);
+
 		}else if(jqXHR.responseJSON.message){
-
-			if(jqXHR.responseJSON.status==406)
-				$title.text('SP Error').attr('title', 'Serial Port Error');
-			else
-				$title.text('NC').attr('title', 'No Connection');
-			if(oldValue){
-				$title.removeClass(oldValue.boorstrapClass);
-				oldValue = undefined;
-				statusChangeEvent.forEach(e=>e());
-			}
-
-			console.log(requestPacket);
 			console.error(jqXHR.responseJSON.message);
-			if(showError)
-				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
-		}
 
+			if(jqXHR.responseJSON.status==406){
+				const status = f_alarmStatus('SP Error');
+				setStatus(status);
+			}else if(jqXHR.responseJSON.status==400){
+			const status = f_alarmStatus('UA Error');
+			setStatus(status);
+			}else{
+				const status = f_alarmStatus('NC');
+				setStatus(status);
+			}
+		}
 	});
+}
+
+function removeCalsses(){
+	const classes = $title.attr('class').split(' ').filter(c=>c.startsWith('text-bg-')).join(' ');
+	$title.removeClass(classes);
 }
 
 const module = {}
 module.fSummaryAlarms = function(packet){
 
-	packet.payloads.forEach(pl=>{
+	if(packet.header.error){
+		console.warn(packet.toString());
+		blink($card, 'connection-wrong');
+		if(showError)
+			showToast("Packet Error", packet.toString());
+		return;
+	}
+
+	packet.payloads?.forEach(pl=>{
 		const value = parser(pl.parameter.code)(pl.data);
-		if(!oldValue || value.severities!=oldValue.severities){
-			statusChangeEvent.forEach(e=>e(value));
-			if(oldValue)
-				$title.removeClass(oldValue.boorstrapClass);
-			$title.addClass(value.boorstrapClass);
-			$title.text(value.text).attr('title', value.text);
-			oldValue = value;
-		}
+		setStatus(value);
 	});
+}
+
+function setStatus(value){
+
+	if(!oldValue || value.severities!=oldValue.severities){
+		showError && showToast(value.severities, value.text, (value.boorstrapClass ?? 'text-bg-danger') + ' bg-opacity-50');
+		statusChangeEvent.forEach(e=>e(value));
+
+		if(oldValue)
+			$title.removeClass(oldValue.boorstrapClass);
+		else
+			removeCalsses();
+
+		if(value.index<0){
+			if(value.text.startsWith('The read operation timed out'))
+				$title.text('Timeout').attr('title', value.text);
+
+			else if(value.text==='Closed')
+				$title.text('Closed').attr('title', 'Closed');
+
+			else
+				$title.text('Error').attr('title', value.text);
+
+		}else{
+			value.boorstrapClass && $title.addClass(value.boorstrapClass);
+			value.index > 6 ? $title.text(value.severities) : $title.text(value.text);
+			$title.attr('title', value.text);
+		}
+		oldValue = value;
+	}
 }

@@ -1,11 +1,13 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" translate="no">
 
 <head>
     <title>GUI - IRT Technologies</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
-	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}">
+    <meta charset="UTF-8"/>
+    <meta name="google" content="notranslate" />
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'/>
+	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
 </head>
 
 <body>
@@ -14,14 +16,14 @@
 		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12">
 			<div class="row row-cols-1">
 				<div class="col">
-					<img src="../static/images/logo.png" th:src="@{/images/logo.png}" class="img-fluid" alt="Logo">
+					<img src="../static/images/logo.png" th:src="@{/images/logo.png}" class="img-fluid" alt="Logo"/>
 				</div>
 				<h4 class="text-center" th:text="'IRT GUI v.' + ${version}"></h4>
 				<div class="col form-floating mb-3">
 					<select id="serialPort" class="form-select" aria-label="Select Serial Port">
 						<option selected="selected" disabled="disabled" hidden="hidden">Select Serial Port</option>
 					</select>
-					<label for="serialPort">Serial Port</label>
+					<label for="serialPort">Serial Port (RS485)</label>
 				</div>
 				<div class="col form-floating mb-3">
 					<select id="baudrate" class="form-select" aria-label="Select Serial Port">
@@ -43,6 +45,8 @@
 							<h6 id="summaryAlarmTitle" class="card-title text-center p-2">Alarms</h6>
 						</div>
 					</div>
+				</div>
+				<div id="conections" class="col text-center text-primary-emphasis fs-5 mb-3">
 				</div>
 				<div class="col mb-3">
 					<input id="btnShowErrors" type="checkbox" class="btn-check" autocomplete="off">
@@ -76,12 +80,12 @@
   						<div class="card-body userPanels">
   							<ul class="nav nav-tabs">
  								<li class="nav-item">
-									<button id="userTabAlarn" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" type="button" role="tab" aria-controls="alarms-tab-pane" aria-selected="false">Alarms</button>
+									<button id="userTabAlarm" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" type="button" role="tab" aria-controls="alarms-tab-pane" aria-selected="false">Alarms</button>
 								</li>
 								<li class="nav-item">
 									<button id="userTabNetwork" class="nav-link"  data-bs-toggle="tab" data-bs-target="#network-tab-pane" type="button" role="tab" aria-controls="network-tab-pane" aria-selected="false">Network</button>
 								 </li>
-								 <li class="nav-item">
+								 <li class="nav-item visually-hidden">
 								 	<button id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" type="button" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
 								 </li>
 								 <li class="nav-item">

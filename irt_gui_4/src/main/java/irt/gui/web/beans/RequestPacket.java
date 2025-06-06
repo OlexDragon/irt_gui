@@ -26,4 +26,5 @@ public class RequestPacket {
 	private Integer timeout;
 	@JsonSerialize(using = BytesToStringSerializer.class)
 	private byte[] answer;
+	private String error;
 }

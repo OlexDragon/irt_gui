@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>GUI - IRT Technologies</title>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
+</head>
+
+<body>
+
+<div class="card">
+
+  <div class="card-body">
+<!-- Auto calibration by Unit Gain -->
+<th:block th:fragment="buc">
+	<div class="row my-2">
+		<div class="col-4">Address:</div>
+		<div class="col"><input id="comAddress" type="number" class="form-control"></div>
+	</div>
+	<div class="row my-2">
+		<div class="col-4">Retransmits:</div>
+		<div class="col"><input id="comRetransmits" type="number" class="form-control"></div>
+	</div>
+	<div class="row my-2">
+		<div class="col-4">Standard:</div>
+		<div class="col">
+			<select id="comStandard" class="form-select">
+				<option selected="selected" disabled="disabled" hidden="hidden">Unknown</option>
+				<option value="2">RS422</option>
+				<option value="3">RS485</option>
+			</select>
+		</div>
+	</div>
+	<div class="row my-2">
+		<div class="col-4">Baudrate:</div>
+		<div class="col">
+			<select id="comBaudrate" class="form-select">
+				<option selected="selected" disabled="disabled" hidden="hidden">Unknown</option>
+				<option value="9600">9600</option>
+				<option value="19200">19200</option>
+				<option value="38400">38400</option>
+				<option value="57600">57600</option>
+				<option value="115200">115200</option>
+			</select>
+		</div>
+	</div>
+</th:block>
+ </div>
+</div>
+</html>

@@ -2,19 +2,15 @@ import {showError} from './worker.js'
 import Packet from './packet/packet.js'
 import RequestPackt from './packet/request-packet.js'
 import {code, parser} from './packet/parameter/alarm.js'
-import {boorstrapClass} from './packet/parameter/value/alarm-status.js'
-import {id as groupId} from './packet/packet-properties/group-id.js'
 import {id as f_PacketId} from './packet/packet-properties/packet-id.js'
-import {code as packetTypeCode} from './packet/packet-properties/packet-type.js'
 
 const $card = $('#userCard');
 const $body = $('#alarms-tab-pane');
 
 //const packetIdSummary = f_PacketId('alarmSummary');
 const packetIdAlarmIDs = f_PacketId('alarmIDs');
-const packetIdAlarmAll = f_PacketId('alarmAll');
+const packetIdAlarmDescription = f_PacketId('alarmDescription');
 const packetIdAlarm = f_PacketId('alarm');
-let packetId;
 let alarmIDs;
 
 let interval;
@@ -34,14 +30,7 @@ export function stop(){
 	interval = undefined
 }
 
-function chooseFragmentName(){
-	const type = typeFromDT();
-	switch(type){
-	default:
-		return 'buc';	
-	}
-}
-
+let readAlarmDescription = true;
 let buisy;
 function run(){
 
@@ -52,27 +41,27 @@ function run(){
 
 	buisy = true;
 
-	sendRequest();
-}
-
-export function sendRequest(){
-
-	let requestPacket;
-
 	if(alarmIDs){
 
-		packetId = packetIdAlarmAll;
-		requestPacket = new RequestPackt(packetId, undefined, alarmIDs);
+		if(readAlarmDescription)
+			getAlarmDescription();
+
+		const requestPacket = new RequestPackt(packetIdAlarm, undefined, alarmIDs);
+		sendRequest(requestPacket);
 
 	}else{
-		packetId = packetIdAlarmIDs;
-		requestPacket = new RequestPackt(packetIdAlarmIDs);
+
+		const requestPacket = new RequestPackt(packetIdAlarmIDs);
+		sendRequest(requestPacket);
 	}
+
+}
+
+export function sendRequest(requestPacket){
 
 	postObject('/serial/send', requestPacket)
 	.done(data=>{
 		buisy = false;
-		blink($card);
 
 		if(!data.answer?.length){
 			console.warn("No answer.");
@@ -82,17 +71,28 @@ export function sendRequest(){
 
 		if(!data.function){
 			console.warn("No function name.");
+			blink($card, 'connection-wrong');
 			return;
 		}
 
 		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
 
-		if(packet.header.packetId !== packetId){
-			console.log(packet);
+		if(![packetIdAlarmIDs, packetIdAlarmDescription, packetIdAlarm].includes(packet.header.packetId)){
+			console.log(packet.toString());
 			console.warn('Received wrong packet.');
 			blink($card, 'connection-wrong');
 			return;
 		}
+
+		if(packet.header.error){
+			console.warn(packet.toString());
+			blink($card, 'connection-wrong');
+			if(showError)
+				showToast("Packet Error", packet.toString());
+			return;
+		}
+
+		blink($card);
 
 		module[data.function](packet);
 	})
@@ -113,27 +113,7 @@ let alarmIndex;
 const module = {}
 module.fAlarms = function(packet){
 	alarmIndex = -1;
-
-	if(packet.header.groupId !== groupId('alarm')){
-		console.warn(packet);
-		blink($card, 'connection-wrong');
-		if(showError)
-			showToast("Packet Error", packet.toString());
-		return;
-	}
-
-	const payloads = packet.payloads;
-
-	if(!payloads?.length){
-		console.log(packet.toString());
-		console.warn('No payloads to parse.');
-		blink($card, 'connection-wrong');
-		return;
-	}
-
-	blink($card);
-
-	payloads.forEach(parseAlarm);
+	packet.payloads.forEach(parseAlarm);
 }
 const codeIdIDs = code('IDs');
 const codeIdDescription = code('description');
@@ -144,10 +124,11 @@ function parseAlarm(pl){
 	switch(pl.parameter.code){
 	case codeIdIDs:
 		alarmIDs = parser(pl.parameter.code)(pl.data);
-		sendRequest();
+		run();
 		break; 
 
 	case codeIdDescription:
+		getAlarmDescription();
 		showDescription(pl);
 		break;
 
@@ -170,7 +151,7 @@ function showValue(pl){
 	if($div.text()!==value.text)
 		$div.text(value.text);
 	if(!$div.hasClass(value.boorstrapClass))
-		$div.removeClass(boorstrapClass).addClass('col ' + value.boorstrapClass)
+		removeCalsses($div).addClass('col ' + value.boorstrapClass)
 
 	if(value.index>alarmIndex)
 		alarmIndex = value.index;
@@ -201,4 +182,23 @@ function getRow(id){
 		$body.append($row);
 	}
 	return $row;
+}
+
+function removeCalsses($el){
+	const classes = $el.attr('class').split(' ').filter(c=>c.startsWith('text-bg-')).join(' ');
+	$el.removeClass(classes);
+	return $el;
+}
+
+let descriptionIndex = 0;
+function getAlarmDescription(){
+	if(descriptionIndex>=alarmIDs.length){
+		readAlarmDescription = false;
+		return;
+	}
+
+	const requestPacket = new RequestPackt(packetIdAlarmDescription, undefined, alarmIDs[descriptionIndex]);
+	++descriptionIndex;
+	sendRequest(requestPacket);
+
 }

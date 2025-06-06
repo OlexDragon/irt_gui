@@ -4,11 +4,13 @@ import {id as f_packetId} from './packet/packet-properties/packet-id.js'
 import Packet from './packet/packet.js'
 import RequestPackt from './packet/request-packet.js'
 import {run as doRun, showError} from './worker.js'
-import {code as parameterCode, parser} from './packet/parameter/configuration.js'
+import {code as parameterCode, parser} from './packet/parameter/control.js'
 import ValuePanel from './value-panel.js'
+import ControllerIrpc from './classes/controller-irpc.js'
 
 const $card = $('.controlCard');
 const $body = $('.control');
+const $userCard = $('#userCard');
 
 let $attenuationValue;
 let $attenuationControl;
@@ -34,68 +36,108 @@ let type;
 let interval;
 let delay = 5000;
 
+let packetId;
+
+function chooseFragmentName(){
+	const type = typeFromDT();
+	switch(type){
+
+	case 'CONTROLLER':
+		packetId = f_packetId('controlIrpc');
+		return 'irpc';	
+
+	default:
+		packetId = f_packetId('controlAll');
+
+				console.log('Add type: ' + type);
+		$userCard.find('.visually-hidden').removeClass('visually-hidden');
+		return 'buc';	
+	}
+}
+
+let controller;
 export function start(){
 	if(interval)
 		return;
 
 	const fragmentName = chooseFragmentName();
-	const url = `/fragment/control/${fragmentName}`;
-	$body.load(url,()=>{
-		buisy = false;
+	switch(fragmentName){
 
-		const $attenuationTab = $('#attenuationTab').click(tabClick);
-		$('#gainTab').click(tabClick);
-		$('#freqTab').click(tabClick);
+	case 'irpc':
 
-		$attenuationValue = $('#attenuationValue');
-		$attenuationControl = $('#attenuationControl');
-		$attenuationStep = $('#attenuationStep');
-		$attenuationRange = $('#attenuationRange');
-		new bootstrap.Tooltip($attenuationRange);
-		attenuationValuePanel =  new ValuePanel($attenuationControl, $attenuationRange, $attenuationStep);
-		attenuationValuePanel.change((v)=>onChange(v, pIdAtenuationSet));
+		controller = new ControllerIrpc($body);
+		controller.onChange(sendCommand);
+		break;
 
-		$gainValue = $('#gainValue');
-		$gainControl = $('#gainControl');
-		$gainStep = $('#gainStep');
-		$gainRange = $('#gainRange');
-		new bootstrap.Tooltip($gainRange);
-		gainValuePanel = new ValuePanel($gainControl, $gainRange, $gainStep);
-		gainValuePanel.change((v)=>onChange(v, pIdGainSet));
+	case 'buc':
+	default:
 
-		$freqValue = $('#freqValue');
-		$freqControl = $('#freqControl');
-		$freqStep = $('#freqStep');
-		$freqRange = $('#freqRange');
-		new bootstrap.Tooltip($freqRange);
-		freqValuePanel = new ValuePanel($freqControl, $freqRange, $freqStep);
-		freqValuePanel.change((v)=>onChange(v, pIdFrequencySet));
+		const url = `/fragment/control/${fragmentName}`;
+		$body.load(url,()=>{
+			buisy = false;
 
-		$btnMute = $('#btnMute').change(onChangeBtnMute);
+			const $attenuationTab = $('#attenuationTab').click(tabClick);
+			$('#gainTab').click(tabClick);
+			$('#freqTab').click(tabClick);
 
-		const tabCookies = Cookies.get('tabCookies');
-		if(tabCookies)
-			new bootstrap.Tab($('#' + tabCookies)).show();
-		else
-			new bootstrap.Tab($attenuationTab).show();
+			$attenuationValue = $('#attenuationValue');
+			$attenuationControl = $('#attenuationControl');
+			$attenuationStep = $('#attenuationStep');
+			$attenuationRange = $('#attenuationRange');
+			new bootstrap.Tooltip($attenuationRange);
+			attenuationValuePanel =  new ValuePanel($attenuationControl, $attenuationRange, $attenuationStep);
+			attenuationValuePanel.change((v)=>onChange(v, pIdAtenuationSet));
 
-		run();
-	});
+			$gainValue = $('#gainValue');
+			$gainControl = $('#gainControl');
+			$gainStep = $('#gainStep');
+			$gainRange = $('#gainRange');
+			new bootstrap.Tooltip($gainRange);
+			gainValuePanel = new ValuePanel($gainControl, $gainRange, $gainStep);
+			gainValuePanel.change((v)=>onChange(v, pIdGainSet));
 
+			$freqValue = $('#freqValue');
+			$freqControl = $('#freqControl');
+			$freqStep = $('#freqStep');
+			$freqRange = $('#freqRange');
+			new bootstrap.Tooltip($freqRange);
+			freqValuePanel = new ValuePanel($freqControl, $freqRange, $freqStep);
+			freqValuePanel.change((v)=>onChange(v, pIdFrequencySet));
+
+			$btnMute = $('#btnMute').change(onChangeBtnMute);
+
+			const tabCookies = Cookies.get('tabCookies');
+			if(tabCookies)
+				new bootstrap.Tab($('#' + tabCookies)).show();
+			else
+				new bootstrap.Tab($attenuationTab).show();
+
+			run();
+		});
 	interval = setInterval(run, delay);
+	}
 }
 
 export function stop(){
 	clearInterval(interval) ;
 	interval = undefined;
 }
+export function disable(){
 
-function chooseFragmentName(){
-	const type = typeFromDT();
-	switch(type){
-	default:
-		return 'buc';	
-	}
+	$attenuationValue?.prop('disabled', true);
+	$attenuationControl?.prop('disabled', true);
+	$attenuationStep?.prop('disabled', true);
+	$attenuationRange?.prop('disabled', true);
+
+	$gainValue?.prop('disabled', true);
+	$gainControl?.prop('disabled', true);
+	$gainStep?.prop('disabled', true);
+	$gainRange?.prop('disabled', true);
+
+	$freqValue?.prop('disabled', true);
+	$freqControl?.prop('disabled', true);
+	$freqStep?.prop('disabled', true);
+	$freqRange?.prop('disabled', true);
 }
 
 function tabClick(e){
@@ -120,7 +162,6 @@ function tabClick(e){
 	}
 }
 
-const packetId = f_packetId('controlAll');
 const pIdAtenuationSet = f_packetId('atenuationSet');
 const pIdGainSet = f_packetId('gainSet');
 const pIdFrequencySet = f_packetId('frequencySet');
@@ -162,7 +203,7 @@ function sendRequest(toSend){
 		buisy = false;
 
 		if(!data.answer?.length){
-			console.log("data");
+			console.log(data);
 			console.warn("No answer.");
 			blink($card, 'connection-wrong');
 			return;
@@ -177,7 +218,7 @@ function sendRequest(toSend){
 		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
 
 		if(![packetId, pIdAtenuationSet, pIdGainSet, pIdFrequencySet, pIdMuteControl].includes(packet.header.packetId)){
-			console.log(packet);
+			console.log(packet.toString());
 			console.warn('Received wrong packet.');
 			blink($card, 'connection-wrong');
 			return;
@@ -207,7 +248,7 @@ const module = {}
 module.fConfig = function(packet){
 
 	if(packet.header.error){
-		console.error(packet);
+	console.warn(packet.toString());
 		blink($card, 'connection-wrong');
 		if(showError)
 			showToast("Packet Error", packet.toString());
@@ -217,6 +258,7 @@ module.fConfig = function(packet){
 	const payloads = packet.payloads;
 
 	if(!payloads?.length){
+		console.log(packet.toString());
 		console.warn('No payloads to parse.');
 		blink($card, 'connection-wrong');
 		return;
@@ -290,6 +332,10 @@ module.fConfig = function(packet){
 		}
 	});
 }
+module.f_IRPC = (packet)=>{
+
+	console.log(packet);
+}
 
 function onChange(value, id){
 	let toSend;
@@ -317,5 +363,16 @@ function onChangeBtnMute(e){
 	const toSend = e.currentTarget.checked ? 1 : 0;	// Mute / Unmute
 	const requestPackt = new RequestPackt(pIdMuteControl, undefined, toSend);
 	sendRequest(requestPackt);
+}
+function sendCommand(object){
+	Object.keys(object).forEach(key=>{
+		packetId = f_packetId(key);
+		const packet = new RequestPackt(packetId, undefined, object[key]);
+		sendRequest(packet);
+	});
+}
+
+export function update(object){
+	controller.update = object;
 }
 export {type}

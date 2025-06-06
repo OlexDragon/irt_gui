@@ -27,8 +27,10 @@
     <Loggers>
 
 <!-- 		<logger name="irt.gui.web.services.JSerialComm" level="all" /> -->
-<!-- 		<logger name="irt.gui.web.controllers.SerialPortController" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.services.LockDistributor" level="all" /> -->
+<!-- 		<logger name="irt.gui.web.controllers.SerialPortController" level="all" /> -->
+<!-- 		<logger name="irt.gui.web.controllers.Gui4RestController" level="all" /> -->
+<!-- 		<logger name="irt.gui.web.Gui4" level="all" /> -->
 
         <Root level="warn">
             <AppenderRef ref="ConsoleAppender" />

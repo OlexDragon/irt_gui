@@ -4,6 +4,7 @@ const packetId = Object.freeze(
 		'deviceInfo',
 
 		'measurementAll',
+		'measurementIRPC',
 
 		'controlAll',
 		'atenuation',
@@ -17,7 +18,7 @@ const packetId = Object.freeze(
 		'network',
 		'networkSet',
 
-		'alarmAll',
+		'alarmDescription',
 		'alarm',
 		'alarmSummary',
 		'alarmIDs',
@@ -29,7 +30,22 @@ const packetId = Object.freeze(
 		'redundancySetCold',
 		'redundancySetHot',
 		'redundancySetNameA',
-		'redundancySetNameB'
+		'redundancySetNameB',
+
+		'irpc',
+		'salectSwtchHvr',
+		'salectStndBy',
+		'btnIrspDefault',
+		'btnHoverA',
+		'btnHoverB',
+
+		'comAll',
+		'comSetAddress',
+		'comSetRetransmit',
+		'comSetStandard',
+		'comSetBaudrate',
+
+		'noAction'
 	]);
 
 export function id(name){

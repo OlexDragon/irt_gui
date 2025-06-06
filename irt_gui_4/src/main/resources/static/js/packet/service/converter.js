@@ -18,6 +18,10 @@ export function shortToBytesR(val){
     return shortToBytes(val, true);
 }
 
+export function intToBytes(val){
+	return numberToBytes(val, 4);
+}
+
 export function longToBytes(val){
 	return numberToBytes(val, 8);
 }

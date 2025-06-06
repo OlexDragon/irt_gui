@@ -10,13 +10,15 @@ import org.junit.jupiter.api.Test;
 
 import com.fazecast.jSerialComm.SerialPort;
 
+import irt.gui.web.exceptions.IrtSerialPortIOException;
+
 class JSerialCommTest {
 	private final static Logger logger = LogManager.getLogger();
 
 	private final JSerialComm port = new JSerialComm();
 
 	@Test
-	void openPortTest() {
+	void openPortTest() throws IrtSerialPortIOException {
 
 		final List<String> serialPortNames = port.getSerialPortNames();
 		if(serialPortNames.size()!=1) {
@@ -41,7 +43,7 @@ class JSerialCommTest {
 	}
 
 	@Test
-	void sendTest() {
+	void sendTest() throws IrtSerialPortIOException {
 
 		final List<String> serialPortNames = port.getSerialPortNames();
 		if(serialPortNames.size()!=1) {
@@ -51,7 +53,7 @@ class JSerialCommTest {
 
 		byte[] bytes = new byte[] {126,(byte) 254,0,0,0,2,122,121,8,0,0,0,(byte) 255,0,0,104,(byte) 144,126};
 		final String spName = serialPortNames.get(0);
-		final byte[] answer = port.send(spName, 5000, bytes);
+		final byte[] answer = port.send(spName, 5000, bytes, null);
 		assertNotNull(answer);
 		assertTrue(answer.length>0);
 		logger.error("{} : {}", answer.length, answer);

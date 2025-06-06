@@ -6,7 +6,7 @@ control.fcm = {};
 control.buc = {};
 control.lnb = {};
 
-function chooseGrout(){
+function chooseGroup(){
 	let t
 	switch(type){
 
@@ -94,7 +94,7 @@ control.buc[0].parser = data=>data.toString();
 control.buc[1] = {}
 control.buc.lo_set					 = 1;
 control.buc[1].description = 'LO Set';
-control.buc[1].parser =  data=>data.toString();
+control.buc[1].parser =  parseToBigInt;
 control.buc[2] = {}
 control.buc.mute					 = 2;
 control.buc[2].description = 'Mute';
@@ -160,12 +160,12 @@ control.lnb[0].description = 'None';
 export function code(name){
 	if(typeof name === 'number')
 		return name;
-	const group = chooseGrout();
+	const group = chooseGroup();
 	return group[name];
 }
 
 export function name(code){
-	const group = chooseGrout();
+	const group = chooseGroup();
 	const keys = Object.keys(group);
 
 	for(const key of keys)
@@ -175,7 +175,7 @@ export function name(code){
 
 export function description(value){
 	const c = code(value)
-	return chooseGrout()[c].description;
+	return chooseGroup()[c].description;
 }
 
 export function toString(value){
@@ -186,5 +186,5 @@ export function toString(value){
 
 export function parser(value){
 	const c = code(value)
-	return chooseGrout()[c].parser;
+	return chooseGroup()[c].parser;
 }

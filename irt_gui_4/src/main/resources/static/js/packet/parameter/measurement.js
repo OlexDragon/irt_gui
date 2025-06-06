@@ -6,20 +6,6 @@ measurwmwnt.fcm = {};
 measurwmwnt.buc = {};
 measurwmwnt.lnb = {};
 
-function chooseGrout(){
-	let t
-	switch(type){
-
-	case 'LNB':
-		t = 'lnb'
-		break;
-
-	default:
-		t = 'buc';
-	}
-	return measurwmwnt[t];
-}
-
 //	FCM Parameter CODE
 measurwmwnt.fcm[0] = {}
 measurwmwnt.fcm.none			 = 0;
@@ -162,34 +148,53 @@ measurwmwnt.lnb.downlinkStatus			 = 9;
 measurwmwnt.lnb[9].description = 'Status';
 measurwmwnt.lnb[9].parser = data=>data.toString();
 
+function chooseGroup(){
+	let t
+	switch(type){
+
+	case 'LNB':
+		t = 'lnb';
+		break;
+
+	default:
+		t = 'buc';
+	}
+	return measurwmwnt[t];
+}
+
 export function code(name){
+
 	if(typeof name === 'number')
 		return name;
-	const group = chooseGrout();
+
+	const group = chooseGroup();
 	return group[name];
 }
 
 export function name(code){
-	const group = chooseGrout();
+
+	const group = chooseGroup();
 	const keys = Object.keys(group);
 
 	for(const key of keys)
-		if(deviceInfo[key] == code)
+		if(group[key] == code)
 			return key;
+
+	return `undefined; code: ${code}; keys: ${keys}`; 
 }
 
 export function description(value){
 	const c = code(value)
-	return chooseGrout()[c].description;
+	return chooseGroup()[c].description;
 }
 
 export function toString(value){
 	const c = code(value)
-	const name = name(value)
-	return `measurement: ${name} (${c})`;
+	const n = name(value)
+	return `measurement: ${n} (${c})`;
 }
 
 export function parser(value){
 	const c = code(value)
-	return chooseGrout()[c].parser;
+	return chooseGroup()[c].parser;
 }
