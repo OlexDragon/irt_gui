@@ -49,7 +49,7 @@ function chooseFragmentName(){
 	default:
 		packetId = f_packetId('controlAll');
 
-				console.log('Add type: ' + type);
+		console.log('Add type: ' + type);
 		$userCard.find('.visually-hidden').removeClass('visually-hidden');
 		return 'buc';	
 	}

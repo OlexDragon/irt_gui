@@ -1,7 +1,6 @@
 import {type as typeFromDT} from './packet/service/device-type.js'
 import {showError, unitAddress, baudrate} from './worker.js'
 import {id as f_packetId} from './packet/packet-properties/packet-id.js'
-import {id as f_groupId} from './packet/packet-properties/group-id.js'
 import Packet from './packet/packet.js'
 import RequestPackt from './packet/request-packet.js'
 import ComControl from './com-control.js'
@@ -15,6 +14,8 @@ const $body = $('#com-tab-pane');
 let comControl;
 let interval;
 let delay = 10000;
+let parameters;
+let type;
 
 export function start(){
 
@@ -22,6 +23,18 @@ export function start(){
 
 	if(interval)
 		return;
+
+	type = typeFromDT();
+	switch(type){
+
+	case 'CONTROLLER':
+		parameters = [3, 4, 5];
+		break;
+
+	default:
+		console.log(type);
+		parameters = [3, 4, 5, 6];
+	}
 
 	const name = chooseFragmentName();
 	$body.load(`/fragment/com/${name}`, ()=>{
@@ -32,6 +45,10 @@ export function start(){
 		comControl = new ComControl($comAddress, $comRetransmits, $comStandard, $comBaudrate);
 		comControl.onChange(onChange);
 
+		switch(type){
+		case 'CONTROLLER':
+			$comStandard.parents('.to-hide').addClass('visually-hidden');
+		}
 //		networkControl.onChange(onChange);
 //		networkControl.onNotSaved(onNotSaved);
 		run();
@@ -74,7 +91,7 @@ function run(){
 
 function sendRequest(){
 
-	const requestPacket = new RequestPackt(packetId);
+	const requestPacket = new RequestPackt(packetId, parameters);
 	post(requestPacket);
 }
 

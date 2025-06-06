@@ -281,9 +281,10 @@ function getWhatNeed(id, linkAddr, value){
 
 	case idComAll:
 		{
+			const length = value.length
 			const payloads = [];
-			for(let i=3; i<7; ++i)
-				payloads.push(new Payload(i))
+			for(let i=0; i<length; ++i)
+				payloads.push(new Payload(value[i]))
 			packet = new Packet(new Header(packetTypeRequest, id, groupId('protocol')), payloads, linkAddr);
 			need.function = 'fCom';
 			need.timeout = 3000;
