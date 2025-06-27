@@ -87,8 +87,8 @@ deviceType[301].description =  "Outdoor Redundancy Protection Controller";
 deviceType[301].type =  "CONTROLLER";
 
 deviceType[310] = {}
-deviceType[310].description =  "Redundancy protection controller";
-deviceType[310].type =  "CONTROLLER";
+deviceType[310].description =  "Intelligent Redundant Protection Controller";
+deviceType[310].type =  "CONTROLLER_IRPC";
 
 deviceType[311] = {}
 deviceType[311].description =  "2 switchs Redundancy protection controller";
@@ -190,7 +190,7 @@ deviceType[2001] = {}
 deviceType[2001].description =  "Bias Board Modul";
 deviceType[2001].type =  "BAIS";
 
-export function type(typeId){
+export default (typeId) =>{
 	if(!(typeFromInfo || typeId))
 		return;
 	return deviceType[typeId ? typeId : typeFromInfo[0]].type;

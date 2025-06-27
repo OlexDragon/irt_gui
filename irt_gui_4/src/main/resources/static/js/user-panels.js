@@ -1,3 +1,4 @@
+import * as serialPort from './serial-port.js'
 import {start as networkStart, stop as networkStop, disable as networkDisable} from './panel-network.js'
 import {start as alarmsStart, stop as alarmsStop} from './panel-alarms.js'
 import {start as redundancyStart, stop as redundancyStop, disable as redundancyDisable} from './panel-redundancy.js'
@@ -7,11 +8,20 @@ import {onStatusChange} from './panel-summary-alarm.js'
 const $body = $('.userPanels');
 const $tabs = $body.find('.nav-link').click(userTabsOnShow);
 
-const userTabsCookies = Cookies.get('userTabsCookies');
-if(userTabsCookies)
-	new bootstrap.Tab($(`#${userTabsCookies}`)).show();
-else
-	new bootstrap.Tab($('#userTabAlarm')).show();
+(()=>{
+	const userTabsCookies = Cookies.get('userTabsCookies');
+	if(userTabsCookies)
+		new bootstrap.Tab($(`#${userTabsCookies}`)).show();
+	else
+		new bootstrap.Tab($('#userTabAlarm')).show();})();
+
+serialPort.onStart(onStart);
+
+function onStart(doRun){
+	if(!doRun){
+		stop();
+	}
+}
 
 let run;
 export function start(){
@@ -35,6 +45,7 @@ export function disable(){
 }
 
 function userTabsOnShow(selected){
+	networkStop(); alarmsStop(); redundancyStop(); comStop();
 
 	if(!run)
 		return;

@@ -116,12 +116,12 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 		final Integer baudrate = requestPacket.getBaudrate();
 		byte[] received = serialPort.send(portName, timeout, bytes, baudrate);
+//		logger.error("{} : {}", received.length, received);
 		if(received == null)
 			return;
 
-		Packet packet = new Packet(received);
+		Packet packet = new Packet(received, requestPacket.getUnitAddr()==0);
 
-		logger.debug("\n\t{}\n\t{} : {}", packet, received.length, received);
 
 		final int lastIndex = packet.getLastIndex() + 1;
 		if(lastIndex==received.length && packet.getPacketType()== PacketType.ACKNOWLEDGEMENT)
@@ -129,9 +129,8 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		else
 			received = Arrays.copyOfRange(received, lastIndex, received.length);
 
-		logger.debug("\n\t{}\n\t{} : {}", packet, received.length, received);
-
 		requestPacket.setAnswer(received);
+		logger.debug(requestPacket);
 
 		Optional.ofNullable(packet.getAcknowledgement()).filter(a->a.length>0)
 		.ifPresent(

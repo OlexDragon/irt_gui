@@ -1,135 +1,99 @@
-import {showError} from './worker.js'
-import Packet from './packet/packet.js'
-import RequestPackt from './packet/request-packet.js'
+import * as serialPort from './serial-port.js'
+import groupId from './packet/packet-properties/group-id.js'
+import packetId from './packet/packet-properties/packet-id.js'
 import {code, parser} from './packet/parameter/alarm.js'
-import {id as f_PacketId} from './packet/packet-properties/packet-id.js'
+import {type} from './panel-info.js'
 
 const $card = $('#userCard');
 const $body = $('#alarms-tab-pane');
+const codeIdIDs = code('IDs');
+const codeIdDescription = code('description');
+const codeIdStatus = code('status');
+
+const action = { groupId: groupId.alarm, data: {parameterCode: codeIdIDs }, function: 'f_Alarms'};
 
 //const packetIdSummary = f_PacketId('alarmSummary');
-const packetIdAlarmIDs = f_PacketId('alarmIDs');
-const packetIdAlarmDescription = f_PacketId('alarmDescription');
-const packetIdAlarm = f_PacketId('alarm');
-let alarmIDs;
+//const packetIdAlarmIDs = f_PacketId('alarmIDs');
+//const packetIdAlarmDescription = f_PacketId('alarmDescription');
+//const packetIdAlarm = f_PacketId('alarm');
+
+let unitType;
 
 let interval;
 let delay = 5000;
+const map = new Map();
 
 export function start(){
 	if(interval)
 		return;
 
-	$body.empty();
+	action.buisy = false;
+	if(unitType?.toString() !== type.toString()){
+		action.IDs = undefined;
+		action.packetId = packetId.alarmIDs
+		action.data.parameterCode = codeIdIDs;
+		readAlarmDescription = true;
+		descriptionIndex = 0;
+		unitType = type;
+		$body.empty();
+		map.clear();
+	}
 	run();
 	interval = setInterval(run, delay);
 }
 
 export function stop(){
 	clearInterval(interval) ;
-	interval = undefined
+	interval = undefined;
+	action.IDs = undefined;
 }
 
 let readAlarmDescription = true;
-let buisy;
 function run(){
+	if(!serialPort.doRun()){
+		stop();
+		return;
+	}
 
-	if(buisy){
-		console.warn('Buisy');
+	if(action.buisy){
+		console.warn('action.buisy');
 		return
 	}
 
-	buisy = true;
+	action.buisy = true;
 
-	if(alarmIDs){
+	if(action.IDs){
 
 		if(readAlarmDescription)
 			getAlarmDescription();
-
-		const requestPacket = new RequestPackt(packetIdAlarm, undefined, alarmIDs);
-		sendRequest(requestPacket);
+		else
+			serialPort.postObject($card, action);
 
 	}else{
 
-		const requestPacket = new RequestPackt(packetIdAlarmIDs);
-		sendRequest(requestPacket);
+		serialPort.postObject($card, action);
 	}
 
 }
 
-export function sendRequest(requestPacket){
-
-	postObject('/serial/send', requestPacket)
-	.done(data=>{
-		buisy = false;
-
-		if(!data.answer?.length){
-			console.warn("No answer.");
-			blink($card, 'connection-wrong');
-			return;
-		}
-
-		if(!data.function){
-			console.warn("No function name.");
-			blink($card, 'connection-wrong');
-			return;
-		}
-
-		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
-
-		if(![packetIdAlarmIDs, packetIdAlarmDescription, packetIdAlarm].includes(packet.header.packetId)){
-			console.log(packet.toString());
-			console.warn('Received wrong packet.');
-			blink($card, 'connection-wrong');
-			return;
-		}
-
-		if(packet.header.error){
-			console.warn(packet.toString());
-			blink($card, 'connection-wrong');
-			if(showError)
-				showToast("Packet Error", packet.toString());
-			return;
-		}
-
-		blink($card);
-
-		module[data.function](packet);
-	})
-	.fail((jqXHR)=>{
-		buisy = false;
-		blink($card, 'connection-fail');
-
-		if(jqXHR.responseJSON?.message){
-			console.log(requestPacket);
-			console.error(jqXHR.responseJSON.message);
-			if(showError)
-				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
-		}
-	
-	});
-}
 let alarmIndex;
-const module = {}
-module.fAlarms = function(packet){
+action.f_Alarms = function(packet){
 	alarmIndex = -1;
 	packet.payloads.forEach(parseAlarm);
 }
-const codeIdIDs = code('IDs');
-const codeIdDescription = code('description');
-const codeIdStatus = code('status');
-const codeIdName = code('name');
 function parseAlarm(pl){
 
 	switch(pl.parameter.code){
 	case codeIdIDs:
-		alarmIDs = parser(pl.parameter.code)(pl.data);
+		action.IDs = action.data.value = parser(pl.parameter.code)(pl.data);
+		action.packetId = packetId.alarmDescription;
+		action.data.parameterCode = codeIdDescription;
 		run();
 		break; 
 
 	case codeIdDescription:
-		getAlarmDescription();
 		showDescription(pl);
+		getAlarmDescription();
 		break;
 
 //	case codeIdName:
@@ -157,29 +121,25 @@ function showValue(pl){
 		alarmIndex = value.index;
 }
 
-//function showName(pl){
-//	const value = parser(pl.parameter.code)(pl.data);
-//	const $row = getRow(value.id);
-//	const $div = $row.find('.name');
-//	if($div.text()!==value.string)
-//		$div.text($div.text());
-//}
-
 function showDescription(pl){
-const value = parser(pl.parameter.code)(pl.data);
-const $row = getRow(value.id);
-const $div = $row.find('.name');
-if($div.text()!==value.string)
-	$div.text(value.string);
+	const value = parser(pl.parameter.code)(pl.data);
+	const $row = getRow(value.id);
+	const $div = $row.find('.name');
+	if($div.text()!==value.string)
+		$div.text(value.string);
 }
 
+let timeout;
 function getRow(id){
-	let $row = $body.find('#row' + id);
-	if(!$row.length){
+	let $row = map.get(id);
+	if(!$row?.length){
 		$row = $('<div>', {id: 'row' + id, class: 'row mt-1'})
 				.append($('<div>', {class: 'col name text-end fw-bold'}))
 				.append($('<div>', {class: 'col value text-center fs-6'}));
-		$body.append($row);
+
+	map.set(id, $row);
+	clearTimeout(timeout);
+	timeout = setTimeout(()=>$body.append(Array.from(map.values())), 100);
 	}
 	return $row;
 }
@@ -192,13 +152,18 @@ function removeCalsses($el){
 
 let descriptionIndex = 0;
 function getAlarmDescription(){
-	if(descriptionIndex>=alarmIDs.length){
+	if(descriptionIndex>=action.IDs.length){
+		action.packetId = packetId.alarm;
+		action.data.parameterCode = codeIdStatus;
+		action.data.value = action.IDs;
 		readAlarmDescription = false;
+		run();
 		return;
 	}
+	action.update = true;
 
-	const requestPacket = new RequestPackt(packetIdAlarmDescription, undefined, alarmIDs[descriptionIndex]);
+	action.data.value = [action.IDs[descriptionIndex]];
 	++descriptionIndex;
-	sendRequest(requestPacket);
+	serialPort.postObject($card, action);
 
 }

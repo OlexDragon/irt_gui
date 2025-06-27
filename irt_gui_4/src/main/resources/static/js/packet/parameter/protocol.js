@@ -1,39 +1,34 @@
 import {parseToInt} from '../service/converter.js'
 
-const protocol = Object.freeze([, , , 'address', 'baudrate',	 'retransmit', 'tranceiver_mode']);
-const parsers =	 Object.freeze([, , , b=>b,		  parseToInt,  b=>b,			b=>b]);
+const protocol = {address: {code: 3, parser:b=>b}, baudrate: {code: 4, parser:parseToInt}, retransmit: {code: 5, parser:b=>b}, tranceiver_mode: {code: 6, parser:b=>b}}
+
+Object.freeze(protocol);
+
+export default protocol;
 
 export function code(name){
-	if(typeof name === 'number')
-		if(name>=0 && name<protocol.length)
-			return name;
-		else
-			throw new Error(name + " - Unknown parameter code.");
 
-	return protocol.indexOf(name);
+	return protocol[name].code;
 }
 
 export function name(code){
-
-	if(typeof code === 'string')
-		if(protocol.includes(code))
-			return code;
-		else
-			throw new Error( code + " - Unknown parameter name.");
-
-	if(code>=0 && code<protocol.length)
-		return protocol[code];
-	else
-		throw new Error(name + " - Unknown parameter code.");
+	const keys = Object.keys(protocol);
+	for(const key of keys)
+		if(protocol[key].code===code)
+			return key;
 }
 
 export function toString(value){
-	const c = code(value)
-	const n = name(value)
-	return `protocol: ${n} (${c})`;
+	if(typeof value === 'number'){
+		const n = name(value)
+		return `protocol: ${n} (${value})`;
+	}else{
+		const c = code(value)
+		return `protocol: ${value} (${c})`;
+	}
 }
 
-export function parser(value){
-	const c = code(value)
-	return parsers[c];
+export function parser(code){
+	const n = name(code)
+	return protocol[n].parser;
 }

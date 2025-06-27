@@ -1,5 +1,5 @@
 import {parseToIrtValue, parseToShortArray, parseToBigInt, parseToBigIntArray, parseToBoolean} from '../service/converter.js'
-import {type} from '../service/device-type.js'
+import f_deviceType from '../service/device-type.js'
 
 const control = {};
 control.fcm = {};
@@ -8,7 +8,7 @@ control.lnb = {};
 
 function chooseGroup(){
 	let t
-	switch(type){
+	switch(f_deviceType()){
 
 	case 'LNB':
 		t = 'lnb'
@@ -87,75 +87,73 @@ control.fcm[14].parser = data=>data.toString();
 //PARAMETER_CONFIG_LNB_STATUST                					= 125, 
 
 // BUC Parameter CODE
-control.buc[0] = {}
-control.buc.none					 = 0;
-control.buc[0].description = 'None';
-control.buc[0].parser = data=>data.toString();
-control.buc[1] = {}
-control.buc.lo_set					 = 1;
-control.buc[1].description = 'LO Set';
-control.buc[1].parser =  parseToBigInt;
-control.buc[2] = {}
-control.buc.mute					 = 2;
-control.buc[2].description = 'Mute';
-control.buc[2].parser =  parseToBoolean;
-control.buc[3] = {}
-control.buc.gain					 = 3;
-control.buc[3].description = 'Gain';
-control.buc[3].parser = bytes=>parseToIrtValue(bytes, 1);
-control.buc[5] = {}
-control.buc.gain_range				 = 5;
-control.buc[5].description = 'Gain Range';
-control.buc[5].parser = parseToShortArray;
-control.buc[4] = {}
-control.buc.attenuation				 = 4;
-control.buc[4].description = 'Attenuation';
-control.buc[4].parser = bytes=>parseToIrtValue(bytes, 1);
-control.buc[6] = {}
-control.buc.attenuation_range		 = 6;
-control.buc[6].description = 'Attenuation Range';
-control.buc[6].parser = parseToShortArray;
-control.buc[7] = {}
-control.buc.lo_frequencies			 = 7;
-control.buc[7].description = 'LO';
-control.buc[7].parser = data=>data.toString();
-control.buc[8] = {}
-control.buc.frequency				 = 8;
-control.buc[8].description = 'Frequency';
-control.buc[8].parser = parseToBigInt;
-control.buc[9] = {}
-control.buc.frequency_range			 = 9;
-control.buc[9].description = 'Frequency Range';
-control.buc[9].parser = parseToBigIntArray;
-control.buc[10] = {}
-control.buc.redundancy_enable		 = 10;
-control.buc[10].description = 'Redundancy';
-control.buc[10].parser = parseToBoolean;
-control.buc[11] = {}
-control.buc.redundancy_mode			 = 11;
-control.buc[11].description = 'Mode';
-control.buc[11].parser = data=>data.toString();
-control.buc[12] = {}
-control.buc.redundancy_name			 = 12;
-control.buc[12].description = 'Name';
-control.buc[12].parser = data=>data.toString();
-control.buc[15] = {}
-control.buc.redundancy_status		 = 15;
-control.buc[15].description = 'Status';
-control.buc[15].parser = parseToIrtValue;
-control.buc[14] = {}
-control.buc.redundancy_set_online	 = 14;
-control.buc[14].description = 'Online';
-control.buc[14].parser = data=>data.toString();
-control.buc[20] = {}
-control.buc.spectrum_inversion		 = 20;
-control.buc[20].description = 'Spectrum Inversion';
-control.buc[20].parser = data=>data.toString();
+control['LO Set']		 = {}
+control['LO Set'].code	 = 1;
+control['LO Set'].parser =  parseToBigInt;
+
+control.Mute		 = {}
+control.Mute.code	 = 2;
+control.Mute.parser	 =  parseToBoolean;
+
+control.Gain		 = {}
+control.Gain.code	 = 3;
+control.Gain.parser	 = bytes=>parseToIrtValue(bytes, 1);
+
+control['Gain Range']		 = {}
+control['Gain Range'].code	 = 5;
+control['Gain Range'].parser = parseToShortArray;
+
+control.Attenuation			 = {}
+control.Attenuation.code	 = 4;
+control.Attenuation.parser	 = bytes=>parseToIrtValue(bytes, 1);
+
+control['Attenuation Range'] = {}
+control['Attenuation Range'].code		 = 6;
+control['Attenuation Range'].parser = parseToShortArray;
+
+control.LO			 = {}
+control.LO.code		 = 7;
+control.LO.parser	 = data=>data.toString();
+
+control.Frequency		 = {}
+control.Frequency.codr	 = 8;
+control.Frequency.parser = parseToBigInt;
+
+control['Frequency Range']			 = {}
+control['Frequency Range'].code		 = 9;
+control['Frequency Range'].parser	 = parseToBigIntArray;
+
+control.Redundancy = {}	// Enable
+control.Redundancy.code		 = 10;
+control.Redundancy.parser = parseToBoolean;
+
+control.Mode		 = {}	// Redundancy
+control.Mode.code	 = 11;
+control.Mode.parser = data=>data.toString();
+
+control.Name		 = {}	// Redundancy
+control.Name.code	 = 12;
+control.Name.parser	 = data=>data.toString();
+
+control.Status			 = {}	// Redundancy
+control.Status.code		 = 15;
+control.Status.parser	 = parseToIrtValue;
+
+control.Online			 = {}	// Redundancy
+control.Online.code		 = 14;
+control.Online.parser	 = data=>data.toString();
+
+control['Spectrum Inversion']		 = {}
+control['Spectrum Inversion'].code	 = 20;
+control['Spectrum Inversion'].parser = data=>data.toString();
 
 // LNB Parameter CODE
 control.lnb[0] = {}
 control.lnb.none					 = 0;
 control.lnb[0].description = 'None';
+
+Object.freeze(control);
+export default control;
 
 export function code(name){
 	if(typeof name === 'number')

@@ -1,13 +1,13 @@
-import {type as typeFromDT} from './packet/service/device-type.js'
-import {showError} from './worker.js'
-import {id as f_packetId} from './packet/packet-properties/packet-id.js'
-import {id as f_groupId} from './packet/packet-properties/group-id.js'
-import Packet from './packet/packet.js'
-import RequestPackt from './packet/request-packet.js'
+import * as serialPort from './serial-port.js'
+import groupId from './packet/packet-properties/group-id.js'
+import packetId from './packet/packet-properties/packet-id.js'
+import f_deviceType from './packet/service/device-type.js'
 import NetworkControl from './network/network-control.js'
 
 const $card = $('#userCard');
 const $body = $('#network-tab-pane');
+
+const action = {packetId: packetId.network, groupId: groupId.network, data: {parameterCode: 1}, function: 'f_network'};
 
 let networkControl;
 let interval;
@@ -18,20 +18,17 @@ export function start(){
 	if(interval)
 		return;
 
-	const name = chooseFragmentName();
-	$body.load(`/fragment/network/${name}`, ()=>{
-		const $selectNetworkType = $('#selectNetworkType');
-		const $networkAddress = $('#networkAddress');
-		const $networkMask = $('#networkMask');
-		const $networkGateway = $('#networkGateway');
-		const $btnVetworkOk = $('#btnVetworkOk');
-		const $btnNetworkCancel = $('#btnNetworkCancel');
-		const $btnHttp = $('#btnHttp');
-		networkControl = new NetworkControl($selectNetworkType, $networkAddress, $networkMask, $networkGateway, $btnVetworkOk, $btnNetworkCancel, $btnHttp);
-		networkControl.onChange(onChange);
-		networkControl.onNotSaved(onNotSaved);
+	action.buisy = false;
+	if(!networkControl){
+		const name = chooseFragmentName();
+		$body.load(`/fragment/network/${name}`, ()=>{
+			networkControl = new NetworkControl($body);
+			networkControl.onChange(onChange);
+			networkControl.onNotSaved(onNotSaved);
+			run();
+		});
+	}else
 		run();
-	});
 	interval = setInterval(run, delay);
 }
 export function stop(){
@@ -43,97 +40,34 @@ export function disable(){
 }
 
 function chooseFragmentName(){
-	const type = typeFromDT();
+	const type = f_deviceType();
 	switch(type){
 	default:
 		return 'buc';	
 	}
 }
 
-const packetId = f_packetId('network');
-const packetIdSet = f_packetId('networkSet');
+//const packetIdSet = f_packetId('networkSet');
 
-let buisy;
 function run(){
+	if(!serialPort.doRun()){
+		stop();
+		return;
+	}
 
-	if(buisy){
-		console.log('Buisy');
+	if(action.buisy){
+		console.log('action.buisy');
 		return
 	}
 
-	buisy = true;
+	action.buisy = true;
 
-	sendRequest();
+	serialPort.postObject($card, action);
 }
 
-function sendRequest(){
+action.f_network = function(packet){
 
-	const requestPacket = new RequestPackt(packetId);
-	post(requestPacket);
-}
-function post(requestPacket){
-
-	postObject('/serial/send', requestPacket)
-	.done(data=>{
-		buisy = false;
-
-		if(!data.answer?.length){
-			console.warn("No answer.");
-			blink($card, 'connection-wrong');
-			return;
-		}
-		blink($card);
-
-		if(!data.function){
-			console.warn("No function name.");
-			return;
-		}
-
-		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
-
-		if(![packetId, packetIdSet].includes(packet.header.packetId)){
-			console.log(packet);
-			console.warn('Received wrong packet.');
-			blink($card, 'connection-wrong');
-			return;
-		}
-
-		module[data.function](packet);
-	})
-	.fail((jqXHR)=>{
-		buisy = false;
-		blink($card, 'connection-fail');
-
-		if(jqXHR.responseJSON?.message){
-			if(showError)
-				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
-		}
-
-	});
-}
-const module = {}
-module.fNetwork = function(packet){
-
-	if(packet.header.error){
-		console.warn(packet.toString());
-		blink($card, 'connection-wrong');
-		if(showError)
-			showToast("Packet Error", packet.toString());
-		return;
-	}
-
-	const payloads = packet.payloads;
-
-	if(!payloads?.length){
-		console.log(packet.toString());
-		console.warn('No payloads to parse.');
-		blink($card, 'connection-wrong');
-		return;
-	}
-
-	blink($card);
-
-	payloads.forEach(pl=>{
+	packet.payloads.forEach(pl=>{
 		switch(pl.parameter.code){
 
 		case 1:
@@ -156,13 +90,19 @@ function parseNetwork(pl){
 	networkControl.value = pl.data;
 }
 
+const actionSet = Object.assign({}, action);
+actionSet.packetId = packetId.networkSet;
+//actionSet.data = {};
+actionSet.toSend = {};
+
 function onChange(ipAddress){
-	const requestPacket = new RequestPackt(packetIdSet, ipAddress.bytes);
-	post(requestPacket);
+	actionSet.update = true;
+	actionSet.data.value = ipAddress.bytes;
+	serialPort.postObject($card, actionSet);
 }
 
 function onNotSaved(e){
 
-	showToast("Network settings are not saved.", e.currentValue.toString(), 'text-bg-warning bg-opacity-50');
+	serialPort.showToast("Network settings are not saved.", e.currentValue.toString(), 'text-bg-warning bg-opacity-50');
 	console.log(e);
 }

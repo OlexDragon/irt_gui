@@ -1,4 +1,4 @@
-import {toString} from './packet-properties/parameter-code.js'
+//import {toString} from './packet-properties/parameter-code.js'
 import {shortToBytes} from './service/converter.js'
 
 
@@ -22,23 +22,23 @@ export default class Parameter{
 
 	toString(packetGroupId){
 
-		let str;
-
-		if(packetGroupId){
-			let tmp = toString(packetGroupId);
-			if(tmp){
-				tmp = tmp(this.code);
-
-				if(tmp)
-					str = tmp;
-				else
-					str = 'code: ' + this.code;
-			}else
-				str = 'code: ' + this.code;
-		}else
-			str = 'code: ' + this.code;
-
-		return str + ', size: ' + this.size;
+//		let str;
+//
+//		if(packetGroupId){
+//			let tmp = toString(packetGroupId);
+//			if(tmp){
+//				tmp = tmp(this.code);
+//
+//				if(tmp)
+//					str = tmp;
+//				else
+//					str = 'code: ' + this.code;
+//			}else
+//				str = 'code: ' + this.code;
+//		}else
+//			str = 'code: ' + this.code;
+//
+//		return str + ', size: ' + this.size;
 	}
 }
 

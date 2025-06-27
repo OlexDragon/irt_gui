@@ -1,37 +1,54 @@
-import {switchoverMode, standbyMode, status, switchover, name, parser} from '../packet/parameter/irpc.js'
-import {update} from '../panel-control.js'
+import Controller from './controller.js'
+import groupId from '../packet/packet-properties/group-id.js'
 
-export default class ControllerMeasurement{
+export default class ControllerMeasurementIrpc extends Controller{
+
+	static URL = '/fragment/measurement/irpc';
+
 	#$controllerStatus;
 	#$unitsStatus;
 
 	#$fields = {};
 
-	constructor($controllerStatus, $unitsStatus){
-		this.#$controllerStatus = $controllerStatus;
-		this.#$unitsStatus = $unitsStatus;
+	constructor($card){
+		super($card);
+		const $body = $card.find('.measurement');
+		$body.load(ControllerMeasurementIrpc.URL, ()=>{
+
+			this.#$controllerStatus = $body.find('#controllerStatus');
+			this.#$unitsStatus = $body.find('#unitsStatus');
+		})
+	}
+
+	get groupId(){
+		return groupId.redundancy;
 	}
 
 	/**
-     * @param {any[]} pls
+     * @param {Array} pls
      */
 	set update(pls){
+		if(!this.#$controllerStatus){
+			console.log('This controller is not ready yet.');
+			return;
+		}
 		pls.forEach(pl=>{
 
 			const c = pl.parameter.code;
-			const key = name(c);
+			const key = this._parameter.name(c);
+			const parser = this._parameter.parser(c);
 
-			switch(c){
+			switch(key){
 
-			case standbyMode:
-			case switchoverMode:
-				update({[key]: pl.data});
+			case 'Standby Mode':
+			case 'Switchover Mode':
+//				update({[key]: pl.data});
 				break;
 
-			case status:
+			case 'Status':
 				{
-					const d = parser(c)([...pl.data]);
-					update({[key]: d});
+					const d = parser([...pl.data]);
+//					update({[key]: d});
 					const {status, bucStatus} = d;
 					Object.keys(status).forEach(key=>{
 						const text = status[key];
@@ -41,8 +58,11 @@ export default class ControllerMeasurement{
 				}
 				break;
 		
-			case switchover:
+			case 'Switchover':
 				break;
+
+			default:
+				console.log(key);
 			}
 		});
 	}

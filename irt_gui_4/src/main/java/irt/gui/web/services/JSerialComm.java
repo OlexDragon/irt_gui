@@ -53,9 +53,7 @@ public class JSerialComm implements IrtSerialPort {
 
 	@Override
 	public List<String> getSerialPortNames(){
-		synchronized (JSerialComm.class) {
-			return Arrays.stream(SerialPort.getCommPorts()).map(sp->{ return sp.getSystemPortName(); }).sorted().collect(Collectors.toList());
-		}
+		return Arrays.stream(SerialPort.getCommPorts()).map(sp->{ return sp.getSystemPortName(); }).sorted().collect(Collectors.toList());
 	}
 
 	@Override
@@ -134,6 +132,16 @@ public class JSerialComm implements IrtSerialPort {
 											throw new IrtSerialPortTOException("Serial Port Read Timeout");
 										}else
 											timeoutThread.interrupt();
+
+										int position = bb.position();
+										if(position==0)
+											throw new IrtSerialPortRTException("SP Error:Problem with serial port.");
+
+										byte[] result = new byte[position];
+										bb.rewind();
+										bb.get(result);
+										logger.debug("resulet: {} bytes : {}", result.length, result);
+										return result;
 									}
 
 								} catch (SerialPortTimeoutException e) {
@@ -142,13 +150,8 @@ public class JSerialComm implements IrtSerialPort {
 								} catch (Exception e) {
 									throw new IrtSerialPortRTException(e.getLocalizedMessage(), e);
 								}
-
-								byte[] result = new byte[bb.position()];
-								bb.rewind();
-								bb.get(result);
-								logger.debug("resulet: {} bytes : {}", result.length, result);
-								return result;
 							}
+							return null;
 						}).orElse(null);
 	}
 
@@ -238,9 +241,7 @@ public class JSerialComm implements IrtSerialPort {
 		}
 
 
-		synchronized (JSerialComm.class) {
-			ports.values().stream().filter(SerialPort::isOpen).forEach(SerialPort::closePort);
-		}
+		ports.values().stream().filter(SerialPort::isOpen).forEach(SerialPort::closePort);
 	}
 
 	@RequiredArgsConstructor
@@ -261,9 +262,8 @@ public class JSerialComm implements IrtSerialPort {
 				TimeUnit.SECONDS.sleep(d);
 
 
-				synchronized (JSerialComm.class) {
-					Optional.ofNullable(sp).filter(SerialPort::isOpen).ifPresent(SerialPort::closePort);
-				}
+				Optional.ofNullable(sp).filter(SerialPort::isOpen).ifPresent(SerialPort::closePort);
+
 				logger.debug("Serial port has been closed. {}", ()->sp.getDescriptivePortName());
 
 			} catch (InterruptedException  e) {
@@ -281,8 +281,7 @@ public class JSerialComm implements IrtSerialPort {
 
 	@Override
 	public boolean close(String spName) {
-		synchronized (JSerialComm.class) {
-			return Optional.ofNullable(ports.remove(spName)).filter(SerialPort::isOpen).map(SerialPort::closePort).orElse(false);
-		}
+		logger.traceEntry(spName);
+		return Optional.ofNullable(ports.remove(spName)).map(SerialPort::closePort).orElse(false);
 	}
 }

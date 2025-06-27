@@ -12,18 +12,23 @@ import lombok.ToString;
 @ToString
 public class Packet {
 
-	public static final int PACKET_TYPE_POSITION = 4;	// without FLAG_SEQUENCE
+	public static final int PACKET_TYPE_POSITION = 4;
 	public static final int PACKET_TYPE_FCM_POSITION = 0;	// without FLAG_SEQUENCE
-	public static final int ACKNOWLEDGEMENT_LENGTH = 9;	// with checksum
-	public static final int ACKNOWLEDGEMENT_FCM_LENGTH = 5;	// with checksum
+	public static final int ACKNOWLEDGEMENT_LENGTH = 7;	
+	public static final int ACKNOWLEDGEMENT_FCM_LENGTH = 3;
 	public static final byte FLAG_SEQUENCE	= 0x7E;
 	public static final byte CONTROL_ESCAPE = 0x7D;;
 
+	private final int typeIndex;
+	private final int length;
 	private final byte[] bytes;
-	@Getter
-	private int lastIndex;
 
-	public Packet(byte[] bytes) {
+	@Getter private int lastIndex;
+
+	public Packet(byte[] bytes, boolean fcm) {
+
+		typeIndex = fcm ? PACKET_TYPE_FCM_POSITION : PACKET_TYPE_POSITION; 	// without FLAG_SEQUENCE
+		length = fcm ? ACKNOWLEDGEMENT_FCM_LENGTH : ACKNOWLEDGEMENT_LENGTH; 	// without FLAG_SEQUENCE
 
 		if(bytes==null) {
 			this.bytes = new byte[0];
@@ -74,26 +79,30 @@ public class Packet {
 
 	public byte[] getAcknowledgement() {
 
-		if(bytes==null || bytes.length<Packet.PACKET_TYPE_POSITION)
+		if(bytes==null || bytes.length<length)
 			return null;
 
-		final PacketType packetType = PacketType.valueOf(bytes[Packet.PACKET_TYPE_POSITION]);
-		if(packetType == PacketType.ACKNOWLEDGEMENT) {
 
+		final PacketType packetType = PacketType.valueOf(bytes[typeIndex]);
+		if(packetType == PacketType.ACKNOWLEDGEMENT){
 			final byte[] controlEscape = controlEscape(bytes);
-			final byte[] ackn = new byte[controlEscape.length+2];
-			System.arraycopy(controlEscape, 0, ackn, 1, controlEscape.length);
-			ackn[0] = ackn[ackn.length-1] = FLAG_SEQUENCE;
-			return ackn;
+			final byte[] toSend = new byte[length + 4];
+			System.arraycopy(controlEscape, 0, toSend, 1, controlEscape.length);
+			toSend[0] = toSend[toSend.length-1] = FLAG_SEQUENCE;
+			return toSend;
+		}
 
-		}else if(packetType == PacketType.RESPONSE || packetType == PacketType.REQUEST || packetType == PacketType.COMMAND) {
-			final byte[] copyOf = Arrays.copyOf(bytes, Packet.ACKNOWLEDGEMENT_LENGTH);
-			copyOf[PACKET_TYPE_POSITION] = PacketType.ACKNOWLEDGEMENT.getCode();
-			final byte[] bs = Arrays.copyOf(copyOf, copyOf.length-2);
-			final byte[] checksum = new Checksum(bs).toBytes();
-			copyOf[copyOf.length-2] = checksum[1];
-			copyOf[copyOf.length-1] = checksum[0];
-			final byte[] controlEscape = controlEscape(copyOf);
+		if(packetType == PacketType.RESPONSE || packetType == PacketType.REQUEST || packetType == PacketType.COMMAND) {
+
+			final byte[] copyOf = Arrays.copyOf(bytes, length);
+			copyOf[typeIndex] = PacketType.ACKNOWLEDGEMENT.getCode();
+			final byte[] checksum = new Checksum(copyOf).toBytes();
+
+			final byte[] withCHeckSum = Arrays.copyOf(copyOf, length+2);
+			withCHeckSum[copyOf.length] = checksum[1];
+			withCHeckSum[copyOf.length+1] = checksum[0];
+
+			final byte[] controlEscape = controlEscape(withCHeckSum);
 			final byte[] ackn = new byte[controlEscape.length+2];
 			System.arraycopy(controlEscape, 0, ackn, 1, controlEscape.length);
 			ackn[0] = ackn[ackn.length-1] = FLAG_SEQUENCE;

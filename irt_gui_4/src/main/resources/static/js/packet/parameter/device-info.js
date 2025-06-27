@@ -13,6 +13,9 @@ deviceInfo.description		 = 6;
 deviceInfo.partNumber		 = 7;
 deviceInfo.all				 = 255;
 
+const o = Object.freeze(structuredClone(deviceInfo));
+export default o;
+
 export function code(name){
 	return deviceInfo[name];
 }

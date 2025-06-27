@@ -1,8 +1,8 @@
-import {id, toString} from './packet-properties/group-id.js'
-import {code, description} from './packet-properties/packet-type.js'
-import {packetError, PACKET_ERROR} from './error.js'
-import {shortToBytes} from './service/converter.js'
-
+import packetType, { name } from './packet-properties/packet-type.js'
+import { id, toString } from './packet-properties/group-id.js'
+import { PACKET_ERROR } from './error.js'
+import { shortToBytes } from './service/converter.js'
+import { toString as idToString } from './packet-properties/packet-id.js'
 
 export default class Header{
 	constructor(type, packetId, groupId, error){
@@ -12,7 +12,7 @@ export default class Header{
 			this.type 		= bytes[0]&0xff;						// byte	type;		0
 			this.packetId 	= (bytes[2]&0xff) * 256 + (bytes[1]&0xff);		// short packetId;	1,2 
 
-			if(bytes.length>=HEADER_SIZE && this.type != acknowledgement){
+			if(bytes.length>=HEADER_SIZE && this.type != packetType.acknowledgement){
 				this.groupId 	= bytes[3]&0xff;											// byte groupId;	3
 				this.reserved	= 0;														// short reserved;	4,5
 				this.error		= (packetId == undefined ? bytes[6]&0xff : packetId);		// byte errorCode;	6
@@ -20,10 +20,10 @@ export default class Header{
 			return;	
 		}
 
-		this.type 		= (type == undefined ? code('request') : type);								// byte	type;		0
+		this.type 		= (type == undefined ? packetType.request : type);								// byte	type;		0
 		this.packetId 	= (packetId == undefined ? Math.floor(Math.random() * 32767 ) : packetId);		// short packetId;	1,2
 
-		if(this.type==acknowledgement)
+		if(this.type==packetType.acknowledgement)
 			return;
 
 		this.groupId 	= (groupId == undefined ? id('deviceInfo') : (typeof groupId == "number") ? groupId : undefined);	// byte groupId;	3; 
@@ -32,7 +32,7 @@ export default class Header{
 	}
 	toBytes(){
 		const id = shortToBytes(this.packetId);
-		if(this.type == acknowledgement)
+		if(this.type == packetType.acknowledgement)
 			return [this.type, id[0], id[1]];
 		const reserved = shortToBytes(this.reserved);
 		return [this.type, id[0], id[1], this.groupId, reserved[0], reserved[1], this.error];
@@ -42,13 +42,12 @@ export default class Header{
 		return [this.type, id[0], id[1]];
 	}
 	toString(){
-		if(this.type == acknowledgement)
-			return 'type = ' + description(this.type) + ', ID = ' + this.packetId;
+		if(this.type == packetType.acknowledgement)
+			return 'type = ' + name(this.type) + ', ID = ' + this.packetId;
 
 		const grId = toString(this.groupId);
-		return 'type = ' + description(this.type) + ', ID = ' + this.packetId + ', groupId = ' + (grId ? grId : this.groupId) + ', error = ' + ((typeof this.error !== "number") ? this.error : PACKET_ERROR[this.error]);
+		return 'type = ' + name(this.type) + ', ID = ' + idToString(this.packetId) + ', groupId = ' + (grId ? grId : this.groupId) + ', error = ' + ((typeof this.error !== "number") ? this.error : PACKET_ERROR[this.error]);
 	}
 }
 
-const acknowledgement = code('acknowledgement');
 const HEADER_SIZE = 7;

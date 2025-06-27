@@ -48,7 +48,8 @@ public class SerialPortController {
 
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			logger.catching(Level.DEBUG, e);
-			throw new ResponseStatusException(HttpStatus.REQUEST_TIMEOUT, e.getLocalizedMessage());
+			requestPacket.setError("TIMEOUT:" + e.getLocalizedMessage());
+			return requestPacket;
 
 		}catch (CancellationException e) {
 			logger.catching(Level.DEBUG, e);

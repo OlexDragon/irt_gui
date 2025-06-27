@@ -15,6 +15,10 @@ groupId.deviceDebug	 = 61;
 groupId.production	 = 100;
 groupId.developer	 = 120;
 
+Object.freeze(groupId);
+
+export default groupId;
+
 export function id(name){
 	return groupId[name];
 }

@@ -20,7 +20,7 @@ statuses.push(new AlarmStatus(statuses.length,'SP Error', undefined	, 'text-bg-d
 statuses.push(new AlarmStatus(statuses.length,'Closed'	, 	'This program has been closed. \nDouble-click the jar file to open it again.', undefined));
 statuses.push(new AlarmStatus(statuses.length,'TIMEOUT', undefined, undefined));
 statuses.push(new AlarmStatus(statuses.length,'NC', 'No Connection', undefined));
-statuses.push(new AlarmStatus(statuses.length,'UA Error', 'Invalid device number. The device number value can be between 0 and 254 inclusive.', 'text-bg-warning'));
+statuses.push(new AlarmStatus(statuses.length,'UA Error', 'Invalid unit address. The unit address value can be between 0 and 254 inclusive.', 'text-bg-warning'));
 
 export function status(bytes){
 
@@ -40,11 +40,8 @@ export function status(bytes){
 
 	const status = new AlarmStatus();
 	status.index = -1;
-	status.severities = 'UNKNOWN';
-	if(status.index>=0)
-		status.text = text[status.text];
-	if(!status.text)
-		status.text = split.length>1 ? split[1] : bytes;
+	status.severities = split[1] ? split[0] : 'UNKNOWN';
+	status.text = split[1] ? split[1] : split[0];
 	return status;
 }
 

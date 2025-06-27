@@ -1,20 +1,20 @@
-import {type as typeFromDT} from './packet/service/device-type.js'
-import {showError, unitAddress, baudrate} from './worker.js'
-import {id as f_packetId} from './packet/packet-properties/packet-id.js'
-import Packet from './packet/packet.js'
-import RequestPackt from './packet/request-packet.js'
-import ComControl from './com-control.js'
-import {code, parser} from './packet/parameter/protocol.js'
+import * as serialPort from './serial-port.js'
+import groupId from './packet/packet-properties/group-id.js'
+import packetId from './packet/packet-properties/packet-id.js'
+import f_deviceType from './packet/service/device-type.js'
+import ComControl from './classes/com-control.js'
+import protocol, {parser} from './packet/parameter/protocol.js'
 import {longToBytes} from './packet/service/converter.js'
 
 
 const $card = $('#userCard');
 const $body = $('#com-tab-pane');
 
+const action = {packetId: packetId.comAll, groupId: groupId.protocol, data: {}, function: 'f_com'};
+
 let comControl;
 let interval;
 let delay = 10000;
-let parameters;
 let type;
 
 export function start(){
@@ -24,16 +24,19 @@ export function start(){
 	if(interval)
 		return;
 
-	type = typeFromDT();
+	action.buisy = false;
+	type = f_deviceType();
 	switch(type){
 
-	case 'CONTROLLER':
-		parameters = [3, 4, 5];
+	case 'CONTROLLER_IRPC':
+		action.data.parameterCode = [3, 4, 5];
 		break;
 
 	default:
 		console.log(type);
-		parameters = [3, 4, 5, 6];
+	case 'BAIS':
+	case 'CONTROLLER':
+		action.data.parameterCode = [3, 4, 5, 6];
 	}
 
 	const name = chooseFragmentName();
@@ -46,7 +49,7 @@ export function start(){
 		comControl.onChange(onChange);
 
 		switch(type){
-		case 'CONTROLLER':
+		case 'CONTROLLER_IRPC':
 			$comStandard.parents('.to-hide').addClass('visually-hidden');
 		}
 //		networkControl.onChange(onChange);
@@ -63,106 +66,32 @@ export function disable(){
 	comControl?.disable();
 }
 function chooseFragmentName(){
-	const type = typeFromDT();
+	const type = f_deviceType();
 	switch(type){
 	default:
 		return 'buc';	
 	}
 }
 
-const packetId = f_packetId('comAll');
-const packetIdSetAddress = f_packetId('comSetAddress');
-const packetIdSetRetransmit = f_packetId('comSetRetransmit');
-const packetIdSetStandard = f_packetId('comSetStandard');
-const packetIdSetBaudrate = f_packetId('comSetBaudrate');
-
-let buisy;
 function run(){
+	if(!serialPort.doRun()){
+		stop();
+		return;
+	}
 
-	if(buisy){
-		console.log('Buisy');
+	if(action.buisy){
+		console.log('action.buisy');
 		return
 	}
 
-	buisy = true;
+	action.buisy = true;
 
-	sendRequest();
+	serialPort.postObject($card, action);
 }
 
-function sendRequest(){
-
-	const requestPacket = new RequestPackt(packetId, parameters);
-	post(requestPacket);
-}
-
-function post(requestPacket){
-
-	postObject('/serial/send', requestPacket)
-	.done(data=>{
-		buisy = false;
-
-		if(!data.answer?.length){
-			console.log(requestPacket);
-			console.warn("No answer.");
-			blink($card, 'connection-wrong');
-			return;
-		}
-		blink($card);
-
-		if(!data.function){
-			console.warn("No function name.");
-			return;
-		}
-
-		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
-
-		if(![packetId, packetIdSetAddress, packetIdSetBaudrate, packetIdSetRetransmit, packetIdSetStandard].includes(packet.header.packetId)){
-			console.log(packet);
-			console.warn('Received wrong packet.');
-			blink($card, 'connection-wrong');
-			return;
-		}
-
-		module[data.function](packet);
-	})
-	.fail((jqXHR)=>{
-		buisy = false;
-		blink($card, 'connection-fail');
-
-		if(jqXHR.responseJSON?.message){
-			if(showError)
-				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
-		}
-
-	});
-}
-
-const addressCode = code('address');
-const retransmitsCode = code('retransmit');
-const baudrateCode = code('baudrate');
-const standardCode = code('tranceiver_mode');
-
-const module = {}
-module.fCom = function(packet){
-
-	if(packet.header.error){
-		console.warn(packet.toString());
-		blink($card, 'connection-wrong');
-		if(showError)
-			showToast("Packet Error", packet.toString());
-		return;
-	}
+action.f_com = function(packet){
 
 	const payloads = packet.payloads;
-
-	if(!payloads?.length){
-		console.log(packet.toString());
-		console.warn('No payloads to parse.');
-		blink($card, 'connection-wrong');
-		return;
-	}
-
-	blink($card);
 
 	comControl.disable = false;
 
@@ -171,20 +100,20 @@ module.fCom = function(packet){
 		const value = parser(pl.parameter.code)(pl.data);
 		switch(pl.parameter.code){
 
-		case addressCode:
+		case protocol.address.code:
 			comControl.address = value;
-			unitAddress.unitAddress = value;
+			serialPort.unitAddrClass.unitAddress = value;
 			break;
 
-		case retransmitsCode:
+		case protocol.retransmit.code:
 			comControl.retransmits = value;
 			break;
 
-		case baudrateCode:
+		case protocol.baudrate.code:
 			comControl.baudrate = value;
 			break;
 
-		case standardCode:
+		case protocol.tranceiver_mode.code:
 			comControl.standard = value;
 			break;
 
@@ -194,36 +123,43 @@ module.fCom = function(packet){
 	});
 }
 
+const actionSet = Object.assign({}, action);
+actionSet.data = {};
+
 function onChange(v){
+
+	actionSet.update = true;
+
 	const keys = Object.keys(v);
 	if(!keys.length){
 		console.warn('something went wrong.')
 		return;
 	}
-
-	let id;
-	let value;
 	const key = keys[0];
 	switch(key){
 
 	case 'address':
-		id = packetIdSetAddress;
-		value = [v.address];
+		actionSet.packetId = packetId.comSetAddress;
+		actionSet.data.value = v.address;
+		actionSet.data.parameterCode = protocol.address.code;
 		break;
 
 	case 'retransmit':
-		id = packetIdSetRetransmit;
-		value = [v.retransmit];
+		actionSet.packetId = packetId.comSetRetransmit;
+		actionSet.data.value = v.retransmit;
+		actionSet.data.parameterCode = protocol.retransmit.code;
 		break;
 
 	case 'standard':
-		id = packetIdSetStandard;
-		value = [v.standard];
+		actionSet.packetId = packetId.comSetStandard;
+		actionSet.data.value = v.standard;
+		actionSet.data.parameterCode = protocol.tranceiver_mode.code;
 		break;
 
 	case 'baudrate':
-		id = packetIdSetBaudrate;
-		value = longToBytes(v.baudrate);
+		actionSet.packetId = packetId.comSetBaudrate;
+		actionSet.data.value = v.baudrate;
+		actionSet.data.parameterCode = protocol.baudrate.code;
 		break;
 
 	default:
@@ -231,8 +167,10 @@ function onChange(v){
 		return;
 	}
 
-	const requestPacket = new RequestPackt(id, value);
-	post(requestPacket);
-	if(key === 'baudrate')
-		baudrate.baudrate = v.baudrate;
+	serialPort.postObject($card, actionSet);
+	switch(key){
+
+	case 'baudrate':
+		setTimeout(()=>serialPort.baudrate.baudrate = v.baudrate, 100);
+	}
 }

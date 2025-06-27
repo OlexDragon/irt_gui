@@ -14,19 +14,19 @@ export default class NetworkControl{
 	#onChangeEvents = [];
 	#onNotSaved = [];
 
-	constructor($typeSelect, $ipRow, $maskRow, $gatewayRow, $btnOk, $btnCansel, $btnHttp){
+	constructor($body){
 
-		this.#typeSelect = $typeSelect.attr('disabled', true).on('input', this.#onInput).change(this.#onChange);
+		this.#typeSelect = $body.find('#selectNetworkType').attr('disabled', true).on('input', this.#onInput).change(this.#onChange);
 		this.#typeSelect.attr('name' , 'type');
-		this.#btnOk = $btnOk.attr('disabled', true).click(this.#onOk);
-		this.#btnCansel = $btnCansel.attr('disabled', true).click(this.#onCansel);
-		this.#btnHttp = $btnHttp.attr('disabled', true);
+		this.#btnOk = $body.find('#btnVetworkOk').attr('disabled', true).click(this.#onOk);
+		this.#btnCansel = $body.find('#btnNetworkCancel').attr('disabled', true).click(this.#onCansel);
+		this.#btnHttp = $body.find('#btnHttp').attr('disabled', true);
 
-		this.#gateway	 = new IpRow($gatewayRow)	.onInput(this.#onInput).disable(true).onNext(this.#btnOk);
+		this.#gateway	 = new IpRow($body.find('#networkGateway'))	.onInput(this.#onInput).disable(true).onNext(this.#btnOk);
 		this.#gateway.name = 'gateway';
-		this.#mask		 = new IpRow($maskRow)		.onInput(this.#onInput).disable(true).onNext(this.#gateway);
+		this.#mask		 = new IpRow($body.find('#networkMask'))		.onInput(this.#onInput).disable(true).onNext(this.#gateway);
 		this.#mask.name = 'mask';
-		this.#address	 = new IpRow($ipRow)		.onInput(this.#onInput).disable(true).onNext(this.#mask);
+		this.#address	 = new IpRow($body.find('#networkAddress')).onInput(this.#onInput).disable(true).onNext(this.#mask);
 		this.#address.name = 'address';
 		
 	}

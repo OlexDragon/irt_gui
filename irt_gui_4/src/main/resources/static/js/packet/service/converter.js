@@ -22,6 +22,12 @@ export function intToBytes(val){
 	return numberToBytes(val, 4);
 }
 
+export function intArratToBytes(...val){
+	const result = []
+	val.forEach(v=>result.push(intToBytes(v)));
+	return result.flat();
+}
+
 export function longToBytes(val){
 	return numberToBytes(val, 8);
 }
@@ -49,14 +55,15 @@ export function numberToBytes(val, minBytes){
 }
 
 export function parseToString(bytes){
-	if(!bytes)
+	const b = [...bytes]
+	if(!b)
 		return '';
 
-	const last = bytes.length - 1;
-	if(bytes[last]==0)
-		bytes.splice(last, 1);
+	const last = b.length - 1;
+	if(b[last]==0)
+		b.splice(last, 1);
 		
-	return String.fromCharCode.apply(String, bytes);
+	return String.fromCharCode.apply(String, b);
 }
 
 export function parseToInt(bytes, unsigned) {
@@ -141,6 +148,22 @@ export function parseToIrtValue(bytes, divider){
 		return prefix + value;
 	}else
 		return divider ? parseToInt(bytes)/divider : parseToInt(bytes);
+}
+
+export function parseToLoFrequency(bytes){
+	const b = [...bytes]
+	const lo = [];
+	while(b.length){
+		const index = b.splice(0,1)&0xff;
+		const value = (parseToBigInt(b.splice(0,8))/1000000n) + ' MHz';
+		lo[index] = value;
+	}
+	return lo;
+}
+
+export function parseToFreqyency(bytes){
+	const b = [...bytes]
+	return parseToBigInt(b)/1000000n;
 }
 
 const statusBits = {};

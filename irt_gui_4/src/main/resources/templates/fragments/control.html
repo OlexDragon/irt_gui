@@ -26,24 +26,24 @@
  						</li>
 					</ul>
 					<div class="tab-content text-cente">
- 						<div class="tab-pane fade" id="attenuation-tab-pane" role="tabpanel" aria-labelledby="attenuation-tab" tabindex="0">
+ 						<div class="tab-pane fade attenuation" id="attenuation-tab-pane" role="tabpanel" aria-labelledby="attenuation-tab" tabindex="0">
 							<div class="row mt-2">
 								<div class="col">
 									<div class="form-floating">
-										<input id="attenuationValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
+										<input id="attenuationValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
   										<label for="attenuationValue">Value (dB)</label>
   									</div>
 								</div>
   								<div class="col">
 									<div class="form-floating">
-										<input id="attenuationControl" type="number" class="form-control" placeholder="to Set">
+										<input id="attenuationControl" type="number" class="form-control control" placeholder="to Set">
   										<label for="attenuationControl">to Set (dB)</label>
 									</div>
 								</div>
 								<div class="col">
 									<div class="col">
 										<div class="form-floating">
-											<input id="attenuationStep" class="form-control" type="number" placeholder="Step">
+											<input id="attenuationStep" class="form-control step" type="number" placeholder="Step">
   											<label for="attenuationStep">Step (dB)</label>
 										</div>
 									</div>
@@ -53,24 +53,24 @@
 								<input id="attenuationRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
 							</div>
  						</div>
- 						<div class="tab-pane fade" id="gain-tab-pane" role="tabpanel" aria-labelledby="gain-tab" tabindex="0">
+ 						<div class="tab-pane fade gain" id="gain-tab-pane" role="tabpanel" aria-labelledby="gain-tab" tabindex="0">
 							<div class="row mt-2">
 								<div class="col">
 									<div class="form-floating">
-										<input id="gainValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
+										<input id="gainValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
   										<label for="gainValue">Value (dB)</label>
   									</div>
 								</div>
 								<div class="col">
 									<div class="form-floating">
-										<input id="gainControl" type="number" class="form-control" placeholder="to Set">
+										<input id="gainControl" type="number" class="form-control control" placeholder="to Set">
   										<label for="gainControl">to Set (dB)</label>
 									</div>
  								</div>
 								<div class="col">
 									<div class="col">
 										<div class="form-floating">
-											<input id="gainStep" class="form-control" type="number" placeholder="Step">
+											<input id="gainStep" class="form-control step" type="number" placeholder="Step">
   											<label for="gainStep">Step (dB)</label>
 										</div>
 									</div>
@@ -80,24 +80,24 @@
 								<input id="gainRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
 							</div>
  						</div>
- 						<div class="tab-pane fade" id="frequency-tab-pane" role="tabpanel" aria-labelledby="frequency-tab" tabindex="0">
+ 						<div class="tab-pane fade frequency" id="frequency-tab-pane" role="tabpanel" aria-labelledby="frequency-tab" tabindex="0">
 							<div class="row mt-2">
 								<div class="col">
 									<div class="form-floating">
-										<input id="freqValue" type="number" class="form-control" readonly="readonly" placeholder="Value">
+										<input id="freqValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
   										<label for="freqValue">Value (MHz)</label>
   									</div>
 								</div>
   								<div class="col">
 									<div class="form-floating">
-										<input id="freqControl" type="number" class="form-control" placeholder="to Set">
+										<input id="freqControl" type="number" class="form-control control" placeholder="to Set">
   										<label for="freqControl">to Set (MHz)</label>
 									</div>
 								</div>
 								<div class="col">
 									<div class="col">
 										<div class="form-floating">
-											<input id="freqStep" class="form-control" type="number" placeholder="Step">
+											<input id="freqStep" class="form-control step" type="number" placeholder="Step">
   											<label for="freqStep">Step (MHz)</label>
 										</div>
 									</div>
@@ -112,6 +112,9 @@
 								<input type="checkbox" class="btn-check" id="btnMute" autocomplete="off" disabled="disabled">
 								<label class="btn btn-outline-warning form-control" for="btnMute"></label><br>
 							</div>
+							<div class="col-5 visually-hidden">
+								<select id="loSelect" class="form-select"></select>
+							</div>
 						</div>
    					</div>
 </th:block>
@@ -119,31 +122,31 @@
 	<div class="container-fluid">
 		<div class="row">
 			<div class="col form-floating">
-				<select id="salectSwtchHvr" class="form-select">
+				<select id="irpcSalectSwtchHvr" class="form-select">
 					<option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
 					<option value="1">Automatic</option>
 					<option value="2">Manual</option>
 				</select>
-				<label for="salectSwtchHvr">Switchover Mode</label>
+				<label for="irpcSalectSwtchHvr">Switchover Mode</label>
 			</div>
 			<div class="col form-floating">
-				<select id="salectStndBy" class="form-select">
+				<select id="irpcStandBy" class="form-select">
 					<option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
 					<option value="1">Hot</option>
 					<option value="2">Cold</option>
 				</select>
-				<label for="salectSwtchHvr">Standby Mode</label>
+				<label for="irpcStandBy">Standby Mode</label>
 			</div>
 		</div>
 		<div class="row mt-3">
 			<div class="col">
-				<button id="btnIrspDefault" class="btn btn-outline-primary form-control" value="3" disabled="disabled">Default</button>
+				<button id="irpcDefault" class="btn btn-outline-primary form-control" value="3" disabled="disabled">Default</button>
 			</div>
 			<div class="col">
-				<button id="btnHoverA" class="btn btn-outline-primary form-control" value="1" disabled="disabled">Switchover A</button>
+				<button id="irpcHoverA" class="btn btn-outline-primary form-control" value="1" disabled="disabled">Switchover A</button>
 			</div>
 			<div class="col">
-				<button id="btnHoverB" class="btn btn-outline-primary form-control" value="2" disabled="disabled">Switchover B</button>
+				<button id="irpcHoverB" class="btn btn-outline-primary form-control" value="2" disabled="disabled">Switchover B</button>
 			</div>
 		</div>
 	</div>

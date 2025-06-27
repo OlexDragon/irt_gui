@@ -1,19 +1,20 @@
 
-const packetId = Object.freeze(
+const packetIdArray = Object.freeze(
 	[
 		'deviceInfo',
 
-		'measurementAll',
+		'measurement',
 		'measurementIRPC',
 
-		'controlAll',
+		'configAll',
 		'atenuation',
 		'atenuationSet',
 		'gain',
 		'gainSet',
 		'frequency',
 		'frequencySet',
-		'mute_control',
+		'muteSet',
+		'loSet',
 
 		'network',
 		'networkSet',
@@ -33,11 +34,11 @@ const packetId = Object.freeze(
 		'redundancySetNameB',
 
 		'irpc',
-		'salectSwtchHvr',
-		'salectStndBy',
-		'btnIrspDefault',
-		'btnHoverA',
-		'btnHoverB',
+		'irpcSalectSwtchHvr',
+		'irpcStandBy',
+		'irpcDefault',
+		'irpcHoverA',
+		'irpcHoverB',
 
 		'comAll',
 		'comSetAddress',
@@ -45,15 +46,31 @@ const packetId = Object.freeze(
 		'comSetStandard',
 		'comSetBaudrate',
 
+		'module',
+		'moduleSet',
+
+		'register',
+		'register1',
+		'register2',
+		'register3',
+		'register4',
+		'registerSet',
+
 		'noAction'
 	]);
 
+const packetId = Object.freeze(packetIdArray.reduce((a, v, i)=>({...a, [v]: i}), {}));
+export default packetId;
+//console.log(packetId);
+
 export function id(name){
-	return packetId.indexOf(name);
+	if(typeof name === 'number')
+		return name;
+	return packetId[name];
 }
 
 export function name(code){
-	return packetId[code];
+	return packetIdArray[code];
 }
 
 export function toString(value){

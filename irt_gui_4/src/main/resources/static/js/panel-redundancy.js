@@ -1,10 +1,9 @@
-import {showError} from './worker.js'
+import * as serialPort from './serial-port.js'
+import f_deviceType from './packet/service/device-type.js'
 import Packet from './packet/packet.js'
-import RequestPackt from './packet/request-packet.js'
-import {type as typeFromDT} from './packet/service/device-type.js'
-import {id as f_groupId} from './packet/packet-properties/group-id.js'
-import {id as f_PacketId} from './packet/packet-properties/packet-id.js'
-import {code, parser} from './packet/parameter/control.js'
+import groupId from './packet/packet-properties/group-id.js'
+import packetId from './packet/packet-properties/packet-id.js'
+import control, {code, parser} from './packet/parameter/control.js'
 
 const $card = $('#userCard');
 const $body = $('#redundancy-tab-pane');
@@ -15,16 +14,7 @@ let $redundancyImg;
 let $btnSetOnline;
 let $redundancyStatus;
 
-const packetId = f_PacketId('redundancyAll');
-const packetIdSetOnline = f_PacketId('redundancySetOnline');
-const packetIdSetEnable = f_PacketId('redundancySetEnable');
-const packetIdSetDisable = f_PacketId('redundancySetDisable');
-const packetIdSetCold = f_PacketId('redundancySetCold');
-const packetIdSetHot = f_PacketId('redundancySetHot');
-const packetIdSetNameA = f_PacketId('redundancySetNameA');
-const packetIdSetNameB = f_PacketId('redundancySetNameB');
-const packetIds = [packetId, packetIdSetOnline, packetIdSetEnable, packetIdSetDisable, packetIdSetCold, packetIdSetHot, packetIdSetNameA, packetIdSetNameB]
-const groupId = f_groupId('configuration')
+const action = {packetId: packetId.redundancyAll, groupId: groupId.configuration, data: {}, function: 'f_Redundancy'};
 
 let interval;
 let delay = 5000;
@@ -32,6 +22,7 @@ let delay = 5000;
 export function start(){
 	if(interval)
 		return;
+	action.buisy = false;
 	const name = chooseFragmentName();
 	$body.load(`/fragment/redundancy/${name}`, ()=>{
 		$selectEnable = $('#selectEnable').change(onSendCommand);
@@ -58,7 +49,7 @@ export function disable(){
 	$btnSetOnline?.prop('disabled', true);
 }
 function chooseFragmentName(){
-	const type = typeFromDT();
+	const type = f_deviceType();
 	switch(type){
 	default:
 		return 'buc';	
@@ -67,6 +58,10 @@ function chooseFragmentName(){
 
 let buisy;
 function run(){
+	if(!serialPort.doRun()){
+		stop();
+		return;
+	}
 
 	if(buisy){
 		console.log('Buisy')
@@ -87,7 +82,7 @@ function sendRequest(packet){
 
 	const requestPacket =  packet ? packet : new RequestPackt(packetId);
 
-	postObject('/serial/send', requestPacket)
+	serialPort.postObject('/serial/send', requestPacket)
 	.done(data=>{
 		buisy = false;
 
@@ -117,23 +112,21 @@ function sendRequest(packet){
 	.fail((jqXHR)=>{
 		buisy = false;
 		blink($card, 'connection-fail');
-
 		if(jqXHR.responseJSON?.message){
 			if(showError)
-				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
+				serialPort.showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
 		}
 	
 	});
 }
 
-const module = {}
-module.fRedundancy = function(packet){
+action.f_Redundancy = function(packet){
 
 	if(packet.header.error){
 		console.warn(packet.toString());
 		blink($card, 'connection-wrong');
 		if(showError)
-			showToast("Packet Error", packet.toString());
+			serialPort.showToast("Packet Error", packet.toString());
 		return;
 	}
 
@@ -150,11 +143,6 @@ module.fRedundancy = function(packet){
 
 	payloads.forEach(parse);
 }
-const enableCode = code('redundancy_enable');
-const modeCode = code('redundancy_mode');
-const nameCode = code('redundancy_name');
-const statusCode = code('redundancy_status');
-const setOnlineCode = code('redundancy_set_online');
 const imageLinks = ['/images/BUC_X.jpg', '/images/BUC_A.jpg', '/images/BUC_B.jpg'];
 const status = ['', 'Online', 'Standby']
 function parse(pl){
@@ -162,22 +150,22 @@ function parse(pl){
 
 	switch(pl.parameter.code){
 
-	case enableCode:
+	case control.Redundancy.code:
 		$selectEnable.val(value.toString());
 		$selectEnable.prop('disabled', false);
 		break;
 
-	case nameCode:
+	case control.Name.code:
 		$selectName.val(value);
 		$selectName.prop('disabled', false);
 		break;
 
-	case modeCode:
+	case control.Mode.code:
 		$selectStandby.val(value);
 		$selectStandby.prop('disabled', false);
 		break;
 
-	case statusCode:
+	case control.Status.code:
 		$redundancyStatus.text(status[value]);
 		let disable = value===1 || value===0;
 		$btnSetOnline.attr('disabled', disable);
@@ -213,28 +201,28 @@ function onSendCommand(e){
 	switch(e.currentTarget.id){
 
 	case 'btnSetOnline':
-		id = packetIdSetOnline;
+		id = packetId.packetIdSetOnline;
 		break;
 
 	case 'selectEnable':
 		if($selectEnable.val()=='true')
-			id = packetIdSetEnable;
+			id = packetId.packetIdSetEnable;
 		else
-			id = packetIdSetDisable;
+			id = packetId.packetIdSetDisable;
 		break;
 
 	case 'selectStandby':
 		if($selectStandby.val()=='0')
-			id = packetIdSetCold;
+			id = packetId.packetIdSetCold;
 		else
-			id = packetIdSetHot;
+			id = packetId.packetIdSetHot;
 		break;
 
 	case 'selectName':
 		if($selectName.val()=='1')
-			id = packetIdSetNameA;
+			id = packetId.packetIdSetNameA;
 		else if($selectName.val()=='2')
-			id = packetIdSetNameB;
+			id = packetId.packetIdSetNameB;
 		break;
 
 	default:

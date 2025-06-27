@@ -2,19 +2,19 @@ import Packet from './packet.js'
 import Header from './header.js'
 import Payload from './payload.js'
 import Parameter from './parameter.js'
+import groupId from './packet-properties/group-id.js'
 import {payload as alarmPayload, payloads as alarmPayloads} from './parameter/alarm.js'
-import {id as groupId} from './packet-properties/group-id.js'
 import {serialPort, baudrate, unitAddress} from '../worker.js'
 import {code as configCode} from './parameter/control.js'
 import {code as protocolCode} from './parameter/protocol.js'
 import {code as irpcCode} from './parameter/irpc.js'
-import {code as packetTypeCode} from './packet-properties/packet-type.js'
-import {id as f_packetId, toString as pIdToString} from './packet-properties/packet-id.js'
+import packetType from './packet-properties/packet-type.js'
+import packetId, {toString as pIdToString} from './packet-properties/packet-id.js'
 import { shortToBytesR, intToBytes, longToBytes } from './service/converter.js'
 
 export default class RequestPackt{
 	constructor(id, linkAddr, value){
-		this.id = packetId(id);
+		this.id = this.#packetId(id);
 		if(Array.isArray(linkAddr)){
 			this.unitAddr = unitAddress.unitAddress;
 			value = linkAddr;
@@ -27,58 +27,13 @@ export default class RequestPackt{
 		this.serialPort = serialPort;
 		this.baudrate = baudrate.baudrate;
 	}
+
+	#packetId(id){
+		if(typeof id === 'number')
+			return id;
+		return groupId[id];
+	}
 }
-
-function packetId(id){
-	if(typeof id === 'number')
-		return id;
-	return groupId(id);
-}
-
-const packetTypeRequest = packetTypeCode('request');
-const packetTypeCommand = packetTypeCode('command');
-
-const idDeviceInfo = f_packetId('deviceInfo');
-
-const idMeasurementAll = f_packetId('measurementAll');
-const idMeasurementIRPC = f_packetId('measurementIRPC');
-
-const idControlAll = f_packetId('controlAll');
-const idNetwork = f_packetId('network');
-const idNetworkSet = f_packetId('networkSet');
-
-const idAlarmSummary = f_packetId('alarmSummary');
-const idAlarmIDs = f_packetId('alarmIDs');
-const idAlarmDescription = f_packetId('alarmDescription');
-const idAlarm = f_packetId('alarm');
-
-const idRedundancyAll = f_packetId('redundancyAll');
-const idRedundancySetOnline = f_packetId('redundancySetOnline');
-const idRedundancySetEnable = f_packetId('redundancySetEnable');
-const idRedundancySetDisable = f_packetId('redundancySetDisable');
-const idRedundancySetCold = f_packetId('redundancySetCold');
-const idRedundancySetHot = f_packetId('redundancySetHot');
-const idRedundancySetNameA = f_packetId('redundancySetNameA');
-const idRedundancySetNameB = f_packetId('redundancySetNameB');
-
-const idAtenuationSet = f_packetId('atenuationSet');
-const idGainSet = f_packetId('gainSet');
-const idFrequencySet = f_packetId('frequencySet');
-const idMuteControl = f_packetId('mute_control');
-
-const idComAll = f_packetId('comAll');
-const idSetAddress = f_packetId('comSetAddress');
-const idSetRetransmit = f_packetId('comSetRetransmit');
-const idSetStandard = f_packetId('comSetStandard');
-const idSetBaudrate = f_packetId('comSetBaudrate');
-
-const idIRPC = f_packetId('irpc');
-const idIRPCsalectSwtchHvr = f_packetId('salectSwtchHvr');
-const idIRPCstandBy =  f_packetId('salectStndBy');
-
-const idIRPCdefault =  f_packetId('btnIrspDefault');
-const idIRPChoverA =  f_packetId('btnHoverA');
-const idIRPChoverB =  f_packetId('btnHoverB');
 
 function getWhatNeed(id, linkAddr, value){
 
@@ -87,26 +42,19 @@ function getWhatNeed(id, linkAddr, value){
 
 	switch(id){
 
-// Device Info
-	case idDeviceInfo:	// Device Info
-		packet = new Packet(new Header(packetTypeRequest, id), undefined, linkAddr);
-		need.function = 'fInfo';
-		need.timeout = 2000;
-		break;
-
 // Measurement
-	case idMeasurementAll: // Measurement All
-		packet = new Packet(new Header(packetTypeRequest, id, groupId('measurement')), undefined, linkAddr);
+	case packetId.measurement: // Measurement All
+		packet = new Packet(new Header(packetType.request, id, groupId.measurement), undefined, linkAddr);
 		need.function = 'fMeasurement';
 		need.timeout = 5000;
 		break;
 
-	case idMeasurementIRPC:
+	case packetId.measurementIRPC:
 		{
 			const payloads = [];
 			for(let i=5; i<6; ++i)
 				payloads.push(new Payload(i));
-			packet = new Packet(new Header(packetTypeRequest, id, groupId('measurement')), payloads, linkAddr);
+			packet = new Packet(new Header(packetType.request, id, groupId.measurement), payloads, linkAddr);
 			console.log(packet);
 			need.function = 'fMeasurement';
 			need.timeout = 5000;
@@ -114,51 +62,51 @@ function getWhatNeed(id, linkAddr, value){
 		break;
 
 // Network
-	case idNetwork: // get network
-		packet = new Packet(new Header(packetTypeRequest, id, groupId('network')), new Payload(new Parameter(1)), linkAddr);
+	case packetId.network: // get network
+		packet = new Packet(new Header(packetType.request, id, groupId.network), new Payload(new Parameter(1)), linkAddr);
 		need.function = 'fNetwork';
 		need.timeout = 3000;
 		break;
 
-	case idNetworkSet: // set network
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('network')), new Payload(new Parameter(1), value), linkAddr);
+	case packetId.networkSet: // set network
+		packet = new Packet(new Header(packetType.command, id, groupIdnetwork), new Payload(new Parameter(1), value), linkAddr);
 		console.log(packet)
 		need.function = 'fNetwork';
 		need.timeout = 3000;
 		break;
 
 // Alarm
-	case idAlarmSummary: 
-		packet = new Packet(new Header(packetTypeRequest, id, groupId('alarm')), alarmPayload('summary status'), linkAddr);
+	case packetId.alarmSummary: 
+		packet = new Packet(new Header(packetType.request, id, groupId.alarm), alarmPayload('summary status'), linkAddr);
 		need.function = 'fSummaryAlarms';
 		need.timeout = 1000;
 		break;
 
-	case idAlarmIDs:
-		packet = new Packet(new Header(packetTypeRequest, id, groupId('alarm')), alarmPayload('IDs'), linkAddr);
+	case packetId.alarmIDs:
+		packet = new Packet(new Header(packetType.request, id, groupId.alarm), alarmPayload('IDs'), linkAddr);
 		need.function = 'fAlarms';
 		need.timeout = 1000;
 		break;
 
-		case idAlarmDescription:
-			{
-				var payloads = alarmPayloads([value], true);
-				packet = new Packet(new Header(packetTypeRequest, id, groupId('alarm')), payloads, linkAddr);
-				need.function = 'fAlarms';
-				need.timeout = 5000;
-			}
-			break;
-
-		case idAlarm:
-			{
-				var payloads = alarmPayloads(value);
-				packet = new Packet(new Header(packetTypeRequest, id, groupId('alarm')), payloads, linkAddr);
-				need.function = 'fAlarms';
-				need.timeout = 5000;
-			}
+	case packetId.alarmDescription:
+		{
+			var payloads = alarmPayloads([value], true);
+			packet = new Packet(new Header(packetType.request, id, groupId.alarm), payloads, linkAddr);
+			need.function = 'fAlarms';
+			need.timeout = 5000;
+		}
 		break;
 
-	case idRedundancyAll:
+	case packetId.alarm:
+		{
+			var payloads = alarmPayloads(value);
+			packet = new Packet(new Header(packetType.request, id, groupId.alarm), payloads, linkAddr);
+			need.function = 'fAlarms';
+			need.timeout = 5000;
+		}
+		break;
+
+	case packetId.redundancyAll:
 		const pls =
 		[
 			new Payload(configCode('redundancy_enable')),
@@ -166,80 +114,80 @@ function getWhatNeed(id, linkAddr, value){
 			new Payload(configCode('redundancy_name')),
 			new Payload(configCode('redundancy_status'))
 		]
-		packet = new Packet(new Header(packetTypeRequest, id, groupId('configuration')), pls, linkAddr);
+		packet = new Packet(new Header(packetType.request, id, groupId.configuration), pls, linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 5000;
 		break;
 
-	case idRedundancySetOnline:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), configCode('redundancy_set_online'), linkAddr);
+	case packetId.redundancySetOnline:
+		packet = new Packet(new Header(packetType.request, id, groupId.configuration), configCode('redundancy_set_online'), linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 1000;
 		break;
 
-	case idRedundancySetEnable:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('redundancy_enable')),[1]), linkAddr);
+	case packetId.redundancySetEnable:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('redundancy_enable')),[1]), linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 1000;
 		break;
 
-	case idRedundancySetDisable:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('redundancy_enable')),[0]), linkAddr);
+	case packetId.redundancySetDisable:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('redundancy_enable')),[0]), linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 1000;
 		break;
 
-	case idRedundancySetCold:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('redundancy_mode')),[0]), linkAddr);
+	case packetId.redundancySetCold:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('redundancy_mode')),[0]), linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 1000;
 		break;
 
-	case idRedundancySetHot:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('redundancy_mode')),[1]), linkAddr);
+	case packetId.redundancySetHot:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('redundancy_mode')),[1]), linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 1000;
 		break;
 
-	case idRedundancySetNameA:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('redundancy_name')),[1]), linkAddr);
+	case packetId.redundancySetNameA:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('redundancy_name')),[1]), linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 1000;
 		break;
 
-	case idRedundancySetNameB:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('redundancy_name')),[2]), linkAddr);
+	case packetId.redundancySetNameB:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('redundancy_name')),[2]), linkAddr);
 		need.function = 'fRedundancy';
 		need.timeout = 1000;
 		break;
 
-	case idIRPC:
-		packet = new Packet(new Header(packetTypeRequest, id, groupId('redundancy')), undefined, linkAddr);
+	case packetId.irpc:
+		packet = new Packet(new Header(packetType.request, id, groupId.redundancy), undefined, linkAddr);
 		need.function = 'f_IRPC';
 		need.timeout = 2000;
 		break;
 
-	case idIRPCsalectSwtchHvr:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('redundancy')), new Payload(new Parameter(irpcCode('Switchover Mode')), [value]), linkAddr);
+	case packetId.irpcSalectSwtchHvr:
+		packet = new Packet(new Header(packetType.command, id, groupId.redundancy), new Payload(new Parameter(irpcCode('Switchover Mode')), [value]), linkAddr);
 		need.function = 'f_IRPC';
 		need.timeout = 500;
 		break;
 
-	case idIRPCstandBy:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('redundancy')), new Payload(new Parameter(irpcCode('Standby Mode')), [value]), linkAddr);
+	case packetId.irpcStandBy:
+		packet = new Packet(new Header(packetType.command, id, groupId.redundancy), new Payload(new Parameter(irpcCode('Standby Mode')), [value]), linkAddr);
 		need.function = 'f_IRPC';
 		need.timeout = 500;
 		break;
 
-	case idIRPCdefault:
-	case idIRPChoverA:
-	case idIRPChoverB:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('redundancy')), new Payload(new Parameter(irpcCode('Switchover')), intToBytes(value)), linkAddr);
+	case packetId.irpcDefault:
+	case packetId.irpcHoverA:
+	case packetId.irpcHoverB:
+		packet = new Packet(new Header(packetType.command, id, groupId.redundancy), new Payload(new Parameter(irpcCode('Switchover')), intToBytes(value)), linkAddr);
 		need.function = 'f_IRPC';
 		need.timeout = 500;
 		break;
 
-	case idControlAll: // Control All
+	case packetId.configAll: // Control All
 		{
 			const payloads = [
 				new Payload(new Parameter(configCode('gain'))),
@@ -249,73 +197,69 @@ function getWhatNeed(id, linkAddr, value){
 				new Payload(new Parameter(configCode('frequency'))),
 				new Payload(new Parameter(configCode('frequency_range')))					,
 				new Payload(new Parameter(configCode('mute')))];
-			packet = new Packet(new Header(packetTypeRequest, id, groupId('configuration')), payloads, linkAddr);
-			need.function = 'fConfig';
-			need.timeout = 3000;
+			packet = new Packet(new Header(packetType.request, id, groupId.configuration), payloads, linkAddr);
 		}
 		break;
 
-	case idAtenuationSet:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('attenuation')), shortToBytesR(value)), linkAddr);
-		need.function = 'fConfig';
-		need.timeout = 1000;
+	case packetId.atenuationSet:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('attenuation')), shortToBytesR(value)), linkAddr);
 		break;
 
-	case idGainSet:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('gain')),shortToBytesR(value)), linkAddr);
-		need.function = 'fConfig';
-		need.timeout = 1000;
+	case packetId.gainSet:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('gain')),shortToBytesR(value)), linkAddr);
 		break;
 
-	case idFrequencySet:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('frequency')),longToBytes(value)), linkAddr);
-		need.function = 'fConfig';
-		need.timeout = 1000;
+	case packetId.frequencySet:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('frequency')),longToBytes(value)), linkAddr);
 		break;
 
-	case idMuteControl:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('configuration')), new Payload(new Parameter(configCode('mute')),[value]), linkAddr);
-		need.function = 'fConfig';
-		need.timeout = 1000;
+	case packetId.muteControl:
+		packet = new Packet(new Header(packetType.command, id, groupId.configuration), new Payload(new Parameter(configCode('mute')),[value]), linkAddr);
 		break;
 
-	case idComAll:
+	case packetId.comAll:
 		{
 			const length = value.length
 			const payloads = [];
 			for(let i=0; i<length; ++i)
 				payloads.push(new Payload(value[i]))
-			packet = new Packet(new Header(packetTypeRequest, id, groupId('protocol')), payloads, linkAddr);
+			packet = new Packet(new Header(packetType.request, id, groupId.protocol), payloads, linkAddr);
 			need.function = 'fCom';
 			need.timeout = 3000;
 		}
 		break;
 
-	case idSetAddress:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('protocol')), new Payload(new Parameter(protocolCode('address')),value), linkAddr);
+	case packetId.comSetAddress :
+		packet = new Packet(new Header(packetType.command, id, groupId.protocol), new Payload(new Parameter(protocolCode('address')),value), linkAddr);
 		need.function = 'fCom';
 		need.timeout = 1000;
 		break;
 
-	case idSetBaudrate:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('protocol')), new Payload(new Parameter(protocolCode('baudrate')),value), linkAddr);
+	case packetId.comSetBaudrate :
+		packet = new Packet(new Header(packetType.command, id, groupId.protocol), new Payload(new Parameter(protocolCode('baudrate')),value), linkAddr);
 		need.function = 'fCom';
 		need.timeout = 10;
 		break;
 
-	case idSetRetransmit:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('protocol')), new Payload(new Parameter(protocolCode('retransmit')),value), linkAddr);
+	case packetId.conSetRetransmit:
+		packet = new Packet(new Header(packetType.command, id, groupId.protocol), new Payload(new Parameter(protocolCode('retransmit')),value), linkAddr);
 		need.function = 'fCom';
 		need.timeout = 1000;
 		break;
 
-	case idSetStandard:
-		packet = new Packet(new Header(packetTypeCommand, id, groupId('protocol')), new Payload(new Parameter(protocolCode('tranceiver_mode')),value), linkAddr);
+	case packetId.comSetStandard:
+		packet = new Packet(new Header(packetType.command, id, groupId.protocol), new Payload(new Parameter(protocolCode('tranceiver_mode')),value), linkAddr);
 		need.function = 'fCom';
 		need.timeout = 1000;
 		break;
 
-	case 'noAction':
+	case packetId.module:
+		packet = new Packet(new Header(packetType.request, id, groupId.control), undefined, linkAddr);
+		need.function = 'fCom';
+		need.timeout = 1000;
+		break;
+
+	case packetId.noAction:
 		break
 
 	default:

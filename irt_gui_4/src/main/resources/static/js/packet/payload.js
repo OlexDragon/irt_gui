@@ -1,5 +1,5 @@
 import Parameter from'./parameter.js'
-import {parser} from'./packet-properties/parameter-code.js'
+//import {parser} from'./packet-properties/parameter-code.js'
 
 export default class Payload{
 
@@ -30,22 +30,22 @@ export default class Payload{
 	}
 
 	toString(packetGroupId){
-		let str;
-		if(!this.data)
-			str = '';
-		else if(packetGroupId){
-			const f_parser = parser(packetGroupId);
-			if(f_parser){
-				const f_p =f_parser(this.parameter.code);
-				if(f_p)
-					str = f_p(this.data);
-				else
-					str = this.data;
-			}else
-				str = this.data;
-		}else
-			str = this.data;
-		return 'Payload:{Parameter:{' + this.parameter.toString(packetGroupId) + '} ' + (str ? 'value: ' + str : '') + '}'
+//		let str;
+//		if(!this.data)
+//			str = '';
+//		else if(packetGroupId){
+//			const f_parser = parser(packetGroupId);
+//			if(f_parser){
+//				const f_p =f_parser(this.parameter.code);
+//				if(f_p)
+//					str = f_p(this.data);
+//				else
+//					str = this.data;
+//			}else
+//				str = this.data;
+//		}else
+//			str = this.data;
+//		return 'Payload:{Parameter:{' + this.parameter.toString(packetGroupId) + '} ' + (str ? 'value: ' + str : '') + '}'
 	}
 
 //	getData(packetGroupId){

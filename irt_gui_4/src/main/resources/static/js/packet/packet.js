@@ -5,16 +5,19 @@ import Parameter from './parameter.js'
 import {code} from './packet-properties/packet-type.js'
 import {checksumToBytes} from './service/checksum.js'
 
+export {LinkHeader, Header, Payload, Parameter}
+
 // Default InfoPacket
 export default class Packet{
 	// Default constuctor converter INFO Packet
 	constructor(header, payloads, unitAddr){
 		// From bytes
 		if(Array.isArray(header)){
-			if(header[0]==FLAG_SEQUENCE)
-				header.splice(0,1)
-			const flagseqIndex = header.indexOf(FLAG_SEQUENCE);
-			const bytes = byteStuffing(flagseqIndex<0 ? header : header.splice(0, flagseqIndex));
+			const array = [...header];
+			if(array[0]==FLAG_SEQUENCE)
+				array.splice(0,1)
+			const flagseqIndex = array.indexOf(FLAG_SEQUENCE);
+			const bytes = byteStuffing(flagseqIndex<0 ? array : array.splice(0, flagseqIndex));
 //			console.log(bytes);
 			const packetArray = bytes.splice(0,bytes.length-2);
 			const chcksm = checksumToBytes(packetArray);
@@ -31,7 +34,7 @@ export default class Packet{
 					console.error('Byte parsing error.');
 			}else{
 				this.header = new Header(code('error'), packetArray[2] * 256 + packetArray[1], 'The packet checksum is incorrect');
-				console.warn('The packet checksum is incorrect; received: ' + header[header.length-2] +',' + header[header.length-1] + '; calculated: ' + chcksm + '; bytes: ' + header);
+				console.warn('The packet checksum is incorrect; received: ' + array[array.length-2] +',' + array[array.length-1] + '; calculated: ' + chcksm + '; bytes: ' + array);
 			}
 //			console.log(this);
 			return;
@@ -47,7 +50,7 @@ export default class Packet{
 			else
 				this.payloads = [payloads];
 
-		if(unitAddr!=undefined)
+		if(unitAddr)
 			this.linkHeader = new LinkHeader(unitAddr);
 
 //		console.log(this);

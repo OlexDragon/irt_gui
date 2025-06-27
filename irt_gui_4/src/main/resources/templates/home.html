@@ -13,7 +13,7 @@
 <body>
 <div class="container-fluid">
 	<div class="row g-1">
-		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12">
+		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:fragment="serial-port">
 			<div class="row row-cols-1">
 				<div class="col">
 					<img src="../static/images/logo.png" th:src="@{/images/logo.png}" class="img-fluid" alt="Logo"/>
@@ -32,30 +32,31 @@
 					<label for="baudrate">Baudrate</label>
 				</div>
 				<div class="col mb-3">
-					<input id="btnStart" type="checkbox" class="btn-check" autocomplete="off" disabled="disabled">
+					<input id="btnStart" type="checkbox" class="btn-check" disabled="disabled"/>
 					<label for="btnStart" class="btn btn-outline-primary form-control">Start</label>
 				</div>
 				<div class="col form-floating mb-3">
-					<input id="unitAddress" type="number" class="form-control" value="254">
+					<input id="unitAddress" type="number" class="form-control" value="254"/>
 					<label for="unitAddress">Unit Address</label>
 				</div>
 				<div class="col mb-3">
 					<div id="summaryAlarmCard" class="card">
 						<div class="card-body">
-							<h6 id="summaryAlarmTitle" class="card-title text-center p-2">Alarms</h6>
+							<h6 id="summaryAlarmTitle" class="card-title text-center p-2"></h6>
 						</div>
 					</div>
 				</div>
 				<div id="conections" class="col text-center text-primary-emphasis fs-5 mb-3">
 				</div>
 				<div class="col mb-3">
-					<input id="btnShowErrors" type="checkbox" class="btn-check" autocomplete="off">
+					<input id="btnShowErrors" type="checkbox" class="btn-check"/>
 					<label for="btnShowErrors" class="btn btn-outline-danger opacity-75 form-control">App Errors</label>
 				</div>
 				<div class="col"><button id="appExit" class="btn btn-outline-dark form-control">Exit</button></div>
 			</div>
 		</div>
 		<div class="col">
+			<div id="unitsSelect" class="row"></div>
 			<div class="row">
 				<div class="col-lg-6 col-12 mt-2">
 					<div class="card infoCard">
@@ -134,13 +135,12 @@
     		</div>
   		</div>
 </div>
-<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3">
+<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
 </div>
 
 	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
 	<script src="/webjars/js-cookie/3.0.1/js.cookie.js"></script>
 	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
-	<script src="../static/js/home.js" th:src="@{/js/home.js}"></script>
 	<script type="module" src="../static/js/worker.js" th:src="@{/js/worker.js}"></script>
 
 </body>

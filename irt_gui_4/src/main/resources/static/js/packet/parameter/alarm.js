@@ -2,8 +2,28 @@ import Payload from '../payload.js'
 import Parameter from '../parameter.js'
 import {parseToAlarmStatus, parseToAlarmString, parseToShortArray, shortToBytes} from '../service/converter.js'
 
-const alarms = Object.freeze([ 'none'	, 'number of alarms', 'IDs'				, 'summary status'	, 'config'	, 'status'			, 'description'	, 'name']);
-const parsers = Object.freeze([ undefined, bytes=>bytes[0]	, parseToShortArray	, parseToAlarmStatus, undefined	, parseToAlarmStatus, parseToAlarmString, parseToAlarmString]);
+const alarms = Object.freeze([
+
+	 'none',
+	 'number of alarms',
+	 'IDs',
+	 'summary status',
+	 'config',
+	 'status',
+	 'description',
+	 'name']);
+
+const parsers = Object.freeze([
+
+	 ,
+	  bytes=>bytes[0],
+	  parseToShortArray,
+	  parseToAlarmStatus,
+	  ,
+	  parseToAlarmStatus,
+	  parseToAlarmString,
+	  parseToAlarmString ]);
+
 const alarmDescription = Object.freeze([
 	 'none - Not Implemented',
 	 'number of alarms',
@@ -13,6 +33,13 @@ const alarmDescription = Object.freeze([
 	  'status - Alarm status.',
 	  'description',
 	  'name']);
+
+export const alarmCode = alarms.reduce((a,k,i)=>{
+
+	  		a[k] = i;
+	  		return a;
+	  	}, []
+	  );
 
 export default class Alarm{
 	constructor(pl){

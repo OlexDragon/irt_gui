@@ -1,6 +1,8 @@
 import {parseToInt, parseToIntArray} from '../service/converter.js'
 
 const redundancy = ['NONE', 'Switchover Mode', 'Standby Mode', 'Status', 'Switchover']
+const all = redundancy.map((_,i)=>i).slice(1);
+export default {all:{code: all}};
 
 export const switchoverMode = code(redundancy[1]);
 export const standbyMode	 = code(redundancy[2]);

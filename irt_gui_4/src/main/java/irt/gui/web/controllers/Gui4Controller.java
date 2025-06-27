@@ -14,11 +14,17 @@ public class Gui4Controller {
 	@Value("${info.app.version}")
 	private String version;
 
-
 	@GetMapping
     String home(Model model) {
 		model.addAttribute("version", version);
 		model.addAttribute("baudrates", Baudrate.values());
 		return "home";
+	}
+
+	@GetMapping("regs")
+    String regs(Model model) {
+		model.addAttribute("version", version);
+		model.addAttribute("baudrates", Baudrate.values());
+		return "regs";
 	}
 }
