@@ -1,6 +1,6 @@
 import * as serialPort from './serial-port.js'
 import f_deviceType from './packet/service/device-type.js'
-import { onTypeChange } from './panel-info.js'
+import { type as unitType, onTypeChange } from './panel-info.js'
 import ControlLoader from './helper/config-loader.js'
 
 const $card = $('div.controlCard');
@@ -13,6 +13,7 @@ let controller;
 let loader = new ControlLoader();
 let interval;
 let buisy;
+const DELAY = 5000;
 export function start(){
 	if(interval || buisy)
 		return;
@@ -20,9 +21,13 @@ export function start(){
 	buisy = true;;
 	action.buisy = false;
 	if(action.packetId){
-		interval = setInterval(run, 3000);
-	}else
+		clearInterval(interval) ;
+		interval = setInterval(run, DELAY);
+	}else{
+		if(unitType)
+			typeChange(unitType);
 		onTypeChange(typeChange);
+	}
 }
 
 function typeChange(type){
@@ -47,7 +52,8 @@ function onControllerLoaded(Controller){
 	buisy = false;
 
 	run();
-	interval = setInterval(run, 3000);
+	clearInterval(interval) ;
+	interval = setInterval(run, DELAY);
 }
 
 function run(){
@@ -69,8 +75,6 @@ function run(){
 	}
 	serialPort.postObject($card, action);
 }
-
-let type;
 
 export function stop(){
 	clearInterval(interval) ;
@@ -95,4 +99,3 @@ function onChange(packetId, value, parameterCode){
 export function update(object){
 	controller.update = object;
 }
-export {type}

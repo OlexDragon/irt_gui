@@ -10,6 +10,10 @@ export default class ModuleLoader{
 		}
 		return new Promise((resolve)=>resolve(this.#script));
 	}
+
+	get script(){
+		return this.#script;
+	}
 }
 
 //new ScriptLoader().load('/controller/controller-irpc.js').then(c=>console.log(c));

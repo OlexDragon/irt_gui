@@ -1,5 +1,8 @@
 package irt.gui.web.controllers;
 
+import java.util.prefs.Preferences;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,11 +14,25 @@ import irt.gui.web.beans.Baudrate;
 public class Gui4Controller {
 //	private final static Logger logger = LogManager.getLogger();
 
+	@Autowired
+	private Preferences prefs;
+
 	@Value("${info.app.version}")
 	private String version;
 
 	@GetMapping
     String home(Model model) {
+
+		final String prefVertion = prefs.get("version", "");
+		
+		if(prefVertion.isEmpty())
+			prefs.put("version", version);
+
+		else if(!prefVertion.equals(version)) {
+			prefs.put("vertion", version);
+			model.addAttribute("cleareCash", true);
+		}
+
 		model.addAttribute("version", version);
 		model.addAttribute("baudrates", Baudrate.values());
 		return "home";

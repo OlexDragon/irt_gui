@@ -1,6 +1,6 @@
 import * as serialPort from './serial-port.js'
 import f_deviceType from './packet/service/device-type.js'
-import { onTypeChange } from './panel-info.js'
+import { type, onTypeChange } from './panel-info.js'
 import MeasurementLoader from './helper/measurement-loader.js'
 import groupId from './packet/packet-properties/group-id.js'
 
@@ -21,9 +21,13 @@ export function start(){
 	buisy = true;
 	action.buisy = false;
 	if(action.packetId){
+		clearInterval(interval);
 		interval = setInterval(run, 3000);
-	}else
+	}else{
+		 if(type)
+			typeChange(type);
 		onTypeChange(typeChange);
+	}
 }
 
 export function stop(){
@@ -50,6 +54,7 @@ function onControllerLoaded(Controller){
 	buisy = false;
 
 	run();
+	clearInterval(interval);
 	interval = setInterval(run, 3000);
 }
 

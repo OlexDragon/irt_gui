@@ -24,6 +24,7 @@ let delay = 5000;
 const map = new Map();
 
 export function start(){
+
 	if(interval)
 		return;
 
@@ -39,6 +40,7 @@ export function start(){
 		map.clear();
 	}
 	run();
+	clearInterval(interval) ;
 	interval = setInterval(run, delay);
 }
 

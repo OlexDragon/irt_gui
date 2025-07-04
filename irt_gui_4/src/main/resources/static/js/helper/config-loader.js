@@ -47,14 +47,14 @@ export default class MeasurementLoader{
 		case 'CONVERTER':
 			this.#getAll = this.#forCONVERTER;
 			this.#packetId = packetId.configAll;
-			loadC = this.#controllerLoader.load('./controller/controller-conf-buc.js');
+			loadC = this.#controllerLoader.load('./controller/controller-config-fcm.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/control-fcm.js');
 			break;
 
 		default:
 			this.#getAll = this.#forBUC;
 			this.#packetId = packetId.configAll;
-			loadC = this.#controllerLoader.load('./controller/controller-conf-buc.js');
+			loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/control-buc.js');
 		}
 
@@ -95,11 +95,12 @@ export default class MeasurementLoader{
 	}
 
 	#forCONVERTER() {
-		this.#toRead = undefined;
+		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute} = this.#parameter.default;
+		this.#toRead = {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute};
 	}
 
 	#forBUC() {
-		const {Gain, gainRange, Attenuation, attenuationRange, Frequency, frequencyRange, loSet, LO, Mute} = this.#parameter.default;
+		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, loSet, LO, Mute} = this.#parameter.default;
 		this.#toRead = {gainRange, attenuationRange, frequencyRange, LO, Gain, Attenuation, Frequency, loSet, Mute};
 	}
 }

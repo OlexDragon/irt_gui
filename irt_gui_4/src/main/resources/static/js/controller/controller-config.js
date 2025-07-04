@@ -3,12 +3,13 @@ import ControllerValue from '../classes/controller-value.js'
 import packetId from '../packet/packet-properties/packet-id.js'
 import groupId from '../packet/packet-properties/group-id.js'
 
-export default class ControllerMeasurement extends Controller{
+export default class ControllerConfig extends Controller{
 	static url = '/fragment/control/buc';
 
 	#attenuationController;
 	#gainController;
 	#freqController;
+	#freqTab;
 	#$btnMute;
 	#$loSelect;
 	#toRead;
@@ -17,9 +18,10 @@ export default class ControllerMeasurement extends Controller{
 	constructor($card) {
 		super($card);
 		const $body = $card.find('div.control');
-		$body.load(ControllerMeasurement.url,()=>{
+		$body.load(ControllerConfig.url,()=>{
 
 			const $attenuationTab = $body.click(this.#tabClick.bind(this)).find('#attenuationTab');
+			this.#freqTab = $body.find('#freqTab');
 
 			const onValueChange = this.#onValueChange.bind(this);
 			this.#attenuationController = new ControllerValue('attenuation', $body.find('div.attenuation'));
@@ -59,8 +61,8 @@ export default class ControllerMeasurement extends Controller{
 	 * @param {Object[]} pls
 	 */
 	set update(pls){
-		if(!this.#gainController){
-			console.log('This controller is not ready yet.');
+		if(!this.#freqTab){
+			console.log('This controller is not ready yet.')
 			return;
 		}
 
@@ -101,9 +103,13 @@ export default class ControllerMeasurement extends Controller{
 
 			case pId.frequencyRange.code:
 				delete this.#toRead.frequencyRange;
-				this.#freqController.min = Number(val[0]/1000000n);
-				this.#freqController.max = Number(val[1]/1000000n);
-				this.#freqController.step = 0.000001;
+				if(val.filter(v=>v).length){
+					this.#freqTab.removeClass('visually-hidden');
+					this._frequencyRange(val.map(v=>Number(v/1000000n)));
+				}else{
+					delete this.#toRead.Frequency;
+					this.#freqTab.addClass('visually-hidden');
+				}
 				break;
 
 			case pId.Frequency.code:
@@ -168,6 +174,25 @@ export default class ControllerMeasurement extends Controller{
 	set change(e){
 		this.#onChangeEvents.push(e);
 	}
+
+	_frequencyRange(val){
+		this._min(val[0]);
+		this._max(val[1]);
+		this._step(0.000001);
+	}
+
+	_min(min){
+		this.#freqController.min = min;
+	}
+
+	_max(max){
+		this.#freqController.max = max;
+	}
+
+	_step(step){
+	this.#freqController.step(step);
+	}
+
 	#tabClick({target:{id}}) {
 		switch (id) {
 
@@ -234,7 +259,8 @@ export default class ControllerMeasurement extends Controller{
 		this.#sendChange(packetId.muteSet, toSend, this.parameter.default.Mute.code);
 	}
 	#onChangeLoSelect({currentTarget:{value: toSend}}){
-	this.#sendChange(packetId.loSet, toSend, this.parameter.default.loSet.code);
+		this.#sendChange(packetId.loSet, toSend, this.parameter.default.loSet.code);
+		Object.assign(this.#toRead, {frequencyRange: this._parameter.default.frequencyRange});
 	}
 
 	#sendChange(){

@@ -18,6 +18,7 @@ export function start(){
 	oldValue = undefined;
 	action.buisy = false;
 	run();
+	clearInterval(interval);
 	interval = setInterval(run, 2000);
 }
 
@@ -54,7 +55,7 @@ function run(){
 	serialPort.postObject($card, action);
 }
 
-function removeCalsses(){
+function removeClasses(){
 	const classes = $title.attr('class').split(' ').filter(c=>c.startsWith('text-bg-')).join(' ');
 	$title.removeClass(classes);
 }
@@ -76,7 +77,7 @@ function setStatus(value){
 		if(oldValue)
 			$title.removeClass(oldValue.boorstrapClass);
 		else
-			removeCalsses();
+			removeClasses();
 
 		value.boorstrapClass && $title.addClass(value.boorstrapClass);
 		$title.text(value.severities);

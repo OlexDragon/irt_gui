@@ -43,7 +43,7 @@ export default class MeasurementLoader{
 
 		case 'CONVERTER':
 			this.#packetId = packetId.measurement;
-			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
+			loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.js');
 			break;
 

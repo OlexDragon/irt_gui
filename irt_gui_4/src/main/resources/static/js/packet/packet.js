@@ -2,7 +2,7 @@ import Header from './header.js'
 import Payload from './payload.js'
 import LinkHeader from './link-header.js'
 import Parameter from './parameter.js'
-import {code} from './packet-properties/packet-type.js'
+import packetType from './packet-properties/packet-type.js'
 import {checksumToBytes} from './service/checksum.js'
 
 export {LinkHeader, Header, Payload, Parameter}
@@ -33,14 +33,14 @@ export default class Packet{
 				else if(packetArray.length)
 					console.error('Byte parsing error.');
 			}else{
-				this.header = new Header(code('error'), packetArray[2] * 256 + packetArray[1], 'The packet checksum is incorrect');
+				this.header = new Header(packetType.error, packetArray[2] * 256 + packetArray[1], 'The packet checksum is incorrect');
 				console.warn('The packet checksum is incorrect; received: ' + array[array.length-2] +',' + array[array.length-1] + '; calculated: ' + chcksm + '; bytes: ' + array);
 			}
 //			console.log(this);
 			return;
 		}
 		this.header = (header == undefined ? new Header() : header);
-		if(this.header.type!=code('acknowledgement'))
+		if(this.header.type!=packetType.acknowledgement)
 			if(!payloads)
 				this.payloads = [new Payload()];
 			else if(typeof payloads =='number')
@@ -56,7 +56,7 @@ export default class Packet{
 //		console.log(this);
 	}
 	getAcknowledgement(){
-		const header = new Header(code('acknowledgement'), this.header.packetId);
+		const header = new Header(packetType.acknowledgement, this.header.packetId);
 		return new Packet(header, undefined, this.linkHeader);
 	}
 	toBytesAcknowledgement(){

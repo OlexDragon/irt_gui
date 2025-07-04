@@ -15,19 +15,19 @@ packetError.timedout				 = 11;
 packetError.noCommunication			 = 20;
 
 const PACKET_ERROR = {};
-PACKET_ERROR[packetError.noError]		 = 'No Error';
-PACKET_ERROR[packetError.internalError]	 = 'Packet ERROR:\n Internal System Error';
-PACKET_ERROR[packetError.WriteError]	 = 'Packet ERROR:\n Write Error';
-PACKET_ERROR[packetError.functionNotImplemented] = 'Packet ERROR:\n Function not implemented';
-PACKET_ERROR[packetError.notInRange]	 = 'Packet ERROR:\n Value outside of valid range';
-PACKET_ERROR[packetError.canNotGenerate] = 'Packet ERROR:\n Requested information can’t be generated';
-PACKET_ERROR[packetError.canNotExecute]	 = 'Packet ERROR:\n Command can’t be executed';
-PACKET_ERROR[packetError.InvalidFormat]	 = 'Packet ERROR:\n Invalid data format';
-PACKET_ERROR[packetError.InvalidValue]	 = 'Packet ERROR:\n Invalid value';
-PACKET_ERROR[packetError.noMemory]		 = 'Packet ERROR:\n Not enough memory';
-PACKET_ERROR[packetError.notFoundr]		 = 'Packet ERROR:\n Requested element not foundr';
-PACKET_ERROR[packetError.timedout]		 = 'Packet ERROR:\n Timed out';
-PACKET_ERROR[packetError.noCommunication] = 'Packet ERROR:\n Communication problem';
+PACKET_ERROR[packetError.noError]		 = `No Error (${packetError.noError})`;
+PACKET_ERROR[packetError.internalError]	 = `Packet ERROR (${packetError.internalError}):\n Internal System Error`;
+PACKET_ERROR[packetError.WriteError]	 = `Packet ERROR (${packetError.WriteError}) :\n Write Error`;
+PACKET_ERROR[packetError.functionNotImplemented] = `Packet ERROR (${packetError.functionNotImplemented}):\n Function not implemented`;
+PACKET_ERROR[packetError.notInRange]	 = `Packet ERROR (${packetError.notInRange}):\n Value outside of valid range`;
+PACKET_ERROR[packetError.canNotGenerate] = `Packet ERROR (${packetError.canNotGenerate}):\n Requested information can’t be generated`;
+PACKET_ERROR[packetError.canNotExecute]	 = `Packet ERROR (${packetError.canNotExecute}):\n Command can’t be executed`;
+PACKET_ERROR[packetError.InvalidFormat]	 = `Packet ERROR (${packetError.InvalidFormat}):\n Invalid data format`;
+PACKET_ERROR[packetError.InvalidValue]	 = `Packet ERROR (${packetError.InvalidValue}):\n Invalid value`;
+PACKET_ERROR[packetError.noMemory]		 = `Packet ERROR (${packetError.noMemory}):\n Not enough memory`;
+PACKET_ERROR[packetError.notFoundr]		 = `Packet ERROR (${packetError.notFoundr}):\n Requested element not foundr`;
+PACKET_ERROR[packetError.timedout]		 = `Packet ERROR (${packetError.timedout}):\n Timed out`;
+PACKET_ERROR[packetError.noCommunication] = `Packet ERROR (${packetError.noCommunication}):\n Communication problem`;
 
 function packetErrorCode(name){
 	return packetError[name];

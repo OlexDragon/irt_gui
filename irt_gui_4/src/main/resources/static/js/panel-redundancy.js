@@ -32,13 +32,12 @@ export function start(){
 		$btnSetOnline = $('#btnSetOnline').click(onSendCommand);
 		$redundancyStatus = $('#redundancyStatus');
 		setTimeout(sendRequest, 100);
+		clearInterval(interval);
 		interval = setInterval(run, delay);
 	});
 }
 
 export function stop(){
-	if(!interval)
-		return;
 	clearInterval(interval) ;
 	interval = undefined;
 }
@@ -121,14 +120,6 @@ function sendRequest(packet){
 }
 
 action.f_Redundancy = function(packet){
-
-	if(packet.header.error){
-		console.warn(packet.toString());
-		blink($card, 'connection-wrong');
-		if(showError)
-			serialPort.showToast("Packet Error", packet.toString());
-		return;
-	}
 
 	const payloads = packet.payloads;
 

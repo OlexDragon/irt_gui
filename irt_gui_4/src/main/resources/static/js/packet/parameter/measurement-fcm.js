@@ -30,15 +30,15 @@ measurement.Temperature.parser = bytes=>parseToInt(bytes)/10 + ' °C';
 
 measurement['5.5V'] = {};
 measurement['5.5V'].code			 = 6;
-measurement['5.5V'].parser = bytes=>parseToInt(bytes)/1000;
+measurement['5.5V'].parser = bytes=>parseToInt(bytes)/1000 + ' V';
 
 measurement['13.2V'] = {};
 measurement['13.2V'].code			 = 7;
-measurement['13.2V'].parser = bytes=>parseToInt(bytes)/1000;
+measurement['13.2V'].parser = bytes=>parseToInt(bytes)/1000 + ' V';
 
 measurement['-13.2V'] = {};
 measurement['-13.2V'].code		 = 8;
-measurement['-13.2V'].parser = bytes=>parseToInt(bytes)/1000;
+measurement['-13.2V'].parser = bytes=>parseToInt(bytes)/1000 + ' V';
 
 measurement.Current = {};
 measurement.Current.code			 = 9;
@@ -54,11 +54,17 @@ measurement['CPU Temperature'].parser = bytes=>parseToInt(bytes)/10 + ' °C';
 
 measurement.Attenuation = {};
 measurement.Attenuation.code		 = 20;
-measurement.Attenuation.parser = data=>data;
+measurement.Attenuation.parser = bytes=>parseToInt(bytes)/10 + ' dB';
 
 measurement.Reference = {};
 measurement.Reference.code	 = 21;
-measurement.Reference.parser = data=>data
+measurement.Reference.parser = bytes=>bytes[0]
+
+measurement.all = {}
+measurement.all.code				 = 255;
+
+Object.freeze(measurement);
+export default measurement;
 
 const names = Object.keys(measurement).reduce((a,key)=>{a[measurement[key].code] = key; return a;}, []);
 

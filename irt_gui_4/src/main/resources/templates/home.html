@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" translate="no">
 
 <head>
@@ -56,7 +56,7 @@
 			</div>
 		</div>
 		<div class="col">
-			<div id="unitsSelect" class="row"></div>
+			<div id="unitsSelect" class="row border p-2 m-2"></div>
 			<div class="row">
 				<div class="col-lg-6 col-12 mt-2">
 					<div class="card infoCard">
@@ -141,6 +141,28 @@
 	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
 	<script src="/webjars/js-cookie/3.0.1/js.cookie.js"></script>
 	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
+	<script th:if="${cleareCash}">
+		const $m =
+		$('<div>', {class: 'modal fade', tabindex: -1})
+		.append(
+				$('<div>', {class: 'modal-dialog'})
+				.append(
+						$('<div>', {class: 'modal-content'})
+						.append(
+								$('<div>', {class: 'modal-header'})
+								.append($('<h5>', {class: 'modal-title ml-3 text-primary', text: 'The GUI version differs from the previous one'}))
+								.append($('<button>', {type: 'button', class: 'btn-close', 'data-bs-dismiss': 'modal', 'aria-label': 'Close'}))
+						)
+						.append(
+								$('<div>', {clsaa: 'modal-body'})
+								.append($('<div>', {class: 'container'})
+										.append($('<p>', {class: 'text-center m-3', html: 'If you are having problems with the GUI,<br>try clearing your browser cache.'}))
+								)
+						)
+				)
+		);
+		new bootstrap.Modal($m).show();
+	</script>
 	<script type="module" src="../static/js/worker.js" th:src="@{/js/worker.js}"></script>
 
 </body>

@@ -55,8 +55,10 @@ export function start(){
 //		networkControl.onChange(onChange);
 //		networkControl.onNotSaved(onNotSaved);
 		run();
+
+		clearInterval(interval) ;
+		interval = setInterval(run, delay);
 	});
-	interval = setInterval(run, delay);
 }
 export function stop(){
 	clearInterval(interval) ;

@@ -41,17 +41,6 @@ async function getRest(action){
 
 	switch(action.toSend.id){
 
-	case packetId.deviceInfo:
-	case packetId.measurement:
-	case packetId.alarmSummary: 
-	case packetId.alarmIDs:
-	case packetId.network: // get network
-		{
-			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), new Payload(new Parameter(action.data.parameterCode)), action.toSend.unitAddr);
-			toSend.bytes = packet.toSend();
-		}
-		break;
-
 	case packetId.measurementIRPC:
 	case packetId.irpc:
 		{
@@ -60,90 +49,23 @@ async function getRest(action){
 		}
 		break;
 
-	// All modules
-	case packetId.module:
+	case packetId.deviceInfo:
+	case packetId.measurement:
+	case packetId.alarmSummary: 
+	case packetId.alarmIDs:
+	case packetId.network: // get network
+	case packetId.module:	// All modules
 		{
-			const packet = new Packet(new Header(packetType.request,  action.toSend.id, groupId.control), new Payload(new Parameter(action.value)), action.toSend.unitAddr);
+			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), new Payload(action.data.parameterCode), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
-			toSend.timeout = 1000;
 		}
 		break;
 
-	case packetId.moduleSet:
-		{
-			const packet =  await import('./packet/parameter/config-buc.js')
-
-				.then(m=>m.default)
-				.then(parameter=>new Packet(new Header(packetType.command,  action.toSend.id, groupId.control), new Payload(new Parameter(parameter.activeModule), [action.value]), action.toSend.unitAddr));
-
-			toSend.bytes = packet.toSend();
-			toSend.timeout = 1000;
-		}
-		break;
 
 	case packetId.atenuationSet:
 	case packetId.gainSet:
 		{
-			const packet = new Packet(new Header(packetType.command,  action.toSend.id, action.groupId), new Payload(new Parameter(action.data.parameterCode),shortToBytesR(action.data.value)), action.toSend.unitAddr);
-			toSend.bytes = packet.toSend();
-		}
-		break;
-
-	case packetId.frequencySet:
-	case packetId.comSetBaudrate :
-		{
-			const packet = new Packet(new Header(packetType.command,  action.toSend.id, action.groupId), new Payload(new Parameter(action.data.parameterCode), longToBytes(action.data.value)), action.toSend.unitAddr);
-			toSend.bytes = packet.toSend();
-		}
-		break;
-
-	case packetId.register:
-	case packetId.register1:
-	case packetId.register2:
-	case packetId.register3:
-	case packetId.register4:
-		{
-			const packet = new Packet(new Header(packetType.request,  action.toSend.id, groupId.deviceDebug), new Payload(new Parameter(action.value.parameterCode), action.value.bytes), action.toSend.unitAddr);
-			toSend.bytes = packet.toSend();
-			toSend.timeout = 5000;
-			toSend.function = 'f_handler';
-		}
-		break;
-
-	case packetId.registerSet:
-		{
-			const packet = new Packet(new Header(packetType.command,  action.toSend.id, groupId.deviceDebug), new Payload(new Parameter(action.value.parameterCode), action.value.bytes), action.toSend.unitAddr);
-			toSend.bytes = packet.toSend();
-			toSend.timeout = 3000;
-			toSend.function = 'f_handler';
-		}
-		break;
-
-	case packetId.muteSet:
-	case packetId.loSet:
-	case packetId.comSetAddress :
-	case packetId.comSetRetransmit:
-	case packetId.comSetStandard:
-	case packetId.irpcSalectSwtchHvr:
-	case packetId.irpcStandBy:
-		{
-			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(new Parameter(action.data.parameterCode), [action.data.value]), action.toSend.unitAddr);
-			toSend.bytes = packet.toSend();
-		}
-		break;
-
-	case packetId.alarm:
-	case packetId.alarmDescription:
-		{
-			const pls = action.data.value.map(v=>new Payload(new Parameter(action.data.parameterCode), shortToBytesR(v)));
-			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
-			toSend.bytes = packet.toSend();
-		}
-		break;
-
-	case packetId.networkSet: // set network
-		{
-			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(new Parameter(action.data.parameterCode), action.data.value), action.toSend.unitAddr);
+			const packet = new Packet(new Header(packetType.command,  action.toSend.id, action.groupId), new Payload(action.data.parameterCode,shortToBytesR(action.data.value)), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
 		}
 		break;
@@ -152,7 +74,15 @@ async function getRest(action){
 	case packetId.irpcHoverA:
 	case packetId.irpcHoverB:
 		{
-			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(new Parameter(action.data.parameterCode), intToBytes(action.data.value)), action.toSend.unitAddr);
+			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, intToBytes(action.data.value)), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
+
+	case packetId.frequencySet:
+	case packetId.comSetBaudrate :
+		{
+			const packet = new Packet(new Header(packetType.command,  action.toSend.id, action.groupId), new Payload(action.data.parameterCode, longToBytes(action.data.value)), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
 		}
 		break;
@@ -166,11 +96,55 @@ async function getRest(action){
 		}
 		break;
 
-			case packetId.module:
-				packet = new Packet(new Header(packetType.request, id, groupId.control), undefined, linkAddr);
-				need.function = 'fCom';
-				need.timeout = 1000;
-				break;
+	case packetId.alarm:
+	case packetId.alarmDescription:
+		{
+			const pls = action.data.value.map(v=>new Payload(action.data.parameterCode, shortToBytesR(v)));
+			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
+
+	case packetId.register:
+	case packetId.register1:
+	case packetId.register2:
+	case packetId.register3:
+	case packetId.register4:
+		{
+			const packet = new Packet(new Header(packetType.request,  action.toSend.id, action.groupId), new Payload(action.data.parameterCode, action.data.value), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
+
+	case packetId.registerSet:
+		{
+			const packet = new Packet(new Header(packetType.command,  action.toSend.id, groupId.deviceDebug), new Payload(action.value.parameterCode, action.value.bytes), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+			toSend.timeout = 3000;
+			toSend.function = 'f_handler';
+		}
+		break;
+
+	case packetId.muteSet:
+	case packetId.loSet:
+	case packetId.comSetAddress :
+	case packetId.comSetRetransmit:
+	case packetId.comSetStandard:
+	case packetId.irpcSalectSwtchHvr:
+	case packetId.irpcStandBy:
+	case packetId.moduleSet:
+		{
+			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, [action.data.value]), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
+
+	case packetId.networkSet: // set network
+		{
+			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, action.data.value), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
 
 	default:
 		console.warn(f_packetIdToString(action.toSend.id));

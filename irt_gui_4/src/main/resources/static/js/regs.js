@@ -15,6 +15,7 @@ let interval;
 function onStart(doRun){
 	if(doRun){
 		run();
+		clearInterval(interval);
 		interval = setInterval(run, 3000);
 	}else
 		interval = clearInterval(interval);

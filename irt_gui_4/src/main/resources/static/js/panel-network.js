@@ -19,6 +19,7 @@ export function start(){
 		return;
 
 	action.buisy = false;
+
 	if(!networkControl){
 		const name = chooseFragmentName();
 		$body.load(`/fragment/network/${name}`, ()=>{
@@ -29,6 +30,8 @@ export function start(){
 		});
 	}else
 		run();
+
+	clearInterval(interval);
 	interval = setInterval(run, delay);
 }
 export function stop(){

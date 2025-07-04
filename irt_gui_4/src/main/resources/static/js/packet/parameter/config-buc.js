@@ -16,7 +16,7 @@ const configNames = Object.keys(config).reduce((a,k)=>{
 		return a;
 	}, []
 );
-Object.freeze(controlNames);
+Object.freeze(configNames);
 
 export default config;
 

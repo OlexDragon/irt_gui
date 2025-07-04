@@ -1,9 +1,7 @@
 import * as serialPort from './serial-port.js'
 import packetId from './packet/packet-properties/packet-id.js'
 import groupId from './packet/packet-properties/group-id.js'
-import { start as measStart, stop as measStop} from './panel-measurement.js'
-import { start as controlStart, stop as controlStop} from './panel-config.js'
-import { start as userStart, stop as userStop} from './user-panels.js'
+import { change as unitChange} from './panel-units.js'
 
 const $card = $('.infoCard');
 const $body = $('.info');
@@ -16,10 +14,14 @@ let interval;
 const action = {packetId: packetId.deviceInfo, groupId: groupId.deviceInfo, data: {}, function: 'f_Info'};
 
 serialPort.onStart(onStart);
+unitChange(()=>{
+	stop();
+	start();
+})
 
 function onStart(doRun){
 	if(!doRun){
-		stopAll();
+		stop();
 	}
 }
 
@@ -29,13 +31,11 @@ export function start(){
 
 	action.buisy = false;
 	getParameter();
-	run();
-	interval = setInterval(run, 5000);
 }
 
 export function stop(){
-	clearInterval(interval) ;
-	interval = undefined;
+	interval = clearInterval(interval) ;
+	stopAll();
 }
 
 const typeChangeEvents = new Set();
@@ -43,9 +43,6 @@ export function onTypeChange(e){
 	typeChangeEvents.add(e);
 }
 
-function stopAll(){
-	stop(); measStop(); controlStop(); userStop();
-}
 async function getParameter(){
 
 	if(!parameter.parser){
@@ -55,8 +52,10 @@ async function getParameter(){
 		parameter.description = description;
 		parameter.comparator = comparator;
 		action.data.parameterCode = parameter.deviceInfo.all;
-	}else
-		startAll();
+	}
+	run();
+	clearInterval(interval);
+	interval = setInterval(run, 5000);
 }
 
 function run(){
@@ -77,24 +76,7 @@ function run(){
 
 action.f_Info = function(packet){
 
-	if(packet.header.error){
-		console.warn(packet.toString());
-		serialPort.blink($card, 'connection-wrong');
-		if(showError)
-			serialPort.showToast("Packet Error", packet.toString());
-		return;
-	}
-
 	const payloads = packet.payloads;
-
-	if(!payloads?.length){
-		console.log(packet.toString());
-		console.warn('No payloads to parse.');
-		serialPort.blink($card, 'connection-wrong');
-		return;
-	}
-
-	serialPort.blink($card);
 
 	let timeout;
 	if(!map.size)
@@ -102,37 +84,33 @@ action.f_Info = function(packet){
 
 	payloads.forEach(pl=>{
 
-		const $row = map.get(pl.parameter.code);
-		const valId = 'infoVal' + pl.parameter.code;
-		const descrId = 'infoDescr' + pl.parameter.code;
-		const parser = parameter.parser(pl.parameter.code);
+		const parameterCode = pl.parameter.code;
+		const $row = map.get(parameterCode);
+		const valId = 'infoVal' + parameterCode;
+		const descrId = 'infoDescr' + parameterCode;
+		const parser = parameter.parser(parameterCode);
 		if(!parser){
-			console.warn('No parser. (Parameter code: )' + pl.parameter.code)
+			console.warn('No parser. (Parameter code: )' + parameterCode)
 			return;
 		}
+		const val = parser(pl.data);
 		if($row?.length){
-			const val = parser(pl.data);
 			const $val = $row.find('#' + valId);
-			if(pl.parameter.code === parameter.deviceInfo.type){
+			if(parameterCode === parameter.deviceInfo.type){
 				const compar = val.filter((v,i)=>v===type[i]);
 				if(compar.length !== type.length){
 					$val.text(val);
-					chashType(val);
 				}
 			}else if(val !== $val.text())
 				$val.text(val);
 		}else{
-			const showText = parameter.description(pl.parameter.code);
+			const showText = parameter.description(parameterCode);
 			const $row = $('<div>', {class: 'row'});
-			const val = parser(pl.data);
-			if(pl.parameter.code === parameter.deviceInfo.type){
-				chashType(val);`	`
-			}
 
 			let $v;
 			if(showText && showText !== 'Description'){
 				$row.append($('<div>', {id: descrId, class: 'col-5', text: showText}));
-				if(pl.parameter.code===5)	// Serial Number
+				if(parameterCode===5)	// Serial Number
 					$v = $('<div>', {class: 'col'}).append($('<a>', {id: valId, text: val, target: '_blank', href: `http://${val}`}));
 				else
 					$v = $('<div>', {id: valId, class: 'col', text: val});
@@ -141,19 +119,36 @@ action.f_Info = function(packet){
 
 			$row.append($v);
 
-			map.set(pl.parameter.code, $row);
+			map.set(parameterCode, $row);
 			clearTimeout(timeout);
 			timeout = setTimeout(()=>$body.append(Array.from(map.values())), 100);
+		}
+		switch(parameterCode){
+
+		case parameter.deviceInfo.type:
+			if(type?.toString()!==val.toString())
+				changeType(val);
+			break;
+
+		case parameter.deviceInfo.serialNumber:
+			const title =  val + ' : IRT Technologies';
+			if(document.title!==title)
+				document.title = title;
 		}
 	});
 }
 
-function chashType(val){
+function changeType(val){
 	type = val;
-	startAll();// controlStart();
+	startAll();
 	typeChangeEvents.forEach(e=>e(type));
 }
 
+const MODULES = ['./panel-measurement.js', './panel-config.js', './user-panels.js']
 function startAll(){
-	measStart(); controlStart(); userStart();
+	MODULES.forEach(u=>import(u).then(m=>m.start()));
+}
+
+function stopAll(){
+	MODULES.forEach(u=>import(u).then(m=>m.stop()));
 }

@@ -101,7 +101,8 @@ export function parseToBigInt(bytes){
 export function parseToBigIntArray(bytes){
 	const ints = [];
 	const b = [...bytes];
-	for(let i=0; b.length && i<3; i++){
+	//	for(let i=0; b.length && i<3; i++){
+	for(let i=0; b.length; i++){
 		const fourBigInt = b.splice(0, 8);
 		ints.push(parseToBigInt(fourBigInt));
 	}
@@ -141,7 +142,7 @@ export function parseToIrtValue(bytes, divider){
 	if(!bytes?.length)
 		return 'N/A';
 
-	if(bytes.length>2){
+	if(bytes.length===3){
 		const index = bytes.splice(0,1)&3;
 		const prefix = prefixes[index];
 		const value = divider ? parseToInt(bytes)/divider : parseToInt(bytes);
@@ -166,6 +167,19 @@ export function parseToFreqyency(bytes){
 	return parseToBigInt(b)/1000000n;
 }
 
+const
+	MINUTE = 60,
+	HOUR	= 60*MINUTE,
+	DAY		= 24*HOUR;
+	
+export function parseToTimeStr(bytes){
+	const time = parseToInt(bytes);
+	const days = Math.floor(time / DAY);
+	const hours = Math.floor(time%DAY / HOUR);
+	const minutes = Math.floor(time%HOUR / MINUTE);
+	const sec = time%MINUTE;
+	return [days, hours, minutes, sec].map(t=>t.toString().padStart(2,'0')).join(':');
+}
 const statusBits = {};
 statusBits.buc = {};
 statusBits.buc.mute = {};

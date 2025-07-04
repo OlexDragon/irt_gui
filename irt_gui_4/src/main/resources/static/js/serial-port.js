@@ -3,6 +3,9 @@ import Packet from './packet/packet.js'
 import UnitAddress from './classes/unit-address.js'
 import Baudrate from './classes/baudrate.js'
 import {start as summaryAlarmStart, stop as summaryAlarmStop, textToStatus, closed} from './panel-summary-alarm.js'
+import {status as f_alarmStatus } from './packet/parameter/value/alarm-status.js'
+import packetType from './packet/packet-properties/packet-type.js'
+//import { start as unitsStart, stop as unitsStop} from './panel-units.js'
 
 export let serialPort;
 export let showError;
@@ -12,6 +15,8 @@ export const unitAddrClass = new UnitAddress($('#unitAddress'));
 export function doRun(){
 	return $btnStart.prop('checked');
 }
+
+const btnStartEvents = [];
 
 export function onStart(cb){
 	btnStartEvents.push(cb);
@@ -72,13 +77,15 @@ $('#appExit').click(async ()=>{
 
 	clearInterval(interval);
 	clearInterval(countInterval);
-	const x = await $.post('/connection/add', {connectionId: sessionId});
+	try{
+		const x = await $.post('/connection/add', {connectionId: sessionId});
 
-	if(x < 2 || confirm(`${x - 1} more connection found.\nAre you sure you want to close this program?`))
-		$.get('/exit').done(showExitModale);
+		if(x < 2 || confirm(`${x - 1} more connection found.\nAre you sure you want to close this program?`))
+			$.get('/exit').always(showExitModal);
+	}catch(e){
+		showExitModal();
+	}
 });
-
-const btnStartEvents = [];
 
 const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
 function countConnections(){
@@ -89,8 +96,9 @@ function countConnections(){
 	});
 }
 
-function showExitModale(){
-	summaryAlarmStop();
+function showExitModal(){
+	summaryAlarmStop(); 
+	import('./panel-units.js').then(m=>m.stop());
 	btnStartEvents.forEach(cb=>cb(false));
 	$modal.load('/modal/exit');
 	$modal.attr('data-bs-backdrop', 'static');
@@ -116,8 +124,9 @@ function toggleStart(){
 	switch (text) {
 		case 'Start':
 			btnStartEvents.forEach(cb => cb(true));
-			summaryAlarmStart()
-			//		, piStart(); measStart(); controlStart(); userStart();
+			summaryAlarmStart();
+			if(unitAddrClass.unitAddress)
+				import('./panel-units.js').then(m=>m.start());
 			$lbl.text('Stop');
 			$btnStart.attr('checked', true);
 			countInterval = setInterval(countConnections, 3000);
@@ -125,7 +134,8 @@ function toggleStart(){
 
 		default:
 			btnStartEvents.forEach(cb => cb(false));
-			summaryAlarmStop();
+			summaryAlarmStop(); 
+			import('./panel-units.js').then(m=>m.stop());
 			$lbl.text('Start');
 			$btnStart.attr('checked', false);
 			clearInterval(countInterval);
@@ -169,27 +179,27 @@ function send($card, toSend, action){
 						return;
 					}
 
-					if (!data.answer?.length) {
+					if(!data.answer?.length) {
 						console.warn("No answer.");
 						blink($card, 'connection-wrong');
 						return;
 					}
 
-					if (!data.function) {
+					if(!data.function) {
 						console.warn("No function name.");
 						return;
 					}
 
 					const packet = new Packet(data.answer, data.unitAddr); // true - packet with LinkHeader
 
-					if (action.packetId !== packet.header.packetId) {
+					if(action.packetId !== packet.header.packetId) {
 						console.log(action, packet);
 						console.warn('Received wrong packet.');
 						blink($card, 'connection-wrong');
 						return;
 					}
 
-					if (packet.header.error) {
+					if(packet.header.error) {
 	//					console.log(data);
 						const packetStr = packet.toString();
 						console.error(packetStr);
@@ -197,9 +207,16 @@ function send($card, toSend, action){
 						if (showError)
 							showToast('Packet Error', packetStr, 'text-bg-danger bg-opacity-50');
 
+						action.packetError = packet.header.error;
 						return;
 					}
 
+					if(!(packet.payloads?.length || packet.header.groupId === packetType.acknowledgement)){
+						console.log(action, packet);
+						console.warn('Packet does not have payloads.');
+						blink($card, 'connection-wrong');
+						return;
+					}
 					blink($card);
 //					console.log(data)
 //					console.log(action)
@@ -250,7 +267,6 @@ function send($card, toSend, action){
 		}else{
 			const status = f_alarmStatus('Closed');
 			$('#summaryAlarmTitle').text(status.text);
-			setAlarm(status);
 		}
 
 	});

@@ -1,4 +1,4 @@
-import {parseToString, parseToInt, parseToIntArray} from '../service/converter.js'
+import {parseToString, parseToTimeStr, parseToIntArray} from '../service/converter.js'
 import Payload from '../payload.js'
 
 const deviceInfo = {};
@@ -95,7 +95,7 @@ deviceInfo.parse[deviceInfo.partNumber]		 = parseToString;
 deviceInfo.parse[deviceInfo.type]			 = parseToIntArray;
 deviceInfo.parse[deviceInfo.firmwareVersion]= parseToString;
 deviceInfo.parse[deviceInfo.firmwareBuild]	 = parseToString;
-deviceInfo.parse[deviceInfo.uptimeCounter]	 = parseToInt;
+deviceInfo.parse[deviceInfo.uptimeCounter]	 = parseToTimeStr;
 
 export function parser(value){
 

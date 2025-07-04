@@ -1,73 +1,73 @@
 import * as converter from '../service/converter.js'
 
-const control = {};
+const config = {};
 
 // BUC Parameter CODE
-control.loSet				 = {}
-control.loSet.code			 = 1;
-control.loSet.parser		 = bytes=>bytes[0];
+config.loSet				 = {}
+config.loSet.code			 = 1;
+config.loSet.parser		 = bytes=>bytes[0];
 
-control.Mute				 = {}
-control.Mute.code			 = 2;
-control.Mute.parser			 = converter.parseToBoolean;
+config.Mute				 = {}
+config.Mute.code			 = 2;
+config.Mute.parser			 = converter.parseToBoolean;
 
-control.Gain				 = {}
-control.Gain.code			 = 3;
-control.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 1);
+config.Gain				 = {}
+config.Gain.code			 = 3;
+config.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 1);
 
-control.gainRange			 = {}
-control.gainRange.code		 = 5;
-control.gainRange.parser	 = converter.parseToShortArray;
+config.gainRange			 = {}
+config.gainRange.code		 = 5;
+config.gainRange.parser	 = converter.parseToShortArray;
 
-control.Attenuation			 = {}
-control.Attenuation.code	 = 4;
-control.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 1);
+config.Attenuation			 = {}
+config.Attenuation.code	 = 4;
+config.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 1);
 
-control.attenuationRange	 = {}
-control.attenuationRange.code = 6;
-control.attenuationRange.parser	 = converter.parseToShortArray;
+config.attenuationRange	 = {}
+config.attenuationRange.code = 6;
+config.attenuationRange.parser	 = converter.parseToShortArray;
 
-control.LO					 = {}
-control.LO.code				 = 7;
-control.LO.parser			 = converter.parseToLoFrequency;
+config.LO					 = {}
+config.LO.code				 = 7;
+config.LO.parser			 = converter.parseToLoFrequency;
 
-control.Frequency			 = {}
-control.Frequency.code		 = 8;
-control.Frequency.parser	 = converter.parseToBigInt;
+config.Frequency			 = {}
+config.Frequency.code		 = 8;
+config.Frequency.parser		 = converter.parseToBigInt;
 
-control.frequencyRange		 = {}
-control.frequencyRange.code = 9;
-control.frequencyRange.parser = converter.parseToBigIntArray;
+config.frequencyRange		 = {}
+config.frequencyRange.code = 9;
+config.frequencyRange.parser = converter.parseToBigIntArray;
 
-control.Redundancy			 = {}
-control.Redundancy.code		 = 10;
-control.Redundancy.parser	 = converter.parseToBoolean;
+config.Redundancy			 = {}
+config.Redundancy.code		 = 10;
+config.Redundancy.parser	 = converter.parseToBoolean;
 
-control.Mode				 = {}	// Redundancy mode
-control.Mode.code			 = 11;
-control.Mode.parser			 = data=>data.toString();
+config.Mode				 = {}	// Redundancy mode
+config.Mode.code			 = 11;
+config.Mode.parser			 = data=>data.toString();
 
-control.Name				 = {}	// Redundancy name
-control.Name.code			 = 12;
-control.Name.parser			 = data=>data.toString();
+config.Name				 = {}	// Redundancy name
+config.Name.code			 = 12;
+config.Name.parser			 = data=>data.toString();
 
-control.Status				 = {}	// Redundancy status
-control.Status.code			 = 15;
-control.Status.parser		 = converter.parseToIrtValue;
+config.Status				 = {}	// Redundancy status
+config.Status.code			 = 15;
+config.Status.parser		 = converter.parseToIrtValue;
 
-control.Online				 = {}	// Redundancy online
-control.Online.code			 = 14;
-control.Online.parser		 = data=>data.toString();
+config.Online				 = {}	// Redundancy online
+config.Online.code			 = 14;
+config.Online.parser		 = data=>data.toString();
 
-control.spectrumInversion	 = {}
-control.spectrumInversion.code = 20;
-control.spectrumInversion.parser = data=>data.toString();
+config.spectrumInversion	 = {}
+config.spectrumInversion.code = 20;
+config.spectrumInversion.parser = data=>data.toString();
 
-Object.freeze(control);
-export default control;
+Object.freeze(config);
+export default config;
 
-const controlNames = Object.keys(control).reduce((a,k)=>{
-		a[control[k].code] = k;
+const controlNames = Object.keys(config).reduce((a,k)=>{
+		a[config[k].code] = k;
 		return a;
 	}, []
 );
@@ -75,7 +75,7 @@ const controlNames = Object.keys(control).reduce((a,k)=>{
 export function code(value){
 	if(typeof value === 'number')
 		return value;
-	return control[value];
+	return config[value];
 }
 
 export function name(value){
@@ -90,6 +90,6 @@ export function toString(value){
 
 export function parser(value){
 	const n = name(value)
-	return control[n].parser;
+	return config[n].parser;
 }
 
