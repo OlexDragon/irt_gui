@@ -36,4 +36,11 @@ class PacketTest {
 		logger.error("acknowledgement2: {} : {}" , acknowledgement2.length, acknowledgement2);
 		assertArrayEquals(new byte[] {126, -1, 15, 0, -9, -125, 126}, acknowledgement2);
 	}
+
+	@Test
+	void packetIdTest(){
+
+		Packet packet = new Packet(new byte[] {126, -1, 15, 0, -9, -125, 126}, true);
+		assertEquals(15, packet.getPacketId());
+	}
 }

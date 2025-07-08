@@ -47,7 +47,14 @@ export default class MeasurementLoader{
 			loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.js');
 			break;
 
+		case 'CONTROLLER_ODRC':
+			this.#packetId = packetId.measurement;
+			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/measurement-pdrc.js');
+			break;
+
 		default:
+			console.log(unitType);
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/measurement-buc.js');

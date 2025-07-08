@@ -55,7 +55,7 @@ class SerialPortControllerTest {
 		final String spName = serialPortNames.get(0);
 		byte[] bytes = new byte[] {126,(byte) 254,0,0,0,2,122,121,8,0,0,0,(byte) 255,0,0,104,(byte) 144,126};
 
-		final RequestPacket requestPacket = new RequestPacket(1, null, spName, bytes, spName);
+		final RequestPacket requestPacket = new RequestPacket(false, 1, 0, spName, bytes, spName);
 		return new ObjectMapper().writeValueAsString(requestPacket);
 	}
 

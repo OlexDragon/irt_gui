@@ -36,13 +36,13 @@ export function stop(){
 }
 
 function typeChange(type){
-	$body.empty();
 	loader.setUnitType(f_deviceType(type[0]), c=>onControllerLoaded(c));
 }
 
 let controllerName;
 function onControllerLoaded(Controller){
 	if(controllerName !== Controller.name){
+		$body.empty();
 		controllerName = Controller.name;
 		controller = new Controller($card);
 		controller.parameter = loader.parameter;

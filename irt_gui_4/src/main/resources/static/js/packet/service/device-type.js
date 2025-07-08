@@ -104,7 +104,7 @@ deviceType[410].type =  "CONTROLLER";
 
 deviceType[411] = {}
 deviceType[411].description =  "DLRS2";
-deviceType[411].type =  "CONTROLLER";
+deviceType[411].type =  "CONTROLLER_ODRC";	// Outdoor Downlink Redundancy Controller
 
 deviceType[412] = {}
 deviceType[412].description =  "1:2 Redundancy LNB";

@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +24,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import irt.gui.web.beans.Packet;
-import irt.gui.web.beans.PacketType;
 import irt.gui.web.beans.RequestPacket;
 import irt.gui.web.exceptions.IrtSerialPortIOException;
 import irt.gui.web.exceptions.IrtSerialPortRTException;
@@ -81,17 +81,18 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	}
 
 	@Override
-	public FutureTask<RequestPacket> send(RequestPacket requestPacket) {
+	public synchronized FutureTask<RequestPacket> send(RequestPacket requestPacket) {
 //		logger.traceEntry("Put in queue -> {}", requestPacket);
 
 		final Callable<RequestPacket> callable = ()->requestPacket;
-		final FutureTask<RequestPacket> task = new FutureTask<>(callable );
+		final FutureTask<RequestPacket> task = new FutureTask<>(callable);
 
-		final PacketTask packetTask = new PacketTask(requestPacket, requestPacket.isCommand());
+		final PacketTask packetTask = new PacketTask(requestPacket, requestPacket.getCommand());
 
 		final Optional<PacketTask> any = queue.parallelStream().filter(packetTask::equals).findAny();
 
-		if(any.isPresent()) {
+		if(any.isPresent() && !requestPacket.getCommand()) {
+			logger.error("Equals\n\t{}\n\t{}", packetTask.getPacket(), any.get().getPacket());
 			any.get().tasks.add(task);
 		}else {
 			packetTask.tasks.add(task);
@@ -116,22 +117,31 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 		final Integer baudrate = requestPacket.getBaudrate();
 		byte[] received = serialPort.send(portName, timeout, bytes, baudrate);
-//		logger.error("{} : {}", received.length, received);
 		if(received == null)
 			return;
 
-		Packet packet = new Packet(received, requestPacket.getUnitAddr()==0);
+//		logger.error("{} : {}", received.length, received);
 
+		received = read(received, portName, baudrate, baudrate);
+
+		Packet packet = new Packet(received, requestPacket.getUnitAddr()==0);
+		if(packet.getPacketId()!=requestPacket.getId()){
+			sendAcknowlegement(packet, portName, baudrate);
+			sendFromQueue(requestPacket);
+			return;
+		}
 
 		final int lastIndex = packet.getLastIndex() + 1;
-		if(lastIndex==received.length && packet.getPacketType()== PacketType.ACKNOWLEDGEMENT)
-			received = serialPort.read(portName, timeout, baudrate);
-		else
-			received = Arrays.copyOfRange(received, lastIndex, received.length);
+		received = read(Arrays.copyOfRange(received, lastIndex, received.length), portName, baudrate, baudrate);
+
 
 		requestPacket.setAnswer(received);
 		logger.debug(requestPacket);
 
+		sendAcknowlegement(packet, portName, baudrate);
+	}
+
+	private void sendAcknowlegement(Packet packet, final String portName, final Integer baudrate) {
 		Optional.ofNullable(packet.getAcknowledgement()).filter(a->a.length>0)
 		.ifPresent(
 				a->{
@@ -143,6 +153,22 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 				});
 	}
 
+	byte[] read(final byte[] bytes, String portName, Integer timeout, Integer baudrate) throws IrtSerialPortIOException{
+
+		if(IntStream.range(0, bytes.length).parallel().filter(i->bytes[i]==Packet.FLAG_SEQUENCE).count()>=2)
+			return bytes;
+
+		final byte[] bs = serialPort.read(portName, timeout, baudrate);
+		if(bs==null)
+			return bytes;
+
+		if(bytes.length==0)
+			return read(bs, portName, timeout, baudrate);
+
+		final byte[] copyOf = Arrays.copyOf(bytes, bytes.length + bs.length);
+		System.arraycopy(bs, 0, copyOf, bytes.length, bs.length);
+		return read(copyOf, portName, baudrate, baudrate);
+	}
 	@Override
 	public Thread newThread(Runnable r) {
 		return new ThreadWorker().newThread(r);

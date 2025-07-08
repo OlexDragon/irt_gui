@@ -29,7 +29,7 @@ public class Gui4Controller {
 			prefs.put("version", version);
 
 		else if(!prefVertion.equals(version)) {
-			prefs.put("vertion", version);
+			prefs.put("version", version);
 			model.addAttribute("cleareCash", true);
 		}
 

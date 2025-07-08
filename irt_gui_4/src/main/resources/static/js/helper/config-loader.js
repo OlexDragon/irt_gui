@@ -52,6 +52,7 @@ export default class MeasurementLoader{
 			break;
 
 		default:
+			console.log(unitType);
 			this.#getAll = this.#forBUC;
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');

@@ -212,8 +212,10 @@ function send($card, toSend, action){
 					}
 
 					if(!(packet.payloads?.length || packet.header.groupId === packetType.acknowledgement)){
-						console.log(action, packet);
-						console.warn('Packet does not have payloads.');
+						if(packet.header.type!==packetType.acknowledgement){
+							console.log(action, packet);
+							console.warn('Packet does not have payloads.');
+						}
 						blink($card, 'connection-wrong');
 						return;
 					}

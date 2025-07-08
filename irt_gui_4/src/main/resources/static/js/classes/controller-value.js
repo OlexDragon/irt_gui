@@ -18,6 +18,7 @@ export default class ControllerValue extends ValuePanel{
 			this._fields.$value.val(v);
 		super.value = v;
 	}
+
 	get value(){
 		return this._fields.$value.val();
 	}

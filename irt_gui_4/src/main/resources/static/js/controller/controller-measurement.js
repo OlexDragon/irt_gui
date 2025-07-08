@@ -49,6 +49,10 @@ export default class ControllerMeasurement extends Controller{
 				if(isArray){
 					if($val.attr('data-value')!==val.toString())
 						$val.attr('data-value', val).html(val.map(v=>{
+							if(typeof v !=='string'){
+								console.warn('Something went wrong.')
+								return;
+							}
 							v = v.toUpperCase();
 							let c;
 							if(v.startsWith('UN'))

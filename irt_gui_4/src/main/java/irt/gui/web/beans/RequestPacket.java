@@ -11,9 +11,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@RequiredArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(exclude = {"serialPort", "bytes", "function", "command", "baudrate", "timeout", "answer"}) @JsonIgnoreProperties(ignoreUnknown = true)
+@RequiredArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(exclude = {"serialPort", "bytes", "function", "baudrate", "timeout", "answer", "error"}) @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestPacket {
 
+	@NonNull private Boolean command;
 	@NonNull private Integer id;
 	@NonNull private Integer unitAddr;
 	@NonNull private String serialPort;
@@ -21,7 +22,6 @@ public class RequestPacket {
 	@NonNull private byte[] bytes;
 	@NonNull private String function;
 
-	private boolean command;
 	private Integer baudrate;
 	private Integer timeout;
 	@JsonSerialize(using = BytesToStringSerializer.class)

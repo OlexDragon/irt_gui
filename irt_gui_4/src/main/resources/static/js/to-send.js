@@ -2,7 +2,7 @@ import packetId, {id as f_packetId, toString as f_packetIdToString} from './pack
 import packetType from './packet/packet-properties/packet-type.js'
 import groupId from './packet/packet-properties/group-id.js'
 import {serialPort, baudrate, unitAddrClass} from './serial-port.js'
-import Packet, {Header, Payload, Parameter} from './packet/packet.js'
+import Packet, {Header, Payload} from './packet/packet.js'
 import {shortToBytesR, intToBytes, longToBytes} from './packet/service/converter.js'
 
 export default async function (action, callBack){
@@ -24,6 +24,7 @@ export default async function (action, callBack){
 		action.toSend.unitAddr = addr;
 		action.toSend.timeout = action.timeout ?? 2000;
 		action.toSend.function = action.function;
+		action.toSend.command = action.command ?? false;
 
 		const rest = await getRest(action);
 		Object.assign(action.toSend, rest);

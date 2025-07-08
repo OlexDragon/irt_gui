@@ -1,5 +1,7 @@
 package irt.gui.web.beans;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -75,6 +77,16 @@ public class Packet {
 			return PacketType.valueOf(bytes[0]);
 		else
 			return packetType;
+	}
+
+	@ToString.Include
+	public int getPacketId() {
+		ByteBuffer bb = ByteBuffer.allocate(2);
+		bb.order(ByteOrder.LITTLE_ENDIAN);
+		bb.put(bytes[typeIndex+1]);
+		bb.put(bytes[typeIndex+2]);
+		short shortVal = bb.getShort(0);
+		return shortVal&0xff;
 	}
 
 	public byte[] getAcknowledgement() {

@@ -7,6 +7,9 @@
 .connection-wrong{
 	border-color: yellow !important;
 }
+.connection-buisy{
+	border-color: black !important;
+}
 .toast-body{
 	white-space: pre-wrap;
 }

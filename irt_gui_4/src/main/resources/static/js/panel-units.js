@@ -14,10 +14,17 @@ let interval;
 const action = {packetId: packetId.module, groupId: groupId.control, data: {}, function: 'f_modules'};
 
 setTimeout(typeChange, 100);
+let type;
 function typeChange(){
-	onTypeChange(()=>{
-		stop();
-		start();
+	onTypeChange(t=>{
+		const str = t.toString();
+		if(type!==str){
+			type = str;
+			action.data.parameterCode = undefined;
+			clear();
+			stop();
+			start();
+		}
 	});
 }
 export function start(){
@@ -27,8 +34,6 @@ export function start(){
 
 	action.buisy = false;
 	action.packetError = undefined;
-
-	clear();
 
 	const unitType = f_unitType();
 	switch(unitType){
@@ -59,7 +64,8 @@ async function getParser(){
 		parameter.parser = parser;
 	}
 
-	action.data.parameterCode = parameter.config.moduleList;
+	if(!action.data.parameterCode)
+		action.data.parameterCode = parameter.config.moduleList;
 	run();
 	clearInterval(interval);
 	interval = setInterval(run, 10000);
@@ -102,8 +108,14 @@ action.f_modules = (packet) =>{
 			break;
 
 		case parameter.config.activeModule:
+			if(!map.size){
+				console.log('This Panel is not ready yet.')
+				return;
+			}
 			const key = parameter.parser(parameter.config.activeModule)(pl.data)
 			const $buttom = map.get(key);
+			if(!$buttom)
+				break;
 			if(!$buttom.prop('checked'))
 				$buttom.prop('checked', true);
 
@@ -127,9 +139,9 @@ function addElements(data){
 		return false;
 	const columns = entries.sort((a,b)=>a[1]-b[1]).map(([k, v])=>{
 		const id = 'module' + v;
-		const $butten = $('<input>', {type: 'radio', class: 'btn-check', name: 'moduleConnect', id: id, autocomplete: 'off', value: v}).change(onChange);
-		map.set(v, $butten);
-		const $col = $('<div>', {class: 'col'}).append($butten).append($('<label>', {for: id, class: 'btn btn-outline-primary form-control', text: k}));
+		const $button = $('<input>', {type: 'radio', class: 'btn-check', name: 'moduleConnect', id: id, autocomplete: 'off', value: v}).change(onChange);
+		map.set(v, $button);
+		const $col = $('<div>', {class: 'col'}).append($button).append($('<label>', {for: id, class: 'btn btn-outline-primary form-control', text: k}));
 		return $col;
 	});
 	$unitsSelect.append(columns);

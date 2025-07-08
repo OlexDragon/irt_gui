@@ -5,7 +5,7 @@ import { status as f_alarmStatus } from './packet/parameter/value/alarm-status.j
 import groupId from './packet/packet-properties/group-id.js'
 
 const $card = $('#summaryAlarmCard');
-const $title = $('#summaryAlarmTitle');
+const $title = $('#summaryAlarmTitle').click(tripleClick);
 
 const statusChangeEvent = [];
 
@@ -46,6 +46,7 @@ function run(){
 	}
 
 	if(action.buisy){
+		serialPort.blink($card, 'connection-buisy');
 		console.warn('Buisy');
 		return
 	}
@@ -90,4 +91,11 @@ function setStatus(value){
 			serialPort.stop();
 		}
 	}
+}
+
+function tripleClick({detail}){
+	if(detail!=3)
+		return;
+
+	window.open(window.location.href + '', '_blank');
 }

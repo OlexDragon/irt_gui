@@ -10,6 +10,7 @@ export let type;
 const map = new Map();
 const parameter = {};
 
+let started;
 let interval;
 const action = {packetId: packetId.deviceInfo, groupId: groupId.deviceInfo, data: {}, function: 'f_Info'};
 
@@ -29,6 +30,7 @@ export function start(){
 	if(interval)
 		return;
 
+	started = true;
 	action.buisy = false;
 	getParameter();
 }
@@ -126,8 +128,10 @@ action.f_Info = function(packet){
 		switch(parameterCode){
 
 		case parameter.deviceInfo.type:
-			if(type?.toString()!==val.toString())
+			if(started || type?.toString()!==val.toString()){
+				started = false;
 				changeType(val);
+			}
 			break;
 
 		case parameter.deviceInfo.serialNumber:

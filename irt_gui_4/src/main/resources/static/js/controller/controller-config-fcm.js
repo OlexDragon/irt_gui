@@ -8,7 +8,10 @@ export default class ControllerControlFcm extends ControllerConfig{
 			this._min(val[0]);
 			const m = val[val.length-1];
 			this._max(m);
-			this._step(m - val[0]);
+			if(set.size===2)
+				this._step(m - val[0]);
+			else
+				this._tickMarks(set);
 		}else
 			super._frequencyRange(val);
 	}

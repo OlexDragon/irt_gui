@@ -2,6 +2,7 @@
 export default class ValuePanel{
 
 	_name;
+	_value;
 	_fields = {};
 	
 	count = 0;
@@ -70,6 +71,7 @@ export default class ValuePanel{
 		return +this._fields.$input.val();
 	}
 	set value(newValue){
+		this._value = newValue;
 
 		if(this.count || this.#inFocus || newValue===parseFloat(this._fields.$input.val()))
 			return;
@@ -120,6 +122,25 @@ export default class ValuePanel{
 		const value = parseFloat(this._fields.$range.val());
 		this._fields.$range.filter(':visible').tooltip('dispose').tooltip({title: Math.abs(value)}).tooltip('show');
 	};
+
+	tickMarks(set){
+		if(!set?.size)
+			return;
+
+		const listName = this._name + '-ticks';
+		let $tickList;
+		if(this._fields.$range.prop('list'))
+			$tickList = $('#' + listName).empty();
+		else{
+			$tickList = $('<datalist>', {id: listName}).insertAfter(this._fields.$range);
+			this._fields.$range.attr('list', listName)
+		}
+
+		const array = Array.from(set);
+		const options = array.map(v=>$('<option>', {value: v}));
+		$tickList.append(options);
+		this._fields.$range.attr("step", array[1] - array[0]);
+	}
 
 	step(newStep){
 		if(newStep){
@@ -179,18 +200,30 @@ export default class ValuePanel{
 		this.count = 0;
 	}
 
-	#inputOnChange = (e)=>{
-		const {currentTarget:{value}} = e;
-		if(value===this._fields.$range.val())
+	#inputOnChange = ({currentTarget:el})=>{
+		const rVal = Math.abs(this._fields.$range.val());
+		let value = +el.value;
+		if(value===rVal)
 			return;
 
+		const step = this._fields.$step.val() || this._fields.$range.prop('step');
+		if(step){
+			if((rVal-value)<0)
+				value = rVal + (+step);
+			else
+				value = rVal - step;
+			el.value = value;
+				
+		}
 		this._fields.$range.val(value*this.multiplier);
 		const v = Math.abs(this._fields.$range.val());
 		this._fields.$range.filter(':visible').tooltip('dispose').tooltip({title: v}).tooltip('show');
-		if(value!==v){
-			e.currentTarget.value = v;
+
+		if(this._value!==v)
 			this.#sendChange(v);
-		}
+
+		if(rVal===v)
+			el.value = v;
 	}
 
 	#stepOnChange = (e)=>{
@@ -217,7 +250,7 @@ export default class ValuePanel{
 					const value = e.currentTarget.value - parseFloat(step);
 					this._fields.$range.val(value*this.multiplier);
 					e.currentTarget.value = Math.abs(this._fields.$range.val());
-					this._fields.$range.filter(':visible').tooltip('dispose').tooltip({title: e.currentTarget.value}).tooltip('show');
+					this._fields.$range.filter(':visible').tooltip('dispose').tooltip({title: e.currentTarget.value}).tooltip('show').change();
 				}
 			}
 			break;
@@ -230,7 +263,7 @@ export default class ValuePanel{
 					const value = parseFloat(e.currentTarget.value) + parseFloat(step);
 					this._fields.$range.val(value*this.multiplier);
 					e.currentTarget.value = Math.abs(this._fields.$range.val());
-					this._fields.$range.filter(':visible').tooltip('dispose').tooltip({title: e.currentTarget.value}).tooltip('show');
+					this._fields.$range.filter(':visible').tooltip('dispose').tooltip({title: e.currentTarget.value}).tooltip('show').change();
 				}
 			}
 			break;

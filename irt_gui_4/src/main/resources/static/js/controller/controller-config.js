@@ -190,7 +190,11 @@ export default class ControllerConfig extends Controller{
 	}
 
 	_step(step){
-	this.#freqController.step(step);
+		this.#freqController.step(step);
+	}
+
+	_tickMarks(set){
+		this.#freqController.tickMarks(set);
 	}
 
 	#tabClick({target:{id}}) {
