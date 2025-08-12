@@ -17,6 +17,6 @@ public class Gui4Config implements WebMvcConfigurer {
 
 	@Bean("prefs")
 	public Preferences prefs() {
-		return Preferences.userRoot().node(this.getClass().getName());
+		return Preferences.userRoot().node(Gui4.class.getName());
 	}
 }

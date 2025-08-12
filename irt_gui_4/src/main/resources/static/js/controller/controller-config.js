@@ -82,7 +82,7 @@ export default class ControllerConfig extends Controller{
 
 			case pId.Attenuation.code:
 				{
-					const value = val/10;
+					const value = val;
 					this.#attenuationController.value = value;
 				}
 				break;
@@ -96,7 +96,7 @@ export default class ControllerConfig extends Controller{
 
 			case pId.Gain.code:
 				{
-					const value = val/10;
+					const value = val;
 					this.#gainController.value = value;
 				}
 				break;

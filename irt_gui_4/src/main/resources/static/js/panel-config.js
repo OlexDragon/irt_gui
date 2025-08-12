@@ -1,6 +1,6 @@
 import * as serialPort from './serial-port.js'
 import f_deviceType from './packet/service/device-type.js'
-import { type as unitType, onTypeChange } from './panel-info.js'
+import { type as unitType, onTypeChange, onStartAll } from './panel-info.js'
 import ControlLoader from './helper/config-loader.js'
 
 const $card = $('div.controlCard');
@@ -14,6 +14,8 @@ let loader = new ControlLoader();
 let interval;
 let buisy;
 const DELAY = 5000;
+
+onStartAll(yes=>yes ? start() : stop())
 export function start(){
 	if(interval || buisy)
 		return;
@@ -34,12 +36,15 @@ function typeChange(type){
 	loader.setUnitType(f_deviceType(type[0]), c=>onControllerLoaded(c));
 }
 
-let controllerName;
 function onControllerLoaded(Controller){
-	if(controllerName !== Controller.name){
+	if(!Controller){
+		console.log('This Controller is not ready.')
+		return;
+	}
+	if(controller?.name !== Controller.name){
 		$body.empty();
-		controllerName = Controller.name;
 		controller = new Controller($card);
+		controller.name = Controller.name;
 		controller.parameter = loader.parameter;
 		controller.toRead = loader.toRead;
 		controller.change = onChange;

@@ -45,14 +45,19 @@ export default class MeasurementLoader{
 			break;
 
 		case 'CONVERTER':
+		case 'CONVERTER_KA':
 			this.#getAll = this.#forCONVERTER;
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-fcm.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/control-fcm.js');
 			break;
 
-		default:
-			console.log(unitType);
+		case 'CONTROLLER_ODRC':
+			return;
+
+			default:
+			console.warn(unitType);
+		case 'BAIS':
 			this.#getAll = this.#forBUC;
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');

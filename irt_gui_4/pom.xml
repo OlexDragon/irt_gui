@@ -11,7 +11,7 @@
 
 	<groupId>irt.gui</groupId>
 	<artifactId>gui</artifactId>
-	<version>4.7</version>
+	<version>4.11</version>
 	<name>web</name>
 	<description>IRT GUI Application</description>
 	<url/>
@@ -44,6 +44,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -56,7 +61,7 @@
 			</exclusions>
 		</dependency>
 
-<!-- https://mvnrepository.com/artifact/com.fazecast/jSerialComm -->
+		<!-- https://mvnrepository.com/artifact/com.fazecast/jSerialComm -->
 		<dependency>
 			<groupId>com.fazecast</groupId>
 			<artifactId>jSerialComm</artifactId>
@@ -67,7 +72,7 @@
 			<artifactId>spring-boot-starter-log4j2</artifactId>
 		</dependency>
 
-<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+		<!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -95,11 +100,23 @@
 			<version>5.3.5</version>
 		</dependency>
 
-<!-- https://mvnrepository.com/artifact/io.nayuki/qrcodegen -->
+		<!-- https://mvnrepository.com/artifact/io.nayuki/qrcodegen -->
 		<dependency>
 			<groupId>io.nayuki</groupId>
 			<artifactId>qrcodegen</artifactId>
 			<version>1.8.0</version>
+		</dependency>
+<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.27.1</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.18.0</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 
 		<dependency>
@@ -111,12 +128,12 @@
 	</dependencies>
 
 	<build>
-<!--		<resources>-->
-<!--			<resource>-->
-<!--				<directory>src/main/resources</directory>-->
-<!--				<filtering>true</filtering>-->
-<!--			</resource>-->
-<!--		</resources>-->
+		<!--		<resources>-->
+		<!--			<resource>-->
+		<!--				<directory>src/main/resources</directory>-->
+		<!--				<filtering>true</filtering>-->
+		<!--			</resource>-->
+		<!--		</resources>-->
 
 		<plugins>
 			<plugin>

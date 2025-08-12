@@ -1,5 +1,5 @@
-import packetId from './packet/packet-properties/packet-id.js'
 import * as serialPort from './serial-port.js'
+import packetId from './packet/packet-properties/packet-id.js'
 import { alarmCode, parser } from './packet/parameter/alarm.js'
 import { status as f_alarmStatus } from './packet/parameter/value/alarm-status.js'
 import groupId from './packet/packet-properties/group-id.js'
@@ -97,5 +97,6 @@ function tripleClick({detail}){
 	if(detail!=3)
 		return;
 
-	window.open(window.location.href + '', '_blank');
+	const url = new URL('production', window.location.href)
+	window.open(url, '_blank');
 }

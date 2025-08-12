@@ -1,4 +1,4 @@
-import {parseToIrtValue, parseToInt, parseToStatus} from '../service/converter.js'
+import {parseToIrtValue, parseToStatus} from '../service/converter.js'
 import {type} from '../service/device-type.js'
 
 const network = {};
@@ -21,15 +21,15 @@ network.buc[0].parser = data=>data.toString();
 network.buc[1] = {}
 network.buc.inputPower				 = 1;
 network.buc[1].description = 'Input Power';
-network.buc[1].parser = bytes=>parseToIrtValue(bytes, 10) + ' dBm';
+network.buc[1].parser = bytes=>parseToIrtValue(bytes, 10, ' dBm');
 network.buc[2] = {}
 network.buc.outputPower				 = 2;
-network.buc[2].description = 'Otput Power';
-network.buc[2].parser =  bytes=>parseToIrtValue(bytes, 10) + ' dBm';
+network.buc[2].description = 'Output Power';
+network.buc[2].parser =  bytes=>parseToIrtValue(bytes, 10, ' dBm');
 network.buc[3] = {}
 network.buc.unitTemperature			 = 3;
 network.buc[3].description = 'Temperature';
-network.buc[3].parser = bytes=>parseToInt(bytes)/10 + ' °C';
+network.buc[3].parser = bytes=>parseToIrtValue(bytes, 10, ' °C');
 network.buc[4] = {}
 network.buc.status					 = 4;
 network.buc[4].description = 'Status';

@@ -56,12 +56,20 @@ async function getRest(action){
 	case packetId.alarmIDs:
 	case packetId.network: // get network
 	case packetId.module:	// All modules
+	case packetId.calMode:
 		{
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), new Payload(action.data.parameterCode), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
 		}
 		break;
 
+	case packetId.dump:
+	case packetId.dumpHelp:
+		{
+			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, intToBytes(action.data.value)), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
 
 	case packetId.atenuationSet:
 	case packetId.gainSet:
@@ -74,6 +82,7 @@ async function getRest(action){
 	case packetId.irpcDefault:
 	case packetId.irpcHoverA:
 	case packetId.irpcHoverB:
+	case packetId.calModeSet:
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, intToBytes(action.data.value)), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
@@ -90,6 +99,7 @@ async function getRest(action){
 
 	case packetId.configAll:
 	case packetId.comAll:
+	case packetId.redundancyAll:
 		{
 			const pls = action.data.parameterCode.map(pc=>new Payload(pc));
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
@@ -143,6 +153,24 @@ async function getRest(action){
 	case packetId.networkSet: // set network
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, action.data.value), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
+
+	case packetId.dacs:
+	case packetId.admv1013:
+		{
+			const pls = action.data.value.map(v=>new Payload(action.data.parameterCode, v.toBytes()));
+			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
+
+	case packetId.dacsSet:
+	case packetId.admv1013Set:
+		{
+			const pl = new Payload(action.data.parameterCode, action.data.value.toBytes());
+			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), pl, action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
 		}
 		break;

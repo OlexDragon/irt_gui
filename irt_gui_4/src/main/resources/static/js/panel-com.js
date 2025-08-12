@@ -4,7 +4,6 @@ import packetId from './packet/packet-properties/packet-id.js'
 import f_deviceType from './packet/service/device-type.js'
 import ComControl from './classes/com-control.js'
 import protocol, {parser} from './packet/parameter/protocol.js'
-import {longToBytes} from './packet/service/converter.js'
 
 
 const $card = $('#userCard');
@@ -29,14 +28,15 @@ export function start(){
 	switch(type){
 
 	case 'CONTROLLER_IRPC':
-		action.data.parameterCode = [3, 4, 5];
+	case 'CONTROLLER_ODRC':
+		action.data.parameterCode = [protocol.address.code, protocol.baudrate.code, protocol.retransmit.code];
 		break;
 
 	default:
 		console.log(type);
 	case 'BAIS':
 	case 'CONTROLLER':
-		action.data.parameterCode = [3, 4, 5, 6];
+		action.data.parameterCode = [protocol.address.code, protocol.baudrate.code, protocol.retransmit.code, protocol.tranceiver_mode.code];
 	}
 
 	const name = chooseFragmentName();

@@ -42,6 +42,7 @@ export default class MeasurementLoader{
 			break;
 
 		case 'CONVERTER':
+		case 'CONVERTER_KA':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.js');
@@ -50,11 +51,12 @@ export default class MeasurementLoader{
 		case 'CONTROLLER_ODRC':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-pdrc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/measurement-odrc.js');
 			break;
 
 		default:
 			console.log(unitType);
+		case 'BAIS':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/measurement-buc.js');

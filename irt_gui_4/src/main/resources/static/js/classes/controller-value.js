@@ -26,4 +26,8 @@ export default class ControllerValue extends ValuePanel{
 	get name(){
 		return this._name;
 	}
+
+	_escape(){
+		return this._fields.$value.val();
+	}
 }

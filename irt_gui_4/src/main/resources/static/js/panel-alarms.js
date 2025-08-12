@@ -111,7 +111,12 @@ function parseAlarm(pl){
 	}
 }
 function showValue(pl){
-	const value = parser(pl.parameter.code)(pl.data);
+	const p = parser(pl.parameter.code);
+	if(!p){
+		console.warn('Parser not found')
+		return;
+	}
+	const value = p(pl.data);
 	const $row = getRow(value.id);
 	const $div = $row.find('.value');
 	if($div.text()!==value.text)
@@ -124,7 +129,12 @@ function showValue(pl){
 }
 
 function showDescription(pl){
-	const value = parser(pl.parameter.code)(pl.data);
+	const p = parser(pl.parameter.code);
+	if(!p){
+		console.warn('Parser not found')
+		return;
+	}
+	const value = p(pl.data);
 	const $row = getRow(value.id);
 	const $div = $row.find('.name');
 	if($div.text()!==value.string)
@@ -139,9 +149,9 @@ function getRow(id){
 				.append($('<div>', {class: 'col name text-end fw-bold'}))
 				.append($('<div>', {class: 'col value text-center fs-6'}));
 
-	map.set(id, $row);
-	clearTimeout(timeout);
-	timeout = setTimeout(()=>$body.append(Array.from(map.values())), 100);
+		map.set(id, $row);
+		clearTimeout(timeout);
+		timeout = setTimeout(()=>$body.append(Array.from(map.values())), 100);
 	}
 	return $row;
 }

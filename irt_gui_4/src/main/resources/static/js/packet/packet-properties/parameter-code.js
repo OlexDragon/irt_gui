@@ -1,7 +1,7 @@
 import {id} from './group-id.js'
 import {description as diDescription, parser as diParser, name as diName, toString as diToSyting} from '../parameter/device-info.js'
 import {description as measDescription, parser as measParser, name as measName, toString as measToSyting} from '../parameter/measurement.js'
-import {parser as confParser, name as confName, toString as confToSyting} from '../parameter/config-buc.js'
+import {parser as confParser, name as confName, toString as confToSyting} from '../parameter/config-modules.js'
 import {parser as contrParser, name as contrName, toString as contrToSyting} from '../parameter/control-buc.js'
 import {parser as protocolParser, name as protocolName, toString as protocolToSyting} from '../parameter/protocol.js'
 import {parser as irpcParser, name as irpcName, toString as irpcToSyting} from '../parameter/irpc.js'

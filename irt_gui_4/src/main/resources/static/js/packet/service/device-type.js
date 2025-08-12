@@ -168,7 +168,7 @@ deviceType[1013].type =  "CONVERTER";
 
 deviceType[1019] = {}
 deviceType[1019].description =  "L to KA Converter";
-deviceType[1019].type =  "CONVERTER";
+deviceType[1019].type =  "CONVERTER_KA";
 
 deviceType[1021] = {}
 deviceType[1021].description =  "L to X Converter";
@@ -184,7 +184,7 @@ deviceType[1052].type =  "CONVERTER";
 
 deviceType[1100] = {}
 deviceType[1100].description =  "Reference Board";
-deviceType[1100].type =  "CONVERTER";
+deviceType[1100].type =  "REFERENCE_BOARD";
 
 deviceType[2001] = {}
 deviceType[2001].description =  "Bias Board Modul";

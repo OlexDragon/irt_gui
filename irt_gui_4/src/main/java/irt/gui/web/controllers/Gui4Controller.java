@@ -38,10 +38,10 @@ public class Gui4Controller {
 		return "home";
 	}
 
-	@GetMapping("regs")
+	@GetMapping({"p", "production"})
     String regs(Model model) {
 		model.addAttribute("version", version);
 		model.addAttribute("baudrates", Baudrate.values());
-		return "regs";
+		return "production";
 	}
 }

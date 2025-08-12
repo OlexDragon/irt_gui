@@ -157,7 +157,7 @@ public class JSerialComm implements IrtSerialPort {
 
 	@Override
 	public byte[] read(String serialPort, Integer timeout, Integer baudrate) throws IrtSerialPortIOException {
-		logger.traceEntry("serialPort: {}; timeout: {}; : {}", serialPort, timeout, baudrate);
+		logger.traceEntry("serialPort: {}; timeout: {}; baudrate: {}", serialPort, timeout, baudrate);
 
 		return Optional
 

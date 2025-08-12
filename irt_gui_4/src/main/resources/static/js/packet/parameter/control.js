@@ -1,5 +1,4 @@
 import {parseToIrtValue, parseToShortArray, parseToBigInt, parseToBigIntArray, parseToBoolean} from '../service/converter.js'
-import f_deviceType from '../service/device-type.js'
 
 const control = {};
 
@@ -76,22 +75,15 @@ export default control;
 export function code(name){
 	if(typeof name === 'number')
 		return name;
-	const group = chooseGroup();
-	return group[name];
+	return group[name].code;
 }
 
 export function name(code){
-	const group = chooseGroup();
-	const keys = Object.keys(group);
+	const keys = Object.keys(control);
 
 	for(const key of keys)
-		if(group[key] == code)
+		if(control[key].code == code)
 			return key;
-}
-
-export function description(value){
-	const c = code(value)
-	return chooseGroup()[c].description;
 }
 
 export function toString(value){
@@ -101,6 +93,6 @@ export function toString(value){
 }
 
 export function parser(value){
-	const c = code(value)
-	return chooseGroup()[c].parser;
+	const n = name(value)
+	return control[n].parser;
 }

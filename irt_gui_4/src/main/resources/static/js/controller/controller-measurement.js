@@ -1,4 +1,3 @@
-import * as serialPort from '../serial-port.js'
 import Controller from './controller.js'
 import groupId from '../packet/packet-properties/group-id.js'
 
@@ -20,15 +19,6 @@ export default class ControllerMeasurement extends Controller{
  */
 	set update(payloads){
 
-		if(!payloads?.length){
-			console.log(packet.toString());
-			console.warn('No payloads to parse.');
-			serialPort.blink($card, 'connection-wrong');
-			return;
-		}
-
-		serialPort.blink(this._$card);
-
 		let timeout;
 		const rows = [];
 		payloads.forEach(pl=>{
@@ -39,9 +29,11 @@ export default class ControllerMeasurement extends Controller{
 			const $desct = this.#$body.find('#' + descrId);
 			const parser = this._parameter.parser(parameterCode);
 			if(!parser){
-				console.warn('No Parser.')
+				console.warn('No Parser for parameterCode ', pl)
 				return;
 			}
+			if(parser==='do not show')
+				return;
 			if($desct.length){
 				let val = parser(pl.data);
 				const isArray = Array.isArray(val);

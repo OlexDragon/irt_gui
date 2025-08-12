@@ -10,15 +10,15 @@ measurement.None.parser = data=>data;
 
 measurement['Input Power'] = {}
 measurement['Input Power'].code		 = 1;
-measurement['Input Power'].parser	 = bytes=>parseToIrtValue(bytes, 10) + ' dBm';
+measurement['Input Power'].parser	 = bytes=>parseToIrtValue(bytes, 10, ' dBm');
 
-measurement['Otput Power'] = {}
-measurement['Otput Power'].code		 = 2;
-measurement['Otput Power'].parser	 = bytes=>parseToIrtValue(bytes, 10) + ' dBm';
+measurement['Output Power'] = {}
+measurement['Output Power'].code		 = 2;
+measurement['Output Power'].parser	 = bytes=>parseToIrtValue(bytes, 10, ' dBm');
 
 measurement.Temperature = {}
 measurement.Temperature.code		 = 3;
-measurement.Temperature.parser		 = bytes=>parseToInt(bytes)/10 + ' °C';
+measurement.Temperature.parser		 = bytes=>parseToIrtValue(bytes, 10, ' °C');
 
 measurement.Status = {}
 measurement.Status.code				 = 4;
@@ -26,7 +26,7 @@ measurement.Status.parser			 = parseToStatus;
 
 measurement['Reflected Power'] = {} // Status
 measurement['Reflected Power'].code	 = 5;
-measurement['Reflected Power'].parser = bytes=>parseToIrtValue(bytes, 10) + ' dBm';
+measurement['Reflected Power'].parser =bytes=>parseToIrtValue(bytes, 10, ' dBm');
 
 measurement['LNB 2'] = {} // Status
 measurement['LNB 2'].code			 = 6;
@@ -58,7 +58,7 @@ measurement.lnb[1].description = 'Input Power';
 measurement.lnb[1].parser = data=>data.toString();
 measurement.lnb[2] = {}
 measurement.lnb.outputPower				 = 2;
-measurement.lnb[2].description = 'Otput Power';
+measurement.lnb[2].description = 'Output Power';
 measurement.lnb[2].parser = data=>data.toString();
 measurement.lnb[3] = {}
 measurement.lnb.unitTemperature			 = 3;

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+</head>
+
+<body>
+
+	<div class="container-fluid" th:fragment="dump">
+			<div class="container-fluid">
+				<div class="row mb-2 mt-2">
+					<div class="col">
+						<input id="cbDumpDevice" type="radio" name="dumpSelect" class="btn-check" autocomplete="off" value="1" checked="checked">
+						<label for="cbDumpDevice" class="btn btn-outline-info form-control">Device</label>
+					</div>
+					<div class="col">
+						<input id="cbDumpDump" type="radio" name="dumpSelect" class="btn-check" autocomplete="off" value="2">
+						<label for="cbDumpDump" class="btn btn-outline-info form-control">Dump</label>
+					</div>
+					<div class="form-floating col mb-2">
+						<input id="dumpAddress" type="number" class="form-control" placeholder="Address">
+						<label for="dumpAddress">Address</label>
+					</div>
+					<div class="col-auto">
+						<button id="btnDumpGet" type="button" class="btn btn-outline-success" disabled="disabled">Get</button>
+					</div>
+				</div>
+				<div class="card row mb-2" >
+					<div class="col">
+						<textarea id="dumpResult" class="form-control" rows="20" readonly="readonly"></textarea>
+					</div>
+				</div>
+				<div class="card row">
+					<div class="col">
+						<textarea id="dumpHelp" class="form-control" rows="20" readonly="readonly"></textarea>
+					</div>
+				</div>
+			</div>
+	</div>
+
+</body>
+</html>

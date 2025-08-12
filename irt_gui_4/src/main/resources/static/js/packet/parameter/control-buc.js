@@ -13,7 +13,7 @@ config.Mute.parser			 = converter.parseToBoolean;
 
 config.Gain				 = {}
 config.Gain.code			 = 3;
-config.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 1);
+config.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 10);
 
 config.gainRange			 = {}
 config.gainRange.code		 = 5;
@@ -21,7 +21,7 @@ config.gainRange.parser	 = converter.parseToShortArray;
 
 config.Attenuation			 = {}
 config.Attenuation.code	 = 4;
-config.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 1);
+config.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 10);
 
 config.attenuationRange	 = {}
 config.attenuationRange.code = 6;
@@ -53,7 +53,7 @@ config.Name.parser			 = data=>data.toString();
 
 config.Status				 = {}	// Redundancy status
 config.Status.code			 = 15;
-config.Status.parser		 = converter.parseToIrtValue;
+config.Status.parser		 = converter.parseToInt;
 
 config.Online				 = {}	// Redundancy online
 config.Online.code			 = 14;

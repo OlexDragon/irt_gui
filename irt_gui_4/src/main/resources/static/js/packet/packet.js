@@ -14,8 +14,8 @@ export default class Packet{
 		// From bytes
 		if(Array.isArray(header)){
 			const array = [...header];
-			if(array[0]==FLAG_SEQUENCE)
-				array.splice(0,1)
+			while(array[0]==FLAG_SEQUENCE)
+				array.splice(0,1);
 			const flagseqIndex = array.indexOf(FLAG_SEQUENCE);
 			const bytes = byteStuffing(flagseqIndex<0 ? array : array.splice(0, flagseqIndex));
 //			console.log(bytes);

@@ -1,8 +1,11 @@
 package irt.gui.web;
 
 import java.awt.Desktop;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
@@ -33,6 +36,31 @@ public class Gui4 {
 			name = "localhost";
 		}
 
+		Resource resource = new ClassPathResource("/application.properties");
+		Properties props;
+		Object port;
+		try {
+			props = PropertiesLoaderUtils.loadProperties(resource);
+			port = props.get("server.port");
+		} catch (IOException e) {
+			logger.catching(e);
+			port = "8085";
+		}
+
+		final String urlStr = "http://" + name + ":" + port;
+
+		try {
+			URL url = new URL(urlStr + "/exit");
+			HttpURLConnection con = (HttpURLConnection) url.openConnection();
+			con.setConnectTimeout(20);
+			con.setRequestMethod("GET");
+	        int code = con.getResponseCode();
+	        logger.trace(code);
+	        Thread.sleep(1000);
+		} catch (Exception e) {
+			logger.catching(Level.TRACE, e);
+		}
+
 		try {
 
 			SpringApplication.run(Gui4.class, args);
@@ -43,10 +71,8 @@ public class Gui4 {
 
 		try {
 
-			Resource resource = new ClassPathResource("/application.properties");
-			Properties props = PropertiesLoaderUtils.loadProperties(resource);
-			final Object port = props.get("server.port");
-			Desktop.getDesktop().browse(new URI("http://" + name + ":" + port));
+			final URI uri = new URI(urlStr);
+			Desktop.getDesktop().browse(uri);
 
 		} catch (Exception e) {
 			logger.catching(e);

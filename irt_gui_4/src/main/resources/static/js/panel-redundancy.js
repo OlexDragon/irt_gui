@@ -1,9 +1,8 @@
 import * as serialPort from './serial-port.js'
 import f_deviceType from './packet/service/device-type.js'
-import Packet from './packet/packet.js'
 import groupId from './packet/packet-properties/group-id.js'
 import packetId from './packet/packet-properties/packet-id.js'
-import control, {code, parser} from './packet/parameter/control.js'
+import control, {parser} from './packet/parameter/control.js'
 
 const $card = $('#userCard');
 const $body = $('#redundancy-tab-pane');
@@ -14,7 +13,13 @@ let $redundancyImg;
 let $btnSetOnline;
 let $redundancyStatus;
 
-const action = {packetId: packetId.redundancyAll, groupId: groupId.configuration, data: {}, function: 'f_Redundancy'};
+const action = {
+	packetId: packetId.redundancyAll,
+	groupId: groupId.configuration,
+	data: {
+		parameterCode: [control.Redundancy.code, control.Name.code, control.Mode.code, control.Status.code]
+	},
+	function: 'f_Redundancy'};
 
 let interval;
 let delay = 5000;
@@ -31,7 +36,6 @@ export function start(){
 		$redundancyImg = $('#redundancyImg');
 		$btnSetOnline = $('#btnSetOnline').click(onSendCommand);
 		$redundancyStatus = $('#redundancyStatus');
-		setTimeout(sendRequest, 100);
 		clearInterval(interval);
 		interval = setInterval(run, delay);
 	});
@@ -55,68 +59,20 @@ function chooseFragmentName(){
 	}
 }
 
-let buisy;
 function run(){
 	if(!serialPort.doRun()){
 		stop();
 		return;
 	}
 
-	if(buisy){
+	if(action.buisy){
 		console.log('Buisy')
 		return
 	}
 
-	buisy = true;
+	action.buisy = true;
 
-	sendRequest();
-}
-
-function sendRequest(packet){
-
-	if(!$redundancyStatus){
-		buisy = false;
-		return;
-	}
-
-	const requestPacket =  packet ? packet : new RequestPackt(packetId);
-
-	serialPort.postObject('/serial/send', requestPacket)
-	.done(data=>{
-		buisy = false;
-
-		if(!data.answer?.length){
-			console.warn("No answer.");
-			blink($card, 'connection-wrong');
-			return;
-		}
-		blink($card);
-
-		if(!data.function){
-			console.warn("No function name.");
-			return;
-		}
-
-		const packet = new Packet(data.answer, true); // true - packet with LinkHeader
-
-		if(!packetIds.includes(packet.header.packetId)){
-			console.log(packet);
-			console.warn('Received wrong packet.');
-			blink($card, 'connection-wrong');
-			return;
-		}
-
-		module[data.function](packet);
-	})
-	.fail((jqXHR)=>{
-		buisy = false;
-		blink($card, 'connection-fail');
-		if(jqXHR.responseJSON?.message){
-			if(showError)
-				serialPort.showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
-		}
-	
-	});
+	serialPort.postObject($card, action);
 }
 
 action.f_Redundancy = function(packet){
@@ -129,8 +85,6 @@ action.f_Redundancy = function(packet){
 		blink($card, 'connection-wrong');
 		return;
 	}
-
-	blink($card);
 
 	payloads.forEach(parse);
 }

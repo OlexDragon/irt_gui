@@ -92,7 +92,6 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		final Optional<PacketTask> any = queue.parallelStream().filter(packetTask::equals).findAny();
 
 		if(any.isPresent() && !requestPacket.getCommand()) {
-			logger.error("Equals\n\t{}\n\t{}", packetTask.getPacket(), any.get().getPacket());
 			any.get().tasks.add(task);
 		}else {
 			packetTask.tasks.add(task);

@@ -2,7 +2,7 @@ import * as serialPort from './serial-port.js'
 import f_unitType from './packet/service/device-type.js'
 import packetId from './packet/packet-properties/packet-id.js'
 import groupId from './packet/packet-properties/group-id.js'
-import { onTypeChange } from './panel-info.js'
+import {type as unitType, onTypeChange } from './panel-info.js'
 
 const $unitsSelect = $('#unitsSelect');
 
@@ -13,8 +13,16 @@ let interval;
 
 const action = {packetId: packetId.module, groupId: groupId.control, data: {}, function: 'f_modules'};
 
-setTimeout(typeChange, 100);
+serialPort.onStart(startStop);
+function startStop(yes){
+	yes ? start() : stop();
+}
 let type;
+setTimeout(()=>{
+	type = unitType?.toString();
+	typeChange();
+}, 100);
+
 function typeChange(){
 	onTypeChange(t=>{
 		const str = t.toString();
@@ -22,7 +30,7 @@ function typeChange(){
 			type = str;
 			action.data.parameterCode = undefined;
 			clear();
-			stop();
+			serialPort.onStart(startStop);
 			start();
 		}
 	});
@@ -59,7 +67,7 @@ export function change(e){
 async function getParser(){
 
 	if(!parameter.parser){
-		const {default: config, parser} = await import('./packet/parameter/config-buc.js');
+		const {default: config, parser} = await import('./packet/parameter/config-modules.js');
 		parameter.config = config;
 		parameter.parser = parser;
 	}
@@ -73,7 +81,6 @@ async function getParser(){
 
 function run(){
 	if(action.packetError){
-		stop();
 		clear();
 		return;
 	}
@@ -104,7 +111,7 @@ action.f_modules = (packet) =>{
 			if(addElements(pl.data))
 				run();
 			else
-				stop();
+				clear();
 			break;
 
 		case parameter.config.activeModule:
@@ -161,6 +168,9 @@ function onChange({currentTarget:{value}}){
 }
 
 function clear(){
+	console.warn('clear()')
+	stop();
 	map.clear();
 	$unitsSelect.empty();
+	serialPort.removeOnStart(startStop);
 }

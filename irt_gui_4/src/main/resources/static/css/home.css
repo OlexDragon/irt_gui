@@ -13,3 +13,9 @@
 .toast-body{
 	white-space: pre-wrap;
 }
+.input-selected{
+	background-color: yellow;
+}
+.pre-line{
+	white-space: pre-line;
+}

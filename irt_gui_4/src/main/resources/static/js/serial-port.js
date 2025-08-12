@@ -5,7 +5,6 @@ import Baudrate from './classes/baudrate.js'
 import {start as summaryAlarmStart, stop as summaryAlarmStop, textToStatus, closed} from './panel-summary-alarm.js'
 import {status as f_alarmStatus } from './packet/parameter/value/alarm-status.js'
 import packetType from './packet/packet-properties/packet-type.js'
-//import { start as unitsStart, stop as unitsStop} from './panel-units.js'
 
 export let serialPort;
 export let showError;
@@ -20,6 +19,11 @@ const btnStartEvents = [];
 
 export function onStart(cb){
 	btnStartEvents.push(cb);
+}
+export function removeOnStart(cb){
+	const index = btnStartEvents.indexOf(cb);
+	if(index>=0)
+		btnStartEvents.splice(index, 1);
 }
 
 export function postObject($card, action){
@@ -98,7 +102,6 @@ function countConnections(){
 
 function showExitModal(){
 	summaryAlarmStop(); 
-	import('./panel-units.js').then(m=>m.stop());
 	btnStartEvents.forEach(cb=>cb(false));
 	$modal.load('/modal/exit');
 	$modal.attr('data-bs-backdrop', 'static');
@@ -125,8 +128,6 @@ function toggleStart(){
 		case 'Start':
 			btnStartEvents.forEach(cb => cb(true));
 			summaryAlarmStart();
-			if(unitAddrClass.unitAddress)
-				import('./panel-units.js').then(m=>m.start());
 			$lbl.text('Stop');
 			$btnStart.attr('checked', true);
 			countInterval = setInterval(countConnections, 3000);
@@ -135,7 +136,6 @@ function toggleStart(){
 		default:
 			btnStartEvents.forEach(cb => cb(false));
 			summaryAlarmStop(); 
-			import('./panel-units.js').then(m=>m.stop());
 			$lbl.text('Start');
 			$btnStart.attr('checked', false);
 			clearInterval(countInterval);
@@ -157,11 +157,6 @@ function btnShowErrorsChange(e){
 }
 
 function send($card, toSend, action){
-//	if(!toSend.data){
-//		action.buisy = false;
-//		console.error(action);
-//		return;
-//	}
 		var json = JSON.stringify(toSend);
 
 		return $.ajax({
@@ -180,13 +175,13 @@ function send($card, toSend, action){
 					}
 
 					if(!data.answer?.length) {
-						console.warn("No answer.");
+						console.warn("No answer.", data);
 						blink($card, 'connection-wrong');
 						return;
 					}
 
 					if(!data.function) {
-						console.warn("No function name.");
+						console.warn("No function name.", data);
 						return;
 					}
 

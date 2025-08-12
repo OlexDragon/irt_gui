@@ -1,9 +1,22 @@
 export default class Controller{
 
 	_parameter;
+	#name;
 
 	constructor($card){
 		this._$card = $card;
+	}
+
+	get name(){
+		return this.#name;
+	}
+	set name(name){
+		if(this.#name){
+			console.error('A name can only be defined once.')
+			return;
+		}
+
+		this.#name = name;
 	}
 
 	/**

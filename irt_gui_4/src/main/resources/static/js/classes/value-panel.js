@@ -16,7 +16,7 @@ export default class ValuePanel{
 
 //		setTimeout(()=>new bootstrap.Tooltip($rangeInput), 10000);
 		this._fields.$range = $body.find(`input.form-range`).on('input', this.#rangeOnInput).change(this.#rangeOnChange);
-		this._fields.$input = $body.find(`input.control`).change(this.#inputOnChange).keydown(this.#inputOnKeydown).focus(this.#onFocus).blur(this.#onBlur);
+		this._fields.$input = $body.find(`input.control`).change(this.#inputOnChange).keydown(this.#inputOnKeydown).focus(this.#onFocus).blur(this.#onBlur).on('input', this.#onInpot.bind(this));
 		this._fields.$step = $body.find(`input.step`).change(this.#stepOnChange).attr('data-input-name', `${name}-step`);
 		if(!(this._fields.$range.length && this._fields.$input.length && this._fields.$step.length))
 			throw new Error(name + ': There cannot be empty fields.')
@@ -203,17 +203,17 @@ export default class ValuePanel{
 	#inputOnChange = ({currentTarget:el})=>{
 		const rVal = Math.abs(this._fields.$range.val());
 		let value = +el.value;
-		if(value===rVal)
-			return;
+		if(value!==rVal){
 
-		const step = this._fields.$step.val() || this._fields.$range.prop('step');
-		if(step){
-			if((rVal-value)<0)
-				value = rVal + (+step);
-			else
-				value = rVal - step;
-			el.value = value;
+			const step = this._fields.$step.val() || this._fields.$range.prop('step');
+			if(step){
+				if((rVal-value)<0)
+					value = rVal + (+step);
+				else
+					value = rVal - step;
+				el.value = value;
 				
+			}
 		}
 		this._fields.$range.val(value*this.multiplier);
 		const v = Math.abs(this._fields.$range.val());
@@ -268,9 +268,20 @@ export default class ValuePanel{
 			}
 			break;
 
-//		default:
-//			console.log(e.code)
+		case 'Escape':
+			const escape = this._escape();
+			if(escape){
+				e.currentTarget.value = escape;
+				this.#onInpot(e);
+			}
+			break;
+
+		default:
+			console.log(e.code)
 		}
+	}
+	#onInpot({currentTarget:{value}}){
+		this._fields.$range.val(value*this.multiplier);
 	}
 	#onFocus = ()=>this.#inFocus = true;
 	#onBlur = ()=>this.#inFocus = false;

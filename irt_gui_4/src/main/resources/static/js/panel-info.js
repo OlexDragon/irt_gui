@@ -1,12 +1,15 @@
 import * as serialPort from './serial-port.js'
+import { change as unitChange} from './panel-units.js'
 import packetId from './packet/packet-properties/packet-id.js'
 import groupId from './packet/packet-properties/group-id.js'
-import { change as unitChange} from './panel-units.js'
+import { onStatusChange } from './panel-summary-alarm.js'
 
 const $card = $('.infoCard');
 const $body = $('.info');
 
 export let type;
+let serialNumber
+
 const map = new Map();
 const parameter = {};
 
@@ -14,19 +17,33 @@ let started;
 let interval;
 const action = {packetId: packetId.deviceInfo, groupId: groupId.deviceInfo, data: {}, function: 'f_Info'};
 
-serialPort.onStart(onStart);
+onStatusChange(statusChange);
+
+function statusChange(alarmStatus){
+	const doRun = alarmStatus.index !== 7 && alarmStatus.index !== 8;
+	if(doRun && serialPort.doRun())
+		start();
+	else{
+		stop();
+	}
+}
+
 unitChange(()=>{
 	stop();
 	start();
 })
 
+serialPort.onStart(onStart);
 function onStart(doRun){
-	if(!doRun){
+	if(doRun)
+		console.log('start')
+//		start();
+	else
 		stop();
-	}
 }
 
 export function start(){
+	console.warn('start')
 	if(interval)
 		return;
 
@@ -43,6 +60,11 @@ export function stop(){
 const typeChangeEvents = new Set();
 export function onTypeChange(e){
 	typeChangeEvents.add(e);
+}
+
+const serialNumberChangeEvents = new Set();
+export function onSerialChange(e){
+	serialNumberChangeEvents.add(e);
 }
 
 async function getParameter(){
@@ -98,13 +120,18 @@ action.f_Info = function(packet){
 		const val = parser(pl.data);
 		if($row?.length){
 			const $val = $row.find('#' + valId);
-			if(parameterCode === parameter.deviceInfo.type){
+			switch(parameterCode){
+			case parameter.deviceInfo.type:
 				const compar = val.filter((v,i)=>v===type[i]);
 				if(compar.length !== type.length){
 					$val.text(val);
 				}
-			}else if(val !== $val.text())
-				$val.text(val);
+				break;
+
+			default:
+				if(val !== $val.text())
+					$val.text(val);
+			}
 		}else{
 			const showText = parameter.description(parameterCode);
 			const $row = $('<div>', {class: 'row'});
@@ -135,9 +162,19 @@ action.f_Info = function(packet){
 			break;
 
 		case parameter.deviceInfo.serialNumber:
-			const title =  val + ' : IRT Technologies';
-			if(document.title!==title)
-				document.title = title;
+			if(serialNumber !== val){
+				serialNumber = val;
+				import('./fw-upgrade.js').then(m=>m.setSerialNumber(val));
+				serialNumberChangeEvents.forEach(cb=>cb(val));
+				if($row)
+					$row.find(`#${valId}`).attr('href', `http://${val}`);
+			}
+			break;
+
+		case parameter.deviceInfo.serialNumber:
+			const split = document.title.split(' - ');
+			if(val!==split[0])
+				document.title = val + ' - ' + split[1];
 		}
 	});
 }
@@ -148,11 +185,34 @@ function changeType(val){
 	typeChangeEvents.forEach(e=>e(type));
 }
 
-const MODULES = ['./panel-measurement.js', './panel-config.js', './user-panels.js']
+const onStartEvent = [];
+export function onStartAll(cb){
+	onStartEvent.push(cb);
+}
+
 function startAll(){
-	MODULES.forEach(u=>import(u).then(m=>m.start()));
+	onStartEvent.forEach(cb=>cb(true));
 }
 
 function stopAll(){
-	MODULES.forEach(u=>import(u).then(m=>m.stop()));
+onStartEvent.forEach(cb=>cb(false));
+}
+
+export function profileSearch(cb){
+	if(!serialNumber){
+		setTimeout(()=>getProfilePath(cb), 100);
+		return;
+	}
+	getProfilePath(cb);
+}
+
+function getProfilePath(cb){
+	if(!serialNumber){
+		cb({warn: 'No serial number'});
+		return;
+	}
+	$.get('/file/path/profile', {sn: serialNumber})
+	.done(data=>{
+		cb({path: data})
+	})
 }

@@ -56,6 +56,18 @@ const packetIdArray = Object.freeze(
 		'register4',
 		'registerSet',
 
+		'calMode',
+		'calModeSet',
+
+		'dacs',
+		'dacsSet',
+
+		'admv1013',
+		'admv1013Set',
+
+		'dump',
+		'dumpHelp',
+
 		'noAction'
 	]);
 

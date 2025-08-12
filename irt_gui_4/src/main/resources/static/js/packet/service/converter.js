@@ -1,4 +1,5 @@
 import {status as alarmStatus} from '../parameter/value/alarm-status.js'
+import IrtValue from '../parameter/value/irt-value.js'
 
 export function shortToBytes(val, reverse){
 
@@ -133,22 +134,25 @@ function parseToArray(bytes, size){
 export function parseToBoolean(bytes){
 	if(!bytes?.length)
 		return '';
-	return bytes[0]>0;
+	return bytes[bytes.length-1]>0;
 }
 
-const prefixes = ['UNDEFINED', '', '<', '>']
-export function parseToIrtValue(bytes, divider){
+const prefixes = [, '', '<', '>', 'N/A']
+export function parseToIrtValue(bytes, divider, postfix){
 
 	if(!bytes?.length)
-		return 'N/A';
+		return new IrtValue();
 
+	let prefix;
 	if(bytes.length===3){
-		const index = bytes.splice(0,1)&3;
-		const prefix = prefixes[index];
-		const value = divider ? parseToInt(bytes)/divider : parseToInt(bytes);
-		return prefix + value;
-	}else
-		return divider ? parseToInt(bytes)/divider : parseToInt(bytes);
+		const index = bytes.splice(0,1)&7;
+		if(index===0)
+			return new IrtValue('UNDEFINED');
+		prefix = prefixes[index];
+		if(index===4)
+			return new IrtValue(prefix);
+	}
+	return new IrtValue(parseToInt(bytes), prefix, postfix, divider);
 }
 
 export function parseToLoFrequency(bytes){
@@ -156,7 +160,9 @@ export function parseToLoFrequency(bytes){
 	const lo = [];
 	while(b.length){
 		const index = b.splice(0,1)&0xff;
-		const value = (parseToBigInt(b.splice(0,8))/1000000n) + ' MHz';
+		let value
+		if(b.length)
+			value = (parseToBigInt(b.splice(0,8))/1000000n) + ' MHz';
 		lo[index] = value;
 	}
 	return lo;
@@ -185,9 +191,9 @@ statusBits.buc = {};
 statusBits.buc.mute = {};
 statusBits.buc.mute.value = 1;
 statusBits.buc.mute.bitmask = 1;
-statusBits.buc.pll_unknown = {};
-statusBits.buc.pll_unknown.value = 0;
-statusBits.buc.pll_unknown.bitmask = 6;
+//statusBits.buc.pll_unknown = {};
+//statusBits.buc.pll_unknown.value = 0;
+//statusBits.buc.pll_unknown.bitmask = 6;
 statusBits.buc.locked = {};
 statusBits.buc.locked.value = 2;
 statusBits.buc.locked.bitmask = 6;
@@ -223,7 +229,7 @@ export function parseToAlarmStatus(bytes){
 }
 export function parseToAlarmString(bytes){
 	const value = {};
-	value.id = parseToIrtValue(bytes.splice(0,2));
+	value.id = parseToInt(bytes.splice(0,2));
 	value.string = parseToString(bytes);
 	return value;
 }

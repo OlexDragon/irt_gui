@@ -5,11 +5,11 @@ const config = {};
 //	FCM Parameter CODE
 config.Gain					 = {}
 config.Gain.code			 = 1;
-config.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 1);
+config.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 10);
 
 config.Attenuation			 = {}
 config.Attenuation.code		 = 2;
-config.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 1);
+config.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 10);
 
 config.loSet				 = {}
 config.loSet.code			 = NaN;

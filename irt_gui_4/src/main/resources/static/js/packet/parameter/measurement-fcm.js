@@ -18,15 +18,15 @@ measurement.Status.parser = data=>new FcmStatus(parseToInt(data)).all;
 
 measurement['Input Power'] = {};
 measurement['Input Power'].code	 = 4;
-measurement['Input Power'].parser = bytes=>parseToIrtValue(bytes, 10) + ' dBm';
+measurement['Input Power'].parser = bytes=>parseToIrtValue(bytes, 10, ' dBm');
 
-measurement['Otput Power'] = {};
-measurement['Otput Power'].code		 = 5;
-measurement['Otput Power'].parser = bytes=>parseToIrtValue(bytes, 10) + ' dBm';
+measurement['Output Power'] = {};
+measurement['Output Power'].code		 = 5;
+measurement['Output Power'].parser = bytes=>parseToIrtValue(bytes, 10, ' dBm');
 
 measurement.Temperature = {};
 measurement.Temperature.code	 = 3;
-measurement.Temperature.parser = bytes=>parseToInt(bytes)/10 + ' °C';
+measurement.Temperature.parser = bytes=>parseToIrtValue(bytes, 10, ' °C');
 
 measurement['5.5V'] = {};
 measurement['5.5V'].code			 = 6;
@@ -46,7 +46,7 @@ measurement.Current.parser = bytes=>parseToInt(bytes)/1000 + ' mA';
 
 measurement['CPU Temperature'] = {};
 measurement['CPU Temperature'].code	 = 10;
-measurement['CPU Temperature'].parser = bytes=>parseToInt(bytes)/10 + ' °C';
+measurement['CPU Temperature'].parser = bytes=>parseToIrtValue(bytes, 10, ' °C');
 
 //measurement['Input Power'] = {}
 //measurement['Input Power'].code		 = 11;
