@@ -22,6 +22,7 @@ public class RequestPacket {
 	@NonNull private byte[] bytes;
 	@NonNull private String function;
 
+	private String name;
 	private Integer baudrate;
 	private Integer timeout;
 	@JsonSerialize(using = BytesToStringSerializer.class)

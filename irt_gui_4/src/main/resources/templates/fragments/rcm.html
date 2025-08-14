@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+</head>
+
+<body>
+
+	<div class="container" th:fragment="rcm">
+		<div class="card-body">
+		<div class="row m-2">
+			<div class="form-floating col-3">
+				<input id="dacSaved" type="number" class="form-control" placeholder="Saved Value" readonly="readonly" disabled="disabled">
+				<label for="dacSaved">Saved Value</label>
+			</div>
+			<div class="col"></div>
+			<div class="form-floating col-3">
+				<input id="dacStep" type="number" class="form-control" placeholder="Step">
+				<label for="dacStep">Step</label>
+			</div>
+		</div>
+		<div class="row m-2">
+			<div class="col">
+				<input id="dacRange" type="range" class="form-range" disabled="disabled">
+			</div>
+		</div>
+		<div class="row m-2">
+			<div class="form-floating col-3">
+				<input id="dac1" type="number" class="form-control dac" placeholder="DAC 1" data-rcm="3" disabled="disabled">
+				<label for="dac1">DAC</label>
+			</div>
+		</div>
+		</div>
+	</div>
+
+</body>
+</html>

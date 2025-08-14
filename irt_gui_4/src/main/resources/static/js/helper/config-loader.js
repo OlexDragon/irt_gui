@@ -49,10 +49,11 @@ export default class MeasurementLoader{
 			this.#getAll = this.#forCONVERTER;
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-fcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/control-fcm.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/config-fcm.js');
 			break;
 
 		case 'CONTROLLER_ODRC':
+		case 'REFERENCE_BOARD':
 			return;
 
 			default:
@@ -61,7 +62,7 @@ export default class MeasurementLoader{
 			this.#getAll = this.#forBUC;
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/control-buc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/config-buc.js');
 		}
 
 		loadC.then(this.#setController.bind(this));

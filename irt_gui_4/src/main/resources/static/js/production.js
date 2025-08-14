@@ -58,8 +58,20 @@ async function loadController(id){
 
 		case 'cbDACs':
 		{
-			const {default:c} = await import('./production/controller-dacs.js');
-			setController(id, c);
+
+			switch(dType){
+
+			case 'REFERENCE_BOARD':
+			{
+				const {default:c} = await import('./production/controller-rcm.js');
+				setController(id, c);
+				break;
+			}
+
+			default:
+				const {default:c} = await import('./production/controller-dacs.js');
+				setController(id, c);
+			}
 			break;
 		}
 
@@ -129,8 +141,10 @@ let dType;
 function typeChange(type){
 	const $navbar = $prodactionNav.parents('.navbar')
 	const $admv = $navbar.find('#admv1013');
-	dType = f_deviceType(type[0]);
-
+	const t = f_deviceType(type[0]);
+	if(t===dType)
+		return;
+	dType = t;
 	if(controller)
 		controller.typeName = dType
 	switch(dType){
@@ -143,6 +157,10 @@ function typeChange(type){
 			$navbar.append($div);
 		}
 		return;
+
+	case 'REFERENCE_BOARD':
+		$prodactionNav.filter(':checked').filter((_,{id})=>id==='cbDACs').change();
+		break;
 
 	default:
 		console.log(type, dType);

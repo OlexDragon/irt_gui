@@ -20,6 +20,8 @@ export default async function (action, callBack){
 			throw new Error('The variable "action" must have function');
 
 		action.toSend = {};
+		if(action.name)
+			action.toSend.name = action.name;
 		action.toSend.id = action.packetId;
 		action.toSend.unitAddr = addr;
 		action.toSend.timeout = action.timeout ?? 2000;
@@ -83,6 +85,7 @@ async function getRest(action){
 	case packetId.irpcHoverA:
 	case packetId.irpcHoverB:
 	case packetId.calModeSet:
+	case packetId.dacSetRcm:
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, intToBytes(action.data.value)), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
@@ -100,6 +103,7 @@ async function getRest(action){
 	case packetId.configAll:
 	case packetId.comAll:
 	case packetId.redundancyAll:
+	case packetId.dacRcm:
 		{
 			const pls = action.data.parameterCode.map(pc=>new Payload(pc));
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);

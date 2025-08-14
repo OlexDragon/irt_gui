@@ -157,6 +157,7 @@ function btnShowErrorsChange(e){
 }
 
 function send($card, toSend, action){
+		
 		var json = JSON.stringify(toSend);
 
 		return $.ajax({

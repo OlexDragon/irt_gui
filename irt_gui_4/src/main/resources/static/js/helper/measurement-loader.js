@@ -48,6 +48,12 @@ export default class MeasurementLoader{
 			loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.js');
 			break;
 
+		case 'REFERENCE_BOARD':
+			this.#packetId = packetId.measurement;
+			loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/measurement-rcm.js');
+			break;
+
 		case 'CONTROLLER_ODRC':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
