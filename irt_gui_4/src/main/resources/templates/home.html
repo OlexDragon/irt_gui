@@ -6,7 +6,8 @@
     <meta charset="UTF-8"/>
     <meta name="google" content="notranslate" />
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'/>
+<!-- 	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'/> -->
+	<link rel='stylesheet' href='/css/bs.css'/>
 	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
 </head>
 
@@ -56,7 +57,7 @@
 				</div>
 				<div id="conections" class="col text-center text-primary-emphasis fs-5 mb-3">
 				</div>
-				<div class="col"><button id="appExit" class="btn btn-outline-dark form-control">Exit</button></div>
+				<div class="col"><button  type="button" id="appExit" class="btn btn-outline-dark form-control">Exit</button></div>
 			</div>
 		</div>
 		<div class="col">
@@ -65,18 +66,84 @@
 				<div class="col-lg-6 col-12 mt-2">
 					<div class="card infoCard">
   						<div class="card-body info">
+  							<div class="placeholder-wave">
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+  							</div>
 						</div>
 					</div>
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
 					<div class="card measurementCard">
   						<div class="card-body measurement">
+ 							<div class="placeholder-wave">
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 							</div>
 						</div>
 					</div>
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
 					<div class="card controlCard">
   						<div class="card-body control">
+ 							<div class="placeholder-wave">
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+  							</div>
 						</div>
 					</div>
 				</div>
@@ -85,22 +152,36 @@
   						<div class="card-body userPanels">
   							<ul class="nav nav-tabs">
  								<li class="nav-item">
-									<button id="userTabAlarm" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" type="button" role="tab" aria-controls="alarms-tab-pane" aria-selected="false">Alarms</button>
+									<button  type="button" id="userTabAlarm" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" role="tab" aria-controls="alarms-tab-pane" aria-selected="false">Alarms</button>
 								</li>
 								<li class="nav-item">
-									<button id="userTabNetwork" class="nav-link"  data-bs-toggle="tab" data-bs-target="#network-tab-pane" type="button" role="tab" aria-controls="network-tab-pane" aria-selected="false">Network</button>
+									<button  type="button" id="userTabNetwork" class="nav-link"  data-bs-toggle="tab" data-bs-target="#network-tab-pane" role="tab" aria-controls="network-tab-pane" aria-selected="false">Network</button>
 								 </li>
 								 <li class="nav-item visually-hidden">
-								 	<button id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" type="button" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
+								 	<button  type="button" id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
 								 </li>
 								 <li class="nav-item">
-								 	<button id="userTabCOM" class="nav-link"  data-bs-toggle="tab" data-bs-target="#com-tab-pane" type="button" role="tab" aria-controls="com-tab-pane" aria-selected="false">COM</button>
+								 	<button  type="button" id="userTabCOM" class="nav-link"  data-bs-toggle="tab" data-bs-target="#com-tab-pane" role="tab" aria-controls="com-tab-pane" aria-selected="false">COM</button>
 								 </li>
 							</ul>
 
 							<div class="tab-content text-cente">
 								<div class="tab-pane fade" id="alarms-tab-pane" role="tabpanel" aria-labelledby="alarm-tab" tabindex="0">
-								</div>
+									<div class="placeholder-wave">
+ 										<div class="row justify-content-evenly mb-2">
+  											<span class="placeholder col-5"></span>
+  											<span class="placeholder col-5"></span>
+  										</div>
+ 										<div class="row justify-content-evenly mb-2">
+  											<span class="placeholder col-5"></span>
+  											<span class="placeholder col-5"></span>
+  										</div>
+ 										<div class="row justify-content-evenly mb-2">
+  											<span class="placeholder col-5"></span>
+ 	 										<span class="placeholder col-5"></span>
+  										</div>
+  									</div>
+ 								</div>
 								<div class="tab-pane fade" id="network-tab-pane" role="tabpanel" aria-labelledby="network-tab" tabindex="0">
 								</div>
 								<div class="tab-pane fade" id="redundancy-tab-pane" role="tabpanel" aria-labelledby="redundancy-tab" tabindex="0">
@@ -141,10 +222,11 @@
 </div>
 <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
 </div>
+<div id="cover" class="page-cover"></div>
 
 	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
 	<script src="/webjars/js-cookie/3.0.1/js.cookie.js"></script>
-	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
+	<script src="/webjars/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
 	<script th:if="${cleareCash}">
 		const $m =
 		$('<div>', {class: 'modal fade', tabindex: -1})

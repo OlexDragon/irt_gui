@@ -77,7 +77,7 @@ const $btnShowErrors = $('#btnShowErrors').change(btnShowErrorsChange);
 	$btnShowErrors.prop('checked', showError);
 })();
 
-$('#appExit').click(async ()=>{
+const $appExit = $('#appExit').click(async ()=>{
 
 	clearInterval(interval);
 	clearInterval(countInterval);
@@ -233,11 +233,20 @@ function send($card, toSend, action){
 				textToStatus('Closed:The application is not responding.')
 		});
 }
+
+const $cover = $('#cover');
+function coverButSerial(){
+	$cover.addClass('cover');
+	$serialPort.addClass('to-front');
+	$appExit.addClass('to-front');
+}
 (function getPortNames(){
 	$.get('/serial/ports')
 	.done(ports=>{
-		if(!ports)
+		if(!ports?.length){
+			coverButSerial();
 			return;
+		}
 		const serialPortCookies = Cookies.get('serialPort');
 		ports.forEach(name=>{
 			const selected = serialPortCookies === name;
@@ -246,15 +255,9 @@ function send($card, toSend, action){
 			$('<option>', {text: name, selected: selected}).appendTo($serialPort);
 			if(selected){
 				$btnStart.attr('disabled', false);
-				toggleStart();
+				$serialPort.change();
 			}else
-				interval = setInterval(()=>{
-					if($serialPort.val()){
-						clearInterval(interval);
-						return;
-					}
-					showToast("Serial port not selected.", "Select the serial port connected to the device.", 'text-bg-warning bg-opacity-50')
-				}, 10000);
+				coverButSerial();
 		});
 	})
 	.fail((jqXHR)=>{
