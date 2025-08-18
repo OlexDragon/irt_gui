@@ -108,9 +108,9 @@ function showExitModal(){
 	$modal.modal('show');
 }
 
-function portSelected(e){
-	serialPort = e.currentTarget.value;
-	Cookies.set('serialPort', serialPort);
+function portSelected({currentTarget:value}){
+	coverButSerial();
+	Cookies.set('serialPort', value);
 	if($btnStart.prop('disabled'))
 		$btnStart.attr('disabled', false);
 	toggleStart();
@@ -235,16 +235,22 @@ function send($card, toSend, action){
 }
 
 const $cover = $('#cover');
-function coverButSerial(){
-	$cover.addClass('cover');
-	$serialPort.addClass('to-front');
-	$appExit.addClass('to-front');
+function coverButSerial(cover){
+	if($cover){
+		$cover.addClass('cover');
+		$serialPort.addClass('to-front');
+		$appExit.addClass('to-front');
+	}else{
+		$cover.removeClass('cover');
+		$serialPort.removeClass('to-front');
+		$appExit.removeClass('to-front');
+	}
 }
 (function getPortNames(){
 	$.get('/serial/ports')
 	.done(ports=>{
 		if(!ports?.length){
-			coverButSerial();
+			coverButSerial(true);
 			return;
 		}
 		const serialPortCookies = Cookies.get('serialPort');
@@ -257,7 +263,7 @@ function coverButSerial(){
 				$btnStart.attr('disabled', false);
 				$serialPort.change();
 			}else
-				coverButSerial();
+				coverButSerial(true);
 		});
 	})
 	.fail((jqXHR)=>{

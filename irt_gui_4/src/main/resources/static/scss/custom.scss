@@ -1,0 +1,15 @@
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+
+$placeholder-opacity-max: 0.01;
+$placeholder-opacity-min: 0.3;
+
+@import "bootstrap/scss/bootstrap";
+
+:root{
+	--bs-border-radius: 1.5rem;
+}
+// Your custom styles
+body {
+    background-color: #f8f9fa;
+}
