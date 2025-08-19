@@ -2,7 +2,7 @@ import f_toSend from './to-send.js'
 import Packet from './packet/packet.js'
 import UnitAddress from './classes/unit-address.js'
 import Baudrate from './classes/baudrate.js'
-import {start as summaryAlarmStart, stop as summaryAlarmStop, textToStatus, closed} from './panel-summary-alarm.js'
+import {start as summaryAlarmStart, stop as summaryAlarmStop, textToStatus, closed, onStatusChange} from './panel-summary-alarm.js'
 import {status as f_alarmStatus } from './packet/parameter/value/alarm-status.js'
 import packetType from './packet/packet-properties/packet-type.js'
 
@@ -76,7 +76,6 @@ const $btnShowErrors = $('#btnShowErrors').change(btnShowErrorsChange);
 	showError = Cookies.get('btnShowErrors')==='true';
 	$btnShowErrors.prop('checked', showError);
 })();
-
 const $appExit = $('#appExit').click(async ()=>{
 
 	clearInterval(interval);
@@ -108,9 +107,10 @@ function showExitModal(){
 	$modal.modal('show');
 }
 
-function portSelected({currentTarget:value}){
+function portSelected({currentTarget:{value}}){
 	coverButSerial();
-	Cookies.set('serialPort', value);
+	serialPort = value;
+	Cookies.set('serialPort', serialPort);
 	if($btnStart.prop('disabled'))
 		$btnStart.attr('disabled', false);
 	toggleStart();
@@ -236,7 +236,7 @@ function send($card, toSend, action){
 
 const $cover = $('#cover');
 function coverButSerial(cover){
-	if($cover){
+	if(cover){
 		$cover.addClass('cover');
 		$serialPort.addClass('to-front');
 		$appExit.addClass('to-front');
@@ -246,6 +246,36 @@ function coverButSerial(cover){
 		$appExit.removeClass('to-front');
 	}
 }
+
+const $baudrate = $('#baudrate');
+const $unitAddress = $('#unitAddress');
+const $summaryAlarmCard = $('#summaryAlarmCard');
+
+onStatusChange(s=>{
+	const index = (s.severities === 'TIMEOUT' ? 1 : 0) + (s.severities === 'Closed' ? 2 : 0)
+	switch(index){
+
+	case 1:
+		$btnStart.next().addClass('to-front');
+	case 2:
+		$cover.addClass('cover');
+		$serialPort.addClass('to-front');
+		$baudrate.addClass('to-front');
+		$unitAddress.addClass('to-front');
+		$summaryAlarmCard.addClass('to-front');
+		$appExit.addClass('to-front');
+		break;
+
+	default:
+		$cover.removeClass('cover');
+		$serialPort.removeClass('to-front');
+		$baudrate.removeClass('to-front');
+		$unitAddress.removeClass('to-front');
+		$btnStart.next().removeClass('to-front');
+		$summaryAlarmCard.removeClass('to-front');
+		$appExit.removeClass('to-front');
+	}
+});
 (function getPortNames(){
 	$.get('/serial/ports')
 	.done(ports=>{
@@ -262,9 +292,12 @@ function coverButSerial(cover){
 			if(selected){
 				$btnStart.attr('disabled', false);
 				$serialPort.change();
-			}else
-				coverButSerial(true);
+			}
 		});
+		if($serialPort.val())
+			coverButSerial();
+		else
+			coverButSerial(true);
 	})
 	.fail((jqXHR)=>{
 

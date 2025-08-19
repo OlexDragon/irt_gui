@@ -65,6 +65,11 @@ export default class DACController extends Controller{
 			this._typeName = 'converter'
 			break;
 
+		case 'BAIS_LOW_POWER':
+			this._action.data.value = [new Register(100,1), new Register(100,2)];
+			this._typeName = 'buc'
+			break;
+
 		default:
 			this._action.data.value = [new Register(100,1), new Register(100,2), new Register(100,3), new Register(100,4)];
 			this._typeName = 'buc'
@@ -93,12 +98,14 @@ export default class DACController extends Controller{
 					return false;
 				}
 			});
-			let now = new Date();
-			let hours = now.getHours();
-			let minutes = now.getMinutes();
-			let seconds = now.getSeconds();
+			const now = new Date();
+			const hours = now.getHours();
+			const minutes = now.getMinutes();
+			const seconds = now.getSeconds();
 
 			if(this._selected?.is($(element))){
+				if(this.#$dacSaved.val()!==`${reg.value}`)
+					this.#$dacSaved.val(reg.value);
 				if(this._selected.value !== reg.value){
 					this._selected.value = reg.value;
 					this.#$logs.append($('<div>', {class: 'row'}).append($('<div>', {class: 'col', text: `${hours}:${minutes}:${seconds}`})).append($('<div>', {class: 'col', text: reg.toString()})));

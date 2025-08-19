@@ -62,6 +62,7 @@ export default class MeasurementLoader{
 
 		default:
 			console.log(unitType);
+		case 'BAIS_LOW_POWER':
 		case 'BAIS':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');

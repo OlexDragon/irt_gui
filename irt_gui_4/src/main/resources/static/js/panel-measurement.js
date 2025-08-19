@@ -14,12 +14,14 @@ let controller;
 let loader = new MeasurementLoader();
 let interval;
 let buisy;
+let emptyCard;
 
 onStartAll(yes=>yes ? start() : stop())
 export function start(){
 	if(interval || buisy)
 		return;
 
+	emptyCard = $card.find('.placeholder').length;
 	buisy = true;
 	action.buisy = false;
 	if(action.packetId){
@@ -48,7 +50,7 @@ function onControllerLoaded(Controller){
 		return;
 	}
 	if(controllerName !== Controller.name){
-		$body.empty();
+		emptyCard || $body.empty();
 		controllerName = Controller.name;
 		controller = new Controller($card);
 		controller.parameter = loader.parameter;
@@ -80,4 +82,10 @@ function run(){
 	serialPort.postObject($card, action);
 }
 
-action.f_measurement = (packet)=>controller && (controller.update = packet.payloads);
+action.f_measurement = (packet)=>{
+		if(emptyCard){
+			emptyCard = false;
+			$body.empty();
+		}
+		controller && (controller.update = packet.payloads);
+	};

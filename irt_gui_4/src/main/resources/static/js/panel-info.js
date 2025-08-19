@@ -35,6 +35,7 @@ unitChange(()=>{
 
 serialPort.onStart(onStart);
 function onStart(doRun){
+	
 	if(doRun)
 		console.log('start')
 //		start();
@@ -42,8 +43,9 @@ function onStart(doRun){
 		stop();
 }
 
+let emptyCard;
 export function start(){
-	console.warn('start')
+	emptyCard = $card.find('.placeholder').length;
 	if(interval)
 		return;
 
@@ -133,6 +135,10 @@ action.f_Info = function(packet){
 					$val.text(val);
 			}
 		}else{
+			if(emptyCard){
+				emptyCard = false;
+				$body.empty();
+			}
 			const showText = parameter.description(parameterCode);
 			const $row = $('<div>', {class: 'row'});
 

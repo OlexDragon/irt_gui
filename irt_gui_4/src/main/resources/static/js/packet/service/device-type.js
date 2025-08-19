@@ -24,7 +24,7 @@ deviceType[102].type =  "BAIS";
 
 deviceType[110] = {}
 deviceType[110].description =  "BUC Low Power Ku";
-deviceType[110].type =  "BAIS";
+deviceType[110].type =  "BAIS_LOW_POWER";
 
 deviceType[111] = {}
 deviceType[111].description =  "BUC Low Power C";

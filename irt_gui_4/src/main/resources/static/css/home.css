@@ -20,19 +20,28 @@
 	white-space: pre-line;
 }
 .page-cover{
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100vh;
-      background-color: black;
-      opacity: 0;
-      transition: opacity 1s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+	width: 100%;
+	height: 100%;
+    background-color: black;
+    opacity: 0;
+	z-index: -1;
+    transition: opacity 1s ease, z-index 1s ease;
 }
 .page-cover.cover{
-      opacity: .5;
+	opacity: .5;
+	z-index: 99;
 }
 .to-front{
 	position: relative;
 	z-index: 100 !important;
+}
+.btn-outline-warning {
+  --bs-btn-color: #555353;
+}
+.logo-sm{
+	max-width: 80px;
+	height: auto;
 }

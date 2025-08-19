@@ -12,7 +12,7 @@
 
 	<groupId>irt.gui</groupId>
 	<artifactId>gui</artifactId>
-	<version>4.11</version>
+	<version>4.12</version>
 	<name>web</name>
 	<description>IRT GUI Application</description>
 	<url/>
@@ -140,7 +140,6 @@
 		<!--				<filtering>true</filtering>-->
 		<!--			</resource>-->
 		<!--		</resources>-->
-
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
