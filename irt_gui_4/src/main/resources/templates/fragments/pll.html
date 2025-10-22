@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+</head>
+
+<body>
+
+	<div class="container-fluid" th:fragment="admv1013">
+			<div class="container-fluid">
+				<div class="row mb-2 mt-2"><div class="col"><button type="button" class="btn btn-outline-success form-control admv1013-save" disabled="disabled">Save All</button></div></div>
+				<div class="row">
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardSpiControl" class="card mb-1 bs-info-bg-subtle">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regSpiControl" type="number" class="form-control register" placeholder="SPI_CONTROL (0)" readonly="readonly" disabled="disabled">
+											<label for="regSpiControl">SPI_CONTROL (0)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container-fluid">
+									<div class="row row-cols-1">
+										<div class="form-floating col mb-2">
+											<input id="regRevision" type="number" class="form-control" placeholder="REVISION (0-3 bit)" readonly="readonly" disabled="disabled">
+											<label for="regRevision">Revision ID (0-3 bit)</label>
+										</div>
+										<div class="form-floating col mb-2">
+											<input id="regChipIdl" type="number" class="form-control" placeholder="CHIP_ID (4-11 bit))" readonly="readonly" disabled="disabled">
+											<label for="regChipIdl">Chip ID (4-11 bit)</label>
+										</div>
+										<div class="col mb-2">
+											<input id="regSpiSoftReser" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regSpiSoftReser" class="btn btn-outline-secondary form-control">SPI Soft Reset</label>
+										</div>
+										<div class="col mb-2">
+											<input id="regParity" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regParity" class="btn btn-outline-secondary form-control text-truncate">Enable the Parity for Write Execution </label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardAlarm" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regAlarm" type="number" class="form-control register" placeholder="SPI_CONTROL (0)" readonly="readonly" disabled="disabled">
+											<label for="regAlarm">Alarm (1)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row mb-1">
+										<div class="col text-end">Parity Error (15)</div>
+										<div id="parityError" class="col text-center p-1"> </div>
+									</div>
+									<div class="row mb-1">
+										<div class="col text-end">Too Few Errors (14)</div>
+										<div id="tooFewErrors" class="col text-center p-1"> </div>
+									</div>
+									<div class="row mb-1">
+										<div class="col text-end">Too Many Errors (13)</div>
+										<div id="tooManyErrors" class="col text-center p-1"> </div>
+									</div>
+									<div class="row">
+										<div class="col text-end">Address Range Error (12)</div>
+										<div id="addressRangeError" class="col text-center p-1"> </div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardAlarmMask" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regSpiControl" type="number" class="form-control register" placeholder="SPI_CONTROL (0)" readonly="readonly" disabled="disabled">
+											<label for="regSpiControl">ALARM_MASKS (2)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="col mb-2">
+											<input id="regParityMask" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regParityMask" class="btn btn-outline-secondary form-control">Parity Error Mask (15)</label>
+										</div>
+										<div class="col mb-2">
+											<input id="regTooFewErrorsMask" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regTooFewErrorsMask" class="btn btn-outline-secondary form-control">Too Few Errors Mask (14)</label>
+										</div>
+										<div class="col mb-2">
+											<input id="regTooManyErrorsMask" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regTooManyErrorsMask" class="btn btn-outline-secondary form-control">Too Many Errors Mask (13)</label>
+										</div>
+										<div class="col mb-2">
+											<input id="regAddressRangeErrorMask" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regAddressRangeErrorMask" class="btn btn-outline-secondary form-control">Address Range Error Mask (12)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer">
+							<div class="row">
+							<div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div>
+							</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardEnable" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regSpiControl" type="number" class="form-control register" placeholder="Enable (3)" readonly="readonly" disabled="disabled">
+											<label for="regSpiControl">Enable (3)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="col mb-2">
+											<input id="regVgaPd" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regVgaPd" class="btn btn-outline-secondary form-control">Power Down the VGA Circuit (15)</label>
+										</div>
+									</div>
+									<div class="row row-cols-1">
+										<div class="col mb-2">
+											<input id="regMixerPd" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regMixerPd" class="btn btn-outline-secondary form-control">Power Down the Mixer Circuit (14)</label>
+										</div>
+									</div>
+									<div class="row row-cols-1">
+										<div class="col mb-2">
+											<input id="regQuadPd" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regQuadPd" class="btn btn-outline-secondary form-control">Enable LO Quad Circuit (13:11)</label>
+										</div>
+									</div>
+									<div class="row row-cols-1">
+										<div class="col mb-2">
+											<input id="regBandGapPd" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regBandGapPd" class="btn btn-outline-secondary form-control">Power Down the Transmitter Band Gap (10)</label>
+										</div>
+									</div>
+									<div class="row row-cols-1">
+										<div class="col mb-2">
+											<input id="regIfMode" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regIfMode" class="btn btn-outline-secondary form-control">Enable the IF Mode (7)</label>
+										</div>
+									</div>
+									<div class="row row-cols-1">
+										<div class="col mb-2">
+											<input id="regEnvelopeDetector" type="checkbox" class="btn-check"  autocomplete="off" disabled="disabled">
+											<label for="regEnvelopeDetector" class="btn btn-outline-secondary form-control">Enable the Envelope Detector (5)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardLoAnpI" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regSpiControl" type="number" class="form-control register" placeholder="LO_AMP_I (5)" readonly="readonly" disabled="disabled">
+											<label for="regSpiControl">LO_AMP_I (5)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="form-floating col mb-2">
+											<input id="regImageRejectionI" type="number" class="form-control" placeholder="Image Rejection I [13:7]" disabled="disabled">
+											<label for="regImageRejectionI">Image Rejection I [13:7]</label>
+										</div>
+										<div class="form-floating col mb-2">
+											<input id="regMixerGateVoltage" type="number" class="form-control" placeholder="Mixer Gate Voltage [6:0]" disabled="disabled">
+											<label for="regMixerGateVoltage">Mixer Gate Voltage [6:0]</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardLoAnpQ" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regSpiControl" type="number" class="form-control register" placeholder="LO_AMP_Q  (6)" readonly="readonly" disabled="disabled">
+											<label for="regSpiControl">LO_AMP_Q (6)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="form-floating col mb-2">
+											<input id="regImageRejectionQ" type="number" class="form-control" placeholder="Image Rejection Q [13:7]" disabled="disabled">
+											<label for="regImageRejectionQ">Image Rejection Q [13:7]</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardOffsetI" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regOffstIControl" type="number" class="form-control register" placeholder="OFFSET_ADJUST_I (7)" readonly="readonly" disabled="disabled">
+											<label for="regOffstIControl">OFFSET_ADJUST_I (7)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="form-floating col mb-2">
+											<input id="regOffsetIPositive" type="number" class="form-control offset-positive" placeholder="Offset I Positive [15:9]" disabled="disabled">
+											<label for="regOffsetIPositive">Offset I Positive [15:9]</label>
+										</div>
+										<div class="form-floating col mb-2">
+											<input id="regOffsetINegative" type="number" class="form-control offset-negative" placeholder="Offset I Negative [8:2]" disabled="disabled">
+											<label for="regOffsetINegative">Offset I Negative [8:2]</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardOffsetQ" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regOffstQControl" type="number" class="form-control register" placeholder="OFFSET_ADJUST_Q (8)" readonly="readonly" disabled="disabled">
+											<label for="regOffstQControl">OFFSET_ADJUST_Q (8)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="form-floating col mb-2">
+											<input id="regOffsetIPositive" type="number" class="form-control offset-positive" placeholder="Offset Q Positive [15:9]" disabled="disabled">
+											<label for="regOffsetIPositive">Offset Q Positive [15:9]</label>
+										</div>
+										<div class="form-floating col mb-2">
+											<input id="regOffsetINegative" type="number" class="form-control offset-negative" placeholder="Offset Q Negative [8:2]" disabled="disabled">
+											<label for="regOffsetINegative">Offset Q Negative [8:2]</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardQUAD" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regQUAD" type="number" class="form-control register" placeholder="QUAD (9)" readonly="readonly" disabled="disabled">
+											<label for="regQUAD">QUAD (9)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="form-floating col mb-2">
+											<select id="regSwitchDifferential" title="Switch Differential/Single-Ended Modes." class="form-control" disabled="disabled">
+												<option selected="selected" disabled="disabled" hidden="hidden" value="">Switch Differential/Single-Ended Modes.</option>
+												<option value='6'>SE Mode, Negative Side Disable</option>
+												<option value='9'>SE Mode, Positive Side Disable</option>
+												<option value='12'>Differential Mode</option>
+											</select>
+											<label for="regSwitchDifferential">Switch Differential/ [9:6]</label>
+										</div>
+										<div class="form-floating col mb-2">
+											<select id="regLOBandwidth" title="LO Filters Bandwidth Selection" class="form-control" disabled="disabled">
+												<option selected="selected" disabled="disabled" hidden="hidden" value="">LO Filters Bandwidth Selection.</option>
+												<option value='0'>S 8.62 GHz to 10.25 GHz</option>
+												<option value='5'>6.6 GHz to 9.2 GHz</option>
+												<option value='10'>5.4 GHz to 8 GHz</option>
+												<option value='15'> 5.4 GHz to 7 GHz</option>
+											</select>
+											<label for="regLOBandwidth">LO Bandwidth [3:0]</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+					<div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+						<div id="cardTemperature" class="card mb-1">
+							<div class="card-header">
+								<div class="container">
+									<div class="row">
+										<div class="form-floating col">
+											<input id="regSpiControl" type="number" class="form-control register" title="VVA Temperature Compensation" placeholder="LO_AMP_Q  (6)" readonly="readonly" disabled="disabled">
+											<label for="regSpiControl">VVA_TEMPERATURE_COMPENSATION  (10)</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-body">
+								<div class="container">
+									<div class="row row-cols-1">
+										<div class="form-floating col mb-2">
+											<input id="regTemperatureCompensation" type="number" class="form-control" placeholder="VVA Temperature Compensation" disabled="disabled">
+											<label for="regTemperatureCompensation">VVA Temperature Compensation</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer"><div class="row"><div class="col">
+								<button class="btn btn-outline-primary form-control btn-set" disabled="disabled">Set</button>
+							</div>
+							<div class="col">
+								<button class="btn btn-outline-dark form-control btn-reset" disabled="disabled">Reset</button>
+							</div></div></div>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-1"><div class="col"><button type="button" class="btn btn-outline-success form-control admv1013-save" disabled="disabled">Save All</button></div></div>
+			</div>
+	</div>
+
+
+	<div class="container-fluid" th:fragment="stuw81300">
+			<div class="row mb-3">
+				<div class="col">
+					<div class="form-floating">
+						<input id="freqSet" type="number" class="form-control"
+							disabled="disabled"> <label for="freqSet">Output
+							Frequency (MHz)</label>
+					</div>
+				</div>
+				<div class="col">
+					<div class="form-floating">
+						<input id="refSet" type="number" class="form-control" value="100">
+						<label for="refSet">Reference Frequency (MHz)</label>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<!-- ST0 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st0  mb-3">
+					<div id="stuw81300-st0" class="card border border-info">
+						<div class="card-header">
+							<h6>Master register (ST0):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input type="checkbox" class="btn-check changed"
+									id="VCO_CALB_DISABLE" autocomplete="off"
+									data-mask="100000000000000000000000000"> <label
+									class="btn btn-outline-primary" for="VCO_CALB_DISABLE"
+									title="1: Disable the VCO calibrator">[26]
+									VCO_CALB_DISABLE</label>
+								<div class="form-floating">
+									<input id="CP_SEL"
+										type="number"
+										class="form-control changed"
+										min="0"
+										max="4.9"
+										step="0.158"
+										placeholder="Charge Pump (mA)"
+										data-mask="11111000000000000000000000"
+										data-shift="21">
+									<label for="CP_SEL">[25:21] CP_SEL (mA); max: 4.9 mA</label>
+								</div>
+								<div class="form-floating">
+									<input id="PFD_DEL" type="number" class="form-control changed"
+										min="0.0" max="0.75" step="0.25" placeholder="Delay (*Icp)"
+										data-mask="110000000000000000000" data-shift="19"> <label
+										for="PFD_DEL">[20:19] PFD_DEL (*Icp); max:0.75</label>
+								</div>
+								<div class="form-floating">
+									<input id="N" type="number" class="form-control changed"
+										min="0" max="65535" step="1" placeholder="Divider"
+										data-mask="11111111111111111" data-shift="0"> <label
+										for="N">[16:0] N; max: 65535</label>
+								</div>
+								<div class="card-footer">
+									<button class="btn btn-outline-secondary btn-sm freqCalc btn-reset">Reset</button>
+									<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST1 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st1 mb-3">
+					<div id="stuw81300-st1" class="card border border-info">
+						<div class="card-header">
+							<h6>Fractional value (ST1):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="DBR_ST1" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100000000000000000000000000">
+								<label for="DBR_ST1" class="btn btn-outline-primary"
+									title="DBR: double buffering bit enable">[26] DBR</label> <input
+									id="RF1_OUT_PD" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="1000000000000000000000000">
+								<label for="RF1_OUT_PD" class="btn btn-outline-primary"
+									title="0: RF1 output enabled; 1: RF1 output disabled">[24]
+									RF1_OUT_PD</label> <input id="MAN_CALB_EN" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="100000000000000000000000"> <label
+									for="MAN_CALB_EN" class="btn btn-outline-primary"
+									title="Enables manual VCO calibrator mode">[23]
+									MAN_CALB_EN</label> <input id="PLL_SEL" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="10000000000000000000000"> <label
+									for="PLL_SEL" class="btn btn-outline-primary"
+									title="0: VCO direct to PLL; 1: VCO divided by 2 to PLL">[22]
+									PLL_ SEL</label> <input id="RF1_SEL" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000000000000"> <label
+									for="RF1_SEL" class="btn btn-outline-primary"
+									title="0: VCO direct; 1: VCO divided by 2">[21] RF1_
+									SEL</label>
+								<div class="form-floating">
+									<input id="FRAC" type="number" class="form-control changed"
+										min="0" max="2097151" step="1" placeholder="Fractional value"
+										data-mask="111111111111111111111" data-shift="0"> <label
+										for="FRAC">[20:0] FRAC; max: 2097151</label>
+								</div>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm freqCalc btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST2 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st2 mb-3">
+					<div id="stuw81300-st2" class="card border border-info">
+						<div class="card-header">
+							<h6>Modulus value (ST2):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="DBR_ST2" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100000000000000000000000000">
+								<label for="DBR_ST2" class="btn btn-outline-primary"
+									title="DBR: double buffering bit enable">[26] DBR</label> <input
+									id="DSM_CLK_DISABLE" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="10000000000000000000000000">
+								<label for="DSM_CLK_DISABLE" class="btn btn-outline-primary"
+									title=" for test purposes only.">[25] DSM_CLK_DISABLE</label> <input
+									id="RF2_OUT_PD" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="1000000000000000000000">
+								<label for="RF2_OUT_PD" class="btn btn-outline-primary"
+									title="0: RF2 output enabled; 1: RF2 output disabled">[21]
+									RF2_OUT_PD</label>
+								<div class="form-floating">
+									<input id="MOD" type="number" class="form-control changed"
+										min="2" max="2097151" step="1" placeholder="Fractional value"
+										data-mask="111111111111111111111" data-shift="0"> <label
+										for="MOD" title="Modulus value bit">[20:0] MOD; range:
+										2-2097151</label>
+								</div>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm freqCalc btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST3 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st3 mb-3">
+					<div id="stuw81300-st3" class="card border border-info">
+						<div class="card-header">
+							<h6>R divider, CP leakage, ... (ST3):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="DBR_ST3" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100000000000000000000000000">
+								<label for="DBR_ST3" class="btn btn-outline-primary"
+									title="DBR: double buffering bit enable">[26] DBR</label> <input
+									id="PD" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="10000000000000000000000000">
+								<label for="PD" class="btn btn-outline-primary"
+									title="at ‘1’ put OFF all blocks (except LDOs)">[25] PD</label>
+								<input id="CP_LEAK_x2" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="1000000000000000000000000">
+								<label for="CP_LEAK_x2" class="btn btn-outline-primary"
+									title="0: 10 µA step; 1: 20 µA step">[24] CP_LEAK (10
+									µA step)</label>
+								<div class="form-floating">
+									<input id="CP_LEAK" type="number" class="form-control changed"
+										min="0" max="2097151" step="10" placeholder="Fractional value"
+										data-mask="111110000000000000000000" data-shift="19">
+									<label for="CP_LEAK" title="Charge Pump leakage current value">[23:19]
+										CP_LEAK (μA); max: 310</label>
+								</div>
+								<input id="CP_LEAK_DIR" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000000000"> <label
+									for="CP_LEAK_DIR" class="btn btn-outline-primary"
+									title="0: set down-leakage; 1: set up-leakage">[18]
+									CP_LEAK_DIR</label> <input id="DNSPLIT_EN" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="100000000000000000"> <label for="DNSPLIT_EN"
+									class="btn btn-outline-primary"
+									title="Current level set by PFD_DEL[1:0] in register ST0">[17]
+									DNSPLIT_EN</label>
+								<div class="form-floating">
+									<select id="PFD_DEL_MODE" class="form-control changed"
+										data-mask="11000000000000000" data-shift="15">
+										<option value="0">No Delay</option>
+										<option value="1">VCO_DIV delayed</option>
+										<option value="2">REF_DIV delayed</option>
+									</select> <label for="PFD_DEL_MODE"
+										title="Delay values set by PFD_DEL[1:0] in register ST0">[16:15]
+										PFD_DEL_MODE</label>
+								</div>
+								<div class="form-floating">
+									<select id="REF_PATH_SEL" class="form-control changed"
+										data-mask="110000000000000" data-shift="13">
+										<option value="0">Direct</option>
+										<option value="1">Doubled in single mode</option>
+										<option value="2">Divided by 2</option>
+										<option value="3">Divided by 4</option>
+									</select> <label for="REF_PATH_SEL"
+										title="Reference clock path selection">[14:13]
+										REF_PATH_SEL</label>
+								</div>
+								<div class="form-floating">
+									<input id="R" type="number" class="form-control changed"
+										min="1" max="8191" step="1"
+										placeholder="Reference clock divider ratio"
+										data-mask="1111111111111" data-shift="0"> <label
+										for="R"
+										title="Reference clock divider ratio (allowed setting range 1 to 8191)">[12:0]
+										R</label>
+								</div>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm freqCalc btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST4 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st4 mb-3">
+					<div id="stuw81300-st4" class="card border border-info">
+						<div class="card-header">
+							<h6>Lock det., ... (ST4):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="CALB_3V3_MODE1" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000000000000000"> <label
+									for="CALB_3V3_MODE1" class="btn btn-outline-primary"
+									title="calibrator supply mode bit1">[24] CALB_3V3_MODE1</label>
+								<input id="RF_OUT_3V3" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100000000000000000000000">
+								<label for="RF_OUT_3V3" class="btn btn-outline-primary"
+									title="0: 4.5V; 1: 3.3V">[23] RF_OUT_3V3</label> <input
+									id="EXT_VCO_EN" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="10000000000000000000"> <label
+									for="EXT_VCO_EN" class="btn btn-outline-primary"
+									title="0: disabled; 1: RF2 enabled">[19] EXT_VCO_EN</label>
+								<div class="form-floating">
+									<input id="VCO_AMP" type="number" class="form-control changed"
+										min="0" max="7" step="1" placeholder="VCO signal amplitude"
+										data-mask="111000000000000000" data-shift="15"> <label
+										for="VCO_AMP" title="Modulus value bit">[17:15]
+										VCO_AMP; 2-2097151</label>
+								</div>
+								<input id="CALB_3V3_MODE0" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="100000000000000"> <label
+									for="CALB_3V3_MODE0" class="btn btn-outline-primary"
+									title="0: when VCC_VCO_Core = 4.5 V; 1: when VCC_VCO_Core = 3.3 V; This feature is not available on product codes STUW81300-1T and STUW81300-1TR">[14]
+									CALB_3V3_MODE0</label> <input id="VCALB_MODE" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000" disabled> <label
+									for="VCALB_MODE" class="btn btn-outline-primary"
+									title="0: for FVCO ≤ 4500 MHz; 1: for FVCO > 4500 MHz;">[12]
+									VCALB_MODE</label> <input id="KVCO_COMP_DIS" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="100000000000"> <label for="KVCO_COMP_DIS"
+									class="btn btn-outline-primary"
+									title="0: for FVCO ≤ 4500 MHz; 1: for FVCO > 4500 MHz;">[11]
+									KVCO_COMP_DIS</label> <input id="PFD_POL" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="10000000000"> <label for="PFD_POL"
+									class="btn btn-outline-primary"
+									title="0: standard mode (default); 1: “inverted” mode;">[10]
+									PFD_POL</label>
+								<div class="form-floating">
+									<select id="REF_BUFF_MODE" class="form-control changed"
+										data-mask="1100000000" data-shift="8">
+										<option value="0" disabled>Reserved</option>
+										<option value="1">Differential Mode</option>
+										<option value="2">XTAL Mode</option>
+										<option value="3">Single Ended Mode</option>
+									</select> <label for="REF_PATH_SEL"
+										title="Reference clock path selection">[9:8]
+										REF_BUFF_MODE</label>
+								</div>
+								<input id="MUTE_LOCK_EN" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="10000000"> <label for="MUTE_LOCK_EN"
+									class="btn btn-outline-primary"
+									title="0: disabled; 1: enabled;">[7] MUTE_LOCK_EN</label> <input
+									id="LD_ACTIVELOW" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="1000000"> <label
+									for="LD_ACTIVELOW" class="btn btn-outline-primary"
+									title="0: active high; 1: active low;">[6] LD_ACTIVELOW</label>
+								<div class="form-floating">
+									<select id="LD_PREC" class="form-control changed"
+										data-mask="111000" data-shift="3">
+										<option value="0">2 ns (default for integer mode)</option>
+										<option value="1">4 ns (default for fractional mode)</option>
+										<option value="2">6 ns</option>
+										<option value="3">8 ns</option>
+										<option value="4">10 ns</option>
+										<option value="5">12 ns</option>
+										<option value="6">14 ns</option>
+										<option value="7">16 ns</option>
+									</select> <label for="LD_PREC"
+										title="LD_PREC: set lock detector precision">[5:3]
+										LD_PREC</label>
+								</div>
+								<div class="form-floating">
+									<select id="LD_COUNT" class="form-control changed"
+										data-mask="111" data-shift="0">
+										<option value="0">4</option>
+										<option value="1">8 (default for FPFD ~1 MHz in
+											integer mode)</option>
+										<option value="2">16</option>
+										<option value="3">64</option>
+										<option value="4">256</option>
+										<option value="5">1024 (default for FPFD ~50 MHz in
+											both fractional/integer mode)</option>
+										<option value="6">2048</option>
+										<option value="7">4096</option>
+									</select> <label for="LD_COUNT"
+										title=" LD_COUNT: set lock detector counter for lock condition">[2:0]
+										LD_COUNT</label>
+								</div>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST5 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st5 mb-3">
+					<div id="stuw81300-st5" class="card border border-info">
+						<div class="card-header">
+							<h6>Low power mode (ST5):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="RF2_OUTBUF_LP" type="checkbox"
+									class="btn-check changed" autocomplete="off" data-mask="10000">
+								<label for="RF2_OUTBUF_LP" class="btn btn-outline-primary"
+									title="RF2 Output Buffer">[4] RF2_OUTBUF_LP</label> <input
+									id="DEMUX_LP" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100"> <label
+									for="DEMUX_LP" class="btn btn-outline-primary"
+									title="DEMUX_LP: RF DEMUX low power mode (0=full power; 1=low power)">[2]
+									DEMUX_LP</label> <input id="REF_BUFF_LP" type="checkbox"
+									class="btn-check changed" autocomplete="off" data-mask="1">
+								<label for="REF_BUFF_LP" class="btn btn-outline-primary"
+									title=" REF_BUFF_LP: reference buffer low power mode (0=full power; 1=low power)">[0]
+									REF_BUFF_LP</label>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST6 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st6 mb-3">
+					<div id="stuw81300-st6" class="card border border-info">
+						<div class="card-header">
+							<h6>VCO Calibrator, ... (ST6):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="DITHERING" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100000000000000000000000000">
+								<label for="DITHERING" class="btn btn-outline-primary"
+									title="DITHERING: at ‘1’ enables dithering of DSM output sequence">[26]
+									DITHERING</label> <input id="CP_UP_OFF" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="10000000000000000000000000"> <label
+									for="CP_UP_OFF" class="btn btn-outline-primary"
+									title=" CP_UP_OFF: for test purposes only; must be set to ‘0’">[25]
+									CP_UP_OFF</label> <input id="CP_DN_OFF" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000000000000000"> <label
+									for="CP_DN_OFF" class="btn btn-outline-primary"
+									title=" CP_DN_OFF: for test purposes only; must be set to ‘0’">[24]
+									CP_DN_OFF</label>
+								<div class="form-floating">
+									<select id="DSM_ORDER" class="form-control changed"
+										data-mask="110000000000000000000000" data-shift="22">
+										<option value="0">3rd order DSM (recommended)</option>
+										<option value="1">2nd order DSM</option>
+										<option value="2">1st order DSM</option>
+										<option value="3">4th order DSM</option>
+									</select> <label for="DSM_ORDER" title="Reference clock path selection">[23:22]
+										DSM_ORDER</label>
+								</div>
+								<input id="EN_AUTOCAL" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100000000000000000000"> <label
+									for="EN_AUTOCAL" class="btn btn-outline-primary"
+									title="1: enable the VCO calibration auto-restart feature">[20]
+									EN_AUTOCAL</label>
+								<div class="form-floating">
+									<select id="VCO_SEL" class="form-control changed"
+										data-mask="11000000000000000000" data-shift="18">
+										<option value="0">VCO_LOW</option>
+										<option value="1">VCO_LOW_MID</option>
+										<option value="2">VCO_MID_HIGH</option>
+										<option value="3">VCO_HIGH</option>
+									</select> <label for="VCO_SEL"
+										title="VCO_SEL: VCO selection bit. For test purposes only.">[19:18]
+										VCO_SEL</label>
+								</div>
+								<div class="form-floating">
+									<input id="VCO_WORD" type="number" class="form-control changed"
+										min="0" max="31" step="1" placeholder="VCO sub-band"
+										data-mask="111110000000000000" data-shift="13"> <label
+										for="VCO_WORD"
+										title=" VCO_WORD: select specific VCO sub-band (range:0 to 31). For test purposes only.">[17:13]
+										VCO_WORD</label>
+								</div>
+								<input id="CAL_TEMP_COMP" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000"> <label for="CAL_TEMP_COMP"
+									class="btn btn-outline-primary"
+									title="0: compensation disabled; 1: compensation enabled">[12]
+									CAL_TEMP_COMP</label>
+								<div class="form-floating">
+									<select id="PRCHG_DEL" class="form-control changed"
+										data-mask="110000000000" data-shift="10">
+										<option value="0">1 slot (default)</option>
+										<option value="1">2 slots</option>
+										<option value="2">3 slots</option>
+										<option value="3">4 slots</option>
+									</select> <label for="PRCHG_DEL"
+										title="PRCHG_DEL: set the number of calibration slots for pre-charge of VCTRL">[11:10]
+										PRCHG_DEL</label>
+								</div>
+								<input id="CAL_ACC_EN" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="1000000000"> <label
+									for="CAL_ACC_EN" class="btn btn-outline-primary"
+									title=" CAL_ACC_EN: at ‘1’ increase calibrator accuracy by removing residual error taking 2 additional calibration slots (default = ‘0’)">[9]
+									CAL_ACC_EN</label>
+								<div class="form-floating">
+									<input id="CAL_DIV" type="number" class="form-control changed"
+										min="0" max="511" step="1" placeholder="Clock Divider"
+										data-mask="111111111" data-shift="0"> <label
+										for="CAL_DIV"
+										title="CAL_DIV: Set Calibrator clock divider ratio (range:1 to 511); ‘0’ set the maximum ratio (‘511’)">[8:0]
+										CAL_DIV max: 511</label>
+								</div>
+							</div>
+
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm freqCalc btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST7 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st7 mb-3">
+					<div id="stuw81300-st7" class="card border border-info">
+						<div class="card-header">
+							<h6>Fast Lock , LD_SDO (ST7):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="LD_SDO_tristate" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="10000000000000000000000000"> <label
+									for="LD_SDO_tristate" class="btn btn-outline-primary"
+									title="LD_SDO_tristate: at ‘1’ put LD_SDO out pin in tri-state mode">[25]
+									LD_SDO_tristate</label> <input id="LD_SDO_MODE" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000000000000000"> <label
+									for="LD_SDO_MODE" class="btn btn-outline-primary"
+									title="0: Open Drain mode; 1: 2.5V CMOS output mode">[24]
+									LD_SDO_MODE</label> <input id="SPI_DATA_OUT_DISABLE" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="100000000000000000000000"> <label
+									for="SPI_DATA_OUT_DISABLE" class="btn btn-outline-primary"
+									title="0: LD_SDO pin automatically switched; 1: LD_SDO pin fixed ">SPI_DATA_OUT_DISABLE</label>
+								<div class="form-floating">
+									<select id="LD_SDO_SEL" class="form-control changed"
+										data-mask="11000000000000000000000" data-shift="21">
+										<option value="0">Lock Detector (default)</option>
+										<option value="1">VCO Divider output (for test
+											purposes only)</option>
+										<option value="2">Calibrator VCO Divider output (for
+											test purposes only)</option>
+										<option value="3">Fast Lock clock output (for test
+											purposes only)</option>
+									</select> <label for="LD_SDO_SEL"
+										title="LD_SDO_SEL: LD_SDO multiplexer output selection bit">[22:21]
+										LD_SDO_SEL</label>
+								</div>
+								<input id="REGDIG_OCP_DIS" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="100000000000000000000"> <label
+									for="REGDIG_OCP_DIS" class="btn btn-outline-primary"
+									title="1: disable the over-current protection of Digital LDO Voltage Regulator">[20]
+									REGDIG_OCP_DIS</label> <input id="CYCLE_SLIP_EN" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="10000000000000000000"> <label
+									for="CYCLE_SLIP_EN" class="btn btn-outline-primary"
+									title="CYCLE_SLIP_EN: at ‘1’ enables cycle-slip feature">[19]
+									CYCLE_SLIP_EN</label> <input id="FSTLCK_EN" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000000000"> <label for="FSTLCK_EN"
+									class="btn btn-outline-primary"
+									title=" FSTLCK_EN: at ‘1’ enables fast lock mode using pin #6 (PD_RF2/FL_SW)">[18]
+									FSTLCK_EN</label>
+								<div class="form-floating">
+									<input id="CP_SEL_FL" type="number"
+										class="form-control changed" min="0" max="31" step="1"
+										placeholder="VCO sub-band" data-mask="111110000000000000"
+										data-shift="13"> <label for="CP_SEL_FL"
+										title="CP_SEL_FL: set the Charge Pump current during fast lock time slot (range:0 to 31)">[17:13]
+										CP_SEL_FL</label>
+								</div>
+								<div class="form-floating">
+									<input id="FSTLCK_CNT" type="number"
+										class="form-control changed" min="2" max="8191" step="1"
+										placeholder="VCO sub-band" data-mask="1111111111111"
+										data-shift="0"> <label for="FSTLCK_CNT"
+										title="FSTLCK_CNT: Fast-Lock counter value (allowed setting range: 2 to 8191)">[12:0]
+										FSTLCK_CNT</label>
+								</div>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST8 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st8 mb-3">
+					<div id="stuw81300-st8" class="card border border-info">
+						<div class="card-header">
+							<h6>LDO Voltage Regulator (ST8):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="PD_RF2_DISABLE" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="100000000000000000000000000"> <label
+									for="PD_RF2_DISABLE" class="btn btn-outline-primary"
+									title="PD_RF2_DISABLE: at ‘1’ disable the hardware power">[26]
+									PD_RF2_DISABLE</label> <input id="REG_OCP_DIS" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="10000000000000000000"> <label
+									for="REG_OCP_DIS" class="btn btn-outline-primary"
+									title="1: disable the over-current protection of LDO voltage regulators except DIG regulator">[19]
+									REG_OCP_DIS</label> <input id="REG_DIG_PD" type="checkbox"
+									class="btn-check changed" autocomplete="off"
+									data-mask="1000000000000000000"> <label
+									for="REG_DIG_PD" class="btn btn-outline-primary"
+									title="REG_DIG_PD: DIGITAL Regulator power down for test purposes only. Must be set to ‘0 ">[18]
+									REG_DIG_PD</label>
+								<div class="form-floating">
+									<select id="REG_DIG_VOUT" class="form-control changed"
+										data-mask="110000000000000000" data-shift="16">
+										<option value="0">2.6 V (Default)</option>
+										<option value="1">2.3 V (for test purposes only)</option>
+										<option value="2">2.4 V (for test purposes only)</option>
+										<option value="3">2.5 V (for test purposes only)</option>
+									</select> <label for="REG_DIG_VOUT"
+										title=" REG_DIG_VOUT: DIGITAL regulator output voltage set">[17:16]
+										REG_DIG_VOUT</label>
+								</div>
+								<input id="REG_REF_PD" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="100000000000000"> <label
+									for="REG_REF_PD" class="btn btn-outline-primary"
+									title=" REG_REF_PD: REFERENCE CLOCK Regulator power down for test purposes only. Must be set to ‘0’">[14]
+									REG_REF_PD</label>
+								<div class="form-floating">
+									<select id="REG_REF_VOUT" class="form-control changed"
+										data-mask="11000000000000" data-shift="12">
+										<option value="0">2.6 V (Default)</option>
+										<option value="1">2.3 V (for test purposes only)</option>
+										<option value="2">2.4 V (for test purposes only)</option>
+										<option value="3">2.5 V (for test purposes only)</option>
+									</select> <label for="REG_REF_VOUT"
+										title="REG_REF_VOUT: REFERENCE CLOCK Regulator output voltage set">[13:12]
+										REG_REF_VOUT</label>
+								</div>
+								<input id="REG_RF_PD" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="10000000000"> <label
+									for="REG_RF_PD" class="btn btn-outline-primary"
+									title="REG_RF_PD: RF Output section Regulator power down for test purposes only. Must be set to ‘0’">[10]
+									REG_RF_PD</label>
+								<div class="form-floating">
+									<select id="REG_RF_VOUT" class="form-control changed"
+										data-mask="1100000000" data-shift="8">
+										<option value="0">2.6 V (Default)</option>
+										<option value="1">2.3 V (for test purposes only)</option>
+										<option value="2">2.4 V (for test purposes only)</option>
+										<option value="3">2.5 V (for test purposes only)</option>
+									</select> <label for="REG_RF_VOUT"
+										title="REG_REF_VOUT: REFERENCE CLOCK Regulator output voltage set">[9:8]
+										REG_RF_VOUT</label>
+								</div>
+								<input id="REG_VCO_PD" type="checkbox" class="btn-check changed"
+									autocomplete="off" data-mask="1000000"> <label
+									for="REG_VCO_PD" class="btn btn-outline-primary"
+									title="REG_VCO_PD: VCO bias-and-control regulator power down for test purposes only. Must be set to ‘0">[6]
+									REG_VCO_PD</label>
+								<div class="form-floating">
+									<select id="REG_VCO_VOUT" class="form-control changed"
+										data-mask="110000" data-shift="4">
+										<option value="0">2.6 V (Default)</option>
+										<option value="1">2.3 V (for test purposes only)</option>
+										<option value="2">2.4 V (for test purposes only)</option>
+										<option value="3">2.5 V (for test purposes only)</option>
+									</select> <label for="REG_VCO_VOUT"
+										title="REG_VCO_VOUT: VCO bias-and-control regulator output voltage set">[5:4]
+										REG_VCO_VOUT</label>
+								</div>
+								<input id="REG_VCO_4V5_PD" type="checkbox"
+									class="btn-check changed" autocomplete="off" data-mask="100">
+								<label for="REG_VCO_4V5_PD" class="btn btn-outline-primary"
+									title=" REG_VCO_4V5_PD: High-voltage regulator power down">[2]
+									REG_VCO_4V5_PD</label>
+								<div class="form-floating">
+									<select id="REG_VCO_4V5_VOUT" class="form-control changed"
+										data-mask="11" data-shift="0">
+										<option value="0">5.0 V</option>
+										<option value="1">2.6 V</option>
+										<option value="2">3.3 V</option>
+										<option value="3">4.5 V</option>
+									</select> <label for="REG_VCO_4V5_VOUT"
+										title=" REG_VCO_4V5_VOUT: High-voltage regulator output voltage set">[1:0]
+										REG_VCO_4V5_VOUT</label>
+								</div>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST9 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st9 mb-3">
+					<div id="stuw81300-st9" class="card border border-info">
+						<div class="card-header">
+							<h6>Test &amp; Initialization (ST9):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<div class="form-floating">
+									<input id="RESERVED_ST9" type="number"
+										class="form-control changed" min="0" max="134217727" step="1"
+										placeholder="Test and Initialization"
+										data-mask="111111111111111111111111111" data-shift="0">
+									<label for="RESERVED_ST9"
+										title="RESERVED: Test and Initialization bit; must be set to ‘0">[]26:0]
+										RESERVED</label>
+								</div>
+							</div>
+							<div class="card-footer">
+								<button class="btn btn-outline-secondary btn-sm btn-reset">Reset</button>
+								<button class="btn btn-outline-warning btn-sm btn-set">Set</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST10 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st10 mb-3">
+					<div id="stuw81300-st10" class="card border border-info">
+						<div class="card-header">
+							<h6>Status (ST10):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<input id="REG_DIG_STARTUP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="100000000000000000" disabled> <label
+									for="REG_DIG_STARTUP" class="btn btn-outline-success"
+									title="REG_DIG_STARTUP: DIGITAL regulator ramp-up indicator">[17]
+									REG_DIG_STARTUP</label> <input id="REG_REF_STARTUP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="10000000000000000" disabled> <label
+									for="REG_REF_STARTUP" class="btn btn-outline-success"
+									title="REG_REF_STARTUP: REFERENCE CLOCK regulator ramp-up indicator">[16]
+									REG_REF_STARTUP</label> <input id="REG_RF_STARTUP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="1000000000000000" disabled> <label
+									for="REG_RF_STARTUP" class="btn btn-outline-success"
+									title="REG_RF_STARTUP: RF Output section regulator ramp-up indicator">[15]
+									REG_RF_STARTUP</label> <input id="REG_VCO_STARTUP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="100000000000000" disabled> <label
+									for="REG_VCO_STARTUP" class="btn btn-outline-success"
+									title=" REG_VCO_STARTUP: VCO bias-and-control regulator ramp-up indicator">[14]
+									REG_VCO_STARTUP</label> <input id="REG_VCO_4V5_STARTUP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="10000000000000" disabled> <label
+									for="REG_VCO_4V5_STARTUP" class="btn btn-outline-success"
+									title="REG_VCO_4V5_STARTUP: High-voltage regulator ramp-up indicator">REG_VCO_4V5_STARTUP</label>
+								<input id="REG_DIG_OCP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="1000000000000" disabled> <label
+									for="REG_DIG_OCP" class="btn btn-outline-danger"
+									title="REG_DIG_OCP: DIGITAL regulator over-current protection indicator">[12]
+									REG_DIG_OCP</label> <input id="REG_REF_OCP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="100000000000" disabled> <label
+									for="REG_REF_OCP" class="btn btn-outline-danger"
+									title="REG_REF_OCP: REFERENCE CLOCK regulator over-current protection indicator">[11]
+									REG_REF_OCP</label> <input id="REG_RF_OCP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="10000000000" disabled> <label
+									for="REG_RF_OCP" class="btn btn-outline-danger"
+									title="REG_RF_OCP: RF Output section regulator over-current protection indicator">[10]
+									REG_RF_OCP</label> <input id="REG_VCO_OCP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="1000000000" disabled> <label
+									for="REG_VCO_OCP" class="btn btn-outline-danger"
+									title=" REG_VCO_OCP: VCO bias and control regulator over-current protection indicator">[9]
+									REG_VCO_OCP</label> <input id="REG_VCO_4V5_OCP" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="100000000" disabled> <label
+									for="REG_VCO_4V5_OCP" class="btn btn-outline-danger"
+									title="REG_VCO_4V5_OCP: high-voltage regulator over-current protection indicator">[8]
+									REG_VCO_4V5_OCP</label> <input id="LOCK_DET" type="checkbox"
+									class="form-control btn-check" autocomplete="off"
+									data-mask="10000000" disabled> <label for="LOCK_DET"
+									class="btn btn-outline-success"
+									title="LOCK_DET: Lock detector status bit (‘1’ means PLL locked)">[7]
+									LOCK_DET</label>
+								<div class="form-floating">
+									<select id="VCO_SEL_ST10" class="form-control"
+										data-mask="1100000" data-shift="5" disabled>
+										<option value="0">VCO_LOW</option>
+										<option value="1">VCO_LOW_MID</option>
+										<option value="2">VCO_MID_HIGH</option>
+										<option value="3">VCO_HIGH</option>
+									</select> <label for="VCO_SEL_ST10"
+										title=" REG_VCO_4V5_VOUT: High-voltage regulator output voltage set">[6:5]
+										VCO_SEL</label>
+								</div>
+								<div class="form-floating">
+									<input id="WORD" type="number" class="form-control" min="0"
+										max="21" step="1"
+										placeholder="Specific VCO sub-band selected by calibration algorithm (range:0 to 31)"
+										data-mask="11111" data-shift="0" disabled> <label
+										for="WORD"
+										title=" specific VCO sub-band selected by calibration algorithm (range:0 to 31)">[4:0]
+										WORD</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ST11 -->
+				<div class="col-xl-3 col-lg-4 col-md-6 st11 mb-3">
+					<div id="stuw81300-st11" class="card border border-info">
+						<div class="card-header">
+							<h6>Device identifier (ST11):</h6>
+							<strong class="register-value"></strong>
+						</div>
+						<div class="card-body">
+							<div class="d-grid gap-2">
+								<div class="form-floating">
+									<select id="Device_ID" class="form-control"
+										data-mask="11111111111111111111111111" data-shift="0" disabled>
+										<option value="0">Unknown</option>
+										<option value="32843">STUW81300-1T and STUW81300-1TR</option>
+										<option value="32850">STUW81300T or STUW81300TR</option>
+									</select> <label for="Device_ID" title="Device identifier">[26:0]
+										Device_ID</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+	</div>
+</body>
+</html>

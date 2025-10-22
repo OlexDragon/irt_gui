@@ -46,6 +46,7 @@ function onStart(doRun){
 let emptyCard;
 export function start(){
 	emptyCard = $card.find('.placeholder').length;
+
 	if(interval)
 		return;
 

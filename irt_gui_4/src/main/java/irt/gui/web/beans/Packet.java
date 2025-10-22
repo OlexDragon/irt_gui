@@ -82,7 +82,7 @@ public class Packet {
 
 	@ToString.Include
 	public int getPacketId() {
-		if(!Optional.ofNullable(bytes).filter(bs->bs.length>typeIndex+1).isPresent())
+		if(!Optional.ofNullable(bytes).filter(bs->bs.length>typeIndex+2).isPresent())
 			return -1;
 		ByteBuffer bb = ByteBuffer.allocate(2);
 		bb.order(ByteOrder.LITTLE_ENDIAN);

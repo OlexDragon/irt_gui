@@ -1,4 +1,4 @@
-import packetId, {id as f_packetId, toString as f_packetIdToString} from './packet/packet-properties/packet-id.js'
+import packetId, {toString as f_packetIdToString} from './packet/packet-properties/packet-id.js'
 import packetType from './packet/packet-properties/packet-type.js'
 import groupId from './packet/packet-properties/group-id.js'
 import {serialPort, baudrate, unitAddrClass} from './serial-port.js'
@@ -67,6 +67,8 @@ async function getRest(action){
 
 	case packetId.dump:
 	case packetId.dumpHelp:
+	case packetId.stuw81300Bias:
+	case packetId.admv1013Bias:
 		{
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, intToBytes(action.data.value)), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
@@ -163,6 +165,7 @@ async function getRest(action){
 
 	case packetId.dacs:
 	case packetId.admv1013:
+	case packetId.stuw81300:
 		{
 			const pls = action.data.value.map(v=>new Payload(action.data.parameterCode, v.toBytes()));
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
@@ -170,8 +173,18 @@ async function getRest(action){
 		}
 		break;
 
-	case packetId.dacsSet:
 	case packetId.admv1013Set:
+	case packetId.admv1013BiasSet:
+		{
+			const pls = action.data.value.map(v=>new Payload(action.data.parameterCode, v.toBytes()));
+			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+			
+		}
+		break;
+
+	case packetId.dacsSet:
+	case packetId.stuw81300Set:
 		{
 			const pl = new Payload(action.data.parameterCode, action.data.value.toBytes());
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), pl, action.toSend.unitAddr);

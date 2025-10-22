@@ -108,12 +108,12 @@ export default class DACController extends Controller{
 					this.#$dacSaved.val(reg.value);
 				if(this._selected.value !== reg.value){
 					this._selected.value = reg.value;
-					this.#$logs.append($('<div>', {class: 'row'}).append($('<div>', {class: 'col', text: `${hours}:${minutes}:${seconds}`})).append($('<div>', {class: 'col', text: reg.toString()})));
+//					this.#$logs.append($('<div>', {class: 'row'}).append($('<div>', {class: 'col', text: `${hours}:${minutes}:${seconds}`})).append($('<div>', {class: 'col', text: reg.toString()})));
 				}
 			}else if (element){
 				if(element.value!==`${reg.value}`){
 					element.value = reg.value;
-					this.#$logs.append($('<div>', {class: 'row'}).append($('<div>', {class: 'col', text: `${hours}:${minutes}:${seconds}`})).append($('<div>', {class: 'col', text: reg.toString()})));
+//					this.#$logs.append($('<div>', {class: 'row'}).append($('<div>', {class: 'col', text: `${hours}:${minutes}:${seconds}`})).append($('<div>', {class: 'col', text: reg.toString()})));
 				}
 			}else
 				console.warn(pl);

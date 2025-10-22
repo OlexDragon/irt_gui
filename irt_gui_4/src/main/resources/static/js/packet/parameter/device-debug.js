@@ -8,7 +8,7 @@ deviceDebug.debugInfo.parser = parseToString;
 
 deviceDebug.debugDump = {};
 deviceDebug.debugDump.code = 2;		/* dump of registers for specified device index */
-deviceDebug.debugDump.parser = parseToIntArray;
+deviceDebug.debugDump.parser = parseToString;
 
 deviceDebug.readWrite = {};
 deviceDebug.readWrite.code = 3;		/* registers read/write operations */

@@ -68,6 +68,15 @@ const packetIdArray = Object.freeze(
 		'admv1013',
 		'admv1013Set',
 
+		'admv1013Bias',
+		'admv1013BiasSet',
+
+		'stuw81300',
+		'stuw81300Set',
+
+		'stuw81300Bias',
+		'stuw81300BiasSet',
+
 		'dump',
 		'dumpHelp',
 

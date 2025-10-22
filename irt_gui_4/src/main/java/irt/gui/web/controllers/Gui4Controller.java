@@ -1,5 +1,6 @@
 package irt.gui.web.controllers;
 
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import irt.gui.web.beans.Baudrate;
 
@@ -43,5 +45,20 @@ public class Gui4Controller {
 		model.addAttribute("version", version);
 		model.addAttribute("baudrates", Baudrate.values());
 		return "production";
+	}
+
+	@GetMapping({"login"})
+    String login(@RequestParam Map<String, Object> map, Model model) {
+		final Object message = map.get("error");
+		if(message!=null)
+			model.addAttribute("message", "Incorrect password. Try again.");
+		return "login";
+	}
+
+	@GetMapping({"test"})
+    String test(Model model) {
+		model.addAttribute("version", version);
+		model.addAttribute("baudrates", Baudrate.values());
+		return "test";
 	}
 }

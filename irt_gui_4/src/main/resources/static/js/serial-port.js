@@ -8,7 +8,8 @@ import packetType from './packet/packet-properties/packet-type.js'
 
 export let serialPort;
 export let showError;
-export const baudrate = new Baudrate($('#baudrate'));
+const $baudrate = $('#baudrate');
+export const baudrate = new Baudrate($baudrate);
 export const unitAddrClass = new UnitAddress($('#unitAddress'));
 
 export function doRun(){
@@ -247,21 +248,20 @@ function coverButSerial(cover){
 	}
 }
 
-const $baudrate = $('#baudrate');
 const $unitAddress = $('#unitAddress');
 const $summaryAlarmCard = $('#summaryAlarmCard');
 
 onStatusChange(s=>{
-	const index = (s.severities === 'TIMEOUT' ? 1 : 0) + (s.severities === 'Closed' ? 2 : 0)
+	const index = ((s.severities === 'TIMEOUT' || s.severities === 'SP Error' || s.severities === 'Stopped') ? 1 : 0) + (s.severities === 'Closed' ? 2 : 0)
 	switch(index){
 
 	case 1:
 		$btnStart.next().addClass('to-front');
 	case 2:
 		$cover.addClass('cover');
-		$serialPort.addClass('to-front');
-		$baudrate.addClass('to-front');
-		$unitAddress.addClass('to-front');
+		$serialPort.addClass('to-front').next().addClass('to-front');
+		$baudrate.addClass('to-front').next().addClass('to-front');
+		$unitAddress.addClass('to-front').next().addClass('to-front');
 		$summaryAlarmCard.addClass('to-front');
 		$appExit.addClass('to-front');
 		break;

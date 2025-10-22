@@ -1,5 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en" xmlns:th="http://www.thymeleaf.org" translate="no">
+<html	xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+		lang="en">
 
 <head>
     <title>GUI - Production</title>
@@ -50,7 +53,7 @@
 			<div id="productionLogst" class="contaner-fluid card"></div>
 		</div>
 	</div>
-	<footer class="row align-items-center py-3 my-4 border-top">
+	<footer class="row align-items-center py-3 my-4 border-top" th:replace="home :: footer">
 			<div class="col-auto"><img alt="https://www.irttechnologies.com" src="/qr-code?text=https://www.irttechnologies.com"/></div>
 			<div class="col text-center">
 				 <a href="https://www.irttechnologies.com" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="IRT Technologies" target="_blank"><img class="logo-sm" src="/images/logo-sm.png" alt="logo"/></a>
@@ -77,11 +80,11 @@
 </div>
 <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
 </div>
-
-<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
-<script src="/webjars/js-cookie/3.0.1/js.cookie.js"></script>
-<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js" th:replace="home :: jsBootstrap"></script>
-<script type="module" src="../static/js/production.js" th:src="@{/js/production.js}"></script>
-
+<th:block th:replace="home :: np">
+	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+	<script src="/webjars/js-cookie/3.0.1/js.cookie.min.js"></script>
+	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
+</th:block>
+	<script type="module" src="../static/js/production.js" th:src="@{/js/production.js}"></script>
 </body>
 </html>

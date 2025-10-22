@@ -4,9 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,6 +36,7 @@ import irt.gui.web.services.ConnectionCounter;
 import irt.gui.web.services.IrtSerialPort;
 import irt.gui.web.services.SerialPortDistributor;
 import irt.gui.web.services.ThreadWorker;
+
 @RestController
 public class Gui4RestController {
 	private final static Logger logger = LogManager.getLogger();
@@ -44,6 +47,7 @@ public class Gui4RestController {
 
 	@Value("${server.port}") String serverPort;
 	@Value("${info.app.version}") String version;
+	@Value("${irt.message}") String message;
 
 	@RequestMapping("qr-code")
     ResponseEntity<InputStreamResource> qrCode(@RequestParam(required = false) String text, Integer scale, Integer border, String fileName) throws IOException {
@@ -124,6 +128,24 @@ public class Gui4RestController {
 			Gui4.exit();
 		});
 		return true;
+	}
+	@RequestMapping("r-login")
+	String rLogin() {
+
+		try {
+
+			final URL url = new URL("http://irttechnologies:8089");
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod("GET");
+			final int responseCode = connection.getResponseCode();
+			logger.debug("Response Code : {}", responseCode);
+			if(responseCode == HttpURLConnection.HTTP_OK)
+				return message;
+
+		} catch (IOException e) {
+			logger.catching(Level.DEBUG, e);
+		}
+        return null;
 	}
 
 	private static BufferedImage toImage(QrCode qr, int scale, int border) {

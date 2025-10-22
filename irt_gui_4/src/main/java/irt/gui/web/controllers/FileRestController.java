@@ -68,10 +68,10 @@ public class FileRestController {
 			}
     	};
 
-    	logger.error(profilePath);
+//    	logger.error(profilePath);
     	final Path start = Paths.get(profilePath);
 		Files.walkFileTree(start, visitor);
-    	logger.error(arPath);
+
 		return arPath.get();
 	}
 

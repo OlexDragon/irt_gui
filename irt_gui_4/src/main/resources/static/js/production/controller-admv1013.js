@@ -1,7 +1,5 @@
 import Controller from './controller.js'
-import packetId from '../packet/packet-properties/packet-id.js'
 import groupId from '../packet/packet-properties/group-id.js'
-import deviceDebug from '../packet/parameter/device-debug.js'
 import Register from '../packet/parameter/value/register.js'
 import SpiControl from './admv1013/spi-control.js'
 import AlarmControl from './admv1013/alarm-controller.js'
@@ -12,42 +10,33 @@ import LoAmpQControl from './admv1013/lo-amp-q-control.js'
 import LoOffsetIControl from './admv1013/lo-offset-control.js'
 import QuadControl from './admv1013/quad-control.js'
 import TemperatureControl from './admv1013/temperature-control.js'
+import deviceDebug from '../packet/parameter/device-debug.js'
 import {calMode} from './cal-mode.js'
 
-export default class ADMV1013sController extends Controller{
+export default class ADMV1013Controller extends Controller{
 
 	#action = {
-		packetId: packetId.admv1013,
 		groupId: groupId.deviceDebug,
-		data: {
-			parameterCode: deviceDebug.readWrite.code,
-			 value: [
-				new Register(7,0),
-				new Register(7,1),
-				new Register(7,2),
-				new Register(7,3),
-				new Register(7,5),
-				new Register(7,6),
-				new Register(7,7),
-				new Register(7,8),
-				new Register(7,9),
-				new Register(7,10)
-			]},
 		function: 'f_reaction',
-		f_reaction: this.#reaction.bind(this)};
+		f_reaction: this._reaction.bind(this)};
 
-	#actionSet = Object.assign({}, this.#action);
+	#actionSet;
 	#onSet;
 
 	#$container;
 	#$btnSaveAll;
 	#registers = {};
 
-	constructor($container){
+	constructor($container, parameterCode, value, packetId, packetIdSet){
 		super();
+		this.#action.data = {parameterCode: parameterCode, value: value};
+		this.#action.packetId = packetId;
 		this.#$container = $container;
-		$container.load('/fragment/admv/admv1013', this.#onLoad.bind(this));
-		this.#actionSet.packetId = packetId.admv1013Set;
+		$container.load('/fragment/pll/admv1013', this.#onLoad.bind(this));
+
+		this.#actionSet = Object.assign({}, this.#action);
+		this.#actionSet.data = { parameterCode: deviceDebug.readWrite.code};
+		this.#actionSet.packetId = packetIdSet;
 	}
 
 	get action(){
@@ -72,57 +61,65 @@ export default class ADMV1013sController extends Controller{
 	#onLoad(){
 
 		this.#registers[0] = new SpiControl(this.#$container.find('#cardSpiControl'));
-		this.#registers[0].onSave = this.#sendCommand.bind(this);
+		this.#registers[0].onSave = this._sendCommand.bind(this);
 
 		this.#registers[1] = new AlarmControl(this.#$container.find('#cardAlarm'));
-		this.#registers[1].onSave = this.#sendCommand.bind(this);
+		this.#registers[1].onSave = this._sendCommand.bind(this);
 
 		this.#registers[2] = new AlarmMaskControl(this.#$container.find('#cardAlarmMask'));
-		this.#registers[2].onSave = this.#sendCommand.bind(this);
+		this.#registers[2].onSave = this._sendCommand.bind(this);
 
 		this.#registers[3] = new EnableControl(this.#$container.find('#cardEnable'));
-		this.#registers[3].onSave = this.#sendCommand.bind(this);
+		this.#registers[3].onSave = this._sendCommand.bind(this);
 
 		this.#registers[5] = new LoAmpIControl(this.#$container.find('#cardLoAnpI'));
-		this.#registers[5].onSave = this.#sendCommand.bind(this);
+		this.#registers[5].onSave = this._sendCommand.bind(this);
 
 		this.#registers[6] = new LoAmpQControl(this.#$container.find('#cardLoAnpQ'));
-		this.#registers[6].onSave = this.#sendCommand.bind(this);
+		this.#registers[6].onSave = this._sendCommand.bind(this);
 
 		this.#registers[7] = new LoOffsetIControl(this.#$container.find('#cardOffsetI'));
-		this.#registers[7].onSave = this.#sendCommand.bind(this);
+		this.#registers[7].onSave = this._sendCommand.bind(this);
 
 		this.#registers[8] = new LoOffsetIControl(this.#$container.find('#cardOffsetQ'));
-		this.#registers[8].onSave = this.#sendCommand.bind(this);
+		this.#registers[8].onSave = this._sendCommand.bind(this);
 
 		this.#registers[9] = new QuadControl(this.#$container.find('#cardQUAD'));
-		this.#registers[9].onSave = this.#sendCommand.bind(this);
+		this.#registers[9].onSave = this._sendCommand.bind(this);
 
 		this.#registers[10] = new TemperatureControl(this.#$container.find('#cardTemperature'));
-		this.#registers[10].onSave = this.#sendCommand.bind(this);
+		this.#registers[10].onSave = this._sendCommand.bind(this);
 
-		this.#$btnSaveAll = this.#$container.find('.admv1013-save').click(this.#btnClick.bind(this));
+		this.#$btnSaveAll = this.#$container.find('.admv1013-save').click(this._btnClick.bind(this));
 	}
 
-	#reaction(packet){
+	_reaction(regs){
 		this.#$btnSaveAll.prop('disabled', !calMode)
-		packet.payloads.forEach(pl=>{
-			const r = Register.parseRegister(pl.data);
-			this.#registers[r.address].register = r; 
+		regs.forEach(r => {
+			if (this.#registers[r.address])
+				this.#registers[r.address].register = r;
 		});
 	}
 
-	#sendCommand(reg){
-		this.#actionSet.data.value = reg;
+	_sendCommand(reg, disableFlash){
+
+		this.#actionSet.data.value = [reg];
 		this.#actionSet.update = true;
 		this.#onSet(this.#actionSet);
-	}
 
-	#btnClick(){
-		if(!confirm('Are you sure you want to save the changes?'))
+		if (disableFlash)
 			return;
 
-		this.#sendCommand(new Register(20, 5, 1));
+		const rSave = new Register(reg.index, 0x10, 1);
+		setTimeout(() => {
+			this.#actionSet.data.value = [rSave];
+			this.#actionSet.update = true;
+			this.#onSet(this.#actionSet);
+		}, 500);
+	}
+
+	_btnClick(){
+		return confirm('Are you sure you want to save the changes?');
 	}
 }
 

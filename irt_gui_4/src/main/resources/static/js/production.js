@@ -77,7 +77,28 @@ async function loadController(id){
 
 		case 'admv1013':
 		{
-			const {default:c} = await import('./production/controller-admv1013.js');
+			const {default:c} = await import('./production/controller-admv1013-converter.js');
+			setController(id, c);
+			break;
+		}
+
+		case 'admv1013Bias':
+		{
+			const {default:c} = await import('./production/controller-admv1013-bias.js');
+			setController(id, c);
+			break;
+		}
+
+		case 'stuw81300':
+		{
+			const {default:c} = await import('./production/controller-stuw81300-converter.js');
+			setController(id, c);
+			break;
+		}
+
+		case 'stuw81300Bias':
+		{
+			const {default:c} = await import('./production/controller-stuw81300-bias.js');
 			setController(id, c);
 			break;
 		}
@@ -91,7 +112,7 @@ async function loadController(id){
 
 		default:
 			controller = undefined;
-			console.warn(id);
+			console.warn('Unknown controller:', id);
 		}
 
 	if(controller){
@@ -113,16 +134,20 @@ function setController(id, c){
 }
 
 function run(){
+
 	if(!type)
 		return;
+
 	const action = controller.action;
 	if(action.packetError){
 		action.packetError = undefined;
 		stop();
 		return;
 	}
-	if(action.doNotSend || action.data.value===undefined)
+	if(action.doNotSend || action.data.value===undefined){
+		console.warn(action.doNotSend, action.data);
 		return;
+	}
 	if(action.buisy){
 		console.log('buisy');
 		return;
@@ -150,11 +175,30 @@ function typeChange(type){
 	switch(dType){
 
 	case 'CONVERTER_KA':
+	case 'KA_BIAS':
 		if(!$admv.length){
-			const $div = $('<div>', {class: 'col-auto ms-1'})
-			.append($('<input>', {id: 'admv1013', name:'prodactionNav', type: 'radio', class: 'btn-check', autocomplete: 'off'}).change(onNavChenge))
-			.append($('<label>', {for: 'admv1013', title:'ADMV1013', text: 'ADMV 1013', class: 'btn btn-outline-primary'}))
-			$navbar.append($div);
+
+			let admvId;
+			let stuwId;
+			if(dType == 'CONVERTER_KA'){
+				admvId = 'admv1013';
+				stuwId = 'stuw81300';
+			}else{
+				admvId = 'admv1013Bias';
+				stuwId = 'stuw81300Bias';
+			}
+
+			// PLL 1
+			const $divADMV1013 = $('<div>', {class: 'col-auto ms-1'})
+			.append($('<input>', {id: admvId, name:'prodactionNav', type: 'radio', class: 'btn-check', autocomplete: 'off'}).change(onNavChenge))
+			.append($('<label>', {for: admvId, title:'ADMV1013', text: 'ADMV 1013', class: 'btn btn-outline-primary'}))
+
+			// PLL 2
+			const $divSTUW81300 = $('<div>', {class: 'col-auto ms-1'})
+			.append($('<input>', {id: stuwId, name:'prodactionNav', type: 'radio', class: 'btn-check', autocomplete: 'off'}).change(onNavChenge))
+			.append($('<label>', {for: stuwId, title:'STUW81300', text: 'STUW 81300', class: 'btn btn-outline-primary'}))
+
+			$navbar.append([$divADMV1013, $divSTUW81300]);
 		}
 		return;
 

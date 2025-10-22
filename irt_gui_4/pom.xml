@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE xml>
 <project xmlns="https://maven.apache.org/POM/4.0.0"
 		 xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -12,7 +13,7 @@
 
 	<groupId>irt.gui</groupId>
 	<artifactId>gui</artifactId>
-	<version>4.12</version>
+	<version>4.13</version>
 	<name>web</name>
 	<description>IRT GUI Application</description>
 	<url/>
@@ -47,6 +48,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<scope>runtime</scope>
 		</dependency>
@@ -54,12 +59,10 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-logging</artifactId>
-				</exclusion>
-			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf.extras</groupId>
+			<artifactId>thymeleaf-extras-springsecurity5</artifactId>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.fazecast/jSerialComm -->
@@ -85,26 +88,26 @@
 			<artifactId>jakarta.xml.bind-api</artifactId>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.webjars/jquery -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>jquery</artifactId>
-			<version>3.7.1</version>
-		</dependency>
+		<!--		 https://mvnrepository.com/artifact/org.webjars/jquery -->
+		<!--		<dependency>-->
+		<!--			<groupId>org.webjars</groupId>-->
+		<!--			<artifactId>jquery</artifactId>-->
+		<!--			<version>3.7.1</version>-->
+		<!--		</dependency>-->
 
-		<!-- https://mvnrepository.com/artifact/org.webjars/js-cookie -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>js-cookie</artifactId>
-			<version>3.0.1</version>
-		</dependency>
+		<!--		 https://mvnrepository.com/artifact/org.webjars/js-cookie -->
+		<!--		<dependency>-->
+		<!--			<groupId>org.webjars</groupId>-->
+		<!--			<artifactId>js-cookie</artifactId>-->
+		<!--			<version>3.0.1</version>-->
+		<!--		</dependency>-->
 
-		<!-- https://mvnrepository.com/artifact/org.webjars/bootstrap -->
-		<dependency>
-			<groupId>org.webjars</groupId>
-			<artifactId>bootstrap</artifactId>
-			<version>5.3.7</version>
-		</dependency>
+		<!--		 https://mvnrepository.com/artifact/org.webjars/bootstrap -->
+		<!--		<dependency>-->
+		<!--			<groupId>org.webjars</groupId>-->
+		<!--			<artifactId>bootstrap</artifactId>-->
+		<!--			<version>5.3.7</version>-->
+		<!--		</dependency>-->
 
 		<!-- https://mvnrepository.com/artifact/io.nayuki/qrcodegen -->
 		<dependency>
@@ -112,7 +115,7 @@
 			<artifactId>qrcodegen</artifactId>
 			<version>1.8.0</version>
 		</dependency>
-<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>

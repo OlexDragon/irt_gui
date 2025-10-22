@@ -25,6 +25,7 @@
     </Appenders>
 
     <Loggers>
+		<logger name="org.springframework.security.core.userdetails.User" level="error" />
 
 <!-- 		<logger name="irt.gui.web.services.JSerialComm" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.services.LockDistributor" level="all" /> -->

@@ -17,7 +17,7 @@ function spOnStart(yes){
 }
 let interval;
 function start(){
-console.warn("start()")
+console.log("start()")
 	if(interval)
 		return;
 	interval = setInterval(run, 5000);

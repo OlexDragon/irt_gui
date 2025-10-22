@@ -89,6 +89,9 @@ export default class DumpController extends Controller{
 	}
 
 	#onChenge({currentTarget: {value}}){
+		if (!this.#action.data.value)
+			this.#$dumpHelp.val('');
+		else
 		this.#$dumpResult.val('');
 		this.#action.data.parameterCode = +value;
 		this.#action.update = true;
