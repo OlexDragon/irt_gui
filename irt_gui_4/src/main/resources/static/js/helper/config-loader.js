@@ -37,11 +37,19 @@ export default class MeasurementLoader{
 		let loadP;
 
 		switch(unitType){
+
 		case 'CONTROLLER_IRPC':
 			this.#getAll = this.#forIRPC;
 			this.#packetId = packetId.irpc;
 			loadC = this.#controllerLoader.load('./controller/controller-irpc.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/irpc.js');
+			break;
+
+		case 'CONTROLLER_ODRC':
+			this.#getAll = this.#forIRPC;
+			this.#packetId = packetId.odrc;
+			loadC = this.#controllerLoader.load('./controller/controller-odrc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/dlrc.js');
 			break;
 
 		case 'CONVERTER':
@@ -52,11 +60,10 @@ export default class MeasurementLoader{
 			loadP = this.#parameterLoader.load('./packet/parameter/config-fcm.js');
 			break;
 
-		case 'CONTROLLER_ODRC':
 		case 'REFERENCE_BOARD':
 			return;
 
-			default:
+		default:
 			console.warn(unitType);
 		case 'BAIS':
 			this.#getAll = this.#forBUC;
@@ -67,8 +74,7 @@ export default class MeasurementLoader{
 
 		loadC.then(this.#setController.bind(this));
 		loadP.then(this.#setParameter.bind(this));
-		Promise.all([loadC, loadP])
-		.then(()=>callBack(this.#controller));
+		Promise.all([loadC, loadP]).then(()=>callBack(this.#controller));
 	}
 
 	get packetId(){

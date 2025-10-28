@@ -35,6 +35,11 @@ export default async function (action, callBack){
 	action.toSend.serialPort = serialPort;
 	action.toSend.baudrate = baudrate.baudrate;
 
+	if(action.toSend.bytes === undefined){
+		console.warn('No data to send.', action);
+		action.buisy = false;
+		return;
+	}
 	callBack(action.toSend);
 }
 
@@ -46,6 +51,7 @@ async function getRest(action){
 
 	case packetId.measurementIRPC:
 	case packetId.irpc:
+	case packetId.odrc:
 		{
 			const packet = new Packet(new Header(packetType.request,  action.toSend.id, action.groupId), undefined, action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
@@ -150,6 +156,8 @@ async function getRest(action){
 	case packetId.irpcSalectSwtchHvr:
 	case packetId.irpcStandBy:
 	case packetId.moduleSet:
+	case packetId.odrcSetMode:
+	case packetId.odrcLNBSelect :
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, [action.data.value]), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();

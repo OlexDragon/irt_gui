@@ -3,6 +3,10 @@ import groupId from '../packet/packet-properties/group-id.js'
 
 export default class ControllerMeasurement extends Controller{
 
+	static #intelligencer = [];
+	static addIntelligencer(callBack) {
+		ControllerMeasurement.#intelligencer.push(callBack);
+	}
 	#$body;
 
 	constructor($card){
@@ -18,6 +22,7 @@ export default class ControllerMeasurement extends Controller{
  * @param {Array} payloads
  */
 	set update(payloads){
+		ControllerMeasurement.#intelligencer.forEach(cb=>cb(payloads));
 
 		let timeout;
 		const rows = [];
@@ -35,7 +40,11 @@ export default class ControllerMeasurement extends Controller{
 			if(parser==='do not show')
 				return;
 			if($desct.length){
-				let val = parser(pl.data);
+				const val = parser(pl.data);
+				if (val === undefined) {
+//					console.warn('Something went wrong.');
+					return;
+				}
 				const isArray = Array.isArray(val);
 				const $val = this.#$body.find('#' + valId);
 				if(isArray){
@@ -62,6 +71,10 @@ export default class ControllerMeasurement extends Controller{
 				const showText = this._parameter.name(parameterCode);
 				const $row = $('<div>', {class: 'row'});
 				const val = parser(pl.data);
+				if (val === undefined) {
+					//					console.warn('Something went wrong.');
+					return;
+				}
 				let $v;
 
 				if(showText && showText !== 'Description'){

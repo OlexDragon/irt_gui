@@ -83,9 +83,5 @@ function run(){
 }
 
 action.f_measurement = (packet)=>{
-		if(emptyCard){
-			emptyCard = false;
-			$body.empty();
-		}
 		controller && (controller.update = packet.payloads);
 	};

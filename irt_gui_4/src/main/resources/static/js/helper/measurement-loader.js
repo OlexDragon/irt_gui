@@ -61,7 +61,7 @@ export default class MeasurementLoader{
 			break;
 
 		default:
-			console.log(unitType);
+			console.log('Load by default', unitType);
 		case 'BAIS_LOW_POWER':
 		case 'BAIS':
 			this.#packetId = packetId.measurement;

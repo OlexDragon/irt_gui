@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.nayuki.qrcodegen.QrCode;
 import irt.gui.web.Gui4;
+import irt.gui.web.beans.Login;
 import irt.gui.web.services.ConnectionCounter;
 import irt.gui.web.services.IrtSerialPort;
 import irt.gui.web.services.SerialPortDistributor;
@@ -130,7 +131,7 @@ public class Gui4RestController {
 		return true;
 	}
 	@RequestMapping("r-login")
-	String rLogin() {
+	Login rLogin() {
 
 		try {
 
@@ -139,8 +140,11 @@ public class Gui4RestController {
 			connection.setRequestMethod("GET");
 			final int responseCode = connection.getResponseCode();
 			logger.debug("Response Code : {}", responseCode);
-			if(responseCode == HttpURLConnection.HTTP_OK)
-				return message;
+			if(responseCode == HttpURLConnection.HTTP_OK) {
+				final String[] split = message.split("\\s");
+				final String p2 = split[0] + split[split.length-1];
+				return new Login("admin", p2);
+			}
 
 		} catch (IOException e) {
 			logger.catching(Level.DEBUG, e);

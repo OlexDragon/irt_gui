@@ -40,6 +40,10 @@ const packetIdArray = Object.freeze(
 		'irpcHoverA',
 		'irpcHoverB',
 
+		'odrc',
+		'odrcSetMode',
+		'odrcLNBSelect',
+
 		'comAll',
 		'comSetAddress',
 		'comSetRetransmit',

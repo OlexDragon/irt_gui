@@ -238,8 +238,9 @@ function serialNumberChange(sn){
 function addCalibrationButton(sn){
 	const $navBar = $prodactionNav.parents('.navbar');
 	$navBar.find('.cal-link').remove();
-	const $div = $('<div>', {class: 'col-auto cal-link ms-2'})
-	$div.append($('<a>', {class: 'btn btn-outline-info', target: '_blank', href:`http://irttechnologies:8089/calibration?sn=${sn}`, text: 'Calibration'}));
+	const $div = $('<div>', {class: 'col-auto cal-link ms-2'});
+	if(admin)
+		$div.append($('<a>', {class: 'btn btn-outline-info', target: '_blank', href:`http://irttechnologies:8089/calibration?sn=${sn}`, text: 'Calibration'}));
 	$div.appendTo($navBar);
 }
 function profilePath(profilePath){
@@ -251,6 +252,8 @@ function profilePath(profilePath){
 	showProfileButton(profilePath);
 }
 function showProfileButton(data){
+	if(!admin)
+		return;
 	const $navBar = $prodactionNav.parents('.navbar');
 	$navBar.find('.btn-group').remove();
 	const arr = []

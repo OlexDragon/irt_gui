@@ -95,7 +95,7 @@ const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
 function countConnections(){
 	$.post('/connection/add', {connectionId: sessionId})
 	.done(count=>{
-		const text = count + ' conections';
+		const text = count + ' conection' + (count===1 ? '' : 's');
 		$conections.text()!==text && $conections.text(text);
 	});
 }
@@ -159,6 +159,12 @@ function btnShowErrorsChange(e){
 
 function send($card, toSend, action){
 		
+	if(!toSend?.bytes){
+		console.warn('No data to send.', toSend, action);
+	    action.buisy = false;
+	    blink($card, 'connection-wrong');
+	    return;
+	}
 		var json = JSON.stringify(toSend);
 
 		return $.ajax({

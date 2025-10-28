@@ -35,6 +35,7 @@ export function start(){
 	case 'CONVERTER':
 	case 'CONVERTER_KA':
 	case 'CONTROLLER_IRPC':
+	case 'CONTROLLER_ODRC':
 		$tabs.filter((_,el)=>el.id==='userTabRedundancy').parent().addClass('visually-hidden');
 		break;
 

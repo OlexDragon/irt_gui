@@ -1,5 +1,6 @@
 import {parseToIrtValue} from '../service/converter.js'
 
+const lnbStatus = ['Not Ready', 'Ready'];
 const measurement = {};
 
 // BUC Parameter CODE
@@ -18,15 +19,15 @@ measurement['WGS Status'].parser	 = parseToStatus;
 
 measurement['LNB 1'] = {} // Status
 measurement['LNB 1'].code			 = 5;
-measurement['LNB 1'].parser			 = bytes=>bytes[0]==1 ? 'Ready' : 'Not Ready';
+measurement['LNB 1'].parser			 = bytes=>lnbStatus[bytes[0]];
 
 measurement['LNB 2'] = {} // Status
 measurement['LNB 2'].code			 = 6;
-measurement['LNB 2'].parser			 = bytes=>bytes[0]==1 ? 'Ready' : 'Not Ready';
+measurement['LNB 2'].parser			 = bytes=>lnbStatus[bytes[0]];
 
 measurement['LNB 3'] = {}
 measurement['LNB 3'].code			 = 7;
-measurement['LNB 3'].parser			 = bytes=>bytes[0]==1 ? 'Ready' : 'Not Ready';
+measurement['LNB 3'].parser			 = bytes=>lnbStatus[bytes[0]];
 
 measurement.all = {}
 measurement.all.code				 = 255;
@@ -61,6 +62,7 @@ export function parser(value){
 	return measurement[name(code(value))]?.parser;
 }
 
+const statuses = ['UNKNOWN','LNB 1','LNB 2',,,,,,,,,'DEFAULT','PROTECTION A','PROTECTION B'];
 function parseToStatus(bytes){
-	console.log(bytes)
+	return statuses[bytes[0]];
 }

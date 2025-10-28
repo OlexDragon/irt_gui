@@ -50,6 +50,7 @@ export function start(){
 
 		switch(type){
 		case 'CONTROLLER_IRPC':
+		case 'CONTROLLER_ODRC':
 			$comStandard.parents('.to-hide').addClass('visually-hidden');
 		}
 //		networkControl.onChange(onChange);
