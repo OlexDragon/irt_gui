@@ -10,6 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import com.fazecast.jSerialComm.SerialPort;
 
+import irt.gui.web.beans.Packet;
+import irt.gui.web.beans.PacketGroupId;
+import irt.gui.web.beans.PacketType;
 import irt.gui.web.exceptions.IrtSerialPortIOException;
 
 class JSerialCommTest {
@@ -56,6 +59,29 @@ class JSerialCommTest {
 		final byte[] answer = port.send(spName, 5000, bytes, null);
 		assertNotNull(answer);
 		assertTrue(answer.length>0);
+		logger.error("{} : {}", answer.length, answer);
+	}
+
+	@Test
+	void sendPacketTest() throws IrtSerialPortIOException {
+
+		final List<String> serialPortNames = port.getSerialPortNames();
+		System.out.println("serialPortNames=" + serialPortNames);
+		if (serialPortNames.size() != 1) {
+			logger.error("Test completed. It is not clear which serial port to use.");
+			return;
+		}
+
+		final byte unitAddress = (byte)254;
+		final byte getAll = (byte) 255;
+		final short packetId = (short) 19956;
+		Packet packet = new Packet(unitAddress, PacketType.REQUEST, packetId, PacketGroupId.DEVICEINFO, getAll, null);
+
+		byte[] bytes = packet.toSend();
+		final String spName = serialPortNames.get(0);
+		final byte[] answer = port.send(spName, 5000, bytes, null);
+		assertNotNull(answer);
+		assertTrue(answer.length > 0);
 		logger.error("{} : {}", answer.length, answer);
 	}
 }

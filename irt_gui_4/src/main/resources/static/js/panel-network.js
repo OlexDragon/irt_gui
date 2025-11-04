@@ -15,7 +15,7 @@ let delay = 10000;
 
 export function start(){
 
-	if(interval)
+		if(interval)
 		return;
 
 	action.buisy = false;

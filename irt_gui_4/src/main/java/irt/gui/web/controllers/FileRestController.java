@@ -49,6 +49,7 @@ public class FileRestController {
 
 	@GetMapping("path/profile")
 	List<Path> profilePath(@RequestParam String sn) throws IOException {
+		logger.traceEntry(sn);
 
 		final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*" + sn + ".bin");
     	final AtomicReference<List<Path>> arPath = new AtomicReference<>(new ArrayList<Path>());
@@ -75,9 +76,11 @@ public class FileRestController {
 		return arPath.get();
 	}
 
-	@GetMapping("open")
+	@PostMapping("open")
 	String open(@RequestParam String p) throws IOException {
-		final File file = Paths.get(URI.create(p)).toFile();
+		logger.traceEntry(p);
+
+		final File file = Paths.get(URI.create(p.replaceAll(" ", "%20"))).toFile();
 		if(file.exists()) {
 			Desktop.getDesktop().open(file);
 			return null;
@@ -85,16 +88,17 @@ public class FileRestController {
 		return "File does not exist: " + p;
 	}
 
-	@GetMapping("location")
+	@PostMapping("location")
 	void location(@RequestParam String p) throws IOException {
+		logger.traceEntry(p);
 		Runtime.getRuntime().exec("explorer.exe /select,\"" + p + "\"");
 	}
 
-	@GetMapping("upload/profile")
+	@PostMapping("upload/profile")
 	String uploadProfile(@RequestParam String p) throws IOException {
 		logger.traceEntry(p);
 
-		final File file = Paths.get(URI.create(p)).toFile();
+		final File file = Paths.get(URI.create(p.replaceAll(" ", "%20"))).toFile();
 		if(!file.exists()) {
 			logger.warn("File does not exist: {}", p);
 			return "File does not exist: " + p;
@@ -107,6 +111,8 @@ public class FileRestController {
 
 	@PostMapping("upload/pkg")
 	String uploadPkg(@RequestParam String sn, MultipartFile file) {
+		logger.traceEntry("sn={}, file={}", sn, file.getOriginalFilename());
+
 		final IrtPackage tarToBytes = new IrtPackage(file);
 		return upload(sn, tarToBytes);
 	}

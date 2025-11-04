@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" translate="no">
+<head>
+   <title>Upgrade Page - IRT GUI</title>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css' th:replace="home :: cssBootstrap"/>
+	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
+</head>
+<body>
+<div class="container-fluid">
+	<div class="row g-1">
+		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:replace="~{home :: serial-port}">
+			<div class="row row-cols-1">
+				<div class="col">
+					<img src="../static/images/logo.png" th:src="@{/images/logo.png}" class="img-fluid" alt="Logo"/>
+				</div>
+				<h4 class="text-center" th:text="'IRT GUI v.' + ${version}"></h4>
+				<div class="col form-floating mb-3">
+					<select id="serialPort" class="form-select" aria-label="Select Serial Port">
+						<option selected="selected" disabled="disabled" hidden="hidden">Select Serial Port</option>
+					</select>
+					<label for="serialPort">Serial Port (RS485)</label>
+				</div>
+				<div class="col form-floating mb-3">
+					<select id="baudrate" class="form-select" aria-label="Select Serial Port">
+						<option th:each="br : ${baudrates}" th:text="${br.value}">Baudrate</option>
+					</select>
+					<label for="baudrate">Baudrate</label>
+				</div>
+				<div class="col form-floating mb-3">
+					<input id="unitAddress" type="number" class="form-control" value="254"/>
+					<label for="unitAddress">Unit Address</label>
+				</div>
+				<div class="col mb-3">
+					<input id="btnStart" type="checkbox" class="btn-check" disabled="disabled"/>
+					<label for="btnStart" class="btn btn-outline-primary form-control">Start</label>
+				</div>
+				<div class="col mb-3">
+					<div id="summaryAlarmCard" class="card">
+						<div class="card-body">
+							<h6 id="summaryAlarmTitle" class="card-title text-center p-2"></h6>
+						</div>
+					</div>
+				</div>
+				<div class="col mb-3">
+					<input id="fwUpgrade" type="file" accept=".pkg" hidden="hidden">
+					<label for="fwUpgrade" class="btn btn-outline-secondary form-control disabled">Firmware Upgrade</label><br>
+				</div>
+				<div class="col mb-3">
+					<input id="btnShowErrors" type="checkbox" class="btn-check"/>
+					<label for="btnShowErrors" class="btn btn-outline-info opacity-75 form-control">App Errors</label>
+				</div>
+				<div id="conections" class="col text-center text-primary-emphasis fs-5 mb-3">
+				</div>
+				<div class="col"><button  type="button" id="appExit" class="btn btn-outline-dark form-control">Exit</button></div>
+			</div>
+		</div>
+		<div class="col">
+			<div class="row">
+				<div class="col-lg-6 col-12 mt-2">
+					<div class="card infoCard">
+  						<div class="card-body info">
+  							<div class="placeholder-wave">
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+ 								<div class="row justify-content-evenly mb-2">
+  									<span class="placeholder col-5"></span>
+  									<span class="placeholder col-5"></span>
+  								</div>
+  							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-lg-6 col-12 mt-2">
+					<div class="card upgradeCard">
+						<div class="card-header">Upgrade for:<div class="input-group">
+							<input id="upgradeName" type="text" class="form-control">
+							<button id="btnUpgradeGet" type="button" class="btn btn-outline-primary">Get</button>
+						</div></div>
+  						<div id="upgradeBody" class="card-body">
+  						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
+</div>
+	<th:block th:replace="home :: np"></th:block>
+	<script type="module" src="../static/js/upgrade.js" th:src="@{/js/upgrade.js}" ></script>
+</body>
+</html>

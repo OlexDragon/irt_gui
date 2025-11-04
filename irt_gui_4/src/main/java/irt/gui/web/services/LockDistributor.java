@@ -2,8 +2,10 @@ package irt.gui.web.services;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import irt.gui.web.beans.Packet;
 import irt.gui.web.beans.RequestPacket;
+import irt.gui.web.controllers.UpgradeRestController;
 import irt.gui.web.exceptions.IrtSerialPortIOException;
 import irt.gui.web.exceptions.IrtSerialPortRTException;
 import irt.gui.web.exceptions.IrtSerialPortTOException;
@@ -84,6 +87,15 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	public synchronized FutureTask<RequestPacket> send(RequestPacket requestPacket) {
 //		logger.traceEntry("Put in queue -> {}", requestPacket);
 
+		// Check if the port is locked
+		if(!requestPacket.getId().equals(UpgradeRestController.PACKET_ID) && lockedPorts.contains(requestPacket.getSerialPort())) {
+			requestPacket.setError("The port is locked.");
+			final Callable<RequestPacket> callable = ()->requestPacket;
+			final FutureTask<RequestPacket> task = new FutureTask<>(callable);
+			task.run();
+			return task;
+		}
+
 		final Callable<RequestPacket> callable = ()->requestPacket;
 		final FutureTask<RequestPacket> task = new FutureTask<>(callable);
 
@@ -131,7 +143,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		}
 
 		final int lastIndex = packet.getLastIndex() + 1;
-		received = read(Arrays.copyOfRange(received, lastIndex, received.length), portName, baudrate, baudrate);
+		received = read(Arrays.copyOfRange(received, lastIndex, received.length), portName, timeout, baudrate);
 
 
 		requestPacket.setAnswer(received);
@@ -189,5 +201,15 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	@Override
 	public boolean closePort(String spName) {
 		return serialPort.close(spName);
+	}
+
+	private Set<String> lockedPorts = new HashSet<>();
+	@Override
+	public void lockPort(String spName) {
+		lockedPorts.add(spName);
+	}
+	@Override
+	public void unlockPort(String spName) {
+		lockedPorts.remove(spName);
 	}
 }

@@ -53,8 +53,13 @@ export default class ControllerOdrc extends Controller{
 						break;
 					this.#$odrcMode.val(value.key);
 					this.#$odrcMode.prop('disabled', false);
-					this.#$odpcLnb1.prop('disabled', value.key === 1); // AUTO mode);
-					this.#$odpcLnb2.prop('disabled', value.key === 1); // AUTO mode);
+					const auto = value.key === 1; // AUTO mode
+					this.#$odpcLnb1.prop('disabled', auto);
+					if(!this.#$odpcLnb1.prop('checked'))
+						this.#$odpcLnb1.next().text('LNB 1');
+					this.#$odpcLnb2.prop('disabled', auto);
+					if (!this.#$odpcLnb2.prop('checked'))
+						this.#$odpcLnb2.next().text('LNB 2');
 					break;
 				}
 				
@@ -99,14 +104,16 @@ export default class ControllerOdrc extends Controller{
 				case 'LNB 1':{
 					const auto = this.#$odrcMode.val() === '1'; // AUTO mode
 					this.#$odpcLnb1.prop('disabled', auto).prop('checked', true).next().text('LNB 1 Active');
-					this.#$odpcLnb2.prop('disabled', auto).next().text('Set LNB 2 Active');
+					this.#$odpcLnb2.prop('disabled', auto).next();
+					auto ? this.#$odpcLnb2.next().text('LNB 2') : this.#$odpcLnb2.next().text('Set LNB 2 Active');
 					break
 				}
  
                case 'LNB 2':{
 				const auto = this.#$odrcMode.val() === '1'; // AUTO mode
 					this.#$odpcLnb2.prop('disabled', auto).prop('checked', true).next().text('LNB 2 Active');
-				    this.#$odpcLnb1.prop('disabled', auto).next().text('Set LNB 1 Active');
+				    this.#$odpcLnb1.prop('disabled', auto).next();
+					auto ? this.#$odpcLnb1.next().text('LNB 1') : this.#$odpcLnb1.next().text('Set LNB 1 Active');
 					break;
 			   }
 

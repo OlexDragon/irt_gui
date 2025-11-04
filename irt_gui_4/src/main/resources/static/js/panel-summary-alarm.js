@@ -12,7 +12,7 @@ const statusChangeEvent = [];
 let oldValue;
 let interval;
 
-const action = {packetId: packetId.alarmSummary, groupId: groupId.alarm, data: {parameterCode: alarmCode['summary status']}, function: 'f_SummaryAlarms'};
+const action = {packetId: packetId.alarmSummary, groupId: groupId.alarm, data: {parameterCode: alarmCode['summary status']}, function: 'f_SummaryAlarms', onError: onError};
 
 export function start(){
 	oldValue = undefined;
@@ -63,6 +63,8 @@ function removeClasses(){
 
 action.f_SummaryAlarms = function(packet){
 
+	$modal?.modal('hide');
+
 	packet.payloads?.forEach(pl=>{
 		const value = parser(pl.parameter.code)(pl.data);
 		setStatus(value);
@@ -99,4 +101,42 @@ function tripleClick({detail}){
 
 	const url = new URL('production', window.location.href)
 	window.open(url, '_blank');
+}
+
+let $modal;
+function onError(error) {
+
+	if($modal)
+		return;
+
+	switch (error) {
+		case "The port is locked.":{
+			$modal = $('<div>', {class: 'modal fade', 'data-bs-backdrop': 'static', tabindex: '-1'})
+			.append(
+				$('<div>', {class: 'modal-dialog modal-dialog-centered'})
+				.append(
+					$('<div>', {class: 'modal-content'})
+					.append(
+						$('<div>', { class: 'modal-header' })
+						.append($('<h5>', { class: 'modal-title', text: 'Serial Port Locked' })))
+						.append(
+							$('<div>', { class: 'modal-body' })
+							.append($('<p>', { text: 'The serial port is locked. Unlocking it may take several minutes.' }))
+							.append($('<p>', { text: 'If it remains locked, please press the "Stop" button to break the connection.' })))
+					.append(
+						$('<div>', { class: 'modal-footer' })
+						.append($('<button>', { type: 'button', class: 'btn btn-primary', text: 'Stop' }).click(()=>{
+							serialPort.stop();
+							$modal.modal('hide');
+						}))))
+					).appendTo('body');
+			new bootstrap.Modal($modal);
+			$modal.on('hidden.bs.modal', ()=>{
+				$modal.remove();
+				$modal = null;
+			});
+			$modal.modal('show');
+			break;
+		}
+	}
 }

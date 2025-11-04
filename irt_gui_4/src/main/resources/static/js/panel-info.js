@@ -1,5 +1,4 @@
 import * as serialPort from './serial-port.js'
-import { change as unitChange} from './panel-units.js'
 import packetId from './packet/packet-properties/packet-id.js'
 import groupId from './packet/packet-properties/group-id.js'
 import { onStatusChange } from './panel-summary-alarm.js'
@@ -20,18 +19,15 @@ const action = {packetId: packetId.deviceInfo, groupId: groupId.deviceInfo, data
 onStatusChange(statusChange);
 
 function statusChange(alarmStatus){
-	const doRun = alarmStatus.index !== 7 && alarmStatus.index !== 8;
+	const doRun = alarmStatus.index !== 7 && alarmStatus.index !== 8 && alarmStatus.index !== 11;
 	if(doRun && serialPort.doRun())
 		start();
 	else{
 		stop();
 	}
 }
-
-unitChange(()=>{
-	stop();
-	start();
-})
+if($('#unitsSelect').length)
+	import('./panel-units.js').then(({change})=>change(()=>{stop();start();}));
 
 serialPort.onStart(onStart);
 function onStart(doRun){
@@ -92,7 +88,7 @@ function run(){
 	}
 
 	if(action.buisy){
-		console.log('Buisy')
+		console.log('Buisy');
 		return
 	}
 

@@ -1,9 +1,9 @@
-import * as serialPort from './serial-port.js'
-import './production/cal-mode.js'
-import './panel-measurement.js'
-import { onStatusChange } from './panel-summary-alarm.js'
-import { type, onStartAll, profileSearch, onTypeChange, onSerialChange } from './panel-info.js'
-import f_deviceType from './packet/service/device-type.js'
+import * as serialPort from './serial-port.js';
+import './production/cal-mode.js';
+import './panel-measurement.js';
+import { onStatusChange } from './panel-summary-alarm.js';
+import { type, onStartAll, profileSearch, onTypeChange, onSerialChange } from './panel-info.js';
+import f_deviceType from './packet/service/device-type.js';
 
 const $prodactionNav = $('input[name=prodactionNav]').change(onNavChenge);
 const $productionContent = $('div#productionContent');
@@ -164,12 +164,14 @@ function onSet(action){
 
 let dType;
 function typeChange(type){
+	console.log('Device Type Change:', type);
 	const $navbar = $prodactionNav.parents('.navbar')
 	const $admv = $navbar.find('#admv1013');
 	const t = f_deviceType(type[0]);
 	if(t===dType)
 		return;
 	dType = t;
+	changeProfilePath()
 	if(controller)
 		controller.typeName = dType
 	switch(dType){
@@ -220,20 +222,12 @@ function typeChange(type){
 
 let serialNumber;
 function serialNumberChange(sn){
+	console.log('Serial Number Change:', sn);
 	if(serialNumber===sn)
 		return;
 	serialNumber = sn;
 	addCalibrationButton(serialNumber);
-	try{
-		const data = Cookies.get(`profilePath${serialNumber}`);
-		if(data){
-			showProfileButton(JSON.parse(data));
-			return;
-		}
-	}catch (e){
-		console.log(e);
-	}
-	profileSearch(profilePath);
+	profileSearch(showProfileButton);
 }
 function addCalibrationButton(sn){
 	const $navBar = $prodactionNav.parents('.navbar');
@@ -243,39 +237,49 @@ function addCalibrationButton(sn){
 		$div.append($('<a>', {class: 'btn btn-outline-info', target: '_blank', href:`http://irttechnologies:8089/calibration?sn=${sn}`, text: 'Calibration'}));
 	$div.appendTo($navBar);
 }
-function profilePath(profilePath){
-	if(!profilePath?.path){
-		console.warn(profilePath);
+function showProfileButton(data){
+	if(!data?.path){
+		console.warn('No profile path found', profilePath);
 		return;
 	}
-	Cookies.set(`profilePath${serialNumber}`, JSON.stringify(profilePath));
-	showProfileButton(profilePath);
-}
-function showProfileButton(data){
 	if(!admin)
 		return;
 	const $navBar = $prodactionNav.parents('.navbar');
 	$navBar.find('.btn-group').remove();
 	const arr = []
 	data.path.forEach(p=>{
-		const $div = $('<div>', {class: 'btn-group ms-2'});
+		const $div = $('<div>', {class: 'col-auto btn-group ms-2'});
 		arr.push($div);
 		$('<a>', {class: 'btn btn-outline-secondary', href: `/file/open?p=${p}`, text: 'Profile', title: p}).click(linkEvent).appendTo($div);
 		$('<button>', {type: 'button', class: 'btn btn-outline-secondary dropdown-toggle dropdown-toggle-split', 'data-bs-toggle': 'dropdown', 'aria-expanded': false})
 		.append($('<span>', {class: 'visually-hidden', text: 'Toggle Dropdown'})).appendTo($div);
 		$('<ul>', {class: 'dropdown-menu'})
 		.append($('<li>').append($('<a>', {class: 'dropdown-item', href: `/file/location?p=${p}`, text: 'Location'}).click(linkEvent)))
-		.append($('<li>').append($('<a>', {class: 'dropdown-item', href: `/file/upload/profile?p=${p}`, text: 'Upload'}).click(linkEvent)))
+		.append($('<li>').append($('<a>', {id: 'profilrUpload', class: 'dropdown-item', href: `/file/upload/profile?p=${p}`, text: 'Upload'}).click(updateProfile)))
 		.appendTo($div);
 	});
-	if(arr.length)
-		$navBar.append(arr);
+	$navBar.append(arr);
+	changeProfilePath();
 }
 function linkEvent(e){
 	e.preventDefault();
 	const {currentTarget: {href}} = e;
-	$.get(href)
+	$.post(href)
 	.done(data=>data ?? serialPort.showToast('File not found', `he file\n${href}\nnot found.`, 'text-bg-danger bg-opacity-50'))
 	.fail(e=>console.log(e));
+}
+function updateProfile(e) {
+	linkEvent(e);
 	serialPort.showToast('Profile Upgrade', 'The update is starting, please wait for the profile to load.');
+}
+// Change profile upload path based on device type and serialNumber
+function changeProfilePath(){
+	const $profilrUpload = $('#profilrUpload');
+	if (!$profilrUpload.length || !dType)
+		return;
+	const search = $profilrUpload.attr('href').split('?')[1];
+	if(dType.startsWith('CONVERTER')){
+		$('#profilrUpload').attr('href', `/upgrade/rest/profile/${serialPort.serialPort}/0?${search}`);
+	}else
+    	$('#profilrUpload').attr('href', `/file/upload/profile?${search}`);
 }

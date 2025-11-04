@@ -2,6 +2,9 @@ package irt.gui.web.beans;
 
 import java.util.Optional;
 
+import lombok.ToString;
+
+@ToString
 public class Checksum {
 
 	private static final int  fcstab[] = {

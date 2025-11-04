@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html	xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+		lang="en">
+
+<head>
+    <title>GUI - Flash</title>
+    <meta charset="UTF-8"/>
+    <meta name="google" content="notranslate" />
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css' th:replace="home :: cssBootstrap"/>
+	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
+</head>
+
+<body>
+<th:block th:replace="home :: np">
+	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+	<script src="/webjars/js-cookie/3.0.1/js.cookie.min.js"></script>
+	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
+</th:block>
+	<script type="module" src="../static/js/flash.js" th:src="@{/js/flash.js}"></script>
+</body>
+</html>

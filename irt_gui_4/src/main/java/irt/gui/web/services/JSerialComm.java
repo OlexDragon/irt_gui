@@ -175,6 +175,7 @@ public class JSerialComm implements IrtSerialPort {
 
 								} catch (Exception e) {
 									final String message = "Unable to read data from serial port " + serialPort;
+									logger.catching(Level.DEBUG, e);
 									throw new IrtSerialPortRTException(message, e);
 								}
 

@@ -5,6 +5,7 @@ import deviceDebug from '../packet/parameter/device-debug.js'
 import Register from '../packet/parameter/value/register.js'
 import ValueControl from './value-control.js'
 import packetType from '../packet/packet-properties/packet-type.js'
+import {calMode} from './cal-mode.js'
 
 export default class DACController extends Controller{
 
@@ -92,16 +93,18 @@ export default class DACController extends Controller{
 				const split = el.dataset[this._typeName].split(',');
 				if(reg.index===+split[0] && reg.address===+split[1]){
 					element = el;
-					if (element.hasAttribute('disabled')) {
-					  element.removeAttribute('disabled');
-					}
+					if(calMode)
+						 element.removeAttribute('disabled');
+					else
+						element.setAttribute('disabled', 'disabled');
+
 					return false;
 				}
 			});
-			const now = new Date();
-			const hours = now.getHours();
-			const minutes = now.getMinutes();
-			const seconds = now.getSeconds();
+//			const now = new Date();
+//			const hours = now.getHours();
+//			const minutes = now.getMinutes();
+//			const seconds = now.getSeconds();
 
 			if(this._selected?.is($(element))){
 				if(this.#$dacSaved.val()!==`${reg.value}`)

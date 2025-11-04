@@ -9,7 +9,7 @@ class AlarmStatus{
 	}
 }
 
-const statuses = [];
+const statuses = [];	// Do not change the order of these statuses
 statuses.push(new AlarmStatus(statuses.length,'NO_ALARM', 'No Alarm', 'text-bg-success'));
 statuses.push(new AlarmStatus(statuses.length,'INFO'	, 'No Alarm', 'text-bg-success'));
 statuses.push(new AlarmStatus(statuses.length,'WARNING'	, 'Warning'	, 'text-bg-warning'));
@@ -21,6 +21,7 @@ statuses.push(new AlarmStatus(statuses.length,'Closed'	, 	'This program has been
 statuses.push(new AlarmStatus(statuses.length,'TIMEOUT', undefined, undefined));
 statuses.push(new AlarmStatus(statuses.length,'NC', 'No Connection', undefined));
 statuses.push(new AlarmStatus(statuses.length,'UA Error', 'Invalid unit address. The unit address value can be between 0 and 254 inclusive.', 'text-bg-warning'));
+statuses.push(new AlarmStatus(statuses.length,'The port is locked.', undefined, undefined));
 
 export function status(bytes){
 

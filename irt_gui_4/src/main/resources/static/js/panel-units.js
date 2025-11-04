@@ -1,3 +1,6 @@
+// Panel Units Selection - allows selecting different units/modules in a panel device.
+// 	Connection via controller
+
 import * as serialPort from './serial-port.js'
 import f_unitType from './packet/service/device-type.js'
 import packetId from './packet/packet-properties/packet-id.js'

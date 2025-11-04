@@ -174,11 +174,14 @@ function send($card, toSend, action){
 			data: json,
 		    dataType: 'json'
 		})
-				.done(data => {
+		.done(data => {
 					action.buisy = false;
 
 					if(data.error){
+						action.packetError = data.error;
+						console.log("Error.", data.error, action);
 						textToStatus(data.error);
+						action.onError?.(data.error);
 						return;
 					}
 

@@ -14,11 +14,8 @@ export default class Packet{
 		// From bytes
 		if(Array.isArray(header)){
 			const array = [...header];
-			while(array[0]==FLAG_SEQUENCE)
-				array.splice(0,1);
-			const flagseqIndex = array.indexOf(FLAG_SEQUENCE);
-			const bytes = byteStuffing(flagseqIndex<0 ? array : array.splice(0, flagseqIndex));
-//			console.log(bytes);
+			const bytes = this.#findLastPacket(array);
+//			console.log(header, bytes);
 			const packetArray = bytes.splice(0,bytes.length-2);
 			const chcksm = checksumToBytes(packetArray);
 			if(chcksm[0]==(bytes[0]&0xff) && chcksm[1]==(bytes[1]&0xff)){
@@ -34,7 +31,7 @@ export default class Packet{
 					console.error('Byte parsing error.');
 			}else{
 				this.header = new Header(packetType.error, packetArray[2] * 256 + packetArray[1], 'The packet checksum is incorrect');
-				console.warn('The packet checksum is incorrect; received: ' + array[array.length-2] +',' + array[array.length-1] + '; calculated: ' + chcksm + '; bytes: ' + array);
+				console.warn('The packet checksum is incorrect; received: ' + packetArray[array.length-2] +',' + packetArray[array.length-1] + '; calculated: ' + chcksm + '; bytes: ' + bytes, 'header: ', header);
 			}
 //			console.log(this);
 			return;
@@ -110,6 +107,24 @@ export default class Packet{
 			return this.payloads?.filter(pl=>(pl.parameter.code&0xff)==parameterCode).map(pl=>pl.getData(this.header.groupId));
 		if(this.payloads?.length)
 			return this.payloads[0].getData(this.header.groupId);
+	}
+	#findLastPacket(bytes){
+		let lastIndex = bytes.lastIndexOf(FLAG_SEQUENCE);
+		if(lastIndex<0)
+			return byteStuffing(bytes);
+
+		while(true){
+
+			const nextIndex = bytes.lastIndexOf(FLAG_SEQUENCE, --lastIndex);
+
+			if(nextIndex<0)
+				return byteStuffing(bytes.splice(0, lastIndex));
+
+			if (lastIndex-nextIndex < 3)
+				lastIndex = nextIndex;
+      		else
+		        return byteStuffing(bytes.splice(nextIndex+1, lastIndex-nextIndex));
+		}
 	}
 }
 
