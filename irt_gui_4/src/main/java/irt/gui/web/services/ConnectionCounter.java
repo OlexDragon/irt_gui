@@ -55,7 +55,7 @@ public class ConnectionCounter {
 
 			try {
 
-				TimeUnit.SECONDS.sleep(5);
+				TimeUnit.MINUTES.sleep(2);
 
 			} catch (InterruptedException e) { }
 

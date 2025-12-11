@@ -14,4 +14,5 @@ public interface IrtSerialPort {
 	byte[] read(String portName, Integer timeout, Integer baudrate) throws IrtSerialPortIOException;
 	void shutdown();
 	boolean close(String spName);
+	boolean isOpen(String serialPort);
 }

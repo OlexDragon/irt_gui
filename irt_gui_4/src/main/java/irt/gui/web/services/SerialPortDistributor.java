@@ -11,5 +11,5 @@ public interface SerialPortDistributor {
 	void lockPort(String spName);
 	void unlockPort(String spName);
 	boolean closePort(String spName);
-
+	boolean isOpen(String spName);
 }

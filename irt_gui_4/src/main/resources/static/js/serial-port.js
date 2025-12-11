@@ -111,7 +111,7 @@ function showExitModal(){
 function portSelected({currentTarget:{value}}){
 	coverButSerial();
 	serialPort = value;
-	Cookies.set('serialPort', serialPort);
+	Cookies.set('serialPort', serialPort, {expires: 365, path: ''});
 	if($btnStart.prop('disabled'))
 		$btnStart.attr('disabled', false);
 	toggleStart();
@@ -152,7 +152,7 @@ function toggleStart(){
 
 function btnShowErrorsChange(e){
 	showError = e.currentTarget.checked;
-	Cookies.set('btnShowErrors', showError);
+	Cookies.set('btnShowErrors', showError, {expires: 365, path: ''});
 	if(showError)
 		showToast('Display of error messages is enabled.', 'Error information will be displayed here..');
 }
@@ -208,7 +208,7 @@ function send($card, toSend, action){
 					if(packet.header.error) {
 	//					console.log(data);
 						const packetStr = packet.toString();
-						console.error(packetStr);
+						console.warn(packetStr, action);
 						blink($card, 'connection-wrong');
 						if (showError)
 							showToast('Packet Error', packetStr, 'text-bg-danger bg-opacity-50');

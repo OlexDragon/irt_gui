@@ -216,7 +216,7 @@ export default class ControllerConfig extends Controller{
 //			console.warn(id);
 			return;
 		}
-		Cookies.set('tabCookies', id);
+		Cookies.set('tabCookies', id, {expires: 365, path: '/'});
 	}
 
 	#onValueChange(object) {

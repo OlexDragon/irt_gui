@@ -13,6 +13,7 @@ export default class NetworkControl{
 	#savedValue;	// Saved value
 	#onChangeEvents = [];
 	#onNotSaved = [];
+	#hasChanges = false;
 
 	constructor($body){
 
@@ -24,9 +25,9 @@ export default class NetworkControl{
 
 		this.#gateway	 = new IpRow($body.find('#networkGateway'))	.onInput(this.#onInput).disable(true).onNext(this.#btnOk);
 		this.#gateway.name = 'gateway';
-		this.#mask		 = new IpRow($body.find('#networkMask'))		.onInput(this.#onInput).disable(true).onNext(this.#gateway);
+		this.#mask		 = new IpRow($body.find('#networkMask'))	.onInput(this.#onInput).disable(true).onNext(this.#gateway);
 		this.#mask.name = 'mask';
-		this.#address	 = new IpRow($body.find('#networkAddress')).onInput(this.#onInput).disable(true).onNext(this.#mask);
+		this.#address	 = new IpRow($body.find('#networkAddress')) .onInput(this.#onInput).disable(true).onNext(this.#mask);
 		this.#address.name = 'address';
 		
 	}
@@ -69,7 +70,8 @@ export default class NetworkControl{
 				const o = {};
 				o.currentValue = this.#value;
 				o.toSave = value;
-				this.#onNotSaved.forEach(e=>e(o));
+				if(!this.#hasChanges)
+					this.#onNotSaved.forEach(e=>e(o));
 			}
 			return ;
 
@@ -115,16 +117,27 @@ export default class NetworkControl{
 		this.#gateway.disable(disable);
 	}
 
-	#onInput = e =>{
-		const name = e.currentTarget.name;
-		const value = e.currentTarget.value;
+	#hasChangesTimeout;
+	#onInput = ({currentTarget:{name, value}}) =>{
+		console.log('#onInput', name, value);
 		let disable = this.#value[name].toString() === value.toString();
 		this.#btnOk.prop('disabled', disable);
 		this.#btnCansel.prop('disabled', disable);
+		if(this.#hasChanges)
+			clearTimeout(this.#hasChangesTimeout);
+
+		if(name==='address')
+			this.#gateway.value = value.slice(0,3).concat([1]);
+
+		if(name==='type' && value==='1')
+			this.#mask.value = [255,255,255,0];
+
+		this.#hasChanges = true;
+		this.#hasChangesTimeout = setTimeout(() => {this.#hasChanges = false;}, 5000);
 	}
 
-	#onChange = e =>{
-		this.#disable(e.currentTarget.value);
+	#onChange = ({currentTarget:{value}}) =>{
+		this.#disable(value);
 		this.#address.focus();
 	}
 

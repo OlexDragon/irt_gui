@@ -4,8 +4,7 @@ import {start as alarmsStart, stop as alarmsStop} from './panel-alarms.js'
 import {start as redundancyStart, stop as redundancyStop, disable as redundancyDisable} from './panel-redundancy.js'
 import {start as comStart, stop as comStop, disable as comDisable} from './panel-com.js'
 import {onStatusChange} from './panel-summary-alarm.js'
-import { onStartAll } from './panel-info.js'
-import f_deviceType from './packet/service/device-type.js'
+import { type as unitType, onStartAll } from './panel-info.js'
 
 const $body = $('.userPanels');
 const $tabs = $body.find('.nav-link').click(userTabsOnShow);
@@ -15,33 +14,44 @@ const $tabs = $body.find('.nav-link').click(userTabsOnShow);
 	if(userTabsCookies)
 		new bootstrap.Tab($(`#${userTabsCookies}`)).show();
 	else
-		new bootstrap.Tab($('#userTabAlarm')).show();})();
+		new bootstrap.Tab($('#userTabAlarm')).show();
+})();
 
 serialPort.onStart(onStart);
 
 function onStart(doRun){
 	if(!doRun){
 		stop();
-	}
+	}else
+		run = true;
 }
 
 onStartAll(yes=>yes ? start() : stop());
 let run;
 export function start(){
 
-	const deviceType = f_deviceType();
-	switch(deviceType){
+	if(!unitType)
+		return;
+
+	switch(unitType.name){
 
 	case 'CONVERTER':
 	case 'CONVERTER_KA':
-	case 'CONTROLLER_IRPC':
-	case 'CONTROLLER_ODRC':
 		$tabs.filter((_,el)=>el.id !== 'userTabAlarm').parent().addClass('visually-hidden');
 		$tabs[0].click();
 		break;
 
+	case 'CONTROLLER_IRPC':
+	case 'CONTROLLER_ODRC':
+	case 'LNB':
+		const $userTabRedundancy = $tabs.filter((_,el)=>el.id === 'userTabRedundancy');
+		$userTabRedundancy.parent().addClass('visually-hidden');
+		if($userTabRedundancy.hasClass('active'))
+			$tabs[0].click();
+		break;
+
 	default:
-		console.log(deviceType);
+		console.log(unitType);
 	case 'BAIS':
 		$tabs.filter((_,el)=>el.id==='userTabRedundancy').parent().removeClass('visually-hidden');
 	}
@@ -70,7 +80,7 @@ function userTabsOnShow(selected){
 		return;
 
 	if(selected.currentTarget){
-		Cookies.set('userTabsCookies', selected.currentTarget.id);
+		Cookies.set('userTabsCookies', selected.currentTarget.id, {expires: 365, path: '/'});
 		selected = selected.currentTarget.id;
 	}
 

@@ -233,7 +233,7 @@ export default class ValuePanel{
 			const step = parseFloat(this._fields.$range.prop('step'));
 			if(pf<step){
 				e.currentTarget.value = step;
-				Cookies.set(`${this._name}-${id}`, step);
+				Cookies.set(`${this._name}-${id}`, step, {expires: 365, path: '/'});
 			}
 		}
 	}
@@ -295,7 +295,7 @@ export default class ValuePanel{
 	}
 	#valueToCookies(e){
 		const {currentTarget:{value, dataset:{inputName}}} = e;
-		Cookies.set(inputName, value, '');
+		Cookies.set(inputName, value, {expires: 365, path: '/'});
 	}
 
 	#sendChange(toSend){

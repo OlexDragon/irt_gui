@@ -2,8 +2,7 @@ import * as serialPort from './serial-port.js';
 import './production/cal-mode.js';
 import './panel-measurement.js';
 import { onStatusChange } from './panel-summary-alarm.js';
-import { type, onStartAll, profileSearch, onTypeChange, onSerialChange } from './panel-info.js';
-import f_deviceType from './packet/service/device-type.js';
+import { type as unitType, onStartAll, profileSearch, onTypeChange, onSerialChange } from './panel-info.js';
 
 const $prodactionNav = $('input[name=prodactionNav]').change(onNavChenge);
 const $productionContent = $('div#productionContent');
@@ -59,7 +58,7 @@ async function loadController(id){
 		case 'cbDACs':
 		{
 
-			switch(dType){
+			switch(unitType?.name){
 
 			case 'REFERENCE_BOARD':
 			{
@@ -120,8 +119,8 @@ async function loadController(id){
 		clearInterval(interval);
 		interval = setInterval(run, 3000);
 		$prodactionNav.prop('disabled', false);
-		if(type)
-			typeChange(type);
+		if(unitType)
+			typeChange(unitType);
 	}
 }
 
@@ -129,13 +128,13 @@ function setController(id, c){
 	controller = new c($productionContent);
 	controller.name = id;
 	controller.onSet = onSet;
-	if(dType)
-		controller.typeName = dType;
+	if(unitType)
+		controller.typeName = unitType.name;
 }
 
 function run(){
 
-	if(!type)
+	if(!unitType)
 		return;
 
 	const action = controller.action;
@@ -145,7 +144,7 @@ function run(){
 		return;
 	}
 	if(action.doNotSend || action.data.value===undefined){
-		console.warn(action.doNotSend, action.data);
+//		console.log(action.doNotSend, action.data);
 		return;
 	}
 	if(action.buisy){
@@ -162,18 +161,14 @@ function onSet(action){
 	serialPort.postObject($productionContent, action);
 }
 
-let dType;
-function typeChange(type){
-	console.log('Device Type Change:', type);
+function typeChange(){
+	console.log('Device Type Change:', unitType);
 	const $navbar = $prodactionNav.parents('.navbar')
 	const $admv = $navbar.find('#admv1013');
-	const t = f_deviceType(type[0]);
-	if(t===dType)
-		return;
-	dType = t;
+	const dType = unitType?.name;
 	changeProfilePath()
 	if(controller)
-		controller.typeName = dType
+		controller.typeName = dType;
 	switch(dType){
 
 	case 'CONVERTER_KA':
@@ -209,7 +204,7 @@ function typeChange(type){
 		break;
 
 	default:
-		console.log(type, dType);
+		console.log(unitType);
 	case 'CONTROLLER_IRPC':
 	case 'CONTROLLER_ODRC':
 	}
@@ -239,7 +234,7 @@ function addCalibrationButton(sn){
 }
 function showProfileButton(data){
 	if(!data?.path){
-		console.warn('No profile path found', profilePath);
+		console.warn('No profile path found', data);
 		return;
 	}
 	if(!admin)
@@ -275,10 +270,10 @@ function updateProfile(e) {
 // Change profile upload path based on device type and serialNumber
 function changeProfilePath(){
 	const $profilrUpload = $('#profilrUpload');
-	if (!$profilrUpload.length || !dType)
+	if (!$profilrUpload.length || !unitType)
 		return;
 	const search = $profilrUpload.attr('href').split('?')[1];
-	if(dType.startsWith('CONVERTER')){
+	if(unitType.name.startsWith('CONVERTER')){
 		$('#profilrUpload').attr('href', `/upgrade/rest/profile/${serialPort.serialPort}/0?${search}`);
 	}else
     	$('#profilrUpload').attr('href', `/file/upload/profile?${search}`);

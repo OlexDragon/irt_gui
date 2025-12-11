@@ -24,7 +24,7 @@ public class Gui4 {
 
 
 	public static void main(String[] args) {
-		logger.info("Start GUI}");
+//		logger.info("Start GUI}");
 
 		System.setProperty("java.awt.headless", "false");
 		String name = null;

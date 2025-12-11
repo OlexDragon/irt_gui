@@ -1,6 +1,8 @@
 package irt.gui.web.controllers;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.file.Paths;
@@ -11,11 +13,19 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +60,7 @@ public class UpgradeRestController {
 
 	@GetMapping("list")
 	List<String> getIrtPackages(@RequestParam String upgradeName){
-        String url = "https://www.irttechnologies.com/pkg/list?f=" + upgradeName;
+        String url = "https://irt-technologies-inc.onrender.com/pkg/list?f=" + upgradeName;
 		return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<String>>() {}).getBody();
 	}
 
@@ -61,8 +71,8 @@ public class UpgradeRestController {
 		distributor.lockPort(sp);
         try {
 
-        	// Load File from https://www.irttechnologies.com/load POST method
-			byte[] fileBytes = loadFileBytes(name, file);
+        	// Load File from https://irt-technologies-inc.onrender.com/load POST method
+			byte[] fileBytes = loadPkgBytes(name, file);
 
 			return send(sp, address, fileBytes);
 
@@ -96,6 +106,17 @@ public class UpgradeRestController {
 		}finally {
 			distributor.unlockPort(sp);
         }
+	}
+
+	@RequestMapping("load")
+	ResponseEntity<ByteArrayResource> load(@RequestParam String folder, @RequestParam String pkg) {
+
+		final byte[] fileBytes = loadPkgBytes(folder, pkg);
+        ByteArrayResource resource = new ByteArrayResource(fileBytes);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + pkg + "\"")
+                .contentLength(fileBytes.length)
+                .body(resource);
 	}
 
 	private String send(String sp, Integer address, byte[] fileBytes)
@@ -135,9 +156,9 @@ public class UpgradeRestController {
 				}
 				return response.toString();
 			}
-			 repeat = REPEAT_COUNT;
+			repeat = REPEAT_COUNT;
 
-			 if (end) break;	// exit condition
+			if (end) break;	// exit condition
 			end = index >= fileLength;	// reach the end of file
 
 			final int size = Math.min(BUFFER_SIZE, fileLength - index);
@@ -172,8 +193,10 @@ public class UpgradeRestController {
 		return dataSend.get(timeout, TimeUnit.MILLISECONDS);
 	}
 
-    private byte[] loadFileBytes(String name, String file) {
-        String url = "https://www.irttechnologies.com/pkg/load?f=" + name + "&p=" + file;
+	@Value("${irt.site.url}") private String irtSiteUrl;
+
+    private byte[] loadPkgBytes(String name, String file) {
+        String url = irtSiteUrl + "/pkg/load?f=" + name + "&p=" + file;
         return restTemplate.postForObject(url, null, byte[].class);
     }
 }

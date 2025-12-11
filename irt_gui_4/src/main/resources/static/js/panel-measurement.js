@@ -1,6 +1,5 @@
 import * as serialPort from './serial-port.js'
-import f_deviceType from './packet/service/device-type.js'
-import { type, onTypeChange, onStartAll } from './panel-info.js'
+import { onTypeChange, onStartAll } from './panel-info.js'
 import MeasurementLoader from './helper/measurement-loader.js'
 import groupId from './packet/packet-properties/group-id.js'
 
@@ -16,6 +15,7 @@ let interval;
 let buisy;
 
 onStartAll(yes=>yes ? start() : stop())
+onTypeChange(typeChange);
 export function start(){
 	if(interval || buisy)
 		return;
@@ -25,10 +25,6 @@ export function start(){
 	if(action.packetId){
 		clearInterval(interval);
 		interval = setInterval(run, 3000);
-	}else{
-		 if(type)
-			typeChange(type);
-		onTypeChange(typeChange);
 	}
 }
 
@@ -38,13 +34,13 @@ export function stop(){
 }
 
 function typeChange(type){
-	loader.setUnitType(f_deviceType(type[0]), c=>onControllerLoaded(c));
+	loader.setUnitType(type, c=>onControllerLoaded(c));
 }
 
 let controllerName;
 function onControllerLoaded(Controller){
 	if(!Controller){
-		console.log('This Controller is not ready.')
+		console.log('The Controller is not ready.')
 		return;
 	}
 	if(controllerName !== Controller.name){

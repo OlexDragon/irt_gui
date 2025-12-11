@@ -61,6 +61,10 @@ export default class DACController extends Controller{
 		switch(deviceType){
 
 		case 'CONVERTER':
+			this._action.data.value = [new Register(1,0), new Register(2,0), new Register(3,0), new Register(4,8)];
+			this._typeName = 'converter'
+			break;
+
 		case 'CONVERTER_KA':
 			this._action.data.value = [new Register(1,0), new Register(2,0), new Register(30,0), new Register(30,8)];
 			this._typeName = 'converter'
@@ -75,14 +79,26 @@ export default class DACController extends Controller{
 			this._action.data.value = [new Register(100,1), new Register(100,2), new Register(100,3), new Register(100,4)];
 			this._typeName = 'buc'
 		}
+
+		this.#setInputsData();
 	}
 
+	#setInputsData(){
+		this._$dacs.each((_, el)=>{
+			const index = el.id.replace(/[^0-9]/g, '') - 1;
+			const register = this._action.data.value[index];
+			el.setAttribute("data-register", `${register.index},${register.address}`);
+		});
+	}
 	#onLoad(){
 		this._$dacs = this.#$container.find('.dac').focus(this.#focuse.bind(this));
 		this.#$dacSaved = this.#$container.find('#dacSaved');
 		this.#$dacStep = this.#$container.find('#dacStep').change(this.#onStepChange.bind(this));
 		this._$dacRange = this.#$container.find('#dacRange').prop('min', 0).prop('max', 4095).prop('step', 1);
 		this.#$logs = $('#productionLogst');
+		const dacStep = Cookies.get('dac-step');
+		if(dacStep)
+			this.#$dacStep.val(dacStep).change();
 	}
 
 	_reaction(packet){
@@ -90,7 +106,7 @@ export default class DACController extends Controller{
 			const reg = Register.parseRegister(pl.data);
 			let element
 			this._$dacs.each((_, el)=>{
-				const split = el.dataset[this._typeName].split(',');
+				const split = el.dataset.register.split(',');
 				if(reg.index===+split[0] && reg.address===+split[1]){
 					element = el;
 					if(calMode)
@@ -144,10 +160,11 @@ export default class DACController extends Controller{
 			this._$dacs.prop('step', step);
 		}else
 			this._$dacs.prop('step', false);
+		Cookies.set('dac-step', el.value, {expires: 365, path: '/production'});
 	}
 
 	_sendCommand(el){
-		const split = el.dataset[this._typeName].split(',');
+		const split = el.dataset.register.split(',');
 		this._actionSet.data.value = new Register(+split[0], +split[1], +el.value);
 		this._actionSet.update = true;
 		this._onSet(this._actionSet);

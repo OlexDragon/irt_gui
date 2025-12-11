@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" translate="no">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head>
    <title>Login Page - IRT GUI</title>
 	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css' th:replace="home :: cssBootstrap"/>
@@ -38,6 +39,9 @@
 			</div>
 		</div>
 	</div>
+	<script th:inline="javascript">
+		const loggedin = /*[[${#authorization.expression('isAuthenticated()')}]]*/ true;
+	</script>
 	<script src="../static/js/login.js" th:src="@{/js/login.js}" ></script>
 </body>
 </html>

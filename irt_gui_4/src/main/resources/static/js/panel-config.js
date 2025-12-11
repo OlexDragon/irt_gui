@@ -1,5 +1,4 @@
 import * as serialPort from './serial-port.js'
-import f_deviceType from './packet/service/device-type.js'
 import { type as unitType, onTypeChange, onStartAll } from './panel-info.js'
 import ControlLoader from './helper/config-loader.js'
 
@@ -33,16 +32,15 @@ export function start(){
 }
 
 function typeChange(type){
-	loader.setUnitType(f_deviceType(type[0]), c=>onControllerLoaded(c));
+	loader.setUnitType(type, c=>onControllerLoaded(c));
 }
 
 function onControllerLoaded(Controller){
 	if(!Controller){
-		console.log('This Controller is not ready.')
+		console.log('Controller is not ready.')
 		return;
 	}
 	if(controller?.name !== Controller.name){
-		$body.empty();
 		controller = new Controller($card);
 		controller.name = Controller.name;
 		controller.parameter = loader.parameter;
@@ -52,6 +50,7 @@ function onControllerLoaded(Controller){
 		action.groupId = controller.groupId
 		actionSet = Object.assign({}, action);
 		actionSet.data = {};
+		action.update = true;
 	}
 
 	buisy = false;

@@ -157,7 +157,9 @@ async function getRest(action){
 	case packetId.irpcStandBy:
 	case packetId.moduleSet:
 	case packetId.odrcSetMode:
+	case packetId.lnbSetMode:
 	case packetId.odrcLNBSelect :
+	case packetId.lnbOverSet :
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, [action.data.value]), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
@@ -201,7 +203,7 @@ async function getRest(action){
 		break;
 
 	default:
-		console.warn(f_packetIdToString(action.toSend.id));
+		console.warn(f_packetIdToString(action.toSend.id), action);
 	}
 	return toSend;
 }

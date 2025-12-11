@@ -1,9 +1,9 @@
 import * as serialPort from './serial-port.js'
 import groupId from './packet/packet-properties/group-id.js'
 import packetId from './packet/packet-properties/packet-id.js'
-import f_deviceType from './packet/service/device-type.js'
 import ComControl from './classes/com-control.js'
 import protocol, {parser} from './packet/parameter/protocol.js'
+import { type as unitType } from './panel-info.js'
 
 
 const $card = $('#userCard');
@@ -14,7 +14,6 @@ const action = {packetId: packetId.comAll, groupId: groupId.protocol, data: {}, 
 let comControl;
 let interval;
 let delay = 10000;
-let type;
 
 export function start(){
 
@@ -24,8 +23,10 @@ export function start(){
 		return;
 
 	action.buisy = false;
-	type = f_deviceType();
-	switch(type){
+	if(!unitType)
+		return;
+
+	switch(unitType.name){
 
 	case 'CONTROLLER_IRPC':
 	case 'CONTROLLER_ODRC':
@@ -33,7 +34,8 @@ export function start(){
 		break;
 
 	default:
-		console.log(type);
+		console.log(unitType);
+	case 'LNB':
 	case 'BAIS':
 	case 'CONTROLLER':
 		action.data.parameterCode = [protocol.address.code, protocol.baudrate.code, protocol.retransmit.code, protocol.tranceiver_mode.code];
@@ -48,7 +50,7 @@ export function start(){
 		comControl = new ComControl($comAddress, $comRetransmits, $comStandard, $comBaudrate);
 		comControl.onChange(onChange);
 
-		switch(type){
+		switch(unitType.name){
 		case 'CONTROLLER_IRPC':
 		case 'CONTROLLER_ODRC':
 			$comStandard.parents('.to-hide').addClass('visually-hidden');
@@ -69,8 +71,7 @@ export function disable(){
 	comControl?.disable();
 }
 function chooseFragmentName(){
-	const type = f_deviceType();
-	switch(type){
+	switch(unitType.name){
 	default:
 		return 'buc';	
 	}

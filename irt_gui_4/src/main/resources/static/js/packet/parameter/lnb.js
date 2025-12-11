@@ -1,3 +1,4 @@
+import {parseToInt, parseToIntArray} from '../service/converter.js'
 
 const config = [];
 config[14] = 'Switchover';  /* Switch the unit to be online */

@@ -2,7 +2,7 @@ import * as serialPort from './serial-port.js'
 import groupId from './packet/packet-properties/group-id.js'
 import packetId from './packet/packet-properties/packet-id.js'
 import {code, parser} from './packet/parameter/alarm.js'
-import {type} from './panel-info.js'
+import {type as unitType, onTypeChange } from './panel-info.js'
 
 const $card = $('#userCard');
 const $body = $('#alarms-tab-pane');
@@ -10,14 +10,20 @@ const codeIdIDs = code('IDs');
 const codeIdDescription = code('description');
 const codeIdStatus = code('status');
 
-const action = { groupId: groupId.alarm, data: {parameterCode: codeIdIDs }, function: 'f_Alarms'};
-
+const action = { name: 'panel-alarms', groupId: groupId.alarm, data: {parameterCode: codeIdIDs }, function: 'f_Alarms'};
+onTypeChange(()=>{
+	action.IDs = undefined;
+	action.packetId = packetId.alarmIDs
+	action.data.parameterCode = codeIdIDs;
+	readAlarmDescription = true;
+	descriptionIndex = 0;
+	$body.empty();
+	map.clear();
+})
 //const packetIdSummary = f_PacketId('alarmSummary');
 //const packetIdAlarmIDs = f_PacketId('alarmIDs');
 //const packetIdAlarmDescription = f_PacketId('alarmDescription');
 //const packetIdAlarm = f_PacketId('alarm');
-
-let unitType;
 
 let interval;
 let delay = 5000;
@@ -29,16 +35,6 @@ export function start(){
 		return;
 
 	action.buisy = false;
-	if(unitType?.toString() !== type.toString()){
-		action.IDs = undefined;
-		action.packetId = packetId.alarmIDs
-		action.data.parameterCode = codeIdIDs;
-		readAlarmDescription = true;
-		descriptionIndex = 0;
-		unitType = type;
-		$body.empty();
-		map.clear();
-	}
 	run();
 	clearInterval(interval) ;
 	interval = setInterval(run, delay);

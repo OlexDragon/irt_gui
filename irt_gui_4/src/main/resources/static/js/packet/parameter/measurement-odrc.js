@@ -62,7 +62,7 @@ export function parser(value){
 	return measurement[name(code(value))]?.parser;
 }
 
-const statuses = ['UNKNOWN','LNB 1','LNB 2',,,,,,,,,'DEFAULT','PROTECTION A','PROTECTION B'];
+const statuses = ['UNKNOWN','LNB 1','LNB 2',,,,,,,,,'DEFAULT','PROTECTION LNB 1','PROTECTION LNB 2'];
 function parseToStatus(bytes){
 	return statuses[bytes[0]];
 }

@@ -20,7 +20,7 @@ export default class Baudrate{
 		this.#$baudrate.val(v.toString()).change();
 	}
 
-	#onChange(e){
-		Cookies.set('unitBaudrate', e.currentTarget.value, {expires: 365, path: ''});
+	#onChange({currentTarget:{value}}){
+		Cookies.set('unitBaudrate', value, {expires: 365, path: ''});
 	}
 }

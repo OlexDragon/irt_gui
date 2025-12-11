@@ -165,14 +165,41 @@
 		<div class="row mt-3">
 			<div class="col">
 				<div class="form-check">
-					<input id="odpcLnb1"  type="radio"class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
-					<label for="odpcLnb1" class="btn btn-outline-primary form-control">Set active LNB 1</label>
+					<input id="lnb1Over"  type="radio"class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
+					<label for="lnb1Over" class="btn btn-outline-primary form-control">Set active LNB 1</label>
 				</div>
 			</div>
 			<div class="col">
 				<div class="form-check">
-					<input id="odpcLnb2" type="radio" class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
-					<label for="odpcLnb2" class="btn btn-outline-primary form-control">Set active LNB 2</label>
+					<input id="lnb2Over" type="radio" class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
+					<label for="lnb2Over" class="btn btn-outline-primary form-control">Set active LNB 2</label>
+				</div>
+			</div>
+		</div>
+	</div>
+</th:block>
+<th:block th:fragment=lnb>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col">
+				<select id="lnbMode" class="form-select">
+                    <option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
+                    <option value="1">Automatic</option>
+                    <option value="2">Manual</option>
+				</select>
+			</div>
+		</div>
+		<div class="row mt-3">
+			<div class="col">
+				<div class="form-check">
+					<input id="lnb1Over"  type="radio"class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
+					<label for="lnb1Over" class="btn btn-outline-primary form-control">Protection LNB 1</label>
+				</div>
+			</div>
+			<div class="col">
+				<div class="form-check">
+					<input id="lnb2Over" type="radio" class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
+					<label for="lnb2Over" class="btn btn-outline-primary form-control">Protection LNB 2</label>
 				</div>
 			</div>
 		</div>

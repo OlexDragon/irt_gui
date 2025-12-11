@@ -1,8 +1,8 @@
 import * as serialPort from './serial-port.js'
 import groupId from './packet/packet-properties/group-id.js'
 import packetId from './packet/packet-properties/packet-id.js'
-import f_deviceType from './packet/service/device-type.js'
 import NetworkControl from './network/network-control.js'
+import { type as unitType } from './panel-info.js'
 
 const $card = $('#userCard');
 const $body = $('#network-tab-pane');
@@ -43,8 +43,7 @@ export function disable(){
 }
 
 function chooseFragmentName(){
-	const type = f_deviceType();
-	switch(type){
+	switch(unitType?.name){
 	default:
 		return 'buc';	
 	}
@@ -105,7 +104,6 @@ function onChange(ipAddress){
 }
 
 function onNotSaved(e){
-
 	serialPort.showToast("Network settings are not saved.", e.currentValue.toString(), 'text-bg-warning bg-opacity-50');
 	console.log(e);
 }

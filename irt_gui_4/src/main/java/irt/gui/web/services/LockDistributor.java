@@ -41,8 +41,9 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	private final static Logger logger = LogManager.getLogger();
 
 	BlockingQueue<PacketTask> queue = new PriorityBlockingQueue<>(100, (a,b)->{ if(a.command==b.command) return 0; else if(a.command) return 1; else return -1; });
-	
+
 	@Autowired @Qualifier("jSerialComm") IrtSerialPort serialPort;
+	@Autowired @Qualifier("jSerialCommFlash") JSerialCommFlash serialPortFlash;
 
 	@Value("${irt.packet.acknowledgement.size}")
 	private int acknowledgementSize;
@@ -58,6 +59,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	private boolean buisy;
 	@Override
 	public void run() {
+
 		if(buisy)
 			return;
 		buisy = true;
@@ -66,7 +68,12 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		try {
 
 			packetTask = queue.take();
-			sendFromQueue(packetTask.packet);
+			logger.traceEntry("packetTask={}", packetTask);
+			final boolean isFlash = Optional.ofNullable(packetTask.getPacket().getName()).map(n->n.equals("Flash")).orElse(false);
+			if (isFlash)
+				sendFromQueueFlash(packetTask.packet);
+			else
+				sendFromQueue(packetTask.packet);
 
 		} catch (IrtSerialPortRTException | IrtSerialPortIOException | IrtSerialPortTOException e) {
 			logger.catching(Level.DEBUG, e);
@@ -85,7 +92,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 	@Override
 	public synchronized FutureTask<RequestPacket> send(RequestPacket requestPacket) {
-//		logger.traceEntry("Put in queue -> {}", requestPacket);
+		logger.traceEntry("Put in queue -> {}", requestPacket);
 
 		// Check if the port is locked
 		if(!requestPacket.getId().equals(UpgradeRestController.PACKET_ID) && lockedPorts.contains(requestPacket.getSerialPort())) {
@@ -111,6 +118,37 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		}
 
 		return task;
+	}
+
+	@Override
+	public boolean isOpen(String serialPort) {
+		return this.serialPort.isOpen(serialPort);
+	}
+
+	private void sendFromQueueFlash(RequestPacket requestPacket) throws IrtSerialPortIOException {
+		logger.traceEntry("{}", requestPacket);
+
+		final String portName = requestPacket.getSerialPort();
+
+		final int timeout = Optional.ofNullable(requestPacket.getTimeout()).orElse(100);
+		final byte[] bytes = requestPacket.getBytes();
+
+		if (bytes == null || bytes.length == 0) {
+			requestPacket.setError("There is no data to send.");
+			return;
+		}
+
+		final Integer baudrate = requestPacket.getBaudrate();
+		serialPortFlash.setExpectedLength(requestPacket.getExpectedLength());
+		byte[] received = serialPortFlash.send(portName, timeout, bytes, baudrate);
+		if (received == null)
+			return;
+
+		logger.error("{} : {}", received.length, received);
+
+		requestPacket.setAnswer(received);
+		logger.debug(requestPacket);
+		
 	}
 
 	private void sendFromQueue(RequestPacket requestPacket) throws IrtSerialPortIOException {
@@ -206,10 +244,15 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	private Set<String> lockedPorts = new HashSet<>();
 	@Override
 	public void lockPort(String spName) {
-		lockedPorts.add(spName);
+		if(!lockedPorts.contains(spName)) {
+			logger.info("Locking port: {}", spName);
+			lockedPorts.add(spName);
+		}
 	}
 	@Override
 	public void unlockPort(String spName) {
-		lockedPorts.remove(spName);
+		if(lockedPorts.remove(spName))
+			logger.info("Unlocking port: {}", spName);
 	}
+
 }

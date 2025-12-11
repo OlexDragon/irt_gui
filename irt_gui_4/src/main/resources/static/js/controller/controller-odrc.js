@@ -101,6 +101,7 @@ export default class ControllerOdrc extends Controller{
 				this.#wgs = wgs;
 				switch(wgs){
 
+				case 'PROTECTION A':
 				case 'LNB 1':{
 					const auto = this.#$odrcMode.val() === '1'; // AUTO mode
 					this.#$odpcLnb1.prop('disabled', auto).prop('checked', true).next().text('LNB 1 Active');
@@ -109,13 +110,21 @@ export default class ControllerOdrc extends Controller{
 					break
 				}
  
-               case 'LNB 2':{
-				const auto = this.#$odrcMode.val() === '1'; // AUTO mode
+				
+				case 'PROTECTION B':
+				case 'LNB 2':{
+					const auto = this.#$odrcMode.val() === '1'; // AUTO mode
 					this.#$odpcLnb2.prop('disabled', auto).prop('checked', true).next().text('LNB 2 Active');
 				    this.#$odpcLnb1.prop('disabled', auto).next();
 					auto ? this.#$odpcLnb1.next().text('LNB 1') : this.#$odpcLnb1.next().text('Set LNB 1 Active');
 					break;
-			   }
+		        }
+
+			   case 'DEFAULT':
+			   		const auto = this.#$odrcMode.val() === '1'; // AUTO mode
+			   		this.#$odpcLnb1.prop('checked', false).prop('disabled', auto);
+					this.#$odpcLnb2.prop('checked', false).prop('disabled', auto);
+				   break;
 
 				default:
 					this.#$odpcLnb1.prop('disabled', true).prop('checked', false).next().text('WGS Unavailable');

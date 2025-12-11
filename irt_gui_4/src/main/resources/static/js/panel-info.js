@@ -2,6 +2,7 @@ import * as serialPort from './serial-port.js'
 import packetId from './packet/packet-properties/packet-id.js'
 import groupId from './packet/packet-properties/group-id.js'
 import { onStatusChange } from './panel-summary-alarm.js'
+import f_deviceType from './packet/service/device-type.js'
 
 const $card = $('.infoCard');
 const $body = $('.info');
@@ -12,7 +13,6 @@ let serialNumber
 const map = new Map();
 const parameter = {};
 
-let started;
 let interval;
 const action = {packetId: packetId.deviceInfo, groupId: groupId.deviceInfo, data: {}, function: 'f_Info'};
 
@@ -32,10 +32,11 @@ if($('#unitsSelect').length)
 serialPort.onStart(onStart);
 function onStart(doRun){
 	
-	if(doRun)
-		console.log('start')
+	if(doRun){
+		console.log('start');
+		startAll();
 //		start();
-	else
+	}else
 		stop();
 }
 
@@ -46,7 +47,6 @@ export function start(){
 	if(interval)
 		return;
 
-	started = true;
 	action.buisy = false;
 	getParameter();
 }
@@ -117,14 +117,16 @@ action.f_Info = function(packet){
 			return;
 		}
 		const val = parser(pl.data);
+		if(!val){
+			console.warn('No value. ', pl);
+			return;
+		}
 		if($row?.length){
 			const $val = $row.find('#' + valId);
 			switch(parameterCode){
 			case parameter.deviceInfo.type:
-				const compar = val.filter((v,i)=>v===type[i]);
-				if(compar.length !== type.length){
+				if(!type || val[0]!==type.type || val[1]!==type.revision || val[2]!==type.subtype)
 					$val.text(val);
-				}
 				break;
 
 			default:
@@ -158,8 +160,7 @@ action.f_Info = function(packet){
 		switch(parameterCode){
 
 		case parameter.deviceInfo.type:
-			if(started || type?.toString()!==val.toString()){
-				started = false;
+			if(type?.type !== val[0] || type.revision !== val[1] || type.subtype !== val[2]){
 				changeType(val);
 			}
 			break;
@@ -183,7 +184,7 @@ action.f_Info = function(packet){
 }
 
 function changeType(val){
-	type = val;
+	type = { name: f_deviceType(val[0]), type: val[0], revision: val[1], subtype: val[2]};
 	startAll();
 	typeChangeEvents.forEach(e=>e(type));
 }

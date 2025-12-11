@@ -27,7 +27,7 @@ export default class MeasurementLoader{
 
 	setUnitType(unitType, callBack){
 
-		if(this.unitType === unitType){
+		if(JSON.stringify(this.unitType) === JSON.stringify(unitType)){
 			callBack(this.#controller);
 			return;
 		}
@@ -36,7 +36,14 @@ export default class MeasurementLoader{
 		let loadC;
 		let loadP;
 
-		switch(unitType){
+		switch(unitType.name){
+
+		case 'LNB':
+			this.#getAll = this.#forIRPC;
+			this.#packetId = packetId.irpc;
+			loadC = this.#controllerLoader.load('./controller/controller-lnb.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/lnb.js');
+			break;
 
 		case 'CONTROLLER_IRPC':
 			this.#getAll = this.#forIRPC;

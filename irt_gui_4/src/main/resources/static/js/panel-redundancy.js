@@ -1,8 +1,8 @@
 import * as serialPort from './serial-port.js'
-import f_deviceType from './packet/service/device-type.js'
 import groupId from './packet/packet-properties/group-id.js'
 import packetId from './packet/packet-properties/packet-id.js'
 import control, {parser} from './packet/parameter/control.js'
+import { type as unitType } from './panel-info.js'
 
 const $card = $('#userCard');
 const $body = $('#redundancy-tab-pane');
@@ -52,8 +52,7 @@ export function disable(){
 	$btnSetOnline?.prop('disabled', true);
 }
 function chooseFragmentName(){
-	const type = f_deviceType();
-	switch(type){
+	switch(unitType?.name){
 	default:
 		return 'buc';	
 	}

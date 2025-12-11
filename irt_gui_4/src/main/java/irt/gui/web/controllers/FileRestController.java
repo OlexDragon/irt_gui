@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +49,7 @@ public class FileRestController {
 	private String profilePath;
 
 	@GetMapping("path/profile")
-	List<Path> profilePath(@RequestParam String sn) throws IOException {
+	List<Path> profilePath(@RequestParam String sn) {
 		logger.traceEntry(sn);
 
 		final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*" + sn + ".bin");
@@ -70,10 +71,15 @@ public class FileRestController {
     	};
 
 //    	logger.error(profilePath);
-    	final Path start = Paths.get(profilePath);
-		Files.walkFileTree(start, visitor);
+		try {
+			final Path start = Paths.get(profilePath);
+			Files.walkFileTree(start, visitor);
+			return arPath.get();
+		} catch (IOException e) {
+			logger.catching(Level.DEBUG, e);
+		}
+		return null;
 
-		return arPath.get();
 	}
 
 	@PostMapping("open")

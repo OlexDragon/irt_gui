@@ -10,10 +10,59 @@
     <meta name="google" content="notranslate" />
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css' th:replace="home :: cssBootstrap"/>
-	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
+	<link rel='stylesheet' href='../static/css/flash.css' th:href="@{/css/flash.css}"/>
 </head>
 
 <body>
+<nav class="navbar navbar-expand-sm bg-body-tertiary fixed-top ">
+  <div class="container-fluid">
+    <a class="navbar-brand align-text-center" href="/" th:inline="text"><img src="../static/images/logo.png" th:src="@{/images/logo.png}" alt="Logo" width="55" class="d-inline-block">IRT GUI v.[[${version}]]</a>
+	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+    	<div class="navbar-nav">
+    		<div class="form-floating">
+				<select id="selectSP", class="form-select">
+					<option selected="selected" disabled="disabled" hidden="hidden">Select Serial Port</option>
+					<option th:each="sp : ${serialPorts}" th:text="${sp}" th:value="${sp}"></option>
+				</select>
+				<label for="selectSP">Serial Port</label>
+			</div>
+			<div class="form-floating ms-2">
+				<select id="selectBR", class="form-select">
+					<option th:each="br : ${baudrates}" th:text="${br}" th:value="${br}"></option>
+				</select>
+				<label for="selectBR">Baudrate</label>
+			</div>
+			<input id="cbFlashConnect" type="checkbox" class="btn-check" autocomplete="off" disabled="disabled">
+			<label for="cbFlashConnect" class="btn btn-outline-primary ms-2">Connect</label>
+			<div id="connectionStatus" class="col ms-2"></div>
+    	</div>
+    </div>
+  </div>
+</nav>
+<div id="content" class="container">
+    <h1 class="text-info text-center mt-5">STM32F4 - Flash v.4</h1>
+	<div class="row">
+		<div class="col">
+			<div class="card">
+				<div class="card-body">
+					<table class="table">
+						<tbody>
+							 <tr>
+								<th scope="row">Port Status:</th>
+								<td id="tdPortStatus"></td>
+							</tr>
+							 <tr>
+								<th scope="row">Processor:</th>
+								<td id="tdProcessor"></td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
 <th:block th:replace="home :: np">
 	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
 	<script src="/webjars/js-cookie/3.0.1/js.cookie.min.js"></script>

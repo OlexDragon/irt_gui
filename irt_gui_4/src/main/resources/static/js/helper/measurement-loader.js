@@ -15,7 +15,7 @@ export default class MeasurementLoader{
 	constructor(unitType){
 		this.#controllerLoader = new ModuleLoader();
 		this.#parameterLoader = new ModuleLoader();
-		if(unitType)
+		if(unitType?.name)
 			this.setUnitType(unitType);
 	}
 
@@ -25,7 +25,7 @@ export default class MeasurementLoader{
 
 	setUnitType(unitType, callBack){
 
-		if(this.unitType === unitType){
+		if(JSON.stringify(this.unitType) === JSON.stringify(unitType)){
 			callBack(this.#controller);
 			return;
 		}
@@ -34,7 +34,7 @@ export default class MeasurementLoader{
 		let loadC;
 		let loadP;
 
-		switch(unitType){
+		switch(unitType.name){
 		case 'CONTROLLER_IRPC':
 			this.#packetId = packetId.measurementIRPC;
 			loadC = this.#controllerLoader.load('./controller/controller-meas-irpc.js');
@@ -55,6 +55,7 @@ export default class MeasurementLoader{
 			break;
 
 		case 'CONTROLLER_ODRC':
+		case 'LNB':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
 			loadP = this.#parameterLoader.load('./packet/parameter/measurement-odrc.js');

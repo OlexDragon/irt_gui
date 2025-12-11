@@ -46,8 +46,10 @@ export function start(){
 	action.buisy = false;
 	action.packetError = undefined;
 
-	const unitType = f_unitType();
-	switch(unitType){
+	if(!unitType)
+		return;
+
+	switch(unitType.name){
 	case 'CONVERTER':
 		return;
 	}

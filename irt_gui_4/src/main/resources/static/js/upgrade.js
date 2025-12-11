@@ -1,5 +1,5 @@
 import * as serialPort from './serial-port.js';
-import { type, onSerialChange } from './panel-info.js';
+import { onSerialChange } from './panel-info.js';
 
 const $upgradeName = $('#upgradeName').on('change', checkWeb);
 const $upgradeBody = $('#upgradeBody');
@@ -23,7 +23,21 @@ function checkWeb({currentTarget:{value:upgradeName}}) {
 			$btnUpgradeGet.prop('disabled', false);
 			$upgradeName.prop('disabled', false);
 			if(data?.length)
-				$upgradeBody.empty().append(data.map(d=>$('<div>', {class: 'row'}).append($('<div>', {class: 'col', text: d})).append($('<div>', {class: 'col-auto'}).append($('<button>', {type: "button", value: encodeURIComponent(d), text: 'Upgrade', class: 'btn btn-outline-primary'}).click(btnClick)))));
+				$upgradeBody.empty().append(
+					data.map(
+						d=>
+						$('<div>', {class: 'row'})
+						.append(
+							$('<div>', {class: 'col', text: d})
+						).append(
+							$('<div>', {class: 'col-auto'})
+							.append(
+								$('<button>', {type: "button", value: encodeURIComponent(d), text: 'Download', class: 'btn btn-outline-secondary', 'data-folder': upgradeName}).click(btnClickDownload))
+						).append(
+							$('<div>', {class: 'col-auto'})
+							.append(
+								$('<button>', {type: "button", value: encodeURIComponent(d), text: 'Upgrade', class: 'btn btn-outline-primary'}).click(btnClick)))
+					));
 			else{
 				const val = $upgradeName.val();
 				$upgradeBody.empty().text('No files found for "'+val+'"');
@@ -31,7 +45,11 @@ function checkWeb({currentTarget:{value:upgradeName}}) {
 		});
 	}
 }
-
+function btnClickDownload(e) {
+	e.preventDefault();
+	const {currentTarget:{value:packege, dataset:{folder}}} = e;
+	window.open(`/upgrade/rest/load?folder=${folder}&pkg=${packege}`, '_blank');
+}
 function btnClick({currentTarget:{value}}) {
 
 	if (!confirm('Are you sure you want to upgrade the unit with this file?'))
