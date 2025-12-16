@@ -59,7 +59,7 @@ export function start(){
 	const $selectedTab = $tabs.filter((_,el)=>el.classList.contains('active'));
 
 	if($selectedTab.length)
-		userTabsOnShow($selectedTab.prop('id'));
+		$selectedTab.click();
 	else
 		console.warn('User Tab is not selected.')
 }
@@ -73,15 +73,16 @@ export function disable(){
 	networkDisable(); redundancyDisable(); comDisable();
 }
 
-function userTabsOnShow(selected){
+function userTabsOnShow({currentTarget:el}){
 	networkStop(); alarmsStop(); redundancyStop(); comStop();
 
 	if(!run)
 		return;
 
-	if(selected.currentTarget){
-		Cookies.set('userTabsCookies', selected.currentTarget.id, {expires: 365, path: '/'});
-		selected = selected.currentTarget.id;
+	let selected;
+	if(el){
+		Cookies.set('userTabsCookies', el.id, {expires: 365, path: '/'});
+		selected = el.id;
 	}
 
 	switch(selected){

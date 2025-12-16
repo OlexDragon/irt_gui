@@ -1,6 +1,8 @@
 import * as serialPort from './serial-port.js';
 import './production/cal-mode.js';
 import './panel-measurement.js';
+import './panel-config.js'
+import './user-panels.js'
 import { onStatusChange } from './panel-summary-alarm.js';
 import { type as unitType, onStartAll, profileSearch, onTypeChange, onSerialChange } from './panel-info.js';
 
@@ -73,6 +75,11 @@ async function loadController(id){
 			}
 			break;
 		}
+
+		case 'potentiometersId':
+			const {default:c} = await import('./production/controller-pots.js');
+			setController(id, c);
+			break;
 
 		case 'admv1013':
 		{
@@ -164,7 +171,7 @@ function onSet(action){
 function typeChange(){
 	console.log('Device Type Change:', unitType);
 	const $navbar = $prodactionNav.parents('.navbar')
-	const $admv = $navbar.find('#admv1013');
+	const $admv = $navbar.find('.pllRegisters');
 	const dType = unitType?.name;
 	changeProfilePath()
 	if(controller)
@@ -187,15 +194,20 @@ function typeChange(){
 
 			// PLL 1
 			const $divADMV1013 = $('<div>', {class: 'col-auto ms-1'})
-			.append($('<input>', {id: admvId, name:'prodactionNav', type: 'radio', class: 'btn-check', autocomplete: 'off'}).change(onNavChenge))
+			.append($('<input>', {id: admvId, name:'prodactionNav', type: 'radio', class: 'btn-check pllRegisters', autocomplete: 'off'}).change(onNavChenge))
 			.append($('<label>', {for: admvId, title:'ADMV1013', text: 'ADMV 1013', class: 'btn btn-outline-primary'}))
 
 			// PLL 2
 			const $divSTUW81300 = $('<div>', {class: 'col-auto ms-1'})
-			.append($('<input>', {id: stuwId, name:'prodactionNav', type: 'radio', class: 'btn-check', autocomplete: 'off'}).change(onNavChenge))
+			.append($('<input>', {id: stuwId, name:'prodactionNav', type: 'radio', class: 'btn-check pllRegisters', autocomplete: 'off'}).change(onNavChenge))
 			.append($('<label>', {for: stuwId, title:'STUW81300', text: 'STUW 81300', class: 'btn btn-outline-primary'}))
 
-			$navbar.append([$divADMV1013, $divSTUW81300]);
+			// Potentiometers
+			const $potentiometers = $('<div>', {class: 'col-auto ms-1'})
+			.append($('<input>', {id: 'potentiometersId', name:'prodactionNav', type: 'radio', class: 'btn-check', autocomplete: 'off'}).change(onNavChenge))
+			.append($('<label>', {for: 'potentiometersId', title:'Potentiometers', text: 'POTs', class: 'btn btn-outline-primary'}))
+
+			$navbar.append([$divADMV1013, $divSTUW81300, $potentiometers]);
 		}
 		return;
 
@@ -230,7 +242,9 @@ function addCalibrationButton(sn){
 	const $div = $('<div>', {class: 'col-auto cal-link ms-2'});
 	if(admin)
 		$div.append($('<a>', {class: 'btn btn-outline-info', target: '_blank', href:`http://irttechnologies:8089/calibration?sn=${sn}`, text: 'Calibration'}));
-	$div.appendTo($navBar);
+	setTimeout(()=>{
+		$div.appendTo($navBar);
+	}, 100);
 }
 function showProfileButton(data){
 	if(!data?.path){

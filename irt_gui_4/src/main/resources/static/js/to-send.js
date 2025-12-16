@@ -1,9 +1,9 @@
-import packetId, {toString as f_packetIdToString} from './packet/packet-properties/packet-id.js'
-import packetType from './packet/packet-properties/packet-type.js'
-import groupId from './packet/packet-properties/group-id.js'
-import {serialPort, baudrate, unitAddrClass} from './serial-port.js'
-import Packet, {Header, Payload} from './packet/packet.js'
-import {shortToBytesR, intToBytes, longToBytes} from './packet/service/converter.js'
+import packetId, {toString as f_packetIdToString} from './packet/packet-properties/packet-id.js';
+import packetType from './packet/packet-properties/packet-type.js';
+import groupId from './packet/packet-properties/group-id.js';
+import {serialPort, baudrate, unitAddrClass} from './serial-port.js';
+import Packet, {Header, Payload} from './packet/packet.js';
+import {shortToBytesR, intToBytes, longToBytes} from './packet/service/converter.js';
 
 export default async function (action, callBack){
 
@@ -77,6 +77,14 @@ async function getRest(action){
 	case packetId.admv1013Bias:
 		{
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, intToBytes(action.data.value)), action.toSend.unitAddr);
+			toSend.bytes = packet.toSend();
+		}
+		break;
+
+	case packetId.POTs_KA_BIAS:
+		{
+			const pls = action.data.value.map(v=>new Payload(action.data.parameterCode, intToBytes(v)));
+			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
 		}
 		break;
@@ -176,6 +184,7 @@ async function getRest(action){
 	case packetId.dacs:
 	case packetId.admv1013:
 	case packetId.stuw81300:
+	case packetId.POTs_KA_Converter:
 		{
 			const pls = action.data.value.map(v=>new Payload(action.data.parameterCode, v.toBytes()));
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);

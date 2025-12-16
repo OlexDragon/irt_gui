@@ -14,6 +14,11 @@
 </head>
 
 <body>
+
+<div class="language-selector visually-hidden">
+	<img src="../static/images/flags/f-usa.png" th:src="'/images/flags/f-english.png'" alt="Language">
+	<label class="badge text-uppercase align-middle" th:text="${lang} eq 'fr' ? 'English' : 'Fran&ccedil;ais'">English</label>
+</div>
 <div class="container-fluid">
 	<div class="row g-1">
 		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:fragment="serial-port">
@@ -66,7 +71,7 @@
 			<div id="unitsSelect" class="row border p-2 m-2"></div>
 			<div class="row">
 				<div class="col-lg-6 col-12 mt-2">
-					<div class="card infoCard">
+					<div class="card infoCard" th:fragment="infoCard">
   						<div class="card-body info">
   							<div class="placeholder-wave">
  								<div class="row justify-content-evenly mb-2">
@@ -94,7 +99,7 @@
 					</div>
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
-					<div class="card measurementCard">
+					<div class="card measurementCard" th:fragment="measurementCard">
   						<div class="card-body measurement">
  							<div class="placeholder-wave">
  								<div class="row justify-content-evenly mb-2">
@@ -122,7 +127,7 @@
 					</div>
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
-					<div class="card controlCard">
+					<div class="card controlCard" th:fragment="controlCard">
   						<div class="card-body control">
  							<div class="placeholder-wave">
  								<div class="row justify-content-evenly mb-2">
@@ -150,7 +155,7 @@
 					</div>
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
-					<div id="userCard" class="card">
+					<div id="userCard" class="card" th:fragment="userPanels">
   						<div class="card-body userPanels">
   							<ul class="nav nav-tabs">
  								<li class="nav-item">

@@ -20,18 +20,18 @@
 		<div class="col">
 			<div id="unitsSelect" class="row border p-2 m-2"></div>
 			<div class="row">
-				<div class="col col mt-2">
-					<div class="card infoCard">
-  						<div class="card-body info">
-						</div>
-					</div>
+				<div class="col-lg-6 col-12 mt-2">
+					<div class="card infoCard" th:replace="home :: infoCard"></div>
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
-					<div class="card measurementCard">
-  						<div class="card-body measurement">
-						</div>
-					</div>
+					<div class="card measurementCard" th:replace="home :: measurementCard"></div>
 				</div>
+				<div class="col-lg-6 col-12 mt-2">
+                    <div class="card controlCard" th:replace="home :: controlCard"></div>
+                </div>
+				<div class="col-lg-6 col-12 mt-2">
+                    <div class="card userPanels" th:replace="home :: userPanels"></div>
+                </div>
 			</div>
 			<nav class="navbar">
 						<div id="calModeDiv" class="col-auto border-bottom p-1">

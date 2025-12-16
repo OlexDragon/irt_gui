@@ -2,9 +2,9 @@ import * as serialPort from '../serial-port.js'
 import packetId from '../packet/packet-properties/packet-id.js'
 import groupId from '../packet/packet-properties/group-id.js'
 import dd from '../packet/parameter/device-debug.js'
-import {onStatusChange} from '../panel-summary-alarm.js'
+import {onStatusChange, } from '../panel-summary-alarm.js'
+import { onStartAll } from '../panel-info.js'
 
-serialPort.onStart(spOnStart);
 
 const $calModeDiv = $('#calModeDiv');
 const $cbCalMode = $('#cbCalMode').change(onChange);
@@ -12,14 +12,15 @@ const action = {packetId: packetId.calMode, groupId: groupId.deviceDebug, data: 
 
 export let calMode;
 
-function spOnStart(yes){
+onStartAll(yes=>{
 	yes ? start() : stop()
-}
+});
 let interval;
 function start(){
 console.log("start()")
 	if(interval)
 		return;
+	run();
 	interval = setInterval(run, 5000);
 }
 
@@ -28,7 +29,8 @@ function stop(){
 }
 
 function run(){
-	if(action.packetError){
+	if(action.packetError && !action.packetError.startsWith('TIMEOUT')){
+		console.warn('Previous error on calMode:', action.packetError);
 		action.packetError = undefined;
 		stop();
 		return;

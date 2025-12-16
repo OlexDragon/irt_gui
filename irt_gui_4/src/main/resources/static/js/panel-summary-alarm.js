@@ -95,12 +95,13 @@ function setStatus(value){
 	}
 }
 
-function tripleClick({detail}){
+function tripleClick({detail, ctrlKey}){
 	if(detail!=3)
 		return;
 
-	const url = new URL('production', window.location.href)
-	window.open(url, '_blank');
+	const page = ctrlKey ? 'upgrade' : 'production';
+	const url = new URL(page, window.location.href)
+	setTimeout(()=>{ window.open(url, '_blank'); }, 100);
 }
 
 let $modal;

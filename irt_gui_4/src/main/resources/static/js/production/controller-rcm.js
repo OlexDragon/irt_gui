@@ -35,8 +35,8 @@ export default class DACsController extends DACController{
 			switch(code){
 
 			case 2:
-				if(value?.length===2 && this._$dacRange.prop('max')!==`${value[1]}`){
-					this._$dacRange.prop('max', value[1]);
+				if(value?.length===2 && this._$valueRange.prop('max')!==`${value[1]}`){
+					this._$valueRange.prop('max', value[1]);
 					this._action.data.parameterCode.splice(0,1);
 					this._action.update = true;
 				}
@@ -49,7 +49,7 @@ export default class DACsController extends DACController{
 						this._selected.value = valStr;
 				}else if(this._$dacs.val()!==`${value}`){
 					this._$dacs.val(value);
-					this._$dacRange.val(value);
+					this._$valueRange.val(value);
 					if(this._$dacs.prop('disabled'))
 						this._$dacs.prop('disabled', false);
 				}

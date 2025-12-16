@@ -11,7 +11,7 @@ export default class ValueControl{
 	constructor($value, $valueToSet, $range, $step){
 		this.#$value = $value.val($valueToSet.val());
 		const onChange = this.#onChange.bind(this);
-		this.#$valueToSet = $valueToSet.addClass('input-selected').change(onChange);
+		this.#$valueToSet = $valueToSet.addClass('input-selected').change(onChange).keyup(this.#keyup);
 		this.#$range = $range.prop('disabled', false).val($valueToSet.val()).change(onChange).on('input', this.#rangeOnInput.bind(this));
 		this.#$step = $step;
 		this.#oldValue = +$valueToSet.val();
@@ -46,6 +46,8 @@ export default class ValueControl{
 
 		#rangeInputCout = 0;
 	#onChange({currentTarget : el}){
+		if(document.activeElement !== el)
+			return;
 		switch(el.type){
 
 		case 'number':
@@ -99,5 +101,11 @@ export default class ValueControl{
 	#rangeOnInput({currentTarget:{value}}){
 		++this.#rangeInputCout;
 		this.#$valueToSet.val(value);
+	}
+	#keyup({currentTarget: el, key}){
+		switch(key){
+		case 'Escape':
+			el.blur();
+		}
 	}
 }

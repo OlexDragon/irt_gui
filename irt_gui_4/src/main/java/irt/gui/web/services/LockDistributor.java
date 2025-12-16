@@ -254,5 +254,4 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		if(lockedPorts.remove(spName))
 			logger.info("Unlocking port: {}", spName);
 	}
-
 }

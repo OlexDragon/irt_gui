@@ -10,7 +10,7 @@ const codeIdIDs = code('IDs');
 const codeIdDescription = code('description');
 const codeIdStatus = code('status');
 
-const action = { name: 'panel-alarms', groupId: groupId.alarm, data: {parameterCode: codeIdIDs }, function: 'f_Alarms'};
+const action = { name: 'panel-alarms', packetId: packetId.alarmIDs, groupId: groupId.alarm, data: {parameterCode: codeIdIDs }, function: 'f_Alarms'};
 onTypeChange(()=>{
 	action.IDs = undefined;
 	action.packetId = packetId.alarmIDs
@@ -43,7 +43,6 @@ export function start(){
 export function stop(){
 	clearInterval(interval) ;
 	interval = undefined;
-	action.IDs = undefined;
 }
 
 let readAlarmDescription = true;

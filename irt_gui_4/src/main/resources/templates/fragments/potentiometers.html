@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+</head>
+
+<body>
+
+	<div class="container" th:fragment="pots">
+		<div class="card-body">
+		<div class="row m-2">
+			<div class="form-floating col-3">
+				<input id="savedValue" type="number" class="form-control" placeholder="Saved Value" readonly="readonly" disabled="disabled">
+				<label for="savedValue">Saved Value</label>
+			</div>
+			<div class="col"></div>
+			<div class="form-floating col-3">
+				<input id="valueStep" type="number" class="form-control" placeholder="Step">
+				<label for="valueStep">Step</label>
+			</div>
+		</div>
+		<div class="row m-2">
+			<div class="col">
+				<input id="valueRange" type="range" class="form-range" disabled="disabled">
+			</div>
+		</div>
+		<div class="row m-2">
+			<div class="input-group mb-3">
+				<div class="form-floating col-4">
+					<input id="pot1" type="number" class="form-control dac" min="0" max="255" placeholder="VC_EQ" disabled="disabled">
+					<label for="pot1">VC_EQ</label>
+				</div>
+				<button class="btn btn-outline-secondary" data-register="30,3,1">Save</button>
+			</div>
+			<div class="input-group mb-3">
+				<div class="form-floating col-4">
+					<input id="pot2" type="number" class="form-control dac" min="0" max="255" placeholder="VG_PA" disabled="disabled">
+					<label for="pot2">VG_PA</label>
+				</div>
+				<button class="btn btn-outline-secondary">Save</button>
+			</div>
+			<div class="input-group mb-3">
+				<div class="form-floating col-4">
+					<input id="pot3" type="number" class="form-control dac" min="0" max="255" placeholder="UC_VCTRL2" disabled="disabled">
+					<label for="pot3">UC_VCTRL2</label>
+				</div>
+				<button class="btn btn-outline-secondary" data-register="20,5,1">Save</button>
+			</div>
+			<div class="input-group mb-3">
+				<div class="form-floating col-4">
+					<input id="pot4" type="number" class="form-control dac" min="0" max="255" placeholder="UC_VCTRL1" disabled="disabled">
+					<label for="pot4">UC_VCTRL1</label>
+				</div>
+				<button class="btn btn-outline-secondary" data-register="31,11,1">Save</button>
+			</div>
+		</div>
+		</div>
+	</div>
+
+</body>
+</html>

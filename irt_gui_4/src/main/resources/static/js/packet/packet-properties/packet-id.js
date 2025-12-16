@@ -87,7 +87,10 @@ const packetIdArray = Object.freeze(
 		'dump',
 		'dumpHelp',
 
-		'noAction'
+		'noAction',
+		
+		'POTs_KA_BIAS',
+		'POTs_KA_Converter'
 	]);
 
 const packetId = Object.freeze(packetIdArray.reduce((a, v, i)=>({...a, [v]: i}), {}));
