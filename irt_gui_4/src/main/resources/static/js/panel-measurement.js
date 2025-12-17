@@ -24,6 +24,7 @@ export function start(){
 	action.buisy = false;
 	if(action.packetId){
 		clearInterval(interval);
+		run();
 		interval = setInterval(run, 3000);
 	}
 }
@@ -31,6 +32,7 @@ export function start(){
 export function stop(){
 	clearInterval(interval);
 	interval = undefined;
+	buisy = false;
 }
 
 function typeChange(type){
@@ -54,10 +56,11 @@ function onControllerLoaded(Controller){
 	}
 
 	buisy = false;
+	start();
 
 //	run();
-	clearInterval(interval);
-	interval = setInterval(run, 3000);
+//	clearInterval(interval);
+//	interval = setInterval(run, 3000);
 }
 
 function run(){

@@ -52,6 +52,7 @@ export function start(){
 
 	default:
 		console.log(unitType);
+	case 'KA_BIAS':
 	case 'BAIS':
 		$tabs.filter((_,el)=>el.id==='userTabRedundancy').parent().removeClass('visually-hidden');
 	}

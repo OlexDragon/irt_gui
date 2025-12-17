@@ -23,12 +23,18 @@ export function start(){
 	action.buisy = false;
 	if(action.packetId){
 		clearInterval(interval) ;
+		run()
 		interval = setInterval(run, DELAY);
 	}else{
 		if(unitType)
 			typeChange(unitType);
-		onTypeChange(typeChange);
 	}
+}
+
+export function stop(){
+	clearInterval(interval) ;
+	interval = undefined;
+	buisy = false;;
 }
 
 function typeChange(type){
@@ -55,9 +61,7 @@ function onControllerLoaded(Controller){
 
 	buisy = false;
 
-	run();
-	clearInterval(interval) ;
-	interval = setInterval(run, DELAY);
+	start();
 }
 
 function run(){
@@ -78,11 +82,6 @@ function run(){
 		action.data.parameterCode = controller.toRead;
 	}
 	serialPort.postObject($card, action);
-}
-
-export function stop(){
-	clearInterval(interval) ;
-	interval = undefined;
 }
 
 action.f_Config = function(packet){

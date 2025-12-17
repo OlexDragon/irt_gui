@@ -53,7 +53,7 @@ action.f_calMode = (packet)=>{
 		if($cbCalMode.prop('checked')!==calMode || $cbCalMode.prop('disabled')){
 			$cbCalMode.prop('disabled', false).prop('checked', calMode);
 		}
-		const text = calMode ? 'Cal. ON' : 'Cal. OFF';
+		const text = calMode ? 'Calibration  ON' : 'Calibration  OFF';
 		const $label = $cbCalMode.next();
 		if($label.text()!==text)
 			$label.text(text);
@@ -67,14 +67,14 @@ function onChange({currentTarget:{checked}}){
 	actionSet.update = true;
 	const v = checked ? 1 : 0;
 	actionSet.data.value = v;
-	serialPort.postObject($cbCalMode, actionSet);
+	serialPort.postObject($calModeDiv, actionSet);
 }
 onStatusChange(alarmStatus =>{
 	switch(alarmStatus.severities){
 
 	case 'Closed':
 	case 'TIMEOUT':
-	case 'Stopped':
+//	case 'Stopped':
 		stop();
 		$cbCalMode.prop('disabled', true);
 		break;

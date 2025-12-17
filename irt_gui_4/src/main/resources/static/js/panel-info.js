@@ -13,6 +13,7 @@ let serialNumber
 const map = new Map();
 const parameter = {};
 
+let stopCalled = false;
 let interval;
 const action = {packetId: packetId.deviceInfo, groupId: groupId.deviceInfo, data: {}, function: 'f_Info'};
 
@@ -34,7 +35,7 @@ function onStart(doRun){
 	
 	if(doRun){
 		console.log('start');
-		startAll();
+//		startAll();
 //		start();
 	}else
 		stop();
@@ -162,7 +163,8 @@ action.f_Info = function(packet){
 		case parameter.deviceInfo.type:
 			if(type?.type !== val[0] || type.revision !== val[1] || type.subtype !== val[2]){
 				changeType(val);
-			}
+			}else if(stopCalled)
+				startAll();
 			break;
 
 		case parameter.deviceInfo.serialNumber:
@@ -195,11 +197,13 @@ export function onStartAll(cb){
 }
 
 function startAll(){
+	stopCalled = false;
 	onStartEvent.forEach(cb=>cb(true));
 }
 
 function stopAll(){
-onStartEvent.forEach(cb=>cb(false));
+	stopCalled = true;
+	onStartEvent.forEach(cb=>cb(false));
 }
 
 export function profileSearch(cb){

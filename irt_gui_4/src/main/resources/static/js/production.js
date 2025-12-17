@@ -6,17 +6,15 @@ import './user-panels.js'
 import { onStatusChange } from './panel-summary-alarm.js';
 import { type as unitType, onStartAll, profileSearch, onTypeChange, onSerialChange } from './panel-info.js';
 
-const $prodactionNav = $('input[name=prodactionNav]').change(onNavChenge);
+const $prodactionNav = $('.navbar');
+$prodactionNav.find('input[name=prodactionNav]').change(onNavChenge);
 const $productionContent = $('div#productionContent');
 
 let controller;
 
 onTypeChange(typeChange);
 onSerialChange(serialNumberChange);
-onStartAll(onStart);
-function onStart(yes){
-	yes ? start() : stop()
-}
+onStartAll(yes=>yes ? start() : stop());
 onStatusChange(statusChange);
 
 function statusChange(alarmStatus){
@@ -40,7 +38,7 @@ function start(){
 		return;
 	}
 
-	$prodactionNav.filter(':checked').each((_,{id})=>loadController(id));
+	$prodactionNav.find(':checked').each((_,{id})=>loadController(id));
 }
 
 function stop(){
@@ -48,7 +46,7 @@ function stop(){
 }
 
 function onNavChenge({currentTarget:{id}}){
-	$prodactionNav.prop('disabled', true);
+	$prodactionNav.find('input[name=prodactionNav]').prop('disabled', true);
 	loadController(id);
 }
 
@@ -125,7 +123,7 @@ async function loadController(id){
 		run();
 		clearInterval(interval);
 		interval = setInterval(run, 3000);
-		$prodactionNav.prop('disabled', false);
+		$prodactionNav.find('input[name=prodactionNav]').prop('disabled', false);
 		if(unitType)
 			typeChange(unitType);
 	}
@@ -170,8 +168,7 @@ function onSet(action){
 
 function typeChange(){
 	console.log('Device Type Change:', unitType);
-	const $navbar = $prodactionNav.parents('.navbar')
-	const $admv = $navbar.find('.pllRegisters');
+	const $admv = $prodactionNav.find('.pllRegisters');
 	const dType = unitType?.name;
 	changeProfilePath()
 	if(controller)
@@ -207,12 +204,12 @@ function typeChange(){
 			.append($('<input>', {id: 'potentiometersId', name:'prodactionNav', type: 'radio', class: 'btn-check', autocomplete: 'off'}).change(onNavChenge))
 			.append($('<label>', {for: 'potentiometersId', title:'Potentiometers', text: 'POTs', class: 'btn btn-outline-primary'}))
 
-			$navbar.append([$divADMV1013, $divSTUW81300, $potentiometers]);
+			$prodactionNav.append([$divADMV1013, $divSTUW81300, $potentiometers]);
 		}
 		return;
 
 	case 'REFERENCE_BOARD':
-		$prodactionNav.filter(':checked').filter((_,{id})=>id==='cbDACs').change();
+		$prodactionNav.find(':checked').filter((_,{id})=>id==='cbDACs').change();
 		break;
 
 	default:
@@ -237,13 +234,12 @@ function serialNumberChange(sn){
 	profileSearch(showProfileButton);
 }
 function addCalibrationButton(sn){
-	const $navBar = $prodactionNav.parents('.navbar');
-	$navBar.find('.cal-link').remove();
+	$prodactionNav.find('.cal-link').remove();
 	const $div = $('<div>', {class: 'col-auto cal-link ms-2'});
 	if(admin)
 		$div.append($('<a>', {class: 'btn btn-outline-info', target: '_blank', href:`http://irttechnologies:8089/calibration?sn=${sn}`, text: 'Calibration'}));
 	setTimeout(()=>{
-		$div.appendTo($navBar);
+		$div.appendTo($prodactionNav);
 	}, 100);
 }
 function showProfileButton(data){
@@ -253,8 +249,7 @@ function showProfileButton(data){
 	}
 	if(!admin)
 		return;
-	const $navBar = $prodactionNav.parents('.navbar');
-	$navBar.find('.btn-group').remove();
+	$prodactionNav.find('.btn-group').remove();
 	const arr = []
 	data.path.forEach(p=>{
 		const $div = $('<div>', {class: 'col-auto btn-group ms-2'});
@@ -267,7 +262,7 @@ function showProfileButton(data){
 		.append($('<li>').append($('<a>', {id: 'profilrUpload', class: 'dropdown-item', href: `/file/upload/profile?p=${p}`, text: 'Upload'}).click(updateProfile)))
 		.appendTo($div);
 	});
-	$navBar.append(arr);
+	$prodactionNav.append(arr);
 	changeProfilePath();
 }
 function linkEvent(e){

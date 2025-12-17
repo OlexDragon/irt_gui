@@ -69,7 +69,7 @@ export function stop(){
 
 const $serialPort = $('select[id=serialPort]').change(portSelected);
 const $btnStart =$('#btnStart').change(toggleStart);
-const $conections = $('#conections');
+const $connections = $('#connections');
 const $toastContainer = $('#toastContainer');
 const $modal = $('#modal');
 const $btnShowErrors = $('#btnShowErrors').change(btnShowErrorsChange);
@@ -95,8 +95,8 @@ const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
 function countConnections(){
 	$.post('/connection/add', {connectionId: sessionId})
 	.done(count=>{
-		const text = count + ' conection' + (count===1 ? '' : 's');
-		$conections.text()!==text && $conections.text(text);
+		const text = count + ' connection' + (count===1 ? '' : 's');
+		$connections.text()!==text && $connections.text(text);
 	});
 }
 
@@ -140,7 +140,7 @@ function toggleStart(){
 			$lbl.text('Start');
 			$btnStart.attr('checked', false);
 			clearInterval(countInterval);
-			$conections.empty()
+			$connections.empty()
 
 			if(closed())
 				return;

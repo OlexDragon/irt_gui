@@ -36,40 +36,42 @@ export default class POTsController extends DACController{
 
 	_onLoad(){
 		super._onLoad();
+		this._$valueRange.prop('min', 0).prop('max', 255).prop('step', 1);
+		this._$container.find('button').click(({currentTarget:{dataset:{register}}})=>{
+			const [index, address, value] = register.split(',').map(v=>parseInt(v));
+			const shift = this._typeName === 'buc' ? 121 : 0;
+			this._actionSet.data.value = new Register(index + shift, address, value);
+			this._actionSet.update = true;
+			this._onSet(this._actionSet);
+		});
+	}
+	_setInputsData(){
 		this._$dacs.each((_, el)=>{
 
 			const text = el.placeholder;
 			switch(text){
 
 			case 'UC_VCTRL1':
-				el.setAttribute("data-register", '31,8');
+				el.setAttribute("data-register", '152,8');
 				break;
 
 			case 'UC_VCTRL2':
-				el.setAttribute("data-register", '31,0');
+				el.setAttribute("data-register", '152,0');
 				break;
 
 			case 'VG_PA':
-				el.setAttribute("data-register", '30,8');
+				el.setAttribute("data-register", '151,8');
 				break;
 
 			case 'VC_EQ':
-				el.setAttribute("data-register", '30,0');
+				el.setAttribute("data-register", '151,0');
 				break;
 
 			default:
 				console.warn('POTsController _onLoad: unexpected DAC name', text);
 			}
 		});
-		this._$valueRange.prop('min', 0).prop('max', 255).prop('step', 1);
-		this._$container.find('button').click(({currentTarget:{dataset:{register}}})=>{
-			const [index, address, value] = register.split(',').map(v=>parseInt(v));
-			this._actionSet.data.value = new Register(index, address, value);
-			this._actionSet.update = true;
-			this._onSet(this._actionSet);
-		});
 	}
-		
 	_reaction(packet){
 
 		switch(this._typeName){
@@ -106,8 +108,8 @@ export default class POTsController extends DACController{
 
 function stringToOayloads(line, added){
 	const values = line.split(/\s+/).filter(s=>s.startsWith('0x')).map(v=>parseInt(v, 16));
-	return [stringToOayload(values[0], 0 + added), stringToOayload(values[1], 1 + added)];
+	return [stringToPayload(values[0], 0 + added), stringToPayload(values[1], 1 + added)];
 }
-function stringToOayload(value, index){
-	return {data: intToBytes(index<2 ? 30 : 31).concat(intToBytes(index%2 ? 8 : 0)).concat(intToBytes(value))};
+function stringToPayload(value, index){
+	return {data: intToBytes(index<2 ? 151 : 152).concat(intToBytes(index%2 ? 8 : 0)).concat(intToBytes(value))};
 }

@@ -86,10 +86,10 @@ export default class DACController extends Controller{
 			this._typeName = 'buc'
 		}
 
-		this.#setInputsData();
+		this._setInputsData();
 	}
 
-	#setInputsData(){
+	_setInputsData(){
 		if(!this._$dacs || !this._action.data.value)
 			return;
 		this._$dacs.each((_, el)=>{
@@ -107,10 +107,11 @@ export default class DACController extends Controller{
 		const valueStep = Cookies.get('dac-step');
 		if(valueStep)
 			this.#$valueStep.val(valueStep).change();
-		this.#setInputsData();
+		this._setInputsData();
 	}
 
 	_reaction(packet){
+		console.log('DACController _reaction calMode:', calMode);
 		packet.payloads.forEach(pl=>{
 			const reg = Register.parseRegister(pl.data);
 			let element

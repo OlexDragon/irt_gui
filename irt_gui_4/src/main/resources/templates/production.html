@@ -33,22 +33,22 @@
                     <div class="card userPanels" th:replace="home :: userPanels"></div>
                 </div>
 			</div>
-			<nav class="navbar">
-						<div id="calModeDiv" class="col-auto border-bottom p-1">
-							<input type="checkbox" class="btn-check" id="cbCalMode" autocomplete="off" disabled="disabled">
-							<label class="btn btn-outline-danger" for="cbCalMode" title="Calibration Mode">Cal.</label>
-						</div>
-						<div class="col">
-						</div>
-						<div class="col-auto">
+			<nav class="navbar mt-2">
+						<div>
 							<input type="radio" class="btn-check" id="cbDACs" name="prodactionNav" autocomplete="off" checked>
-							<label class="btn btn-outline-primary" for="cbDACs" title="Calibration Mode">DACs</label>
+							<label class="btn btn-outline-primary" for="cbDACs" title="Converter DACs">DACs</label>
 						</div>
-						<div class="col-auto ms-2">
+						<div class="ms-2">
 							<input type="radio" class="btn-check" id="cbDump" name="prodactionNav" autocomplete="off">
 							<label class="btn btn-outline-primary" for="cbDump" title="Diagnostic">Dump</label>
 						</div>
 			</nav>
+			<div class="row m-2">
+				<div id="calModeDiv" class="card border p-1">
+					<input type="checkbox" class="btn-check" id="cbCalMode" autocomplete="off" disabled="disabled">
+					<label class="btn btn-outline-danger form-control" for="cbCalMode" title="Calibration Mode">Calibration </label>
+				</div>
+			</div>
 			<div id="productionContent" class="contaner-fluid card"></div>
 			<div id="productionLogst" class="contaner-fluid card"></div>
 		</div>
