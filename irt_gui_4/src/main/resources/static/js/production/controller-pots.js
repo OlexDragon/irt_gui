@@ -52,19 +52,19 @@ export default class POTsController extends DACController{
 			switch(text){
 
 			case 'UC_VCTRL1':
-				el.setAttribute("data-register", '152,8');
+				el.setAttribute("data-register", this._typeName==='buc' ? '152,8' : '31,8');
 				break;
 
 			case 'UC_VCTRL2':
-				el.setAttribute("data-register", '152,0');
+				el.setAttribute("data-register", this._typeName==='buc' ? '152,0' : '31,0');
 				break;
 
 			case 'VG_PA':
-				el.setAttribute("data-register", '151,8');
+				el.setAttribute("data-register", this._typeName==='buc' ? '151,8' : '30,8');
 				break;
 
 			case 'VC_EQ':
-				el.setAttribute("data-register", '151,0');
+				el.setAttribute("data-register", this._typeName==='buc' ? '151,0' : '30,0');
 				break;
 
 			default:

@@ -72,9 +72,11 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 			if (!shutdown && (commPort.isOpen() || commPort.openPort())) {
 				Optional.of(baudrate).filter(br->br!=commPort.getBaudRate()).ifPresent(commPort::setBaudRate);
 				portCloseDelays.put(spName, myExecutor.submit(new RunDelay(commPort)));
+				logger.debug("Serial Port {} is opened with {} baudrate.", spName, baudrate);
 				return commPort;
 			}
 		}
+		logger.debug("Serial Port {} couldn't be opened.", spName);
 		Optional.ofNullable(ports.remove(spName)).filter(SerialPort::isOpen).ifPresent(SerialPort::closePort);
 		final String message = "SP Error: The Serial Port " + spName + " couldn't be opened.";
 		throw new IrtSerialPortIOException(message);
@@ -82,7 +84,7 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 
 	@Override
 	public byte[] send(String serialPort, Integer timeout, byte[] bytes, Integer baudrate) throws IrtSerialPortIOException {
-		logger.traceEntry("serialPort: {}; timeout: {}; baudrate: {}; {} : {}", serialPort, timeout, baudrate, bytes.length, bytes);
+		logger.traceEntry("serialPort: {}; timeout: {}; baudrate: {};  bytes.length: {} bytes: {}", serialPort, timeout, baudrate, bytes.length, bytes);
 
 		return Optional
 				.ofNullable(open(serialPort, baudrate))
@@ -97,6 +99,7 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 
 									clearInputStream(is);
 
+									logger.debug("Sending {} bytes: {}", bytes.length, bytes);
 									final int writeBytes = sp.writeBytes(bytes, bytes.length);
 									if(writeBytes<0) {
 										final String message = "There was an error writing to the port.";
@@ -135,7 +138,7 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 										byte[] result = new byte[position];
 										bb.rewind();
 										bb.get(result);
-										logger.debug("resulet: {} bytes : {}", result.length, result);
+										logger.debug("result: {} bytes : {}", result.length, result);
 										return result;
 									}
 
@@ -215,7 +218,7 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 		while((bytesAvailable = is.available())>0){
 			final byte[] b = new byte[bytesAvailable];
 			final int r = is.read(b);
-			logger.trace("clearInputStream: {}", r);
+			logger.trace("clearInputStream: { }bytes - {}", r, b);
 			try {
 				TimeUnit.MICROSECONDS.sleep(500);
 			} catch (InterruptedException e) {

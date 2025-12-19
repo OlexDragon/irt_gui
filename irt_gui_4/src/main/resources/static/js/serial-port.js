@@ -232,6 +232,8 @@ function send($card, toSend, action){
 		})
 		.fail((jqXHR)=>{
 			action.buisy = false;
+			if(action.onFail)
+				action.onFail(jqXHR);
 			blink($card, 'connection-fail');
 
 			console.log(jqXHR.getAllResponseHeaders());

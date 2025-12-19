@@ -33,7 +33,7 @@
 <!-- 		<logger name="irt.gui.web.controllers.Gui4RestController" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.controllers.UpgradeRestController" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.controllers.FileRestController" level="all" /> -->
-		<logger name="irt.gui.web.controllers.FlashRestController" level="debug" />
+<!-- 		<logger name="irt.gui.web.controllers.FlashRestController" level="debug" /> -->
 <!-- 		<logger name="irt.gui.web.Gui4" level="all" /> -->
 
         <Root level="info">

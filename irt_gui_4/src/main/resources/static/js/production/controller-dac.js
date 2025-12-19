@@ -111,7 +111,6 @@ export default class DACController extends Controller{
 	}
 
 	_reaction(packet){
-		console.log('DACController _reaction calMode:', calMode);
 		packet.payloads.forEach(pl=>{
 			const reg = Register.parseRegister(pl.data);
 			let element

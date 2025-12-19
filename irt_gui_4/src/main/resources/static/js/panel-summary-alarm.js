@@ -95,9 +95,15 @@ function setStatus(value){
 	}
 }
 
-function tripleClick({detail, ctrlKey}){
+function tripleClick({detail, ctrlKey, shiftKey}){
+
 	if(detail!=3)
 		return;
+
+	if(shiftKey && ctrlKey){
+		unitAddressScan();
+		return;
+	}
 
 	const page = ctrlKey ? 'upgrade' : 'production';
 	const url = new URL(page, window.location.href)
@@ -140,4 +146,66 @@ function onError(error) {
 			break;
 		}
 	}
+}
+function unitAddressScan(){
+	stop();
+	const $body = showModal();
+	action.timeout = 50;
+	action.function = 'f_scanResponse';
+	if(!action.f_scanResponseOriginal)
+		action.f_scanResponse = function(packet){
+	                                 if(packet.header.packetId===action.packetId)
+										 $body.find('#colId-' + packet.linkHeader.unitAddr[0]).removeClass('text-danger').addClass('btn btn-success btn-sm').click(addressClick);
+								 };
+	scanAddress($body, 1, 255, action);
+}
+function addressClick({currentTarget:el}){
+	$(el).parents('.modal').modal('hide');
+	$('#unitAddress').val(el.innerText).change();
+}
+function scanAddress($body, start, end){
+	if(start>end || !action.timeout)
+		return;
+	if(action.buisy){
+		setTimeout(()=>scanAddress($body, start, end), 50);
+		return;
+	}
+	$body.append($('<div>', { id: 'colId-' + start, class: 'col text-danger text-end', text: start }));
+	action.buisy = true;
+	action.unitAddr = start;
+	serialPort.postObject($card, action);
+	setTimeout(()=>scanAddress($body, ++start, end), 100);
+}
+function showModal(){
+	const $body = $('<div>', { class: 'row' });
+	const $modal = $('<div>', {class: 'modal fade', tabindex: '-1'})
+					.append(
+						$('<div>', {class: 'modal-dialog modal-dialog-centered'})
+						.append(
+							$('<div>', {class: 'modal-content'})
+							.append(
+								$('<div>', { class: 'modal-header' })
+								.append(
+									$('<h5>', { class: 'modal-title', text: 'Unit Address Scan' }))
+								.append(
+									$('<button>', { type: 'button', class: 'btn-close', 'data-bs-dismiss': 'modal', 'aria-label': 'Close' })))
+							.append(
+								$('<div>', { class: 'modal-body' }).append($body))))
+					.on('hidden.bs.modal', ()=>{
+						$modal.remove();
+					    setDefault();
+						start();
+				    });
+	new bootstrap.Modal($modal).show();
+	return $body;
+}
+function setDefault(){
+	action.buisy = false;
+	action.update = true;
+	action.unitAddr = undefined;
+	action.timeout = undefined;
+	action.function = 'f_SummaryAlarms';
+}
+action.onFail = jqXHR=>{
+	console.log(jqXHR.getAllResponseHeaders());
 }

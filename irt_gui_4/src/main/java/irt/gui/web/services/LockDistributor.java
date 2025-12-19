@@ -151,6 +151,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		
 	}
 
+	private int oldPacketId = Integer.MIN_VALUE;
 	private void sendFromQueue(RequestPacket requestPacket) throws IrtSerialPortIOException {
 		logger.traceEntry("{}", requestPacket);
 
@@ -174,11 +175,13 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		received = read(received, portName, baudrate, baudrate);
 
 		Packet packet = new Packet(received, requestPacket.getUnitAddr()==0);
-		if(packet.getPacketId()!=requestPacket.getId()){
+		if(oldPacketId==Integer.MIN_VALUE && packet.getPacketId()!=requestPacket.getId()){
+			oldPacketId = packet.getPacketId();
 			sendAcknowlegement(packet, portName, baudrate);
 			sendFromQueue(requestPacket);
 			return;
 		}
+		oldPacketId = Integer.MIN_VALUE;
 
 		final int lastIndex = packet.getLastIndex() + 1;
 		received = read(Arrays.copyOfRange(received, lastIndex, received.length), portName, timeout, baudrate);

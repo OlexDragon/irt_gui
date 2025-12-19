@@ -194,10 +194,17 @@ function mapToValue($el) {
 
 			const divider = getDivider($el);
 			let value = +$el.val();
-			if (!value)
+			const maxValue = $el.prop('max');
+			if(maxValue && +maxValue<value){
+				value = +maxValue;
+				$el.val(value);
+			}
+			if (value<=0){
+				$el.val(0);
 				return 0;
+			}
 
-			value /= divider;
+			value = Math.round(value/divider);
 
 			const shift = +$el.data('shift');
 			const v = value & (mask >>> shift);

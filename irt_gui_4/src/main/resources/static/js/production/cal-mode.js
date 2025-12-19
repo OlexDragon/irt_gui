@@ -54,10 +54,12 @@ action.f_calMode = (packet)=>{
 			$cbCalMode.prop('disabled', false).prop('checked', calMode);
 		}
 		const text = calMode ? 'Calibration  ON' : 'Calibration  OFF';
+		const title = calMode ? 'Click to set Calibration  OFF' : 'Click to set Calibration  ON';
 		const $label = $cbCalMode.next();
-		if($label.text()!==text)
+		if($label.text()!==text){
 			$label.text(text);
-		
+			$label.attr('title', title);
+		}
 	});
 }
 

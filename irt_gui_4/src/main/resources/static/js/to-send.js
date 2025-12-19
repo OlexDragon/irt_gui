@@ -8,7 +8,7 @@ import {shortToBytesR, intToBytes, longToBytes} from './packet/service/converter
 export default async function (action, callBack){
 
 	const addr = unitAddrClass.unitAddress;
-	if(action.update || action.toSend?.id!==action.packetId || action.toSend?.unitAddr!==addr){
+	if(action.update || action.toSend?.id!==action.packetId || action.toSend?.unitAddr!==addr || (action.unitAddr && action.unitAddr!==action.toSend?.unitAddr)){
 
 		if(!action?.packetId===undefined)
 			throw new Error('The variable "action" must have packetId');
@@ -23,7 +23,10 @@ export default async function (action, callBack){
 		if(action.name)
 			action.toSend.name = action.name;
 		action.toSend.id = action.packetId;
-		action.toSend.unitAddr = addr;
+		if(action.unitAddr)
+			action.toSend.unitAddr = action.unitAddr;
+		else
+			action.toSend.unitAddr = addr;
 		action.toSend.timeout = action.timeout ?? 2000;
 		action.toSend.function = action.function;
 		action.toSend.command = action.command ?? false;
