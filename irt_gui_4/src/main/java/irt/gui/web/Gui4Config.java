@@ -52,6 +52,8 @@ public class Gui4Config implements WebMvcConfigurer {
 						new AntPathRequestMatcher("/js/**"),
 						new AntPathRequestMatcher("/fragment/**"),
 						new AntPathRequestMatcher("/connection/**"),
+						new AntPathRequestMatcher("/c/**"),
+						new AntPathRequestMatcher("/console/**"),
 						new AntPathRequestMatcher("/r-login"),
 						new AntPathRequestMatcher("/exit"),
 						new AntPathRequestMatcher("/u/**"),

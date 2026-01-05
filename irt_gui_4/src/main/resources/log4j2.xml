@@ -27,11 +27,12 @@
     <Loggers>
 		<logger name="org.springframework.security.core.userdetails.User" level="error" />
 
-<!-- 		<logger name="irt.gui.web.services.JSerialComm" level="all" /> -->
-<!-- 		<logger name="irt.gui.web.services.LockDistributor" level="debug" /> -->
+		<logger name="irt.gui.web.services.JSerialComm" level="all" />
+		<logger name="irt.gui.web.services.LockDistributor" level="all" />
+		<logger name="irt.gui.web.controllers.ConsoleRestController" level="all" />
 <!-- 		<logger name="irt.gui.web.controllers.SerialPortController" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.controllers.Gui4RestController" level="all" /> -->
-<!-- 		<logger name="irt.gui.web.controllers.UpgradeRestController" level="all" /> -->
+		<logger name="irt.gui.web.controllers.UpgradeRestController" level="all" />
 <!-- 		<logger name="irt.gui.web.controllers.FileRestController" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.controllers.FlashRestController" level="debug" /> -->
 <!-- 		<logger name="irt.gui.web.Gui4" level="all" /> -->

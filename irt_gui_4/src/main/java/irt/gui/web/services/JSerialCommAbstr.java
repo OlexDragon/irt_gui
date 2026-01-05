@@ -51,11 +51,31 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 	@Override
 	public SerialPort open(String spName, Integer baudrate) throws IrtSerialPortIOException {
 		logger.traceEntry("spName: {}; baudrate: {}", spName, baudrate);
+
 		if(shutdown)
 			return null;
 
 		synchronized (JSerialCommAbstr.class) {
-			Optional.ofNullable(portCloseDelays.get(spName)).filter(f -> !(f.isCancelled() || f.isDone())).ifPresent(f->f.cancel(true));
+
+			final Optional<Future<?>> oFuture = Optional.ofNullable(portCloseDelays.get(spName));
+			if(oFuture.filter(future->future.isCancelled()).isPresent()){
+
+				synchronized (portCloseDelays) {
+					portCloseDelays.remove(spName);
+				}
+				return null;
+			}
+
+			oFuture.ifPresent(future->future.cancel(true));
+
+			Optional.ofNullable(portCloseDelays.get(spName))
+			.ifPresent(future->{
+				try {
+					logger.debug("Cancelled: {}, done: {}", future.isCancelled(), future.isDone());
+				} catch (Exception e) {
+					logger.catching(Level.DEBUG, e);
+				}
+			});
 
 			SerialPort commPort = Optional.ofNullable(ports.get(spName)).filter(SerialPort::isOpen)
 
@@ -69,10 +89,14 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 			if(baudrate == null)
 				baudrate = 115200;
 
-			if (!shutdown && (commPort.isOpen() || commPort.openPort())) {
+			if (commPort.isOpen() || commPort.openPort()) {
+
 				Optional.of(baudrate).filter(br->br!=commPort.getBaudRate()).ifPresent(commPort::setBaudRate);
-				portCloseDelays.put(spName, myExecutor.submit(new RunDelay(commPort)));
+				synchronized (portCloseDelays) {
+					portCloseDelays.put(spName, myExecutor.submit(new RunDelay(commPort)));
+				}
 				logger.debug("Serial Port {} is opened with {} baudrate.", spName, baudrate);
+				logger.catching(new Throwable());
 				return commPort;
 			}
 		}
@@ -108,8 +132,6 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 
 									if(timeout!=null) {
 
-										read(is, bb);
-
 										AtomicBoolean isTimeout = new AtomicBoolean();
 										Thread timeoutThread = ThreadWorker.runThread(
 
@@ -125,6 +147,8 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 														logger.catching(Level.TRACE, e);
 													}
 												});
+
+										read(is, bb);
 
 										if(isTimeout.get()) {
 											throw new IrtSerialPortTOException("Serial Port Read Timeout");
@@ -232,34 +256,42 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 	@RequiredArgsConstructor
 	public class RunDelay implements Runnable{
 
-		private final SerialPort sp;
+		private final SerialPort serialPort;
 
 		@Override
 		public void run() {
-			try {
 
+			final Optional<SerialPort> oSerialPort = Optional.ofNullable(serialPort);
+			if(!oSerialPort.isPresent()) {
+				logger.trace("Serial port is null.");
+				return;
+			}
+
+			final SerialPort sp = oSerialPort.get();
+
+			try {
 				if(!sp.isOpen()) {
-					logger.debug("Serial port is closed. {}", ()->sp.getDescriptivePortName());
+					logger.trace("The serial port is already closed. {}", ()->sp.getDescriptivePortName());
 					return;
 				}
 
 				final Integer d = Optional.ofNullable(delay).orElse(10);
 				TimeUnit.SECONDS.sleep(d);
 
+				synchronized (portCloseDelays) {
+					portCloseDelays.remove(sp.getSystemPortName());
+				}
+				if(!sp.isOpen())
+					return;
 
-				Optional.ofNullable(sp).filter(SerialPort::isOpen).ifPresent(SerialPort::closePort);
-
-				logger.debug("Serial port has been closed. {}", ()->sp.getDescriptivePortName());
+				sp.closePort();
+				logger.trace("The serial port has been closed. {}", ()->sp.getDescriptivePortName());
 
 			} catch (InterruptedException  e) {
 //				logger.catching(Level.TRACE, e);
 			} catch (Exception e) {
 				logger.catching(e);
-				if(sp.isOpen())
-
-					synchronized (JSerialCommAbstr.class) {
-						sp.closePort();
-					}
+				serialPort.closePort();
 			}
 		}
 	}

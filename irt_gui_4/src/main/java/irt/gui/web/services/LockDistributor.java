@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import irt.gui.web.beans.Packet;
 import irt.gui.web.beans.RequestPacket;
+import irt.gui.web.controllers.ConsoleRestController;
 import irt.gui.web.controllers.UpgradeRestController;
 import irt.gui.web.exceptions.IrtSerialPortIOException;
 import irt.gui.web.exceptions.IrtSerialPortRTException;
@@ -152,7 +153,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	}
 
 	private int oldPacketId = Integer.MIN_VALUE;
-	private void sendFromQueue(RequestPacket requestPacket) throws IrtSerialPortIOException {
+	private void sendFromQueue(RequestPacket requestPacket) throws IrtSerialPortIOException, InterruptedException {
 		logger.traceEntry("{}", requestPacket);
 
 		final String portName = requestPacket.getSerialPort();
@@ -172,7 +173,8 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 //		logger.error("{} : {}", received.length, received);
 
-		received = read(received, portName, baudrate, baudrate);
+		final byte flagSequence = (byte) (requestPacket.getId() == ConsoleRestController.PACKET_ID ? '\n' : Packet.FLAG_SEQUENCE);
+		received = read(received, portName, timeout, baudrate, flagSequence);
 
 		Packet packet = new Packet(received, requestPacket.getUnitAddr()==0);
 		if(oldPacketId==Integer.MIN_VALUE && packet.getPacketId()!=requestPacket.getId()){
@@ -184,7 +186,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		oldPacketId = Integer.MIN_VALUE;
 
 		final int lastIndex = packet.getLastIndex() + 1;
-		received = read(Arrays.copyOfRange(received, lastIndex, received.length), portName, timeout, baudrate);
+		received = read(Arrays.copyOfRange(received, lastIndex, received.length), portName, timeout, baudrate, flagSequence);
 
 
 		requestPacket.setAnswer(received);
@@ -194,6 +196,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 	}
 
 	private void sendAcknowlegement(Packet packet, final String portName, final Integer baudrate) {
+
 		Optional.ofNullable(packet.getAcknowledgement()).filter(a->a.length>0)
 		.ifPresent(
 				a->{
@@ -205,21 +208,28 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 				});
 	}
 
-	byte[] read(final byte[] bytes, String portName, Integer timeout, Integer baudrate) throws IrtSerialPortIOException{
+	byte[] read(final byte[] bytes, String portName, Integer timeout, Integer baudrate, byte flagSequence) throws IrtSerialPortIOException, InterruptedException{
+		logger.traceEntry("bytes={}, portName={}, timeout={}, baudrate={}", bytes, portName, timeout, baudrate);
 
-		if(IntStream.range(0, bytes.length).parallel().filter(i->bytes[i]==Packet.FLAG_SEQUENCE).count()>=2)
+		if(flagSequence==Packet.FLAG_SEQUENCE) {
+			if(IntStream.range(0, bytes.length).parallel().filter(i->bytes[i]==flagSequence).count()>=2)
+				return bytes;
+		}else if(IntStream.range(0, bytes.length).parallel().filter(i->bytes[i]==flagSequence).findAny().isPresent())
 			return bytes;
 
 		final byte[] bs = serialPort.read(portName, timeout, baudrate);
 		if(bs==null)
 			return bytes;
 
-		if(bytes.length==0)
-			return read(bs, portName, timeout, baudrate);
+		if(bytes.length==0){
+			TimeUnit.MILLISECONDS.sleep(10);
+			return read(bs, portName, timeout, baudrate, flagSequence);
+		}
 
+		TimeUnit.MILLISECONDS.sleep(10);
 		final byte[] copyOf = Arrays.copyOf(bytes, bytes.length + bs.length);
 		System.arraycopy(bs, 0, copyOf, bytes.length, bs.length);
-		return read(copyOf, portName, baudrate, baudrate);
+		return read(copyOf, portName, baudrate, baudrate, flagSequence);
 	}
 	@Override
 	public Thread newThread(Runnable r) {

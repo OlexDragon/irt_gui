@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html	xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:th="http://www.thymeleaf.org"
+		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+		lang="en">
+
+<head>
+    <title>GUI - IRT Technologies</title>
+    <meta charset="UTF-8"/>
+    <meta name="google" content="notranslate" />
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<link rel='stylesheet' href='/css/bs.css' th:fragment="cssBootstrap"/>
+	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="row g-1">
+		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:replace="home :: serial-port"></div>
+		<div class="col">
+			<div id="unitsSelect" class="row border p-2 m-2"></div>
+			<div class="row">
+				<div class="col-lg-6 col-12 mt-2">
+					<div class="input-group">
+						<div class="form-floating">
+							<input id="commandInput" type="text" class="form-control" placeholder="Enter Command"/>
+							<label for="commandInput">Command to send</label>
+						</div>
+						<button id="sendCommandBtn" class="btn btn-outline-primary" type="button">Send</button>
+					</div>
+				</div>
+				<div class="col-lg-6 col-12 mt-2">
+                    <div class="input-group"></div>
+				</div>
+				<div class="col-lg-6 col-12 mt-2">
+                </div>
+			</div>
+		</div>
+		<footer class="row align-items-center py-3 my-4 border-top" th:fragment="footer" th:replace="home :: footer">
+			<div class="col-auto"><img alt="https://www.irttechnologies.com" src="/qr-code?text=https://www.irttechnologies.com"></div>
+			<div class="col text-center">
+				 <a href="https://www.irttechnologies.com" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="IRT Technologies" target="_blank"><img class="logo-sm" src="/images/logo.png" alt="logo"></a>
+				 <span class="mb-3 mb-md-0 text-body-secondary">© 2025 IRT Technologies, Inc</span>
+			</div> 
+			<div class="col-auto"><img alt="IRT GUI" src="/qr-code"></div>
+		</footer>
+	</div>
+</div>
+<th:block th:replace="home :: np">
+	<script src="/js/np/jquery.min.js"></script>
+	<script src="/js/np/js.cookie.min.js"></script>
+	<script src="/js/np/bootstrap.bundle.min.js"></script>
+</th:block>
+	<script type="module" src="../static/js/console.js" th:src="@{/js/console.js}"></script>
+
+</body>
+</html>

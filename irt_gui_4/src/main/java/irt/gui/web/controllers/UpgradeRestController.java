@@ -178,6 +178,7 @@ public class UpgradeRestController {
 	}
 
 	private RequestPacket sendUpgrateData(String sp, Integer address, byte parameterId, byte[] data) throws InterruptedException, ExecutionException, TimeoutException {
+		logger.debug("sendUpgrateData: sp={}, address={}, parameterId={}, data={}", sp, address, parameterId, data);
 		final Packet p = new Packet(address.byteValue(),  PacketType.COMMAND, (short)PACKET_ID, PacketGroupId.CONTROL, parameterId, data);
 		final RequestPacket requestPacket = new RequestPacket(true, PACKET_ID, address, sp, p.toSend(), "Upgrade");
 		final long timeout = (parameterId==PARAMETER_ID_UPGRADE_DATA && data.length==4) ? WAIT_TIME : TIMEOUT;

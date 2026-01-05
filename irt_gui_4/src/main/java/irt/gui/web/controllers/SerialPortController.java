@@ -56,6 +56,7 @@ public class SerialPortController {
 			throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getLocalizedMessage());
 		}
 	}
+
 	@PostMapping("close")
     boolean close(@RequestParam String spName){
 		return distributor.closePort(spName);
