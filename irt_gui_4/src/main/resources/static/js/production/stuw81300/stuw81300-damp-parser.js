@@ -1,4 +1,4 @@
-import DampParser from './damp-parser.js'
+import DampParser from '../admv1013/damp-parser.js'
 
 export default class Stuw81300DampParser extends DampParser{
 

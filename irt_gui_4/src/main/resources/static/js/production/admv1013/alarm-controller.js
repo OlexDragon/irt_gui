@@ -16,6 +16,9 @@ export default class AlarmControl extends RegisterController{
 		this.#$addressRangeError = $card.find('#addressRangeError');
 	}
 
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -31,8 +34,8 @@ export default class AlarmControl extends RegisterController{
 		this.#addressError(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 //		const value = this._register.value;
 //		this.#revision(value);
 //		this.#chipId(value);

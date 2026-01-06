@@ -21,6 +21,10 @@ export default class EnableControl extends RegisterController{
 		this.#$regEnvelopeDetector = $card.find('#regEnvelopeDetector').change(bind);
 	}
 
+
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -38,8 +42,8 @@ export default class EnableControl extends RegisterController{
 		this.#envelopeDetector(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#vgaPd(value);
 		this.#mixerPd(value);

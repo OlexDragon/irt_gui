@@ -17,6 +17,10 @@ export default class AlarmMaskControl extends RegisterController{
 		this.#$regAddressRangeErrorMask = $card.find('#regAddressRangeErrorMask').change(bind);
 	}
 
+
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -32,8 +36,8 @@ export default class AlarmMaskControl extends RegisterController{
 		this.#addressRangeErrorMask(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#parityMask(value);
 		this.#tooFewErrorsMask(value);

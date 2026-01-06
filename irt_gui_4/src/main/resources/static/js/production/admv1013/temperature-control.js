@@ -15,6 +15,10 @@ export default class TemperatureControl extends RegisterController{
 		this.#temperatureController.change = this.#onChange.bind(this);
 	}
 
+
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -27,8 +31,8 @@ export default class TemperatureControl extends RegisterController{
 		this.#temperature(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#temperature(value);
 	}

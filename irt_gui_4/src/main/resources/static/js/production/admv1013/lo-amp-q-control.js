@@ -15,6 +15,10 @@ export default class LoAmpQControl extends RegisterController{
 		this.#imageRejectionController.change = this.#onChange.bind(this);
 	}
 
+
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -27,8 +31,8 @@ export default class LoAmpQControl extends RegisterController{
 		this.#imageRejection(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#imageRejection(value);
 	}

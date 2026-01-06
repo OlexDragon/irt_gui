@@ -10,8 +10,8 @@ export default class RegisterController{
 	constructor($card){
 		this.#$card = $card;
 		this.#$register = $card.find('.register').change(this.#onChange.bind(this));
-		this.#btnSet =  $card.find('.btn-set').click(this.#save.bind(this));
-		this.#btnReset =  $card.find('.btn-reset').click(this._reset.bind(this));
+		this.#btnSet =  $card.find('.btn-set').click(this.save.bind(this));
+		this.#btnReset =  $card.find('.btn-reset').click(this.reset.bind(this));
 	}
 
 	get register(){
@@ -56,7 +56,7 @@ export default class RegisterController{
 		$checkBox.prop('checked', toSet);
 	}
 
-	#save(){
+	save(){
 		this.#btnSet.prop('disabled', true);
 		this.#btnReset.prop('disabled', true);
 		this._register.value = this.value;
@@ -64,7 +64,7 @@ export default class RegisterController{
 		this.#$card.removeClass('connection-wrong');
 	}
 
-	_reset(){
+	reset(){
 		this.#$register.val(this._register.value).change();
 	}
 

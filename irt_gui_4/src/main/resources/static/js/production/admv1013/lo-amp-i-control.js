@@ -21,6 +21,10 @@ export default class LoAmpIControl extends RegisterController{
 		this.#mixerGateVoltageController.change = this.#onChange.bind(this);
 	}
 
+
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -34,8 +38,8 @@ export default class LoAmpIControl extends RegisterController{
 		this.#mixerGateVoltage(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#imageRejection(value);
 		this.#mixerGateVoltage(value);

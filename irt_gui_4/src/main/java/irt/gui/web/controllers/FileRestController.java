@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,43 @@ public class FileRestController {
 		}
 		return null;
 
+	}
+
+	@RequestMapping("exists")
+	boolean exists(@RequestParam String fileName) {
+		logger.traceEntry(fileName);
+
+		final File documentsDir = getIrtFolder();
+		final File file = new File(documentsDir, URI.create(fileName.replaceAll(" ", "%20")).toString());
+
+		return logger.traceExit(file.exists());
+	}
+
+	@PostMapping("save")
+	boolean save(@RequestParam String fileName, @RequestParam String content) throws IOException {
+		logger.traceEntry("p={}, content={}", fileName, content);
+
+		final File documentsDir = getIrtFolder();
+		final File file = new File(documentsDir, URI.create(fileName.replaceAll(" ", "%20")).toString());
+		
+		final File parentFile = file.getParentFile();
+		if(!parentFile.exists())
+			parentFile.mkdirs();
+
+		try {
+
+			Files.write(
+					file.toPath(),
+					content.getBytes(),
+					StandardOpenOption.CREATE,           // Create if not exists
+			        StandardOpenOption.TRUNCATE_EXISTING);
+
+		} catch (IOException e) {
+			logger.catching(e);
+			return false;
+		}
+
+		return true;
 	}
 
 	@PostMapping("open")
@@ -165,5 +203,20 @@ public class FileRestController {
 
 		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);
 		return buf.toString();
+	}
+
+	public File getIrtFolder() {
+		final File documentsDir = Optional.ofNullable(System.getProperty("user.home"))
+
+				.map(
+						home->{
+							final File homeDir = new File(home, "irt");
+
+							if(!homeDir.exists())
+								homeDir.mkdirs();
+
+							return homeDir;
+						}).orElse(new File("/irt"));
+		return documentsDir;
 	}
 }

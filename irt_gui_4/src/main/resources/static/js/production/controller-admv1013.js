@@ -25,6 +25,7 @@ export default class ADMV1013Controller extends Controller{
 
 	#$container;
 	#$btnSaveAll;
+	#$fileInput
 	#registers = {};
 
 	constructor($container, parameterCode, value, packetId, packetIdSet){
@@ -91,6 +92,51 @@ export default class ADMV1013Controller extends Controller{
 		this.#registers[10].onSave = this._sendCommand.bind(this);
 
 		this.#$btnSaveAll = this.#$container.find('.admv1013-save').click(this._btnClick.bind(this));
+
+		// Save to file
+		this.#$container.find('.save-to-file').click(()=>{
+
+			let fileName = prompt('Enter file name', 'admv1013_registers');
+			if (!fileName)
+				return;
+
+			fileName = '/gui/' + fileName + '.admv1013';
+
+			const text = Object.entries(this.#registers).map(entry =>{
+				const [key,register] = entry;
+				return `${key}:${register.value}`;
+			}).join('\n');
+
+			console.log(`Saving to file: ${fileName}`);
+			$.post('/file/exists', {fileName: fileName}, (exists) => {
+				if (exists && !confirm(`File ${fileName} already exists. Overwrite?`))
+						return;
+				$.post('/file/save', {fileName: fileName, content: text}, (success) => {
+					if (success)
+						alert(`File ${fileName} saved successfully.`);
+					else
+						alert(`Error saving file ${fileName}.`);
+				})
+				.fail(error=>{
+					console.error(error.responseText);
+					alert(`Error saving file ${fileName}.`);
+				});
+			});
+		});
+
+		// Load from file
+		this.#$container.find('#fileInput').change(({target:fileInput}) => {
+			const file = fileInput.files[0];
+			if (!file)
+				return;
+			const reader = new FileReader();
+			reader.onload = (e) => {
+				const content = e.target.result.split(/\r?\n/);
+				setRegisterValue(this.#registers, content);
+			};
+			fileInput.value = '';
+			reader.readAsText(file);
+		});
 	}
 
 	_reaction(regs){
@@ -111,6 +157,7 @@ export default class ADMV1013Controller extends Controller{
 			return;
 
 		const rSave = new Register(reg.index, 0x10, 1);
+		console.log('Scheduling flash save for register', rSave);
 		setTimeout(() => {
 			this.#actionSet.data.value = [rSave];
 			this.#actionSet.update = true;
@@ -123,3 +170,21 @@ export default class ADMV1013Controller extends Controller{
 	}
 }
 
+// Recursively set register values from the list
+function setRegisterValue(registerControls, values){
+	if (!values.length)
+		return;
+	const line = values.splice(0,1);
+	const [key, value] = line[0].split(':');
+	const register = registerControls[key];
+	const reg = register.register;
+	if (!reg){
+		console.warn(`Register with key ${key} not found.`);
+		return;
+	}
+	reg.value = parseInt(value);
+	register.register = reg;
+	register.reset();
+	register.save();
+	setTimeout(()=>setRegisterValue(registerControls, values), 1000);
+}

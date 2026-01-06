@@ -21,6 +21,10 @@ export default class LoOffsetIControl extends RegisterController{
 		this.#offsetNegativeController.change = this.#onChange.bind(this);
 	}
 
+
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -34,8 +38,8 @@ export default class LoOffsetIControl extends RegisterController{
 		this.#negative(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#positive(value);
 		this.#negative(value);

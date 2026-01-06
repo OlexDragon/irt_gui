@@ -17,6 +17,10 @@ export default class SpiControl extends RegisterController{
 		this.#regParity = $card.find('#regParity').change(bind);
 	}
 
+
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -32,8 +36,8 @@ export default class SpiControl extends RegisterController{
 		this.#parity(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#revision(value);
 		this.#chipId(value);

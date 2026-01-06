@@ -21,6 +21,9 @@ export default class QuadControl extends RegisterController{
 		this.#mixerGateVoltageController.change = this.#onChange.bind(this);
 	}
 
+	get register(){
+		return super.register;
+	}
 	/**
      * @param {Register} reg
      */
@@ -34,8 +37,8 @@ export default class QuadControl extends RegisterController{
 		this.#lOBandwidth(value);
 	}
 
-	_reset(){
-		super._reset();
+	reset(){
+		super.reset();
 		const value = this._register.value;
 		this.#switchDifferential(value);
 		this.#lOBandwidth(value);
