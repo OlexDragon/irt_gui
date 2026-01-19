@@ -95,7 +95,7 @@ const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
 function countConnections(){
 	$.post('/connection/add', {connectionId: sessionId})
 	.done(count=>{
-		const text = count + ' connection' + (count===1 ? '' : 's');
+		const text = (count + ' ' + txtConnection) + (count===1 ? '' : 's');
 		$connections.text()!==text && $connections.text(text);
 	});
 }
@@ -126,10 +126,10 @@ function toggleStart(){
 	const text = $lbl.text();
 
 	switch (text) {
-		case 'Start':
+		case txtStart:
 			btnStartEvents.forEach(cb => cb(true));
 			summaryAlarmStart();
-			$lbl.text('Stop');
+			$lbl.text(txtStop);
 			$btnStart.attr('checked', true);
 			countInterval = setInterval(countConnections, 3000);
 			break;
@@ -137,7 +137,7 @@ function toggleStart(){
 		default:
 			btnStartEvents.forEach(cb => cb(false));
 			summaryAlarmStop(); 
-			$lbl.text('Start');
+			$lbl.text(txtStart);
 			$btnStart.attr('checked', false);
 			clearInterval(countInterval);
 			$connections.empty()

@@ -83,7 +83,11 @@ function setStatus(value){
 			removeClasses();
 
 		value.boorstrapClass && $title.addClass(value.boorstrapClass);
-		$title.text(value.severities);
+		const severity = value.severities;
+		if(txtStatus[severity])
+			$title.text(txtStatus[severity]);
+		else
+			$title.text(value.severities);
 		$title.attr('title', value.text);
 
 		oldValue = value;

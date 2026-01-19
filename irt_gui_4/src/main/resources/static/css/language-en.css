@@ -1,0 +1,8 @@
+@import './language.css';
+
+.language-selector img {
+	content: url('/images/flags/f-usa.png');
+}
+.language-selector:hover img {
+	content: url('/images/flags/f-french.png');
+}

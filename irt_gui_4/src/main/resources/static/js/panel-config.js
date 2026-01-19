@@ -1,5 +1,5 @@
 import * as serialPort from './serial-port.js'
-import { type as unitType, onTypeChange, onStartAll } from './panel-info.js'
+import { type as unitType, onStartAll } from './panel-info.js'
 import ControlLoader from './helper/config-loader.js'
 
 const $card = $('div.controlCard');
@@ -8,13 +8,24 @@ const $body = $('div.control');
 const action = {data: {}, function: 'f_Config'};
 
 let controller;
+let controller2;
 
 let loader = new ControlLoader();
 let interval;
 let buisy;
 const DELAY = 5000;
 
-onStartAll(yes=>yes ? start() : stop())
+onStartAll(yes=>{
+	if(yes){
+		start();
+		if(controller2)
+			controller2.start();
+	}else{
+		stop();
+	if(controller2)
+		controller2.stop();
+	}
+})
 export function start(){
 	if(interval || buisy)
 		return;
@@ -39,6 +50,24 @@ export function stop(){
 
 function typeChange(type){
 	loader.setUnitType(type, c=>onControllerLoaded(c));
+	const pathname = window.location.pathname;
+	if(pathname === '/')
+		return;
+	switch(type.name){
+		case 'LNB':
+			if(type.revision>30)
+				import('./controller/controller-lnb-registers.js')
+			        .then(({default: Controller})=>{
+						controller2 = new Controller($card);
+					});
+	        break;
+
+		default:
+			if(controller2){
+				controller2.remove();
+				controller2 = undefined;
+			}
+		}
 }
 
 function onControllerLoaded(Controller){

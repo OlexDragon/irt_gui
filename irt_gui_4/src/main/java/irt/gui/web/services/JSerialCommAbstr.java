@@ -96,7 +96,7 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 					portCloseDelays.put(spName, myExecutor.submit(new RunDelay(commPort)));
 				}
 				logger.debug("Serial Port {} is opened with {} baudrate.", spName, baudrate);
-				logger.catching(new Throwable());
+//				logger.catching(new Throwable());
 				return commPort;
 			}
 		}

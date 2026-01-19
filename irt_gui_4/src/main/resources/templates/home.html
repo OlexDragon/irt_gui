@@ -11,9 +11,31 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<link rel='stylesheet' href='/css/bs.css' th:fragment="cssBootstrap"/>
 	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
+    <link rel="stylesheet" href="../static/css/language.css" th:href="@{${lang} == 'fr' ? '/css/language-fr.css' : '/css/language-en.css'}">
+    <th:block th:fragment="links">
+    	<script th:if="${lang} == null">
+    	function getLangCookieValue(){
+			return document.cookie.split('; ').filter(c => c.startsWith('localeInfo')).map(c => c.split('=')[1]).pop();;
+		}
+    	const jsLang = getLangCookieValue();
+    	if(jsLang !== 'fr' && jsLang !== 'en') {
+    		let lang = navigator.languages[0].split('-')[0];
+    		if(lang !== 'fr' && lang !== 'en')
+    			lang = 'en';
+    		const date = new Date();
+    		date.setDate(date.getDate() + 99); // Add 99 days
+    		document.cookie = `localeInfo=${lang}; expires=${date.toUTCString()}; path=/`;
+    		if(getLangCookieValue() === lang)
+    			location.reload();
+    	}
+    	</script>
 </head>
 
 <body>
+<div class="language-selector visually-hidden">
+	<img src="../static/images/flags/f-usa.png" th:src="'/images/flags/f-english.png'" alt="Language">
+	<label class="badge text-uppercase align-middle" th:text="${lang} eq 'fr' ? 'English' : 'Fran&ccedil;ais'">English</label>
+</div>
 <div class="container-fluid">
 	<div class="row g-1">
 		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:fragment="serial-port">
@@ -26,21 +48,21 @@
 					<select id="serialPort" class="form-select" aria-label="Select Serial Port">
 						<option selected="selected" disabled="disabled" hidden="hidden">Select Serial Port</option>
 					</select>
-					<label for="serialPort">Serial Port (RS485)</label>
+					<label for="serialPort" th:text="#{Serial Port} + ' (RS485)'">Serial Port (RS485)</label>
 				</div>
 				<div class="col form-floating mb-3">
 					<select id="baudrate" class="form-select" aria-label="Select Serial Port">
 						<option th:each="br : ${baudrates}" th:text="${br.value}">Baudrate</option>
 					</select>
-					<label for="baudrate">Baudrate</label>
+					<label for="baudrate" th:text="#{Baudrate}">Baudrate</label>
 				</div>
 				<div class="col form-floating mb-3">
 					<input id="unitAddress" type="number" class="form-control" value="254"/>
-					<label for="unitAddress">Unit Address</label>
+					<label for="unitAddress" th:text="#{Unit Address}">Unit Address</label>
 				</div>
 				<div class="col mb-3">
 					<input id="btnStart" type="checkbox" class="btn-check" disabled="disabled"/>
-					<label for="btnStart" class="btn btn-outline-primary form-control">Start</label>
+					<label for="btnStart" class="btn btn-outline-primary form-control" th:text="#{Start}">START</label>
 				</div>
 				<div class="col mb-3">
 					<div id="summaryAlarmCard" class="card">
@@ -51,15 +73,15 @@
 				</div>
 				<div class="col mb-3">
 					<input id="fwUpgrade" type="file" accept=".pkg" hidden="hidden">
-					<label for="fwUpgrade" class="btn btn-outline-secondary form-control disabled">Firmware Upgrade</label><br>
+					<label for="fwUpgrade" class="btn btn-outline-secondary form-control disabled" th:text="#{Firmware Upgrade}">Firmware Upgrade</label><br>
 				</div>
 				<div class="col mb-3">
 					<input id="btnShowErrors" type="checkbox" class="btn-check"/>
-					<label for="btnShowErrors" class="btn btn-outline-info opacity-75 form-control">App Errors</label>
+					<label for="btnShowErrors" class="btn btn-outline-info opacity-75 form-control" th:text="#{Show Messages}">SHow Messages</label>
 				</div>
 				<div id="connections" class="col text-center text-primary-emphasis fs-5 mb-3">
 				</div>
-				<div class="col"><button  type="button" id="appExit" class="btn btn-outline-dark form-control">Exit</button></div>
+				<div class="col"><button  type="button" id="appExit" class="btn btn-outline-dark form-control" th:text="#{Exit}">Exit</button></div>
 			</div>
 		</div>
 		<div class="col">
@@ -154,10 +176,10 @@
   						<div class="card-body userPanels">
   							<ul class="nav nav-tabs">
  								<li class="nav-item">
-									<button  type="button" id="userTabAlarm" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" role="tab" aria-controls="alarms-tab-pane" aria-selected="false">Alarms</button>
+									<button  type="button" id="userTabAlarm" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" role="tab" aria-controls="alarms-tab-pane" aria-selected="false" th:text="#{Alarms}">Alarms</button>
 								</li>
 								<li class="nav-item">
-									<button  type="button" id="userTabNetwork" class="nav-link"  data-bs-toggle="tab" data-bs-target="#network-tab-pane" role="tab" aria-controls="network-tab-pane" aria-selected="false">Network</button>
+									<button  type="button" id="userTabNetwork" class="nav-link"  data-bs-toggle="tab" data-bs-target="#network-tab-pane" role="tab" aria-controls="network-tab-pane" aria-selected="false" th:text="#{Network}">Network</button>
 								 </li>
 								 <li class="nav-item visually-hidden">
 								 	<button  type="button" id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
@@ -230,6 +252,32 @@
 	<script src="/js/np/js.cookie.min.js"></script>
 	<script src="/js/np/bootstrap.bundle.min.js"></script>
 </th:block>
+	<script th:inline="javascript">
+    /*<![CDATA[*/
+		const localeInfo = Cookies.get('localeInfo');
+		if(localeInfo === 'fr' || localeInfo === 'en')
+			$('.language-selector').removeClass('visually-hidden');
+		else{
+			$('<div>', {class: 'alert alert-warning alert-dismissible fade show', role: 'alert'})
+				.append($('<strong>').text('To use internationalization, you must enable cookies.'))
+				.append($('<button>', {type: 'button', class: 'btn-close', 'data-bs-dismiss': 'alert', 'aria-label': 'Close'}))
+				.prependTo('body');
+		}
+		$('.language-selector').click(()=>{
+			const lang = /*[[${lang}]]*/ 'en';
+			Cookies.set('localeInfo', lang === 'en' ? 'fr' : 'en', { expires: 99, path: '/' });
+			location.reload();
+		});
+		const txtStart = /*[[#{Start}]]*/ 'START';
+		const txtStop = /*[[#{Stop}]]*/ 'STOP';
+		const txtConnection = /*[[#{connection}]]*/ 'connection';
+		const txtStatus = {}
+		txtStatus.Stopped = /*[[#{Stopped}]]*/ 'STOPPED';
+		txtStatus.TIMEOUT = /*[[#{TIMEOUT}]]*/ 'Timeout';
+		txtStatus['SP Error'] = /*[[#{SP Error}]]*/ 'SP ERROR';
+	/*]]>*/
+	//# sourceURL=language-control.js
+	</script>
 	<script th:if="${cleareCash}">
 		const $m =
 		$('<div>', {class: 'modal fade', tabindex: -1})

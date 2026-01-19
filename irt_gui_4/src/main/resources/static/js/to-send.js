@@ -40,6 +40,7 @@ export default async function (action, callBack){
 
 	if(action.toSend.bytes === undefined){
 		console.warn('No data to send.', action);
+		action.toSend = undefined;
 		action.buisy = false;
 		return;
 	}
@@ -184,10 +185,12 @@ async function getRest(action){
 		}
 		break;
 
+		// request with multiple payloads
 	case packetId.dacs:
 	case packetId.admv1013:
 	case packetId.stuw81300:
 	case packetId.POTs_KA_Converter:
+	case packetId.lnbRegisters:
 		{
 			const pls = action.data.value.map(v=>new Payload(action.data.parameterCode, v.toBytes()));
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
@@ -195,6 +198,7 @@ async function getRest(action){
 		}
 		break;
 
+		// command with multiple payloads
 	case packetId.admv1013Set:
 	case packetId.admv1013BiasSet:
 		{
@@ -205,8 +209,10 @@ async function getRest(action){
 		}
 		break;
 
+		// command with single payload
 	case packetId.dacsSet:
 	case packetId.stuw81300Set:
+	case packetId.lnbRegistersSet:
 		{
 			const pl = new Payload(action.data.parameterCode, action.data.value.toBytes());
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), pl, action.toSend.unitAddr);

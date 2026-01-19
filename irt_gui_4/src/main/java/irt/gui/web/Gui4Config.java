@@ -1,5 +1,6 @@
 package irt.gui.web;
 
+import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -15,8 +16,10 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 
 @Configuration
 @EnableWebSecurity
@@ -38,6 +41,15 @@ public class Gui4Config implements WebMvcConfigurer {
 	@Bean("prefs")
 	public Preferences prefs() {
 		return Preferences.userRoot().node(Gui4.class.getName());
+	}
+
+	@Bean
+	public LocaleResolver localeResolver() {
+		CookieLocaleResolver resolver = new CookieLocaleResolver();
+		resolver.setCookieName("localeInfo");
+		resolver.setCookieMaxAge((int) TimeUnit.DAYS.toSeconds(99)); // Set the cookie max age (in seconds)
+//        resolver.setDefaultLocale(Locale.ENGLISH); // Set default locale
+		return resolver;
 	}
 
 	@Bean

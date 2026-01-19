@@ -11,7 +11,6 @@ export default class MeasurementLoader{
 	#controller;
 	#parameter;;
 
-
 	constructor(unitType){
 		this.#controllerLoader = new ModuleLoader();
 		this.#parameterLoader = new ModuleLoader();

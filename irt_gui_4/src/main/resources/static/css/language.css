@@ -1,0 +1,38 @@
+.language-selector {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 1000;
+	background: rgb(22, 67, 150);
+	cursor: pointer;
+}
+.language-selector img {
+	margin: 3px;
+	width: 1.2rem;
+	height: auto;
+	border-radius: 10%;
+	border: 1px solid white;
+}
+.language-selector:hover img {
+	content: url('/images/flags/f-french.png');
+}
+.language-selector label.badge {
+	position: absolute;
+	width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+    cursor: inherit;
+}
+.language-selector:hover label.badge {
+	position: relative;
+	width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+}
