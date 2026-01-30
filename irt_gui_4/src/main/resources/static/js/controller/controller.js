@@ -4,7 +4,7 @@ export default class Controller{
 	#name;
 
 	constructor($card){
-		this._$card = $card;
+		this._$card = $card.find('div.control');
 	}
 
 	get name(){
@@ -53,5 +53,10 @@ export default class Controller{
 	 */
 	set parameter(p) {
 		this._parameter = p;
+	}
+	stop(){}
+	destroy(){
+		this._$card.empty();
+		this._$card = null;
 	}
 }

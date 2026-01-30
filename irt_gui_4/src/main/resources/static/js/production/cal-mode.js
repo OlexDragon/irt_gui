@@ -8,33 +8,32 @@ import { onStartAll } from '../panel-info.js'
 
 const $calModeDiv = $('#calModeDiv');
 const $cbCalMode = $('#cbCalMode').change(onChange);
-const action = {packetId: packetId.calMode, groupId: groupId.deviceDebug, data: {parameterCode: dd.calibrationMode.code}, function: 'f_calMode'};
+const action = {packetId: packetId.calMode, groupId: groupId.deviceDebug, data: {parameterCode: dd.calibrationMode.code}, function: 'f_calMode', f_error: packetError};
+
+let hasError;
 
 export let calMode;
 
 onStartAll(yes=>{
+	if(hasError)
+		return;
 	yes ? start() : stop()
 });
 let interval;
 function start(){
-console.log("start()")
 	if(interval)
 		return;
+	$calModeDiv.removeClass('visually-hidden');
+//	console.warn("start()");
 	run();
 	interval = setInterval(run, 5000);
 }
 
 function stop(){
 	interval = clearInterval(interval);
+	hasError = false;
 }
-
 function run(){
-	if(action.packetError && !action.packetError.startsWith('TIMEOUT')){
-		console.warn('Previous error on calMode:', action.packetError);
-		action.packetError = undefined;
-		stop();
-		return;
-	}
 	if(action.buisy){
 		console.log('Buisy');
 		return;
@@ -76,12 +75,22 @@ onStatusChange(alarmStatus =>{
 
 	case 'Closed':
 	case 'TIMEOUT':
-//	case 'Stopped':
-		stop();
 		$cbCalMode.prop('disabled', true);
+	case 'Stopped':
+		stop();
 		break;
 
-		default:
+	default:
+		if(!hasError)
 			start();
 	}
 });
+function packetError(packet){
+	if(packet.header.error === 10){	// Requested element not foundr
+		console.warn('The Packet has an error. Controller stops.\n', packet.toString());
+		stop();
+		hasError = true;
+		$calModeDiv.addClass('visually-hidden');
+	}else
+		console.warn(packet.toString());
+}

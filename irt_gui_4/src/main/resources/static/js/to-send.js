@@ -124,6 +124,7 @@ async function getRest(action){
 	case packetId.comAll:
 	case packetId.redundancyAll:
 	case packetId.dacRcm:
+	case packetId.lnbBand:
 		{
 			const pls = action.data.parameterCode.map(pc=>new Payload(pc));
 			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
@@ -172,8 +173,10 @@ async function getRest(action){
 	case packetId.lnbSetMode:
 	case packetId.odrcLNBSelect :
 	case packetId.lnbOverSet :
+	case packetId.lnbBandSet :
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, [action.data.value]), action.toSend.unitAddr);
+//			console.log(packet)
 			toSend.bytes = packet.toSend();
 		}
 		break;

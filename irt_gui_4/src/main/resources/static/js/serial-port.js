@@ -80,17 +80,19 @@ const $btnShowErrors = $('#btnShowErrors').change(btnShowErrorsChange);
 const $appExit = $('#appExit').click(async ()=>{
 
 	clearInterval(interval);
-	clearInterval(countInterval);
 	try{
 		const x = await $.post('/connection/add', {connectionId: sessionId});
 
 		if(x < 2 || confirm(`${x - 1} more connection found.\nAre you sure you want to close this program?`))
 			$.get('/exit').always(showExitModal);
-	}catch(e){
+
+		}catch(e){
 		showExitModal();
 	}
 });
-
+window.addEventListener("beforeunload", e=>{
+	$.post('/connection/remove', {connectionId: sessionId});
+});
 const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
 function countConnections(){
 	$.post('/connection/add', {connectionId: sessionId})
@@ -106,6 +108,7 @@ function showExitModal(){
 	$modal.load('/modal/exit');
 	$modal.attr('data-bs-backdrop', 'static');
 	$modal.modal('show');
+	clearInterval(conCheckInterval);
 }
 
 function portSelected({currentTarget:{value}}){
@@ -118,7 +121,6 @@ function portSelected({currentTarget:{value}}){
 }
 
 let interval;
-let countInterval;
 function toggleStart(){
 	clearInterval(interval);
 
@@ -131,7 +133,6 @@ function toggleStart(){
 			summaryAlarmStart();
 			$lbl.text(txtStop);
 			$btnStart.attr('checked', true);
-			countInterval = setInterval(countConnections, 3000);
 			break;
 
 		default:
@@ -139,8 +140,6 @@ function toggleStart(){
 			summaryAlarmStop(); 
 			$lbl.text(txtStart);
 			$btnStart.attr('checked', false);
-			clearInterval(countInterval);
-			$connections.empty()
 
 			if(closed())
 				return;
@@ -208,12 +207,15 @@ function send($card, toSend, action){
 					if(packet.header.error) {
 	//					console.log(data);
 						const packetStr = packet.toString();
-						console.warn(packetStr, action);
 						blink($card, 'connection-wrong');
 						if (showError)
 							showToast('Packet Error', packetStr, 'text-bg-danger bg-opacity-50');
 
-						action.packetError = packet.header.error;
+						action.packetError = packet.header.toString();
+						if(action.f_error)
+							action.f_error(packet);
+						else
+							console.warn(packetStr, action);
 						return;
 					}
 
@@ -287,7 +289,11 @@ onStatusChange(s=>{
 		$appExit.removeClass('to-front');
 	}
 });
+let conCheckInterval;
 (function getPortNames(){
+
+	countConnections();
+	conCheckInterval = setInterval(countConnections, 20000);
 	$.get('/serial/ports')
 	.done(ports=>{
 		if(!ports?.length){

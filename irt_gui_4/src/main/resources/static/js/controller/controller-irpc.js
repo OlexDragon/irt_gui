@@ -18,14 +18,7 @@ export default class ControllerIrpc extends Controller{
 	constructor($card){
 		super($card);
 		const $body = $card.find('.control');
-		$body.load(ControllerIrpc.URL, ()=>{
-
-			this.#$salectSwtchHvr = $('#irpcSalectSwtchHvr').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcSalectSwtchHvr).attr('data-parameter-code', irpcCode('Switchover Mode'));
-			this.#$salectStndBy = $('#irpcStandBy').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcStandBy).attr('data-parameter-code', irpcCode('Standby Mode'));
-			this.#$btnIrspDefault = $('#irpcDefault').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcDefault).attr('data-parameter-code', irpcCode('Switchover'));
-			this.#$btnHoverA = $('#irpcHoverA').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcHoverA).attr('data-parameter-code', irpcCode('Switchover'));
-			this.#$btnHoverB = $('#irpcHoverB').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcHoverB).attr('data-parameter-code', irpcCode('Switchover'));
-		});
+		$body.load(ControllerIrpc.URL, this.#onLoad.bind(this));
 	}
 
 	get groupId(){
@@ -36,6 +29,9 @@ export default class ControllerIrpc extends Controller{
      * @param {Array} pls
      */
 	set update(pls){
+		if(!this.#$salectSwtchHvr)
+			return;
+		
 		pls.forEach(pl => {
 
 			const c = pl.parameter.code;
@@ -105,6 +101,18 @@ export default class ControllerIrpc extends Controller{
 		this.#$btnHoverB.prop('disabled', true);
 	}
 
+	#onLoad(_, statusText){
+		if(statusText !== 'success'){
+			console.warn(statusText);
+			return;
+		}
+		console.log(statusText);
+		this.#$salectSwtchHvr = this._$card.find('#irpcSalectSwtchHvr').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcSalectSwtchHvr).attr('data-parameter-code', irpcCode('Switchover Mode'));
+		this.#$salectStndBy = this._$card.find('#irpcStandBy').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcStandBy).attr('data-parameter-code', irpcCode('Standby Mode'));
+		this.#$btnIrspDefault = this._$card.find('#irpcDefault').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcDefault).attr('data-parameter-code', irpcCode('Switchover'));
+		this.#$btnHoverA = this._$card.find('#irpcHoverA').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcHoverA).attr('data-parameter-code', irpcCode('Switchover'));
+		this.#$btnHoverB = this._$card.find('#irpcHoverB').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcHoverB).attr('data-parameter-code', irpcCode('Switchover'));
+	}
 	#onCange = ({currentTarget:{value, dataset:{packetid, parameterCode}}})=>{
 		this.disable();
 		this.#onChangeEvents.forEach(cb=>cb(+packetid, +value, +parameterCode));

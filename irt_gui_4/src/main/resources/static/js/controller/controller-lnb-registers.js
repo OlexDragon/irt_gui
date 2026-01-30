@@ -23,21 +23,24 @@ export default class ControllerLnbRegisters {
 		this.#action.data.value = [new Register(26, 32), new Register(26, 33), new Register(26, 34)];
 	}
 	start(){
+		clearInterval(this.#interval);
 		this.#interval = setInterval(()=>this.readRegisters(), 5000);
 	}
 	stop(){
 		clearInterval(this.#interval);
 	}
-	readRegisters(){
-		console.log('Reading LNB registers...');
-		serialPort.postObject(this.#$card, this.#action);
-	}
-	remove(){
+	destroy(){
 		this.stop();
 		if(this.#$row){
-			this.#$row.empty();
+			this.#$row.remove();
 			this.#$row = undefined;
 		}
+		this.#$card = null;
+		this.#$inputs = null;
+	}
+	readRegisters(){
+//		console.log('Reading LNB registers...');
+		serialPort.postObject(this.#$card, this.#action);
 	}
 	#createRow(){
 		this.#$row = $('<div>', {class: 'lnb-registers-row row m-3'})
@@ -63,12 +66,12 @@ export default class ControllerLnbRegisters {
 			const $input = this.#$inputs.find($el=>$el.prop('id')===`lnb${reg.address - 31}-register-input`);
 			const regValue = toRegValue(reg.value);
 			if($input.is(":focus")){
-				$input.prop('title', `Value: ${regValue.value}, Anable: ${regValue.anable}`);
+				$input.prop('title', `Value: ${regValue.value}, Enable: ${regValue.enable}`);
 				return;
 			}
 			if($input.val() !== `${regValue.value}`){
 				$input.val(regValue.value);
-				$input.prop('title', `Value: ${regValue.value}, Anable: ${regValue.anable}`);
+				$input.prop('title', `Value: ${regValue.value}, Enable: ${regValue.enable}`);
 			}
 		});
 	}
@@ -89,6 +92,6 @@ export default class ControllerLnbRegisters {
 }
 function toRegValue(value){
 	const v = value & 0x3F;
-	const anable = (value & 0x100) >0;
-	return {value: v, anable: anable};
+	const enable = (value & 0x100) >0;
+	return {value: v, enable: enable};
 }

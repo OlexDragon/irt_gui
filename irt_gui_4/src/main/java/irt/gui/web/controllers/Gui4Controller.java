@@ -27,11 +27,19 @@ public class Gui4Controller {
 
 	@GetMapping
     String home(@CookieValue(required = false) String localeInfo, Model model) {
-		logger.traceEntry("localeInfo='{}'", localeInfo);
+		logger.traceEntry("localeInfo ='{}'", localeInfo);
 
 		// Set Language
 		Optional.ofNullable(localeInfo).filter(s->s.equals("fr") || s.equals("en")).ifPresent(s->model.addAttribute("lang", s));
 
+		checkVersion(model);
+
+		model.addAttribute("version", version);
+		model.addAttribute("baudrates", Baudrate.values());
+		return "home";
+	}
+
+	public void checkVersion(Model model) {
 		final String prefVertion = prefs.get("version", "");
 		
 		if(prefVertion.isEmpty())
@@ -41,10 +49,6 @@ public class Gui4Controller {
 			prefs.put("version", version);
 			model.addAttribute("cleareCash", true);
 		}
-
-		model.addAttribute("version", version);
-		model.addAttribute("baudrates", Baudrate.values());
-		return "home";
 	}
 
 	@GetMapping({"p", "production"})

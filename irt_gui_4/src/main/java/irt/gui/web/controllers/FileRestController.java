@@ -198,7 +198,8 @@ public class FileRestController {
 				logger.debug(buf);
 			}
 		} catch (IOException e) {
-			logger.catching(e);
+			logger.warn(e.getLocalizedMessage());
+			logger.catching(Level.DEBUG, e);
 		}
 
 		Optional.ofNullable(connection).ifPresent(HttpURLConnection::disconnect);

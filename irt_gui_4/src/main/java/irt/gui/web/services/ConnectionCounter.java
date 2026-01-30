@@ -27,6 +27,10 @@ public class ConnectionCounter {
 				});
 	}
 
+	public void remove(String connectionId) {
+		sessions.remove(connectionId);
+	}
+
 	public int getConnectionCount() {
 		synchronized (sessions) {
 			return sessions.size();

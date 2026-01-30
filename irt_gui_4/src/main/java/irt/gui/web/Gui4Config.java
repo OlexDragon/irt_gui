@@ -70,6 +70,7 @@ public class Gui4Config implements WebMvcConfigurer {
 						new AntPathRequestMatcher("/exit"),
 						new AntPathRequestMatcher("/u/**"),
 						new AntPathRequestMatcher("/update/**"),
+						new AntPathRequestMatcher("/modal/**"),
 						new AntPathRequestMatcher("/upgrade/**"),
 						new AntPathRequestMatcher("/serial/**")).permitAll().anyRequest().authenticated())
 				.formLogin((form) -> form.loginPage("/login").permitAll()).logout((logout) -> logout.permitAll())

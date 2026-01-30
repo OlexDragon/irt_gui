@@ -33,10 +33,9 @@ function statusChange(alarmStatus){
 
 let interval;
 function start(){
-	if(interval){
-		console.log('Buisy');
+//	console.warn('start');
+	if(interval)
 		return;
-	}
 
 	$prodactionNav.find(':checked').each((_,{id})=>loadController(id));
 }
@@ -52,7 +51,7 @@ function onNavChenge({currentTarget:{id}}){
 
 async function loadController(id){
 
-	if(controller?.name !== id)
+	if(controller?.constructor.namee !== id)
 		switch(id){
 
 		case 'cbDACs':
@@ -124,8 +123,7 @@ async function loadController(id){
 		clearInterval(interval);
 		interval = setInterval(run, 3000);
 		$prodactionNav.find('input[name=prodactionNav]').prop('disabled', false);
-		if(unitType)
-			typeChange(unitType);
+		typeChange();
 	}
 }
 
@@ -143,7 +141,9 @@ function run(){
 		return;
 
 	const action = controller.action;
+	action.f_error = packetError;
 	if(action.packetError){
+		console.warn('Packet error: ', action.packetError);
 		action.packetError = undefined;
 		stop();
 		return;
@@ -166,8 +166,12 @@ function onSet(action){
 	serialPort.postObject($productionContent, action);
 }
 
+let savedUnitType;
 function typeChange(){
-	console.log('Device Type Change:', unitType);
+	if(!unitType || (JSON.stringify(unitType) === JSON.stringify(savedUnitType)))
+		return;
+	savedUnitType = unitType;
+//	console.warn('Device Type Change:', unitType);
 	const $admv = $prodactionNav.find('.pllRegisters');
 	const dType = unitType?.name;
 	changeProfilePath()
@@ -286,4 +290,10 @@ function changeProfilePath(){
 		$('#profilrUpload').attr('href', `/upgrade/rest/profile/${serialPort.serialPort}/0?${search}`);
 	}else
     	$('#profilrUpload').attr('href', `/file/upload/profile?${search}`);
+}
+function packetError(packet){
+	if(!packet.header.error)
+		return;
+	console.warn('The Packet has an error. Controller stops.\n', packet.toString());
+	stop();
 }

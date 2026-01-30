@@ -1,9 +1,8 @@
 import * as serialPort from './serial-port.js'
-import { type as unitType, onStartAll } from './panel-info.js'
+import { type as unitType, onStartAll, onTypeChange } from './panel-info.js'
 import ControlLoader from './helper/config-loader.js'
 
 const $card = $('div.controlCard');
-const $body = $('div.control');
 
 const action = {data: {}, function: 'f_Config'};
 
@@ -26,6 +25,23 @@ onStartAll(yes=>{
 		controller2.stop();
 	}
 })
+let storedUnitType;
+onTypeChange(type=>{
+	if(storedUnitType && (JSON.stringify(storedUnitType)===JSON.stringify(type)))
+		return;
+	if(controller){
+		console.log(controller.constructor.name)
+		controller.stop();
+		controller.destroy();
+		controller = null;
+	}
+	if(controller2){
+		controller2.stop();
+		controller2.destroy();
+		controller2 = null;
+	}
+	typeChange(type);
+});
 export function start(){
 	if(interval || buisy)
 		return;
@@ -49,12 +65,16 @@ export function stop(){
 }
 
 function typeChange(type){
+	if(storedUnitType && (JSON.stringify(storedUnitType)===JSON.stringify(type)))
+		return;
+	storedUnitType = type;
 	loader.setUnitType(type, c=>onControllerLoaded(c));
 	const pathname = window.location.pathname;
 	if(pathname === '/')
 		return;
 	switch(type.name){
 		case 'LNB':
+		case 'CONTROLLER_ODRC':
 			if(type.revision>30)
 				import('./controller/controller-lnb-registers.js')
 			        .then(({default: Controller})=>{
@@ -64,7 +84,7 @@ function typeChange(type){
 
 		default:
 			if(controller2){
-				controller2.remove();
+				controller2.destroy();
 				controller2 = undefined;
 			}
 		}
@@ -75,9 +95,8 @@ function onControllerLoaded(Controller){
 		console.log('Controller is not ready.')
 		return;
 	}
-	if(controller?.name !== Controller.name){
+	if(controller?.constructor.name !== Controller.name){
 		controller = new Controller($card);
-		controller.name = Controller.name;
 		controller.parameter = loader.parameter;
 		controller.toRead = loader.toRead;
 		controller.change = onChange;
@@ -99,7 +118,7 @@ function run(){
 		return;
 	}
 
-	if(action.buisy){
+	if(action.buisy || !controller){
 		console.log('Buisy')
 		return
 	}
@@ -114,6 +133,8 @@ function run(){
 }
 
 action.f_Config = function(packet){
+	if(!controller)
+		return;
 
 	const payloads = packet.payloads;
 	controller.update = payloads;

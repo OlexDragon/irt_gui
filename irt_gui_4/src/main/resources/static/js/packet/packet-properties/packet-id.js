@@ -72,6 +72,9 @@ const packetIdArray = Object.freeze(
 		'lnbRegisters',
 		'lnbRegistersSet',
 
+		'lnbBand',
+		'lnbBandSet',
+
 		'dacRcm',
 		'dacSetRcm',
 

@@ -12,6 +12,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -99,10 +101,32 @@ public class Gui4RestController {
 		return counter.getConnectionCount();
 	}
 
+	private FutureTask<Void> shutdownTask;
+	private final Callable<Void> shutdownDelay = new Callable<Void>(){
+
+		@Override
+		public Void call() throws Exception {
+			TimeUnit.HOURS.sleep(1);
+			Gui4.exit();
+			return null;
+		}
+	};
 	@RequestMapping("connection/add")
     int addConnection(String connectionId) {
 		counter.add(connectionId);
+		ThreadWorker.runThread(()->{
+			synchronized (Gui4RestController.class) {
+				Optional.ofNullable(shutdownTask).ifPresent(ft->ft.cancel(true));
+				shutdownTask = new FutureTask<Void>(shutdownDelay);
+				ThreadWorker.runThread(shutdownTask);
+			}
+		});
 		return connectionCount();
+	}
+
+	@RequestMapping("connection/remove")
+    void removeConnection(String connectionId) {
+		counter.remove(connectionId);
 	}
 
 	@RequestMapping("ping")

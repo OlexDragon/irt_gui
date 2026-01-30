@@ -17,34 +17,18 @@ export default class ControllerConfig extends Controller{
 
 	constructor($card) {
 		super($card);
-		const $body = $card.find('div.control');
-		$body.load(ControllerConfig.url,()=>{
-
-			const $attenuationTab = $body.click(this.#tabClick.bind(this)).find('#attenuationTab');
-			this.#freqTab = $body.find('#freqTab');
-
-			const onValueChange = this.#onValueChange.bind(this);
-			this.#attenuationController = new ControllerValue('attenuation', $body.find('div.attenuation'));
-			this.#attenuationController.change = onValueChange;
-
-			this.#gainController = new ControllerValue('gain', $body.find('div.gain'));
-			this.#gainController.change = onValueChange;
-
-			this.#freqController = new ControllerValue('freq', $body.find('div.frequency'));
-			this.#freqController.change = onValueChange;
-
-			this.#$btnMute = $body.find('#btnMute').change(this.#onChangeBtnMute.bind(this));
-			this.#$loSelect = $body.find('#loSelect').change(this.#onChangeLoSelect.bind(this));
-
-			const tabCookies = Cookies.get('tabCookies');
-			if (tabCookies)
-				new bootstrap.Tab($('#' + tabCookies)).show();
-			else
-				new bootstrap.Tab($attenuationTab).show();
-			
-		});
+		this._$card.load(ControllerConfig.url, this.#onLoad.bind(this));
 	}
-
+	destroy(){
+		console.log('***** destroy() *****')
+		super.destroy();
+		this.#freqTab.remove();
+		this.#freqTab = null;
+		this.#$btnMute.remove();
+		this.#$btnMute = null;
+		this.#$loSelect.remove();
+		this.#$loSelect = null;
+	}
 	get groupId(){
 		return groupId.configuration;
 	}
@@ -197,6 +181,33 @@ export default class ControllerConfig extends Controller{
 		this.#freqController.tickMarks(set);
 	}
 
+	#onLoad(_, statusText){
+		if(statusText !== 'success'){
+			console.warn(statusText);
+			return;
+		}
+		const $attenuationTab = this._$card.click(this.#tabClick.bind(this)).find('#attenuationTab');
+		this.#freqTab = this._$card.find('#freqTab');
+
+		const onValueChange = this.#onValueChange.bind(this);
+		this.#attenuationController = new ControllerValue('attenuation', this._$card.find('div.attenuation'));
+		this.#attenuationController.change = onValueChange;
+
+		this.#gainController = new ControllerValue('gain', this._$card.find('div.gain'));
+		this.#gainController.change = onValueChange;
+
+		this.#freqController = new ControllerValue('freq', this._$card.find('div.frequency'));
+		this.#freqController.change = onValueChange;
+
+		this.#$btnMute = this._$card.find('#btnMute').change(this.#onChangeBtnMute.bind(this));
+		this.#$loSelect = this._$card.find('#loSelect').change(this.#onChangeLoSelect.bind(this));
+
+		const tabCookies = Cookies.get('tabCookies');
+		if (tabCookies)
+			new bootstrap.Tab($('#' + tabCookies)).show();
+		else
+			new bootstrap.Tab($attenuationTab).show();
+	}
 	#tabClick({target:{id}}) {
 		switch (id) {
 
