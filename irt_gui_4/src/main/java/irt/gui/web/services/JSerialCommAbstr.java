@@ -117,7 +117,7 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 						sp->{
 							synchronized (sp) {
 								
-								Optional.ofNullable(timeout).filter(t->t>1).filter(t->t!=sp.getReadTimeout()).ifPresent(t->sp.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, t, 0));
+								setSpTimeout(sp, timeout);
 								ByteBuffer bb = ByteBuffer.allocate(4095);
 								try(final InputStream is = sp.getInputStream();){
 
@@ -175,6 +175,10 @@ public abstract class JSerialCommAbstr implements IrtSerialPort {
 							}
 							return null;
 						}).orElse(null);
+	}
+
+	protected void setSpTimeout(SerialPort sp, Integer timeout) {
+		Optional.ofNullable(timeout).filter(t->t>1).filter(t->t!=sp.getReadTimeout()).ifPresent(t->sp.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, t, 0));
 	}
 
 	@Override

@@ -41,7 +41,8 @@ public class ConsoleRestController {
 		else if(command.charAt(command.length()-1)!='\n')
 			command+='\n';
 
-		final RequestPacket requestPacket = new RequestPacket(false, PACKET_ID, -1, sp, command.getBytes(), "unused");
+		final RequestPacket requestPacket = new RequestPacket(false, PACKET_ID, 1, sp, command.getBytes(), "unused");
+		requestPacket.setName("Console");
 		requestPacket.setBaudrate(br);
 		requestPacket.setTimeout(consoleTimeoutMs);
 		distributor.send(requestPacket);

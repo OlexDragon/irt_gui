@@ -18,7 +18,7 @@ public class JSerialCommFlash extends JSerialCommAbstr {
 
 	@Override
 	protected void read(final InputStream is, ByteBuffer bb) throws IOException {
-		logger.error("JSerialCommFlash.read()");
+		logger.traceEntry("JSerialCommFlash.read()");
 
 		try {
 			while(true) {
@@ -29,7 +29,7 @@ public class JSerialCommFlash extends JSerialCommAbstr {
 					break;
 
 				final byte readByte = (byte)read;
-				logger.error("Read byte: 0x{}", readByte);
+				logger.error("Read byte: {}", readByte);
 				bb.put(readByte);
 
 				if(bb.position()>=expectedLength) 

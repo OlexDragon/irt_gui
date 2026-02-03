@@ -12,8 +12,7 @@
 	<link rel='stylesheet' href='/css/bs.css' th:fragment="cssBootstrap"/>
 	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
     <link rel="stylesheet" href="../static/css/language.css" th:href="@{${lang} == 'fr' ? '/css/language-fr.css' : '/css/language-en.css'}">
-    <th:block th:fragment="links">
-    	<script th:if="${lang} == null">
+    <script th:if="${lang} == null" th:fragment="languageCookiesCheck">
     	function getLangCookieValue(){
 			return document.cookie.split('; ').filter(c => c.startsWith('localeInfo')).map(c => c.split('=')[1]).pop();;
 		}
@@ -28,11 +27,11 @@
     		if(getLangCookieValue() === lang)
     			location.reload();
     	}
-    	</script>
+    </script>
 </head>
 
 <body>
-<div class="language-selector visually-hidden">
+<div class="language-selector visually-hidden" th:fragment="languageSelect">
 	<img src="../static/images/flags/f-usa.png" th:src="'/images/flags/f-english.png'" alt="Language">
 	<label class="badge text-uppercase align-middle" th:text="${lang} eq 'fr' ? 'English' : 'Fran&ccedil;ais'">English</label>
 </div>
@@ -70,6 +69,9 @@
 							<h6 id="summaryAlarmTitle" class="card-title text-center p-2"></h6>
 						</div>
 					</div>
+				</div>
+				<div class="col mb-3">
+					<a class="btn btn-outline-secondary form-control" href="/console">Console</a>
 				</div>
 				<div class="col mb-3">
 					<input id="fwUpgrade" type="file" accept=".pkg" hidden="hidden">

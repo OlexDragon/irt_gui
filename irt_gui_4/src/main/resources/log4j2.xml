@@ -28,6 +28,7 @@
 		<logger name="org.springframework.security.core.userdetails.User" level="error" />
 
 <!-- 		<logger name="irt.gui.web.services.JSerialComm" level="all" /> -->
+<!-- 		<logger name="irt.gui.web.services.JSerialCommConsole" level="debug" /> -->
 <!-- 		<logger name="irt.gui.web.services.LockDistributor" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.controllers.ConsoleRestController" level="all" /> -->
 <!-- 		<logger name="irt.gui.web.controllers.SerialPortController" level="all" /> -->

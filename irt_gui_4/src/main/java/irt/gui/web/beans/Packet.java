@@ -148,6 +148,7 @@ public class Packet {
 
 		if(bytes==null || bytes.length<acknowLength) {
 			logger.warn("Packet is too short to create Acknowledgement: {}\n\t{}", bytes==null ? "null" : bytes.length, bytes);
+			logger.catching(new Throwable());
 			return null;
 		}
 

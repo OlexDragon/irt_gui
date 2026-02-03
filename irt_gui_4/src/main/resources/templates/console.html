@@ -5,16 +5,19 @@
 		lang="en">
 
 <head>
-    <title>GUI - IRT Technologies</title>
+    <title>GUI - Console</title>
     <meta charset="UTF-8"/>
     <meta name="google" content="notranslate" />
 	<meta name="viewport" content="width=device-width, initial-scale=1"/>
 	<link rel='stylesheet' href='/css/bs.css' th:fragment="cssBootstrap"/>
 	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
+    <link rel="stylesheet" href="../static/css/language.css" th:href="@{${lang} == 'fr' ? '/css/language-fr.css' : '/css/language-en.css'}">
+	<script th:replace="home :: languageCookiesCheck"></script>
 </head>
 
 <body>
 <div class="container-fluid">
+<div class="language-selector visually-hidden" th:replace="home :: languageSelect"></div>
 	<div class="row g-1">
 		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:replace="home :: serial-port"></div>
 		<div class="col">
@@ -24,9 +27,9 @@
 					<div class="input-group">
 						<div class="form-floating">
 							<input id="commandInput" type="text" class="form-control" placeholder="Enter Command"/>
-							<label for="commandInput">Command to send</label>
+							<label for="commandInput" th:text="#{Command to send}">Command to send</label>
 						</div>
-						<button id="sendCommandBtn" class="btn btn-outline-primary" type="button">Send</button>
+						<button id="sendCommandBtn" class="btn btn-outline-primary" type="button" th:text="#{Send}">Send</button>
 					</div>
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
@@ -34,6 +37,20 @@
 				</div>
 				<div class="col-lg-6 col-12 mt-2">
                 </div>
+			</div>
+			<div class="row">
+				<div class="col mt-2">	
+					<textarea id="taConsole" class="form-control" rows="25" readonly="readonly"></textarea>
+				</div>
+			</div>
+			<div class="row mt-3">
+				<div class="col form-floating">
+					<textarea id="commandHistory" class="form-control" readonly="readonly" placeholder="History"></textarea>
+					<label for="commandHistory" th:text="#{History}">History</label>
+				</div>
+				<div class="col">
+					<button id="clearText" class="btn btn-outline-secondary form-control" th:text="#{Clear}">Clear</button>
+				</div>
 			</div>
 		</div>
 		<footer class="row align-items-center py-3 my-4 border-top" th:fragment="footer" th:replace="home :: footer">
@@ -45,12 +62,31 @@
 			<div class="col-auto"><img alt="IRT GUI" src="/qr-code"></div>
 		</footer>
 	</div>
+<div id="modal" class="modal fade" tabindex="-1">
+		<div class="modal-dialog">
+    		<div class="modal-content">
+<!-- Modal Header -->
+      			<div class="modal-header">
+        			<h5 class="modal-title ml-3 text-primary">The IRT GUI has been completed.</h5>
+      			</div>
+ <!-- Modal Body -->
+      			<div class="modal-body">
+      				<p>The IRT GUI has finished working.</p>
+      				<p>You can close your browser.</p>
+      			</div>
+    		</div>
+  		</div>
+</div>
 </div>
 <th:block th:replace="home :: np">
 	<script src="/js/np/jquery.min.js"></script>
 	<script src="/js/np/js.cookie.min.js"></script>
 	<script src="/js/np/bootstrap.bundle.min.js"></script>
 </th:block>
+	<script th:inline="javascript" th:replace="home :: language-control"></script>
+	<script th:inline="javascript">
+		const txtSerialPort232 = /*[[#{Select Serial Port} + ' (RS232)']]*/ 'Serial Port (RS232)';
+	</script>
 	<script type="module" src="../static/js/flash.js" th:src="@{/js/flash.js}"></script>
 	<script type="module" src="../static/js/console.js" th:src="@{/js/console.js}"></script>
 

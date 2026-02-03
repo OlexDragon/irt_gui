@@ -70,9 +70,11 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 			packetTask = queue.take();
 			logger.traceEntry("packetTask={}", packetTask);
-			final boolean isFlash = Optional.ofNullable(packetTask.getPacket().getName()).map(n->n.equals("Flash")).orElse(false);
-			if (isFlash)
+			final Optional<String> oPacketName = Optional.ofNullable(packetTask.getPacket().getName());
+			if (oPacketName.map(n->n.equals("Flash")).orElse(false))
 				sendFromQueueFlash(packetTask.packet);
+			else if(oPacketName.map(n->n.equals("Console")).orElse(false))
+				sendFromQueueConsole(packetTask.packet);
 			else
 				sendFromQueue(packetTask.packet);
 
@@ -150,6 +152,29 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 		requestPacket.setAnswer(received);
 		logger.debug(requestPacket);
 		
+	}
+	private JSerialCommConsole serialPortConsole;
+	private void sendFromQueueConsole(RequestPacket requestPacket) throws IrtSerialPortIOException {
+		logger.traceEntry("{}", requestPacket);
+
+		if(serialPortConsole==null)
+			serialPortConsole =  new JSerialCommConsole();
+
+		final String portName = requestPacket.getSerialPort();
+
+		final int timeout = requestPacket.getTimeout();
+		final byte[] bytes = requestPacket.getBytes();
+
+		if (bytes == null || bytes.length == 0) {
+			requestPacket.setError("There is no data to send.");
+			return;
+		}
+
+		final Integer baudrate = requestPacket.getBaudrate();
+		serialPortConsole.setExpectedEnd(requestPacket.getAnswer());
+		byte[] received = serialPortConsole.send(portName, timeout, bytes, baudrate);
+		requestPacket.setAnswer(received);
+		logger.debug(requestPacket);
 	}
 
 	private int oldPacketId = Integer.MIN_VALUE;
