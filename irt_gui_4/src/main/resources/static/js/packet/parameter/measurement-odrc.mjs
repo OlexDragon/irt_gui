@@ -1,4 +1,12 @@
 import {parseToIrtValue} from '../service/converter.js'
+import Measurement  from "./parameters.mjs";
+
+export default class MeasurementOdrc extends Measurement{
+
+	constructor(){
+		super(measurement, 'Measurement ODRC');
+	}
+}
 
 const lnbStatus = ['Not Ready', 'Ready'];
 const measurement = {};
@@ -31,36 +39,6 @@ measurement['LNB 3'].parser			 = bytes=>lnbStatus[bytes[0]];
 
 measurement.all = {}
 measurement.all.code				 = 255;
-
-Object.freeze(measurement);
-export default measurement;
-
-const names = Object.keys(measurement).reduce(toNames, []);
-function toNames(a, key){
-	a[measurement[key].code] = key;
-	return a;
-}
-
-export function code(name){
-
-	if(typeof name === 'number')
-		return name;
-
-	return measurement[name].code;
-}
-
-export function name(code){
-	return names[code]; 
-}
-
-export function toString(value){
-	const c = code(value);
-	return `measurement: ${name(c)} (${c})`;
-}
-
-export function parser(value){
-	return measurement[name(code(value))]?.parser;
-}
 
 const statuses = ['UNKNOWN','LNB 1','LNB 2',,,,,,,,,'DEFAULT','PROTECTION LNB 1','PROTECTION LNB 2'];
 function parseToStatus(bytes){

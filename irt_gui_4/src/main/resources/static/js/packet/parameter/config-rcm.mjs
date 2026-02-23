@@ -1,4 +1,17 @@
 import * as converter from '../service/converter.js'
+import Parameter  from "./parameters.mjs";
+
+export default class ControlRcm extends Parameter{
+
+	constructor(){
+		super(config, 'Control RCM');
+	}
+
+	get all(){
+		const {Capabilities, ['DAC Range']:range, DAC, Source} = this.parameters;
+		return {Capabilities, range, DAC, Source};
+	}
+}
 
 const config = {};
 
@@ -12,7 +25,7 @@ config['DAC Range'].parser	 = converter.parseToIntArray;
 
 config.DAC					 = {}
 config.DAC.code				 = 3;
-config.DAC.parser			 = bytes=>converter.parseToInt(bytes);
+config.DAC.parser			 = converter.parseToIntUnsigned;
 
 config['DAC Step Range']		 = {}
 config['DAC Step Range'].code	 = 4;
@@ -30,45 +43,17 @@ config.Decrement			 = {}
 config.Decrement.code		 = 7;
 //config.Decrement.parser		 = converter.parseToInt;
 
+// Factory Reset is a command, not a setting, so it doesn't need a parser
 config['Factory Reset']			 = {}
 config['Factory Reset'].code	 = 8;
 //config['Factory Reset'].parser		 = converter.parseToBigInt;
 
+// Factory Value is a command, not a setting, so it doesn't need a parser
 config['Factory Value']			 = {}
 config['Factory Value'].code	 = 9;
 //config['Factory Value'].parser	 = converter.parseToInt;
 
 config.Capabilities	 = {}
 config.Capabilities.code = 19;
-config.Capabilities.parser = data=>data.toString();
-
-Object.freeze(config);
-export default config;
-
-const controlNames = Object.keys(config).reduce((a,k)=>{
-		a[config[k].code] = k;
-		return a;
-	}, []
-);
-
-export function code(value){
-	if(typeof value === 'number')
-		return value;
-	return config[value];
-}
-
-export function name(value){
-	return controlNames[value];
-}
-
-export function toString(value){
-	const c = code(value)
-	const n = name(c)
-	return `control: ${n} (${c})`;
-}
-
-export function parser(value){
-	const n = name(value)
-	return config[n].parser;
-}
+config.Capabilities.parser = converter.parseToCapabilities;
 

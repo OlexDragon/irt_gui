@@ -12,7 +12,6 @@ export default class ControllerConfig extends Controller{
 	#freqTab;
 	#$btnMute;
 	#$loSelect;
-	#toRead;
 	#onChangeEvents = [];
 
 	constructor($card) {
@@ -33,14 +32,6 @@ export default class ControllerConfig extends Controller{
 		return groupId.configuration;
 	}
 
-	get toRead(){
-		return Object.values(this.#toRead).map(({code})=>code);
-	}
-
-	set toRead(v){
-		this.#toRead = v;
-	}
-
 	/**
 	 * @param {Object[]} pls
 	 */
@@ -50,15 +41,15 @@ export default class ControllerConfig extends Controller{
 			return;
 		}
 
+		const pId =this.parametersClass.parameters;
 		pls.sort(({parameter:a},{parameter:b})=>b.code - a.code).forEach(pl=>{
 
-			const pId =this._parameter.default;
-			const val = this._parameter.parser(pl.parameter.code)(pl.data);
+			const val = this.parametersClass.parser(pl.parameter.code)(pl.data);
 
 			switch(pl.parameter.code){
 
 			case pId.attenuationRange.code:
-				delete this.#toRead.attenuationRange;
+				delete this._toRead.attenuationRange;
 				this.#attenuationController.min = val[1]/10*-1;
 				this.#attenuationController.max = val[0];
 				this.#attenuationController.step = 0.1;
@@ -72,7 +63,7 @@ export default class ControllerConfig extends Controller{
 				break;
 
 			case pId.gainRange.code:
-				delete this.#toRead.gainRange;
+				delete this.toRead.gainRange;
 				this.#gainController.min = val[0]/10;
 				this.#gainController.max = val[1]/10;
 				this.#gainController.step = 0.1;
@@ -86,12 +77,12 @@ export default class ControllerConfig extends Controller{
 				break;
 
 			case pId.frequencyRange.code:
-				delete this.#toRead.frequencyRange;
+				delete this.toRead.frequencyRange;
 				if(val.filter(v=>v).length){
 					this.#freqTab.removeClass('visually-hidden');
 					this._frequencyRange(val.map(v=>Number(v/1000000n)));
 				}else{
-					delete this.#toRead.Frequency;
+					delete this._toRead.Frequency;
 					this.#freqTab.addClass('visually-hidden');
 				}
 				break;
@@ -120,20 +111,20 @@ export default class ControllerConfig extends Controller{
 
 			case pId.loSet.code:
 				{
-					const value = this.#toRead.loSet.parser(pl.data);
+					const value = this._toRead.loSet.parser(pl.data);
 					this.#$loSelect.val(value);
 				}
 				break;
 
 			case pId.LO.code:
 				{
-					if(!this.#toRead.LO)
+					if(!this._toRead.LO)
 						return;
 
-					const value = this.#toRead.LO.parser(pl.data);
-					delete this.#toRead.LO;
+					const value = this._toRead.LO.parser(pl.data);
+					delete this._toRead.LO;
 					if(!pl.parameter.size){
-						delete this.#toRead.LO;
+						delete this._toRead.LO;
 						return;
 					}
 
@@ -240,20 +231,20 @@ export default class ControllerConfig extends Controller{
 			switch (key) {
 
 			case this.#attenuationController.name:
-				pId = packetId.atenuationSet;
-				parameterCode = this.parameter.default.Attenuation.code;
+				pId = packetId.attenuationSet;
+				parameterCode = this.parametersClass.parameters.Attenuation.code;
 				toSend = object[key] * 10;
 				break;
 
 			case this.#gainController.name:
 				pId = packetId.gainSet;
-				parameterCode = this.parameter.default.Gain.code;
+				parameterCode = this.parametersClass.parameters.Gain.code;
 				toSend = object[key] * 10;
 				break;
 
 			case this.#freqController.name:
 				pId = packetId.frequencySet;
-				parameterCode = this.parameter.default.Frequency.code;
+				parameterCode = this.parametersClass.parameters.Frequency.code;
 				const value = object[key];
 				const floor = Math.floor(value);
 				const remainder = Math.round(value % 1 * 1000000);
@@ -271,11 +262,11 @@ export default class ControllerConfig extends Controller{
 
 	#onChangeBtnMute(e) {
 		const toSend = e.currentTarget.checked ? 1 : 0;	// Mute / Unmute
-		this.#sendChange(packetId.muteSet, toSend, this.parameter.default.Mute.code);
+		this.#sendChange(packetId.muteSet, toSend, this.parametersClass.parameters.Mute.code);
 	}
 	#onChangeLoSelect({currentTarget:{value: toSend}}){
-		this.#sendChange(packetId.loSet, toSend, this.parameter.default.loSet.code);
-		Object.assign(this.#toRead, {frequencyRange: this._parameter.default.frequencyRange});
+		this.#sendChange(packetId.loSet, toSend, this.parametersClass.parameters.loSet.code);
+		Object.assign(this._toRead, {frequencyRange: this.parametersClass.parameters.frequencyRange});
 	}
 
 	#sendChange(){

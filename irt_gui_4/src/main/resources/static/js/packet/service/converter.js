@@ -118,6 +118,10 @@ export function parseToIntArray(bytes){
 	return parseToArray(bytes, 4);
 }
 
+export function parseToIntSequence(bytes){
+	return parseToArray(bytes, 4).join('.');
+}
+
 export function parseToShortArray(bytes){
 	return parseToArray(bytes, 2);
 }
@@ -232,5 +236,16 @@ export function parseToAlarmString(bytes){
 	value.id = parseToInt(bytes.splice(0,2));
 	value.string = parseToString(bytes);
 	return value;
+}
+const capabilities = [undefined, 'Internal', 'External', 'Autosense'];
+export function parseToCapabilities(bytes){
+	const intVal = parseToInt(bytes);
+	const result = [];
+	for(let i=1; i<capabilities.length; i++){
+		const bitmask = 1<<i;
+		if(intVal & bitmask)
+			result.push({[capabilities[i]]:i});
+	}
+	return result;
 }
 

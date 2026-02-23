@@ -39,20 +39,18 @@ function typeChange(type){
 	loader.setUnitType(type, c=>onControllerLoaded(c));
 }
 
-let controllerName;
 function onControllerLoaded(Controller){
 	if(!Controller){
 		console.log('The Controller is not ready.')
 		return;
 	}
-	if(controllerName !== Controller.name){
+	if(controller?.constructor.name !== Controller.name || controller?.parameter.constructor.name !== loader.parameter.name){
 		!hasPlaceholder && $body.empty();
-		controllerName = Controller.name;
 		controller = new Controller($card);
-		controller.parameter = loader.parameter;
+		controller.parametersClass = new loader.parameter();
 		action.packetId = loader.packetId;
 		action.groupId = controller.groupId;
-		action.data.parameterCode = loader.parameter.default.all.code;
+		action.data.parameterCode = 255;
 	}
 
 	buisy = false;

@@ -1,4 +1,17 @@
 import * as converter from '../service/converter.js'
+import Parameter  from "./parameters.mjs";
+
+export default class ControlFcm extends Parameter{
+
+	constructor(){
+		super(config, 'Control FCM');
+	}
+
+	get all(){
+		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute} = this.parametersClass.parameters;
+		return {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute};
+	}
+}
 
 const config = {};
 
@@ -105,34 +118,4 @@ config.LO.parser			 = converter.parseToLoFrequency;
 
 config.all						 = {}
 config.all.code					 = 255;
-
-Object.freeze(config);
-export default config;
-
-const controlNames = Object.keys(config).reduce((a,k)=>{
-		a[config[k].code] = k;
-		return a;
-	}, []
-);
-
-export function code(value){
-	if(typeof value === 'number')
-		return value;
-	return config[value];
-}
-
-export function name(value){
-	return controlNames[value];
-}
-
-export function toString(value){
-	const c = code(value)
-	const n = name(c)
-	return `control: ${n} (${c})`;
-}
-
-export function parser(value){
-	const n = name(value)
-	return config[n].parser;
-}
 

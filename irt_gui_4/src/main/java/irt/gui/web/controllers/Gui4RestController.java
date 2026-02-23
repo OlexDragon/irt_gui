@@ -159,7 +159,7 @@ public class Gui4RestController {
 
 		try {
 
-			final URL url = new URL("http://irttechnologies:8089");
+			final URL url = new URL("http://irt");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			final int responseCode = connection.getResponseCode();

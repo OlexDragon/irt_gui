@@ -95,6 +95,10 @@ window.addEventListener("beforeunload", e=>{
 });
 const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
 function countConnections(){
+	if(closed()){
+		clearInterval(conCheckInterval);
+        return;
+	}
 	$.post('/connection/add', {connectionId: sessionId})
 	.done(count=>{
 		const text = (count + ' ' + txtConnection) + (count===1 ? '' : 's');

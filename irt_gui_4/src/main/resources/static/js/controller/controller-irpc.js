@@ -35,8 +35,8 @@ export default class ControllerIrpc extends Controller{
 		pls.forEach(pl => {
 
 			const c = pl.parameter.code;
-			const key = this._parameter.name(c);
-			const parser = this._parameter.parser(c);
+			const key = this.parametersClass.toName(c);
+			const parser = this.parametersClass.parser(c);
 			const value = parser(pl.data);
 
 			switch (key) {
@@ -106,7 +106,6 @@ export default class ControllerIrpc extends Controller{
 			console.warn(statusText);
 			return;
 		}
-		console.log(statusText);
 		this.#$salectSwtchHvr = this._$card.find('#irpcSalectSwtchHvr').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcSalectSwtchHvr).attr('data-parameter-code', irpcCode('Switchover Mode'));
 		this.#$salectStndBy = this._$card.find('#irpcStandBy').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcStandBy).attr('data-parameter-code', irpcCode('Standby Mode'));
 		this.#$btnIrspDefault = this._$card.find('#irpcDefault').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcDefault).attr('data-parameter-code', irpcCode('Switchover'));

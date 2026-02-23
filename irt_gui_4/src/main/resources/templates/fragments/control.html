@@ -205,6 +205,52 @@
 		</div>
 	</div>
 </th:block>
+ <th:block th:fragment=rcm>
+	<div class="container-fluid">
+		<div class="row mt-2">
+			<div class="col">
+				<div class="form-floating">
+					<input id="rcmDacValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
+  					<label for="rcmDacValue">Value</label>
+  				</div>
+			</div>
+  			<div class="col">
+				<div class="form-floating">
+					<input id="rcmDacControl" type="number" class="form-control control" placeholder="to Set">
+  					<label for="rcmDacControl">to Set</label>
+				</div>
+			</div>
+			<div class="col">
+				<div class="col">
+					<div class="form-floating">
+						<input id="rcmDacStep" class="form-control step" type="number" placeholder="Step">
+  						<label for="rcmDacStep">Step</label>
+					</div>
+				</div>
+			</div>
+ 		</div>
+		<div>
+			<input id="rcmDacRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
+		</div>
+		<div class="row">
+			<div class="col form-floating">
+				<input id="rcmProfileValue" type="number" class="form-control" readonly="readonly" placeholder="Profile Value">
+  				<label for="rcmProfileValue">Profile Value</label>
+			</div>
+			<div class="col"><button id="rcmDacSave" type="button" class="btn btn-outline-primary form-control mt-3">Save</button></div>
+		</div>
+		<div>
+			<button id="rcmDacDefault" type="button" class="btn btn-outline-secondary form-control mt-3">Default</button>
+		</div>
+		<div class="row mt-3">
+			<div class="col form-floating">
+			    <select id="capabilities" class="form-select">
+                </select>
+                <label for="rcmSelect">Mode</label>
+			</div>
+		</div>
+	</div>
+</th:block>
  	</div>
 </div>
 </html>

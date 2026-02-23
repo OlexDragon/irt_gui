@@ -1,5 +1,13 @@
 import {parseToIrtValue, parseToInt} from '../service/converter.js'
 import FcmStatus from './value/fcm-status.js'
+import Measurement  from "./parameters.mjs";
+
+export default class MeasurementFcm extends Measurement{
+
+	constructor(){
+		super(measurement, 'Measurement FCM');
+	}
+}
 
 const measurement = {};
 
@@ -70,32 +78,3 @@ measurement.Reference.parser = bytes=>bytes[0]
 
 measurement.all = {}
 measurement.all.code				 = 255;
-
-Object.freeze(measurement);
-export default measurement;
-
-const names = Object.keys(measurement).reduce((a,key)=>{a[measurement[key].code] = key; return a;}, []);
-
-export function code(name){
-
-	if(typeof name === 'number')
-		return name;
-
-	return measurement[name].code;
-}
-
-export function name(code){
-
-	return names[code]; 
-}
-
-export function toString(value){
-	const c = code(value);
-	const n = name(c);
-	return `measurement: ${n} (${c})`;
-}
-
-export function parser(value){
-	const n = name(code(value));
-	return measurement[n]?.parser;
-}

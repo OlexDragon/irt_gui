@@ -161,8 +161,9 @@ action.f_Info = function(packet){
 		switch(parameterCode){
 
 		case parameter.deviceInfo.type:
-			if(type?.type !== val[0] || type.revision !== val[1] || type.subtype !== val[2]){
-				changeType(val);
+			const spl = val.split('.').map(v=>+v);
+			if(type?.type !== spl[0] || type.revision !== spl[1] || type.subtype !== spl[2]){
+				changeType(spl);
 			}else if(stopCalled)
 				startAll();
 			break;

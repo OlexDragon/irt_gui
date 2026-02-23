@@ -37,6 +37,7 @@ export function start(){
 
 	case 'CONVERTER':
 	case 'CONVERTER_KA':
+	case 'REFERENCE_BOARD':
 		$tabs.filter((_,el)=>el.id !== 'userTabAlarm').parent().addClass('visually-hidden');
 		$tabs[0].click();
 		break;

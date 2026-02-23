@@ -124,7 +124,9 @@ public class FileRestController {
 	String open(@RequestParam String p) throws IOException {
 		logger.traceEntry(p);
 
-		final File file = Paths.get(URI.create(p.replaceAll(" ", "%20"))).toFile();
+		final String replaceAll = p.replaceAll(" ", "%20").replaceAll("\\+", "%2B");
+		final URI uri = URI.create(replaceAll);
+		final File file = Paths.get(uri).toFile();
 		if(file.exists()) {
 			Desktop.getDesktop().open(file);
 			return null;
@@ -142,7 +144,7 @@ public class FileRestController {
 	String uploadProfile(@RequestParam String p) throws IOException {
 		logger.traceEntry(p);
 
-		final File file = Paths.get(URI.create(p.replaceAll(" ", "%20"))).toFile();
+		final File file = Paths.get(URI.create(p.replaceAll(" ", "%20").replaceAll("\\+", "%2B"))).toFile();
 		if(!file.exists()) {
 			logger.warn("File does not exist: {}", p);
 			return "File does not exist: " + p;

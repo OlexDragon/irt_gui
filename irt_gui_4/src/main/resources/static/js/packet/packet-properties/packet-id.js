@@ -7,8 +7,8 @@ const packetIdArray = Object.freeze(
 		'measurementIRPC',
 
 		'configAll',
-		'atenuation',
-		'atenuationSet',
+		'attenuation',
+		'attenuationSet',
 		'gain',
 		'gainSet',
 		'frequency',
@@ -94,7 +94,14 @@ const packetIdArray = Object.freeze(
 		'dumpHelp',
 
 		'noAction',
-		
+
+		'saveConfig',
+
+		'rcmSourceSet',
+		'rcmDacSet',
+		'rcmDacSave',
+		'rcmDacDefault',
+	
 		'POTs_KA_BIAS',
 		'POTs_KA_Converter'
 	]);

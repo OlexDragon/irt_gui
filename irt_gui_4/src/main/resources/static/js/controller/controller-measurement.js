@@ -32,7 +32,7 @@ export default class ControllerMeasurement extends Controller{
 			const valId = 'measVal' + parameterCode;
 			const descrId = 'measDescr' + parameterCode;
 			const $desct = this.#$body.find('#' + descrId);
-			const parser = this._parameter.parser(parameterCode);
+			const parser = this.parametersClass.parser(parameterCode);
 			if(!parser){
 				console.warn('No Parser for parameterCode ', pl)
 				return;
@@ -68,7 +68,7 @@ export default class ControllerMeasurement extends Controller{
 				}else if($val.text()!==val)
 					$val.text(val);
 			}else{
-				const showText = this._parameter.name(parameterCode);
+				const showText = this.parametersClass.toName(parameterCode);
 				const $row = $('<div>', {class: 'row'});
 				const val = parser(pl.data);
 				if (val === undefined) {

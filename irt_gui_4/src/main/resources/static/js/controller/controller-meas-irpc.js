@@ -35,8 +35,8 @@ export default class ControllerMeasurementIrpc extends Controller{
 		pls.forEach(pl=>{
 
 			const c = pl.parameter.code;
-			const key = this._parameter.name(c);
-			const parser = this._parameter.parser(c);
+			const key = this.parametersClass.toName(c);
+			const parser = this.parametersClass.parser(c);
 
 			switch(key){
 

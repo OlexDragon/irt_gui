@@ -10,6 +10,7 @@ export default async function (action, callBack){
 	const addr = unitAddrClass.unitAddress;
 	if(action.update || action.toSend?.id!==action.packetId || action.toSend?.unitAddr!==addr || (action.unitAddr && action.unitAddr!==action.toSend?.unitAddr)){
 
+		action.update = false;
 		if(!action?.packetId===undefined)
 			throw new Error('The variable "action" must have packetId');
 
@@ -31,7 +32,7 @@ export default async function (action, callBack){
 		action.toSend.function = action.function;
 		action.toSend.command = action.command ?? false;
 
-		const rest = await getRest(action);
+		const rest = getRest(action);
 		Object.assign(action.toSend, rest);
 	}
 
@@ -47,9 +48,10 @@ export default async function (action, callBack){
 	callBack(action.toSend);
 }
 
-async function getRest(action){
+function getRest(action){
 
 	const toSend = {};
+	const type = action.command ? packetType.command : packetType.request;
 
 	switch(action.toSend.id){
 
@@ -69,8 +71,9 @@ async function getRest(action){
 	case packetId.network: // get network
 	case packetId.module:	// All modules
 	case packetId.calMode:
+	case packetId.saveConfig :
 		{
-			const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), new Payload(action.data.parameterCode), action.toSend.unitAddr);
+			const packet = new Packet(new Header(type, action.toSend.id, action.groupId), new Payload(action.data.parameterCode), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
 		}
 		break;
@@ -93,7 +96,7 @@ async function getRest(action){
 		}
 		break;
 
-	case packetId.atenuationSet:
+	case packetId.attenuationSet:
 	case packetId.gainSet:
 		{
 			const packet = new Packet(new Header(packetType.command,  action.toSend.id, action.groupId), new Payload(action.data.parameterCode,shortToBytesR(action.data.value)), action.toSend.unitAddr);
@@ -106,6 +109,8 @@ async function getRest(action){
 	case packetId.irpcHoverB:
 	case packetId.calModeSet:
 	case packetId.dacSetRcm:
+	case packetId.rcmDacSet:
+	case packetId.rcmDacSave:
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, intToBytes(action.data.value)), action.toSend.unitAddr);
 			toSend.bytes = packet.toSend();
@@ -163,7 +168,7 @@ async function getRest(action){
 
 	case packetId.muteSet:
 	case packetId.loSet:
-	case packetId.comSetAddress :
+	case packetId.comSetAddress:
 	case packetId.comSetRetransmit:
 	case packetId.comSetStandard:
 	case packetId.irpcSalectSwtchHvr:
@@ -171,9 +176,11 @@ async function getRest(action){
 	case packetId.moduleSet:
 	case packetId.odrcSetMode:
 	case packetId.lnbSetMode:
-	case packetId.odrcLNBSelect :
-	case packetId.lnbOverSet :
-	case packetId.lnbBandSet :
+	case packetId.odrcLNBSelect:
+	case packetId.lnbOverSet:
+	case packetId.lnbBandSet:
+	case packetId.rcmDacDefault:
+	case packetId.rcmSourceSet:
 		{
 			const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, [action.data.value]), action.toSend.unitAddr);
 //			console.log(packet)

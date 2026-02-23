@@ -37,27 +37,27 @@ export default class MeasurementLoader{
 		case 'CONTROLLER_IRPC':
 			this.#packetId = packetId.measurementIRPC;
 			loadC = this.#controllerLoader.load('./controller/controller-meas-irpc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/irpc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/irpc.mjs');
 			break;
 
 		case 'CONVERTER':
 		case 'CONVERTER_KA':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.mjs');
 			break;
 
 		case 'REFERENCE_BOARD':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-rcm.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/measurement-rcm.mjs');
 			break;
 
 		case 'CONTROLLER_ODRC':
 		case 'LNB':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-odrc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/measurement-odrc.mjs');
 			break;
 
 		default:
@@ -66,7 +66,7 @@ export default class MeasurementLoader{
 		case 'BAIS':
 			this.#packetId = packetId.measurement;
 			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-buc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/measurement-buc.mjs');
 		}
 
 		loadC.then(this.setController.bind(this));
@@ -93,6 +93,7 @@ export default class MeasurementLoader{
 	}
 
 	setParameter(p){
-		this.#parameter = p;
+		const {default: Parameter} = p;
+		this.#parameter = Parameter;
 	}
 }

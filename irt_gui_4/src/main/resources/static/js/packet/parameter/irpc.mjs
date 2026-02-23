@@ -1,13 +1,39 @@
 import {parseToInt, parseToIntArray} from '../service/converter.js'
+import Parameter  from "./parameters.mjs";
 
-const redundancy = ['NONE', 'Switchover Mode', 'Standby Mode', 'Status', 'Switchover']
-const all = redundancy.map((_,i)=>i).slice(1);
-export default {all:{code: all}};
+export default class ControlIrpc extends Parameter{
 
-export const switchoverMode = code(redundancy[1]);
-export const standbyMode	 = code(redundancy[2]);
-export const status		 = code(redundancy[3]);
-export const switchover	 = code(redundancy[4]);
+	constructor(){
+		super(redundancy, 'Control IRPC');
+	}
+
+	get all(){
+		const {['Standby Mode']:standbyMode, Status, Switchover, ['Switchover Mode']:switchoverMode} = this.parameters;
+		return {standbyMode, Status, Switchover, switchoverMode};
+	}
+}
+
+const redundancy = {};
+redundancy['Switchover Mode'] = {};
+redundancy['Switchover Mode'].code = 1;
+redundancy['Switchover Mode'].parser = parseSwitchoverMode;
+
+redundancy['Standby Mode'] = {};
+redundancy['Standby Mode'].code = 2;
+redundancy['Standby Mode'].parser = bytes=>redundancyMode[bytes[0]&1]
+
+redundancy['Status'] = {};
+redundancy['Status'].code = 3;
+redundancy['Status'].parser = parseStatus;
+
+redundancy['Switchover'] = {};
+redundancy['Switchover'].code = 4;
+redundancy['Switchover'].parser = parseToInt;
+
+const switchoverMode = redundancy['Switchover Mode'].code;
+const standbyMode	 = redundancy['Standby Mode'].code;
+const status		 = redundancy['Status'].code;
+const switchover	 = redundancy['Switchover'].code;
 
 // Bits masck
 const statusBitMask = {
@@ -120,6 +146,10 @@ function parseSwitchoverMode(bytes){
 }
 
 export function code(name){
+	if(name===undefined || Array.isArray(name)){
+		console.warn('Parameter "name" is missing or wrong', name)
+		return;
+	}
 
 	if(typeof name === 'number')
 		if(name>=0 && name<redundancy.length)
@@ -148,29 +178,3 @@ export function name(code){
 		return redundancy[code];
 }
 
-export function parser(value){
-	const c = code(value);
-	switch(c){
-
-	case switchoverMode:
-		return parseSwitchoverMode;
-
-	case standbyMode:
-		return bytes=>redundancyMode[bytes[0]&1];
-
-	case status:
-		return parseStatus;
-
-	case switchover:
-		return parseToInt;
-
-	default:
-		return b=>b;
-	}
-}
-
-export function toString(value){
-	const c = code(value)
-	const n = name(value)
-	return `irpc: ${n} (${c})`;
-}

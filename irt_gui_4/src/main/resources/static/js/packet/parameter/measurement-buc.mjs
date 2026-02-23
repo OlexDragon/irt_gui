@@ -1,7 +1,14 @@
-import {parseToIrtValue, parseToInt, parseToStatus} from '../service/converter.js'
+import Measurement  from "./parameters.mjs";
+import {parseToIrtValue, parseToStatus} from '../service/converter.js'
+
+export default class MeasurementBuc extends Measurement{
+
+	constructor(){
+		super(measurement, 'BUC Measurement');
+	}
+}
 
 const measurement = {};
-measurement.lnb = {};
 
 // BUC Parameter CODE
 measurement.None = {}
@@ -24,11 +31,11 @@ measurement.Status = {}
 measurement.Status.code				 = 4;
 measurement.Status.parser			 = parseToStatus;
 
-measurement['Reflected Power'] = {} // Status
+measurement['Reflected Power'] = {}
 measurement['Reflected Power'].code	 = 5;
 measurement['Reflected Power'].parser =bytes=>parseToIrtValue(bytes, 10, ' dBm');
 
-measurement['LNB 2'] = {} // Status
+measurement['LNB 2'] = {}
 measurement['LNB 2'].code			 = 6;
 measurement['LNB 2'].parser			 = data=>data;
 
@@ -47,6 +54,7 @@ measurement.Downlink.parser			 = data=>data;
 measurement.all = {}
 measurement.all.code				 = 255;
 
+measurement.lnb = {};
 // LNB Parameter CODE
 measurement.lnb[0] = {}
 measurement.lnb.none					 = 0;
@@ -88,29 +96,3 @@ measurement.lnb[9] = {}
 measurement.lnb.downlinkStatus			 = 9;
 measurement.lnb[9].description = 'Status';
 measurement.lnb[9].parser = data=>data.toString();
-
-Object.freeze(measurement);
-export default measurement;
-
-const names = Object.keys(measurement).reduce((a,key)=>{a[measurement[key].code] = key; return a;}, []);
-
-export function code(name){
-
-	if(typeof name === 'number')
-		return name;
-
-	return measurement[name].code;
-}
-
-export function name(code){
-	return names[code]; 
-}
-
-export function toString(value){
-	const c = code(value);
-	return `measurement: ${name(c)} (${c})`;
-}
-
-export function parser(value){
-	return measurement[name(code(value))]?.parser;
-}

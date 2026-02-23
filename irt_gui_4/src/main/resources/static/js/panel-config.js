@@ -30,7 +30,6 @@ onTypeChange(type=>{
 	if(storedUnitType && (JSON.stringify(storedUnitType)===JSON.stringify(type)))
 		return;
 	if(controller){
-		console.log(controller.constructor.name)
 		controller.stop();
 		controller.destroy();
 		controller = null;
@@ -59,8 +58,7 @@ export function start(){
 }
 
 export function stop(){
-	clearInterval(interval) ;
-	interval = undefined;
+	interval = clearInterval(interval) ;
 	buisy = false;;
 }
 
@@ -69,9 +67,10 @@ function typeChange(type){
 		return;
 	storedUnitType = type;
 	loader.setUnitType(type, c=>onControllerLoaded(c));
-	const pathname = window.location.pathname;
-	if(pathname === '/')
+	if(window.location.pathname === '/'){
+		console.log('The user is not allowed to manage registers.');
 		return;
+	}
 	switch(type.name){
 		case 'LNB':
 		case 'CONTROLLER_ODRC':
@@ -80,6 +79,7 @@ function typeChange(type){
 			        .then(({default: Controller})=>{
 						controller2 = new Controller($card);
 					});
+//			interval = clearInterval(interval) ;
 	        break;
 
 		default:
@@ -95,10 +95,9 @@ function onControllerLoaded(Controller){
 		console.log('Controller is not ready.')
 		return;
 	}
-	if(controller?.constructor.name !== Controller.name){
+	if(controller?.constructor.name !== Controller.name || controller?.parameter?.constructor.name !== loader.parameter.name){
 		controller = new Controller($card);
-		controller.parameter = loader.parameter;
-		controller.toRead = loader.toRead;
+		controller.parametersClass = new loader.parameter();
 		controller.change = onChange;
 		action.packetId = loader.packetId
 		action.groupId = controller.groupId
@@ -118,31 +117,40 @@ function run(){
 		return;
 	}
 
-	if(action.buisy || !controller){
-		console.log('Buisy')
+	if(action.buisy || !controller?.parametersClass){
+		console.log(action.buisy ?'Buisy' : 'No data to send');
 		return
+	}
+
+	const toRead = controller.toRead;
+	if(!toRead){
+		console.log('No data to Read')
+		return;
 	}
 
 	action.buisy = true;
 
-	if(action.data.parameterCode?.toString() !== controller.toRead?.toString()){
+	if(action.data.parameterCode?.toString() !== toRead?.toString()){
 		action.update = true;
-		action.data.parameterCode = controller.toRead;
+		action.data.parameterCode = toRead;
 	}
-	serialPort.postObject($card, action);
+	if(action.data.parameterCode.length)
+		serialPort.postObject($card, action);
+	else
+		stop();
 }
 
 action.f_Config = function(packet){
 	if(!controller)
 		return;
 
-	const payloads = packet.payloads;
-	controller.update = payloads;
+	controller.update = packet.payloads;
 }
 
 let actionSet;
-function onChange(packetId, value, parameterCode){
+function onChange(packetId, value, parameterCode, groupId){
 	actionSet.update = true;
+	actionSet.groupId = groupId ?? controller.groupId
 	actionSet.packetId = packetId;
 	actionSet.data.value = value;
 	actionSet.data.parameterCode = parameterCode;

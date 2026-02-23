@@ -1,4 +1,17 @@
 import * as converter from '../service/converter.js'
+import Parameter  from "./parameters.mjs";
+
+export default class ControBuc extends Parameter{
+
+	constructor(){
+		super(config, 'Control BUC');
+	}
+
+	get all(){
+		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, loSet, LO, Mute} = this.parameters;
+		return {gainRange, attenuationRange, frequencyRange, LO, Gain, Attenuation, Frequency, loSet, Mute};
+	}
+}
 
 const config = {};
 
@@ -62,34 +75,3 @@ config.Online.parser		 = data=>data.toString();
 config.spectrumInversion	 = {}
 config.spectrumInversion.code = 20;
 config.spectrumInversion.parser = data=>data.toString();
-
-Object.freeze(config);
-export default config;
-
-const controlNames = Object.keys(config).reduce((a,k)=>{
-		a[config[k].code] = k;
-		return a;
-	}, []
-);
-
-export function code(value){
-	if(typeof value === 'number')
-		return value;
-	return config[value];
-}
-
-export function name(value){
-	return controlNames[value];
-}
-
-export function toString(value){
-	const c = code(value)
-	const n = name(c)
-	return `control: ${n} (${c})`;
-}
-
-export function parser(value){
-	const n = name(value)
-	return config[n].parser;
-}
-

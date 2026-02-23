@@ -241,7 +241,7 @@ function addCalibrationButton(sn){
 	$prodactionNav.find('.cal-link').remove();
 	const $div = $('<div>', {class: 'col-auto cal-link ms-2'});
 	if(admin)
-		$div.append($('<a>', {class: 'btn btn-outline-info', target: '_blank', href:`http://irttechnologies:8089/calibration?sn=${sn}`, text: 'Calibration'}));
+		$div.append($('<a>', {class: 'btn btn-outline-info', target: '_blank', href:`http://irt/calibration?sn=${sn}`, text: 'Calibration'}));
 	setTimeout(()=>{
 		$div.appendTo($prodactionNav);
 	}, 100);
@@ -256,14 +256,15 @@ function showProfileButton(data){
 	$prodactionNav.find('.btn-group').remove();
 	const arr = []
 	data.path.forEach(p=>{
+		const uncodedP = encodeURIComponent(p);
 		const $div = $('<div>', {class: 'col-auto btn-group ms-2'});
 		arr.push($div);
-		$('<a>', {class: 'btn btn-outline-secondary', href: `/file/open?p=${p}`, text: 'Profile', title: p}).click(linkEvent).appendTo($div);
+		$('<a>', {class: 'btn btn-outline-secondary', href: `/file/open?p=${uncodedP}`, text: 'Profile', title: p}).click(linkEvent).appendTo($div);
 		$('<button>', {type: 'button', class: 'btn btn-outline-secondary dropdown-toggle dropdown-toggle-split', 'data-bs-toggle': 'dropdown', 'aria-expanded': false})
 		.append($('<span>', {class: 'visually-hidden', text: 'Toggle Dropdown'})).appendTo($div);
 		$('<ul>', {class: 'dropdown-menu'})
-		.append($('<li>').append($('<a>', {class: 'dropdown-item', href: `/file/location?p=${p}`, text: 'Location'}).click(linkEvent)))
-		.append($('<li>').append($('<a>', {id: 'profilrUpload', class: 'dropdown-item', href: `/file/upload/profile?p=${p}`, text: 'Upload'}).click(updateProfile)))
+		.append($('<li>').append($('<a>', {class: 'dropdown-item', href: `/file/location?p=${uncodedP}`, text: 'Location'}).click(linkEvent)))
+		.append($('<li>').append($('<a>', {id: 'profilrUpload', class: 'dropdown-item', href: `/file/upload/profile?p=${uncodedP}`, text: 'Upload'}).click(updateProfile)))
 		.appendTo($div);
 	});
 	$prodactionNav.append(arr);
@@ -286,7 +287,7 @@ function changeProfilePath(){
 	if (!$profilrUpload.length || !unitType)
 		return;
 	const search = $profilrUpload.attr('href').split('?')[1];
-	if(unitType.name.startsWith('CONVERTER')){
+	if(unitType.name.startsWith('CONVERTER') || unitType.name.startsWith('REFERENCE_BOARD')){
 		$('#profilrUpload').attr('href', `/upgrade/rest/profile/${serialPort.serialPort}/0?${search}`);
 	}else
     	$('#profilrUpload').attr('href', `/file/upload/profile?${search}`);

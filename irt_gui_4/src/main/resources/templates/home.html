@@ -45,7 +45,7 @@
 				<h4 class="text-center" th:text="'IRT GUI v.' + ${version}"></h4>
 				<div class="col form-floating mb-3">
 					<select id="serialPort" class="form-select" aria-label="Select Serial Port">
-						<option selected="selected" disabled="disabled" hidden="hidden">Select Serial Port</option>
+						<option selected="selected" disabled="disabled" hidden="hidden" th:text="#{Select Serial Port}">Select Serial Port</option>
 					</select>
 					<label for="serialPort" th:text="#{Serial Port} + ' (RS485)'">Serial Port (RS485)</label>
 				</div>

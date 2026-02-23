@@ -9,7 +9,7 @@ export default class MeasurementLoader{
 	#parameterLoader;
 
 	#controller;
-	#parameter;;
+	#parameter;
 	#toRead;
 
 	#getAll;
@@ -39,44 +39,42 @@ export default class MeasurementLoader{
 		switch(unitType.name){
 
 		case 'LNB':
-			this.#getAll = this.#forIRPC;
 			this.#packetId = packetId.irpc;
 			loadC = this.#controllerLoader.load('./controller/controller-lnb.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/lnb.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/lnb.mjs');
 			break;
 
 		case 'CONTROLLER_IRPC':
-			this.#getAll = this.#forIRPC;
 			this.#packetId = packetId.irpc;
 			loadC = this.#controllerLoader.load('./controller/controller-irpc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/irpc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/irpc.mjs');
 			break;
 
 		case 'CONTROLLER_ODRC':
-			this.#getAll = this.#forIRPC;
 			this.#packetId = packetId.odrc;
 			loadC = this.#controllerLoader.load('./controller/controller-odrc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/dlrc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/dlrc.mjs');
 			break;
 
 		case 'CONVERTER':
 		case 'CONVERTER_KA':
-			this.#getAll = this.#forCONVERTER;
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-fcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/config-fcm.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/config-fcm.mjs');
 			break;
 
 		case 'REFERENCE_BOARD':
-			return;
+			this.#packetId = packetId.configAll;
+			loadC = this.#controllerLoader.load('./controller/controller-config-rcm.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/config-rcm.mjs');
+			break;
 
 		default:
 			console.warn(unitType);
 		case 'BAIS':
-			this.#getAll = this.#forBUC;
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/config-buc.js');
+			loadP = this.#parameterLoader.load('./packet/parameter/config-buc.mjs');
 		}
 
 		loadC.then(this.#setController.bind(this));
@@ -97,12 +95,7 @@ export default class MeasurementLoader{
 	}
 
 	get parameter(){
-		return this.#parameter;
-	}
-
-	#setController(c){
-		const {default: Controller} = c;
-		this.#controller = Controller;
+		return this.#parameter.default;
 	}
 
 	#setParameter(p){
@@ -110,17 +103,8 @@ export default class MeasurementLoader{
 		this.#getAll();
 	}
 
-	#forIRPC(){
-		this.#toRead = undefined;
-	}
-
-	#forCONVERTER() {
-		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute} = this.#parameter.default;
-		this.#toRead = {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute};
-	}
-
-	#forBUC() {
-		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, loSet, LO, Mute} = this.#parameter.default;
-		this.#toRead = {gainRange, attenuationRange, frequencyRange, LO, Gain, Attenuation, Frequency, loSet, Mute};
+	#setController(c){
+		const {default: Controller} = c;
+		this.#controller = Controller;
 	}
 }

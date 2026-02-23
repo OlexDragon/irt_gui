@@ -3,7 +3,7 @@ import packetId from '../packet/packet-properties/packet-id.js';
 import {code as dlrcCode} from '../packet/parameter/dlrc.js';
 import groupId from '../packet/packet-properties/group-id.js';
 import ControllerMeasurement from './controller-measurement.js';
-import measurement from '../packet/parameter/measurement-odrc.js';
+import MeasurementClass from '../packet/parameter/measurement-odrc.mjs';
 import ControllerLnbBamd from './controller-lnb-band.js'
 import { onStartAll } from '../panel-info.js'
 
@@ -17,6 +17,7 @@ export default class ControllerOdrc extends Controller{
 	#bandSelectController;
 
 	#onChangeEvents = [];
+	#measurement;
 
 	constructor($card){
 		super($card);
@@ -26,6 +27,7 @@ export default class ControllerOdrc extends Controller{
 		this.#bandSelectController.showOneRow();
 		this.#bandSelectController.start();
 
+		this.#measurement = new MeasurementClass();
 		onStartAll(yes=>{
 			if(!this.#bandSelectController)
 				return;
@@ -46,7 +48,7 @@ export default class ControllerOdrc extends Controller{
 		pls.forEach(pl=>{
 
 			const c = pl.parameter.code;
-			const name = this._parameter.name(c);
+			const name = this.parametersClass.toName(c);
 
 			switch(name){
 
@@ -55,18 +57,20 @@ export default class ControllerOdrc extends Controller{
 				break;
 
 			case 'Mode Select':{
-					const parser = this._parameter.parser(name);
+					const parser = this.parametersClass.parser(name);
 					const value = parser(pl.data);
-					if (+this.#$odrcMode.val() === value.key)
-						break;
-					this.#$odrcMode.val(value.key);
-					this.#$odrcMode.prop('disabled', false);
+					if(this.#$odrcMode?.length){
+						if (+this.#$odrcMode.val() !== value.key){
+							this.#$odrcMode.val(value.key);
+							this.#$odrcMode.prop('disabled', false);
+						}
+					}
 					const auto = value.key === 1; // AUTO mode
 					this.#$odpcLnb1.prop('disabled', auto);
-					if(!this.#$odpcLnb1.prop('checked'))
+					if(!this.#$odpcLnb1.prop('checked') && this.#$odpcLnb1.next().text() !== 'LNB 1')
 						this.#$odpcLnb1.next().text('LNB 1');
 					this.#$odpcLnb2.prop('disabled', auto);
-					if (!this.#$odpcLnb2.prop('checked'))
+					if (!this.#$odpcLnb2.prop('checked') && this.#$odpcLnb2.next().text() !== 'LNB 2')
 						this.#$odpcLnb2.next().text('LNB 2');
 					break;
 				}
@@ -105,15 +109,19 @@ export default class ControllerOdrc extends Controller{
 	}
 	#wgs;
 	#measurementControl(pls){
+		if(!this.#$odrcMode){
+			console.warn('No this.#$odrcMode')
+			return;
+		}
 		pls.forEach(pl=>{
 
 			const code = pl.parameter.code;
 
 			switch(code){
 
-			case measurement['WGS Status'].code:
+			case this.#measurement.parameters['WGS Status'].code:
 
-				const wgs = measurement['WGS Status'].parser(pl.data);
+				const wgs = this.#measurement.parameters['WGS Status'].parser(pl.data);
 				const auto = this.#$odrcMode.val() !== '2'; // AUTO mode or NULL
 				const disabled = this.#$odpcLnb1.prop('disabled');
 
