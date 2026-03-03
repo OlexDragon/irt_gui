@@ -8,7 +8,7 @@ export default class ControlFcm extends Parameter{
 	}
 
 	get all(){
-		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute} = this.parametersClass.parameters;
+		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute} = this.parameters;
 		return {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute};
 	}
 }

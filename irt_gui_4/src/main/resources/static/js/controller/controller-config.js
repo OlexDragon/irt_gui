@@ -16,7 +16,7 @@ export default class ControllerConfig extends Controller{
 
 	constructor($card) {
 		super($card);
-		this._$card.load(ControllerConfig.url, this.#onLoad.bind(this));
+		this._$card.load(ControllerConfig.url, this._onLoad.bind(this));
 	}
 	destroy(){
 		console.log('***** destroy() *****')
@@ -172,7 +172,7 @@ export default class ControllerConfig extends Controller{
 		this.#freqController.tickMarks(set);
 	}
 
-	#onLoad(_, statusText){
+	_onLoad(_, statusText){
 		if(statusText !== 'success'){
 			console.warn(statusText);
 			return;
@@ -256,20 +256,20 @@ export default class ControllerConfig extends Controller{
 				return;
 			}
 
-			this.#sendChange(pId, toSend, parameterCode);
+			this._sendChange(pId, toSend, parameterCode);
 		});
 	}
 
 	#onChangeBtnMute(e) {
 		const toSend = e.currentTarget.checked ? 1 : 0;	// Mute / Unmute
-		this.#sendChange(packetId.muteSet, toSend, this.parametersClass.parameters.Mute.code);
+		this._sendChange(packetId.muteSet, toSend, this.parametersClass.parameters.Mute.code);
 	}
 	#onChangeLoSelect({currentTarget:{value: toSend}}){
-		this.#sendChange(packetId.loSet, toSend, this.parametersClass.parameters.loSet.code);
+		this._sendChange(packetId.loSet, toSend, this.parametersClass.parameters.loSet.code);
 		Object.assign(this._toRead, {frequencyRange: this.parametersClass.parameters.frequencyRange});
 	}
 
-	#sendChange(){
+	_sendChange(){
 		this.#onChangeEvents.forEach(cb=>cb(...arguments));
 	}
 }

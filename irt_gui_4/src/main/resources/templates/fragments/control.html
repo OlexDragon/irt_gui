@@ -14,7 +14,7 @@
 <!-- Auto calibration by Unit Gain -->
 <th:block th:fragment=buc>
  <!-- Modal Body -->
-					<ul class="nav nav-tabs" role="tablist">
+					<ul class="nav nav-tabs buc" role="tablist">
 						<li class="nav-item" role="presentation">
     						<button class="nav-link" id="attenuationTab" data-bs-toggle="tab" data-bs-target="#attenuation-tab-pane" type="button" role="tab" aria-controls="attenuation-tab-pane" aria-selected="true">Attenuation</button>
   						</li>
@@ -25,7 +25,7 @@
     						<button class="nav-link" id="freqTab" data-bs-toggle="tab" data-bs-target="#frequency-tab-pane" type="button" role="tab" aria-controls="frequency-tab-pane" aria-selected="false">Frequency</button>
  						</li>
 					</ul>
-					<div class="tab-content text-cente">
+					<div class="tab-content text-cente buc">
  						<div class="tab-pane fade attenuation" id="attenuation-tab-pane" role="tabpanel" aria-labelledby="attenuation-tab" tabindex="0">
 							<div class="row mt-2">
 								<div class="col">
@@ -115,11 +115,14 @@
 							<div class="col-5 visually-hidden">
 								<select id="loSelect" class="form-select"></select>
 							</div>
+							<div class="col-5 visually-hidden">
+								<button id="fcmSaveConfig" class="btn btn-outline-primary form-control">Save Conf.</button>
+							</div>
 						</div>
    					</div>
 </th:block>
 <th:block th:fragment=irpc>
-	<div class="container-fluid">
+	<div class="container-fluid irpc">
 		<div class="row">
 			<div class="col form-floating">
 				<select id="irpcSalectSwtchHvr" class="form-select">
@@ -152,7 +155,7 @@
 	</div>
 </th:block>
 <th:block th:fragment=odrc>
-	<div class="container-fluid">
+	<div class="container-fluid odrc">
 		<div class="row">
 			<div class="col">
 				<select id="odrcMode" class="form-select">
@@ -179,7 +182,7 @@
 	</div>
 </th:block>
 <th:block th:fragment=lnb>
-	<div class="container-fluid">
+	<div class="container-fluid lnb">
 		<div class="row">
 			<div class="col">
 				<select id="lnbMode" class="form-select">
@@ -206,7 +209,7 @@
 	</div>
 </th:block>
  <th:block th:fragment=rcm>
-	<div class="container-fluid">
+	<div class="container-fluid rcm">
 		<div class="row mt-2">
 			<div class="col">
 				<div class="form-floating">

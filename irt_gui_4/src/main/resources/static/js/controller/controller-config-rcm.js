@@ -1,7 +1,7 @@
-import Controller from './controller.js'
-import packetId from '../packet/packet-properties/packet-id.js'
-import groupId from '../packet/packet-properties/group-id.js'
-import ControllerValue from '../classes/controller-value.js'
+import Controller from './controller.js';
+import packetId from '../packet/packet-properties/packet-id.js';
+import groupId from '../packet/packet-properties/group-id.js';
+import ControllerValue from '../classes/controller-value.js';
 
 export default class ControllerConfigRcm extends Controller{
 	static url = '/fragment/control/rcm';
