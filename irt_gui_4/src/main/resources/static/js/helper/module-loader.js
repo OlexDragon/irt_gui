@@ -3,7 +3,8 @@ export default class ModuleLoader{
 	#script;
 
 	async load(url){
-		url = '.' + url;
+		if(url.startsWith('./'))
+			url = '.' + url;
 		if(url !== this.#url){
 			this.#url = url;
 			this.#script = await import(url);

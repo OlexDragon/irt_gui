@@ -33,7 +33,7 @@ export default class ControllerLnbBamd{
 		this.#interval = setInterval(this.#run.bind(this), 6000);
 	}
 	stop(){
-		clearInterval(this.#interval);
+		try{ if(this.#interval && typeof this.#interval.stop === 'function'){ this.#interval.stop(); } else { clearInterval(this.#interval); } }catch(e){}
 	}
 	destroy(){
 		this.stop();
@@ -88,7 +88,7 @@ export default class ControllerLnbBamd{
 		packet.payloads.forEach(pl=>{
 			const d = pl.data[0]
 			if(!d){
-				clearInterval(this.#interval);
+				try{ if(this.#interval && typeof this.#interval.stop === 'function'){ this.#interval.stop(); } else { clearInterval(this.#interval); } }catch(e){}
 				this.#$row1.addClass('visually-hidden');
 				this.#$row2.addClass('visually-hidden');
 				return;

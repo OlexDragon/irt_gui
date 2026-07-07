@@ -27,7 +27,7 @@ export default class ControllerLnbRegisters {
 		this.#interval = setInterval(()=>this.readRegisters(), 5000);
 	}
 	stop(){
-		clearInterval(this.#interval);
+		try{ if(this.#interval && typeof this.#interval.stop === 'function'){ this.#interval.stop(); } else { clearInterval(this.#interval); } }catch(e){}
 	}
 	destroy(){
 		this.stop();

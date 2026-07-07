@@ -1,4 +1,4 @@
-import Parameter from'./parameter.js'
+import Parameter, {PARAMETER_SIZE} from'./parameter.js'
 //import {parser} from'./packet-properties/parameter-code.js'
 
 export default class Payload{
@@ -18,8 +18,8 @@ export default class Payload{
 		else
 			this.parameter =  new Parameter();
 		if(data){
-			this.data = data;
-			this.parameter.size = data.length;
+			this.data = Array.isArray(data) ? data : [data];
+			this.parameter.size = this.data.length;
 		}
 	}
 

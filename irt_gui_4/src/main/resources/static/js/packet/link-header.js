@@ -20,4 +20,4 @@ export default class LinkHeader{
 	}
 }
 
-const LINK_HEADER_SIZE = 4;
+export const LINK_HEADER_SIZE = 4;

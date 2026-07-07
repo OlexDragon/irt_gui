@@ -103,7 +103,9 @@ const packetIdArray = Object.freeze(
 		'rcmDacDefault',
 	
 		'POTs_KA_BIAS',
-		'POTs_KA_Converter'
+		'POTs_KA_Converter',
+
+		'dumpADC'
 	]);
 
 const packetId = Object.freeze(packetIdArray.reduce((a, v, i)=>({...a, [v]: i}), {}));

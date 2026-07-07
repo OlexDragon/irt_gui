@@ -1,6 +1,6 @@
 import ControllerValue from './controller-value.js'
 import deviceDebug, {parser} from '../packet/parameter/device-debug.js'
-import {intArratToBytes} from '../packet/service/converter.js'
+import {intArrayToBytes} from '../packet/service/converter.js'
 
 export default class Register extends ControllerValue{
 
@@ -45,9 +45,9 @@ export default class Register extends ControllerValue{
 		const value = {};
 		value.parameterCode = deviceDebug.parameter.readWrite;
 		if(v===undefined)
-			value.bytes = intArratToBytes(+index, +addr);
+			value.bytes = intArrayToBytes(+index, +addr);
 		else{
-			value.bytes = intArratToBytes(+index, +addr, v);
+			value.bytes = intArrayToBytes(+index, +addr, v);
 			value.packetId = this.#packetIdSet;
 		}
 

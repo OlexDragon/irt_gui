@@ -27,21 +27,21 @@ const controllerFlash = new ControllerStm32();
 function spChange({currentTarget:{value}}) {
 	if(!value || value==='Select Serial Port'){
 		$cbFlashConnect.attr('disabled', true);
-		spInterval = clearInterval(spInterval);
+		stopHandle(spInterval);
 		return;
 	}
 	$cbFlashConnect.attr('disabled', false);
 	requestPacket.serialPort = value;
 	doLock = true;
 	sendLock(value);
-	clearInterval(spInterval);
-	spInterval = setInterval(()=>sendLock(value), 5000);
+	stopHandle(spInterval);
+	spInterval = startPollLocal(5000, ()=>sendLock(value));
 	Cookies.set('serialPort', value, {expires: 365, path: ''});
 }
 function sendLock(sp) {
 	$.post('/flash/rest/lock', {sp, lock: doLock}, spIsOpen => {
 		if(!spIsOpen && !$selectSP.val())
-			spInterval = clearInterval(spInterval);
+			stopHandle(spInterval);
 		const portStatus = spIsOpen ? 'Open' : "Close";
 		if($tdPortStatus.text()!=portStatus)
 			$tdPortStatus.text(portStatus);

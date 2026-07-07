@@ -10,17 +10,16 @@ packetType.acknowledgement	= 0xFF;			/* Layer 2 acknowledgement. */
 Object.freeze(packetType);
 
 export default packetType;
+const reverse = Object.fromEntries(
+    Object.entries(packetType).map(([k,v]) => [v,k])
+);
 
 export function code(name){
 	return packetType[name];
 }
 
 export function name(code){
-	const keys = Object.keys(packetType);
-	for(const key of keys){
-		if(packetType[key] == code)
-			return key;
-			}
+	return reverse[code] ?? undefined;
 }
 
 export function toString(value){

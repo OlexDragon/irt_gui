@@ -1,7 +1,7 @@
 import packetId from '../packet/packet-properties/packet-id.js'
 import ModuleLoader from './module-loader.js'
 
-export default class MeasurementLoader{
+export default class ConfigLoader{
 
 	#unitType;
 	#packetId;
@@ -10,9 +10,6 @@ export default class MeasurementLoader{
 
 	#controller;
 	#parameter;
-	#toRead;
-
-	#getAll;
 
 	constructor(unitType){
 		this.#controllerLoader = new ModuleLoader();
@@ -70,7 +67,7 @@ export default class MeasurementLoader{
 			break;
 
 		default:
-			console.warn(unitType);
+			console.warn('[Unknown Unit Type]', unitType);
 		case 'BAIS':
 			this.#packetId = packetId.configAll;
 			loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');
@@ -86,10 +83,6 @@ export default class MeasurementLoader{
 		return this.#packetId;
 	}
 
-	get toRead(){
-		return this.#toRead;
-	}
-
 	get controller(){
 		return this.#controller;
 	}
@@ -100,7 +93,6 @@ export default class MeasurementLoader{
 
 	#setParameter(p){
 		this.#parameter = p;
-		this.#getAll();
 	}
 
 	#setController(c){

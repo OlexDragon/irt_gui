@@ -1,7 +1,8 @@
+// config-rcm.mjs
 import * as converter from '../service/converter.js'
 import Parameter  from "./parameters.mjs";
 
-export default class ControlRcm extends Parameter{
+export default class ConfigRcm extends Parameter{
 
 	constructor(){
 		super(config, 'Control RCM');
@@ -57,3 +58,5 @@ config.Capabilities	 = {}
 config.Capabilities.code = 19;
 config.Capabilities.parser = converter.parseToCapabilities;
 
+const configRcm = new ConfigRcm();
+export {configRcm};

@@ -1,6 +1,8 @@
 //import {toString} from './packet-properties/parameter-code.js'
 import {shortToBytes} from './service/converter.js'
 
+const PARAMETER_ALL			= 255;
+export const PARAMETER_SIZE= 3;
 
 export default class Parameter{
 
@@ -42,6 +44,5 @@ export default class Parameter{
 	}
 }
 
-const PARAMETER_ALL			= 255;
 //const PARAMETER_READ_WRITE	= deviceDebug.parameter.readWrite ;
 //const DUMP_REGISTERS	= deviceDebug.parameter.debugDump ;

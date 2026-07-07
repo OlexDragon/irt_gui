@@ -32,6 +32,8 @@ export function postObject($card, action){
 }
 
 export function blink($el, bottstrapClass){
+	if(!$el.length)
+		$el = $($el)
 	if(!bottstrapClass)
 		bottstrapClass = 'connection-ok';
 	$el.addClass(bottstrapClass);
@@ -219,7 +221,7 @@ function send($card, toSend, action){
 						if(action.f_error)
 							action.f_error(packet);
 						else
-							console.warn(packetStr, action);
+							console.warn({packetStr, action});
 						return;
 					}
 

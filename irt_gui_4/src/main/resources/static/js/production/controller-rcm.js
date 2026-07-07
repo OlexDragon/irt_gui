@@ -1,7 +1,7 @@
 import DACController from './controller-dac.js';
 import packetId from '../packet/packet-properties/packet-id.js';
 import groupId from '../packet/packet-properties/group-id.js';
-import {parser} from '../packet/parameter/config-rcm.js'
+import {configRcm} from '../packet/parameter/config-rcm.mjs'
 
 export default class DACsController extends DACController{
 
@@ -31,7 +31,7 @@ export default class DACsController extends DACController{
 	_reaction(packet){
 		packet.payloads.forEach(pl=>{
 			const code = pl.parameter.code;
-			const value = parser(code)(pl.data);
+			const value = configRcm.parser(code)(pl.data);
 			switch(code){
 
 			case 2:

@@ -23,7 +23,7 @@ export function intToBytes(val){
 	return numberToBytes(val, 4);
 }
 
-export function intArratToBytes(...val){
+export function intArrayToBytes(...val){
 	const result = []
 	val.forEach(v=>result.push(intToBytes(v)));
 	return result.flat();
@@ -33,36 +33,28 @@ export function longToBytes(val){
 	return numberToBytes(val, 8);
 }
 
-export function numberToBytes(val, minBytes){
-	let hex = val.toString(16);
-	const hexArray = [];
-	while(hex.length){
-		const start = hex.length-2;
-		if(start>=0){
-			const substring = hex.substring(start, start+2);
-			hexArray.push(substring);
-			hex = hex.substring(0, start);
-		}else{
-			hexArray.push(hex);
-			hex = '';
-		}
-	}
-	const bytes = [];
-	hexArray.forEach(h=>bytes.unshift(parseInt(h, 16)));
-	if(minBytes)
-		while(minBytes>bytes.length)
-			bytes.unshift(0);
+export function numberToBytes(value, minBytes = 0) {
+    const bytes = [];
+
+    do {
+        bytes.unshift(value & 0xff);
+        value >>>= 8;
+    } while (value);
+
+    while (bytes.length < minBytes)
+        bytes.unshift(0);
+
     return bytes;
 }
 
 export function parseToString(bytes){
-	const b = [...bytes]
-	if(!b)
-		return '';
+	if(!Array.isArray(bytes))
+		return null;
 
-	const last = b.length - 1;
-	if(b[last]==0)
-		b.splice(last, 1);
+	const b = [...bytes];
+
+	if (b.at(-1) === 0)
+	    b.pop();
 		
 	return String.fromCharCode.apply(String, b);
 }
@@ -129,7 +121,7 @@ export function parseToShortArray(bytes){
 function parseToArray(bytes, size){
 	const ints = [];
 	const b = [...bytes];
-	for(let i=0; b.length; i++){
+	while(b.length){
 		const fourBytes = b.splice(0, size);
 		ints.push(parseToInt(fourBytes));
 	}
@@ -149,7 +141,7 @@ export function parseToIrtValue(bytes, divider, postfix){
 
 	let prefix;
 	if(bytes.length===3){
-		const index = bytes.splice(0,1)&7;
+		const index = bytes.splice(0,1)[0] & 7;
 		if(index===0)
 			return new IrtValue('UNDEFINED');
 		prefix = prefixes[index];
@@ -163,7 +155,7 @@ export function parseToLoFrequency(bytes){
 	const b = [...bytes]
 	const lo = [];
 	while(b.length){
-		const index = b.splice(0,1)&0xff;
+		const index = b.splice(0,1)[0]&0xff;
 		let value
 		if(b.length)
 			value = (parseToBigInt(b.splice(0,8))/1000000n) + ' MHz';
@@ -190,24 +182,27 @@ export function parseToTimeStr(bytes){
 	const sec = time%MINUTE;
 	return [days, hours, minutes, sec].map(t=>t.toString().padStart(2,'0')).join(':');
 }
-const statusBits = {};
-statusBits.buc = {};
-statusBits.buc.mute = {};
-statusBits.buc.mute.value = 1;
-statusBits.buc.mute.bitmask = 1;
-//statusBits.buc.pll_unknown = {};
-//statusBits.buc.pll_unknown.value = 0;
-//statusBits.buc.pll_unknown.bitmask = 6;
-statusBits.buc.locked = {};
-statusBits.buc.locked.value = 2;
-statusBits.buc.locked.bitmask = 6;
-statusBits.buc.unlocked = {};
-statusBits.buc.unlocked.value = 4;
-statusBits.buc.unlocked.bitmask = 6;
-statusBits.buc.internal = {};
-statusBits.buc.internal.value = 16;
-statusBits.buc.internal.bitmask = 16;
 
+const statusBits = {
+    buc: {
+        mute: {
+            value: 1,
+            bitmask: 1
+        },
+        locked: {
+            value: 2,
+            bitmask: 6
+        },
+        unlocked: {
+            value: 4,
+            bitmask: 6
+        },
+        internal: {
+            value: 16,
+            bitmask: 16
+        }
+    }
+};
 
 export function parseToStatus(value, type){
 	let status;

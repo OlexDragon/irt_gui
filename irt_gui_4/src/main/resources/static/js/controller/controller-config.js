@@ -59,6 +59,9 @@ export default class ControllerConfig extends Controller{
 				{
 					const value = val;
 					this.#attenuationController.value = value;
+					const text = this.$attenuationTab.text();
+					const split = text.split(' : ');
+					this.$attenuationTab.text(split[0] + ' : ' + value);
 				}
 				break;
 
@@ -73,6 +76,9 @@ export default class ControllerConfig extends Controller{
 				{
 					const value = val;
 					this.#gainController.value = value;
+					const text = this.$gainTab.text();
+					const split = text.split(' : ');
+					this.$gainTab.text(split[0] + ' : ' + value);
 				}
 				break;
 
@@ -93,6 +99,9 @@ export default class ControllerConfig extends Controller{
 					const remainder = Number(val - value*1000000n)/1000000;
 					const result = Number(value)+remainder;
 					this.#freqController.value = result;
+					const text = this.#freqTab.text();
+					const split = text.split(' : ');
+					this.#freqTab.text(split[0] + ' : ' + result);
 				}
 				break;
 
@@ -177,8 +186,9 @@ export default class ControllerConfig extends Controller{
 			console.warn(statusText);
 			return;
 		}
-		const $attenuationTab = this._$card.click(this.#tabClick.bind(this)).find('#attenuationTab');
+		this.$attenuationTab = this._$card.click(this.#tabClick.bind(this)).find('#attenuationTab');
 		this.#freqTab = this._$card.find('#freqTab');
+		this.$gainTab = this._$card.find('#gainTab');
 
 		const onValueChange = this.#onValueChange.bind(this);
 		this.#attenuationController = new ControllerValue('attenuation', this._$card.find('div.attenuation'));
@@ -197,7 +207,7 @@ export default class ControllerConfig extends Controller{
 		if (tabCookies)
 			new bootstrap.Tab($('#' + tabCookies)).show();
 		else
-			new bootstrap.Tab($attenuationTab).show();
+			new bootstrap.Tab(this.$attenuationTab).show();
 	}
 	#tabClick({target:{id}}) {
 		switch (id) {

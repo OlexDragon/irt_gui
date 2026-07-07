@@ -17,10 +17,12 @@ export default class ControllerConfigRcm extends Controller{
 		super($card);
 		this._$card.load(ControllerConfigRcm.url, this.#onLoad.bind(this));
 	}
+
 	destroy(){
 		console.log('***** destroy() *****')
 		super.destroy();
 	}
+
 	get groupId(){
 		return groupId.configuration;
 	}
@@ -81,7 +83,7 @@ export default class ControllerConfigRcm extends Controller{
 				const key =  Object.entries(this._toRead).find(([_,v])=>v.code === parameterCode);
 				delete this._toRead[key[0]];
 			}
-		});	
+		});
 	}
 
 	/**
@@ -103,6 +105,7 @@ export default class ControllerConfigRcm extends Controller{
 		this.#dacController =  new ControllerValue('dacValue', this._$card);
 		this.#dacController.change = this.#onValueChange.bind(this);
 	}
+
 	#onValueChange(object){
 		const toSend = object.dacValue;
 		this.#sendChange(packetId.rcmDacSet, toSend, this.parametersClass.parameters.DAC.code);
@@ -111,10 +114,12 @@ export default class ControllerConfigRcm extends Controller{
 	#sendChange(){
 		this.#onChangeEvents.forEach(cb=>cb(...arguments));
 	}
+
 	#createMask(max){
 		const n = Math.floor(Math.log2(max)) + 1;
 		this.#mask = (1 << n) - 1;
 	}
+
 	#capabilitiesChange({currentTarget:{value}}){
 		this.#sendChange(packetId.rcmSourceSet, value, this.parametersClass.parameters.Source.code);
 	}

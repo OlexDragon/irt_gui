@@ -17,14 +17,13 @@ const DELAY = 5000;
 onStartAll(yes=>{
 	if(yes){
 		start();
-		if(controller2)
-			controller2.start();
+		controller2?.start();
 	}else{
 		stop();
-	if(controller2)
-		controller2.stop();
+	controller2?.stop();
 	}
 })
+
 let storedUnitType;
 onTypeChange(type=>{
 	if(storedUnitType && (JSON.stringify(storedUnitType)===JSON.stringify(type)))
@@ -82,6 +81,13 @@ function typeChange(type){
 //			interval = clearInterval(interval) ;
 	        break;
 
+			case 'REFERENCE_BOARD':
+				import('./controller/controller-dump-adc.js')
+				    .then(({default: Controller})=>{
+						controller2 = new Controller($card[0]);
+						controller2.start()
+					});
+				break;
 		default:
 			if(controller2){
 				controller2.destroy();

@@ -1,3 +1,4 @@
+// parameters.mjs
 export default class Parameters{
 
 	#parameters;
@@ -7,7 +8,10 @@ export default class Parameters{
 	constructor(parameters, name){
 		this.name = name;
 		this.#parameters = Object.freeze(parameters);
-		this.#names = Object.keys(this.#parameters).reduce((a,key)=>{a[this.#parameters[key].code] = key; return a;}, []);
+		this.#names = Object.keys(this.#parameters).reduce((a, key) => {
+		    a[this.#parameters[key].code] = key;
+		    return a;
+		}, []);
 	}
 
 	get parameters(){
