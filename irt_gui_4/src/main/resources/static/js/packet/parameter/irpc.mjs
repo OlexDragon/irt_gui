@@ -1,4 +1,4 @@
-import {parseToInt, parseToIntArray} from '../service/converter.js'
+import {parseToInt, parseToIntArray, parseToString} from '../service/converter.js'
 import Parameter  from "./parameters.mjs";
 
 export default class ControlIrpc extends Parameter{
@@ -119,14 +119,15 @@ function parseFlags(flags){
 }
 
 function parseStatus(bytes){
+const data = [...bytes];
 	const statuses = {};
-	statuses.status = parseStatusFlags( parseToInt(bytes.splice(0,4)));
+	statuses.status = parseStatusFlags( parseToInt(data.splice(0,4)));
 	statuses.bucStatus = {};
-	while(bytes.length){
-		const name = spliceString(bytes);
-		const [id, linkId, bucId] =  parseToIntArray(bytes.splice(0, 12));
+	while(data.length){
+		const name = spliceString(data);
+		const [id, linkId, bucId] =  parseToIntArray(data.splice(0, 12));
+		const status = parseFlags(parseToInt(data.splice(0, 4)));
 		const s = {status, id, linkId, bucId};
-		s.status = parseFlags(parseToInt(bytes.splice(0, 4)));
 		statuses.bucStatus[name] = s;
 	}
 
@@ -135,15 +136,16 @@ function parseStatus(bytes){
 
 function spliceString(bytes){
 	const length = bytes.indexOf(0);
-	const r = String.fromCharCode.apply(null, bytes.splice(0, length));
+	const str = parseToString(bytes.splice(0, length));
 	bytes.splice(0, 1);
-	return r;
+	return str;
 }
 
 function parseSwitchoverMode(bytes){
 	if(bytes?.length)
-		return switchoverModes[bytes[0]];
+		return bytes?.length ? switchoverModes[bytes[0]] : undefined;
 }
+
 
 export function code(name){
 	if(name===undefined || Array.isArray(name)){
@@ -157,7 +159,7 @@ export function code(name){
 		else
 			throw new Error('Wrong index - ' + name);
 
-	const index = redundancy.indexOf(name);
+	const index = redundancy[name]?.code;
 	if(index<0)
 		throw new Error('Wrong mane - ' + name);
 

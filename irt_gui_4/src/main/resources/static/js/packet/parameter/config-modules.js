@@ -1,61 +1,43 @@
-import {parseToString} from '../service/converter.js'
+// config-modules.js
 
-const config = {};
+import { createIdMap } from '../packet-properties/helper/id-map.mjs';
+import { parseToString, parseToInt } from '../service/converter.js';
 
-config.saveProfile	 = 1;
-config.reset		 = 2;
-config.restor		 = 3;
-config.activeModule	 = 10;
-config.moduleList	 = 11;
+const config = createIdMap({
+    saveProfile: 1,
+    reset: 2,
+    restor: 3,
+    activeModule: 10,
+    moduleList: 11
+}, {
+    prefix: 'configuration'
+});
 
-Object.freeze(config);
+export const {
+    code,
+    name,
+	info,
+    toString
+} = config;
 
-const configNames = Object.keys(config).reduce((a,k)=>{
-
-		a[config[k].code] = k;
-		return a;
-	}, []
-);
-Object.freeze(configNames);
-
-export default config;
-
-export function code(name){
-	if(typeof name === 'number')
-		return name;
-
-	return config[name];
-}
-export function name(code){
-	if(typeof code === 'string')
-		return configNames.includes(code) ? code : undefined;
-
-	return configNames[code];
-}
+export default config.map;
 
 export function parser(codeId){
 
 	if(typeof codeId === 'string')
-		codeId = code(codeId);
+		codeId = config.code(codeId);
 
 	switch(codeId){
 
-	case config.moduleList:
+	case config.map.moduleList:
 		return parseModuleList;
 
-	case config.activeModule:
-		return b=>b[0];
+	case config.map.activeModule:
+		return parseToInt;
 
 	default:
 		return b=>b;
 	}
-}
-
-
-export function toString(value){
-	const c = code(value)
-	const n = name(value)
-	return `configuration: ${n} (${c})`;
 }
 
 function parseModuleList(bytes){

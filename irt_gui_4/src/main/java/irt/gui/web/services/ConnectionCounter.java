@@ -1,77 +1,61 @@
 package irt.gui.web.services;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ConnectionCounter {
+	private final static Logger logger = LogManager.getLogger();
 
-	@Value("${irt.serial.port.close.delay}") private Integer delay;
-	private final static Map<String, IdRemover> sessions = new HashMap<>();
+	final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(ThreadWorker.getThreadFactory());
 
-	public void add(String sessionId){
-		ThreadWorker.runThread(
-				()->{
-					synchronized (sessions) {
+	@Value("${irt.connection.counter.delay}")
+	private Integer delayMinutes;
 
-						Optional.ofNullable(sessions.get(sessionId)).ifPresent(IdRemover::stopThis);
+	private final Map<String, ScheduledFuture<?>> sessions = new ConcurrentHashMap<>();
 
-						IdRemover idRemover = new IdRemover(sessionId);
-						sessions.put(sessionId, idRemover);
-					}
-				});
-	}
+    public void add(String sessionId) {
+    	if(sessionId == null) {
+    		logger.catching(new Throwable("Missing session ID."));
+    		return;
+    	}
 
-	public void remove(String connectionId) {
-		sessions.remove(connectionId);
-	}
+        // Cancel previous timeout if session is refreshed
+        Optional.ofNullable(sessions.remove(sessionId))
+                .ifPresent(f -> f.cancel(false));
 
-	public int getConnectionCount() {
-		synchronized (sessions) {
-			return sessions.size();
-		}
-	}
+        // Schedule removal after delay
+        ScheduledFuture<?> future = scheduler.schedule(
+                () -> sessions.remove(sessionId),
+                delayMinutes,
+                TimeUnit.MINUTES
+        );
 
-	public static void stop() {
-		sessions.entrySet().stream().map(Map.Entry::getValue).forEach(IdRemover::stopThis);
-	}
+        sessions.put(sessionId, future);
+    }
 
-	class IdRemover extends Thread{
+    public void remove(String sessionId) {
+        Optional.ofNullable(sessions.remove(sessionId))
+                .ifPresent(f -> f.cancel(false));
+    }
 
-		private final String sessionId;
-		
-		private boolean run = true;
+    public int getConnectionCount() {
+        return sessions.size();
+    }
 
-		private Thread thisThread;
-
-		public IdRemover(String sessionId) {
-			this.sessionId =  sessionId;
-			thisThread = ThreadWorker.runThread(this);
-		}
-
-		@Override
-		public void run() {
-
-			try {
-
-				TimeUnit.MINUTES.sleep(2);
-
-			} catch (InterruptedException e) { }
-
-			if(run)
-				synchronized (sessions) {
-					sessions.remove(sessionId);
-				}
-		}
-
-		public void stopThis() {
-			run = false;
-			thisThread.interrupt();
-		}
-	}
+    public void stop() {
+        sessions.values().forEach(f -> f.cancel(false));
+        sessions.clear();
+        scheduler.shutdownNow();
+    }
 }

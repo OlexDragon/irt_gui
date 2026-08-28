@@ -1,8 +1,6 @@
 @import './language.css';
 
-.language-selector img {
-	content: url('/images/flags/f-french.png');
+.language-current img {
+	content: url('/images/flags/f-fr.png');
 }
-div.language-selector:hover img {
-	content: url('/images/flags/f-usa.png');
-}
+

@@ -4,7 +4,7 @@ import {intArrayToBytes} from '../packet/service/converter.js'
 
 export default class Register extends ControllerValue{
 
-	#buisy;
+	#busy;
 	#packetIdSet
 
 	constructor(name, $card, packetIdGet, packetIdSet){
@@ -37,8 +37,8 @@ export default class Register extends ControllerValue{
 		if(!(index && addr))
 			return;
 
-		if(this.#buisy){
-			console.log(ithis._fields.$index.prop('id') + ' Buisy');
+		if(this.#busy){
+			console.log(ithis._fields.$index.prop('id') + ' busy');
 			return;
 		}
 

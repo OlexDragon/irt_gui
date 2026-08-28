@@ -48,3 +48,9 @@ function parser(data){
 	console.warn('No parser for irpc config parameter ' + data);
 	return data[0];
 }
+
+const controlDrcp = new ControlDrcp();
+
+export const code = controlDrcp.toCode.bind(controlDrcp);
+export const name = controlDrcp.toName.bind(controlDrcp);
+//export const parser = controlDrcp.parser.bind(controlDrcp);

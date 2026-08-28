@@ -30,7 +30,7 @@ config.DAC.parser			 = converter.parseToIntUnsigned;
 
 config['DAC Step Range']		 = {}
 config['DAC Step Range'].code	 = 4;
-config['DAC Step Range'].parser	 = bytes=>converter.parseToIrtValue(bytes, 10);
+config['DAC Step Range'].parser	 = bytes=>converter.parseToIrtValue( {bytes, divider: 10 });
 
 config['DAC Step']			 = {}
 config['DAC Step'].code		 = 5;

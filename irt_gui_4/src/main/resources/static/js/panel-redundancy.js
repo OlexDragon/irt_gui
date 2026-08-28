@@ -1,181 +1,244 @@
-import * as serialPort from './serial-port.js'
-import groupId from './packet/packet-properties/group-id.js'
-import packetId from './packet/packet-properties/packet-id.js'
-import control, {parser} from './packet/parameter/control.js'
-import { type as unitType } from './panel-info.js'
 
-const $card = $('#userCard');
-const $body = $('#redundancy-tab-pane');
-let $selectEnable;
-let $selectStandby;
-let $selectName;
-let $redundancyImg;
-let $btnSetOnline;
-let $redundancyStatus;
+import * as serialPort from './serial-port.js'
+import groupId from './packet/packet-properties/group-id.mjs'
+import packetId from './packet/packet-properties/packet-id.mjs'
+import { controlBuc } from './packet/parameter/config-buc.mjs'
+import { type as unitType } from './panel-info.js'
+import packetType from './packet/packet-properties/packet-type.js'
+import SelectHelper from './controller/helper/select-helper.mjs'
+import { translate } from './packet/service/converter.js'
+
+const parameters = controlBuc.parameters;
+
+const card = document.querySelector('#userCard')
+const body = document.querySelector('#redundancy-tab-pane')
+
+let redundancyImg
+let redOnline
+let redundancyStatus
+
+const controllers = {};
 
 const action = {
-	packetId: packetId.redundancyAll,
-	groupId: groupId.configuration,
-	data: {
-		parameterCode: [control.Redundancy.code, control.Name.code, control.Mode.code, control.Status.code]
-	},
-	function: 'f_Redundancy'};
+    type: {
+        code: packetType.request,
+        name: 'request'
+    },
+    packetId: {
+        code: packetId.redundancyAll,
+        name: 'redundancyAll'
+    },
+    groupId: {
+        code: groupId.configuration,
+        name: 'configuration'
+    },
+    data: {
+        codes: [
+            parameters.redEnable,
+            parameters.redName,
+            parameters.redMode,
+            parameters.redStatus
+        ]
+    },
+    function: 'f_Redundancy'
+};
 
-let interval;
-let delay = 5000;
+let interval
+const delay = 5000;
+let fragmentName;
 
-export function start(){
-	if(interval)
-		return;
-	action.buisy = false;
-	const name = chooseFragmentName();
-	$body.load(`/fragment/redundancy/${name}`, ()=>{
-		$selectEnable = $('#selectEnable').change(onSendCommand);
-		$selectStandby = $('#selectStandby').change(onSendCommand);
-		$selectName = $('#selectName').change(onSendCommand);
-		$redundancyImg = $('#redundancyImg');
-		$btnSetOnline = $('#btnSetOnline').click(onSendCommand);
-		$redundancyStatus = $('#redundancyStatus');
-		clearInterval(interval);
-		interval = setInterval(run, delay);
-	});
+export async function start() {
+    if (interval)
+        return;
+
+    action.busy = false;
+
+    const name = chooseFragmentName();
+
+    try {
+        if (name !== fragmentName) {
+
+            const response = await fetch(`/fragment/redundancy/${name}`);
+
+            if (!response.ok)
+                throw new Error(`Failed to load redundancy fragment: ${response.status}`);
+
+            fragmentName = name;
+
+            body.innerHTML = await response.text();
+
+            controllers.redEnable = new SelectHelper(body.querySelector('#redEnable'), onSendCommand);
+            controllers.redMode = new SelectHelper(body.querySelector('#redMode'), onSendCommand);
+            controllers.redName = new SelectHelper(body.querySelector('#redName'), onSendCommand);
+
+            redundancyImg = body.querySelector('#redundancyImg');
+            redundancyStatus = body.querySelector('#redundancyStatus');
+
+            redOnline = body.querySelector('#redOnline');
+            redOnline.addEventListener('click', onClick);
+        }
+
+        clearInterval(interval)
+        run();
+        interval = setInterval(run, delay)
+    } catch (error) {
+        console.error('Failed to load redundancy fragment.', error)
+    }
 }
 
-export function stop(){
-	clearInterval(interval) ;
-	interval = undefined;
-}
-export function disable(){
-	$selectEnable?.prop('disabled', true);
-	$selectStandby?.prop('disabled', true);
-	$selectName?.prop('disabled', true);
-	$btnSetOnline?.prop('disabled', true);
-}
-function chooseFragmentName(){
-	switch(unitType?.name){
-	default:
-		return 'buc';	
-	}
+export function stop() {
+    clearInterval(interval)
+    interval = undefined
 }
 
-function run(){
-	if(!serialPort.doRun()){
-		stop();
-		return;
-	}
+export function disable() {
 
-	if(action.buisy){
-		console.log('Buisy')
-		return
-	}
+    Object.values(controllers).forEach(controller => {
+        controller.disabled = true;
+    });
 
-	action.buisy = true;
-
-	serialPort.postObject($card, action);
+    redOnline.disabled = true;
 }
 
-action.f_Redundancy = function(packet){
-
-	const payloads = packet.payloads;
-
-	if(!payloads?.length){
-		console.log(packet.toString());
-		console.warn('No payloads to parse.');
-		blink($card, 'connection-wrong');
-		return;
-	}
-
-	payloads.forEach(parse);
-}
-const imageLinks = ['/images/BUC_X.jpg', '/images/BUC_A.jpg', '/images/BUC_B.jpg'];
-const status = ['', 'Online', 'Standby']
-function parse(pl){
-	const value = parser(pl.parameter.code)(pl.data);
-
-	switch(pl.parameter.code){
-
-	case control.Redundancy.code:
-		$selectEnable.val(value.toString());
-		$selectEnable.prop('disabled', false);
-		break;
-
-	case control.Name.code:
-		$selectName.val(value);
-		$selectName.prop('disabled', false);
-		break;
-
-	case control.Mode.code:
-		$selectStandby.val(value);
-		$selectStandby.prop('disabled', false);
-		break;
-
-	case control.Status.code:
-		$redundancyStatus.text(status[value]);
-		let disable = value===1 || value===0;
-		$btnSetOnline.attr('disabled', disable);
-		disable = !disable;
-		$selectEnable.attr('disabled', disable);
-		$selectStandby.attr('disabled', disable);
-		$selectName.attr('disabled', disable);
-		const nameId = $selectName.val();
-		if(nameId)
-			if(nameId==1 && value==1)
-				$redundancyImg.attr('src', imageLinks[1]);
-			else if(nameId==2 && value==1)
-				$redundancyImg.attr('src', imageLinks[2]);
-			else if(nameId==1 && value==2)
-				$redundancyImg.attr('src', imageLinks[2]);
-			else if(nameId==2 && value==2)
-				$redundancyImg.attr('src', imageLinks[1]);
-			else
-				$redundancyImg.attr('src', imageLinks[0]);
-		else
-			$redundancyImg.attr('src', imageLinks[0]);
-		break;
-
-	default:
-		console.log(pl);
-	}
+function chooseFragmentName() {
+    switch (unitType?.name) {
+        default:
+            return 'buc'
+    }
 }
 
-function onSendCommand(e){
+function run() {
+    if (!serialPort.doRun()) {
+        stop()
+        return
+    }
 
-	let id;
+    if (action.busy) {
+        console.log('busy')
+        return
+    }
 
-	switch(e.currentTarget.id){
+    action.busy = true
 
-	case 'btnSetOnline':
-		id = packetId.packetIdSetOnline;
-		break;
+    serialPort.postObject(card, action)
+}
 
-	case 'selectEnable':
-		if($selectEnable.val()=='true')
-			id = packetId.packetIdSetEnable;
-		else
-			id = packetId.packetIdSetDisable;
-		break;
+action.f_Redundancy = function(packet) {
+    const payloads = packet.payloads
 
-	case 'selectStandby':
-		if($selectStandby.val()=='0')
-			id = packetId.packetIdSetCold;
-		else
-			id = packetId.packetIdSetHot;
-		break;
+    if (!payloads?.length) {
+        console.log(packet.toString())
+        console.warn('No payloads to parse.')
+        blink(card, 'connection-wrong')
+        return
+    }
 
-	case 'selectName':
-		if($selectName.val()=='1')
-			id = packetId.packetIdSetNameA;
-		else if($selectName.val()=='2')
-			id = packetId.packetIdSetNameB;
-		break;
+    payloads.forEach(parse)
+}
 
-	default:
-		console.warn(e.currentTarget.id);
-	}
+function parse(pl) {
+    const code = pl.parameter.code
+    const value = controlBuc.parser(code)(pl.data)
+    const name = controlBuc.toName(code)
 
-	if(!id)
-		return;
+    const controller = controllers[name]
 
-	const packet = new RequestPackt(id);
-	sendRequest(packet);
+    if (controller) {
+        controller.value = value
+        controller.disabled = false
+    }
+
+    if (code === parameters.redStatus.code) {
+        updateStatus(value)
+    }
+}
+
+function updateStatus(status) {
+    if (redundancyStatus.textContent !== status.text)
+        redundancyStatus.textContent = status.text ? translate('redundancy.status', status.text) : '';
+
+    redOnline.disabled = !status.isStandby;
+
+    const online = status.isOnline;
+    Object.values(controllers).forEach(controller => {
+        controller.disabled = !online;
+    });
+
+    const redundancyEnabled = controllers.redEnable.value === 'true';
+
+    if (!status.isStandby && !online && redundancyEnabled)
+        controllers.redEnable.disabled = false;
+
+    updateImage(status);
+}
+
+const imageLinks = [
+    '/images/BUC_X.jpg',
+    '/images/BUC_A.jpg',
+    '/images/BUC_B.jpg'
+]
+function updateImage(status) {
+    const nameCode = Number(controllers.redName.value)
+
+    if (!status.isOnline && !status.isStandby) {
+        redundancyImg.src = imageLinks[0]
+        return
+    }
+
+    const imageIndex = status.value === nameCode ? 1 : 2
+    redundancyImg.src = imageLinks[imageIndex]
+}
+
+function onClick({ currentTarget: { id, value } }) {
+    onSendCommand({ id, value });
+}
+
+const actionSet = {
+    ...action,
+    type: {
+        code: packetType.command,
+        name: 'command'
+    },
+    packetId: {
+        code: packetId.redundancySet,
+        name: 'redundancySet'
+    }
+};
+
+function onSendCommand({ id, value }) {
+
+    actionSet.update = true;
+
+    const data = {
+        values: {},
+        raw: value
+    };
+    actionSet.data = data;
+
+    switch (id) {
+        case 'redOnline':
+            data.codes = [parameters.redOnline];// There is no need to send a value.
+            break
+
+        case 'redEnable': {
+            const obj = parameters.redEnable;
+            data.codes = [obj];
+            data.values[obj.code] = [value === 'true' ? 1 : 0];
+        }
+            break
+
+        default: {
+
+            const obj = parameters[id];
+            if (!obj) {
+                console.warn(id + '- Invalid element properties, needs to be renamed.')
+                return
+            }
+
+            data.codes = [obj];
+            data.values[obj.code] = [Number(value)];
+        }
+    }
+
+    serialPort.postObject(card, actionSet)
 }

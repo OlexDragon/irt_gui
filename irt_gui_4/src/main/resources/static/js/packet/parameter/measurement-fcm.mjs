@@ -1,4 +1,4 @@
-import {parseToIrtValue, parseToInt} from '../service/converter.js'
+import {parseToIrtValue, parseToInt, parseRefSource} from '../service/converter.js'
 import FcmStatus from './value/fcm-status.js'
 import Measurement  from "./parameters.mjs";
 
@@ -26,15 +26,15 @@ measurement.Status.parser = bytes=>new FcmStatus(parseToInt(bytes)).all;
 
 measurement['Input Power'] = {};
 measurement['Input Power'].code	 = 4;
-measurement['Input Power'].parser = bytes=>parseToIrtValue(bytes, 10, ' dBm');
+measurement['Input Power'].parser = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' dBm', measurementType: 'power' });
 
 measurement['Output Power'] = {};
 measurement['Output Power'].code		 = 5;
-measurement['Output Power'].parser = bytes=>parseToIrtValue(bytes, 10, ' dBm');
+measurement['Output Power'].parser = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' dBm', measurementType: 'power' });
 
 measurement.Temperature = {};
 measurement.Temperature.code	 = 3;
-measurement.Temperature.parser = bytes=>parseToIrtValue(bytes, 10, ' °C');
+measurement.Temperature.parser = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' °C', measurementType: 'temperature' });
 
 measurement['5.5V'] = {};
 measurement['5.5V'].code			 = 6;
@@ -54,11 +54,11 @@ measurement.Current.parser = bytes=>parseToInt(bytes)/1000 + ' mA';
 
 measurement['CPU Temperature'] = {};
 measurement['CPU Temperature'].code	 = 10;
-measurement['CPU Temperature'].parser = bytes=>parseToIrtValue(bytes, 10, ' °C');
+measurement['CPU Temperature'].parser = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' °C', measurementType: 'temperature' });
 
 measurement['MCU Temperature'] = {}
 measurement['MCU Temperature'].code		 = 11;
-measurement['MCU Temperature'].parser =bytes=>parseToIrtValue(bytes, 10, ' °C');
+measurement['MCU Temperature'].parser =bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' °C', measurementType: 'temperature' });
 
 measurement['Reference Level'] = {}
 measurement['Reference Level'].code		 = 12;
@@ -74,7 +74,7 @@ measurement.Attenuation.parser = bytes=>parseToInt(bytes)/10 + ' dB';
 
 measurement.Reference = {};
 measurement.Reference.code	 = 21;
-measurement.Reference.parser = bytes=>bytes[0]
+measurement.Reference.parser = parseRefSource;
 
 measurement.all = {}
 measurement.all.code				 = 255;

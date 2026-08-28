@@ -12,7 +12,6 @@
 	<link rel='stylesheet' href='/css/bs.css' th:fragment="cssBootstrap"/>
 	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
     <link rel="stylesheet" href="../static/css/language.css" th:href="@{${lang} == 'fr' ? '/css/language-fr.css' : '/css/language-en.css'}">
-	<script th:replace="home :: languageCookiesCheck"></script>
 </head>
 
 <body>
@@ -87,7 +86,7 @@
 	<script th:inline="javascript">
 		const txtSerialPort232 = /*[[#{Select Serial Port} + ' (RS232)']]*/ 'Serial Port (RS232)';
 	</script>
-	<script type="module" src="../static/js/flash.js" th:src="@{/js/flash.js}"></script>
+<!-- 	<script type="module" src="../static/js/flash.js" th:src="@{/js/flash.js}"></script> -->
 	<script type="module" src="../static/js/console.js" th:src="@{/js/console.js}"></script>
 
 </body>

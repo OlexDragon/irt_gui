@@ -17,11 +17,11 @@ measurement.Source.parser = source;
 
 measurement['CPU Temperature'] = {};
 measurement['CPU Temperature'].code	 = 10;
-measurement['CPU Temperature'].parser = bytes=>parseToIrtValue(bytes, 10, ' °C');
+measurement['CPU Temperature'].parser = bytes=>parseToIrtValue({bytes, divider: 10, postfix: ' °C', measurementType: 'temperature}'});
 
 measurement['MCU Temperature'] = {}
 measurement['MCU Temperature'].code		 = 11;
-measurement['MCU Temperature'].parser =bytes=>parseToIrtValue(bytes, 10, ' °C');
+measurement['MCU Temperature'].parser =bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' °C', measurementType: 'temperature' });
 
 measurement['Reference Level'] = {}
 measurement['Reference Level'].code		 = 12;

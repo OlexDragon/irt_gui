@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import irt.gui.web.services.SerialPortDistributor;
+import irt.gui.web.services.distributor.SerialPortDistributor;
 
 @RestController
 @RequestMapping("flash/rest")
@@ -25,7 +25,6 @@ public class FlashRestController {
 	@Autowired SerialPortDistributor distributor;
 
 	private static Map<String, FutureTask<Void>> tasks = new HashMap<>();
-	
 
 	@PostMapping("lock")
 	public boolean lockPort(@RequestParam String sp, Boolean lock){

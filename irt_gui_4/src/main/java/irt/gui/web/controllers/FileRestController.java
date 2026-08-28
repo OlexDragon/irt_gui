@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -30,6 +31,11 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,13 +60,13 @@ public class FileRestController {
 		logger.traceEntry(sn);
 
 		final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*" + sn + ".bin");
-    	final AtomicReference<List<Path>> arPath = new AtomicReference<>(new ArrayList<Path>());
-    	final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
+		final AtomicReference<List<Path>> arPath = new AtomicReference<>(new ArrayList<Path>());
+		final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
 
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 
-				if(attrs.isRegularFile()) {
+				if (attrs.isRegularFile()) {
 					Path name = file.getFileName();
 					if (matcher.matches(name)) {
 						arPath.get().add(file);
@@ -69,7 +75,7 @@ public class FileRestController {
 
 				return FileVisitResult.CONTINUE;
 			}
-    	};
+		};
 
 //    	logger.error(profilePath);
 		try {
@@ -99,18 +105,15 @@ public class FileRestController {
 
 		final File documentsDir = getIrtFolder();
 		final File file = new File(documentsDir, URI.create(fileName.replaceAll(" ", "%20")).toString());
-		
+
 		final File parentFile = file.getParentFile();
-		if(!parentFile.exists())
+		if (!parentFile.exists())
 			parentFile.mkdirs();
 
 		try {
 
-			Files.write(
-					file.toPath(),
-					content.getBytes(),
-					StandardOpenOption.CREATE,           // Create if not exists
-			        StandardOpenOption.TRUNCATE_EXISTING);
+			Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE, // Create if not exists
+					StandardOpenOption.TRUNCATE_EXISTING);
 
 		} catch (IOException e) {
 			logger.catching(e);
@@ -127,7 +130,7 @@ public class FileRestController {
 		final String replaceAll = p.replaceAll(" ", "%20").replaceAll("\\+", "%2B");
 		final URI uri = URI.create(replaceAll);
 		final File file = Paths.get(uri).toFile();
-		if(file.exists()) {
+		if (file.exists()) {
 			Desktop.getDesktop().open(file);
 			return null;
 		}
@@ -145,7 +148,7 @@ public class FileRestController {
 		logger.traceEntry(p);
 
 		final File file = Paths.get(URI.create(p.replaceAll(" ", "%20").replaceAll("\\+", "%2B"))).toFile();
-		if(!file.exists()) {
+		if (!file.exists()) {
 			logger.warn("File does not exist: {}", p);
 			return "File does not exist: " + p;
 		}
@@ -175,26 +178,27 @@ public class FileRestController {
 			connection.setRequestProperty("Content-Type", "multipart/form-data;");
 			connection.setDoOutput(true);
 
-			try(	OutputStream outputStream = connection.getOutputStream();
+			try (OutputStream outputStream = connection.getOutputStream();
 					DataOutputStream dataOutputStream = new DataOutputStream(outputStream);) {
 
 				dataOutputStream.writeBytes("Upgrade" + lineEnd);
 				dataOutputStream.writeBytes(lineEnd);
 
 				byte[] bytes = tarToBytes.toBytes();
-				dataOutputStream.write(bytes , 0, bytes.length);
+				dataOutputStream.write(bytes, 0, bytes.length);
 				dataOutputStream.writeBytes(lineEnd);
 				dataOutputStream.flush();
 			}
 
 			// Read Response
-			try(	InputStream inputStream = connection.getInputStream();
+			try (InputStream inputStream = connection.getInputStream();
 					BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));) {
 
 				String line;
 
-				// When the unit accepts the update it return page with the title 'End of session'
-				while ((line = reader.readLine())!=null) {
+				// When the unit accepts the update it return page with the title 'End of
+				// session'
+				while ((line = reader.readLine()) != null) {
 					buf.append(line).append(lineEnd);
 				}
 				logger.debug(buf);
@@ -211,15 +215,51 @@ public class FileRestController {
 	public File getIrtFolder() {
 		final File documentsDir = Optional.ofNullable(System.getProperty("user.home"))
 
-				.map(
-						home->{
-							final File homeDir = new File(home, "irt");
+				.map(home -> {
+					final File homeDir = new File(home, "irt");
 
-							if(!homeDir.exists())
-								homeDir.mkdirs();
+					if (!homeDir.exists())
+						homeDir.mkdirs();
 
-							return homeDir;
-						}).orElse(new File("/irt"));
+					return homeDir;
+				}).orElse(new File("/irt"));
 		return documentsDir;
+	}
+
+	@Value("${irt.i18n.default-locale}")
+	private String defaultLocale;
+
+	@Value("${irt.i18n.supported-locales}")
+	private List<String> languages;
+
+	@GetMapping("/messages")
+	public ResponseEntity<String> messages(
+	        @CookieValue(name = "localeInfo", required = false) String localeInfo,
+	        @RequestParam(required = false) String lang) throws IOException {
+
+	    String language = Optional.ofNullable(lang).orElse(localeInfo);
+
+	    if (!languages.contains(language)) 
+	        language = defaultLocale;
+
+	    String fileName = "messages_" + language.replace("-", "_") + ".properties";
+
+	    ClassPathResource resource = new ClassPathResource(fileName);
+
+	    if (!resource.exists()) {
+	        resource = new ClassPathResource(
+	                "messages_" + defaultLocale + ".properties"
+	        );
+	    }
+
+	    String content = StreamUtils.copyToString(
+	            resource.getInputStream(),
+	            StandardCharsets.UTF_8
+	    );
+
+	    return ResponseEntity
+	            .ok()
+	            .contentType(MediaType.TEXT_PLAIN)
+	            .body(content);
 	}
 }

@@ -1,99 +1,100 @@
-import packetId from '../packet/packet-properties/packet-id.js'
+import packetId from '../packet/packet-properties/packet-id.mjs'
 import ModuleLoader from './module-loader.js'
 
-export default class MeasurementLoader{
+export default class MeasurementLoader {
 
-	#unitType;
-	#packetId;
-	#controllerLoader;
-	#parameterLoader;
+    #unitType;
+    #packetId;
+    #controllerLoader;
+    #parameterLoader;
 
-	#controller;
-	#parameter;;
+    #controller;
+    #parameter;;
 
-	constructor(unitType){
-		this.#controllerLoader = new ModuleLoader();
-		this.#parameterLoader = new ModuleLoader();
-		if(unitType?.name)
-			this.setUnitType(unitType);
-	}
+    constructor(unitType) {
+        this.#controllerLoader = new ModuleLoader();
+        this.#parameterLoader = new ModuleLoader();
+        if (unitType?.name)
+            this.setUnitType(unitType);
+    }
 
-	get unitType(){
-		return this.#unitType;
-	}
+    get unitType() {
+        return this.#unitType;
+    }
 
-	setUnitType(unitType, callBack){
+    setUnitType(unitType, callBack) {
 
-		if(JSON.stringify(this.unitType) === JSON.stringify(unitType)){
-			callBack(this.#controller);
-			return;
-		}
+        if (JSON.stringify(this.unitType) === JSON.stringify(unitType)) {
+            callBack(this.#controller);
+            return;
+        }
 
-		this.#unitType = unitType;
-		let loadC;
-		let loadP;
+        this.#unitType = unitType;
+        let loadC;
+        let loadP;
 
-		switch(unitType.name){
-		case 'CONTROLLER_IRPC':
-			this.#packetId = packetId.measurementIRPC;
-			loadC = this.#controllerLoader.load('./controller/controller-meas-irpc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/irpc.mjs');
-			break;
+        switch (unitType.name) {
+            case 'CONTROLLER_IRPC':
+                this.#packetId = packetId.measurementIRPC;
+                loadC = this.#controllerLoader.load('./controller/controller-meas-irpc.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/irpc.mjs');
+                break;
 
-		case 'CONVERTER':
-		case 'CONVERTER_KA':
-			this.#packetId = packetId.measurement;
-			loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.mjs');
-			break;
+            case 'CONVERTER':
+            case 'CONVERTER_KA':
+                this.#packetId = packetId.measurement;
+                loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/measurement-fcm.mjs');
+                break;
 
-		case 'REFERENCE_BOARD':
-			this.#packetId = packetId.measurement;
-			loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-rcm.mjs');
-			break;
+            case 'REFERENCE_BOARD':
+                this.#packetId = packetId.measurement;
+                loadC = this.#controllerLoader.load('./controller/controller-meas-fcm.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/measurement-rcm.mjs');
+                break;
 
-		case 'CONTROLLER_ODRC':
-		case 'LNB':
-			this.#packetId = packetId.measurement;
-			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-odrc.mjs');
-			break;
+            case 'CONTROLLER_ODRC':
+            case 'LNB':
+                this.#packetId = packetId.measurement;
+                loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/measurement-odrc.mjs');
+                break;
 
-		default:
-			console.log('Load by default', unitType);
-		case 'BAIS_LOW_POWER':
-		case 'BAIS':
-			this.#packetId = packetId.measurement;
-			loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/measurement-buc.mjs');
-		}
+            default:
+                console.log('Load by default', unitType);
+            case 'CONTROLLER':
+            case 'BAIS_LOW_POWER':
+            case 'BAIS':
+                this.#packetId = packetId.measurement;
+                loadC = this.#controllerLoader.load('./controller/controller-measurement.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/measurement-buc.mjs');
+        }
 
-		loadC.then(this.setController.bind(this));
-		loadP.then(this.setParameter.bind(this));
-		Promise.all([loadC, loadP])
-		.then(()=>callBack(this.#controller));
-	}
+        loadC.then(this.setController.bind(this));
+        loadP.then(this.setParameter.bind(this));
+        Promise.all([loadC, loadP])
+            .then(() => callBack(this.#controller));
+    }
 
-	get packetId(){
-		return this.#packetId;
-	}
+    get packetId() {
+        return this.#packetId;
+    }
 
-	get controller(){
-		return this.#controller;
-	}
+    get controller() {
+        return this.#controller;
+    }
 
-	get parameter(){
-		return this.#parameter;
-	}
+    get parameter() {
+        return this.#parameter;
+    }
 
-	setController(c){
-		const {default: Controller} = c;
-		this.#controller = Controller;
-	}
+    setController(c) {
+        const { default: Controller } = c;
+        this.#controller = Controller;
+    }
 
-	setParameter(p){
-		const {default: Parameter} = p;
-		this.#parameter = Parameter;
-	}
+    setParameter(p) {
+        const { default: Parameter } = p;
+        this.#parameter = Parameter;
+    }
 }

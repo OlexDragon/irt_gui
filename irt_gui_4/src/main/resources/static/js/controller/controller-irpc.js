@@ -1,7 +1,7 @@
 import Controller from './controller.js'
-import packetId from '../packet/packet-properties/packet-id.js'
-import {code as irpcCode} from '../packet/parameter/irpc.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import packetId from '../packet/packet-properties/packet-id.mjs'
+import {code as irpcCode} from '../packet/parameter/irpc.mjs'
+import groupId from '../packet/packet-properties/group-id.mjs'
 
 export default class ControllerIrpc extends Controller{
 
@@ -18,7 +18,7 @@ export default class ControllerIrpc extends Controller{
 	constructor($card){
 		super($card);
 		const $body = $card.find('.control');
-		$body.load(ControllerIrpc.URL, this.#onLoad.bind(this));
+		$body.load(ControllerIrpc.URL, ()=>this.#onLoad());
 	}
 
 	get groupId(){
@@ -101,11 +101,7 @@ export default class ControllerIrpc extends Controller{
 		this.#$btnHoverB.prop('disabled', true);
 	}
 
-	#onLoad(_, statusText){
-		if(statusText !== 'success'){
-			console.warn(statusText);
-			return;
-		}
+	#onLoad(){
 		this.#$salectSwtchHvr = this._$card.find('#irpcSalectSwtchHvr').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcSalectSwtchHvr).attr('data-parameter-code', irpcCode('Switchover Mode'));
 		this.#$salectStndBy = this._$card.find('#irpcStandBy').change(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcStandBy).attr('data-parameter-code', irpcCode('Standby Mode'));
 		this.#$btnIrspDefault = this._$card.find('#irpcDefault').click(this.#onCange).prop('disabled', true).attr('data-packetId', packetId.irpcDefault).attr('data-parameter-code', irpcCode('Switchover'));

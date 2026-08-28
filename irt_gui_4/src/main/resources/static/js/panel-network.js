@@ -1,6 +1,6 @@
 import * as serialPort from './serial-port.js'
-import groupId from './packet/packet-properties/group-id.js'
-import packetId from './packet/packet-properties/packet-id.js'
+import groupId from './packet/packet-properties/group-id.mjs'
+import packetId from './packet/packet-properties/packet-id.mjs'
 import NetworkControl from './network/network-control.js'
 import { type as unitType } from './panel-info.js'
 
@@ -18,7 +18,7 @@ export function start(){
 		if(interval)
 		return;
 
-	action.buisy = false;
+	action.busy = false;
 
 	if(!networkControl){
 		const name = chooseFragmentName();
@@ -57,12 +57,12 @@ function run(){
 		return;
 	}
 
-	if(action.buisy){
-		console.log('action.buisy');
+	if(action.busy){
+		console.log('action.busy');
 		return
 	}
 
-	action.buisy = true;
+	action.busy = true;
 
 	serialPort.postObject($card, action);
 }
@@ -105,5 +105,5 @@ function onChange(ipAddress){
 
 function onNotSaved(e){
 	serialPort.showToast("Network settings are not saved.", e.currentValue.toString(), 'text-bg-warning bg-opacity-50');
-	console.log(e);
+//	console.log(e);
 }

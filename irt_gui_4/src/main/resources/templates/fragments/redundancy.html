@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>$
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
@@ -14,29 +14,29 @@
 <!-- Auto calibration by Unit Gain -->
 <th:block th:fragment="buc">
 	<div class="row mt-2">
-		<div class="col">Redundancy</div>
+		<div class="col" th:text="#{Redundancy} + ':'">Redundancy</div>
 		<div class="col">
-			<select id="selectEnable" class="form-select" disabled>
+			<select id="redEnable" class="form-select" disabled>
 				<option selected="selected" disabled="disabled" hidden="hidden"></option>
-				<option value="false">Disable</option>
-				<option value="true">Enable</option>
+				<option value="false" th:text="#{Disable}">Disable</option>
+				<option value="true" th:text="#{Enable}">Enable</option>
 			</select>
 		</div>
 	</div>
 	<div class="row mt-2">
-		<div class="col">Standby</div>
+		<div class="col" th:text="#{Standby} + ':'">Standby</div>
 		<div class="col">
-			<select id="selectStandby" class="form-select" disabled>
+			<select id="redMode" class="form-select" disabled>
 				<option selected="selected" disabled="disabled" hidden="hidden"></option>
-				<option value="0">Cold</option>
-				<option value="1">Hot</option>
+				<option value="0" th:text="#{Cold}">Cold</option>
+				<option value="1" th:text="#{Hot}">Hot</option>
 			</select>
 		</div>
 	</div>
 	<div class="row mt-2">
-		<div class="col">Unit</div>
+		<div class="col" th:text="#{Unit} + ':'">Unit</div>
 		<div class="col">
-			<select id="selectName" class="form-select" disabled>
+			<select id="redName" class="form-select" disabled>
 				<option selected="selected" disabled="disabled" hidden="hidden"></option>
 				<option value="1">A</option>
 				<option value="2">B</option>
@@ -44,7 +44,7 @@
 		</div>
 	</div>
 	<div class="row mt-2">
-		<div class="col">Status</div>
+		<div class="col" th:text="#{Status} + ':'">Status</div>
 		<div id="redundancyStatus" class="col"></div>
 	</div>
 	<div class="row mt-2 justify-content-center">
@@ -54,7 +54,7 @@
 	</div>
 	<div class="row mt-2 justify-content-center">
 		<div class="col-8">
-			<button id="btnSetOnline" class="btn btn-outline-primary form-control" disabled="disabled">Set Online</button>
+			<button id="redOnline" class="btn btn-outline-primary form-control" disabled="disabled" th:text="#{setOnline}">Set Online</button>
 		</div>
 	</div>
 </th:block>

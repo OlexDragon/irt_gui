@@ -14,6 +14,7 @@ import irt.gui.web.beans.Packet;
 import irt.gui.web.beans.PacketGroupId;
 import irt.gui.web.beans.PacketType;
 import irt.gui.web.exceptions.IrtSerialPortIOException;
+import irt.gui.web.services.serialPort.JSerialComm;
 
 class JSerialCommTest {
 	private final static Logger logger = LogManager.getLogger();

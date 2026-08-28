@@ -1,181 +1,224 @@
+// panel-units.js
 // Panel Units Selection - allows selecting different units/modules in a panel device.
-// 	Connection via controller
+// Connection via controller
 
-import * as serialPort from './serial-port.js'
-import f_unitType from './packet/service/device-type.js'
-import packetId from './packet/packet-properties/packet-id.js'
-import groupId from './packet/packet-properties/group-id.js'
-import {type as unitType, onTypeChange } from './panel-info.js'
+import * as serialPort from './serial-port.js';
+import { info as idInfo } from './packet/packet-properties/packet-id.mjs';
+import { info as groupInfo } from './packet/packet-properties/group-id.mjs';
+import { onTypeChange } from './panel-info.js';
+import ModuleSelector from './helper/module-selector.mjs';
+import { info as typeInfo } from './packet/packet-properties/packet-type.js'
 
-const $unitsSelect = $('#unitsSelect');
+const unitsSelect = document.querySelector('#unitsSelect');
+let parser;
 
-const chengeEvents = [];
-const map = new Map();
+const action = {
+    type: typeInfo.request,
+    packetId: idInfo.module,
+    groupId: groupInfo.control,
+    data: {},
+    function: 'f_modules'
+};
+const moduleEvents = new Set();
+
+export function onModules(callback) {
+    moduleEvents.add(callback);
+}
+
+export const moduleSelector = new ModuleSelector(unitsSelect);
+moduleSelector.onChange(value => sendCommand(value));
+
+export function select(value, callBack) {
+    sendCommand(value, callBack);
+}
+
+let commandCallback;
+function sendCommand(value, callBack) {
+
+    if (!actionSet.data.codes) {
+        console.warn('This operation cannot be performed.', actionSet);
+        callBack?.({ message: 'This operation cannot be performed.', actionSet })
+        return;
+    }
+
+    commandCallback = callBack;
+    setcommandPending(false);
+
+    actionSet.data.values = { [parameter.config.activeModule]: [value] };
+
+    actionSet.update = true;
+    serialPort.postObject(unitsSelect, actionSet);
+
+    setcommandPending(true);
+
+}
+
+function setcommandPending(disable) {
+    commandPending = disable;
+    moduleSelector.disable(disable);
+}
+const changeEvents = new Set();
 const parameter = {};
-let interval;
 
-const action = {packetId: packetId.module, groupId: groupId.control, data: {}, function: 'f_modules'};
+let interval;
+let previousType;
+let commandPending;
 
 serialPort.onStart(startStop);
-function startStop(yes){
-	yes ? start() : stop();
-}
-let type;
-setTimeout(()=>{
-	type = unitType?.toString();
-	typeChange();
-}, 100);
 
-function typeChange(){
-	onTypeChange(t=>{
-		const str = t.toString();
-		if(type!==str){
-			type = str;
-			action.data.parameterCode = undefined;
-			clear();
-			serialPort.onStart(startStop);
-			start();
-		}
-	});
-}
-export function start(){
-
-	if(interval)
-		return;
-
-	action.buisy = false;
-	action.packetError = undefined;
-
-	if(!unitType)
-		return;
-
-	switch(unitType.name){
-	case 'CONVERTER':
-		return;
-	}
-
-	getParser();
+function startStop(yes) {
+    yes ? start() : stop();
 }
 
-export function stop(){
-	interval = clearInterval(interval)
+
+onTypeChange(t => {
+
+    if (previousType?.type == t.type && previousType?.subtype === t.subtype)
+        return;
+
+    previousType = t;
+    delete action.data.codes;
+
+    resetModules();
+    start();
+});
+
+export function start() {
+    if (interval)
+        return;
+
+    action.busy = false;
+    action.packetError = undefined;
+
+    switch (previousType?.name) {
+        case 'CONVERTER':
+            return;
+    }
+
+    getParser();
 }
 
-export function disable(d){
-	Array.from(map.values()).forEach($el=>$el.prop('disabled', d));
+export function stop() {
+    interval = clearInterval(interval);
 }
 
-export function change(e){
-	chengeEvents.push(e);
+export function disable(disabled) {
+    moduleSelector.disable(disabled);
 }
 
-async function getParser(){
-
-	if(!parameter.parser){
-		const {default: config, parser} = await import('./packet/parameter/config-modules.js');
-		parameter.config = config;
-		parameter.parser = parser;
-	}
-
-	if(!action.data.parameterCode)
-		action.data.parameterCode = parameter.config.moduleList;
-	run();
-	clearInterval(interval);
-	interval = setInterval(run, 10000);
+export function onChange(callback) {
+    changeEvents.add(callback);
 }
 
-function run(){
-	if(action.packetError){
-		clear();
-		return;
-	}
-
-	if(!serialPort.doRun()){
-		stop();
-		return;
-	}
-
-	if(action.buisy){
-		console.log('Buisy')
-		return
-	}
-
-	action.buisy = true;
-
-	serialPort.postObject($unitsSelect, action);
+export function getModules() {
+    return moduleSelector.modules();
 }
 
-action.f_modules = (packet) =>{
+function getParser() {
+    if (parameter.parser)
+        return requestModuleList();
 
-	packet.payloads.forEach(pl=>{
-		switch(pl.parameter.code){
+    import('./packet/parameter/config-modules.js')
+        .then(({ default: config, info, parser }) => {
+            parameter.config = config;
+            parameter.info = info;
+            parameter.parser = parser;
 
-		case parameter.config.moduleList:
-			action.update = true;
-			action.data.parameterCode = parameter.config.activeModule;
-			if(addElements(pl.data))
-				run();
-			else
-				clear();
-			break;
-
-		case parameter.config.activeModule:
-			if(!map.size){
-				console.log('This Panel is not ready yet.')
-				return;
-			}
-			const key = parameter.parser(parameter.config.activeModule)(pl.data)
-			const $buttom = map.get(key);
-			if(!$buttom)
-				break;
-			if(!$buttom.prop('checked'))
-				$buttom.prop('checked', true);
-
-			if(moduleChange){
-				moduleChange = false;
-				disable(false);
-				chengeEvents.forEach(e=>e());
-			}		
-			break;
-
-		default:
-			console.warn(packet.toString());
-		}
-	});
+            requestModuleList();
+        });
 }
 
-function addElements(data){
-	const modules = parameter.parser(parameter.config.moduleList)(data);
-	const entries = Object.entries(modules);
-	if(entries.length<2)
-		return false;
-	const columns = entries.sort((a,b)=>a[1]-b[1]).map(([k, v])=>{
-		const id = 'module' + v;
-		const $button = $('<input>', {type: 'radio', class: 'btn-check', name: 'moduleConnect', id: id, autocomplete: 'off', value: v}).change(onChange);
-		map.set(v, $button);
-		const $col = $('<div>', {class: 'col'}).append($button).append($('<label>', {for: id, class: 'btn btn-outline-primary form-control', text: k}));
-		return $col;
-	});
-	$unitsSelect.append(columns);
-	return true;
+function requestModuleList() {
+    action.data.codes = [parameter.info.moduleList];
+    parser = parameter.parser(parameter.config.moduleList)
+    action.update = true;
+
+    restart();
 }
 
-let moduleChange;
-function onChange({currentTarget:{value}}){
-
-	disable(true);
-	const a = Object.assign({}, action);
-	a.packetId = packetId.moduleSet;
-	a.update = true;
-	a.data.value = +value;
-	serialPort.postObject($unitsSelect, a);
-	moduleChange = true;
+function restart() {
+    stop();
+    run();
+    interval = setInterval(run, 10000);
 }
 
-function clear(){
-	console.warn('clear()')
-	stop();
-	map.clear();
-	$unitsSelect.empty();
-	serialPort.removeOnStart(startStop);
+function run() {
+    if (action.packetError) {
+        resetModules();// The module may be disabled, wait for a response.
+        return;
+    }
+
+    if (!serialPort.doRun()) {
+        stop();
+        return;
+    }
+
+    if (action.busy) {
+        console.log('busy');
+        return;
+    }
+
+    action.busy = true; // serialPort sets action.busy = false even when action.f_modules is not called
+
+    serialPort.postObject(unitsSelect, action);
+}
+
+action.f_modules = packet => {
+    packet.payloads.forEach(pl => {
+        const code = pl.parameter.code;
+        const value = parser(pl.data);
+
+        switch (code) {
+            case parameter.config.moduleList:
+                if (Object.keys(value).length < 2) {
+                    resetModules();
+                    return;
+                }
+
+                moduleSelector.setModules(value);
+                moduleEvents.forEach(callback => callback(value));
+
+                actionSet.data.codes = action.data.codes = [parameter.info.activeModule];
+                parser = parameter.parser(parameter.config.activeModule)
+                action.update = true;
+
+                restart();
+                break;
+
+            case parameter.config.activeModule:
+                if (!moduleSelector.setSelected(value))
+                    break;
+
+                commandCallback?.({
+                    value,
+                    actionSet
+                });
+                commandCallback = undefined
+
+                if (commandPending) {	// to callback once
+                    setcommandPending(false);
+                    changeEvents.forEach(callback => callback());
+                }
+                break;
+
+            default:
+                console.warn(packet.toString());
+        }
+    });
+};
+
+action.f_error = (packet) => {
+    setcommandPending(false);
+    console.warn(packet);
+}
+const actionSet = {
+    ...action,
+    type: typeInfo.command,
+    packetId: idInfo.moduleSet,
+    data: {}
+};
+
+function resetModules() {
+    stop();
+    moduleSelector.clear();
 }

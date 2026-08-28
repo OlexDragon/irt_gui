@@ -34,7 +34,7 @@ import irt.gui.web.beans.PacketType;
 import irt.gui.web.beans.RequestPacket;
 import irt.gui.web.beans.upload.IrtProfile;
 import irt.gui.web.beans.upload.TarToBytes;
-import irt.gui.web.services.SerialPortDistributor;
+import irt.gui.web.services.distributor.SerialPortDistributor;
 
 @RestController
 @RequestMapping("upgrade/rest")

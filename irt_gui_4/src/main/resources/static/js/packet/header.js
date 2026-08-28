@@ -1,8 +1,8 @@
 import packetType, { name } from './packet-properties/packet-type.js'
-import { id, toString } from './packet-properties/group-id.js'
+import { id, toString } from './packet-properties/group-id.mjs'
 import { PACKET_ERROR } from './error.js'
 import { shortToBytes } from './service/converter.js'
-import { toString as idToString } from './packet-properties/packet-id.js'
+import { toString as idToString } from './packet-properties/packet-id.mjs'
 
 export const HEADER_SIZE = 7;
 export const ACKNOWLEDGEMENT_HEADER_SIZE = 3; // 3 bytes - packet type and packet ID

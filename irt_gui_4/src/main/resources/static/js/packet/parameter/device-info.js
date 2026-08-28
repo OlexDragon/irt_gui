@@ -1,114 +1,108 @@
-import {parseToString, parseToTimeStr, parseToIntSequence} from '../service/converter.js'
-import Payload from '../payload.js'
+import { createIdMap } from '../packet-properties/helper/id-map.mjs';
+import {
+    parseToString,
+    parseToTimeStr,
+    parseToIntSequence
+} from '../service/converter.js';
+import Payload from '../payload.js';
+import translator from '../../helper/text-translator.mjs';
 
-const deviceInfo = {};
+const deviceInfo = createIdMap({
+    type: 1,
+    firmwareVersion: 2,
+    firmwareBuild: 3,
+    uptimeCounter: 4,
+    serialNumber: 5,
+    description: 6,
+    partNumber: 7,
+    all: 255
+});
 
-// Parameter CODE
-deviceInfo.type				 = 1;
-deviceInfo.firmwareVersion	 = 2;
-deviceInfo.firmwareBuild	 = 3;
-deviceInfo.uptimeCounter	 = 4;
-deviceInfo.serialNumber		 = 5;
-deviceInfo.description		 = 6;
-deviceInfo.partNumber		 = 7;
-deviceInfo.all				 = 255;
+export const id = deviceInfo.id;
+export const name = deviceInfo.name;
+export const toString = deviceInfo.toString;
+export const info = deviceInfo.info;
 
-const o = Object.freeze(structuredClone(deviceInfo));
-export default o;
+export default deviceInfo.map;
 
-export function code(name){
-	return deviceInfo[name];
-}
-
-export function name(code){
-	const keys = Object.keys(deviceInfo);
-	for(const key of keys){
-		if(deviceInfo[key] == code)
-			return key;
-			}
-}
 
 // Show order
-deviceInfo.sequence = {};
-deviceInfo.sequence[deviceInfo.description]		 = 0;
-deviceInfo.sequence[deviceInfo.serialNumber]	 = 1;
-deviceInfo.sequence[deviceInfo.partNumber]		 = 2;
-deviceInfo.sequence[deviceInfo.type]			 = 3;
-deviceInfo.sequence[deviceInfo.firmwareVersion]	 = 4;
-deviceInfo.sequence[deviceInfo.firmwareBuild]	 = 5;
-deviceInfo.sequence[deviceInfo.uptimeCounter]	 = 6;
 
-export function order(name){
-	const code = deviceInfo[name];
-	return deviceInfo.sequence[code]
+const sequence = {
+    [id('description')]: 0,
+    [id('serialNumber')]: 1,
+    [id('partNumber')]: 2,
+    [id('type')]: 3,
+    [id('firmwareVersion')]: 4,
+    [id('firmwareBuild')]: 5,
+    [id('uptimeCounter')]: 6
+};
+
+export function order(value) {
+
+    const code = typeof value === 'number'
+        ? value
+        : id(value);
+
+    return sequence[code];
 }
-export function comparator(index1, index2){
-	
-	if(index1 instanceof Payload){
-		index1 = index1.parameter.code;
-		index2 = index2.parameter.code;
-	}
-	return deviceInfo.sequence[index1] - deviceInfo.sequence[index2]
+
+export function comparator(index1, index2) {
+
+    if (index1 instanceof Payload) {
+        index1 = index1.parameter.code;
+        index2 = index2.parameter.code;
+    }
+
+    return sequence[index1] - sequence[index2];
 }
+
 
 // Description
-deviceInfo.string = {};
-deviceInfo.string[deviceInfo.description]	 = 'Description';
-deviceInfo.string[deviceInfo.serialNumber]	 = 'Serial Number';
-deviceInfo.string[deviceInfo.partNumber]	 = 'Part Number';
-deviceInfo.string[deviceInfo.type]			 = 'Type';
-deviceInfo.string[deviceInfo.firmwareVersion]= 'FW Version';
-deviceInfo.string[deviceInfo.firmwareBuild]	 = 'FW Build';
-deviceInfo.string[deviceInfo.uptimeCounter]	 = 'Counter';
 
-export function description(value){
+const strings = {
+    [id('description')]: 'Description',
+    [id('serialNumber')]: 'Serial Number',
+    [id('partNumber')]: 'Part Number',
+    [id('type')]: 'Type',
+    [id('firmwareVersion')]: 'FW Version',
+    [id('firmwareBuild')]: 'FW Build',
+    [id('uptimeCounter')]: 'Counter'
+};
 
-	if(typeof value === 'number')
-		return deviceInfo.string[value];
+export function description(value) {
 
-	else{
+    const code = typeof value === 'number'
+        ? value
+        : id(value);
 
-		const code = code(value);
-		return deviceInfo.string[code];
-	}
+        const key = `info.${code}`;
+        const translated = translator.translate(key);
+        if (key !== translated)
+            return translated;
+        console.warn(`The key ${key} is missing`)
+
+    return strings[code];
 }
 
-export function toString(value){
-
-	if(typeof value === 'number'){
-
-		const name = name(value);
-		return `deviceInfo: ${name} (${value})`;
-
-	}else{
-
-		const code = code(value);
-		return `deviceInfo: ${value} (${code})`;
-	}
-}
 
 // Device Info parse functions
-deviceInfo.parse = {};
-deviceInfo.parse[deviceInfo.description]	 = parseToString;
-deviceInfo.parse[deviceInfo.serialNumber]	 = parseToString;
-deviceInfo.parse[deviceInfo.partNumber]		 = parseToString;
-deviceInfo.parse[deviceInfo.type]			 = parseToIntSequence;
-deviceInfo.parse[deviceInfo.firmwareVersion]= parseToString;
-deviceInfo.parse[deviceInfo.firmwareBuild]	 = parseToString;
-deviceInfo.parse[deviceInfo.uptimeCounter]	 = parseToTimeStr;
 
-export function parser(value){
+const parsers = {
+    [id('description')]: parseToString,
+    [id('serialNumber')]: parseToString,
+    [id('partNumber')]: parseToString,
+    [id('type')]: parseToIntSequence,
+    [id('firmwareVersion')]: parseToString,
+    [id('firmwareBuild')]: parseToString,
+    [id('uptimeCounter')]: parseToTimeStr
+};
 
-	let parser;
-	if(typeof value === 'number')
-		parser = deviceInfo.parse[value]
+export function parser(value) {
 
-	else{
+    const code = typeof value === 'number'
+        ? value
+        : id(value);
 
-		const code = code(value);
-		parser = deviceInfo.parse[code]
-	}
-
-	return parser ? parser : value.toString();
+    return parsers[code] ?? String(value);
 }
-

@@ -1,314 +1,383 @@
 <!DOCTYPE html>
-<html	xmlns="http://www.w3.org/1999/xhtml"
-		xmlns:th="http://www.thymeleaf.org"
-		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-		lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+	lang="en">
 
 <head>
-    <title>GUI - IRT Technologies</title>
-    <meta charset="UTF-8"/>
-    <meta name="google" content="notranslate" />
-	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	<link rel='stylesheet' href='/css/bs.css' th:fragment="cssBootstrap"/>
-	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
-    <link rel="stylesheet" href="../static/css/language.css" th:href="@{${lang} == 'fr' ? '/css/language-fr.css' : '/css/language-en.css'}">
-    <script th:if="${lang} == null" th:fragment="languageCookiesCheck">
-    	function getLangCookieValue(){
-			return document.cookie.split('; ').filter(c => c.startsWith('localeInfo')).map(c => c.split('=')[1]).pop();;
-		}
-    	const jsLang = getLangCookieValue();
-    	if(jsLang !== 'fr' && jsLang !== 'en') {
-    		let lang = navigator.languages[0].split('-')[0];
-    		if(lang !== 'fr' && lang !== 'en')
-    			lang = 'en';
-    		const date = new Date();
-    		date.setDate(date.getDate() + 99); // Add 99 days
-    		document.cookie = `localeInfo=${lang}; expires=${date.toUTCString()}; path=/`;
-    		if(getLangCookieValue() === lang)
-    			location.reload();
-    	}
-    </script>
+<title>GUI - IRT Technologies</title>
+<meta charset="UTF-8" />
+<meta name="google" content="notranslate" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel='stylesheet' href='/css/bs.css' th:fragment="cssBootstrap" />
+<link rel='stylesheet' href='../static/css/home.css'
+	th:href="@{/css/home.css}" />
+<link rel="stylesheet" href="../static/css/language.css"
+	th:href="@{'/css/language-' + ${#locale.toLanguageTag()} + '.css'}" />
+
 </head>
 
 <body>
-<div class="language-selector visually-hidden" th:fragment="languageSelect">
-	<img src="../static/images/flags/f-usa.png" th:src="'/images/flags/f-english.png'" alt="Language">
-	<label class="badge text-uppercase align-middle" th:text="${lang} eq 'fr' ? 'English' : 'Fran&ccedil;ais'">English</label>
-</div>
-<div class="container-fluid">
-	<div class="row g-1">
-		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:fragment="serial-port">
-			<div class="row row-cols-1">
-				<div class="col">
-					<img src="../static/images/logo.png" th:src="@{/images/logo.png}" class="img-fluid" alt="Logo"/>
-				</div>
-				<h4 class="text-center" th:text="'IRT GUI v.' + ${version}"></h4>
-				<div class="col form-floating mb-3">
-					<select id="serialPort" class="form-select" aria-label="Select Serial Port">
-						<option selected="selected" disabled="disabled" hidden="hidden" th:text="#{Select Serial Port}">Select Serial Port</option>
-					</select>
-					<label for="serialPort" th:text="#{Serial Port} + ' (RS485)'">Serial Port (RS485)</label>
-				</div>
-				<div class="col form-floating mb-3">
-					<select id="baudrate" class="form-select" aria-label="Select Serial Port">
-						<option th:each="br : ${baudrates}" th:text="${br.value}">Baudrate</option>
-					</select>
-					<label for="baudrate" th:text="#{Baudrate}">Baudrate</label>
-				</div>
-				<div class="col form-floating mb-3">
-					<input id="unitAddress" type="number" class="form-control" value="254"/>
-					<label for="unitAddress" th:text="#{Unit Address}">Unit Address</label>
-				</div>
-				<div class="col mb-3">
-					<input id="btnStart" type="checkbox" class="btn-check" disabled="disabled"/>
-					<label for="btnStart" class="btn btn-outline-primary form-control" th:text="#{Start}">START</label>
-				</div>
-				<div class="col mb-3">
-					<div id="summaryAlarmCard" class="card">
-						<div class="card-body">
-							<h6 id="summaryAlarmTitle" class="card-title text-center p-2"></h6>
-						</div>
-					</div>
-				</div>
-				<div class="col mb-3">
-					<a class="btn btn-outline-secondary form-control" href="/console">Console</a>
-				</div>
-				<div class="col mb-3">
-					<input id="fwUpgrade" type="file" accept=".pkg" hidden="hidden">
-					<label for="fwUpgrade" class="btn btn-outline-secondary form-control disabled" th:text="#{Firmware Upgrade}">Firmware Upgrade</label><br>
-				</div>
-				<div class="col mb-3">
-					<input id="btnShowErrors" type="checkbox" class="btn-check"/>
-					<label for="btnShowErrors" class="btn btn-outline-info opacity-75 form-control" th:text="#{Show Messages}">SHow Messages</label>
-				</div>
-				<div id="connections" class="col text-center text-primary-emphasis fs-5 mb-3">
-				</div>
-				<div class="col"><button  type="button" id="appExit" class="btn btn-outline-dark form-control" th:text="#{Exit}">Exit</button></div>
-			</div>
-		</div>
-		<div class="col">
-			<div id="unitsSelect" class="row border p-2 m-2"></div>
-			<div class="row">
-				<div class="col-lg-6 col-12 mt-2">
-					<div class="card infoCard" th:fragment="infoCard">
-  						<div class="card-body info">
-  							<div class="placeholder-wave">
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
-  							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-6 col-12 mt-2">
-					<div class="card measurementCard" th:fragment="measurementCard">
-  						<div class="card-body measurement">
- 							<div class="placeholder-wave">
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-6 col-12 mt-2">
-					<div class="card controlCard" th:fragment="controlCard">
-  						<div class="card-body control">
- 							<div class="placeholder-wave">
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
- 								<div class="row justify-content-evenly mb-2">
-  									<span class="placeholder col-5"></span>
-  									<span class="placeholder col-5"></span>
-  								</div>
-  							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-6 col-12 mt-2">
-					<div id="userCard" class="card" th:fragment="userPanels">
-  						<div class="card-body userPanels">
-  							<ul class="nav nav-tabs">
- 								<li class="nav-item">
-									<button  type="button" id="userTabAlarm" class="nav-link"  data-bs-toggle="tab" data-bs-target="#alarms-tab-pane" role="tab" aria-controls="alarms-tab-pane" aria-selected="false" th:text="#{Alarms}">Alarms</button>
-								</li>
-								<li class="nav-item">
-									<button  type="button" id="userTabNetwork" class="nav-link"  data-bs-toggle="tab" data-bs-target="#network-tab-pane" role="tab" aria-controls="network-tab-pane" aria-selected="false" th:text="#{Network}">Network</button>
-								 </li>
-								 <li class="nav-item visually-hidden">
-								 	<button  type="button" id="userTabRedundancy" class="nav-link"  data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane" role="tab" aria-controls="redundancy-tab-pane" aria-selected="false">Redundancy</button>
-								 </li>
-								 <li class="nav-item">
-								 	<button  type="button" id="userTabCOM" class="nav-link"  data-bs-toggle="tab" data-bs-target="#com-tab-pane" role="tab" aria-controls="com-tab-pane" aria-selected="false">COM</button>
-								 </li>
-							</ul>
+	<div class="language-selector" th:fragment="languageSelect">
 
-							<div class="tab-content text-cente">
-								<div class="tab-pane fade" id="alarms-tab-pane" role="tabpanel" aria-labelledby="alarm-tab" tabindex="0">
-									<div class="placeholder-wave">
- 										<div class="row justify-content-evenly mb-2">
-  											<span class="placeholder col-5"></span>
-  											<span class="placeholder col-5"></span>
-  										</div>
- 										<div class="row justify-content-evenly mb-2">
-  											<span class="placeholder col-5"></span>
-  											<span class="placeholder col-5"></span>
-  										</div>
- 										<div class="row justify-content-evenly mb-2">
-  											<span class="placeholder col-5"></span>
- 	 										<span class="placeholder col-5"></span>
-  										</div>
-  									</div>
- 								</div>
-								<div class="tab-pane fade" id="network-tab-pane" role="tabpanel" aria-labelledby="network-tab" tabindex="0">
+		<!-- Current language -->
+		<div class="language-current">
+			<label> <img
+				th:src="'/images/flags/f-' + ${#locale.toLanguageTag()} + '.png'"
+				src="/images/flags/f-english.png" alt="Language"> <span
+				th:text="#{languageSelect}"> Select Language </span>
+			</label>
+		</div>
+
+		<!-- Language choices -->
+		<div class="language-options">
+
+			<a th:if="${#locale.language} != 'en'" th:href="@{?lang=en}"> <img
+				src="/images/flags/f-en.png" alt=""> <span>English</span>
+			</a> <a th:if="${#locale.language} != 'fr'" th:href="@{?lang=fr}"> <img
+				src="/images/flags/f-fr.png" alt=""> <span>Français</span>
+			</a> <a th:if="${#locale.toLanguageTag()} != 'zh'" th:href="@{?lang=zh}"> <img
+				src="/images/flags/f-zh.png" alt=""> <span>中文</span>
+			</a><a th:if="${#locale.toLanguageTag()} != 'zh-TW'" th:href="@{?lang=zh-TW}"> <img
+				src="/images/flags/f-zh-TW.png" alt=""> <span>繁體中文</span>
+			</a>
+
+		</div>
+	</div>
+	<div class="container-fluid">
+		<div class="row g-1">
+			<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12"
+				th:fragment="serial-port">
+				<div class="row row-cols-1">
+					<div class="col">
+						<img src="../static/images/logo.png" th:src="@{/images/logo.png}"
+							class="img-fluid" alt="Logo" />
+					</div>
+					<h4 class="text-center" th:text="'IRT GUI v.' + ${version}"></h4>
+					<div class="col form-floating mb-3">
+						<select id="serialPort" class="form-select"
+							aria-label="Select Serial Port">
+							<option selected="selected" disabled="disabled" hidden="hidden"
+								th:text="#{Select Serial Port}">Select Serial Port</option>
+						</select> <label for="serialPort" th:text="#{Serial Port} + ' (RS485)'">Serial
+							Port (RS485)</label>
+					</div>
+					<div class="col form-floating mb-3">
+						<select id="baudrate" class="form-select"
+							aria-label="Select Serial Port">
+							<option th:each="br : ${baudrates}" th:text="${br.value}">Baudrate</option>
+						</select> <label for="baudrate" th:text="#{Baudrate}">Baudrate</label>
+					</div>
+					<div class="col form-floating mb-3">
+						<input id="unitAddress" type="number" class="form-control"
+							value="254" /> <label for="unitAddress"
+							th:text="#{Unit Address}">Unit Address</label>
+					</div>
+					<div class="col mb-3">
+						<input id="btnStart" type="checkbox" class="btn-check"
+							disabled="disabled" /> <label for="btnStart"
+							class="btn btn-outline-primary form-control" th:text="#{Start}">START</label>
+					</div>
+					<div class="col mb-3">
+						<div id="summaryAlarmCard" class="card">
+							<div class="card-body">
+								<h6 id="summaryAlarmTitle" class="card-title text-center p-2"></h6>
+							</div>
+						</div>
+					</div>
+					<div class="col mb-3">
+						<a id="consoleLink" class="btn btn-outline-secondary form-control" href="/console"
+							th:text="#{Console}">Console</a>
+					</div>
+					<div class="col mb-3">
+						<input id="fwUpgrade" type="file" accept=".pkg" hidden="hidden">
+						<label for="fwUpgrade"
+							class="btn btn-outline-secondary form-control disabled"
+							th:text="#{Firmware Upgrade}">Firmware Upgrade</label><br>
+					</div>
+					<div class="col mb-3">
+						<input id="btnShowErrors" type="checkbox" class="btn-check" /> <label
+							for="btnShowErrors"
+							class="btn btn-outline-info opacity-75 form-control"
+							th:text="#{Show Messages}">SHow Messages</label>
+					</div>
+					<div id="connections"
+						class="col text-center text-primary-emphasis fs-5 mb-3"></div>
+					<div class="col">
+						<button type="button" id="appExit"
+							class="btn btn-outline-dark form-control" th:text="#{Exit}">Exit</button>
+					</div>
+				</div>
+			</div>
+			<div class="col">
+				<div id="unitsSelect" class="row border p-2 m-2"></div>
+				<div class="row">
+					<div class="col-lg-6 col-12 mt-2">
+						<div class="card infoCard" th:fragment="infoCard">
+							<div class="card-body info">
+								<div class="placeholder-wave">
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
 								</div>
-								<div class="tab-pane fade" id="redundancy-tab-pane" role="tabpanel" aria-labelledby="redundancy-tab" tabindex="0">
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 col-12 mt-2">
+						<div class="card measurementCard" th:fragment="measurementCard">
+							<div class="card-body measurement">
+								<div class="placeholder-wave">
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
 								</div>
-								<div class="tab-pane fade" id="com-tab-pane" role="tabpanel" aria-labelledby="com-tab" tabindex="0">
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 col-12 mt-2">
+						<div class="card controlCard" th:fragment="controlCard">
+							<div class="card-body control">
+								<div class="placeholder-wave">
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+									<div class="row justify-content-evenly mb-2">
+										<span class="placeholder col-5"></span> <span
+											class="placeholder col-5"></span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="col-lg-6 col-12 mt-2">
+						<div id="userCard" class="card" th:fragment="userPanels">
+							<div class="card-body userPanels">
+								<ul class="nav nav-tabs">
+									<li class="nav-item">
+										<button type="button" id="userTabAlarm" class="nav-link"
+											data-bs-toggle="tab" data-bs-target="#alarms-tab-pane"
+											role="tab" aria-controls="alarms-tab-pane"
+											aria-selected="false" th:text="#{Alarms}">Alarms</button>
+									</li>
+									<li class="nav-item">
+										<button type="button" id="userTabNetwork" class="nav-link"
+											data-bs-toggle="tab" data-bs-target="#network-tab-pane"
+											role="tab" aria-controls="network-tab-pane"
+											aria-selected="false" th:text="#{Network}">Network</button>
+									</li>
+									<li class="nav-item visually-hidden">
+										<button type="button" id="userTabRedundancy" class="nav-link"
+											data-bs-toggle="tab" data-bs-target="#redundancy-tab-pane"
+											role="tab" aria-controls="redundancy-tab-pane"
+											aria-selected="false" th:text="#{redundancy}">Redundancy</button>
+									</li>
+									<li class="nav-item">
+										<button type="button" id="userTabCOM" class="nav-link"
+											data-bs-toggle="tab" data-bs-target="#com-tab-pane"
+											role="tab" aria-controls="com-tab-pane" aria-selected="false"
+											th:text="#{com}">COM</button>
+									</li>
+								</ul>
+
+								<div class="tab-content text-cente">
+									<div class="tab-pane fade" id="alarms-tab-pane" role="tabpanel"
+										aria-labelledby="alarm-tab" tabindex="0">
+										<div class="placeholder-wave">
+											<div class="row justify-content-evenly mb-2">
+												<span class="placeholder col-5"></span> <span
+													class="placeholder col-5"></span>
+											</div>
+											<div class="row justify-content-evenly mb-2">
+												<span class="placeholder col-5"></span> <span
+													class="placeholder col-5"></span>
+											</div>
+											<div class="row justify-content-evenly mb-2">
+												<span class="placeholder col-5"></span> <span
+													class="placeholder col-5"></span>
+											</div>
+										</div>
+									</div>
+									<div class="tab-pane fade" id="network-tab-pane"
+										role="tabpanel" aria-labelledby="network-tab" tabindex="0">
+									</div>
+									<div class="tab-pane fade" id="redundancy-tab-pane"
+										role="tabpanel" aria-labelledby="redundancy-tab" tabindex="0">
+									</div>
+									<div class="tab-pane fade" id="com-tab-pane" role="tabpanel"
+										aria-labelledby="com-tab" tabindex="0"></div>
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+			<div id="cover" class="page-cover"></div>
 		</div>
-		<div id="cover" class="page-cover"></div>
-	</div>
-	<footer class="row align-items-center py-3 my-4 border-top" th:fragment="footer">
-			<div class="col-auto"><img alt="https://www.irttechnologies.com" src="/qr-code?text=https://www.irttechnologies.com"></div>
+		<footer class="row align-items-center py-3 my-4 border-top"
+			th:fragment="footer">
+			<div class="col-auto">
+				<img alt="https://www.irttechnologies.com"
+					src="/qr-code?text=https://www.irttechnologies.com">
+			</div>
 			<div class="col text-center">
-				 <a href="https://www.irttechnologies.com" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="IRT Technologies" target="_blank"><img class="logo-sm" src="/images/logo.png" alt="logo"></a>
-				 <span class="mb-3 mb-md-0 text-body-secondary">© 2026 IRT Technologies, Inc</span>
-			</div> 
-			<div class="col-auto"><img alt="IRT GUI" src="/qr-code"></div>
-	</footer>
-</div>
+				<a href="https://www.irttechnologies.com"
+					class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1"
+					aria-label="IRT Technologies" target="_blank"><img
+					class="logo-sm" src="/images/logo.png" alt="logo"></a> <span
+					class="mb-3 mb-md-0 text-body-secondary">© 2026 IRT
+					Technologies, Inc</span>
+			</div>
+			<div class="col-auto">
+				<img alt="IRT GUI" src="/qr-code">
+			</div>
+		</footer>
+	</div>
 
-<div id="modal" class="modal fade" tabindex="-1">
+	<div id="modal" class="modal fade" tabindex="-1">
 		<div class="modal-dialog">
-    		<div class="modal-content">
-<!-- Modal Header -->
-      			<div class="modal-header">
-        			<h5 class="modal-title ml-3 text-primary">The IRT GUI has been completed.</h5>
-      			</div>
- <!-- Modal Body -->
-      			<div class="modal-body">
-      				<p>The IRT GUI has finished working.</p>
-      				<p>You can close your browser.</p>
-      			</div>
-    		</div>
-  		</div>
-</div>
-<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
-</div>
-<th:block th:fragment="np">
-	<script src="/js/np/jquery.min.js"></script>
-	<script src="/js/np/js.cookie.min.js"></script>
-	<script src="/js/np/bootstrap.bundle.min.js"></script>
-</th:block>
+			<div class="modal-content">
+				<!-- Modal Header -->
+				<div class="modal-header">
+					<h5 class="modal-title ml-3 text-primary">The IRT GUI has been
+						completed.</h5>
+				</div>
+				<!-- Modal Body -->
+				<div class="modal-body">
+					<p>The IRT GUI has finished working.</p>
+					<p>You can close your browser.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="toastContainer"
+		class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+	<th:block th:fragment="np">
+		<script src="/js/np/jquery.min.js"></script>
+		<script src="/js/np/js.cookie.min.js"></script>
+		<script src="/js/np/bootstrap.bundle.min.js"></script>
+	</th:block>
 	<script th:inline="javascript" th:fragment="language-control">
-    /*<![CDATA[*/
-		const localeInfo = Cookies.get('localeInfo');
-		if(localeInfo === 'fr' || localeInfo === 'en')
-			$('.language-selector').removeClass('visually-hidden');
-		else{
-			$('<div>', {class: 'alert alert-warning alert-dismissible fade show', role: 'alert'})
-				.append($('<strong>').text('To use internationalization, you must enable cookies.'))
-				.append($('<button>', {type: 'button', class: 'btn-close', 'data-bs-dismiss': 'alert', 'aria-label': 'Close'}))
-				.prependTo('body');
-		}
-		$('.language-selector').click(()=>{
-			const lang = /*[[${lang}]]*/ 'en';
-			Cookies.set('localeInfo', lang === 'en' ? 'fr' : 'en', { expires: 99, path: '/' });
-			location.reload();
-		});
-		const txtStart = /*[[#{Start}]]*/ 'START';
-		const txtStop = /*[[#{Stop}]]*/ 'STOP';
-		const txtConnection = /*[[#{connection}]]*/ 'connection';
-		const txtStatus = {}
-		txtStatus.Stopped = /*[[#{Stopped}]]*/ 'STOPPED';
-		txtStatus.TIMEOUT = /*[[#{TIMEOUT}]]*/ 'Timeout';
-		txtStatus.Closed = /*[[#{Closed}]]*/ 'CLOSED';
-		txtStatus['SP Error'] = /*[[#{SP Error}]]*/ 'SP ERROR';
-	/*]]>*/
-	//# sourceURL=language-control.js
+		/*<![CDATA[*/
+
+		const txtStart = /*[[#{Start}]]*/'START';
+		const txtStop = /*[[#{Stop}]]*/'STOP';
+		const txtConnection = /*[[#{connection}]]*/'connection';
+
+		const txtStatus = {};
+
+		txtStatus.Stopped = /*[[#{Stopped}]]*/'STOPPED';
+		txtStatus.TIMEOUT = /*[[#{TIMEOUT}]]*/'Timeout';
+		txtStatus.Closed = /*[[#{Closed}]]*/'CLOSED';
+		txtStatus['SP Error'] = /*[[#{SP Error}]]*/'SP ERROR';
+
+		/*]]>*/
+		//# sourceURL=language-control.js
 	</script>
 	<script th:if="${cleareCash}" th:inline="javascript">
-    /*<![CDATA[*/
-		const newVersionTitle = /*[[#{newVersionTitle}]]*/ 'The GUI version differs from the previous one';
-		const newVersionMessage = /*[[#{newVersionMessage}]]*/ 'If you are having problems with the GUI, try clearing your browser cache.';
-		const $m =
-		$('<div>', {class: 'modal fade', tabindex: -1})
-		.append(
-				$('<div>', {class: 'modal-dialog'})
-				.append(
-						$('<div>', {class: 'modal-content'})
-						.append(
-								$('<div>', {class: 'modal-header'})
-								.append($('<h5>', {class: 'modal-title ml-3 text-primary', text: newVersionTitle}))
-								.append($('<button>', {type: 'button', class: 'btn-close', 'data-bs-dismiss': 'modal', 'aria-label': 'Close'}))
-						)
-						.append(
-								$('<div>', {clsaa: 'modal-body'})
-								.append($('<div>', {class: 'container'})
-										.append($('<p>', {class: 'text-center m-3', html: newVersionMessage}))
-								)
-						)
-				)
-		);
-		new bootstrap.Modal($m).show();
-	/*]]>*/
-	//# sourceURL=new-version-modal.js
+		/*<![CDATA[*/
+		const newVersionTitle = /*[[#{newVersionTitle}]]*/'The GUI version differs from the previous one';
+		const newVersionMessage = /*[[#{newVersionMessage}]]*/'If you are having problems with the GUI, try clearing your browser cache.';
+
+		const modalDiv = document.createElement('div');
+		modalDiv.className = 'modal fade';
+		modalDiv.tabIndex = -1;
+
+		const modalDialog = document.createElement('div');
+		modalDialog.className = 'modal-dialog';
+
+		const modalContent = document.createElement('div');
+		modalContent.className = 'modal-content';
+
+		// Header
+		const modalHeader = document.createElement('div');
+		modalHeader.className = 'modal-header';
+
+		const title = document.createElement('h5');
+		title.className = 'modal-title ml-3 text-primary';
+		title.textContent = newVersionTitle;
+		modalHeader.appendChild(title);
+
+		const closeBtn = document.createElement('button');
+		closeBtn.type = 'button';
+		closeBtn.className = 'btn-close';
+		closeBtn.setAttribute('data-bs-dismiss', 'modal');
+		closeBtn.setAttribute('aria-label', 'Close');
+		modalHeader.appendChild(closeBtn);
+
+		modalContent.appendChild(modalHeader);
+
+		// Body
+		const modalBody = document.createElement('div');
+		modalBody.className = 'modal-body';
+
+		const container = document.createElement('div');
+		container.className = 'container';
+
+		const p = document.createElement('p');
+		p.className = 'text-center m-3';
+		p.innerHTML = newVersionMessage;
+		container.appendChild(p);
+
+		modalBody.appendChild(container);
+		modalContent.appendChild(modalBody);
+
+		modalDialog.appendChild(modalContent);
+		modalDiv.appendChild(modalDialog);
+		document.body.appendChild(modalDiv);
+
+		new bootstrap.Modal(modalDiv).show();
+		/*]]>*/
+		//# sourceURL=new-version-modal.js
 	</script>
-	<script type="module" src="../static/js/worker.js" th:src="@{/js/worker.js}"></script>
+	<script type="module" src="../static/js/worker.js"
+		th:src="@{/js/worker.js}"></script>
 
 </body>
 </html>

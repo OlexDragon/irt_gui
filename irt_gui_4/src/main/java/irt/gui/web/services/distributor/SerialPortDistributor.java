@@ -1,4 +1,4 @@
-package irt.gui.web.services;
+package irt.gui.web.services.distributor;
 
 import java.util.concurrent.FutureTask;
 

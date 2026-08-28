@@ -36,16 +36,15 @@ import io.nayuki.qrcodegen.QrCode;
 import irt.gui.web.Gui4;
 import irt.gui.web.beans.Login;
 import irt.gui.web.services.ConnectionCounter;
-import irt.gui.web.services.IrtSerialPort;
-import irt.gui.web.services.SerialPortDistributor;
 import irt.gui.web.services.ThreadWorker;
+import irt.gui.web.services.distributor.SerialPortDistributor;
+import irt.gui.web.services.serialPort.IrtSerialPort;
 
 @RestController
 public class Gui4RestController {
 	private final static Logger logger = LogManager.getLogger();
 
 	@Autowired @Qualifier("jSerialComm") IrtSerialPort serialPort;
-	@Autowired ConnectionCounter counter;
 	@Autowired SerialPortDistributor distributor;
 
 	@Value("${server.port}") String serverPort;
@@ -96,39 +95,6 @@ public class Gui4RestController {
 				.body(new InputStreamResource(new ByteArrayInputStream(byteArray)));
 	}
 
-	@RequestMapping("connection/count")
-    int connectionCount() {
-		return counter.getConnectionCount();
-	}
-
-	private FutureTask<Void> shutdownTask;
-	private final Callable<Void> shutdownDelay = new Callable<Void>(){
-
-		@Override
-		public Void call() throws Exception {
-			TimeUnit.HOURS.sleep(1);
-			Gui4.exit();
-			return null;
-		}
-	};
-	@RequestMapping("connection/add")
-    int addConnection(String connectionId) {
-		counter.add(connectionId);
-		ThreadWorker.runThread(()->{
-			synchronized (Gui4RestController.class) {
-				Optional.ofNullable(shutdownTask).ifPresent(ft->ft.cancel(true));
-				shutdownTask = new FutureTask<Void>(shutdownDelay);
-				ThreadWorker.runThread(shutdownTask);
-			}
-		});
-		return connectionCount();
-	}
-
-	@RequestMapping("connection/remove")
-    void removeConnection(String connectionId) {
-		counter.remove(connectionId);
-	}
-
 	@RequestMapping("ping")
     Boolean ping() {
 		return true;
@@ -154,6 +120,7 @@ public class Gui4RestController {
 		});
 		return true;
 	}
+
 	@RequestMapping("r-login")
 	Login rLogin() {
 

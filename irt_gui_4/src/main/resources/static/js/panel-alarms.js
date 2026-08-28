@@ -1,176 +1,191 @@
 import * as serialPort from './serial-port.js'
-import groupId from './packet/packet-properties/group-id.js'
-import packetId from './packet/packet-properties/packet-id.js'
-import {code, parser} from './packet/parameter/alarm.js'
-import {type as unitType, onTypeChange } from './panel-info.js'
+import groupId from './packet/packet-properties/group-id.mjs'
+import packetId from './packet/packet-properties/packet-id.mjs'
+import { code, parser } from './packet/parameter/alarm.js'
+import { onTypeChange } from './panel-info.js'
+import translator from './helper/text-translator.mjs';
 
-const $card = $('#userCard');
-const $body = $('#alarms-tab-pane');
+const card = document.getElementById('userCard');
+const body = document.getElementById('alarms-tab-pane');
 const codeIdIDs = code('IDs');
 const codeIdDescription = code('description');
 const codeIdStatus = code('status');
 
-const action = { name: 'panel-alarms', packetId: packetId.alarmIDs, groupId: groupId.alarm, data: {parameterCode: codeIdIDs }, function: 'f_Alarms'};
-onTypeChange(()=>{
-	action.IDs = undefined;
-	action.packetId = packetId.alarmIDs
-	action.data.parameterCode = codeIdIDs;
-	readAlarmDescription = true;
-	descriptionIndex = 0;
-	$body.empty();
-	map.clear();
+const action = { name: 'panel-alarms', packetId: packetId.alarmIDs, groupId: groupId.alarm, data: { parameterCode: codeIdIDs }, function: 'f_Alarms' };
+onTypeChange(() => {
+    action.IDs = undefined;
+    action.packetId = packetId.alarmIDs
+    action.data.parameterCode = codeIdIDs;
+    readAlarmDescription = true;
+    descriptionIndex = 0;
+    body.innerHTML = '';
+    map.clear();
 })
-//const packetIdSummary = f_PacketId('alarmSummary');
-//const packetIdAlarmIDs = f_PacketId('alarmIDs');
-//const packetIdAlarmDescription = f_PacketId('alarmDescription');
-//const packetIdAlarm = f_PacketId('alarm');
 
 let interval;
 let delay = 5000;
 const map = new Map();
 
-export function start(){
+export function start() {
 
-	if(interval)
-		return;
+    if (interval)
+        return;
 
-	action.buisy = false;
-	run();
-	clearInterval(interval) ;
-	interval = setInterval(run, delay);
+    action.busy = false;
+    stop();
+    run();
+    interval = setInterval(run, delay);
 }
 
-export function stop(){
-	clearInterval(interval) ;
-	interval = undefined;
+export function stop() {
+    clearInterval(interval);
+    interval = undefined;
 }
 
 let readAlarmDescription = true;
-function run(){
-	if(!serialPort.doRun()){
-		stop();
-		return;
-	}
+function run() {
+    if (!serialPort.doRun()) {
+        stop();
+        return;
+    }
 
-	if(action.buisy){
-		console.warn('action.buisy');
-		return
-	}
+    if (action.busy) {
+        console.warn('action.busy');
+        return
+    }
 
-	action.buisy = true;
+    action.busy = true;
 
-	if(action.IDs){
+    if (action.IDs) {
 
-		if(readAlarmDescription)
-			getAlarmDescription();
-		else
-			serialPort.postObject($card, action);
+        if (readAlarmDescription)
+            getAlarmDescription();
+        else
+            serialPort.postObject(card, action);
 
-	}else{
+    } else {
 
-		serialPort.postObject($card, action);
-	}
+        serialPort.postObject(card, action);
+    }
 
 }
 
 let alarmIndex;
-action.f_Alarms = function(packet){
-	alarmIndex = -1;
-	packet.payloads.forEach(parseAlarm);
-}
-function parseAlarm(pl){
-
-	switch(pl.parameter.code){
-	case codeIdIDs:
-		action.IDs = action.data.value = parser(pl.parameter.code)(pl.data);
-		action.packetId = packetId.alarmDescription;
-		action.data.parameterCode = codeIdDescription;
-		run();
-		break; 
-
-	case codeIdDescription:
-		showDescription(pl);
-		getAlarmDescription();
-		break;
-
-//	case codeIdName:
-//		showName(pl);
-//		break;
-
-	case codeIdStatus:
-		showValue(pl);
-		break;
-
-	default:
-		console.warn(pl);
-	}
-}
-function showValue(pl){
-	const p = parser(pl.parameter.code);
-	if(!p){
-		console.warn('Parser not found')
-		return;
-	}
-	const value = p(pl.data);
-	const $row = getRow(value.id);
-	const $div = $row.find('.value');
-	if($div.text()!==value.text)
-		$div.text(value.text);
-	if(!$div.hasClass(value.boorstrapClass))
-		removeCalsses($div).addClass('col ' + value.boorstrapClass)
-
-	if(value.index>alarmIndex)
-		alarmIndex = value.index;
+action.f_Alarms = function(packet) {
+    alarmIndex = -1;
+    packet.payloads.forEach(parseAlarm);
 }
 
-function showDescription(pl){
-	const p = parser(pl.parameter.code);
-	if(!p){
-		console.warn('Parser not found')
-		return;
-	}
-	const value = p(pl.data);
-	const $row = getRow(value.id);
-	const $div = $row.find('.name');
-	if($div.text()!==value.string)
-		$div.text(value.string);
+function parseAlarm(pl) {
+
+    switch (pl.parameter.code) {
+        case codeIdIDs:
+
+            action.IDs = action.data.value =
+                parser(pl.parameter.code)(pl.data);
+
+            action.packetId = packetId.alarmDescription;
+            action.data.parameterCode = codeIdDescription;
+
+            getAlarmDescription();
+
+            break;
+
+        case codeIdDescription:
+            showDescription(pl);
+            getAlarmDescription();
+            break;
+
+        case codeIdStatus:
+            showValue(pl);
+            break;
+
+        default:
+            console.warn(pl);
+    }
+}
+
+function showValue(pl) {
+    const p = parser(pl.parameter.code);
+    if (!p) {
+        console.warn('Parser not found')
+        return;
+    }
+    const value = p(pl.data);
+    const row = getRow(value.id);
+    const div = row.querySelector('.value');
+    if (div.textContent !== value.text)
+        div.textContent = value.text;
+    if (!div.classList.contains(value.boorstrapClass))
+        removeClasses(div).classList.add('col', value.boorstrapClass)
+
+    if (value.index > alarmIndex)
+        alarmIndex = value.index;
+}
+
+function showDescription(pl) {
+    const p = parser(pl.parameter.code);
+    if (!p) {
+        console.warn('Parser not found')
+        return;
+    }
+    const value = p(pl.data);
+    const row = getRow(value.id);
+    const div = row.querySelector('.name');
+	const text = translator.translate(value.string); // In this case, the alarm name came from the device.
+    if (div.textContent !== text)
+        div.textContent = text;
 }
 
 let timeout;
-function getRow(id){
-	let $row = map.get(id);
-	if(!$row?.length){
-		$row = $('<div>', {id: 'row' + id, class: 'row mt-1'})
-				.append($('<div>', {class: 'col name text-end fw-bold'}))
-				.append($('<div>', {class: 'col value text-center fs-6'}));
+function getRow(id) {
+    let row = map.get(id);
+    if (!row) {
+        row = document.createElement('div');
+        row.id = 'row' + id;
+        row.className = 'row mt-1';
 
-		map.set(id, $row);
-		clearTimeout(timeout);
-		timeout = setTimeout(()=>$body.append(Array.from(map.values())), 100);
-	}
-	return $row;
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'col name text-end fw-bold';
+        row.appendChild(nameDiv);
+
+        const valueDiv = document.createElement('div');
+        valueDiv.className = 'col value text-center fs-6';
+        row.appendChild(valueDiv);
+
+        map.set(id, row);
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            const fragment = document.createDocumentFragment();
+            for (const row of map.values()) {
+                fragment.appendChild(row);
+            }
+            body.appendChild(fragment);
+        }, 100);
+    }
+    return row;
 }
 
-function removeCalsses($el){
-	const classes = $el.attr('class').split(' ').filter(c=>c.startsWith('text-bg-')).join(' ');
-	$el.removeClass(classes);
-	return $el;
+function removeClasses(el) {
+    const classes = el.className.split(' ').filter(c => c.startsWith('text-bg-'));
+    el.classList.remove(...classes);
+    return el;
 }
 
 let descriptionIndex = 0;
-function getAlarmDescription(){
-	if(descriptionIndex>=action.IDs.length){
-		action.packetId = packetId.alarm;
-		action.data.parameterCode = codeIdStatus;
-		action.data.value = action.IDs;
-		readAlarmDescription = false;
-		run();
-		return;
-	}
-	action.update = true;
+function getAlarmDescription() {
+    if (descriptionIndex >= action.IDs.length) {
+        action.packetId = packetId.alarm;
+        action.data.parameterCode = codeIdStatus;
+        action.data.value = action.IDs;
+        readAlarmDescription = false;
+        run();
+        return;
+    }
+    action.update = true;
 
-	action.data.value = [action.IDs[descriptionIndex]];
-	++descriptionIndex;
-	serialPort.postObject($card, action);
+    action.data.value = [action.IDs[descriptionIndex]];
+    ++descriptionIndex;
+    serialPort.postObject(card, action);
 
 }

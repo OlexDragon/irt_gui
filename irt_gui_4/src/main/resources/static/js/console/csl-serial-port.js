@@ -1,95 +1,142 @@
+// csl-serial-port.js
+
 import Baudrate from '../classes/baudrate.js'
+import { canExit, stop as stopCounter } from '../helper/connection-counter-ui.mjs';
 
-export let serialPort; 
 
-$('#serialPort').next().text(txtSerialPort232)
-$('#unitAddress').parent().hide();
-$('#btnStart').parent().hide();
-$('#summaryAlarmCard').parent().hide().next().hide();
-$('#fwUpgrade').parent().hide();
-
-const $serialPort = $('#serialPort').change(serialPortChange);
-const $baudrate = $('#baudrate');
-const $connections = $('#connections');
-const $modal = $('#modal');
-
-export const baudrate = new Baudrate($baudrate);
-
-const sessionId = 'sessionId' + Math.random().toString(16).slice(2);
-let conCheckInterval;
-(function getPortNames(){
-	countConnections();
-	conCheckInterval = setInterval(countConnections, 20000);
-	$.get('/serial/ports')
-	.done(ports=>{
-		if(!ports?.length){
-//			coverButSerial(true);
-			return;
-		}
-		const serialPortCookies = Cookies.get('cslSerialPort');
-		ports.forEach(name=>{
-			const selected = serialPortCookies === name;
-			if(selected)
-				serialPort = name;
-			$('<option>', {text: name, selected: selected}).appendTo($serialPort);
-			if(selected){
-//				bthStartDisable(false);
-				$serialPort.change();
-			}
-		});
-//		if($serialPort.val())
-//			coverButSerial();
-//		else
-//			coverButSerial(true);
-	})
-	.fail((jqXHR)=>{
-
-		if(jqXHR.responseJSON?.message){
-			if(showError)
-				showToast(jqXHR.responseJSON.error, jqXHR.responseJSON.message, 'text-bg-danger bg-opacity-50');
-		}else{
-			const status = f_alarmStatus('Closed');
-			if(txtStatus[status.text])
-				$('#summaryAlarmTitle').text(txtStatus[status.text]);
-			else
-				$('#summaryAlarmTitle').text(status.text);
-		}
-
-	});
-})();
-let failsCount = 0;
-function countConnections(){
-	$.post('/connection/add', {connectionId: sessionId})
-	.done(count=>{
-		failsCount = 0;
-		const text = (count + ' ' + txtConnection) + (count===1 ? '' : 's');
-		$connections.text()!==text && $connections.text(text);
-	})
-	.fail(()=>{
-		if(failsCount > 3)
-			location.reload();
-		failsCount++;
-	});
+function hideElement(element) {
+    element.style.display = 'none';
 }
-function serialPortChange(){
-	serialPort = $serialPort.val();
-	Cookies.set('cslSerialPort', serialPort, {expires: 365, path: '/console'});
-}
-$('#appExit').click(async ()=>{
 
-	try{
-		const x = await $.post('/connection/add', {connectionId: sessionId});
+// DOM element references
+const serialPortSelect = document.getElementById('serialPort');
+serialPortSelect.addEventListener('change', serialPortChange);
+serialPortSelect.nextElementSibling.textContent = txtSerialPort232;
 
-		if(x < 2 || confirm(`${x - 1} more connection found.\nAre you sure you want to close this program?`))
-			$.get('/exit').always(showExitModal);
+const baudrateElement = document.getElementById('baudrate');
+export const baudrate = new Baudrate(baudrateElement, { storageKey: 'console' });
+export let serialPort;
 
-		}catch(e){
-		showExitModal();
-	}
+hideElement(document.getElementById('btnStart')?.parentElement);
+hideElement(document.getElementById('unitAddress')?.parentElement);
+hideElement(document.getElementById('fwUpgrade')?.parentElement);
+
+const summaryAlarmCard = document.getElementById('summaryAlarmCard');
+hideElement(summaryAlarmCard);
+
+const guiLink = document.getElementById('consoleLink');
+guiLink.textContent = 'GUI';
+guiLink.href = '/';
+
+document.getElementById('appExit').addEventListener('click', async () => {
+
+    try {
+
+        if (await canExit()) {
+
+            stopCounter();
+            await showExitModal();
+
+            fetch('/exit', {
+                keepalive: true
+            });
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
 });
-function showExitModal(){
-	$modal.load('/modal/exit');
-	$modal.attr('data-bs-backdrop', 'static');
-	$modal.modal('show');
-	clearInterval(conCheckInterval);
+
+// Event listener for serial port change
+function serialPortChange() {
+    serialPort = serialPortSelect.value;
+    localStorage.setItem('cslSerialPort', serialPort);
+}
+
+
+
+(async function getPortNames() {
+
+    try {
+        const response = await fetch('/serial/ports');
+
+        if (!response.ok) {
+            try {
+                const errorData = await response.json();
+                if (errorData?.message) {
+                    if (showError)
+                        showToast(errorData.error, errorData.message, 'text-bg-danger bg-opacity-50');
+                } else {
+                    const status = f_alarmStatus('Closed');
+                    summaryAlarmTitle.textContent = status.text;
+                }
+            } catch {
+                const status = f_alarmStatus('Closed');
+                summaryAlarmTitle.textContent = status.text;
+            }
+            return;
+        }
+
+        const ports = await response.json();
+
+        const savedSerialPort = localStorage.getItem('cslSerialPort');
+        ports.forEach(name => {
+            const selected = savedSerialPort === name;
+            if (selected)
+                serialPort = name;
+            const option = document.createElement('option');
+            option.text = name;
+            option.selected = selected;
+            serialPortSelect.appendChild(option);
+            if (selected) {
+                btnStart.disabled = false;
+                serialPortSelect.dispatchEvent(new Event('change'));
+            }
+        });
+
+    } catch (error) {
+        console.error(error);
+    }
+})();
+
+const modal = document.getElementById('modal');
+async function showExitModal() {
+
+    let html;
+
+    try {
+
+        const response = await fetch('/modal/exit');
+
+        if (!response.ok)
+            throw new Error(`HTTP ${response.status}`);
+
+        html = await response.text();
+
+    } catch (error) {
+
+        console.error('Error loading exit modal:', error);
+
+        html = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">${translate('modal.exit', `guiClosed`)}</h5>
+                    </div>
+                    <div class="modal-body">
+					${translate('modal.exit', `guiClosedMessage`)}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    modal.innerHTML = html;
+    modal.setAttribute('data-bs-backdrop', 'static');
+
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
 }

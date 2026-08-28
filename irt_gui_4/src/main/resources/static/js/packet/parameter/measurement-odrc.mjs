@@ -19,7 +19,7 @@ measurement.Status.parser	 = 'do not show';
 
 measurement.Temperature = {}
 measurement.Temperature.code		 = 3;
-measurement.Temperature.parser		 = bytes=>parseToIrtValue(bytes, 10, ' °C');
+measurement.Temperature.parser		 = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' °C', measurementType: 'temperature' });
 
 measurement['WGS Status'] = {}
 measurement['WGS Status'].code		 = 4;

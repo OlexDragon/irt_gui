@@ -1,101 +1,128 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html	xmlns="http://www.w3.org/1999/xhtml"
-		xmlns:th="http://www.thymeleaf.org"
-		xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-		lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+	lang="en">
 
 <head>
-    <title>GUI - Production</title>
-    <meta charset="UTF-8"/>
-    <meta name="google" content="notranslate" />
-	<meta name="viewport" content="width=device-width, initial-scale=1"/>
-	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css' th:replace="home :: cssBootstrap"/>
-	<link rel='stylesheet' href='../static/css/home.css' th:href="@{/css/home.css}"/>
+<title>GUI - Production</title>
+<meta charset="UTF-8" />
+<meta name="google" content="notranslate" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel='stylesheet'
+	href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'
+	th:replace="home :: cssBootstrap" />
+<link rel='stylesheet' href='../static/css/home.css'
+	th:href="@{/css/home.css}" />
 </head>
 
 <body>
-<div class="container-fluid">
-	<div class="row g-1">
-		<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12" th:replace="home :: serial-port"></div>
-		<div class="col">
-			<div id="unitsSelect" class="row border p-2 m-2"></div>
-			<div class="row">
-				<div class="col-lg-6 col-12 mt-2">
-					<div class="card infoCard" th:replace="home :: infoCard"></div>
+	<div class="container-fluid">
+		<div class="row g-1">
+			<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12"
+				th:replace="home :: serial-port"></div>
+			<div class="col">
+				<div id="unitsSelect" class="row border p-2 m-2"></div>
+				<div class="row">
+					<div class="col-lg-6 col-12 mt-2">
+						<div class="card infoCard" th:replace="home :: infoCard"></div>
+					</div>
+					<div class="col-lg-6 col-12 mt-2">
+						<div class="card measurementCard"
+							th:replace="home :: measurementCard"></div>
+					</div>
+					<div class="col-lg-6 col-12 mt-2">
+						<div class="card controlCard" th:replace="home :: controlCard"></div>
+					</div>
+					<div class="col-lg-6 col-12 mt-2">
+						<div class="card userPanels" th:replace="home :: userPanels"></div>
+					</div>
 				</div>
-				<div class="col-lg-6 col-12 mt-2">
-					<div class="card measurementCard" th:replace="home :: measurementCard"></div>
-				</div>
-				<div class="col-lg-6 col-12 mt-2">
-                    <div class="card controlCard" th:replace="home :: controlCard"></div>
-                </div>
-				<div class="col-lg-6 col-12 mt-2">
-                    <div class="card userPanels" th:replace="home :: userPanels"></div>
-                </div>
-			</div>
-			<nav class="navbar mt-2">
-						<div>
-							<input type="radio" class="btn-check" id="cbDACs" name="prodactionNav" autocomplete="off" checked>
-							<label class="btn btn-outline-primary" for="cbDACs" title="Converter DACs">DACs</label>
+				<dir class="contaner-fruid">
+					<div class="navbar row mt-2">
+						<div class="col">
+							<input type="radio" class="btn-check" id="cbDACs"
+								name="productionNav" autocomplete="off" checked>
+							 <label
+								class="btn btn-outline-primary form-control" for="cbDACs"
+								title="Converter DACs">DACs</label>
 						</div>
-						<div class="ms-2">
-							<input type="radio" class="btn-check" id="cbDump" name="prodactionNav" autocomplete="off">
-							<label class="btn btn-outline-primary" for="cbDump" title="Diagnostic">Dump</label>
+						<div class="col ms-2">
+							<input type="radio" class="btn-check" id="cbDump"
+								name="productionNav" autocomplete="off"> <label
+								class="btn btn-outline-primary form-control" for="cbDump" title="Diagnostic">Dump</label>
 						</div>
-			</nav>
-			<div class="row m-2">
-				<div id="calModeDiv" class="card border p-1">
-					<input type="checkbox" class="btn-check" id="cbCalMode" autocomplete="off" disabled="disabled">
-					<label class="btn btn-outline-danger form-control" for="cbCalMode" title="Calibration Mode">Calibration </label>
+					</div>
+				</dir>
+				<div class="row m-2">
+					<div id="calModeDiv" class="card border p-1">
+						<input type="checkbox" class="btn-check" id="cbCalMode"
+							autocomplete="off" disabled="disabled"> <label
+							class="btn form-control" for="cbCalMode" title="Calibration Mode">Calibration
+						</label>
+					</div>
+				</div>
+				<div id="productionContent" class="contaner-fluid card"></div>
+				<div id="productionLogst" class="contaner-fluid card"></div>
+			</div>
+		</div>
+		<footer class="row align-items-center py-3 my-4 border-top"
+			th:replace="home :: footer">
+		<div class="col-auto">
+			<img alt="https://www.irttechnologies.com"
+				src="/qr-code?text=https://www.irttechnologies.com" />
+		</div>
+		<div class="col text-center">
+			<a href="https://www.irttechnologies.com"
+				class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1"
+				aria-label="IRT Technologies" target="_blank"><img
+				class="logo-sm" src="/images/logo-sm.png" alt="logo" /></a> <span
+				class="mb-3 mb-md-0 text-body-secondary">© 2025 IRT
+				Technologies, Inc</span>
+		</div>
+		<div class="col-auto">
+			<img alt="IRT GUI" src="/qr-code" />
+		</div>
+		</footer>
+	</div>
+
+	<div id="modal" class="modal fade" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<!-- Modal Header -->
+				<div class="modal-header">
+					<h5 class="modal-title ml-3 text-primary">The IRT GUI has been
+						completed.</h5>
+				</div>
+				<!-- Modal Body -->
+				<div class="modal-body">
+					<p>The IRT GUI has finished working.</p>
+					<p>You can close your browser.</p>
 				</div>
 			</div>
-			<div id="productionContent" class="contaner-fluid card"></div>
-			<div id="productionLogst" class="contaner-fluid card"></div>
 		</div>
 	</div>
-	<footer class="row align-items-center py-3 my-4 border-top" th:replace="home :: footer">
-			<div class="col-auto"><img alt="https://www.irttechnologies.com" src="/qr-code?text=https://www.irttechnologies.com"/></div>
-			<div class="col text-center">
-				 <a href="https://www.irttechnologies.com" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="IRT Technologies" target="_blank"><img class="logo-sm" src="/images/logo-sm.png" alt="logo"/></a>
-				 <span class="mb-3 mb-md-0 text-body-secondary">© 2025 IRT Technologies, Inc</span>
-			</div> 
-			<div class="col-auto"><img alt="IRT GUI" src="/qr-code"/></div>
-	</footer>
-</div>
-
-<div id="modal" class="modal fade" tabindex="-1">
-		<div class="modal-dialog">
-    		<div class="modal-content">
-<!-- Modal Header -->
-      			<div class="modal-header">
-        			<h5 class="modal-title ml-3 text-primary">The IRT GUI has been completed.</h5>
-      			</div>
- <!-- Modal Body -->
-      			<div class="modal-body">
-      				<p>The IRT GUI has finished working.</p>
-      				<p>You can close your browser.</p>
-      			</div>
-    		</div>
-  		</div>
-</div>
-<div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3">
-</div>
-<th:block th:replace="home :: np">
-	<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
-	<script src="/webjars/js-cookie/3.0.1/js.cookie.min.js"></script>
-	<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
-</th:block>
+	<div id="toastContainer"
+		class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+	<th:block th:replace="home :: np">
+		<script src="/webjars/jquery/3.7.1/jquery.min.js"></script>
+		<script src="/webjars/js-cookie/3.0.1/js.cookie.min.js"></script>
+		<script src="/webjars/bootstrap/5.3.5/js/bootstrap.bundle.min.js"></script>
+	</th:block>
 	<script th:replace="home :: language-control">
-	const txtStart = /*[[#{Start}]]*/ 'START';
-	const txtStop = /*[[#{Stop}]]*/ 'STOP';
-	const txtConnection = /*[[#{connection}]]*/ 'connection';
-	const txtStatus = {}
-	txtStatus.Stopped = /*[[#{Stopped}]]*/ 'STOPPED';
-	txtStatus.TIMEOUT = /*[[#{TIMEOUT}]]*/ 'Timeout';
-	txtStatus.Closed = /*[[#{Closed}]]*/ 'CLOSED';
-	txtStatus['SP Error'] = /*[[#{SP Error}]]*/ 'SP ERROR';
+		const txtStart = /*[[#{Start}]]*/'START';
+		const txtStop = /*[[#{Stop}]]*/'STOP';
+		const txtConnection = /*[[#{connection}]]*/'connection';
+		const txtStatus = {}
+		txtStatus.Stopped = /*[[#{Stopped}]]*/'STOPPED';
+		txtStatus.TIMEOUT = /*[[#{TIMEOUT}]]*/'Timeout';
+		txtStatus.Closed = /*[[#{Closed}]]*/'CLOSED';
+		txtStatus['SP Error'] = /*[[#{SP Error}]]*/'SP ERROR';
 	</script>
-	<script th:inline="javascript">/*<![CDATA[*/const admin = /*[[${#authorization.expression('hasRole(''ADMIN'')')}]]*/ false;/*]]>*/</script>
-	<script type="module" src="../static/js/production.js" th:src="@{/js/production.js}"></script>
+	<script th:inline="javascript">
+		/*<![CDATA[*/const admin = /*[[${#authorization.expression('hasRole(''ADMIN'')')}]]*/false;/*]]>*/
+	</script>
+	<script type="module" src="../static/js/production.js"
+		th:src="@{/js/production.js}"></script>
 </body>
 </html>

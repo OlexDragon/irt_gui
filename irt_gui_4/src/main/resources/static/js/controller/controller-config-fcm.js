@@ -1,6 +1,6 @@
 import ControllerConfig from './controller-config.js';
-import packetId from '../packet/packet-properties/packet-id.js';
-import groupId from '../packet/packet-properties/group-id.js';
+import packetId from '../packet/packet-properties/packet-id.mjs';
+import groupId from '../packet/packet-properties/group-id.mjs';
 
 export default class ControllerControlFcm extends ControllerConfig{
 
@@ -17,8 +17,8 @@ export default class ControllerControlFcm extends ControllerConfig{
 		}else
 			super._frequencyRange(val);
 	}
-	_onLoad(_, statusText){
-		super._onLoad(undefined, statusText);
+
+	_onLoad(){
 		$('#fcmSaveConfig').click(()=>this._sendChange(packetId.saveConfig, 0, 1, groupId.control)).parent().removeClass('visually-hidden');
 	}
 }

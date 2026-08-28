@@ -1,6 +1,6 @@
 import DACController from './controller-dac.js';
-import packetId from '../packet/packet-properties/packet-id.js';
-import groupId from '../packet/packet-properties/group-id.js';
+import packetId from '../packet/packet-properties/packet-id.mjs';
+import groupId from '../packet/packet-properties/group-id.mjs';
 import {parseToString, intToBytes} from '../packet/service/converter.js'
 import Register from '../packet/parameter/value/register.js'
 

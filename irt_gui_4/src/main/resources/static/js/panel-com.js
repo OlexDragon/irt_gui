@@ -1,6 +1,6 @@
 import * as serialPort from './serial-port.js'
-import groupId from './packet/packet-properties/group-id.js'
-import packetId from './packet/packet-properties/packet-id.js'
+import groupId from './packet/packet-properties/group-id.mjs'
+import packetId from './packet/packet-properties/packet-id.mjs'
 import ComControl from './classes/com-control.js'
 import protocol, {parser} from './packet/parameter/protocol.js'
 import { type as unitType } from './panel-info.js'
@@ -22,7 +22,7 @@ export function start(){
 	if(interval)
 		return;
 
-	action.buisy = false;
+	action.busy = false;
 	if(!unitType)
 		return;
 
@@ -83,12 +83,12 @@ function run(){
 		return;
 	}
 
-	if(action.buisy){
-		console.log('action.buisy');
+	if(action.busy){
+		console.log('action.busy');
 		return
 	}
 
-	action.buisy = true;
+	action.busy = true;
 
 	serialPort.postObject($card, action);
 }

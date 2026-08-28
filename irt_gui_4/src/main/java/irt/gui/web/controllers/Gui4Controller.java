@@ -1,7 +1,7 @@
 package irt.gui.web.controllers;
 
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -25,12 +24,9 @@ public class Gui4Controller {
 	@Value("${info.app.version}")
 	private String version;
 
-	@GetMapping
-    String home(@CookieValue(required = false) String localeInfo, Model model) {
-		logger.traceEntry("localeInfo ='{}'", localeInfo);
 
-		// Set Language
-		Optional.ofNullable(localeInfo).filter(s->s.equals("fr") || s.equals("en")).ifPresent(s->model.addAttribute("lang", s));
+	@GetMapping
+    String home(Model model) {
 
 		checkVersion(model);
 

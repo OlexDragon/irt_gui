@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import irt.gui.web.beans.RequestPacket;
-import irt.gui.web.services.IrtSerialPort;
-import irt.gui.web.services.SerialPortDistributor;
+import irt.gui.web.services.distributor.SerialPortDistributor;
+import irt.gui.web.services.serialPort.IrtSerialPort;
 import lombok.NonNull;
 
 @RestController

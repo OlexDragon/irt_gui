@@ -1,61 +1,70 @@
-export default class Controller{
+export default class Controller {
 
-	#parametersClass;
-	#name;
-	_toRead;
+    #parametersClass;
+    #name;
+    _toRead;
+    _$card
+    _card;
+    _root;
 
-	constructor($card){
-		this._$card = $card.find('div.control');
-	}
+    constructor(card) {
+        this._root = card instanceof Element ? card : card[0];
+		this._card = this._root.querySelector('div.control');
+		this._$card = $(this._card);
+    }
 
-	get name(){
-		return this.#name;
-	}
-	set name(name){
-		if(this.#name){
-			console.error('A name can only be defined once.')
-			return;
-		}
+    _onLoad() {
+    }
 
-		this.#name = name;
-	}
+    get name() {
+        return this.#name;
+    }
+    set name(name) {
+        if (this.#name) {
+            console.error('A name can only be defined once.');
+            return;
+        }
 
-	/**
-     * @param {[]} pls
+        this.#name = name;
+    }
+
+    /**
+     * @param {Array} payloads
      */
-	set update(pls){
-		throw new Error('Setter parameter() must be implemented. Entry: ' + pls);
-	}
+    set update(payloads) {
+        throw new Error(
+            `Setter update() must be implemented. Entry: ${payloads}`
+        );
+    }
 
-/**
- * @param {Array} payloads
- */
-	set update(payloads){
-		throw new Error('Setter parameter() must be implemented. Entry: ' + payloads);
-	}
+    /**
+     * @param {{}} p
+     */
+    get parametersClass() {
+        return this.#parametersClass;
+    }
+    /**
+     * @param {{}} p
+     */
+    set parametersClass(p) {
+        this.#parametersClass = p;
+        this._toRead = p.readAllCode;
+    }
 
-	/**
-	 * @param {{}} p
-	 */
+    get toRead() {
+//        console.log('[get toRead()]', { _toRead: this._toRead });
+        if (!this._toRead == null)
+            return;
+        return Object.values(this._toRead);
+    }
 
-	get parametersClass(){
-		return this.#parametersClass;
-	}
-	/**
-	 * @param {{}} p
-	 */
-	set parametersClass(p) {
-		this.#parametersClass = p;
-		this._toRead = p.all;
-	}
-	get toRead(){
-		if(!this._toRead)
-			return;
-		return Object.values(this._toRead).map(({code})=>code);
-	}
-	stop(){}
-	destroy(){
-		this._$card.empty();
-		this._$card = null;
-	}
+	start(){}
+    stop() {}
+
+    destroy() {
+        if (this._card) {
+            this._card.innerHTML = '';
+            this._card = null;
+        }
+    }
 }

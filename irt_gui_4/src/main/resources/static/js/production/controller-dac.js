@@ -1,6 +1,6 @@
 import Controller from './controller.js'
-import packetId from '../packet/packet-properties/packet-id.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import packetId from '../packet/packet-properties/packet-id.mjs'
+import groupId from '../packet/packet-properties/group-id.mjs'
 import deviceDebug from '../packet/parameter/device-debug.js'
 import Register from '../packet/parameter/value/register.js'
 import ValueControl from './value-control.js'
@@ -155,7 +155,6 @@ export default class DACController extends Controller{
 	}
 	
 	#focuse({currentTarget: el}){
-		console.log('DAC focuse:', el.id);
 		this._selected?.focusOut();
 		this._selected = new ValueControl(this.#$savedValue, $(el), this._$valueRange, this.#$valueStep);
 		this._selected.onChange(this._sendCommand.bind(this));

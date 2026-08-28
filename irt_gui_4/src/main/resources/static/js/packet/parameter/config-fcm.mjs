@@ -1,121 +1,94 @@
-import * as converter from '../service/converter.js'
-import Parameter  from "./parameters.mjs";
+// config-fcm.mjs
+import {
+    parseToIrtValue,
+    parseToBigInt,
+    parseToBigIntArray,
+    parseToShortArray,
+    parseToBoolean,
+    parseToOnOffStatus,
+    parseToOnOff,
+    parseToCapabilities,
+    parseToInt
+} from '../service/converter.js';
 
-export default class ControlFcm extends Parameter{
+import Parameter from "./parameters.mjs";
 
-	constructor(){
-		super(config, 'Control FCM');
-	}
+export default class ControlFcm extends Parameter {
+    constructor() {
+        super(config, 'Control FCM');
+    }
 
-	get all(){
-		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute} = this.parameters;
-		return {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, Mute};
-	}
+    get all() {
+        const {
+            gainRange,
+            attenuationRange,
+            frequencyRange,
+            gain,
+            attenuation,
+            Frequency,
+            mute
+        } = this.parameters;
+
+        return { gainRange, attenuationRange, frequencyRange, gain, attenuation, Frequency, mute };
+    }
 }
 
-const config = {};
+// ------------------------------------------------------------
+// Elegant parameter definition helper
+// ------------------------------------------------------------
+const define = (code, parser) => ({ code, parser });
+const irt = (code, usedFor) => ({
+    code,
+    parser: bytes => parseToIrtValue({
+        bytes,
+        divider: 10,
+        usedFor
+    })
+});
 
-//	FCM Parameter CODE
-config.Gain					 = {}
-config.Gain.code			 = 1;
-config.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 10);
+// ------------------------------------------------------------
+// FCM Parameter Configuration (clean & consistent)
+// ------------------------------------------------------------
 
-config.Attenuation			 = {}
-config.Attenuation.code		 = 2;
-config.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 10);
+// !!! Do this to change the parameter name.: config.gain.name = 'bucGain
+const config = {
 
-config.loSet				 = {}
-config.loSet.code			 = NaN;
-config.loSet.parser			 = bytes=>bytes[0];
+    attenuation: irt(2, bytes=>bytes.toString()),
+	attenuationRange: define(6, parseToShortArray),
 
-config.LO					 = {}
-config.LO.code				 = NaN;
-config.LO.parser			 = converter.parseToLoFrequency;
+    frequency: define(3, parseToBigInt),
+    frequencyRange: define(4, parseToBigIntArray),
 
-config.Frequency			 = {}
-config.Frequency.code		 = 3;
-config.Frequency.parser		 = converter.parseToBigInt;
+	gain: irt(1,  'gain' ),
+    gainRange: define(5, parseToShortArray),
 
-config.frequencyRange		 = {}
-config.frequencyRange.code	 = 4;
-config.frequencyRange.parser = converter.parseToBigIntArray;
+	gainOffset: irt(10,  bytes=>bytes.toString()),
+	gainOffsetRange: define(11, parseToShortArray),
 
-config.gainRange			 = {}
-config.gainRange.code		 = 5;
-config.gainRange.parser		 = converter.parseToShortArray;
+    mute: define(7, parseToBoolean),
 
-config.attenuationRange		 = {}
-config.attenuationRange.code = 6;
-config.attenuationRange.parser = converter.parseToShortArray;
+    powerToLnb: define(8, parseToOnOffStatus),
+    flags: define(9, data => data.toString()),
 
-config.Mute					 = {}
-config.Mute.code			 = 7;
-config.Mute.parser			 = converter.parseToBoolean;
 
-config.Power				 = {}
-config.Power.code			 = 8;
-config.Power.parser			 = data=>data.toString();
 
-config.Flags				 = {}
-config.Flags.code			 = 9;
-config.Flags.parser			 = data=>data.toString();
+    alcOnOff: define(12, bytes => !!bytes[0]),
+    alcLevel: irt(13,  bytes=>bytes.toString()),
+    alcLevelRange: define(14, parseToShortArray),
+	
+    alcProtectionOnOff: define(15, data => data.toString()),
+    alcProtectionThreshold: define(16, data => data.toString()),
+    alcProtectionRange: define(17, data => data.toString()),
 
-config['Gain Offset']		 = {}
-config['Gain Offset'].code	 = 10;
-config['Gain Offset'].parser = data=>data.toString();
+    refSource: define(18, parseToInt),
+    refCapability: define(19, parseToCapabilities),
 
-config['Gain Offset Range']		 = {}
-config['Gain Offset Range'].code	 = 11;
-config['Gain Offset Range'].parser = data=>data.toString();
+    spectrumInversion: define(20, parseToOnOff),
 
-config.ALC					 = {}
-config.ALC.code				 = 12;
-config.ALC.parser			 = data=>data.toString();
+    referenceToLnb: define(21, parseToOnOff),
 
-config['ALC Level']			 = {}
-config['ALC Level'].code	 = 13;
-config['ALC Level'].parser	 = data=>data.toString();
+    // Special "all" parameter
+    all: define(255, () => null)
+};
 
-config['ALC Range']			 = {}
-config['ALC Range'].code	 = 14;
-config['ALC Range'].parser	 = data=>data.toString();
-
-config['ALC Protection']		 = {}
-config['ALC Protection'].code	 = 15;
-config['ALC Protection'].parser	 = data=>data.toString();
-
-config['ALC Protection Threshold']	 = {}
-config['ALC Protection Threshold'].code	 = 16;
-config['ALC Protection Threshold'].parser = data=>data.toString();
-
-config['ALC Protection Range']		 = {}
-config['ALC Protection Range'].code	 = 17;
-config['ALC Protection Range'].parser = data=>data.toString();
-
-config['Ref. Source']		 = {}
-config['Ref. Source'].code	 = 18;
-config['Ref. Source'].parser = data=>data.toString();
-
-config.capability		 = {}
-config.capability.code	 = 19;
-config.capability.parser = data=>data.toString();
-
-config['Spectrum Inversion']			 = {}
-config['Spectrum Inversion'].code	 = 20;
-config['Spectrum Inversion'].parser	 = data=>data.toString();
-
-config['LNB Reference']		 = {}
-config['LNB Reference'].code = 21;
-config['LNB Reference'].parser = data=>data.toString();
-
-config.loSet				 = {}
-config.loSet.code			 = NaN;
-config.loSet.parser			 = bytes=>bytes[0];
-
-config.LO					 = {}
-config.LO.code				 = NaN;
-config.LO.parser			 = converter.parseToLoFrequency;
-
-config.all						 = {}
-config.all.code					 = 255;
-
+export { config };

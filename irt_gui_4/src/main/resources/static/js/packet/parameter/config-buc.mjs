@@ -1,77 +1,104 @@
-import * as converter from '../service/converter.js'
-import Parameter  from "./parameters.mjs";
+// config-buc.mjs
 
-export default class ControBuc extends Parameter{
+import {
+    parseToBoolean,
+    parseToIrtValue,
+    parseToShortArray,
+    parseToLoFrequency,
+    parseToBigInt,
+    parseToBigIntArray,
+    parseToInt,
+    parseToOnOff,
+    parseToCapabilities,
+    parseToSingleByte,
+    parseToRedStatus
+} from '../service/converter.js';
 
-	constructor(){
-		super(config, 'Control BUC');
-	}
+import Parameter from "./parameters.mjs";
 
-	get all(){
-		const {gainRange, attenuationRange, frequencyRange, Gain, Attenuation, Frequency, loSet, LO, Mute} = this.parameters;
-		return {gainRange, attenuationRange, frequencyRange, LO, Gain, Attenuation, Frequency, loSet, Mute};
-	}
+export default class ControlBuc extends Parameter {
+    constructor() {
+        super(config, 'Control BUC');
+    }
+
+    get readAllCode() {
+        const {
+            gainRange,
+            attenuationRange,
+            frequencyRange,
+            gain,
+            attenuation,
+            frequency,
+            loSet,
+            lo,
+            mute
+        } = this.parameters;
+
+        return codesOf({
+            gainRange,
+            attenuationRange,
+            frequencyRange,
+            lo,
+            gain,
+            attenuation,
+            frequency,
+            loSet,
+            mute
+        });
+    }
 }
 
-const config = {};
+const codesOf = parameters =>
+    Object.fromEntries(
+        Object.entries(parameters).map(([name, { code }]) => [name, code])
+    );
 
-// BUC Parameter CODE
-config.loSet				 = {}
-config.loSet.code			 = 1;
-config.loSet.parser		 = bytes=>bytes[0];
+// ------------------------------------------------------------
+// Elegant parameter definition helpers
+// ------------------------------------------------------------
 
-config.Mute				 = {}
-config.Mute.code			 = 2;
-config.Mute.parser			 = converter.parseToBoolean;
+const define = (code, parser) => ({ code, parser });
 
-config.Gain				 = {}
-config.Gain.code			 = 3;
-config.Gain.parser			 = bytes=>converter.parseToIrtValue(bytes, 10);
+const irt = (code, usedFor) => ({
+    code,
+    parser: bytes => parseToIrtValue({
+        bytes,
+        divider: 10,
+        usedFor
+    })
+});
 
-config.gainRange			 = {}
-config.gainRange.code		 = 5;
-config.gainRange.parser	 = converter.parseToShortArray;
+// ------------------------------------------------------------
+// BUC Parameter Configuration
+// ------------------------------------------------------------
 
-config.Attenuation			 = {}
-config.Attenuation.code	 = 4;
-config.Attenuation.parser	 = bytes=>converter.parseToIrtValue(bytes, 10);
+const config = {
 
-config.attenuationRange	 = {}
-config.attenuationRange.code = 6;
-config.attenuationRange.parser	 = converter.parseToShortArray;
+    mute: define(2, parseToBoolean),
 
-config.LO					 = {}
-config.LO.code				 = 7;
-config.LO.parser			 = converter.parseToLoFrequency;
+    gain: irt(3, bytes => bytes.tiString()),
+	gainRange: define(5, parseToShortArray),
 
-config.Frequency			 = {}
-config.Frequency.code		 = 8;
-config.Frequency.parser		 = converter.parseToBigInt;
+    attenuation: irt(4, bytes => bytes.tiString()),
+    attenuationRange: define(6, parseToShortArray),
 
-config.frequencyRange		 = {}
-config.frequencyRange.code = 9;
-config.frequencyRange.parser = converter.parseToBigIntArray;
+	loSet: define(1, bytes => bytes[0]),
+    lo: define(7, parseToLoFrequency),
 
-config.Redundancy			 = {}
-config.Redundancy.code		 = 10;
-config.Redundancy.parser	 = converter.parseToBoolean;
+    frequency: define(8, parseToBigInt),
+    frequencyRange: define(9, parseToBigIntArray),
 
-config.Mode				 = {}	// Redundancy mode
-config.Mode.code			 = 11;
-config.Mode.parser			 = data=>data.toString();
+    redEnable: define(10, parseToBoolean),
+    redMode: define(11, parseToSingleByte),
+    redName: define(12, parseToSingleByte),
+    redOnline: define(14, data => data),
+    redStatus: define(15, parseToRedStatus),
 
-config.Name				 = {}	// Redundancy name
-config.Name.code			 = 12;
-config.Name.parser			 = data=>data.toString();
+	refSource: define(31, parseToInt),
+	refCapability: define(32, parseToCapabilities),
 
-config.Status				 = {}	// Redundancy status
-config.Status.code			 = 15;
-config.Status.parser		 = converter.parseToInt;
+    spectrumInversion: define(20, parseToOnOff)
+};
 
-config.Online				 = {}	// Redundancy online
-config.Online.code			 = 14;
-config.Online.parser		 = data=>data.toString();
-
-config.spectrumInversion	 = {}
-config.spectrumInversion.code = 20;
-config.spectrumInversion.parser = data=>data.toString();
+const controlBuc = new ControlBuc();
+export { controlBuc, config }; // config left for compatibility

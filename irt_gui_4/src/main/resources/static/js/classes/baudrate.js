@@ -1,26 +1,31 @@
-export default class Baudrate{
+export default class Baudrate {
 
-	#$baudrate;
+    #baudrateElement;
+    #storageKey;
 
-	constructor($baudrate){
-		this.#$baudrate = $baudrate.change(this.#onChange);
+    constructor(baudrateElement, { storageKey = 'unit', defaultBaudrate = '115200' } = {}) {
 
-		const ub = Cookies.get('unitBaudrate');
-		if(ub)
-			this.#$baudrate.val(ub);
-		else
-			this.#$baudrate.val(115200);
-	}
+        this.#baudrateElement = baudrateElement;
+        this.#storageKey = storageKey + ':Baudrate';
 
-	get baudrate(){
-		return +this.#$baudrate.val();
-	}
+        this.#baudrateElement.addEventListener(
+            'change',
+            ({ currentTarget: { value } }) => this.#onChange(value)
+        );
 
-	set baudrate(v){
-		this.#$baudrate.val(v.toString()).change();
-	}
+        this.#baudrateElement.value = localStorage.getItem(this.#storageKey) ?? defaultBaudrate;
+    }
 
-	#onChange({currentTarget:{value}}){
-		Cookies.set('unitBaudrate', value, {expires: 365, path: ''});
-	}
+    get baudrate() {
+        return +this.#baudrateElement.value;
+    }
+
+    set baudrate(value) {
+        this.#baudrateElement.value = value.toString();
+        this.#onChange(value);
+    }
+
+    #onChange(value) {
+        localStorage.setItem(this.#storageKey, value);
+    }
 }

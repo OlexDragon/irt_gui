@@ -1,4 +1,4 @@
-import packetId from '../packet/packet-properties/packet-id.js';
+import packetId from '../packet/packet-properties/packet-id.mjs';
 import deviceDebug from '../packet/parameter/device-debug.js';
 import STUW81300Controller from './controller-stuw81300.js';
 import Stuw81300DampParser from './stuw81300/stuw81300-damp-parser.js';

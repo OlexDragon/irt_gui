@@ -119,7 +119,7 @@ export default class NetworkControl{
 
 	#hasChangesTimeout;
 	#onInput = ({currentTarget:{name, value}}) =>{
-		console.log('#onInput', name, value);
+//		console.log('#onInput', name, value);
 		let disable = this.#value[name].toString() === value.toString();
 		this.#btnOk.prop('disabled', disable);
 		this.#btnCansel.prop('disabled', disable);

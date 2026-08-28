@@ -1,8 +1,9 @@
 // controller-dump-adc.js
 import * as serialPort from '../serial-port.js'
-import packetId from '../packet/packet-properties/packet-id.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import packetId from '../packet/packet-properties/packet-id.mjs'
+import groupId from '../packet/packet-properties/group-id.mjs'
 import deviceDebug from '../packet/parameter/device-debug.js'
+import { parseToString } from '../packet/service/converter.js';
 
 export default class ControllerDumpAdc {
 
@@ -67,10 +68,9 @@ export default class ControllerDumpAdc {
     }
 
     #packetError(packet) {
-        console.error('Dump ADC packet error:', packet.toString());
+        console.error('Dump ADC packet error:', packet);
     }
 
-    static UTF8_DECODER = new TextDecoder();
     static ADC_REGEX = /^ADC:\s*([\d.]+)/;
     static CHANNEL_REGEX = /^Ch\s+(\d+):\s*(\d+)\s*\(([\d.]+)\s*V\)$/;
     static parseAdcReport(bytes) {
@@ -80,11 +80,7 @@ export default class ControllerDumpAdc {
 
         try {
 
-            const end = bytes.indexOf(0);
-            const view = new Uint8Array(
-                bytes.slice(0, end >= 0 ? end : bytes.length)
-            );
-            const text = ControllerDumpAdc.UTF8_DECODER.decode(view);
+            const text = parseToString(bytes);
 
             const lines = text
                 .split(/\r?\n/)

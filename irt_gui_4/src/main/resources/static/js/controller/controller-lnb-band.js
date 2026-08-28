@@ -1,7 +1,7 @@
 import * as serialPort from '../serial-port.js'
-import packetId from '../packet/packet-properties/packet-id.js'
-import groupId from '../packet/packet-properties/group-id.js'
-import { code } from '../packet/parameter/dlrc.js'
+import packetId from '../packet/packet-properties/packet-id.mjs'
+import groupId from '../packet/packet-properties/group-id.mjs'
+import { code } from '../packet/parameter/dlrc.mjs'
 
 export default class ControllerLnbBamd{
 
@@ -111,8 +111,8 @@ export default class ControllerLnbBamd{
 			this.stop();
 			return;
 		}
-		if(this.#action.buisy){
-			console.log('Buisy')
+		if(this.#action.busy){
+			console.log('busy')
 			return
 		}
 		serialPort.postObject(this.#$card, this.#action);
@@ -130,8 +130,8 @@ export default class ControllerLnbBamd{
 			break;
 		}
 	}
-	#packetError(packet){
-		if(packet.header.error === 10){	// Requested element not foundr
+	#packetError(error){
+		if(error.packet.header.error === 10){	// Requested element not foundr
 			console.warn('The Packet has an error. Controller stops.\n', packet.toString());
 			this.stop();
 			if(this.#$row1)
@@ -139,6 +139,6 @@ export default class ControllerLnbBamd{
 			if(this.#$row2)
 				this.#$row2.addClass('visually-hidden');
 		}else
-			console.warn(packet.toString());
+			console.warn(error);
 	}
 }

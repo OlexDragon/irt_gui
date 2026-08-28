@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import irt.gui.web.beans.Baudrate;
-import irt.gui.web.services.IrtSerialPort;
+import irt.gui.web.services.serialPort.IrtSerialPort;
 
 @Controller
 @RequestMapping({"f", "flash"})

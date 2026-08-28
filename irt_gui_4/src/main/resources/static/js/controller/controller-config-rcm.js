@@ -1,6 +1,6 @@
 import Controller from './controller.js';
-import packetId from '../packet/packet-properties/packet-id.js';
-import groupId from '../packet/packet-properties/group-id.js';
+import packetId from '../packet/packet-properties/packet-id.mjs';
+import groupId from '../packet/packet-properties/group-id.mjs';
 import ControllerValue from '../classes/controller-value.js';
 
 export default class ControllerConfigRcm extends Controller{
@@ -15,7 +15,7 @@ export default class ControllerConfigRcm extends Controller{
 
 	constructor($card) {
 		super($card);
-		this._$card.load(ControllerConfigRcm.url, this.#onLoad.bind(this));
+		this._$card.load(ControllerConfigRcm.url, ()=>this.#onLoad());
 	}
 
 	destroy(){
@@ -93,11 +93,7 @@ export default class ControllerConfigRcm extends Controller{
 		this.#onChangeEvents.push(e);
 	}
 
-	#onLoad(_, statusText){
-		if(statusText !== 'success'){
-			console.warn(statusText);
-			return;
-		}
+	#onLoad(){
 		$('#rcmDacSave').click(()=>this.#sendChange(packetId.saveConfig, 0, 1, groupId.control));
 		$('#rcmDacDefault').click(()=>this.#sendChange(packetId.rcmDacDefault, 0, this.parametersClass.parameters['Factory Reset'].code));
 		this.#$capabilities = this._$card.find('#capabilities').change(this.#capabilitiesChange.bind(this));

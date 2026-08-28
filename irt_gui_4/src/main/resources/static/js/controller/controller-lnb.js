@@ -1,7 +1,7 @@
 import Controller from './controller.js';
-import packetId from '../packet/packet-properties/packet-id.js';
-import {code as dlrcCode} from '../packet/parameter/dlrc.js';
-import groupId from '../packet/packet-properties/group-id.js';
+import packetId from '../packet/packet-properties/packet-id.mjs';
+import {code as dlrcCode} from '../packet/parameter/dlrc.mjs';
+import groupId from '../packet/packet-properties/group-id.mjs';
 import ControllerMeasurement from './controller-measurement.js';
 import measurement from '../packet/parameter/measurement-odrc.mjs';
 

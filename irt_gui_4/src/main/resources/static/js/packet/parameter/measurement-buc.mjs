@@ -1,3 +1,5 @@
+// measurement-buc.mjs
+
 import Measurement  from "./parameters.mjs";
 import {parseToIrtValue, parseToStatus} from '../service/converter.js'
 
@@ -17,15 +19,15 @@ measurement.None.parser = data=>data;
 
 measurement['Input Power'] = {}
 measurement['Input Power'].code		 = 1;
-measurement['Input Power'].parser	 = bytes=>parseToIrtValue(bytes, 10, ' dBm');
+measurement['Input Power'].parser	 = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' dBm', measurementType: 'power' });
 
 measurement['Output Power'] = {}
 measurement['Output Power'].code		 = 2;
-measurement['Output Power'].parser	 = bytes=>parseToIrtValue(bytes, 10, ' dBm');
+measurement['Output Power'].parser	 = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' dBm', measurementType: 'power' });
 
 measurement.Temperature = {}
 measurement.Temperature.code		 = 3;
-measurement.Temperature.parser		 = bytes=>parseToIrtValue(bytes, 10, ' °C');
+measurement.Temperature.parser		 = bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' °C', measurementType: 'temperature' });
 
 measurement.Status = {}
 measurement.Status.code				 = 4;
@@ -33,7 +35,7 @@ measurement.Status.parser			 = parseToStatus;
 
 measurement['Reflected Power'] = {}
 measurement['Reflected Power'].code	 = 5;
-measurement['Reflected Power'].parser =bytes=>parseToIrtValue(bytes, 10, ' dBm');
+measurement['Reflected Power'].parser =bytes=>parseToIrtValue({ bytes, divider: 10, postfix: ' dBm', measurementType: 'power' });
 
 measurement['LNB 2'] = {}
 measurement['LNB 2'].code			 = 6;

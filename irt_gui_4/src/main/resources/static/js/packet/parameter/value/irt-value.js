@@ -1,14 +1,25 @@
 
-export default class IrtValue{
+export default class IrtValue {
 
-	constructor(value, prefix, postfix, divider){
-		this.value = value;
-		this.prefix = prefix;
-		this.postfix = postfix;
-		this.divider = divider;
-	}
+    #value;
+    #divider;
 
-	toString(){
-		return `${this.prefix ?? ""}${this.divider ? this.value/this.divider : this.value}${this.postfix ?? ""}`
-	}
+    constructor(value, prefix, postfix, divider = 1) {
+        this.#value = value;
+        this.prefix = prefix;
+        this.postfix = postfix;
+        this.#divider = divider;
+    }
+
+    get value() {
+        return typeof this.#value === 'number' ? this.#value / this.#divider : this.#value;
+    }
+
+    valueOf() {
+        return this.value;
+    }
+
+    toString() {
+        return `${this.prefix ?? ''}${this.value}${this.postfix ?? ''}`;
+    }
 }

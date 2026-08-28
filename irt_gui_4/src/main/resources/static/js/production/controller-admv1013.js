@@ -1,5 +1,5 @@
 import Controller from './controller.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import groupId from '../packet/packet-properties/group-id.mjs'
 import Register from '../packet/parameter/value/register.js'
 import SpiControl from './admv1013/spi-control.js'
 import AlarmControl from './admv1013/alarm-controller.js'

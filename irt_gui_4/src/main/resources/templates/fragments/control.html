@@ -2,262 +2,329 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>GUI - IRT Technologies</title>
-	<link rel='stylesheet' href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
+<title>GUI - IRT Technologies</title>
+<link rel='stylesheet'
+	href='/webjars/bootstrap/5.3.5/css/bootstrap.min.css'>
 </head>
 
 <body>
 
-<div class="card">
+	<div class="card">
 
-  <div class="card-body">
-<!-- Auto calibration by Unit Gain -->
-<th:block th:fragment=buc>
- <!-- Modal Body -->
-					<ul class="nav nav-tabs buc" role="tablist">
-						<li class="nav-item" role="presentation">
-    						<button class="nav-link" id="attenuationTab" data-bs-toggle="tab" data-bs-target="#attenuation-tab-pane" type="button" role="tab" aria-controls="attenuation-tab-pane" aria-selected="true">Attenuation</button>
-  						</li>
-  						<li class="nav-item" role="presentation">
-							<button class="nav-link" id="gainTab" data-bs-toggle="tab" data-bs-target="#gain-tab-pane" type="button" role="tab" aria-controls="gain-tab-pane" aria-selected="false">Gain</button>
-  						</li>
- 						<li class="nav-item" role="presentation">
-    						<button class="nav-link" id="freqTab" data-bs-toggle="tab" data-bs-target="#frequency-tab-pane" type="button" role="tab" aria-controls="frequency-tab-pane" aria-selected="false">Frequency</button>
- 						</li>
-					</ul>
-					<div class="tab-content text-cente buc">
- 						<div class="tab-pane fade attenuation" id="attenuation-tab-pane" role="tabpanel" aria-labelledby="attenuation-tab" tabindex="0">
-							<div class="row mt-2">
-								<div class="col">
-									<div class="form-floating">
-										<input id="attenuationValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
-  										<label for="attenuationValue">Value (dB)</label>
-  									</div>
-								</div>
-  								<div class="col">
-									<div class="form-floating">
-										<input id="attenuationControl" type="number" class="form-control control" placeholder="to Set">
-  										<label for="attenuationControl">to Set (dB)</label>
-									</div>
-								</div>
-								<div class="col">
-									<div class="col">
-										<div class="form-floating">
-											<input id="attenuationStep" class="form-control step" type="number" placeholder="Step">
-  											<label for="attenuationStep">Step (dB)</label>
-										</div>
-									</div>
-								</div>
- 							</div>
-							<div>
-								<input id="attenuationRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
-							</div>
- 						</div>
- 						<div class="tab-pane fade gain" id="gain-tab-pane" role="tabpanel" aria-labelledby="gain-tab" tabindex="0">
-							<div class="row mt-2">
-								<div class="col">
-									<div class="form-floating">
-										<input id="gainValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
-  										<label for="gainValue">Value (dB)</label>
-  									</div>
-								</div>
-								<div class="col">
-									<div class="form-floating">
-										<input id="gainControl" type="number" class="form-control control" placeholder="to Set">
-  										<label for="gainControl">to Set (dB)</label>
-									</div>
- 								</div>
-								<div class="col">
-									<div class="col">
-										<div class="form-floating">
-											<input id="gainStep" class="form-control step" type="number" placeholder="Step">
-  											<label for="gainStep">Step (dB)</label>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div>
-								<input id="gainRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
-							</div>
- 						</div>
- 						<div class="tab-pane fade frequency" id="frequency-tab-pane" role="tabpanel" aria-labelledby="frequency-tab" tabindex="0">
-							<div class="row mt-2">
-								<div class="col">
-									<div class="form-floating">
-										<input id="freqValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
-  										<label for="freqValue">Value (MHz)</label>
-  									</div>
-								</div>
-  								<div class="col">
-									<div class="form-floating">
-										<input id="freqControl" type="number" class="form-control control" placeholder="to Set">
-  										<label for="freqControl">to Set (MHz)</label>
-									</div>
-								</div>
-								<div class="col">
-									<div class="col">
-										<div class="form-floating">
-											<input id="freqStep" class="form-control step" type="number" placeholder="Step">
-  											<label for="freqStep">Step (MHz)</label>
-										</div>
-									</div>
-								</div>
-							</div>
-							<div class="row">
-								<input id="freqRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
-							</div>
- 						</div>
-						<div class="row justify-content-center">
-							<div class="col-5">
-								<input type="checkbox" class="btn-check" id="btnMute" autocomplete="off" disabled="disabled">
-								<label class="btn btn-outline-warning form-control" for="btnMute"></label><br>
-							</div>
-							<div class="col-5 visually-hidden">
-								<select id="loSelect" class="form-select"></select>
-							</div>
-							<div class="col-5 visually-hidden">
-								<button id="fcmSaveConfig" class="btn btn-outline-primary form-control">Save Conf.</button>
-							</div>
+		<div class="card-body">
+			<!-- Auto calibration by Unit Gain -->
+			<th:block th:fragment=buc>
+				<!-- Modal Body -->
+				<ul class="nav nav-tabs buc" role="tablist">
+					<li class="nav-item visually-hidden" role="presentation">
+						<button class="nav-link" id="attenuationTab" data-bs-toggle="tab"
+							data-bs-target="#attenuation-tab-pane" type="button" role="tab"
+							aria-controls="attenuation-tab-pane" aria-selected="true" th:text="#{attenuation}">Attenuation</button>
+					</li>
+					<li class="nav-item visually-hidden" role="presentation">
+						<button class="nav-link" id="gainTab" data-bs-toggle="tab"
+							data-bs-target="#gain-tab-pane" type="button" role="tab"
+							aria-controls="gain-tab-pane" aria-selected="false" th:text="#{gain}">Gain</button>
+					</li>
+					<li class="nav-item" role="presentation">
+						<button class="nav-link" id="frequencyTab" data-bs-toggle="tab"
+							data-bs-target="#frequency-tab-pane" type="button" role="tab"
+							aria-controls="frequency-tab-pane" aria-selected="false" th:text="#{frequency}">Frequency</button>
+					</li>
+					<li class="nav-item visually-hidden" role="presentation">
+						<button class="nav-link" id="gainOffsetTab" data-bs-toggle="tab"
+							data-bs-target="#gainOffset-tab-pane" type="button" role="tab"
+							aria-controls="gainOffset-tab-pane" aria-selected="false">Gain
+							Offset</button>
+					</li>
+					<li class="nav-item visually-hidden" role="presentation">
+						<button class="nav-link" id="alcLevelTab" data-bs-toggle="tab"
+							data-bs-target="#alcLevel-tab-pane" type="button" role="tab"
+							aria-controls="alcLevel-tab-pane" aria-selected="false">ALC</button>
+					</li>
+				</ul>
+				<div class="tab-content text-cente buc">
+					<div
+						th:replace="~{fragments/control-tabs :: slider(
+					title = #{attenuation}, 
+					id = 'attenuation',
+					unit = 'dB',
+					step = 0.1,
+					hasToggle = false)}"></div>
+					<div
+						th:replace="~{fragments/control-tabs :: slider(
+					title = #{gain},  
+					id = 'gain',
+					unit = 'dB',
+					step = 0.1,
+					hasToggle = false)}"></div>
+					<div
+						th:replace="~{fragments/control-tabs :: slider(
+					title = #{frequency},  
+					id = 'frequency',
+					unit = 'MHz',
+					step = 0.000001,
+					hasToggle = false)}"></div>
+					<div
+						th:replace="~{fragments/control-tabs :: slider(
+					title = 'Gain Offset',  
+					id = 'gainOffset',
+					unit = 'dB',
+					step = 0.1,
+					hasToggle = false)}"></div>
+					<div
+						th:replace="~{fragments/control-tabs :: slider(
+					title = 'ALC',  
+					id = 'alcLevel',
+					unit = 'dB',
+					step = 0.1,
+					hasToggle = true)}"></div>
+					<div class="row justify-content-center mt-2">
+						<div class="col-5">
+							<input type="checkbox" class="btn-check" id="btnMute"
+								autocomplete="off" disabled="disabled"> <label
+								class="btn form-control" for="btnMute">Mute</label>
 						</div>
-   					</div>
-</th:block>
-<th:block th:fragment=irpc>
-	<div class="container-fluid irpc">
-		<div class="row">
-			<div class="col form-floating">
-				<select id="irpcSalectSwtchHvr" class="form-select">
-					<option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
-					<option value="1">Automatic</option>
-					<option value="2">Manual</option>
-				</select>
-				<label for="irpcSalectSwtchHvr">Switchover Mode</label>
-			</div>
-			<div class="col form-floating">
-				<select id="irpcStandBy" class="form-select">
-					<option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
-					<option value="1">Hot</option>
-					<option value="2">Cold</option>
-				</select>
-				<label for="irpcStandBy">Standby Mode</label>
-			</div>
-		</div>
-		<div class="row mt-3">
-			<div class="col">
-				<button id="irpcDefault" class="btn btn-outline-primary form-control" value="3" disabled="disabled">Default</button>
-			</div>
-			<div class="col">
-				<button id="irpcHoverA" class="btn btn-outline-primary form-control" value="1" disabled="disabled">Switchover A</button>
-			</div>
-			<div class="col">
-				<button id="irpcHoverB" class="btn btn-outline-primary form-control" value="2" disabled="disabled">Switchover B</button>
-			</div>
-		</div>
-	</div>
-</th:block>
-<th:block th:fragment=odrc>
-	<div class="container-fluid odrc">
-		<div class="row">
-			<div class="col">
-				<select id="odrcMode" class="form-select">
-                    <option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
-                    <option value="1">Automatic</option>
-                    <option value="2">Manual</option>
-				</select>
-			</div>
-		</div>
-		<div class="row mt-3">
-			<div class="col">
-				<div class="form-check">
-					<input id="lnb1Over"  type="radio"class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
-					<label for="lnb1Over" class="btn btn-outline-primary form-control">Set active LNB 1</label>
-				</div>
-			</div>
-			<div class="col">
-				<div class="form-check">
-					<input id="lnb2Over" type="radio" class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
-					<label for="lnb2Over" class="btn btn-outline-primary form-control">Set active LNB 2</label>
-				</div>
-			</div>
-		</div>
-	</div>
-</th:block>
-<th:block th:fragment=lnb>
-	<div class="container-fluid lnb">
-		<div class="row">
-			<div class="col">
-				<select id="lnbMode" class="form-select">
-                    <option selected="selected" disabled="disabled" hidden="hidden">Select Mode</option>
-                    <option value="1">Automatic</option>
-                    <option value="2">Manual</option>
-				</select>
-			</div>
-		</div>
-		<div class="row mt-3">
-			<div class="col">
-				<div class="form-check">
-					<input id="lnb1Over"  type="radio"class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
-					<label for="lnb1Over" class="btn btn-outline-primary form-control">Protection LNB 1</label>
-				</div>
-			</div>
-			<div class="col">
-				<div class="form-check">
-					<input id="lnb2Over" type="radio" class="btn-check" name="activeLnb" autocomplete="off" disabled="disabled">
-					<label for="lnb2Over" class="btn btn-outline-primary form-control">Protection LNB 2</label>
-				</div>
-			</div>
-		</div>
-	</div>
-</th:block>
- <th:block th:fragment=rcm>
-	<div class="container-fluid rcm">
-		<div class="row mt-2">
-			<div class="col">
-				<div class="form-floating">
-					<input id="rcmDacValue" type="number" class="form-control value" readonly="readonly" placeholder="Value">
-  					<label for="rcmDacValue">Value</label>
-  				</div>
-			</div>
-  			<div class="col">
-				<div class="form-floating">
-					<input id="rcmDacControl" type="number" class="form-control control" placeholder="to Set">
-  					<label for="rcmDacControl">to Set</label>
-				</div>
-			</div>
-			<div class="col">
-				<div class="col">
-					<div class="form-floating">
-						<input id="rcmDacStep" class="form-control step" type="number" placeholder="Step">
-  						<label for="rcmDacStep">Step</label>
+						<div class="col-5 visually-hidden">
+							<select id="loSelect" class="form-select"></select>
+						</div>
+						<div class="col-5 visually-hidden">
+							<button id="fcmSaveConfig"
+								class="btn btn-outline-primary form-control">Save Conf.</button>
+						</div>
+					</div>
+					<div id="controllerOptions"
+						class="d-flex justify-content-center align-items-center gap-2 flex-wrap mt-3">
+
+						<div class="visually-hidden">
+							<select id="refSource" class="form-select"></select>
+						</div>
+
+						<div class="visually-hidden">
+							<input id="btnPowerToLnb" type="checkbox" class="btn-check" autocomplete="off">
+							<label for="btnPowerToLnb" class="btn btn-outline-secondary form-control">
+								PowerToLnb </label>
+						</div>
+
+						<div class="visually-hidden">
+							<input id="btnRefToLnb" type="checkbox" class="btn-check" autocomplete="off">
+							<label for="btnRefToLnb" class="btn btn-outline-secondary form-control">
+								referenceToLnb </label>
+						</div>
+
+						<div class="visually-hidden">
+							<input id="btnSpecInversion" type="checkbox" class="btn-check" autocomplete="off">
+							<label for="btnSpecInversion" class="btn btn-outline-secondary form-control">
+								spectrumInversion </label>
+						</div>
 					</div>
 				</div>
-			</div>
- 		</div>
-		<div>
-			<input id="rcmDacRange" type="range" class="form-range mt-5" data-bs-toggle="tooltip" data-bs-title="0">
-		</div>
-		<div class="row">
-			<div class="col form-floating">
-				<input id="rcmProfileValue" type="number" class="form-control" readonly="readonly" placeholder="Profile Value">
-  				<label for="rcmProfileValue">Profile Value</label>
-			</div>
-			<div class="col"><button id="rcmDacSave" type="button" class="btn btn-outline-primary form-control mt-3">Save</button></div>
-		</div>
-		<div class="row">
-			<div class="col form-floating">
-				<input id="rcmInputValue" type="number" class="form-control" readonly="readonly" placeholder="Profile Value">
-  				<label for="rcmInputValue">Input Value</label>
-			</div>
-			<button id="rcmDacDefault" type="button" class="col btn btn-outline-secondary form-control mt-3">Default</button>
-		</div>
-		<div class="row mt-3">
-			<div class="col form-floating">
-			    <select id="capabilities" class="form-select">
-                </select>
-                <label for="rcmSelect">Mode</label>
-			</div>
+			</th:block>
+			<th:block th:fragment=irpc>
+				<div class="container-fluid irpc">
+					<div class="row">
+						<div class="col form-floating">
+							<select id="irpcSalectSwtchHvr" class="form-select">
+								<option selected="selected" disabled="disabled" hidden="hidden">Select
+									Mode</option>
+								<option value="1">Automatic</option>
+								<option value="2">Manual</option>
+							</select> <label for="irpcSalectSwtchHvr">Switchover Mode</label>
+						</div>
+						<div class="col form-floating">
+							<select id="irpcStandBy" class="form-select">
+								<option selected="selected" disabled="disabled" hidden="hidden">Select
+									Mode</option>
+								<option value="1">Hot</option>
+								<option value="2">Cold</option>
+							</select> <label for="irpcStandBy">Standby Mode</label>
+						</div>
+					</div>
+					<div class="row mt-3">
+						<div class="col">
+							<button id="irpcDefault"
+								class="btn btn-outline-primary form-control" value="3"
+								disabled="disabled">Default</button>
+						</div>
+						<div class="col">
+							<button id="irpcHoverA"
+								class="btn btn-outline-primary form-control" value="1"
+								disabled="disabled">Switchover A</button>
+						</div>
+						<div class="col">
+							<button id="irpcHoverB"
+								class="btn btn-outline-primary form-control" value="2"
+								disabled="disabled">Switchover B</button>
+						</div>
+					</div>
+				</div>
+			</th:block>
+			<th:block th:fragment=odrc>
+				<div class="container-fluid odrc">
+					<div class="row">
+						<div class="col">
+							<select id="odrcMode" class="form-select">
+								<option selected="selected" disabled="disabled" hidden="hidden">Select
+									Mode</option>
+								<option value="1">Automatic</option>
+								<option value="2">Manual</option>
+							</select>
+						</div>
+					</div>
+					<div class="row mt-3">
+						<div class="col">
+							<div class="form-check">
+								<input id="lnb1Over" type="radio" class="btn-check"
+									name="activeLnb" autocomplete="off" disabled="disabled">
+								<label for="lnb1Over"
+									class="btn btn-outline-primary form-control">Set active
+									LNB 1</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-check">
+								<input id="lnb2Over" type="radio" class="btn-check"
+									name="activeLnb" autocomplete="off" disabled="disabled">
+								<label for="lnb2Over"
+									class="btn btn-outline-primary form-control">Set active
+									LNB 2</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</th:block>
+			<th:block th:fragment=lnb>
+				<div class="container-fluid lnb">
+					<div class="row">
+						<div class="col">
+							<select id="lnbMode" class="form-select">
+								<option selected="selected" disabled="disabled" hidden="hidden">Select
+									Mode</option>
+								<option value="1">Automatic</option>
+								<option value="2">Manual</option>
+							</select>
+						</div>
+					</div>
+					<div class="row mt-3">
+						<div class="col">
+							<div class="form-check">
+								<input id="lnb1Over" type="radio" class="btn-check"
+									name="activeLnb" autocomplete="off" disabled="disabled">
+								<label for="lnb1Over"
+									class="btn btn-outline-primary form-control">Protection
+									LNB 1</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-check">
+								<input id="lnb2Over" type="radio" class="btn-check"
+									name="activeLnb" autocomplete="off" disabled="disabled">
+								<label for="lnb2Over"
+									class="btn btn-outline-primary form-control">Protection
+									LNB 2</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</th:block>
+			<th:block th:fragment=rcm>
+				<div class="container-fluid rcm">
+					<div class="row mt-2">
+						<div class="col">
+							<div class="form-floating">
+								<input id="rcmDacValue" type="number" class="form-control value"
+									readonly="readonly" placeholder="Value"> <label
+									for="rcmDacValue">Value</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-floating">
+								<input id="rcmDacControl" type="number"
+									class="form-control control" placeholder="to Set"> <label
+									for="rcmDacControl">to Set</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="col">
+								<div class="form-floating">
+									<input id="rcmDacStep" class="form-control step" type="number"
+										placeholder="Step"> <label for="rcmDacStep">Step</label>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div>
+						<input id="rcmDacRange" type="range" class="form-range mt-5"
+							data-bs-toggle="tooltip" data-bs-title="0">
+					</div>
+					<div class="row">
+						<div class="col form-floating">
+							<input id="rcmProfileValue" type="number" class="form-control"
+								readonly="readonly" placeholder="Profile Value"> <label
+								for="rcmProfileValue">Profile Value</label>
+						</div>
+						<div class="col">
+							<button id="rcmDacSave" type="button"
+								class="btn btn-outline-primary form-control mt-3">Save</button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col form-floating">
+							<input id="rcmInputValue" type="number" class="form-control"
+								readonly="readonly" placeholder="Profile Value"> <label
+								for="rcmInputValue">Input Value</label>
+						</div>
+						<button id="rcmDacDefault" type="button"
+							class="col btn btn-outline-secondary form-control mt-3">Default</button>
+					</div>
+					<div class="row mt-3">
+						<div class="col form-floating">
+							<select id="capabilities" class="form-select">
+							</select> <label for="rcmSelect">Mode</label>
+						</div>
+					</div>
+				</div>
+			</th:block>
+			<th:block th:fragment="slider(id, title, unit)">
+				<div class="tab-pane fade" th:classappend="${id}"
+					th:id="${id} + '-tab-pane'" role="tabpanel"
+					th:aria-labelledby="${id} + 'Tab'" tabindex="0">
+					<div class="row mt-2">
+						<div class="col">
+							<div class="form-floating">
+								<input th:id="${id} + 'Value'" type="number"
+									class="form-control value" readonly="readonly"
+									placeholder="Value"> <label th:for="${id} + 'Value'"
+									th:text="'Value (' + ${unit} + ')'">Value (dB)</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="form-floating">
+								<input th:id="${id} + 'Control'" type="number"
+									class="form-control control" placeholder="to Set"> <label
+									th:for="${id} + 'Control'" th:text="'to Set (' + ${unit} + ')'">to
+									Set (dB)</label>
+							</div>
+						</div>
+						<div class="col">
+							<div class="col">
+								<div class="form-floating">
+									<input th:id="${id} + 'Step'" class="form-control step"
+										type="number" placeholder="Step"> <label
+										th:for="${id} + 'Step'" th:text="'Step (' + ${unit} + ')'">Step
+										(dB)</label>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div>
+						<input id="attenuationRange" th:id="${id} + 'Range'" type="range"
+							class="form-range mt-5" data-bs-toggle="tooltip"
+							data-bs-title="0">
+					</div>
+				</div>
+
+			</th:block>
 		</div>
 	</div>
-</th:block>
- 	</div>
-</div>
 </html>

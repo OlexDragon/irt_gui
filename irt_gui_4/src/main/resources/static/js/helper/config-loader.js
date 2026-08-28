@@ -1,102 +1,111 @@
-import packetId from '../packet/packet-properties/packet-id.js'
+// config-loader.js
+import packetId from '../packet/packet-properties/packet-id.mjs'
 import ModuleLoader from './module-loader.js'
 
-export default class ConfigLoader{
+export default class ConfigLoader {
 
-	#unitType;
-	#packetId;
-	#controllerLoader;
-	#parameterLoader;
+    #unitType;
+    #packetId;
+    #controllerLoader;
+    #parameterLoader;
 
-	#controller;
-	#parameter;
+    #controller;
+    #parameter;
 
-	constructor(unitType){
-		this.#controllerLoader = new ModuleLoader();
-		this.#parameterLoader = new ModuleLoader();
-		if(unitType)
-			this.setUnitType(unitType);
-	}
+    constructor(unitType) {
+        this.#controllerLoader = new ModuleLoader();
+        this.#parameterLoader = new ModuleLoader();
+        if (unitType)
+            this.setUnitType(unitType);
+    }
 
-	get unitType(){
-		return this.#unitType;
-	}
+    get unitType() {
+        return this.#unitType;
+    }
 
-	setUnitType(unitType, callBack){
+    setUnitType(unitType, callBack) {
 
-		if(JSON.stringify(this.unitType) === JSON.stringify(unitType)){
-			callBack(this.#controller);
-			return;
-		}
+        if (this.#unitType?.name === unitType?.name && this.#unitType?.type === unitType?.type && this.#unitType?.subtype === unitType?.subtype) {
+            callBack?.(this.#controller);
+            return;
+        }
 
-		this.#unitType = unitType;
-		let loadC;
-		let loadP;
+        this.#unitType = unitType;
+        let loadC = null;
+        let loadP = null;
 
-		switch(unitType.name){
+        switch (unitType.name) {
 
-		case 'LNB':
-			this.#packetId = packetId.irpc;
-			loadC = this.#controllerLoader.load('./controller/controller-lnb.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/lnb.mjs');
-			break;
+            case 'LNB':
+                this.#packetId = packetId.irpc;
+                loadC = this.#controllerLoader.load('./controller/controller-lnb.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/lnb.mjs');
+                break;
 
-		case 'CONTROLLER_IRPC':
-			this.#packetId = packetId.irpc;
-			loadC = this.#controllerLoader.load('./controller/controller-irpc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/irpc.mjs');
-			break;
+            case 'CONTROLLER_IRPC':
+                this.#packetId = packetId.irpc;
+                loadC = this.#controllerLoader.load('./controller/controller-irpc.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/irpc.mjs');
+                break;
 
-		case 'CONTROLLER_ODRC':
-			this.#packetId = packetId.odrc;
-			loadC = this.#controllerLoader.load('./controller/controller-odrc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/dlrc.mjs');
-			break;
+            case 'CONTROLLER_ODRC':
+                this.#packetId = packetId.odrc;
+                loadC = this.#controllerLoader.load('./controller/controller-odrc.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/dlrc.mjs');
+                break;
 
-		case 'CONVERTER':
-		case 'CONVERTER_KA':
-			this.#packetId = packetId.configAll;
-			loadC = this.#controllerLoader.load('./controller/controller-config-fcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/config-fcm.mjs');
-			break;
+            case 'CONVERTER':
+            case 'CONVERTER_KA':
+                this.#packetId = packetId.configAll;
+                loadC = this.#controllerLoader.load('./controller/controller-config-fcm.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/config-fcm.mjs');
+                break;
 
-		case 'REFERENCE_BOARD':
-			this.#packetId = packetId.configAll;
-			loadC = this.#controllerLoader.load('./controller/controller-config-rcm.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/config-rcm.mjs');
-			break;
+            case 'REFERENCE_BOARD':
+                this.#packetId = packetId.configAll;
+                loadC = this.#controllerLoader.load('./controller/controller-config-rcm.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/config-rcm.mjs');
+                break;
 
-		default:
-			console.warn('[Unknown Unit Type]', unitType);
-		case 'BAIS':
-			this.#packetId = packetId.configAll;
-			loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');
-			loadP = this.#parameterLoader.load('./packet/parameter/config-buc.mjs');
-		}
+            default:
+                console.warn('[Unknown Unit Type]', unitType); // There is no need to stop the API, this is for informational purposes only. 'warn' command to find out who is calling the setUnitType.
+            case 'BAIS':
+            case 'CONTROLLER':
+                this.#packetId = packetId.configAll;
+                loadC = this.#controllerLoader.load('./controller/controller-config-buc.js');
+                loadP = this.#parameterLoader.load('./packet/parameter/config-buc.mjs');
+        }
 
-		loadC.then(this.#setController.bind(this));
-		loadP.then(this.#setParameter.bind(this));
-		Promise.all([loadC, loadP]).then(()=>callBack(this.#controller));
-	}
 
-	get packetId(){
-		return this.#packetId;
-	}
+        Promise.all([loadC, loadP])
+            .then(([controller, parameter]) => {
+                this.#setController(controller);
+                this.#setParameter(parameter);
+                callBack?.(this.#controller);
+            })
+            .catch(error => {
+                console.error('Failed to load configuration modules.', error);
+            });
 
-	get controller(){
-		return this.#controller;
-	}
+    }
 
-	get parameter(){
-		return this.#parameter.default;
-	}
+    get packetId() {
+        return this.#packetId;
+    }
 
-	#setParameter(p){
-		this.#parameter = p;
-	}
+    get controller() {
+        return this.#controller;
+    }
 
-	#setController(c){
-		const {default: Controller} = c;
-		this.#controller = Controller;
-	}
+    get parameter() {
+        return this.#parameter;
+    }
+
+    #setParameter({ default: parameter }) {
+        this.#parameter = parameter;
+    }
+
+    #setController({ default: Controller }) {
+        this.#controller = Controller;
+    }
 }

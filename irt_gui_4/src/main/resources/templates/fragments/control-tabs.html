@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="slider(title, id, unit, step, hasToggle)">
+	<div class="tab-pane fade" th:classappend="${id}"
+		th:id="${id} + '-tab-pane'" role="tabpanel"
+		th:aria-labelledby="${id} + 'Tab'" tabindex="0">
+		<div class="control-header mt-3 pb-2">
+			<div class="row">
+				<div class="col">
+					<h4 th:text="${title}"></h4>
+				</div>
+				<div class="col" th:if="${hasToggle}" th:classappend="${id} + 'Enable'">
+					<input type="checkbox"
+					 class="btn-check"
+					 th:id="${id} + 'Enable'"
+						autocomplete="off"> <label
+						class="btn btn-outline-secondary form-control"
+						th:for="${id} + 'Enable'">Disabled</label>
+				</div>
+			</div>
+		</div>
+		<div class="control-body">
+			<div class="row mt-2">
+				<div class="col">
+					<div class="form-floating">
+						<input th:id="${id} + 'Value'" type="number"
+							class="form-control value" readonly="readonly"
+							placeholder="Value"> <label th:for="${id} + 'Value'"
+							th:text="#{currentValue} + ' (' + ${unit} + ')'">Value (dB)</label>
+					</div>
+				</div>
+				<div class="col">
+					<div class="form-floating">
+						<input th:id="${id} + 'Control'" type="number"
+							class="form-control control" placeholder="to Set"> <label
+							th:for="${id} + 'Control'" th:text="#{setValue} + ' (' + ${unit} + ')'">to
+							Set (dB)</label>
+					</div>
+				</div>
+				<div class="col">
+					<div class="col">
+						<div class="form-floating">
+							<input th:id="${id} + 'Step'" class="form-control step"
+								type="number" placeholder="Step"> <label
+								th:for="${id} + 'Step'" th:text="#{step} + ' (' + ${unit} + ')'">Step
+								(dB)</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div>
+				<input id="attenuationRange" th:id="${id} + 'Range'" type="range"
+					th:step="${step ?: 0.1}" class="form-range mt-5"
+					data-bs-toggle="tooltip" data-bs-title="0">
+			</div>
+		</div>
+	</div>
+
+</th:block>
+
+</html>

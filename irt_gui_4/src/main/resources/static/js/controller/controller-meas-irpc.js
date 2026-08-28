@@ -1,5 +1,5 @@
 import Controller from './controller.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import groupId from '../packet/packet-properties/group-id.mjs'
 
 export default class ControllerMeasurementIrpc extends Controller{
 

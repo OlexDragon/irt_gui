@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import irt.gui.web.beans.RequestPacket;
-import irt.gui.web.services.JSerialComm;
+import irt.gui.web.services.serialPort.JSerialComm;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc

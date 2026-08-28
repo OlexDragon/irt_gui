@@ -1,6 +1,6 @@
-import packetId, { toString as f_packetIdToString } from './packet/packet-properties/packet-id.js';
+import packetId, { toString as f_packetIdToString } from './packet/packet-properties/packet-id.mjs';
 import packetType from './packet/packet-properties/packet-type.js';
-import groupId from './packet/packet-properties/group-id.js';
+import groupId from './packet/packet-properties/group-id.mjs';
 import { serialPort, baudrate, unitAddrClass } from './serial-port.js';
 import Packet, { Header, Payload } from './packet/packet.js';
 import { shortToBytesR, intToBytes, longToBytes } from './packet/service/converter.js';
@@ -8,7 +8,11 @@ import { shortToBytesR, intToBytes, longToBytes } from './packet/service/convert
 export default async function(action, callBack) {
 
     const addr = unitAddrClass.unitAddress;
-    if (action.update || action.toSend?.id !== action.packetId || action.toSend?.unitAddr !== addr || (action.unitAddr && action.unitAddr !== action.toSend?.unitAddr)) {
+    if (
+        action.update
+        || action.toSend?.id !== action.packetId
+        || action.toSend?.unitAddr !== addr
+        || (action.unitAddr && action.unitAddr !== action.toSend?.unitAddr)) {
 
         action.update = false;
         if (!action?.packetId === undefined)
@@ -23,7 +27,7 @@ export default async function(action, callBack) {
         action.toSend = {};
         if (action.name)
             action.toSend.name = action.name;
-        action.toSend.id = action.packetId;
+        action.toSend.id = action.packetId.code ?? action.packetId;
         if (action.unitAddr)
             action.toSend.unitAddr = action.unitAddr;
         else
@@ -42,7 +46,7 @@ export default async function(action, callBack) {
     if (action.toSend.bytes === undefined) {
         console.warn('No data to send.', action);
         action.toSend = undefined;
-        action.buisy = false;
+        action.busy = false;
         return;
     }
     callBack(action.toSend);
@@ -66,11 +70,11 @@ function getRest(action) {
 
         case packetId.deviceInfo:
         case packetId.measurement:
-        case packetId.alarmSummary:
+        //        case packetId.alarmSummary:
         case packetId.alarmIDs:
         case packetId.network: // get network
-        case packetId.module:	// All modules
-        case packetId.calMode:
+        //        case packetId.module:	// All modules
+        //        case packetId.calMode:
         case packetId.saveConfig:
             {
                 const packet = new Packet(new Header(type, action.toSend.id, action.groupId), new Payload(action.data.parameterCode), action.toSend.unitAddr);
@@ -99,8 +103,10 @@ function getRest(action) {
 
         case packetId.attenuationSet:
         case packetId.gainSet:
+        case packetId.gainOffsetSet:
+        case packetId.alcLevelSet:
             {
-                const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, shortToBytesR(action.data.value)), action.toSend.unitAddr);
+                const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId.code ?? action.groupId), new Payload(action.data.parameterCode, shortToBytesR(action.data.value)), action.toSend.unitAddr);
                 toSend.bytes = packet.toSend();
             }
             break;
@@ -108,7 +114,7 @@ function getRest(action) {
         case packetId.irpcDefault:
         case packetId.irpcHoverA:
         case packetId.irpcHoverB:
-        case packetId.calModeSet:
+        //        case packetId.calModeSet:
         case packetId.dacSetRcm:
         case packetId.rcmDacSet:
         case packetId.rcmDacSave:
@@ -121,19 +127,19 @@ function getRest(action) {
         case packetId.frequencySet:
         case packetId.comSetBaudrate:
             {
-                const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, longToBytes(action.data.value)), action.toSend.unitAddr);
+                const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId.code ?? action.groupId), new Payload(action.data.parameterCode, longToBytes(action.data.value)), action.toSend.unitAddr);
                 toSend.bytes = packet.toSend();
             }
             break;
 
         case packetId.configAll:
         case packetId.comAll:
-        case packetId.redundancyAll:
+        //        case packetId.redundancyAll:
         case packetId.dacRcm:
         case packetId.lnbBand:
             {
                 const pls = action.data.parameterCode.map(pc => new Payload(pc));
-                const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId), pls, action.toSend.unitAddr);
+                const packet = new Packet(new Header(packetType.request, action.toSend.id, action.groupId.code ?? action.groupId), pls, action.toSend.unitAddr);
                 toSend.bytes = packet.toSend();
             }
             break;
@@ -174,7 +180,7 @@ function getRest(action) {
         case packetId.comSetStandard:
         case packetId.irpcSalectSwtchHvr:
         case packetId.irpcStandBy:
-        case packetId.moduleSet:
+        //        case packetId.moduleSet:
         case packetId.odrcSetMode:
         case packetId.lnbSetMode:
         case packetId.odrcLNBSelect:
@@ -182,8 +188,9 @@ function getRest(action) {
         case packetId.lnbBandSet:
         case packetId.rcmDacDefault:
         case packetId.rcmSourceSet:
+        case packetId.alcOnOff:
             {
-                const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId), new Payload(action.data.parameterCode, [action.data.value]), action.toSend.unitAddr);
+                const packet = new Packet(new Header(packetType.command, action.toSend.id, action.groupId.code ?? action.groupId), new Payload(action.data.parameterCode, [action.data.value]), action.toSend.unitAddr);
                 //			console.log(packet)
                 toSend.bytes = packet.toSend();
             }
@@ -232,7 +239,16 @@ function getRest(action) {
             break;
 
         default:
-            console.warn(f_packetIdToString(action.toSend.id), action);
+//            if (action.packetId.name === 'refSourceSet') {
+//                console.log(f_packetIdToString(action.toSend.id), action);
+//                debugger
+//            }
+			action.command = packetType.command === action.type.code
+            const values = action.data.values ?? {};	// bytes
+            const pls = action.data.codes.map(pc => new Payload(pc.code, values[pc.code]));
+            const packet = new Packet(new Header(action.type.code, action.packetId.code, action.groupId.code), pls, action.toSend.unitAddr);
+            //            console.log(packet)
+            toSend.bytes = packet.toSend();
     }
     return toSend;
 }

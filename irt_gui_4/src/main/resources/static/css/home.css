@@ -1,15 +1,41 @@
-.connection-ok{
-	border-color: green !important;
+@import "volume.css";
+
+/* Connection OK = green glow */
+.connection-ok {
+    box-shadow:
+        0 0 0 2px rgba(40, 167, 69, 0.6),
+        0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        0 2px 4px -1px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.04) !important;
 }
-.connection-fail{
-	border-color: red !important;
+
+/* Connection FAIL = red glow */
+.connection-fail {
+    box-shadow:
+        0 0 0 2px rgba(220, 53, 69, 0.6),
+        0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        0 2px 4px -1px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.04) !important;
 }
-.connection-wrong{
-	border-color: yellow !important;
+
+/* Connection WRONG = yellow glow */
+.connection-wrong {
+    box-shadow:
+        0 0 0 2px rgba(255, 193, 7, 0.6),
+        0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        0 2px 4px -1px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.04) !important;
 }
-.connection-buisy{
-	border-color: black !important;
+
+/* Connection BUSY = black glow */
+.connection-busy {
+    box-shadow:
+        0 0 0 2px rgba(0, 0, 0, 0.6),
+        0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        0 2px 4px -1px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.04) !important;
 }
+
 .toast-body{
 	white-space: pre-wrap;
 }
@@ -44,4 +70,121 @@
 .logo-sm{
 	max-width: 80px;
 	height: auto;
+}
+
+
+/* ===== Global Typography Upgrade ===== */
+
+/* Base font smoothing */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modern font stack */
+body {
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "Microsoft YaHei",
+        "微软雅黑",
+        "Noto Sans SC",
+        Arial,
+        sans-serif;
+    font-size: 15px;
+    color: #2c2c2c;
+    letter-spacing: 0.2px;
+    background-color: #d8e5f1;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #1a1a1a;
+}
+
+/* Labels (Bootstrap floating labels, form labels, etc.) */
+label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    letter-spacing: 0.3px;
+}
+
+/* Inputs */
+input.form-control,
+select.form-select {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #222;
+}
+
+/* Placeholder text */
+.placeholder {
+    color: rgb(190, 218, 224) !important;
+    opacity: 0.5;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+/* Buttons */
+.btn {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    box-shadow: 0 1px 3px rgba(74, 144, 217, 0.08);
+}
+
+/* Range slider tooltip text */
+[data-bs-toggle="tooltip"] {
+    font-size: 0.85rem;
+}
+
+/* Checkbox labels */
+.btn-check + .btn {
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.measurement, .infoCard {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  /* WebKit-only, may help on macOS Safari */
+  -webkit-font-smoothing: antialiased;
+  /* Has almost no effect on modern browsers, but harmless */
+  text-rendering: optimizeLegibility;
+}
+
+.nav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;      /* Firefox */
+}
+
+.nav-tabs.buc::-webkit-scrollbar {
+    height: 6px;
+}
+
+.nav-tabs.buc .nav-item {
+    flex: 0 0 auto;
+}
+
+.controller-option {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.controller-option .form-range {
+    width: 120px;
+}
+#controllerOptions > div {
+    min-width: 140px;
 }

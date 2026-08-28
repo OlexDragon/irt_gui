@@ -1,94 +1,142 @@
+// controller-measurement.js
+
 import Controller from './controller.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import groupId from '../packet/packet-properties/group-id.mjs'
+import { translate } from '../packet/service/converter.js'
 
-export default class ControllerMeasurement extends Controller{
+export default class ControllerMeasurement extends Controller {
+  static #intelligencer = [];
+  static addIntelligencer(callBack) {
+    ControllerMeasurement.#intelligencer.push(callBack);
+  }
 
-	static #intelligencer = [];
-	static addIntelligencer(callBack) {
-		ControllerMeasurement.#intelligencer.push(callBack);
-	}
-	#$body;
+  #bodyElement;
+  #pendingRows = [];
+  #debounceTimer = null;
 
-	constructor($card){
-		super($card);
-		this.#$body = $card.find('.measurement');
-	}
+  constructor(card) {
+    super(card);
+    this.#bodyElement = this._root.querySelector('.measurement');
+  }
 
-	get groupId(){
-		return groupId.measurement;
-	}
+  get groupId() {
+    return groupId.measurement;
+  }
 
-/**
- * @param {Array} payloads
- */
-	set update(payloads){
-		ControllerMeasurement.#intelligencer.forEach(cb=>cb(payloads));
+  /**
+     * @param {object[]} payloads
+     */
+  set update(payloads) {
+    ControllerMeasurement.#intelligencer.forEach(cb => cb(payloads));
 
-		let timeout;
-		const rows = [];
-		payloads.forEach(pl=>{
+    payloads.forEach(pl => this.#processPayload(pl));
+  }
 
-			const parameterCode = pl.parameter.code;
-			const valId = 'measVal' + parameterCode;
-			const descrId = 'measDescr' + parameterCode;
-			const $desct = this.#$body.find('#' + descrId);
-			const parser = this.parametersClass.parser(parameterCode);
-			if(!parser){
-				console.warn('No Parser for parameterCode ', pl)
-				return;
-			}
-			if(parser==='do not show')
-				return;
-			if($desct.length){
-				const val = parser(pl.data);
-				if (val === undefined) {
-//					console.warn('Something went wrong.');
-					return;
-				}
-				const isArray = Array.isArray(val);
-				const $val = this.#$body.find('#' + valId);
-				if(isArray){
-					if($val.attr('data-value')!==val.toString())
-						$val.attr('data-value', val).html(val.map(v=>{
-							if(typeof v !=='string'){
-								console.warn('Something went wrong.')
-								return;
-							}
-							v = v.toUpperCase();
-							let c;
-							if(v.startsWith('UN'))
-								c = 'btn btn-outline-danger m-1';
-							else if(v.endsWith('LOW') || v === 'MUTE')
-								c = 'btn btn-outline-warning m-1';
-							else
-								c = 'btn btn-outline-success m-1';
-							return $('<div>', {class: c, text: v});
-						}));
-					
-				}else if($val.text()!==val)
-					$val.text(val);
-			}else{
-				const showText = this.parametersClass.toName(parameterCode);
-				const $row = $('<div>', {class: 'row'});
-				const val = parser(pl.data);
-				if (val === undefined) {
-					//					console.warn('Something went wrong.');
-					return;
-				}
-				let $v;
+  #processPayload(pl) {
+    const code = pl.parameter.code;
+    const parser = this.parametersClass.parser(code);
 
-				if(showText && showText !== 'Description'){
-					$row.append($('<div>', {id: descrId, class: 'col-5', text: showText}));
-					$v = $('<div>', {id: valId, class: 'col', text: val});
-				}else
-					$v =$('<div>', {id: descrId, class: 'col'}).append($('<h4>', {text: val}));
+    if (!parser || parser === 'do not show') {
+      if (!parser) console.warn('No Parser for parameterCode ', pl);
+      return;
+    }
 
-				$row.append($v);
+    const descrElement = document.getElementById('measDescr' + code);
+    const val = parser(pl.data);
 
-				rows.push($row);
-				clearTimeout(timeout);
-				timeout = setTimeout(()=>this.#$body.append(rows), 100);
-			}
-		});
-	}
+    if (val === undefined) return;
+
+    if (descrElement) {
+      this.#updateExistingValue(code, val);
+    } else {
+      this.#createNewRow(code, val);
+    }
+  }
+
+  #updateExistingValue(code, val) {
+    const valElement = document.getElementById('measVal' + code);
+    if (!valElement) return;
+
+    if (Array.isArray(val)) {
+      this.#renderStatusBadges(val, valElement);
+    } else if (valElement.textContent !== String(val)) {
+      valElement.textContent = val;
+    }
+  }
+
+  #renderStatusBadges(values, container) {
+    const key = values.toString();
+    if (container.getAttribute('data-value') === key) return;
+
+    container.setAttribute('data-value', key);
+    container.innerHTML = '';
+
+    values.forEach(v => {
+      if (typeof v !== 'string') {
+        console.warn('Something went wrong.');
+        return;
+      }
+
+      const status = v.toUpperCase();
+      const className = this.#getBadgeClass(status);
+      
+      const badge = document.createElement('div');
+      badge.className = className;
+      badge.textContent = translate('measurement.status', status);
+      container.appendChild(badge);
+    });
+  }
+
+  #getBadgeClass(status) {
+    if (status.startsWith('UN')) return 'btn btn-outline-danger m-1';
+    if (status.endsWith('LOW') || status === 'MUTE') return 'btn btn-outline-warning m-1';
+    return 'btn btn-outline-success m-1';
+  }
+
+  #createNewRow(code, val) {
+    const showText = this.parametersClass.translation(code);
+    const name = this.parametersClass.toName(code);
+    
+    const row = document.createElement('div');
+    row.className = 'row';
+
+    const hasLabel = showText && name !== 'Description';
+    const descrId = 'measDescr' + code;
+    const valId = 'measVal' + code;
+
+    if (hasLabel) {
+      const label = document.createElement('div');
+      label.id = descrId;
+      label.className = 'col-5';
+      label.textContent = showText;
+      row.appendChild(label);
+    }
+
+    const valueContainer = document.createElement('div');
+    valueContainer.id = hasLabel ? valId : descrId;
+    valueContainer.className = 'col';
+
+    if (hasLabel) {
+      valueContainer.textContent = val;
+    } else {
+      const heading = document.createElement('h4');
+      heading.textContent = val;
+      valueContainer.appendChild(heading);
+    }
+
+    row.appendChild(valueContainer);
+    this.#queueRow(row);
+  }
+
+  #queueRow(row) {
+    this.#pendingRows.push(row);
+    
+    clearTimeout(this.#debounceTimer);
+    this.#debounceTimer = setTimeout(() => {
+      const fragment = document.createDocumentFragment();
+      this.#pendingRows.forEach(r => fragment.appendChild(r));
+      this.#bodyElement.appendChild(fragment);
+      this.#pendingRows = [];
+    }, 100);
+  }
 }

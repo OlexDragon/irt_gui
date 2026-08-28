@@ -1,0 +1,6 @@
+@import './language.css';
+
+.language-current img {
+	content: url('/images/flags/f-zh.png');
+}
+

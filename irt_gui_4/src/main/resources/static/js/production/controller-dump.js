@@ -1,6 +1,6 @@
 import Controller from './controller.js'
-import packetId from '../packet/packet-properties/packet-id.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import packetId from '../packet/packet-properties/packet-id.mjs'
+import groupId from '../packet/packet-properties/group-id.mjs'
 import deviceDebug from '../packet/parameter/device-debug.js'
 
 export default class DumpController extends Controller{

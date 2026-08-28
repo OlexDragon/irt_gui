@@ -1,117 +1,118 @@
 import * as serialPort from './serial-port.js'
-import {start as networkStart, stop as networkStop, disable as networkDisable} from './panel-network.js'
-import {start as alarmsStart, stop as alarmsStop} from './panel-alarms.js'
-import {start as redundancyStart, stop as redundancyStop, disable as redundancyDisable} from './panel-redundancy.js'
-import {start as comStart, stop as comStop, disable as comDisable} from './panel-com.js'
-import {onStatusChange} from './panel-summary-alarm.js'
+import { start as networkStart, stop as networkStop, disable as networkDisable } from './panel-network.js'
+import { start as alarmsStart, stop as alarmsStop } from './panel-alarms.js'
+import { start as redundancyStart, stop as redundancyStop, disable as redundancyDisable } from './panel-redundancy.js'
+import { start as comStart, stop as comStop, disable as comDisable } from './panel-com.js'
+import { onStatusChange } from './panel-summary-alarm.js'
 import { type as unitType, onStartAll } from './panel-info.js'
 
 const $body = $('.userPanels');
 const $tabs = $body.find('.nav-link').click(userTabsOnShow);
 
-(()=>{
-	const userTabsCookies = Cookies.get('userTabsCookies');
-	if(userTabsCookies)
-		new bootstrap.Tab($(`#${userTabsCookies}`)).show();
-	else
-		new bootstrap.Tab($('#userTabAlarm')).show();
+(() => {
+    const userTabsCookies = Cookies.get('userTabsCookies');
+    if (userTabsCookies)
+        new bootstrap.Tab($(`#${userTabsCookies}`)).show();
+    else
+        new bootstrap.Tab($('#userTabAlarm')).show();
 })();
 
 serialPort.onStart(onStart);
 
-function onStart(doRun){
-	if(!doRun){
-		stop();
-	}else
-		run = true;
+function onStart(doRun) {
+    if (!doRun) {
+        stop();
+    } else
+        run = true;
 }
 
-onStartAll(yes=>yes ? start() : stop());
+onStartAll(yes => yes ? start() : stop());
 let run;
-export function start(){
+export function start() {
 
-	if(!unitType)
-		return;
+    if (!unitType)
+        return;
 
-	switch(unitType.name){
+    switch (unitType.name) {
 
-	case 'CONVERTER':
-	case 'CONVERTER_KA':
-	case 'REFERENCE_BOARD':
-		$tabs.filter((_,el)=>el.id !== 'userTabAlarm').parent().addClass('visually-hidden');
-		$tabs[0].click();
-		break;
+        case 'CONVERTER':
+        case 'CONVERTER_KA':
+        case 'REFERENCE_BOARD':
+            $tabs.filter((_, el) => el.id !== 'userTabAlarm').parent().addClass('visually-hidden');
+            $tabs[0].click();
+            break;
 
-	case 'CONTROLLER_IRPC':
-	case 'CONTROLLER_ODRC':
-	case 'LNB':
-		const $userTabRedundancy = $tabs.filter((_,el)=>el.id === 'userTabRedundancy');
-		$userTabRedundancy.parent().addClass('visually-hidden');
-		if($userTabRedundancy.hasClass('active'))
-			$tabs[0].click();
-		break;
+        case 'CONTROLLER_IRPC':
+        case 'CONTROLLER_ODRC':
+        case 'LNB':
+            const $userTabRedundancy = $tabs.filter((_, el) => el.id === 'userTabRedundancy');
+            $userTabRedundancy.parent().addClass('visually-hidden');
+            if ($userTabRedundancy.hasClass('active'))
+                $tabs[0].click();
+            break;
 
-	default:
-		console.log(unitType);
-	case 'KA_BIAS':
-	case 'BAIS':
-		$tabs.filter((_,el)=>el.id==='userTabRedundancy').parent().removeClass('visually-hidden');
-	}
-	run  = true;
-	const $selectedTab = $tabs.filter((_,el)=>el.classList.contains('active'));
+        default:
+            console.log(unitType);
+        case 'CONTROLLER':
+        case 'KA_BIAS':
+        case 'BAIS':
+            $tabs.filter((_, el) => el.id === 'userTabRedundancy').parent().removeClass('visually-hidden');
+    }
+    run = true;
+    const $selectedTab = $tabs.filter((_, el) => el.classList.contains('active'));
 
-	if($selectedTab.length)
-		$selectedTab.click();
-	else
-		console.warn('User Tab is not selected.')
+    if ($selectedTab.length)
+        $selectedTab.click();
+    else
+        console.warn('User Tab is not selected.')
 }
 
-export function stop(){
-	run  = false;
-	networkStop(); alarmsStop(); redundancyStop(); comStop();
+export function stop() {
+    run = false;
+    networkStop(); alarmsStop(); redundancyStop(); comStop();
 }
 
-export function disable(){
-	networkDisable(); redundancyDisable(); comDisable();
+export function disable() {
+    networkDisable(); redundancyDisable(); comDisable();
 }
 
-function userTabsOnShow({currentTarget:el}){
-	networkStop(); alarmsStop(); redundancyStop(); comStop();
+function userTabsOnShow({ currentTarget: el }) {
+    networkStop(); alarmsStop(); redundancyStop(); comStop();
 
-	if(!run)
-		return;
+    if (!run)
+        return;
 
-	let selected;
-	if(el){
-		Cookies.set('userTabsCookies', el.id, {expires: 365, path: '/'});
-		selected = el.id;
-	}
+    let selected;
+    if (el) {
+        Cookies.set('userTabsCookies', el.id, { expires: 365, path: '/' });
+        selected = el.id;
+    }
 
-	switch(selected){
+    switch (selected) {
 
-		case 'userTabNetwork':
-			networkStart();
-			break;
+        case 'userTabNetwork':
+            networkStart();
+            break;
 
-		case 'userTabAlarm':
-			alarmsStart();
-			break;
+        case 'userTabAlarm':
+            alarmsStart();
+            break;
 
-		case 'userTabRedundancy':
-			redundancyStart();
-			break;
+        case 'userTabRedundancy':
+            redundancyStart();
+            break;
 
-		case 'userTabCOM':
-			comStart();
-			break;
+        case 'userTabCOM':
+            comStart();
+            break;
 
-		default:
-			console.warn('Have to ccreate ' + selected);
-	}
+        default:
+            console.warn('Have to ccreate ' + selected);
+    }
 }
-onStatusChange(alarmStatus =>{
-	switch(alarmStatus.severities){
-	case 'CRITICAL':
-		$tabs.filter((_,el)=>el.id==='userTabAlarm').filter((_,el)=>!el.classList.contains('active')).click();
-	}
+onStatusChange(alarmStatus => {
+    switch (alarmStatus.severities) {
+        case 'CRITICAL':
+            $tabs.filter((_, el) => el.id === 'userTabAlarm').filter((_, el) => !el.classList.contains('active')).click();
+    }
 });

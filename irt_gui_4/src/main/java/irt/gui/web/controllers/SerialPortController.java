@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import irt.gui.web.beans.RequestPacket;
-import irt.gui.web.services.IrtSerialPort;
-import irt.gui.web.services.SerialPortDistributor;
+import irt.gui.web.services.distributor.SerialPortDistributor;
+import irt.gui.web.services.serialPort.IrtSerialPort;
 
 @RestController
 @RequestMapping("serial")

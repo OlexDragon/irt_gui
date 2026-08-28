@@ -1,4 +1,4 @@
-import {id} from './group-id.js'
+import {id} from './group-id.mjs'
 import {description as diDescription, parser as diParser, name as diName, toString as diToSyting} from '../parameter/device-info.js'
 import {description as measDescription, parser as measParser, name as measName, toString as measToSyting} from '../parameter/measurement.js'
 import {parser as confParser, name as confName, toString as confToSyting} from '../parameter/config-modules.js'

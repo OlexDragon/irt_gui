@@ -1,0 +1,88 @@
+/* Cards - increased depth and volume */
+.card {
+    border-radius: 16px !important;
+    border: none !important;
+    box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        0 2px 4px -1px rgba(0, 0, 0, 0.04),
+        0 8px 24px rgba(0, 0, 0, 0.04) !important;
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+    background: #ffffff !important;
+}
+
+.card:hover {
+    box-shadow: 
+        0 10px 15px -3px rgba(0, 0, 0, 0.08),
+        0 4px 6px -2px rgba(0, 0, 0, 0.03),
+        0 12px 32px rgba(0, 0, 0, 0.06) !important;
+    transform: translateY(-1px);
+}
+
+/* Info cards with subtle gradient edge */
+.card-body {
+    background: linear-gradient(145deg, #ffffff 0%, #d1e5f9 100%);
+    border-radius: 16px;
+}
+
+/* ===== Normal (enabled) ===== */
+.form-range::-webkit-slider-runnable-track {
+    height: 6px;
+    background: #0d6efd;
+    border-radius: 3px;
+}
+.form-range::-moz-range-track {
+    height: 6px;
+    background: #0d6efd;
+    border-radius: 3px;
+}
+
+/* Thumb */
+.form-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #0d6efd;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-top: -7px; /* centers thumb on 6px track */
+    transition: 0.15s ease;
+}
+.form-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #0d6efd;
+    border-radius: 50%;
+    border: 2px solid white;
+    transition: 0.15s ease;
+}
+
+/* Hover / Active */
+.form-range:hover:not(:disabled)::-webkit-slider-thumb {
+    transform: scale(1.1);
+}
+.form-range:active:not(:disabled)::-webkit-slider-thumb {
+    transform: scale(1.15);
+}
+
+
+/* ===== Disabled ===== */
+.form-range:disabled {
+    opacity: 0.6; /* global dim */
+    cursor: not-allowed;
+}
+
+.form-range:disabled::-webkit-slider-runnable-track {
+    background: #adb5bd; /* Bootstrap secondary gray */
+}
+.form-range:disabled::-moz-range-track {
+    background: #adb5bd;
+}
+
+.form-range:disabled::-webkit-slider-thumb {
+    background: #6c757d; /* muted gray */
+    border-color: #e9ecef;
+}
+.form-range:disabled::-moz-range-thumb {
+    background: #6c757d;
+    border-color: #e9ecef;
+}

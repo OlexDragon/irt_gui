@@ -1,47 +1,51 @@
-import {showToast} from '../serial-port.js'
+import { showToast } from '../serial-port.js'
 
-export default class UnitAddress{
+export default class UnitAddress {
 
-	#$unitAddress;
+    #unitAddressElement;
 
-	constructor($unitAddress){
-		this.#$unitAddress = $unitAddress.change(this.#onChange);
-		const ua = Cookies.get('unitAddress');
-		if(ua){
-			$unitAddress.val(ua);
-			this._unotAddress = ua;
-		}else
-			$unitAddress.val(254);
-	}
+    constructor(unitAddressElement) {
+        this.#unitAddressElement = unitAddressElement;
+        this.#unitAddressElement.addEventListener('change', this.#onChange);
 
-	get unitAddress(){
-		return +this.#$unitAddress.val();
-	}
+        const ua = Cookies.get('unitAddress');
+        if (ua) {
+            this.#unitAddressElement.value = ua;
+            this._unotAddress = ua;
+        } else {
+            this.#unitAddressElement.value = '254';
+        }
+    }
 
-	set unitAddress(address){
-		clearTimeout(this._timeout);
+    get unitAddress() {
+        return +this.#unitAddressElement.value;
+    }
 
-		if(typeof address ==='string')
-			address = +address;
-		if(Array.isArray(address))
-			if(address.length)
-				address = address[0];
-			else
-				return;
+    set unitAddress(address) {
+        clearTimeout(this._timeout);
 
-		const value = +this.#$unitAddress.val();
-		if(value === address)
-			return;
+        if (typeof address === 'string')
+            address = +address;
+        if (Array.isArray(address))
+            if (address.length)
+                address = address[0];
+            else
+                return;
 
-		if(address<0 || address>=255){
-			showToast('Address error', 'The address value cannot be a negative number or exceed 254.', 'text-bg-danger bg-opacity-50');
-			return;
-		}
+        const value = +this.#unitAddressElement.value;
+        if (value === address)
+            return;
 
-		this.#$unitAddress.val(address).change();
-	}
+        if (address < 0 || address >= 255) {
+            showToast('Address error', 'The address value cannot be a negative number or exceed 254.', 'text-bg-danger bg-opacity-50');
+            return;
+        }
 
-	#onChange = (e) =>{
-		Cookies.set('unitAddress', e.currentTarget.value, {expires: 365, path: ''});
-	}
+        this.#unitAddressElement.value = address;
+        this.#unitAddressElement.dispatchEvent(new Event('change'));
+    }
+
+    #onChange = (e) => {
+        Cookies.set('unitAddress', e.currentTarget.value, { expires: 365, path: '' });
+    }
 }

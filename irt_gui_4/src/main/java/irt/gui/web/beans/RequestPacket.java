@@ -13,7 +13,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@RequiredArgsConstructor @Getter @Setter @ToString @EqualsAndHashCode(exclude = {"serialPort", "bytes", "function", "baudrate", "timeout", "answer", "error"}) @JsonIgnoreProperties(ignoreUnknown = true)
+@RequiredArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(of = {"command", "id", "unitAddr", "bytes"})
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestPacket {
 
 	@NonNull private Boolean command;
@@ -30,6 +35,7 @@ public class RequestPacket {
 	@JsonSerialize(using = BytesToStringSerializer.class)
 	private byte[] answer;
 	private String error;
+	private String syncInfo;
 
 	// Functions below used in the STM 32 Flash programming
 	@JsonGetter

@@ -1,285 +1,501 @@
+// controller-config.js
 import Controller from './controller.js'
-import ControllerValue from '../classes/controller-value.js'
-import packetId from '../packet/packet-properties/packet-id.js'
-import groupId from '../packet/packet-properties/group-id.js'
+import ControllerValue from './controller-value.js'
+import packetId, { info as infoId } from '../packet/packet-properties/packet-id.mjs'
+import {info as infoGroup} from '../packet/packet-properties/group-id.mjs'
+import IrtValue from '../packet/parameter/value/irt-value.js';
+import CheckboxHelper from './helper/checkbox-helper.mjs';
+import SelectHelper from './helper/select-helper.mjs';
+import translator from '../helper/text-translator.mjs';
+import { info as infoType } from '../packet/packet-properties/packet-type.js'
 
-export default class ControllerConfig extends Controller{
-	static url = '/fragment/control/buc';
+export default class ControllerConfig extends Controller {
+    static url = '/fragment/control/buc';
 
-	#attenuationController;
-	#gainController;
-	#freqController;
-	#freqTab;
-	#$btnMute;
-	#$loSelect;
-	#onChangeEvents = [];
+    #onChangeEvents = [];
 
-	constructor($card) {
-		super($card);
-		this._$card.load(ControllerConfig.url, this._onLoad.bind(this));
-	}
-	destroy(){
-		console.log('***** destroy() *****')
-		super.destroy();
-		this.#freqTab.remove();
-		this.#freqTab = null;
-		this.#$btnMute.remove();
-		this.#$btnMute = null;
-		this.#$loSelect.remove();
-		this.#$loSelect = null;
-	}
-	get groupId(){
-		return groupId.configuration;
-	}
+    tabs = {};
+    controllers = {};
+    elements = {};
 
-	/**
-	 * @param {Object[]} pls
-	 */
-	set update(pls){
-		if(!this.#freqTab){
-			console.log('This controller is not ready yet.')
-			return;
-		}
+    constructor(card) {
+        super(card);
+        // Load the fragment
+        fetch(ControllerConfig.url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                super._onLoad();
+                this._card.innerHTML = html;
+                this.#onLoad();
+            })
+            .catch(error => {
+                console.warn('Error loading config:', error);
+            });
+    }
 
-		const pId =this.parametersClass.parameters;
-		pls.sort(({parameter:a},{parameter:b})=>b.code - a.code).forEach(pl=>{
+    get groupId() {
+        return infoGroup.configuration;
+    }
 
-			const val = this.parametersClass.parser(pl.parameter.code)(pl.data);
+    /**
+     * @param {Object[]} pls
+     */
+    set update(pls) {
 
-			switch(pl.parameter.code){
+        if (this._toRead.readAll)
+            this.#replaceReadAll(pls);
+        if (!this.controllers.loSet) {
+            console.log('This controller is not ready yet.');
+            return;
+        }
 
-			case pId.attenuationRange.code:
-				delete this._toRead.attenuationRange;
-				this.#attenuationController.min = val[1]/10*-1;
-				this.#attenuationController.max = val[0];
-				this.#attenuationController.step = 0.1;
-				break;
+        pls.sort(({ parameter: a }, { parameter: b }) => b.code - a.code).forEach(pl => {
+            const { code } = pl.parameter
+            const val = this.parametersClass.parser(code)(pl.data);
+            const name = this.parametersClass.toName(code);
 
-			case pId.Attenuation.code:
-				{
-					const value = val;
-					this.#attenuationController.value = value;
-					const text = this.$attenuationTab.text();
-					const split = text.split(' : ');
-					this.$attenuationTab.text(split[0] + ' : ' + value);
-				}
-				break;
+            const value = val instanceof IrtValue
+                ? val.value
+                : val;
+            const ps = this.parametersClass.parameters;
 
-			case pId.gainRange.code:
-				delete this.toRead.gainRange;
-				this.#gainController.min = val[0]/10;
-				this.#gainController.max = val[1]/10;
-				this.#gainController.step = 0.1;
-				break;
+            switch (name) {
 
-			case pId.Gain.code:
-				{
-					const value = val;
-					this.#gainController.value = value;
-					const text = this.$gainTab.text();
-					const split = text.split(' : ');
-					this.$gainTab.text(split[0] + ' : ' + value);
-				}
-				break;
+                case ps.alcLevelRange?.name:
+                case ps.attenuationRange.name:
+                case ps.gainOffsetRange?.name:
+                case ps.gainRange.name:
+                    delete this._toRead[name];
+                    const controllerName = name.replace('Range', '');
+                    this.tabs[controllerName].closest('.nav-item').classList.remove('visually-hidden');
+                    this.controllers[controllerName].min = val[0] / 10;
+                    this.controllers[controllerName].max = val[1] / 10;
+                    this.controllers[controllerName].step = 0.1;
+                    break;
 
-			case pId.frequencyRange.code:
-				delete this.toRead.frequencyRange;
-				if(val.filter(v=>v).length){
-					this.#freqTab.removeClass('visually-hidden');
-					this._frequencyRange(val.map(v=>Number(v/1000000n)));
-				}else{
-					delete this._toRead.Frequency;
-					this.#freqTab.addClass('visually-hidden');
-				}
-				break;
+                case ps.alcLevel?.name:
+                case ps.attenuation.name:
+                case ps.gainOffset?.name:
+                case ps.gain.name: {
+                    this.controllers[name].value = value;
+                    const text = this.tabs[name].textContent;
+                    const split = text.split(' : ');
+                    this.tabs[name].textContent = split[0] + ' : ' + value;
+                    break;
+                }
 
-			case pId.Frequency.code:
-				{
-					const value = val/1000000n;
-					const remainder = Number(val - value*1000000n)/1000000;
-					const result = Number(value)+remainder;
-					this.#freqController.value = result;
-					const text = this.#freqTab.text();
-					const split = text.split(' : ');
-					this.#freqTab.text(split[0] + ' : ' + result);
-				}
-				break;
+                case ps.frequencyRange.name:
+                    delete this._toRead.frequencyRange;
+                    if (val.filter(v => v).length) {
+                        this.tabs.frequency.classList.remove('visually-hidden');
+                        this._frequencyRange(val.map(v => Number(v / 1000000n)));
+                    } else {
+                        delete this._toRead.frequency;
+                        this.tabs.frequency.classList.add('visually-hidden');
+                    }
+                    break;
 
-			case pId.Mute.code:
-				{
-					if(val===''){
-						this.#$btnMute.attr('disabled', true);
-						break;
-					}
-					const value = val ? 'Unmute' : 'Mute';
-					const label = this.#$btnMute.prop('checked', val).attr('disabled', false).next();
-					if(label.text()!==value)
-						label.text(value);
-				}
-				break;
+                case ps.frequency.name: {
+                    const value = val / 1000000n;
+                    const remainder = Number(val - value * 1000000n) / 1000000;
+                    const result = Number(value) + remainder;
+                    this.controllers.frequency.value = result;
+                    const text = this.tabs.frequency.textContent;
+                    const split = text.split(' : ');
+                    this.tabs.frequency.textContent = split[0] + ' : ' + result;
+                    break;
+                }
 
-			case pId.loSet.code:
-				{
-					const value = this._toRead.loSet.parser(pl.data);
-					this.#$loSelect.val(value);
-				}
-				break;
+                case ps.spectrumInversion.name:
+                case ps.powerToLnb?.name:
+                case ps.referenceToLnb?.name:
+                case ps.mute.name: {
 
-			case pId.LO.code:
-				{
-					if(!this._toRead.LO)
-						return;
+                    const c = this.controllers[name];
+                    if (!c) {
+                        console.log(`TThe ${name} controller is not ready yet.`);
+                        break;
+                    }
 
-					const value = this._toRead.LO.parser(pl.data);
-					delete this._toRead.LO;
-					if(!pl.parameter.size){
-						delete this._toRead.LO;
-						return;
-					}
+                    if (val === undefined) {
+                        delete this._toRead[name];
+                        c.disabled = true;
+                        break;
+                    }
+                    c.checked = val;
+                    break;
+                }
 
-					const potions = value.map((v,i)=>v ? $('<option>', {value: i, text: v}) : undefined).filter(v=>v);
-					this.#$loSelect.append(potions).parent().removeClass('visually-hidden');
-				}
-				break;
+                case ps.loSet?.name: {
+                    this.controllers.loSet.value = val;
+                    break;
+                }
 
-//			case pId.Status.code:	// Redundancy
-//				console.log(pl);
-//				break;
+                case ps.lo?.name: {
 
-			default:
-				console.warn(pl);
-			}
-		});
-	}
+                    const c = this.controllers.loSet;
 
-	/**
-	 * @param {method} e
-	 */
-	set change(e){
-		this.#onChangeEvents.push(e);
-	}
 
-	_frequencyRange(val){
-		this._min(val[0]);
-		this._max(val[1]);
-		this._step(0.000001);
-	}
+                    delete this._toRead[name];
 
-	_min(min){
-		this.#freqController.min = min;
-	}
+                    const length = Number(value?.length);
+                    if (!length) {
+                        c.disabled = true;
+                        break;
+                    }
+                    c.show();
+                    c.fill(value);
+                    if (length === 1) {
+                        c.disabled = true;
+                        delete this._toRead[ps.loSet.name];
+                    }
+                    break;
+                }
 
-	_max(max){
-		this.#freqController.max = max;
-	}
+                case ps.alcOnOff?.name: {
+                    this.controllers.alcLevel.anable = value;
+                    break;
+                }
 
-	_step(step){
-		this.#freqController.step(step);
-	}
+                case ps.refCapability.name: {
 
-	_tickMarks(set){
-		this.#freqController.tickMarks(set);
-	}
+                    const c = this.controllers.refSource;
 
-	_onLoad(_, statusText){
-		if(statusText !== 'success'){
-			console.warn(statusText);
-			return;
-		}
-		this.$attenuationTab = this._$card.click(this.#tabClick.bind(this)).find('#attenuationTab');
-		this.#freqTab = this._$card.find('#freqTab');
-		this.$gainTab = this._$card.find('#gainTab');
+                    delete this._toRead[name];
 
-		const onValueChange = this.#onValueChange.bind(this);
-		this.#attenuationController = new ControllerValue('attenuation', this._$card.find('div.attenuation'));
-		this.#attenuationController.change = onValueChange;
+                    const length = Number(val?.length);
+                    if (!length) {
+                        c.disabled = true;
+                        break;
+                    }
+                    c.show();
+                    c.fill(val);
+                    if (length === 1) {
+                        c.disabled = true;
+                        delete this._toRead[ps.refSource.name];
+                    }
+                    break;
+                }
 
-		this.#gainController = new ControllerValue('gain', this._$card.find('div.gain'));
-		this.#gainController.change = onValueChange;
+                case ps.refSource.name: {
+                    this.controllers.refSource.value = val;
+                    break;
+                }
 
-		this.#freqController = new ControllerValue('freq', this._$card.find('div.frequency'));
-		this.#freqController.change = onValueChange;
+                default:
+                    console.warn('[TODO]', { pl, [name]: val });
+                case ps.alcProtectionRange?.name:
+                case ps.alcProtectionThreshold?.name:
+                case ps.alcProtectionOnOff?.name:
+                case ps.flags?.name: {
+                    delete this._toRead[name];
+                }
 
-		this.#$btnMute = this._$card.find('#btnMute').change(this.#onChangeBtnMute.bind(this));
-		this.#$loSelect = this._$card.find('#loSelect').change(this.#onChangeLoSelect.bind(this));
+            }
+        });
+    }
 
-		const tabCookies = Cookies.get('tabCookies');
-		if (tabCookies)
-			new bootstrap.Tab($('#' + tabCookies)).show();
-		else
-			new bootstrap.Tab(this.$attenuationTab).show();
-	}
-	#tabClick({target:{id}}) {
-		switch (id) {
+    /**
+     * @param {method} e
+     */
+    set change(e) {
+        this.#onChangeEvents.push(e);
+    }
 
-		case 'attenuationTab':
-			this.#attenuationController.active()
-			break;
+    _frequencyRange(val) {
+        this._min(val[0]);
+        this._max(val[1]);
+        this._step(0.000001);
+    }
 
-		case 'gainTab':
-			this.#gainController.active()
-			break;
+    _min(min) {
+        this.controllers.frequency.min = min;
+    }
 
-		case 'freqTab':
-			this.#freqController.active()
-			break;
+    _max(max) {
+        this.controllers.frequency.max = max;
+    }
 
-		default:
-//			console.warn(id);
-			return;
-		}
-		Cookies.set('tabCookies', id, {expires: 365, path: '/'});
-	}
+    _step(step) {
+        this.controllers.frequency.step(step);
+    }
 
-	#onValueChange(object) {
-		Object.keys(object).forEach(key => {
+    _tickMarks(set) {
+        this.controllers.frequency.tickMarks(set);
+    }
 
-			let toSend;
-			let pId;
-			let parameterCode;
+    #replaceReadAll(pls) {
+        delete this._toRead.readAll;
+        pls.forEach(pl => {
+            const { code } = pl.parameter;
+            const name = this.parametersClass.toName(code);
+            this._toRead[name] = code;
+        });
+    }
 
-			switch (key) {
+    #onLoad() {
+        // Get references to elements
+        this.tabs.attenuation = this._card.querySelector('#attenuationTab');
+        this.tabs.frequency = this._card.querySelector('#frequencyTab');
+        this.tabs.gain = this._card.querySelector('#gainTab');
+        this.tabs.gainOffset = this._card.querySelector('#gainOffsetTab');
+        this.tabs.alcLevel = this._card.querySelector('#alcLevelTab');
 
-			case this.#attenuationController.name:
-				pId = packetId.attenuationSet;
-				parameterCode = this.parametersClass.parameters.Attenuation.code;
-				toSend = object[key] * 10;
-				break;
+        // Add click listeners to tabs
+        Object.values(this.tabs).forEach(tab => {
+            tab.addEventListener('click', e => this.#tabClick(e));
+        });
 
-			case this.#gainController.name:
-				pId = packetId.gainSet;
-				parameterCode = this.parametersClass.parameters.Gain.code;
-				toSend = object[key] * 10;
-				break;
+        const onValueChange = this.#onValueChange.bind(this);
 
-			case this.#freqController.name:
-				pId = packetId.frequencySet;
-				parameterCode = this.parametersClass.parameters.Frequency.code;
-				const value = object[key];
-				const floor = Math.floor(value);
-				const remainder = Math.round(value % 1 * 1000000);
-				toSend = BigInt(floor) * 1000000n + BigInt(remainder);
-				break;
+        this.controllers.attenuation = this.#createController('attenuation', onValueChange);
+        this.controllers.gain = this.#createController('gain', onValueChange);
+        this.controllers.frequency = this.#createController('frequency', onValueChange);
+        this.controllers.gainOffset = this.#createController('gainOffset', onValueChange);
+        this.controllers.alcLevel = this.#createController('alcLevel', onValueChange);
 
-			default:
-				console.log('To add key = ' + key);
-				return;
-			}
+        const chkBoxMute = this._card.querySelector('#btnMute');
+        if (chkBoxMute)
+            this.controllers.mute = this.#createToggleController(
+                chkBoxMute, {
+                statusOn: translator.translate('MUTED'),
+                ststusOff: translator.translate('UNMUTED'),
+                hoverOn: translator.translate('Unmute'),
+                hoverOff: translator.translate('Mute'),
+                cssOn: translator.translate('btn-warning'),
+                ctrlKeyOn: translator.translate('Resend Mute'),
+                ctrlKeyOff: translator.translate('Resend Unmute')
+            });
 
-			this._sendChange(pId, toSend, parameterCode);
-		});
-	}
+        const chkBoxRef = this._card.querySelector('#btnRefToLnb');
+        if (chkBoxRef)
+            this.controllers.referenceToLnb = this.#createToggleController(
+                chkBoxRef, {
+                statusOn: 'Ref.is ON',
+                ststusOff: 'Ref.is OFF',
+                hoverOn: 'Set Off',
+                hoverOff: 'Set ON'
+            });
 
-	#onChangeBtnMute(e) {
-		const toSend = e.currentTarget.checked ? 1 : 0;	// Mute / Unmute
-		this._sendChange(packetId.muteSet, toSend, this.parametersClass.parameters.Mute.code);
-	}
-	#onChangeLoSelect({currentTarget:{value: toSend}}){
-		this._sendChange(packetId.loSet, toSend, this.parametersClass.parameters.loSet.code);
-		Object.assign(this._toRead, {frequencyRange: this.parametersClass.parameters.frequencyRange});
-	}
+        const chkBoxPower = this._card.querySelector('#btnPowerToLnb');
+        if (chkBoxPower)
+            this.controllers.powerToLnb = this.#createToggleController(
+                chkBoxPower, {
+                statusOn: 'Power is ON',
+                ststusOff: 'Poweris OFF',
+                hoverOn: 'Set Off',
+                hoverOff: 'Set ON'
+            });
 
-	_sendChange(){
-		this.#onChangeEvents.forEach(cb=>cb(...arguments));
-	}
+        const chkBoxInversion = this._card.querySelector('#btnSpecInversion');
+        if (chkBoxInversion)
+            this.controllers.spectrumInversion = this.#createToggleController(
+                chkBoxInversion, {
+                statusOn: 'Inverted',
+                ststusOff: 'Non-inverted',
+                hoverOn: 'Set Non-inverted',
+                hoverOff: 'Set Inverted'
+            });
+
+        this.controllers.refSource = new SelectHelper(this._card.querySelector('#refSource'), toSend => this.#onChangeBtn(toSend));
+        this.controllers.loSet = new SelectHelper(this._card.querySelector('#loSelect'), toSend => this.#onChangeBtn(toSend));
+
+        //        this.elements.loSelect = this._card.querySelector('#loSelect');
+        //        if (this.elements.loSelect) {
+        //            this.elements.loSelect.addEventListener('change', this.#onChangeLoSelect.bind(this));
+        //        }
+
+        // Restore tab from cookie
+        const tabCookies = Cookies.get('tabCookies');
+        if (tabCookies) {
+            const tabElement = document.getElementById(tabCookies);
+            if (tabElement) {
+                new bootstrap.Tab(tabElement).show();
+            }
+        } else if (this.tabs.attenuation) {
+            new bootstrap.Tab(this.tabs.attenuation).show();
+        }
+        this._onLoad?.();
+    }
+
+    #createToggleController(
+        chkBox, {
+            statusOn,
+            ststusOff,
+            hoverOn,
+            hoverOff,
+            cssOn,
+            ctrlKeyOn,
+            ctrlKeyOff
+        }) {
+
+        const options = {
+            status: {
+                on: statusOn,
+                off: ststusOff
+            },
+            hover: {
+                on: hoverOn,
+                off: hoverOff
+            },
+            css: {
+                on: cssOn
+            },
+            ctrlKey: {
+                on: ctrlKeyOn,
+                off: ctrlKeyOff
+            }
+        }
+        return new CheckboxHelper(chkBox, toSet => this.#onChangeBtn(toSet), options);
+    }
+
+    #createController(cssClass, onValueChange) {
+        const div = this._card.querySelector(`div.${cssClass}`);
+        div.dataset.controller = cssClass;
+        const controller = new ControllerValue(div);
+        controller.change = onValueChange;
+        return controller;
+    }
+
+    #tabClick({ currentTarget: { id } }) {
+
+        Object.values(this.controllers).forEach(c => c.hideTooltip?.());
+        const name = id.replace('Tab', '');
+        const controller = this.controllers[name];
+        if (!controller)
+            console.error(name);
+        controller.active();
+        Cookies.set('tabCookies', id, { expires: 365, path: '/' });
+    }
+
+    #onValueChange(object) {
+        const cs = this.controllers;
+        Object.entries(object).forEach(([key, value]) => {
+            let toSend;
+            let pId;
+            let parameterCode;
+
+            switch (key) {
+                case cs.alcLevel.name:
+                    if (value.enable != null) {
+                        toSend = value.enable ? 1 : 0;
+                        const alcOnOff = this.parametersClass.parameters.alcOnOff;
+                        parameterCode = alcOnOff.code;
+                        pId = packetId.alcOnOff;
+                        break;
+                    }
+                case cs.gainOffset.name:
+                case cs.gain.name:
+                case cs.attenuation.name:
+                    const packetIdName = key + 'Set'
+                    pId = packetId[packetIdName];
+                    if (!pId) {
+                        console.warn('Have to add Packet ID: ' + packetIdName);
+                        return;
+                    }
+                    parameterCode = this.parametersClass.parameters[key].code;
+                    toSend = value * 10;
+                    break;
+
+                case cs.frequency.name:
+                    pId = packetId.frequencySet;
+                    parameterCode = this.parametersClass.parameters.frequency.code;
+                    const floor = Math.floor(value);
+                    const remainder = Math.round(value % 1 * 1000000);
+                    toSend = BigInt(floor) * 1000000n + BigInt(remainder);
+                    break;
+
+                default:
+                    console.log('To add key = ' + key);
+                    return;
+            }
+
+            this._sendChange(pId, toSend, parameterCode);
+        });
+    }
+
+    #parameterMap = {
+        // deprecated
+        btnMute: () => ({
+            id: packetId.muteSet,
+            parameter: this.parametersClass.parameters.mute.code,
+            toSend: ({ value, ctrlKey }) => ctrlKey ? +!value : +value
+        }),
+        btnPowerToLnb: () => ({
+            id: 'powerToLnbSet', // The ID is a string because if I forgot to add this ID to the packetId, there would be a missing ID message.
+            parameter: this.parametersClass.parameters.powerToLnb.code,
+            toSend: ({ value }) => value ? 2 : 3
+        }),
+        btnRefToLnb: () => ({
+            id: 'refToLnbSet',
+            parameter: this.parametersClass.parameters.referenceToLnb.code,
+            toSend: ({ value }) => value ? 1 : 2
+        }),
+        btnSpecInversion: () => ({
+            id: 'specInversionSet',
+            parameter: this.parametersClass.parameters.spectrumInversion.code,
+            toSend: ({ value }) => value ? 1 : 2
+        }),
+        loSelect: () => ({
+            id: packetId.loSet,
+            parameter: this.parametersClass.parameters.loSet.code,
+            toSend: ({ value }) => value
+        }),
+        // new style code
+        refSource: () => ({
+            id: infoId.refSourceSet,
+            codes: [this.parametersClass.parameters.refSource],
+            toSend: ({ value }) => ({
+                [this.parametersClass.parameters.refSource.code]: [Number(value)]
+            })
+        })
+    };
+
+    #onChangeBtn(toSet) {
+        const map = this.#parameterMap[toSet.id]?.();
+
+        if (!map) {
+            console.warn(`Unknown toggle: ${toSet.id}`);
+            return;
+        }
+
+        // new style code
+        if (map.parameter == null) {
+            const command = {
+                type: infoType.command,
+                packetId: map.id,
+                groupId: this.groupId,
+                data: {
+                    values: map.toSend(toSet),
+                    codes: map.codes
+                },
+                update: true
+            };
+            this._sendChange(command);
+            return;
+        }
+        // deprecated
+        const id = map.id;
+        const toSend = map.toSend(toSet);
+        const parameter = map.parameter;
+
+        this._sendChange(id, toSend, parameter);
+    }
+
+    _sendChange() {
+        this.#onChangeEvents.forEach(cb => cb(...arguments));
+    }
+
+    destroy() {
+        Object.values(this.controllers).forEach(c => c.destroy?.());
+
+        this.controllers = {};
+        this.tabs = {};
+        this.elements = {};
+    }
 }
