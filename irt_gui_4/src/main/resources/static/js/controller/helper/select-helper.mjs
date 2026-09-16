@@ -1,19 +1,17 @@
 // select-helper.mjs
+
 export default class SelectHelper {
 
     #root;
     #select;
     #onChange;
+    #callback;
 
     constructor(select, callback) {
         this.#select = select.localName === 'select' ? select : select.querySelector('select');
         this.#root = select.parentElement;
-        this.#onChange = () => {
-            callback?.({
-                id: this.#select.id,
-                value: this.#select.value,
-            })
-        };
+        this.#callback = callback;
+        this.#onChange = () => this.#doCallback();
         this.#select.addEventListener('change', this.#onChange);
     }
 
@@ -40,12 +38,35 @@ export default class SelectHelper {
         this.#select.disabled = disabled;
     }
 
-    fill(values) {
+    fill(values, selected = '', { createDefault = false, defaultText = 'Select' } = {}) {
+
+        let options = [];
+        if (createDefault) {
+            const option = new Option(defaultText, '');
+            option.disabled = true;
+            option.hidden = true;
+            options.push(option);
+        }
+
         this.#select.replaceChildren(
-            ...values.map(({ value, name }) => new Option(name, value))
+            ...options,
+            ...values.map(({ value, name }) => new Option(name, value, false, selected === value || selected === name))
         );
+        if (this.#select.value)
+            this.#doCallback();
     }
 
+	toggleClass(classToToggle, status){
+		this.#select.classList.toggle(classToToggle, status);
+	}
+
+    #doCallback() {
+        this.#callback?.({
+            id: this.#select.id,
+            value: this.#select.value,
+        });
+    }
+	
     show() {
         this.#root.classList.remove('visually-hidden');
         this.disabled = false;

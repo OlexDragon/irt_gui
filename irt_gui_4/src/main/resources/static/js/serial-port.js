@@ -3,31 +3,39 @@
 import f_toSend from './to-send.js'
 import Packet from './packet/packet.js'
 import UnitAddress from './classes/unit-address.js'
-import Baudrate from './classes/baudrate.js'
 import { start as summaryAlarmStart, stop as summaryAlarmStop, textToStatus, closed, onStatusChange } from './panel-summary-alarm.js'
 import { status as f_alarmStatus } from './packet/parameter/value/alarm-status.js'
 import packetType from './packet/packet-properties/packet-type.js'
-import { translate } from './packet/service/converter.js'
-import { canExit, stop as stopCounter } from './helper/connection-counter-ui.mjs';
+import CslSerialPort from './serial/csl-serial-port.mjs';
 
-export let serialPort;
+const cslSerialPort = new CslSerialPort({
+
+    serialPortElement: document.getElementById('serialPort'),
+    baudrateElement: document.getElementById('baudrate'),
+    exitElement: document.getElementById('appExit'),
+    modal: document.getElementById('modal'),
+    callback: portSelected,
+    storageKey: 'gui',
+    beforeExit: () => {
+        summaryAlarmStop();
+        btnStartEvents.forEach(cb => cb(false));
+    }
+});
+
 export let showError;
-const baudrateElement = document.getElementById('baudrate');
-export const baudrate = new Baudrate(baudrateElement);
+export const baudrate = cslSerialPort.baudrate;
+const selectSerialPort = cslSerialPort.serialPort
 const unitAddressElement = document.getElementById('unitAddress');
 export const unitAddrClass = new UnitAddress(unitAddressElement);
 
 // DOM element references
-const serialPortSelect = document.getElementById('serialPort');
+
 const btnStart = document.getElementById('btnStart');
 const toastContainer = document.getElementById('toastContainer');
-const modal = document.getElementById('modal');
 const coverDiv = document.getElementById('cover');
 const btnShowErrors = document.getElementById('btnShowErrors');
 const appExit = document.getElementById('appExit');
 const summaryAlarmCard = document.getElementById('summaryAlarmCard');
-const summaryAlarmTitle = document.getElementById('summaryAlarmTitle');
-
 
 export function doRun() {
     return btnStart.checked;
@@ -44,8 +52,8 @@ export function removeOnStart(cb) {
         btnStartEvents.splice(index, 1);
 }
 
-export function postObject($card, action) {
-    f_toSend(action, toSend => send($card, toSend, action));
+export function postObject(card, action) {
+    f_toSend(action, toSend => send(card, toSend, action));
 }
 
 export function blink(el, bootstrapClass = 'connection-ok') {
@@ -110,7 +118,6 @@ export function stop() {
 }
 
 // Event listeners
-serialPortSelect.addEventListener('change', portSelected);
 btnStart.addEventListener('change', toggleStart);
 btnShowErrors.addEventListener('change', btnShowErrorsChange);
 
@@ -119,75 +126,15 @@ btnShowErrors.addEventListener('change', btnShowErrorsChange);
     btnShowErrors.checked = showError;
 })();
 
-appExit.addEventListener('click', async () => {
-
-    try {
-
-        if (await canExit()) {
-
-            stopCounter();
-            await showExitModal();
-
-            fetch('/exit', {
-                keepalive: true
-            });
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
+export let serialPort;
+function portSelected(data) {
+    coverButSerial(false);
+    if (!data?.value) {
+        console.warn('Midding data')
+        returm;
     }
-
-});
-
-async function showExitModal() {
-
-    summaryAlarmStop();
-    btnStartEvents.forEach(cb => cb(false));
-
-    let html;
-
-    try {
-
-        const response = await fetch('/modal/exit');
-
-        if (!response.ok)
-            throw new Error(`HTTP ${response.status}`);
-
-        html = await response.text();
-
-    } catch (error) {
-
-        console.error('Error loading exit modal:', error);
-
-        html = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">${translate('modal.exit', `guiClosed`)}</h5>
-                    </div>
-                    <div class="modal-body">
-					${translate('modal.exit', `guiClosedMessage`)}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    modal.innerHTML = html;
-    modal.setAttribute('data-bs-backdrop', 'static');
-
-    const bsModal = new bootstrap.Modal(modal);
-    bsModal.show();
-}
-
-function portSelected({ currentTarget: { value } }) {
-    coverButSerial();
-    serialPort = value;
-    Cookies.set('serialPort', serialPort, { expires: 365, path: '' });
-    if (btnStart.disabled)
-        btnStart.disabled = false;
+    serialPort = data.value;
+    btnStart.disabled = false;
     toggleStart();
 }
 
@@ -243,7 +190,7 @@ function btnShowErrorsChange(e) {
         showToast('Display of error messages is enabled.', 'Error information will be displayed here..');
 }
 
-function send($card, toSend, action) {
+function send(card, toSend, action) {
 
     if (!btnStart.checked) {
         console.warn('Stop button pressed, unauthorized attempt to use serial port.', action);
@@ -252,7 +199,7 @@ function send($card, toSend, action) {
 
     if (!toSend?.bytes) {
         console.warn('No data to send.', toSend, action);
-        blink($card, 'connection-wrong');
+        blink(card, 'connection-wrong');
         return;
     }
     const json = JSON.stringify(toSend);
@@ -273,7 +220,7 @@ function send($card, toSend, action) {
                         response,
                         error: null
                     });
-                    blink($card, 'connection-fail');
+                    blink(card, 'connection-fail');
 
                     console.log(response.headers);
 
@@ -289,7 +236,7 @@ function send($card, toSend, action) {
                         response,
                         error: null
                     });
-                    blink($card, 'connection-fail');
+                    blink(card, 'connection-fail');
 
                     console.log(response.headers);
                     textToStatus('Closed:The application is not responding.');
@@ -310,7 +257,7 @@ function send($card, toSend, action) {
             }
 
             if (!data.answer?.length) {
-                blink($card, 'connection-wrong');
+                blink(card, 'connection-wrong');
                 onError({
                     message: 'No answer.',
                     data
@@ -330,7 +277,7 @@ function send($card, toSend, action) {
 
             const id = action.packetId.code ?? action.packetId;
             if (id !== packet.header.packetId) {
-                blink($card, 'connection-wrong');
+                blink(card, 'connection-wrong');
                 onError({
                     message: 'Received wrong packet.',
                     packet
@@ -340,7 +287,7 @@ function send($card, toSend, action) {
 
             if (packet.header.error) {
                 const packetStr = packet.toString();
-                blink($card, 'connection-wrong');
+                blink(card, 'connection-wrong');
                 if (showError)
                     showToast('Packet Error', packetStr, 'text-bg-danger bg-opacity-50');
 
@@ -357,7 +304,7 @@ function send($card, toSend, action) {
                     console.log(action, packet);
                     console.warn('Packet does not have payloads.');
                 }
-                blink($card, 'connection-wrong');
+                blink(card, 'connection-wrong');
                 onError({
                     message: 'Packet does not have payloads.',
                     data
@@ -365,7 +312,7 @@ function send($card, toSend, action) {
                 return;
             }
 
-            blink($card);
+            blink(card);
             action[data.function](packet);
 
         } catch (error) {
@@ -374,7 +321,7 @@ function send($card, toSend, action) {
                 error
             });
             console.error(error, { action });
-            blink($card, 'connection-fail');
+            blink(card, 'connection-fail');
             textToStatus('Closed:The application is not responding.');
         } finally {
             action.busy = false;
@@ -393,15 +340,9 @@ function onError(error, action) {
 }
 
 function coverButSerial(cover) {
-    if (cover) {
-        coverDiv?.classList.add('cover');
-        serialPortSelect.classList.add('to-front');
-        appExit.classList.add('to-front');
-    } else {
-        coverDiv?.classList.remove('cover');
-        serialPortSelect.classList.remove('to-front');
-        appExit.classList.remove('to-front');
-    }
+    coverDiv?.classList.toggle('cover', cover);
+    selectSerialPort.toggleClass('to-front', cover);
+    appExit.classList.toggle('to-front', cover);
 }
 
 onStatusChange(s => {
@@ -411,14 +352,8 @@ onStatusChange(s => {
             btnStart.nextElementSibling.classList.add('to-front');
         case 2:
             coverDiv?.classList.add('cover');
-            serialPortSelect.classList.add('to-front');
-            if (serialPortSelect.nextElementSibling) {
-                serialPortSelect.nextElementSibling.classList.add('to-front');
-            }
-            baudrateElement.classList.add('to-front');
-            if (baudrateElement.nextElementSibling) {
-                baudrateElement.nextElementSibling.classList.add('to-front');
-            }
+            selectSerialPort.toggleClass('to-front', true);
+            baudrate.toggleClass('to-front', true);
             unitAddressElement.classList.add('to-front');
             if (unitAddressElement.nextElementSibling) {
                 unitAddressElement.nextElementSibling.classList.add('to-front');
@@ -429,14 +364,8 @@ onStatusChange(s => {
 
         default:
             coverDiv?.classList.remove('cover');
-            serialPortSelect.classList.remove('to-front');
-            if (serialPortSelect.nextElementSibling) {
-                serialPortSelect.nextElementSibling.classList.remove('to-front');
-            }
-            baudrateElement.classList.remove('to-front');
-            if (baudrateElement.nextElementSibling) {
-                baudrateElement.nextElementSibling.classList.remove('to-front');
-            }
+            selectSerialPort.toggleClass('to-front', false);
+            baudrate.toggleClass('to-front', false);
             unitAddressElement.classList.remove('to-front');
             if (unitAddressElement.nextElementSibling) {
                 unitAddressElement.nextElementSibling.classList.remove('to-front');
@@ -448,58 +377,3 @@ onStatusChange(s => {
             appExit.classList.remove('to-front');
     }
 });
-
-(async function getPortNames() {
-
-    try {
-        const response = await fetch('/serial/ports');
-
-        if (!response.ok) {
-            try {
-                const errorData = await response.json();
-                if (errorData?.message) {
-                    if (showError)
-                        showToast(errorData.error, errorData.message, 'text-bg-danger bg-opacity-50');
-                } else {
-                    const status = f_alarmStatus('Closed');
-                    summaryAlarmTitle.textContent = status.text;
-                }
-            } catch {
-                const status = f_alarmStatus('Closed');
-                summaryAlarmTitle.textContent = status.text;
-            }
-            return;
-        }
-
-        const ports = await response.json();
-
-        if (!ports?.length) {
-            coverButSerial(true);
-            return;
-        }
-
-        const serialPortCookies = Cookies.get('serialPort');
-        ports.forEach(name => {
-            const selected = serialPortCookies === name;
-            if (selected)
-                serialPort = name;
-            const option = document.createElement('option');
-            option.text = name;
-            option.selected = selected;
-            serialPortSelect.appendChild(option);
-            if (selected) {
-                btnStart.disabled = false;
-                serialPortSelect.dispatchEvent(new Event('change'));
-            }
-        });
-
-        if (serialPortSelect.value)
-            coverButSerial();
-        else
-            coverButSerial(true);
-
-    } catch (error) {
-        const status = f_alarmStatus('Closed');
-        summaryAlarmTitle.textContent = status.text;
-    }
-})();

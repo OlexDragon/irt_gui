@@ -9,11 +9,12 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -21,14 +22,15 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 @SpringBootApplication
 public class Gui4 {
 	private final static Logger logger = LogManager.getLogger();
-
+	private static String urlStr;
+	private static Object port;
 
 	public static void main(String[] args) {
 //		logger.info("Start GUI}");
 
 		System.setProperty("java.awt.headless", "false");
-		String name = null;
 
+		String name;
 		try {
 			name = InetAddress.getLocalHost().getHostName();
 		} catch (UnknownHostException e) {
@@ -38,7 +40,7 @@ public class Gui4 {
 
 		Resource resource = new ClassPathResource("/application.properties");
 		Properties props;
-		Object port;
+
 		try {
 			props = PropertiesLoaderUtils.loadProperties(resource);
 			port = props.get("server.port");
@@ -47,33 +49,36 @@ public class Gui4 {
 			port = "8085";
 		}
 
-		final String urlStr = "http://" + name + ":" + port;
+		urlStr = "http://" + name + ":" + port;
+		stopPreviousInstance(urlStr);
+
+		SpringApplication.run(Gui4.class, args);
+	}
+
+	private static void stopPreviousInstance(String urlStr) {
 
 		try {
 			URL url = new URL(urlStr + "/exit");
+
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
-			con.setConnectTimeout(20);
+
+			con.setConnectTimeout(50);
+			con.setReadTimeout(50);
 			con.setRequestMethod("GET");
-	        int code = con.getResponseCode();
-	        logger.trace(code);
-	        Thread.sleep(1000);
+
+			con.getResponseCode();
+			con.disconnect();
+
 		} catch (Exception e) {
-			logger.catching(Level.TRACE, e);
+			logger.trace("No previous instance found.");
 		}
+	}
 
+	@EventListener(ApplicationReadyEvent.class)
+	public void applicationReady() {
 		try {
-
-			SpringApplication.run(Gui4.class, args);
-
-		}catch(Exception e) {
-			logger.catching(Level.TRACE, e);
-		}
-
-		try {
-
 			final URI uri = new URI(urlStr);
 			Desktop.getDesktop().browse(uri);
-
 		} catch (Exception e) {
 			logger.catching(e);
 		}

@@ -20,7 +20,11 @@
 	<div class="container-fluid">
 		<div class="row g-1">
 			<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12"
-				th:replace="home :: serial-port"></div>
+				th:replace="home :: serial-port(
+		portType = 'RS485',
+		 linkText='GUI',
+		  linkHref='/'
+		  )"></div>
 			<div class="col">
 				<div id="unitsSelect" class="row border p-2 m-2"></div>
 				<div class="row">
@@ -42,15 +46,15 @@
 					<div class="navbar row mt-2">
 						<div class="col">
 							<input type="radio" class="btn-check" id="cbDACs"
-								name="productionNav" autocomplete="off" checked>
-							 <label
+								name="productionNav" autocomplete="off" checked> <label
 								class="btn btn-outline-primary form-control" for="cbDACs"
 								title="Converter DACs">DACs</label>
 						</div>
 						<div class="col ms-2">
 							<input type="radio" class="btn-check" id="cbDump"
 								name="productionNav" autocomplete="off"> <label
-								class="btn btn-outline-primary form-control" for="cbDump" title="Diagnostic">Dump</label>
+								class="btn btn-outline-primary form-control" for="cbDump"
+								title="Diagnostic">Dump</label>
 						</div>
 					</div>
 				</dir>

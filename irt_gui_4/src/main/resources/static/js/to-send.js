@@ -8,9 +8,10 @@ import { shortToBytesR, intToBytes, longToBytes } from './packet/service/convert
 export default async function(action, callBack) {
 
     const addr = unitAddrClass.unitAddress;
+    const packetId = action.packetId.code ?? action.packetId;
     if (
         action.update
-        || action.toSend?.id !== action.packetId
+        || action.toSend?.id !== packetId
         || action.toSend?.unitAddr !== addr
         || (action.unitAddr && action.unitAddr !== action.toSend?.unitAddr)) {
 
@@ -27,11 +28,12 @@ export default async function(action, callBack) {
         action.toSend = {};
         if (action.name)
             action.toSend.name = action.name;
-        action.toSend.id = action.packetId.code ?? action.packetId;
+        action.toSend.id = packetId;
         if (action.unitAddr)
             action.toSend.unitAddr = action.unitAddr;
         else
-            action.toSend.unitAddr = addr;
+            action.toSend.unitAddr = action.unitAddr = addr;
+
         action.toSend.timeout = action.timeout ?? 2000;
         action.toSend.function = action.function;
         action.toSend.command = action.command ?? false;
@@ -239,11 +241,11 @@ function getRest(action) {
             break;
 
         default:
-//            if (action.packetId.name === 'refSourceSet') {
-//                console.log(f_packetIdToString(action.toSend.id), action);
-//                debugger
-//            }
-			action.command = packetType.command === action.type.code
+            //            if (action.packetId.name === 'refSourceSet') {
+            //                console.log(f_packetIdToString(action.toSend.id), action);
+            //                debugger
+            //            }
+            action.command = packetType.command === action.type.code
             const values = action.data.values ?? {};	// bytes
             const pls = action.data.codes.map(pc => new Payload(pc.code, values[pc.code]));
             const packet = new Packet(new Header(action.type.code, action.packetId.code, action.groupId.code), pls, action.toSend.unitAddr);

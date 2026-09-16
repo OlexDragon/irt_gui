@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
-	lang="en">
+	lang="en" th:with="selectedLanguage = ${#locale.toLanguageTag() == 'zh-TW' ? 'zh-TW' : #locale.language}">
 
 <head>
 <title>GUI - IRT Technologies</title>
@@ -13,7 +13,7 @@
 <link rel='stylesheet' href='../static/css/home.css'
 	th:href="@{/css/home.css}" />
 <link rel="stylesheet" href="../static/css/language.css"
-	th:href="@{'/css/language-' + ${#locale.toLanguageTag()} + '.css'}" />
+	th:href="@{'/css/language-' + ${selectedLanguage} + '.css'}" />
 
 </head>
 
@@ -22,12 +22,13 @@
 
 		<!-- Current language -->
 		<div class="language-current">
-			<label> <img
-				th:src="'/images/flags/f-' + ${#locale.toLanguageTag()} + '.png'"
-				src="/images/flags/f-english.png" alt="Language"> <span
-				th:text="#{languageSelect}"> Select Language </span>
-			</label>
-		</div>
+    <label>
+        <img th:src="${'/images/flags/f-' + selectedLanguage + '.png'}"
+            src="/images/flags/f-english.png"
+            alt="Language">
+        <span th:text="#{languageSelect}">Select Language</span>
+    </label>
+</div>
 
 		<!-- Language choices -->
 		<div class="language-options">
@@ -47,7 +48,12 @@
 	<div class="container-fluid">
 		<div class="row g-1">
 			<div class="col-xxl-2 col-lg-2 col-md-2 col-sm-3 col-12"
-				th:fragment="serial-port">
+				th:fragment="serial-port(portType, linkText, linkHref)"
+				 th:with="
+				type=${portType==null ? 'RS485' : portType},
+				lText=${linkText==null ? 'Console' : linkText},
+				lHref=${linkHref==null ? '/console' : linkHref}"
+				>
 				<div class="row row-cols-1">
 					<div class="col">
 						<img src="../static/images/logo.png" th:src="@{/images/logo.png}"
@@ -59,7 +65,7 @@
 							aria-label="Select Serial Port">
 							<option selected="selected" disabled="disabled" hidden="hidden"
 								th:text="#{Select Serial Port}">Select Serial Port</option>
-						</select> <label for="serialPort" th:text="#{Serial Port} + ' (RS485)'">Serial
+						</select> <label for="serialPort" th:text="#{Serial Port} + ' (' + ${type} + ')'">Serial
 							Port (RS485)</label>
 					</div>
 					<div class="col form-floating mb-3">
@@ -68,17 +74,17 @@
 							<option th:each="br : ${baudrates}" th:text="${br.value}">Baudrate</option>
 						</select> <label for="baudrate" th:text="#{Baudrate}">Baudrate</label>
 					</div>
-					<div class="col form-floating mb-3">
+					<div th:if="${type == 'RS485'}" class="col form-floating mb-3">
 						<input id="unitAddress" type="number" class="form-control"
 							value="254" /> <label for="unitAddress"
 							th:text="#{Unit Address}">Unit Address</label>
 					</div>
-					<div class="col mb-3">
+					<div th:if="${type == 'RS485'}" class="col mb-3">
 						<input id="btnStart" type="checkbox" class="btn-check"
 							disabled="disabled" /> <label for="btnStart"
 							class="btn btn-outline-primary form-control" th:text="#{Start}">START</label>
 					</div>
-					<div class="col mb-3">
+					<div th:if="${type == 'RS485'}" class="col mb-3">
 						<div id="summaryAlarmCard" class="card">
 							<div class="card-body">
 								<h6 id="summaryAlarmTitle" class="card-title text-center p-2"></h6>
@@ -87,15 +93,16 @@
 					</div>
 					<div class="col mb-3">
 						<a id="consoleLink" class="btn btn-outline-secondary form-control" href="/console"
-							th:text="#{Console}">Console</a>
+						th:href="${lHref}"
+							th:text="#{${lText}}">Console</a>
 					</div>
-					<div class="col mb-3">
+					<div th:if="${type == 'RS485'}" class="col mb-3">
 						<input id="fwUpgrade" type="file" accept=".pkg" hidden="hidden">
 						<label for="fwUpgrade"
 							class="btn btn-outline-secondary form-control disabled"
 							th:text="#{Firmware Upgrade}">Firmware Upgrade</label><br>
 					</div>
-					<div class="col mb-3">
+					<div th:if="${type == 'RS485'}" class="col mb-3">
 						<input id="btnShowErrors" type="checkbox" class="btn-check" /> <label
 							for="btnShowErrors"
 							class="btn btn-outline-info opacity-75 form-control"

@@ -210,7 +210,7 @@ public class LockDistributor implements SerialPortDistributor, Runnable, ThreadF
 
 	@Override
 	public Thread newThread(Runnable r) {
-		return new ThreadWorker().newThread(r);
+		return ThreadWorker.createThread(r);
 	}
 
 	@Override

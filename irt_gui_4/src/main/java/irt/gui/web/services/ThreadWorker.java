@@ -1,35 +1,30 @@
-
 package irt.gui.web.services;
 
 import java.util.concurrent.ThreadFactory;
 
-public class ThreadWorker implements ThreadFactory {
+public final class ThreadWorker {
 
-	@Override
-	public Thread newThread(Runnable r) {
+    public static Thread runThread(Runnable runnable) {
 
-		Thread t = new Thread(r);
-		int priority = t.getPriority();
-		if(priority>Thread.MIN_PRIORITY)
-			t.setPriority(--priority);
-		t.setDaemon(true);
-		return t;
-	}
+        Thread thread = createThread(runnable);
+        thread.start();
 
-	public static Thread runThread(Runnable r) {
-		final Thread t = new ThreadWorker().newThread(r);
-		t.start();
-		return t;
-	}
+        return thread;
+    }
 
-	public static ThreadFactory getThreadFactory() {
-		return new ThreadFactory() {
-			
-			@Override
-			public Thread newThread(Runnable r) {
-				return new ThreadWorker().newThread(r);
-			}
-		};
-	}
+    public static ThreadFactory getThreadFactory() {
+        return ThreadWorker::createThread;
+    }
 
+    public static Thread createThread(Runnable runnable) {
+
+        Thread thread = new Thread(runnable);
+
+        if (thread.getPriority() > Thread.MIN_PRIORITY)
+            thread.setPriority(thread.getPriority() - 1);
+
+        thread.setDaemon(true);
+
+        return thread;
+    }
 }

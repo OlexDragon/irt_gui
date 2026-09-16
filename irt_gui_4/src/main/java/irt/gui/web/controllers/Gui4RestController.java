@@ -12,8 +12,6 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -35,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import io.nayuki.qrcodegen.QrCode;
 import irt.gui.web.Gui4;
 import irt.gui.web.beans.Login;
-import irt.gui.web.services.ConnectionCounter;
 import irt.gui.web.services.ThreadWorker;
 import irt.gui.web.services.distributor.SerialPortDistributor;
 import irt.gui.web.services.serialPort.IrtSerialPort;
@@ -102,22 +99,7 @@ public class Gui4RestController {
 
 	@RequestMapping("exit")
     Boolean exit() {
-		logger.traceEntry();
-
-		serialPort.shutdown();
-		distributor.shutdown();
-
-		ThreadWorker.runThread(()->{
-
-			try {
-				TimeUnit.SECONDS.sleep(1);
-
-			} catch (InterruptedException e) {
-				logger.catching(Level.DEBUG, e);
-			}
-
-			Gui4.exit();
-		});
+		Gui4.exit();
 		return true;
 	}
 

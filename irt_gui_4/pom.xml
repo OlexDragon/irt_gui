@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
 <project xmlns="https://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -13,21 +13,21 @@
 
 	<groupId>irt.gui</groupId>
 	<artifactId>gui</artifactId>
-	<version>4.22.4</version>
+	<version>4.22.2</version>
 	<name>web</name>
 	<description>IRT GUI Application</description>
-	<url/>
+	<url />
 	<licenses>
-		<license/>
+		<license />
 	</licenses>
 	<developers>
-		<developer/>
+		<developer />
 	</developers>
 	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
+		<connection />
+		<developerConnection />
+		<tag />
+		<url />
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -66,10 +66,11 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.fazecast/jSerialComm -->
+		<!-- Source: https://mvnrepository.com/artifact/com.fazecast/jSerialComm -->
 		<dependency>
 			<groupId>com.fazecast</groupId>
 			<artifactId>jSerialComm</artifactId>
- 			<version>[2.0.0,3.0.0)</version>
+			<version>2.11.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -115,7 +116,8 @@
 			<artifactId>qrcodegen</artifactId>
 			<version>1.8.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<!--
+		https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
@@ -137,12 +139,17 @@
 	</dependencies>
 
 	<build>
-		<!--		<resources>-->
-		<!--			<resource>-->
-		<!--				<directory>src/main/resources</directory>-->
-		<!--				<filtering>true</filtering>-->
-		<!--			</resource>-->
-		<!--		</resources>-->
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+
+				<excludes>
+					<exclude>static/scss/**</exclude>
+					<exclude>static/**/*.map</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -151,6 +158,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

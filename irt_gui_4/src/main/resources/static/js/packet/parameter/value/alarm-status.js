@@ -67,10 +67,11 @@ function translate(severities) {
     return translated;
 }
 
-function parseStatus(bytes) {
-    const id = parseToInt(bytes.slice(0, 2));
-    const index = parseToInt(bytes.slice(2, 3)) & 7;
-    const s = index < statuses.length && statuses[index];
-    s.id = id;
-    return s;
+function parseStatus(bytes){
+	const b = [...bytes];
+	const id = parseToInt(b.splice(0,2));
+	const index = parseToInt(b)&7;
+	const s = index<statuses.length && statuses[index]; 
+	s.id = id;
+	return s;
 }

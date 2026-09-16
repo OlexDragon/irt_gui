@@ -78,7 +78,7 @@ function removeClasses() {
 }
 
 action.f_SummaryAlarms = function(packet) {
-    $modal?.hide();
+    modal?.hide();
 
     packet.payloads?.forEach(pl => {
         const value = parser(pl.parameter.code)(pl.data);
@@ -133,9 +133,14 @@ function tripleClick({ detail, ctrlKey, shiftKey }) {
     setTimeout(() => { window.open(url, '_blank'); }, 100);
 }
 
-let $modal;
+let modal;
 function onError(error) {
-    if ($modal)
+	const err = error.error;
+	if(err && !err.data.answer){
+		serialPort.showToast(err.message);
+		return;
+	}
+    if (modal)
         return;
 
     switch (error) {
@@ -189,12 +194,12 @@ function onError(error) {
             modalDiv.appendChild(modalDialog);
             document.body.appendChild(modalDiv);
 
-            $modal = new bootstrap.Modal(modalDiv);
+            modal = new bootstrap.Modal(modalDiv);
             modalDiv.addEventListener('hidden.bs.modal', () => {
                 modalDiv.remove();
-                $modal = null;
+                modal = null;
             });
-            $modal.show();
+            modal.show();
             break;
         }
     }
